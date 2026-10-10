@@ -21,11 +21,16 @@ export function formatCurrency(
   onRequest: string
 ) {
   if (value == null || !currency) return onRequest;
-  return new Intl.NumberFormat(localeTag(locale), {
-    style: "currency",
-    currency,
-    maximumFractionDigits: 2,
-  }).format(value);
+  try {
+    return new Intl.NumberFormat(localeTag(locale), {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 2,
+    }).format(value);
+  } catch {
+    // Non-ISO fixture codes (e.g. seed "TEST") — show amount + code
+    return `${formatNumber(value, locale, { maximumFractionDigits: 2 })} ${currency}`;
+  }
 }
 
 export function formatDate(
