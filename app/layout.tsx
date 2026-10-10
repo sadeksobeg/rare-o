@@ -1,37 +1,39 @@
 import type { Metadata } from "next";
 import {
+  Amiri,
   Cormorant_Garamond,
-  Noto_Naskh_Arabic,
-  Noto_Sans_Arabic,
+  IBM_Plex_Sans_Arabic,
   Source_Sans_3,
 } from "next/font/google";
 import "./globals.css";
 import { getRequestLocale } from "@/lib/i18n/server";
 import { dirForLocale } from "@/lib/i18n/config";
 
-const arabic = Noto_Sans_Arabic({
+const amiri = Amiri({
+  subsets: ["arabic", "latin"],
+  weight: ["400", "700"],
+  variable: "--font-amiri",
+  display: "swap",
+});
+
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["500", "600"],
+  variable: "--font-cormorant",
+  display: "swap",
+});
+
+const source = Source_Sans_3({
+  subsets: ["latin"],
+  weight: ["400", "600"],
+  variable: "--font-source",
+  display: "swap",
+});
+
+const plexAr = IBM_Plex_Sans_Arabic({
   subsets: ["arabic"],
-  variable: "--font-arabic",
-  display: "swap",
-});
-
-const latin = Source_Sans_3({
-  subsets: ["latin"],
-  variable: "--font-latin",
-  display: "swap",
-});
-
-const displayLat = Cormorant_Garamond({
-  subsets: ["latin"],
   weight: ["400", "500", "600"],
-  variable: "--font-display-lat",
-  display: "swap",
-});
-
-const displayAr = Noto_Naskh_Arabic({
-  subsets: ["arabic"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-display-ar",
+  variable: "--font-plex-ar",
   display: "swap",
 });
 
@@ -52,9 +54,14 @@ export default async function RootLayout({
     <html
       lang={locale}
       dir={dir}
-      className={`${arabic.variable} ${latin.variable} ${displayLat.variable} ${displayAr.variable}`}
+      className={`${amiri.variable} ${cormorant.variable} ${source.variable} ${plexAr.variable}`}
     >
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="min-h-screen antialiased">
+        <a href="#main-content" className="ro-skip-link">
+          {locale === "ar" ? "تخطَّ إلى المحتوى" : "Skip to content"}
+        </a>
+        {children}
+      </body>
     </html>
   );
 }

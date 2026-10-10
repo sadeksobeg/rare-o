@@ -1,23 +1,33 @@
-import Link from "next/link";
-import { cn } from "@/lib/utils";
+/**
+ * Thin wrappers over Button (P2). Keep exports for existing imports.
+ */
+import {
+  Button,
+  ButtonLink,
+  type ButtonVariant,
+} from "@/components/ui/button";
 
-type Variant = "primary" | "secondary" | "ghost" | "on-dark" | "on-dark-outline";
+type LegacyVariant =
+  | "primary"
+  | "secondary"
+  | "ghost"
+  | "on-dark"
+  | "on-dark-outline";
 
-const variants: Record<Variant, string> = {
-  primary:
-    "bg-ro-purple text-ro-cream hover:bg-ro-black focus-visible:outline-ro-purple",
-  secondary:
-    "border border-ro-line bg-transparent text-ro-black hover:border-ro-purple hover:text-ro-purple focus-visible:outline-ro-purple",
-  ghost:
-    "bg-transparent text-ro-muted underline-offset-8 hover:text-ro-black hover:underline focus-visible:outline-ro-purple",
-  "on-dark":
-    "bg-ro-cream text-ro-black hover:bg-white focus-visible:outline-ro-cream",
-  "on-dark-outline":
-    "border border-ro-line-on-dark bg-transparent text-ro-cream hover:border-ro-cream focus-visible:outline-ro-cream",
-};
-
-const base =
-  "inline-flex items-center justify-center gap-2 px-7 py-3.5 text-[0.75rem] tracking-[0.18em] uppercase transition-[color,background-color,border-color,transform] duration-300 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:scale-[0.985]";
+function mapVariant(v: LegacyVariant): ButtonVariant {
+  switch (v) {
+    case "ghost":
+      return "text";
+    case "on-dark":
+      return "inverse-primary";
+    case "on-dark-outline":
+      return "inverse-secondary";
+    case "secondary":
+      return "secondary";
+    default:
+      return "primary";
+  }
+}
 
 export function RoButtonLink({
   href,
@@ -27,13 +37,17 @@ export function RoButtonLink({
 }: {
   href: string;
   children: React.ReactNode;
-  variant?: Variant;
+  variant?: LegacyVariant;
   className?: string;
 }) {
   return (
-    <Link href={href} className={cn(base, variants[variant], className)}>
+    <ButtonLink
+      href={href}
+      variant={mapVariant(variant)}
+      className={className}
+    >
       {children}
-    </Link>
+    </ButtonLink>
   );
 }
 
@@ -44,15 +58,16 @@ export function RoButton({
   type = "button",
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: Variant;
+  variant?: LegacyVariant;
 }) {
   return (
-    <button
+    <Button
       type={type}
-      className={cn(base, variants[variant], className)}
+      variant={mapVariant(variant)}
+      className={className}
       {...props}
     >
       {children}
-    </button>
+    </Button>
   );
 }
