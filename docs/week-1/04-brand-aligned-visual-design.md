@@ -22,7 +22,7 @@ Heritage appears through **material photography, typography, spacing, and quiet 
 |-------|------|-----|------|
 | `--ro-near-black` | Near Black | `#0B080D` | Primary text, strong surfaces, headers |
 | `--ro-deep-purple` | Deep Blackened Purple | `#32104F` | Accent actions, focus, key markers |
-| `--ro-warm-ivory` | Warm Ivory | `#F2EEF4` | Primary page background, airy panels |
+| `--ro-warm-ivory` / `--ro-cream` | Warm Cream | `#F4E7D8` | Primary page background, airy panels (aligned with identity case study + implementation) |
 
 ### Derived supporting tones (implementation consistency — not a second brand palette)
 
@@ -30,7 +30,7 @@ Heritage appears through **material photography, typography, spacing, and quiet 
 |-------|-----------------|------|
 | `--ro-ink-muted` | `#0B080D` at ~64% opacity | Secondary text |
 | `--ro-line` | `#0B080D` at ~12% opacity | Quiet dividers |
-| `--ro-surface-elevated` | Soft `#F8F5FA` / light panel | Forms, tables |
+| `--ro-surface-elevated` | Soft `#EFE3D4` (`--ro-surface`) | Forms, tables, elevated panels |
 | `--ro-success` | Deep desaturated green | Agreed / shipped |
 | `--ro-warning` | Muted amber | Under review / awaits response |
 | `--ro-danger` | Deep desaturated red | Errors / hard system failures only — **not** “deal rejected” branding |
