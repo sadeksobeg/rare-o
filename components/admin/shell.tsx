@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { adminLogoutAction } from "@/app/actions";
 import { AdminLocaleToggle } from "@/components/admin/locale-toggle";
+import {
+  AdminMobileNav,
+  AdminSidebar,
+  type AdminNavGroup,
+} from "@/components/admin/nav";
+import { OfflineBanner } from "@/components/system/offline-banner";
 import { getAdminSession } from "@/lib/auth/admin-session";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { redirect } from "next/navigation";
@@ -10,53 +16,74 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
   if (!session) redirect("/admin/login");
 
   const { locale, dict } = await getRequestDictionary();
+  const a = dict.admin;
 
-  const links = [
-    { href: "/admin", label: dict.admin.dashboard },
-    { href: "/admin/inbox", label: dict.admin.inbox },
-    { href: "/admin/products", label: dict.admin.products },
-    { href: "/admin/categories", label: dict.admin.categories },
-    { href: "/admin/customers", label: dict.admin.customers },
-    { href: "/admin/requests", label: dict.admin.requests },
-    { href: "/admin/traders", label: dict.admin.traders },
-    { href: "/admin/deals", label: dict.admin.deals },
-    { href: "/admin/wholesale", label: dict.admin.wholesale },
-    { href: "/admin/offers", label: dict.admin.offers },
+  const groups: AdminNavGroup[] = [
+    {
+      title: dict.common.navOps,
+      items: [
+        { href: "/admin", label: a.dashboard },
+        { href: "/admin/inbox", label: a.inbox },
+        { href: "/admin/requests", label: a.requests },
+        { href: "/admin/deals", label: a.deals },
+        { href: "/admin/wholesale", label: a.wholesale },
+      ],
+    },
+    {
+      title: dict.common.navCatalog,
+      items: [
+        { href: "/admin/products", label: a.products },
+        { href: "/admin/categories", label: a.categories },
+        { href: "/admin/offers", label: a.offers },
+      ],
+    },
+    {
+      title: dict.common.navPeople,
+      items: [
+        { href: "/admin/customers", label: a.customers },
+        { href: "/admin/traders", label: a.traders },
+      ],
+    },
   ];
 
+  const brand = `RARE OUD · ${a.dashboard}`;
+
   return (
-    <div className="min-h-screen bg-ro-canvas text-ro-ink">
-      <header className="border-b border-ro-border">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4">
-          <div className="flex flex-wrap items-center gap-6">
-            <Link href="/admin" className="tracking-[0.2em]">
-              RARE OUD · {dict.admin.dashboard}
+    <div className="flex min-h-screen bg-ro-canvas text-ro-ink">
+      <AdminSidebar groups={groups} brand={brand} />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <OfflineBanner />
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-ro-line bg-ro-paper/95 px-4 backdrop-blur">
+          <div className="flex items-center gap-3">
+            <AdminMobileNav
+              groups={groups}
+              menuLabel={dict.common.menu}
+              closeLabel={dict.common.close}
+            />
+            <Link href="/admin" className="text-sm font-semibold lg:hidden">
+              {brand}
             </Link>
-            <nav className="flex flex-wrap gap-4 text-sm text-ro-muted">
-              {links.map((l) => (
-                <Link key={l.href} href={l.href} className="hover:text-ro-ink">
-                  {l.label}
-                </Link>
-              ))}
-            </nav>
           </div>
           <div className="flex items-center gap-3 text-sm">
             <AdminLocaleToggle locale={locale} label={dict.common.language} />
-            <span className="text-ro-muted">{session.email}</span>
+            <span className="hidden text-ro-muted sm:inline">{session.email}</span>
             <form action={adminLogoutAction}>
               <button
                 type="submit"
-                className="rounded-[var(--ro-r-sm)] border border-ro-border px-3 py-1"
+                className="rounded-[var(--ro-r-sm)] border border-ro-line px-3 py-1.5 text-xs"
               >
-                {dict.admin.logout}
+                {a.logout}
               </button>
             </form>
           </div>
-        </div>
-      </header>
-      <main id="main-content" className="mx-auto max-w-6xl px-4 py-8">
-        {children}
-      </main>
+        </header>
+        <main
+          id="main-content"
+          className="mx-auto w-full max-w-[1440px] flex-1 px-4 py-6 sm:px-6 lg:px-8"
+        >
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

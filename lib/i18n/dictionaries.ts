@@ -293,6 +293,18 @@ type Dict = {
     email: string;
     password: string;
     signIn: string;
+    errorTitle: string;
+    errorBody: string;
+    errorRetry: string;
+    errorNotFound: string;
+    errorForbidden: string;
+    errorSession: string;
+    errorOffline: string;
+    goToPortal: string;
+    signOut: string;
+    navOps: string;
+    navCatalog: string;
+    navPeople: string;
   };
   contact: {
     title: string;
@@ -613,6 +625,19 @@ const ar: Dict = {
     email: "البريد الإلكتروني",
     password: "كلمة المرور",
     signIn: "دخول",
+    errorTitle: "تعذّر إكمال العملية",
+    errorBody:
+      "حاول مرة أخرى. وإن استمرت المشكلة تواصل معنا عبر واتساب.",
+    errorRetry: "إعادة المحاولة",
+    errorNotFound: "الصفحة غير موجودة",
+    errorForbidden: "هذا القسم غير متاح لحسابك",
+    errorSession: "انتهت جلستك. سجّل الدخول من جديد.",
+    errorOffline: "لا يوجد اتصال بالإنترنت",
+    goToPortal: "الانتقال إلى بوابتك",
+    signOut: "تسجيل الخروج",
+    navOps: "التشغيل",
+    navCatalog: "الكتالوج",
+    navPeople: "الأشخاص",
   },
   contact: {
     title: "تواصل معنا",
@@ -934,6 +959,19 @@ const en: Dict = {
     email: "Email",
     password: "Password",
     signIn: "Sign in",
+    errorTitle: "Something went wrong",
+    errorBody:
+      "Please try again. If it continues, contact us on WhatsApp.",
+    errorRetry: "Try again",
+    errorNotFound: "Page not found",
+    errorForbidden: "This area isn't available for your account",
+    errorSession: "Your session has expired. Please sign in again.",
+    errorOffline: "You're offline",
+    goToPortal: "Go to your portal",
+    signOut: "Sign out",
+    navOps: "Operations",
+    navCatalog: "Catalog",
+    navPeople: "People",
   },
   contact: {
     title: "Contact us",

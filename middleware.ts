@@ -29,33 +29,71 @@ function withLocale(
   return response;
 }
 
-async function guardRole(
-  request: NextRequest,
-  cookieName: string,
-  role: "admin" | "trader",
-  loginPath: string
-) {
-  const secret = process.env.AUTH_SECRET;
-  const token = request.cookies.get(cookieName)?.value;
-  if (!token || !secret || secret.length < 16) {
-    return NextResponse.redirect(new URL(loginPath, request.url));
-  }
+async function readRole(
+  token: string | undefined,
+  secret: string
+): Promise<"admin" | "trader" | null> {
+  if (!token) return null;
   try {
     const { payload } = await jwtVerify(
       token,
       new TextEncoder().encode(secret)
     );
-    if (payload.role !== role) {
-      return NextResponse.redirect(new URL(loginPath, request.url));
+    if (payload.role === "admin" || payload.role === "trader") {
+      return payload.role;
     }
+    return null;
   } catch {
+    return null;
+  }
+}
+
+/**
+ * Guard portal routes without changing JWT crypto.
+ * Missing/invalid session → login.
+ * Valid session for the *other* role → /forbidden (not login).
+ */
+async function guardRole(
+  request: NextRequest,
+  expected: "admin" | "trader",
+  loginPath: string
+) {
+  const secret = process.env.AUTH_SECRET;
+  if (!secret || secret.length < 16) {
     return NextResponse.redirect(new URL(loginPath, request.url));
   }
-  return null;
+
+  const ownCookie = expected === "admin" ? ADMIN_COOKIE : TRADER_COOKIE;
+  const otherCookie = expected === "admin" ? TRADER_COOKIE : ADMIN_COOKIE;
+  const otherRole = expected === "admin" ? "trader" : "admin";
+
+  const ownRole = await readRole(request.cookies.get(ownCookie)?.value, secret);
+  if (ownRole === expected) return null;
+
+  const crossRole = await readRole(
+    request.cookies.get(otherCookie)?.value,
+    secret
+  );
+  if (crossRole === otherRole) {
+    const url = new URL("/forbidden", request.url);
+    url.searchParams.set("portal", otherRole);
+    return NextResponse.redirect(url);
+  }
+
+  const loginUrl = new URL(loginPath, request.url);
+  const returnTo = request.nextUrl.pathname + request.nextUrl.search;
+  if (returnTo && returnTo !== loginPath) {
+    loginUrl.searchParams.set("returnTo", returnTo);
+  }
+  return NextResponse.redirect(loginUrl);
 }
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (pathname === "/forbidden") {
+    return NextResponse.next();
+  }
 
   // Storefront English prefix → rewrite + locale en
   if (pathname === "/en" || pathname.startsWith("/en/")) {
@@ -63,42 +101,32 @@ export async function middleware(request: NextRequest) {
     if (
       stripped.startsWith("/admin") ||
       stripped.startsWith("/trader") ||
-      stripped.startsWith("/dev")
+      stripped.startsWith("/dev") ||
+      stripped.startsWith("/forbidden")
     ) {
       return NextResponse.redirect(new URL(stripped, request.url));
     }
     return withLocale(request, "en", stripped);
   }
 
-  // Auth guards (JWT unchanged)
   if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
-    const denied = await guardRole(
-      request,
-      ADMIN_COOKIE,
-      "admin",
-      "/admin/login"
-    );
+    const denied = await guardRole(request, "admin", "/admin/login");
     if (denied) return denied;
     return NextResponse.next();
   }
 
   if (pathname.startsWith("/trader") && !pathname.startsWith("/trader/login")) {
-    const denied = await guardRole(
-      request,
-      TRADER_COOKIE,
-      "trader",
-      "/trader/login"
-    );
+    const denied = await guardRole(request, "trader", "/trader/login");
     if (denied) return denied;
     return NextResponse.next();
   }
 
-  // Public storefront Arabic paths
   if (
     !pathname.startsWith("/admin") &&
     !pathname.startsWith("/trader") &&
     !pathname.startsWith("/dev") &&
-    !pathname.startsWith("/api")
+    !pathname.startsWith("/api") &&
+    !pathname.startsWith("/forbidden")
   ) {
     return withLocale(request, "ar");
   }
@@ -120,6 +148,7 @@ export const config = {
     "/offers/:path*",
     "/contact",
     "/privacy",
+    "/forbidden",
     "/admin/:path*",
     "/trader/:path*",
   ],

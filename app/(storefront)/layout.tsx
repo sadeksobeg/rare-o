@@ -1,5 +1,6 @@
 import { StorefrontHeader } from "@/components/storefront/header";
 import { StorefrontProviders } from "@/components/storefront/providers";
+import { OfflineBanner } from "@/components/system/offline-banner";
 import { getRequestDictionary } from "@/lib/i18n/server";
 
 export default async function StorefrontLayout({
@@ -12,6 +13,7 @@ export default async function StorefrontLayout({
   return (
     <StorefrontProviders>
       <div className="min-h-screen bg-ro-cream text-ro-black">
+        <OfflineBanner />
         <StorefrontHeader dict={dict} locale={locale} />
         <main
           id="main-content"
