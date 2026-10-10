@@ -1,5 +1,18 @@
 import { RequestForm } from "@/components/storefront/request-form";
+import type { Metadata } from "next";
 import { getRequestDictionary } from "@/lib/i18n/server";
+import { storefrontMetadata } from "@/lib/seo";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { locale, dict } = await getRequestDictionary();
+  return storefrontMetadata({
+    locale,
+    title: `${dict.request.title} — ${dict.brand}`,
+    description: dict.request.handoffHint,
+    path: "/request",
+    noIndex: true,
+  });
+}
 
 export default async function RequestPage() {
   const { locale, dict } = await getRequestDictionary();

@@ -6,16 +6,17 @@ import { getRequestDictionary } from "@/lib/i18n/server";
 export default async function TraderOffersPage() {
   await requireTraderSession();
   const offers = await listPublishedPublicOffers();
-  const { locale } = await getRequestDictionary();
+  const { locale, dict } = await getRequestDictionary();
+  const t = dict.trader;
 
   return (
     <section className="space-y-6">
-      <h1 className="text-3xl">Public curated offers</h1>
-      <p className="text-sm text-ro-muted">
-        Published RARE OUD presentations only — not trader storefronts.
-      </p>
+      <h1 className="font-display text-3xl font-semibold tracking-tight">
+        {t.offersTitle}
+      </h1>
+      <p className="text-sm text-ro-muted">{t.offersLead}</p>
       {offers.length === 0 ? (
-        <p className="text-ro-muted">No published offers yet.</p>
+        <p className="text-ro-muted">{t.offersEmpty}</p>
       ) : (
         <ul className="space-y-4">
           {offers.map((o) => {
@@ -34,7 +35,7 @@ export default async function TraderOffersPage() {
         </ul>
       )}
       <Link href="/offers" className="text-sm text-ro-purple">
-        Open public offers page
+        {t.offersOpenPublic}
       </Link>
     </section>
   );

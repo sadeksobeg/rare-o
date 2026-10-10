@@ -1,51 +1,80 @@
 import Link from "next/link";
+import {
+  DataTable,
+  DataTableHead,
+  Td,
+  Th,
+  Tr,
+} from "@/components/admin/data-table";
+import { PageHeader } from "@/components/admin/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
+import { StatusChip } from "@/components/ui/status-chip";
 import { listDealsForAdmin } from "@/lib/deals/service";
+import { getRequestDictionary } from "@/lib/i18n/server";
+import { getStatusChipProps } from "@/lib/ui/status-labels";
 
 export default async function AdminDealsPage() {
+  const { dict } = await getRequestDictionary();
+  const a = dict.admin;
+  const u = dict.adminUi;
   const deals = await listDealsForAdmin();
 
   return (
     <section className="space-y-6">
-      <h1 className="text-3xl">Deal proposals</h1>
-      <p className="text-sm text-ro-muted">
-        Negotiation workspace — propose / continue / counter / accept / close.
-        Separate from retail requests.
-      </p>
-      <div className="overflow-x-auto border border-ro-line">
-        <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-ro-line bg-ro-surface">
-            <tr>
-              <th className="p-3">Reference</th>
-              <th className="p-3">Trader</th>
-              <th className="p-3">Title</th>
-              <th className="p-3">Kind</th>
-              <th className="p-3">Status</th>
-              <th className="p-3">Entries</th>
-              <th className="p-3" />
-            </tr>
-          </thead>
+      <PageHeader title={a.deals} description={u.dealsLead} />
+      {deals.length === 0 ? (
+        <div className="border border-ro-line">
+          <EmptyState title={u.emptyTitle} body={u.emptyBody} />
+        </div>
+      ) : (
+        <DataTable>
+          <DataTableHead>
+            <Th>{u.colReference}</Th>
+            <Th>{u.colTrader}</Th>
+            <Th>{u.colTitle}</Th>
+            <Th>{u.colKind}</Th>
+            <Th>{a.colStatus}</Th>
+            <Th>{u.colEntries}</Th>
+            <Th />
+          </DataTableHead>
           <tbody>
             {deals.map((d) => (
-              <tr key={d.id} className="border-b border-ro-line">
-                <td className="p-3">{d.reference}</td>
-                <td className="p-3">
+              <Tr key={d.id}>
+                <Td className="font-medium">{d.reference}</Td>
+                <Td>
                   {d.trader.displayName}
-                  <div className="text-ro-muted">{d.trader.email}</div>
-                </td>
-                <td className="p-3">{d.title}</td>
-                <td className="p-3">{d.dealKind}</td>
-                <td className="p-3">{d.status}</td>
-                <td className="p-3">{d._count.entries}</td>
-                <td className="p-3">
-                  <Link href={`/admin/deals/${d.id}`} className="text-ro-purple">
-                    Negotiate
+                  <div className="text-ro-muted" dir="ltr">
+                    {d.trader.email}
+                  </div>
+                </Td>
+                <Td>{d.title}</Td>
+                <Td>
+                  {d.dealKind === "catalog"
+                    ? u.kindCatalog
+                    : d.dealKind === "non_catalog"
+                      ? u.kindNonCatalog
+                      : d.dealKind}
+                </Td>
+                <Td>
+                  <StatusChip
+                    size="sm"
+                    {...getStatusChipProps(dict, "deal", d.status)}
+                  />
+                </Td>
+                <Td className="tabular-nums">{d._count.entries}</Td>
+                <Td>
+                  <Link
+                    href={`/admin/deals/${d.id}`}
+                    className="text-ro-plum hover:underline"
+                  >
+                    {u.actionNegotiate}
                   </Link>
-                </td>
-              </tr>
+                </Td>
+              </Tr>
             ))}
           </tbody>
-        </table>
-      </div>
+        </DataTable>
+      )}
     </section>
   );
 }

@@ -55,6 +55,8 @@ export function productJsonLd(input: {
   price?: number | null;
   currency?: string | null;
   url: string;
+  /** Defaults to true (InStock). Pass false for OutOfStock. */
+  available?: boolean;
 }) {
   const data: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -70,8 +72,16 @@ export function productJsonLd(input: {
       "@type": "Offer",
       price: input.price,
       priceCurrency: input.currency,
-      availability: "https://schema.org/InStock",
+      availability:
+        input.available === false
+          ? "https://schema.org/OutOfStock"
+          : "https://schema.org/InStock",
     };
   }
   return data;
+}
+
+/** Serialise JSON-LD safely for inline <script type="application/ld+json">. */
+export function jsonLdString(data: unknown): string {
+  return JSON.stringify(data).replace(/</g, "\\u003c");
 }

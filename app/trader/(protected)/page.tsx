@@ -8,6 +8,10 @@ import { listPublishedPublicOffers } from "@/lib/offers/service";
 import { listWholesaleRequestsForTrader } from "@/lib/wholesale/service";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { dealNextActor, getStatusMeta } from "@/lib/ui/status";
+import {
+  dealStatusLabel,
+  wholesaleStatusLabel,
+} from "@/lib/ui/trader-labels";
 
 export default async function TraderHomePage() {
   const session = await requireTraderSession();
@@ -34,14 +38,14 @@ export default async function TraderHomePage() {
       href: `/trader/deals/${d.id}`,
       title: d.reference,
       meta: getStatusMeta("deal", d.status),
-      status: d.status,
+      label: dealStatusLabel(t, d.status),
     })),
     ...waitingWholesale.map((w) => ({
       key: `ws-${w.id}`,
       href: `/trader/wholesale/${w.id}`,
       title: w.reference,
       meta: getStatusMeta("wholesale", w.status),
-      status: w.status,
+      label: wholesaleStatusLabel(t, w.status),
     })),
   ];
 
@@ -76,7 +80,7 @@ export default async function TraderHomePage() {
                     <span className="font-medium">{item.title}</span>
                     <StatusChip
                       tone={item.meta.tone}
-                      label={item.status}
+                      label={item.label}
                       size="sm"
                     />
                     <span className="text-ro-plum">{t.openRecord}</span>

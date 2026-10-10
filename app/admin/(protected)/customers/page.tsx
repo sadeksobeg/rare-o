@@ -1,4 +1,16 @@
+import {
+  DataTable,
+  DataTableHead,
+  Td,
+  Th,
+  Tr,
+} from "@/components/admin/data-table";
+import { PageHeader } from "@/components/admin/page-header";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { prisma } from "@/lib/db/prisma";
+import { formatDate } from "@/lib/i18n/format";
+import { getRequestDictionary } from "@/lib/i18n/server";
 
 export default async function AdminCustomersPage({
   searchParams,
@@ -7,6 +19,9 @@ export default async function AdminCustomersPage({
 }) {
   const { q } = await searchParams;
   const query = q?.trim();
+  const { locale, dict } = await getRequestDictionary();
+  const a = dict.admin;
+  const u = dict.adminUi;
 
   const customers = await prisma.customer.findMany({
     where: query
@@ -26,46 +41,49 @@ export default async function AdminCustomersPage({
 
   return (
     <section className="space-y-6">
-      <h1 className="text-3xl">Customers</h1>
-      <p className="text-sm text-ro-muted">
-        Contact records from retail requests. Phone is searchable but not a
-        unique identity. No customer login in Week 2.
-      </p>
-      <form className="flex gap-2">
+      <PageHeader title={a.customers} description={u.customersLead} />
+      <form className="flex flex-wrap gap-2" role="search">
         <input
           name="q"
           defaultValue={query ?? ""}
-          placeholder="Search name or phone"
-          className="border border-ro-line bg-transparent px-3 py-2 text-sm"
+          placeholder={u.searchPlaceholder}
+          aria-label={u.searchPlaceholder}
+          className="h-10 w-full max-w-xs rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-paper px-3 text-sm outline-none focus:border-[var(--ro-plum-900)]"
         />
-        <button type="submit" className="bg-ro-purple px-4 py-2 text-sm text-ro-ivory">
-          Search
-        </button>
+        <Button type="submit" size="sm">
+          {u.search}
+        </Button>
       </form>
-      <div className="overflow-x-auto border border-ro-line">
-        <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-ro-line bg-ro-surface">
-            <tr>
-              <th className="p-3">Name</th>
-              <th className="p-3">Phone</th>
-              <th className="p-3">Notes</th>
-              <th className="p-3">Requests</th>
-              <th className="p-3">Created</th>
-            </tr>
-          </thead>
+      {customers.length === 0 ? (
+        <div className="border border-ro-line">
+          <EmptyState title={u.emptyTitle} body={u.emptyBody} />
+        </div>
+      ) : (
+        <DataTable>
+          <DataTableHead>
+            <Th>{a.colName}</Th>
+            <Th>{u.colPhone}</Th>
+            <Th>{u.colNotes}</Th>
+            <Th>{u.colRequests}</Th>
+            <Th>{u.colCreated}</Th>
+          </DataTableHead>
           <tbody>
             {customers.map((c) => (
-              <tr key={c.id} className="border-b border-ro-line">
-                <td className="p-3">{c.name}</td>
-                <td className="p-3">{c.phone}</td>
-                <td className="p-3">{c.notes ?? "—"}</td>
-                <td className="p-3">{c._count.requests}</td>
-                <td className="p-3">{c.createdAt.toISOString().slice(0, 10)}</td>
-              </tr>
+              <Tr key={c.id}>
+                <Td className="font-medium">{c.name}</Td>
+                <Td>
+                  <span dir="ltr">{c.phone}</span>
+                </Td>
+                <Td className="text-ro-muted">{c.notes ?? "—"}</Td>
+                <Td className="tabular-nums">{c._count.requests}</Td>
+                <Td className="text-ro-muted">
+                  {formatDate(c.createdAt, locale, { dateStyle: "medium" })}
+                </Td>
+              </Tr>
             ))}
           </tbody>
-        </table>
-      </div>
+        </DataTable>
+      )}
     </section>
   );
 }

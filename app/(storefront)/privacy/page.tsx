@@ -1,4 +1,16 @@
+import type { Metadata } from "next";
 import { getRequestDictionary } from "@/lib/i18n/server";
+import { storefrontMetadata } from "@/lib/seo";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { locale, dict } = await getRequestDictionary();
+  return storefrontMetadata({
+    locale,
+    title: `${dict.privacy.title} — ${dict.brand}`,
+    description: dict.seo.privacyDescription,
+    path: "/privacy",
+  });
+}
 
 export default async function PrivacyPage() {
   const { dict } = await getRequestDictionary();

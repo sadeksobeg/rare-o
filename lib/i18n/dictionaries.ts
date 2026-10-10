@@ -110,6 +110,33 @@ type Dict = {
     search: string;
     filters: string;
     allCategories: string;
+    lead: string;
+    photoCaption: string;
+    filtersTitle: string;
+    typeLabel: string;
+    priceLabel: string;
+    priceMin: string;
+    priceMax: string;
+    priceApply: string;
+    sortLabel: string;
+    sortNew: string;
+    sortPriceAsc: string;
+    sortPriceDesc: string;
+    clearAll: string;
+    clearFilters: string;
+    activeFilters: string;
+    removeFilter: string;
+    noResults: string;
+    noResultsHint: string;
+    resultsUpdated: string;
+    showResults: string;
+    loadMore: string;
+    showing: string;
+    quickAdd: string;
+    quickAdded: string;
+    priceFrom: string;
+    priceTo: string;
+    searchLabel: string;
   };
   offers: {
     title: string;
@@ -123,6 +150,13 @@ type Dict = {
     unavailable: string;
     specs: string;
     priceOnRequest: string;
+    available: string;
+    unavailableReason: string;
+    contactUs: string;
+    added: string;
+    description: string;
+    related: string;
+    breadcrumb: string;
   };
   cart: {
     title: string;
@@ -198,6 +232,68 @@ type Dict = {
     quickOffer: string;
     quickTrader: string;
   };
+  adminUi: {
+    colReference: string;
+    colCustomer: string;
+    colCountry: string;
+    colTotal: string;
+    colTrader: string;
+    colTitle: string;
+    colKind: string;
+    colEntries: string;
+    colMode: string;
+    colLines: string;
+    colPhone: string;
+    colNotes: string;
+    colRequests: string;
+    colCreated: string;
+    colEmail: string;
+    colDeals: string;
+    colDeal: string;
+    actionView: string;
+    actionNegotiate: string;
+    actionReview: string;
+    requestsLead: string;
+    dealsLead: string;
+    wholesaleLead: string;
+    customersLead: string;
+    tradersLead: string;
+    categoriesLead: string;
+    offersLead: string;
+    newOffer: string;
+    searchPlaceholder: string;
+    search: string;
+    emptyTitle: string;
+    emptyBody: string;
+    newTrader: string;
+    traderCreateTitle: string;
+    traderCreateLead: string;
+    traderEmail: string;
+    traderPassword: string;
+    traderDisplayName: string;
+    traderCompany: string;
+    traderPhone: string;
+    traderNotes: string;
+    traderCreateSubmit: string;
+    traderCreated: string;
+    traderActivate: string;
+    traderDisable: string;
+    categorySave: string;
+    categoryNameAr: string;
+    categoryNameEn: string;
+    categorySortOrder: string;
+    kindCatalog: string;
+    kindNonCatalog: string;
+    modeRequestQuote: string;
+    modeProposePrice: string;
+    status: {
+      retail: Record<string, string>;
+      deal: Record<string, string>;
+      wholesale: Record<string, string>;
+      trader: Record<string, string>;
+      offer: Record<string, string>;
+    };
+  };
   trader: {
     brand: string;
     overview: string;
@@ -220,6 +316,120 @@ type Dict = {
     openRecord: string;
     offersNow: string;
     viewAllOffers: string;
+    /* P6b/c — trader portal polish */
+    dealStatus: Record<string, string>;
+    wholesaleStatus: Record<string, string>;
+    requestMode: Record<string, string>;
+    dealKind: Record<string, string>;
+    actorRole: Record<string, string>;
+    dealAction: Record<string, string>;
+    wholesaleEvent: Record<string, string>;
+    accountStatus: Record<string, string>;
+    unknownStatus: string;
+    waitingOnYou: string;
+    waitingOnAdmin: string;
+    dealsTitle: string;
+    dealsEmpty: string;
+    dealsEmptyBody: string;
+    entriesCount: string;
+    colReference: string;
+    colTitle: string;
+    colKind: string;
+    colStatus: string;
+    colEntries: string;
+    newDealTitle: string;
+    newDealLead: string;
+    sectionType: string;
+    sectionTerms: string;
+    sectionMessage: string;
+    dealTypeLabel: string;
+    dealTitleLabel: string;
+    productLabel: string;
+    productPlaceholder: string;
+    nonCatalogNote: string;
+    priceOptional: string;
+    currencyLabel: string;
+    quantityLabel: string;
+    conditionsLabel: string;
+    initialMessageLabel: string;
+    submitProposal: string;
+    submitting: string;
+    dealProduct: string;
+    dealNonCatalog: string;
+    dealSnapshot: string;
+    dealQtyShort: string;
+    dealConditions: string;
+    dealHistory: string;
+    dealTerms: string;
+    dealClosed: string;
+    dealWaitingBanner: string;
+    dealWaitingAdmin: string;
+    negTitle: string;
+    negHint: string;
+    negAction: string;
+    negMessage: string;
+    negPrice: string;
+    negCurrency: string;
+    negQty: string;
+    negConditions: string;
+    negRecorded: string;
+    negSubmit: string;
+    wsTitle: string;
+    wsLead: string;
+    wsMyRequests: string;
+    wsNewRequest: string;
+    wsEmpty: string;
+    wsEmptyBody: string;
+    wsColReference: string;
+    wsColMode: string;
+    wsColStatus: string;
+    wsColLines: string;
+    wsLinesCount: string;
+    wsDetailTitle: string;
+    wsYourNotes: string;
+    wsLines: string;
+    wsQty: string;
+    wsProposed: string;
+    wsQuoted: string;
+    wsRetailRef: string;
+    wsQuoteTitle: string;
+    wsQuotedAt: string;
+    wsQuoteCurrency: string;
+    wsQuoteMessage: string;
+    wsQuoteLines: string;
+    wsQuoteBanner: string;
+    wsHistory: string;
+    wsTraderResponse: string;
+    wsModeLabel: string;
+    wsFormHint: string;
+    wsColProduct: string;
+    wsColRetail: string;
+    wsColQty: string;
+    wsColUnitPrice: string;
+    wsColCurrency: string;
+    wsNoProducts: string;
+    wsNotes: string;
+    wsSubmit: string;
+    wsActions: string;
+    wsReviewQuote: string;
+    wsNoteOptional: string;
+    wsAccept: string;
+    wsDecline: string;
+    wsResponseRecorded: string;
+    wsCancel: string;
+    wsCancelled: string;
+    wsNoActions: string;
+    profileTitle: string;
+    profileName: string;
+    profileEmail: string;
+    profileCompany: string;
+    profilePhone: string;
+    profileStatus: string;
+    profileNote: string;
+    offersTitle: string;
+    offersLead: string;
+    offersEmpty: string;
+    offersOpenPublic: string;
   };
   inbox: {
     title: string;
@@ -280,6 +490,9 @@ type Dict = {
     linkErrorUnauthorized: string;
     linkSuccess: string;
     unlinkSuccess: string;
+    conversations: string;
+    selectConversation: string;
+    selectConversationHint: string;
   };
   common: {
     language: string;
@@ -324,6 +537,11 @@ type Dict = {
     traderTitle: string;
     traderHint: string;
     loginError: string;
+  };
+  seo: {
+    catalogDescription: string;
+    productFallbackDescription: string;
+    privacyDescription: string;
   };
 };
 
@@ -439,6 +657,33 @@ const ar: Dict = {
     search: "بحث",
     filters: "تصفية",
     allCategories: "كل الفئات",
+    lead: "قطع مختارة بعناية من العود والآلات الوترية والملحقات. اختر القطعة التي تلفت نظرك وأضفها إلى قائمة الطلب.",
+    photoCaption: "الصورة قيد التصوير",
+    filtersTitle: "تصفية وترتيب",
+    typeLabel: "النوع",
+    priceLabel: "السعر",
+    priceMin: "الحد الأدنى",
+    priceMax: "الحد الأقصى",
+    priceApply: "تطبيق",
+    sortLabel: "الترتيب",
+    sortNew: "الأحدث",
+    sortPriceAsc: "السعر: من الأقل إلى الأعلى",
+    sortPriceDesc: "السعر: من الأعلى إلى الأقل",
+    clearAll: "مسح الكل",
+    clearFilters: "مسح الفلاتر",
+    activeFilters: "الفلاتر المطبّقة",
+    removeFilter: "إزالة الفلتر: {label}",
+    noResults: "لا نتائج مطابقة",
+    noResultsHint: "جرّب تغيير الفلاتر أو مسحها لعرض كل القطع.",
+    resultsUpdated: "تم تحديث النتائج: {n}",
+    showResults: "عرض {n} قطعة",
+    loadMore: "عرض المزيد",
+    showing: "عرض {shown} من {total}",
+    quickAdd: "إضافة سريعة إلى الطلب",
+    quickAdded: "تمت إضافة {name} إلى قائمة الطلب",
+    priceFrom: "من {value}",
+    priceTo: "إلى {value}",
+    searchLabel: "ابحث في المجموعة",
   },
   offers: {
     title: "عروض مختارة",
@@ -452,6 +697,13 @@ const ar: Dict = {
     unavailable: "غير متوفر حالياً",
     specs: "المواصفات",
     priceOnRequest: "السعر عند الطلب",
+    available: "متوفر",
+    unavailableReason: "هذه القطعة غير متاحة للطلب حالياً.",
+    contactUs: "تحدث معنا",
+    added: "تمت الإضافة",
+    description: "الوصف",
+    related: "قطع ذات صلة",
+    breadcrumb: "مسار التنقل",
   },
   cart: {
     title: "قائمة الطلب",
@@ -529,6 +781,98 @@ const ar: Dict = {
     quickOffer: "عرض",
     quickTrader: "حساب تاجر",
   },
+  adminUi: {
+    colReference: "المرجع",
+    colCustomer: "العميل",
+    colCountry: "الدولة",
+    colTotal: "الإجمالي",
+    colTrader: "التاجر",
+    colTitle: "العنوان",
+    colKind: "النوع",
+    colEntries: "الإدخالات",
+    colMode: "الوضع",
+    colLines: "البنود",
+    colPhone: "الهاتف",
+    colNotes: "ملاحظات",
+    colRequests: "الطلبات",
+    colCreated: "تاريخ الإنشاء",
+    colEmail: "البريد الإلكتروني",
+    colDeals: "الصفقات",
+    colDeal: "الصفقة",
+    actionView: "عرض",
+    actionNegotiate: "تفاوض",
+    actionReview: "مراجعة",
+    requestsLead: "طلبات التجزئة الواردة من المتجر، الأحدث أولاً.",
+    dealsLead:
+      "مساحة التفاوض مع التجّار: اقتراح، متابعة، عرض مقابل، قبول، إغلاق. منفصلة عن طلبات التجزئة.",
+    wholesaleLead:
+      "طلبات الجملة من التجّار، منفصلة عن طلبات التجزئة والصفقات. عرض سعر وتأكيد وإكمال فقط.",
+    customersLead:
+      "جهات الاتصال الناتجة عن طلبات التجزئة. يمكن البحث بالهاتف وهو ليس هوية فريدة.",
+    tradersLead: "حسابات التجّار تُنشأ من الإدارة فقط. لا تسجيل عام.",
+    categoriesLead:
+      "مجموعة الإطلاق فقط (الآلات الوترية، الإكسسوارات). يمكن تعديل التسميات والترتيب؛ إضافة فئات جديدة غير متاحة.",
+    offersLead: "عروض عامة منسّقة من الإدارة — ليست متاجر للتجّار.",
+    newOffer: "عرض جديد",
+    searchPlaceholder: "ابحث بالاسم أو الهاتف",
+    search: "بحث",
+    emptyTitle: "لا يوجد شيء هنا بعد",
+    emptyBody: "ستظهر السجلات هنا عند إنشائها.",
+    newTrader: "إضافة تاجر",
+    traderCreateTitle: "إنشاء حساب تاجر",
+    traderCreateLead: "حسابات تُنشأ من الإدارة فقط. لا تسجيل ذاتي.",
+    traderEmail: "البريد الإلكتروني",
+    traderPassword: "كلمة مرور مؤقتة (8 أحرف على الأقل)",
+    traderDisplayName: "الاسم المعروض",
+    traderCompany: "الشركة (اختياري)",
+    traderPhone: "الهاتف (اختياري)",
+    traderNotes: "ملاحظات الإدارة",
+    traderCreateSubmit: "إنشاء التاجر",
+    traderCreated: "تم الإنشاء.",
+    traderActivate: "تفعيل",
+    traderDisable: "تعطيل",
+    categorySave: "حفظ التسميات",
+    categoryNameAr: "الاسم (عربي)",
+    categoryNameEn: "الاسم (إنجليزي)",
+    categorySortOrder: "ترتيب العرض",
+    kindCatalog: "من الكتالوج",
+    kindNonCatalog: "خارج الكتالوج",
+    modeRequestQuote: "طلب عرض سعر",
+    modeProposePrice: "اقتراح سعر",
+    status: {
+      retail: {
+        draft: "مسودة",
+        ready_for_handoff: "جاهز للتحويل",
+        handoff_opened: "فُتح واتساب",
+        in_follow_up: "قيد المتابعة",
+        completed: "مكتمل",
+        cancelled: "ملغى",
+      },
+      deal: {
+        proposed: "مقترحة",
+        negotiating: "قيد التفاوض",
+        accepted: "مقبولة",
+        closed: "مغلقة",
+      },
+      wholesale: {
+        submitted: "مُقدَّم",
+        under_review: "قيد المراجعة",
+        quote_provided: "تم تقديم عرض السعر",
+        confirmed: "مؤكد",
+        completed: "مكتمل",
+        cancelled: "ملغى",
+      },
+      trader: {
+        active: "نشط",
+        disabled: "معطّل",
+      },
+      offer: {
+        draft: "مسودة",
+        published: "منشور",
+        unpublished: "غير منشور",
+      },
+    },
+  },
   trader: {
     brand: "بوابة التجّار",
     overview: "الرئيسية",
@@ -551,6 +895,154 @@ const ar: Dict = {
     openRecord: "فتح",
     offersNow: "العروض المتاحة الآن",
     viewAllOffers: "عرض الكل",
+    dealStatus: {
+      proposed: "مقترحة",
+      negotiating: "قيد التفاوض",
+      accepted: "مقبولة",
+      closed: "مغلقة",
+    },
+    wholesaleStatus: {
+      submitted: "مُرسل",
+      under_review: "قيد المراجعة",
+      quote_provided: "تم تقديم عرض السعر",
+      confirmed: "مؤكَّد",
+      completed: "مكتمل",
+      cancelled: "ملغى",
+    },
+    requestMode: {
+      request_quote: "طلب عرض سعر",
+      propose_price: "اقتراح سعر الوحدة",
+    },
+    dealKind: {
+      catalog: "صفقة من الكتالوج",
+      non_catalog: "فرصة خارج الكتالوج",
+    },
+    actorRole: { trader: "التاجر", admin: "الإدارة" },
+    dealAction: {
+      propose: "اقتراح",
+      continue: "متابعة",
+      counter: "عرض مقابل",
+      accept: "قبول",
+      close: "إغلاق",
+    },
+    wholesaleEvent: {
+      submitted: "تم الإرسال",
+      status_changed: "تغيّرت الحالة",
+      quote_provided: "تم تقديم عرض السعر",
+      trader_accepted: "قبل التاجر العرض",
+      trader_declined: "رفض التاجر العرض",
+    },
+    accountStatus: { active: "نشط", disabled: "معطّل" },
+    unknownStatus: "غير معروف",
+    waitingOnYou: "بانتظارك",
+    waitingOnAdmin: "بانتظار الإدارة",
+    dealsTitle: "مقترحات صفقاتي",
+    dealsEmpty: "لا توجد مقترحات بعد",
+    dealsEmptyBody: "ابدأ بتقديم أول مقترح صفقة إلى RARE OUD.",
+    entriesCount: "{n} إدخالات",
+    colReference: "المرجع",
+    colTitle: "العنوان",
+    colKind: "النوع",
+    colStatus: "الحالة",
+    colEntries: "الإدخالات",
+    newDealTitle: "اقتراح صفقة",
+    newDealLead:
+      "صفقات الكتالوج تشير إلى منتج قائم في RARE OUD. الفرص خارج الكتالوج تبقى خارجه حتى تقرر الإدارة لاحقاً غير ذلك — ولا يحدث ذلك تلقائياً.",
+    sectionType: "نوع الصفقة",
+    sectionTerms: "الشروط التجارية",
+    sectionMessage: "الرسالة الأولى",
+    dealTypeLabel: "نوع الصفقة",
+    dealTitleLabel: "الموضوع / العنوان",
+    productLabel: "منتج من الكتالوج",
+    productPlaceholder: "اختر المنتج",
+    nonCatalogNote:
+      "المقترحات خارج الكتالوج لا تُنشئ ولا تعدّل أي منتجات أو تصنيفات.",
+    priceOptional: "السعر المقترح (اختياري)",
+    currencyLabel: "العملة",
+    quantityLabel: "الكمية",
+    conditionsLabel: "الشروط / ملاحظات",
+    initialMessageLabel: "الرسالة الأولى",
+    submitProposal: "إرسال المقترح",
+    submitting: "جارٍ الإرسال…",
+    dealProduct: "المنتج",
+    dealNonCatalog: "خارج الكتالوج (بلا ربط بمنتج)",
+    dealSnapshot: "الملخص التجاري",
+    dealQtyShort: "الكمية",
+    dealConditions: "الشروط / ملاحظات",
+    dealHistory: "سجل التفاوض",
+    dealTerms: "الشروط",
+    dealClosed: "هذه الصفقة {status}. التفاوض مغلق.",
+    dealWaitingBanner: "ردّت الإدارة — بانتظار ردّك على هذه الصفقة.",
+    dealWaitingAdmin: "بانتظار ردّ إدارة RARE OUD.",
+    negTitle: "ردّك في التفاوض",
+    negHint: "تفاوض منظّم وليس محادثة. اختر متابعة أو عرضاً مقابلاً أو قبولاً أو إغلاقاً.",
+    negAction: "الإجراء",
+    negMessage: "الرسالة",
+    negPrice: "السعر المقترح",
+    negCurrency: "العملة",
+    negQty: "الكمية",
+    negConditions: "الشروط / ملاحظات",
+    negRecorded: "تم تسجيل إدخال التفاوض.",
+    negSubmit: "إرسال الإدخال",
+    wsTitle: "الطلب بالجملة",
+    wsLead:
+      "اطلب كميات بالجملة من كتالوج RARE OUD. هذه ليست واجهة متجر للتجّار ولا تُنشئ صفقات أو طلبات تجزئة.",
+    wsMyRequests: "طلباتي بالجملة",
+    wsNewRequest: "طلب جديد",
+    wsEmpty: "لا توجد طلبات جملة بعد",
+    wsEmptyBody: "اختر القطع والكميات وستردّ الإدارة بعرض السعر.",
+    wsColReference: "المرجع",
+    wsColMode: "النمط",
+    wsColStatus: "الحالة",
+    wsColLines: "البنود",
+    wsLinesCount: "{n} بنود",
+    wsDetailTitle: "طلب جملة",
+    wsYourNotes: "ملاحظاتك",
+    wsLines: "البنود (لقطات وقت الإرسال)",
+    wsQty: "الكمية",
+    wsProposed: "سعرك المقترح",
+    wsQuoted: "سعر الوحدة المعروض",
+    wsRetailRef: "مرجع التجزئة في الكتالوج (ليس سعر جملة)",
+    wsQuoteTitle: "عرض السعر",
+    wsQuotedAt: "تاريخ العرض",
+    wsQuoteCurrency: "عملة العرض",
+    wsQuoteMessage: "رسالة الإدارة",
+    wsQuoteLines: "أسعار الوحدة حسب البند",
+    wsQuoteBanner: "وصلك عرض سعر — راجعه ثم اقبله أو ارفضه.",
+    wsHistory: "السجل",
+    wsTraderResponse: "ردّك على العرض",
+    wsModeLabel: "نمط الطلب",
+    wsFormHint:
+      "لا تفرض المنصة سعر جملة. استخدم «طلب عرض سعر» إلا إذا كنت تقترح سعر وحدة خاصاً بك. سعر التجزئة المعروض مرجع فقط وليس سعر جملة. الحد الأدنى للطلب غير مفروض، والحد الأقصى للكمية ({max}) حدّ أمان تقني فقط.",
+    wsColProduct: "المنتج",
+    wsColRetail: "تجزئة الكتالوج (مرجع)",
+    wsColQty: "الكمية",
+    wsColUnitPrice: "سعر الوحدة عندك",
+    wsColCurrency: "العملة",
+    wsNoProducts: "لا توجد منتجات منشورة مؤهلة للجملة.",
+    wsNotes: "ملاحظات",
+    wsSubmit: "إرسال طلب الجملة",
+    wsActions: "الإجراءات",
+    wsReviewQuote: "راجع عرض السعر ثم اقبله (نيّة تنفيذ) أو ارفضه.",
+    wsNoteOptional: "ملاحظة (اختياري)",
+    wsAccept: "قبول العرض",
+    wsDecline: "رفض",
+    wsResponseRecorded: "تم تسجيل ردّك.",
+    wsCancel: "إلغاء الطلب",
+    wsCancelled: "تم إلغاء الطلب.",
+    wsNoActions: "لا إجراءات متاحة للتاجر في هذه الحالة.",
+    profileTitle: "حسابي",
+    profileName: "الاسم المعروض",
+    profileEmail: "البريد الإلكتروني",
+    profileCompany: "الشركة",
+    profilePhone: "الهاتف",
+    profileStatus: "الحالة",
+    profileNote:
+      "تغييرات الحساب تتم عبر إدارة RARE OUD. هذه ليست هوية بائع عامة.",
+    offersTitle: "العروض العامة المختارة",
+    offersLead: "عروض RARE OUD المنشورة فقط — وليست متاجر للتجّار.",
+    offersEmpty: "لا توجد عروض منشورة بعد.",
+    offersOpenPublic: "فتح صفحة العروض العامة",
   },
   inbox: {
     title: "صندوق واتساب",
@@ -612,6 +1104,9 @@ const ar: Dict = {
     linkErrorUnauthorized: "غير مصرّح.",
     linkSuccess: "تم ربط المحادثة.",
     unlinkSuccess: "تمت إزالة الربط.",
+    conversations: "المحادثات",
+    selectConversation: "اختر محادثة",
+    selectConversationHint: "اختر محادثة من القائمة لعرض الرسائل وسياق العمل.",
   },
   common: {
     language: "EN",
@@ -658,6 +1153,14 @@ const ar: Dict = {
     traderTitle: "دخول التجّار",
     traderHint: "الحسابات تُنشأ من الإدارة فقط — لا تسجيل ذاتي عام.",
     loginError: "البريد أو كلمة المرور غير صحيحة.",
+  },
+  seo: {
+    catalogDescription:
+      "تصفّح المجموعة المنشورة من RARE OUD — قطع مختارة بعناية، يمكن إضافتها إلى قائمة الطلب وإرسالها للفريق عبر واتساب.",
+    productFallbackDescription:
+      "قطعة من مجموعة RARE OUD المنشورة. اطّلع على التفاصيل وأضفها إلى قائمة الطلب.",
+    privacyDescription:
+      "كيف تجمع RARE OUD بيانات التواصل اللازمة لتجهيز طلبك وكيف تستخدمها.",
   },
 };
 
@@ -773,6 +1276,33 @@ const en: Dict = {
     search: "Search",
     filters: "Filters",
     allCategories: "All categories",
+    lead: "Pieces chosen with care: oud, string instruments and accessories. Pick what catches your eye and add it to your request list.",
+    photoCaption: "Photography in progress",
+    filtersTitle: "Filter & sort",
+    typeLabel: "Type",
+    priceLabel: "Price",
+    priceMin: "Min",
+    priceMax: "Max",
+    priceApply: "Apply",
+    sortLabel: "Sort",
+    sortNew: "Newest",
+    sortPriceAsc: "Price: low to high",
+    sortPriceDesc: "Price: high to low",
+    clearAll: "Clear all",
+    clearFilters: "Clear filters",
+    activeFilters: "Active filters",
+    removeFilter: "Remove filter: {label}",
+    noResults: "No matching results",
+    noResultsHint: "Try changing or clearing the filters to see every piece.",
+    resultsUpdated: "Results updated: {n}",
+    showResults: "Show {n} pieces",
+    loadMore: "Show more",
+    showing: "Showing {shown} of {total}",
+    quickAdd: "Quick add to request",
+    quickAdded: "{name} added to your request list",
+    priceFrom: "From {value}",
+    priceTo: "To {value}",
+    searchLabel: "Search the collection",
   },
   offers: {
     title: "Curated offers",
@@ -786,6 +1316,13 @@ const en: Dict = {
     unavailable: "Currently unavailable",
     specs: "Specifications",
     priceOnRequest: "Price on request",
+    available: "Available",
+    unavailableReason: "This piece is not available to request right now.",
+    contactUs: "Talk to us",
+    added: "Added",
+    description: "Description",
+    related: "Related pieces",
+    breadcrumb: "Breadcrumb",
   },
   cart: {
     title: "Request list",
@@ -863,6 +1400,98 @@ const en: Dict = {
     quickOffer: "Offer",
     quickTrader: "Trader account",
   },
+  adminUi: {
+    colReference: "Reference",
+    colCustomer: "Customer",
+    colCountry: "Country",
+    colTotal: "Total",
+    colTrader: "Trader",
+    colTitle: "Title",
+    colKind: "Kind",
+    colEntries: "Entries",
+    colMode: "Mode",
+    colLines: "Lines",
+    colPhone: "Phone",
+    colNotes: "Notes",
+    colRequests: "Requests",
+    colCreated: "Created",
+    colEmail: "Email",
+    colDeals: "Deals",
+    colDeal: "Deal",
+    actionView: "View",
+    actionNegotiate: "Negotiate",
+    actionReview: "Review",
+    requestsLead: "Retail requests from the storefront, newest first.",
+    dealsLead:
+      "Negotiation workspace with traders: propose, continue, counter, accept, close. Separate from retail requests.",
+    wholesaleLead:
+      "Trader wholesale requests, separate from retail requests and deals. Quote, confirm and complete only.",
+    customersLead:
+      "Contact records from retail requests. Phone is searchable but not a unique identity.",
+    tradersLead: "Accounts are provisioned by admin only. No public registration.",
+    categoriesLead:
+      "Launch set only (String Musical Instruments, Accessories). Labels and order can be edited; adding categories is not available.",
+    offersLead: "Admin-curated public presentations — not trader storefronts.",
+    newOffer: "New offer",
+    searchPlaceholder: "Search name or phone",
+    search: "Search",
+    emptyTitle: "Nothing here yet",
+    emptyBody: "Records will appear here once they are created.",
+    newTrader: "Add trader",
+    traderCreateTitle: "Create trader account",
+    traderCreateLead: "Admin-provisioned only. No self-registration.",
+    traderEmail: "Email",
+    traderPassword: "Temporary password (min 8)",
+    traderDisplayName: "Display name",
+    traderCompany: "Company (optional)",
+    traderPhone: "Phone (optional)",
+    traderNotes: "Admin notes",
+    traderCreateSubmit: "Create trader",
+    traderCreated: "Created.",
+    traderActivate: "Activate",
+    traderDisable: "Disable",
+    categorySave: "Save labels",
+    categoryNameAr: "Name (Arabic)",
+    categoryNameEn: "Name (English)",
+    categorySortOrder: "Sort order",
+    kindCatalog: "Catalog",
+    kindNonCatalog: "Non-catalog",
+    modeRequestQuote: "Request quote",
+    modeProposePrice: "Propose price",
+    status: {
+      retail: {
+        draft: "Draft",
+        ready_for_handoff: "Ready for handoff",
+        handoff_opened: "Handoff opened",
+        in_follow_up: "In follow-up",
+        completed: "Completed",
+        cancelled: "Cancelled",
+      },
+      deal: {
+        proposed: "Proposed",
+        negotiating: "Negotiating",
+        accepted: "Accepted",
+        closed: "Closed",
+      },
+      wholesale: {
+        submitted: "Submitted",
+        under_review: "Under review",
+        quote_provided: "Quote provided",
+        confirmed: "Confirmed",
+        completed: "Completed",
+        cancelled: "Cancelled",
+      },
+      trader: {
+        active: "Active",
+        disabled: "Disabled",
+      },
+      offer: {
+        draft: "Draft",
+        published: "Published",
+        unpublished: "Unpublished",
+      },
+    },
+  },
   trader: {
     brand: "Trader portal",
     overview: "Home",
@@ -885,6 +1514,155 @@ const en: Dict = {
     openRecord: "Open",
     offersNow: "Offers available now",
     viewAllOffers: "View all",
+    dealStatus: {
+      proposed: "Proposed",
+      negotiating: "Negotiating",
+      accepted: "Accepted",
+      closed: "Closed",
+    },
+    wholesaleStatus: {
+      submitted: "Submitted",
+      under_review: "Under review",
+      quote_provided: "Quote provided",
+      confirmed: "Confirmed",
+      completed: "Completed",
+      cancelled: "Cancelled",
+    },
+    requestMode: {
+      request_quote: "Request quote",
+      propose_price: "Propose unit price",
+    },
+    dealKind: {
+      catalog: "Catalog deal",
+      non_catalog: "Non-catalog opportunity",
+    },
+    actorRole: { trader: "Trader", admin: "RARE OUD" },
+    dealAction: {
+      propose: "Proposal",
+      continue: "Continue",
+      counter: "Counter",
+      accept: "Accept",
+      close: "Close",
+    },
+    wholesaleEvent: {
+      submitted: "Submitted",
+      status_changed: "Status changed",
+      quote_provided: "Quote provided",
+      trader_accepted: "Trader accepted quote",
+      trader_declined: "Trader declined quote",
+    },
+    accountStatus: { active: "Active", disabled: "Disabled" },
+    unknownStatus: "Unknown",
+    waitingOnYou: "Waiting on you",
+    waitingOnAdmin: "Waiting on RARE OUD",
+    dealsTitle: "My deal proposals",
+    dealsEmpty: "No proposals yet",
+    dealsEmptyBody: "Start by sending your first deal proposal to RARE OUD.",
+    entriesCount: "{n} entries",
+    colReference: "Reference",
+    colTitle: "Title",
+    colKind: "Kind",
+    colStatus: "Status",
+    colEntries: "Entries",
+    newDealTitle: "Propose a deal",
+    newDealLead:
+      "Catalog deals reference an existing RARE OUD product. Non-catalog opportunities stay outside the catalog until an admin later chooses otherwise — never automatic.",
+    sectionType: "Deal type",
+    sectionTerms: "Commercial terms",
+    sectionMessage: "Opening message",
+    dealTypeLabel: "Deal type",
+    dealTitleLabel: "Subject / title",
+    productLabel: "Catalog product",
+    productPlaceholder: "Select product",
+    nonCatalogNote:
+      "Non-catalog proposals do not create or modify products/categories.",
+    priceOptional: "Proposed price (optional)",
+    currencyLabel: "Currency",
+    quantityLabel: "Quantity",
+    conditionsLabel: "Conditions / notes",
+    initialMessageLabel: "Initial message",
+    submitProposal: "Submit proposal",
+    submitting: "Submitting…",
+    dealProduct: "Product",
+    dealNonCatalog: "Non-catalog (no product link)",
+    dealSnapshot: "Commercial snapshot",
+    dealQtyShort: "qty",
+    dealConditions: "Conditions / notes",
+    dealHistory: "Negotiation history",
+    dealTerms: "Terms",
+    dealClosed: "This deal is {status}. Negotiation is closed.",
+    dealWaitingBanner: "RARE OUD has responded — your reply is needed on this deal.",
+    dealWaitingAdmin: "Waiting for a reply from RARE OUD.",
+    negTitle: "Negotiation response",
+    negHint:
+      "Structured negotiation — not chat. Choose continue, counter, accept, or close.",
+    negAction: "Action",
+    negMessage: "Message",
+    negPrice: "Proposed price",
+    negCurrency: "Currency",
+    negQty: "Quantity",
+    negConditions: "Conditions / notes",
+    negRecorded: "Negotiation entry recorded.",
+    negSubmit: "Submit entry",
+    wsTitle: "Wholesale ordering",
+    wsLead:
+      "Request wholesale quantities from RARE OUD’s catalog. This is not a trader storefront and does not create deals or retail requests.",
+    wsMyRequests: "My wholesale requests",
+    wsNewRequest: "New request",
+    wsEmpty: "No wholesale requests yet",
+    wsEmptyBody: "Choose pieces and quantities; admin will respond with a quote.",
+    wsColReference: "Reference",
+    wsColMode: "Mode",
+    wsColStatus: "Status",
+    wsColLines: "Lines",
+    wsLinesCount: "{n} lines",
+    wsDetailTitle: "Wholesale request",
+    wsYourNotes: "Your notes",
+    wsLines: "Lines (snapshots at submission)",
+    wsQty: "Qty",
+    wsProposed: "Your proposed price",
+    wsQuoted: "Quoted unit price",
+    wsRetailRef: "Catalog retail ref. (not wholesale pricing)",
+    wsQuoteTitle: "Quotation",
+    wsQuotedAt: "Provided",
+    wsQuoteCurrency: "Quote currency",
+    wsQuoteMessage: "Message from RARE OUD",
+    wsQuoteLines: "Unit prices by line",
+    wsQuoteBanner: "A quotation is ready — review it, then accept or decline.",
+    wsHistory: "History",
+    wsTraderResponse: "Your response to the quote",
+    wsModeLabel: "Request mode",
+    wsFormHint:
+      "No wholesale list price is invented by the platform. Use “Request quote” unless you are proposing your own unit price. Catalog retail shown below is a reference only — not wholesale pricing. MOQ is not enforced. Quantity max {max} is a technical safety limit only.",
+    wsColProduct: "Product",
+    wsColRetail: "Catalog retail (ref.)",
+    wsColQty: "Qty",
+    wsColUnitPrice: "Your unit price",
+    wsColCurrency: "Currency",
+    wsNoProducts: "No wholesale-eligible published products.",
+    wsNotes: "Notes",
+    wsSubmit: "Submit wholesale request",
+    wsActions: "Actions",
+    wsReviewQuote: "Review the quotation, then accept (fulfillment intent) or decline.",
+    wsNoteOptional: "Note (optional)",
+    wsAccept: "Accept quotation",
+    wsDecline: "Decline",
+    wsResponseRecorded: "Response recorded.",
+    wsCancel: "Cancel request",
+    wsCancelled: "Request cancelled.",
+    wsNoActions: "No trader actions for this status.",
+    profileTitle: "Profile",
+    profileName: "Display name",
+    profileEmail: "Email",
+    profileCompany: "Company",
+    profilePhone: "Phone",
+    profileStatus: "Status",
+    profileNote:
+      "Profile changes are managed by RARE OUD admin. This is not a public seller identity.",
+    offersTitle: "Public curated offers",
+    offersLead: "Published RARE OUD presentations only — not trader storefronts.",
+    offersEmpty: "No published offers yet.",
+    offersOpenPublic: "Open public offers page",
   },
   inbox: {
     title: "WhatsApp inbox",
@@ -946,6 +1724,10 @@ const en: Dict = {
     linkErrorUnauthorized: "Unauthorized.",
     linkSuccess: "Conversation linked.",
     unlinkSuccess: "Link removed.",
+    conversations: "Conversations",
+    selectConversation: "Select a conversation",
+    selectConversationHint:
+      "Choose a conversation from the list to see messages and business context.",
   },
   common: {
     language: "AR",
@@ -992,6 +1774,14 @@ const en: Dict = {
     traderTitle: "Trader sign in",
     traderHint: "Accounts are provisioned by RARE OUD admin. No public registration.",
     loginError: "Email or password is incorrect.",
+  },
+  seo: {
+    catalogDescription:
+      "Browse the published RARE OUD collection — pieces chosen with care, ready to add to your request list and send to the team on WhatsApp.",
+    productFallbackDescription:
+      "A piece from the published RARE OUD collection. View the details and add it to your request list.",
+    privacyDescription:
+      "How RARE OUD collects the contact details needed to prepare your request, and how they are used.",
   },
 };
 

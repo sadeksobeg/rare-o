@@ -1,9 +1,12 @@
 import { NewDealForm } from "@/components/trader/new-deal-form";
 import { requireTraderSession } from "@/lib/auth/trader-session";
 import { prisma } from "@/lib/db/prisma";
+import { getRequestDictionary } from "@/lib/i18n/server";
 
 export default async function NewTraderDealPage() {
   await requireTraderSession();
+  const { locale, dict } = await getRequestDictionary();
+  const t = dict.trader;
   const products = await prisma.product.findMany({
     where: { status: "published" },
     orderBy: { nameEn: "asc" },
@@ -12,13 +15,11 @@ export default async function NewTraderDealPage() {
 
   return (
     <section className="space-y-6">
-      <h1 className="text-3xl">Propose a deal</h1>
-      <p className="max-w-xl text-sm text-ro-muted">
-        Catalog deals reference an existing RARE OUD product. Non-catalog
-        opportunities stay outside the catalog until an admin later chooses
-        otherwise — never automatic.
-      </p>
-      <NewDealForm products={products} />
+      <h1 className="font-display text-3xl font-semibold tracking-tight">
+        {t.newDealTitle}
+      </h1>
+      <p className="max-w-xl text-sm text-ro-muted">{t.newDealLead}</p>
+      <NewDealForm products={products} labels={t} locale={locale} />
     </section>
   );
 }

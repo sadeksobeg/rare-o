@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { BusinessContextPanel } from "@/components/admin/business-context-panel";
 import { InboxComposer } from "@/components/admin/inbox-composer";
-import { InboxHealthBanner } from "@/components/admin/inbox-health";
 import { InboxLinkControls } from "@/components/admin/inbox-link-controls";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -74,15 +73,17 @@ export default async function AdminWhatsAppConversationPage({
   }
 
   return (
-    <section className="space-y-6">
-      <div className="space-y-2">
+    <section className="space-y-4">
+      <div className="space-y-1">
         <Link
           href="/admin/inbox"
-          className="text-sm text-ro-purple hover:underline"
+          className="text-sm text-ro-plum hover:underline lg:hidden"
         >
           ← {dict.inbox.backToList}
         </Link>
-        <h1 className="text-3xl">{conversation.displayLabel}</h1>
+        <h2 className="text-xl font-semibold" dir="auto">
+          {conversation.displayLabel}
+        </h2>
         <p className="text-sm text-ro-muted">
           {conversation.link.linked
             ? `${dict.inbox.linkedAs}: ${linkTypeLabel(dict, conversation.link.linkType)}`
@@ -92,11 +93,9 @@ export default async function AdminWhatsAppConversationPage({
         </p>
       </div>
 
-      <InboxHealthBanner health={health} dict={dict} />
-
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(16rem,0.8fr)]">
-        <div className="space-y-4">
-          <div className="space-y-3 border border-ro-line p-4">
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)]">
+        <div className="min-w-0 space-y-4">
+          <div className="space-y-3 border border-ro-line p-4 xl:max-h-[calc(100vh-24rem)] xl:overflow-y-auto">
             {conversation.messages.length === 0 ? (
               <p className="text-sm text-ro-muted">{dict.inbox.noMessages}</p>
             ) : (

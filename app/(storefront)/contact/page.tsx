@@ -1,8 +1,20 @@
+import type { Metadata } from "next";
 import { getRequestDictionary } from "@/lib/i18n/server";
+import { storefrontMetadata } from "@/lib/seo";
 import { whatsAppGreetingLink } from "@/lib/config/contact";
 import { MaterialPlate } from "@/components/storefront/material-plate";
 import { ButtonLink } from "@/components/ui/button";
 import { Banner } from "@/components/ui/banner";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { locale, dict } = await getRequestDictionary();
+  return storefrontMetadata({
+    locale,
+    title: `${dict.contact.title} — ${dict.brand}`,
+    description: dict.contact.lead,
+    path: "/contact",
+  });
+}
 
 export default async function ContactPage() {
   const { locale, dict } = await getRequestDictionary();

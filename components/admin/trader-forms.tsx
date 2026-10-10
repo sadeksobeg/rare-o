@@ -5,73 +5,73 @@ import {
   adminSetTraderStatusAction,
 } from "@/app/deal-actions";
 import type { ActionResult } from "@/app/actions";
+import { Button } from "@/components/ui/button";
+import { TextField } from "@/components/ui/text-field";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { useRouter } from "next/navigation";
 import { useActionState, useTransition } from "react";
 
 const initial: ActionResult | null = null;
 
-export function CreateTraderForm() {
+const controlClass =
+  "w-full rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-paper px-3 py-2 text-sm text-ro-ink outline-none focus:border-[var(--ro-plum-900)]";
+
+export function CreateTraderForm({ dict }: { dict: Dictionary }) {
+  const u = dict.adminUi;
   const [state, action, pending] = useActionState(
     adminCreateTraderAction,
     initial
   );
 
   return (
-    <form action={action} className="grid max-w-xl gap-3 border border-ro-line p-4">
-      <h2 className="text-lg">Create trader account</h2>
-      <p className="text-sm text-ro-muted">
-        Admin-provisioned only. No public self-registration.
-      </p>
-      <input
+    <form
+      action={action}
+      className="grid max-w-xl gap-3 border border-ro-line bg-ro-surface p-4"
+    >
+      <h2 className="text-lg font-semibold">{u.traderCreateTitle}</h2>
+      <p className="text-sm text-ro-muted">{u.traderCreateLead}</p>
+      <TextField
         name="email"
         type="email"
+        label={u.traderEmail}
         required
-        placeholder="Email"
-        className="border border-ro-line bg-transparent px-3 py-2 text-sm"
+        dense
+        dir="ltr"
       />
-      <input
+      <TextField
         name="password"
         type="password"
+        label={u.traderPassword}
         required
         minLength={8}
-        placeholder="Temporary password (min 8)"
-        className="border border-ro-line bg-transparent px-3 py-2 text-sm"
+        dense
+        dir="ltr"
       />
-      <input
+      <TextField
         name="displayName"
+        label={u.traderDisplayName}
         required
-        placeholder="Display name"
-        className="border border-ro-line bg-transparent px-3 py-2 text-sm"
+        dense
       />
-      <input
-        name="companyName"
-        placeholder="Company (optional)"
-        className="border border-ro-line bg-transparent px-3 py-2 text-sm"
-      />
-      <input
-        name="phone"
-        placeholder="Phone (optional)"
-        className="border border-ro-line bg-transparent px-3 py-2 text-sm"
-      />
-      <textarea
-        name="adminNotes"
-        placeholder="Admin notes"
-        rows={2}
-        className="border border-ro-line bg-transparent px-3 py-2 text-sm"
-      />
+      <TextField name="companyName" label={u.traderCompany} dense />
+      <TextField name="phone" label={u.traderPhone} dense dir="ltr" />
+      <label className="block space-y-1.5 text-sm">
+        <span className="font-medium text-ro-ink">{u.traderNotes}</span>
+        <textarea name="adminNotes" rows={2} className={controlClass} />
+      </label>
       {state && !state.ok ? (
-        <p className="text-sm text-red-800">{state.error}</p>
+        <p className="text-sm text-[var(--ro-danger-700)]" role="alert">
+          {state.error}
+        </p>
       ) : null}
       {state?.ok ? (
-        <p className="text-sm text-ro-muted">{state.message ?? "Created."}</p>
+        <p className="text-sm text-ro-muted" role="status">
+          {state.message ?? u.traderCreated}
+        </p>
       ) : null}
-      <button
-        type="submit"
-        disabled={pending}
-        className="bg-ro-purple px-4 py-2 text-sm text-ro-ivory disabled:opacity-60"
-      >
-        Create trader
-      </button>
+      <Button type="submit" size="sm" loading={pending} className="w-fit">
+        {u.traderCreateSubmit}
+      </Button>
     </form>
   );
 }
@@ -79,9 +79,11 @@ export function CreateTraderForm() {
 export function TraderStatusButton({
   traderId,
   nextStatus,
+  label,
 }: {
   traderId: string;
   nextStatus: "active" | "disabled";
+  label: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -97,13 +99,15 @@ export function TraderStatusButton({
     >
       <input type="hidden" name="traderId" value={traderId} />
       <input type="hidden" name="status" value={nextStatus} />
-      <button
+      <Button
         type="submit"
-        disabled={pending}
-        className="border border-ro-line px-3 py-1 text-xs disabled:opacity-60"
+        variant="secondary"
+        size="sm"
+        loading={pending}
+        className="h-8 px-3"
       >
-        Set {nextStatus}
-      </button>
+        {label}
+      </Button>
     </form>
   );
 }

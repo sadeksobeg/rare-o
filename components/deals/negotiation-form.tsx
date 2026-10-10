@@ -7,13 +7,17 @@ import {
 import type { ActionResult } from "@/app/actions";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import type { TraderDict } from "@/lib/ui/trader-labels";
 
 export function NegotiationForm({
   dealId,
   mode,
+  labels,
 }: {
   dealId: string;
   mode: "trader" | "admin";
+  /** Optional bilingual labels (trader portal). Admin keeps English defaults. */
+  labels?: TraderDict;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -34,28 +38,28 @@ export function NegotiationForm({
         });
       }}
     >
-      <h2 className="text-lg">Negotiation response</h2>
+      <h2 className="text-lg">{labels?.negTitle ?? "Negotiation response"}</h2>
       <p className="text-sm text-ro-muted">
-        Structured negotiation — not chat. Choose continue, counter, accept, or
-        close.
+        {labels?.negHint ??
+          "Structured negotiation — not chat. Choose continue, counter, accept, or close."}
       </p>
       <input type="hidden" name="dealId" value={dealId} />
       <label className="block space-y-1 text-sm">
-        <span>Action</span>
+        <span>{labels?.negAction ?? "Action"}</span>
         <select
           name="action"
           value={action}
           onChange={(e) => setAction(e.target.value)}
           className="w-full border border-ro-line bg-transparent px-3 py-2"
         >
-          <option value="continue">Continue</option>
-          <option value="counter">Counter</option>
-          <option value="accept">Accept</option>
-          <option value="close">Close</option>
+          <option value="continue">{labels?.dealAction.continue ?? "Continue"}</option>
+          <option value="counter">{labels?.dealAction.counter ?? "Counter"}</option>
+          <option value="accept">{labels?.dealAction.accept ?? "Accept"}</option>
+          <option value="close">{labels?.dealAction.close ?? "Close"}</option>
         </select>
       </label>
       <label className="block space-y-1 text-sm">
-        <span>Message</span>
+        <span>{labels?.negMessage ?? "Message"}</span>
         <textarea
           name="message"
           rows={3}
@@ -65,7 +69,7 @@ export function NegotiationForm({
       {action === "counter" ? (
         <div className="grid gap-3 sm:grid-cols-3">
           <label className="block space-y-1 text-sm">
-            <span>Proposed price</span>
+            <span>{labels?.negPrice ?? "Proposed price"}</span>
             <input
               name="proposedPrice"
               type="number"
@@ -75,7 +79,7 @@ export function NegotiationForm({
             />
           </label>
           <label className="block space-y-1 text-sm">
-            <span>Currency</span>
+            <span>{labels?.negCurrency ?? "Currency"}</span>
             <input
               name="currency"
               placeholder="e.g. USD"
@@ -83,7 +87,7 @@ export function NegotiationForm({
             />
           </label>
           <label className="block space-y-1 text-sm">
-            <span>Quantity</span>
+            <span>{labels?.negQty ?? "Quantity"}</span>
             <input
               name="quantity"
               type="number"
@@ -92,7 +96,7 @@ export function NegotiationForm({
             />
           </label>
           <label className="block space-y-1 text-sm sm:col-span-3">
-            <span>Conditions / notes</span>
+            <span>{labels?.negConditions ?? "Conditions / notes"}</span>
             <textarea
               name="conditionsNotes"
               rows={2}
@@ -105,14 +109,14 @@ export function NegotiationForm({
         <p className="text-sm text-red-800">{result.error}</p>
       ) : null}
       {result?.ok ? (
-        <p className="text-sm text-ro-muted">Negotiation entry recorded.</p>
+        <p className="text-sm text-ro-muted">{labels?.negRecorded ?? "Negotiation entry recorded."}</p>
       ) : null}
       <button
         type="submit"
         disabled={pending}
         className="bg-ro-purple px-4 py-2 text-sm text-ro-ivory disabled:opacity-60"
       >
-        Submit entry
+        {labels?.negSubmit ?? "Submit entry"}
       </button>
     </form>
   );

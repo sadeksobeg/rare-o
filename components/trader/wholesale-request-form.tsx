@@ -2,6 +2,9 @@
 
 import { traderCreateWholesaleRequestAction } from "@/app/wholesale-actions";
 import type { ActionResult } from "@/app/actions";
+import { Banner } from "@/components/ui/banner";
+import type { Locale } from "@/lib/i18n/config";
+import { fmt, type TraderDict } from "@/lib/ui/trader-labels";
 import { WHOLESALE_QTY_TECHNICAL_MAX } from "@/lib/wholesale/constants";
 import { useActionState, useMemo, useState } from "react";
 
@@ -18,8 +21,12 @@ const initial: ActionResult | null = null;
 
 export function WholesaleRequestForm({
   products,
+  labels: t,
+  locale,
 }: {
   products: ProductOption[];
+  labels: TraderDict;
+  locale: Locale;
 }) {
   const [mode, setMode] = useState<"request_quote" | "propose_price">(
     "request_quote"
@@ -54,39 +61,39 @@ export function WholesaleRequestForm({
   return (
     <form action={action} className="space-y-6">
       <input type="hidden" name="linesJson" value={linesJson} />
-      <label className="block max-w-md space-y-1 text-sm">
-        <span>Request mode</span>
+      <label className="block max-w-md space-y-1.5 text-sm">
+        <span className="font-medium">{t.wsModeLabel}</span>
         <select
           name="requestMode"
           value={mode}
           onChange={(e) =>
             setMode(e.target.value as "request_quote" | "propose_price")
           }
-          className="w-full border border-ro-line bg-transparent px-3 py-2"
+          className="min-h-11 w-full border border-ro-line bg-transparent px-3 py-2"
         >
-          <option value="request_quote">Request quote</option>
-          <option value="propose_price">Propose unit price</option>
+          <option value="request_quote">{t.requestMode.request_quote}</option>
+          <option value="propose_price">{t.requestMode.propose_price}</option>
         </select>
       </label>
       <p className="text-sm text-ro-muted">
-        No wholesale list price is invented by the platform. Use{" "}
-        <strong>Request quote</strong> unless you are proposing your own unit
-        price. Catalog retail shown below is a reference only — not wholesale
-        pricing. MOQ is not enforced. Quantity max {WHOLESALE_QTY_TECHNICAL_MAX}{" "}
-        is a technical safety limit only.
+        {fmt(t.wsFormHint, { max: WHOLESALE_QTY_TECHNICAL_MAX })}
       </p>
 
       <div className="overflow-x-auto border border-ro-line">
-        <table className="min-w-full text-left text-sm">
+        <table className="min-w-full text-start text-sm">
           <thead className="border-b border-ro-line bg-ro-surface">
             <tr>
-              <th className="p-3">Product</th>
-              <th className="p-3">Catalog retail (ref.)</th>
-              <th className="p-3">Qty</th>
+              <th className="p-3 text-start font-medium">{t.wsColProduct}</th>
+              <th className="p-3 text-start font-medium">{t.wsColRetail}</th>
+              <th className="p-3 text-start font-medium">{t.wsColQty}</th>
               {mode === "propose_price" ? (
                 <>
-                  <th className="p-3">Your unit price</th>
-                  <th className="p-3">Currency</th>
+                  <th className="p-3 text-start font-medium">
+                    {t.wsColUnitPrice}
+                  </th>
+                  <th className="p-3 text-start font-medium">
+                    {t.wsColCurrency}
+                  </th>
                 </>
               ) : null}
             </tr>
@@ -95,14 +102,16 @@ export function WholesaleRequestForm({
             {products.length === 0 ? (
               <tr>
                 <td className="p-4 text-ro-muted" colSpan={5}>
-                  No wholesale-eligible published products.
+                  {t.wsNoProducts}
                 </td>
               </tr>
             ) : (
               products.map((p) => (
                 <tr key={p.id} className="border-b border-ro-line">
                   <td className="p-3">
-                    {p.nameEn || p.nameAr}
+                    {locale === "ar"
+                      ? p.nameAr || p.nameEn
+                      : p.nameEn || p.nameAr}
                     <div className="text-ro-muted">{p.slug}</div>
                   </td>
                   <td className="p-3 text-ro-muted">
@@ -114,6 +123,7 @@ export function WholesaleRequestForm({
                       min={0}
                       max={WHOLESALE_QTY_TECHNICAL_MAX}
                       step={1}
+                      dir="ltr"
                       value={qtyById[p.id] ?? 0}
                       onChange={(e) =>
                         setQtyById((prev) => ({
@@ -121,7 +131,7 @@ export function WholesaleRequestForm({
                           [p.id]: Number(e.target.value) || 0,
                         }))
                       }
-                      className="w-24 border border-ro-line bg-transparent px-2 py-1"
+                      className="min-h-10 w-24 border border-ro-line bg-transparent px-2 py-1"
                     />
                   </td>
                   {mode === "propose_price" ? (
@@ -131,6 +141,7 @@ export function WholesaleRequestForm({
                           type="number"
                           min={0}
                           step="0.01"
+                          dir="ltr"
                           value={priceById[p.id] ?? ""}
                           onChange={(e) =>
                             setPriceById((prev) => ({
@@ -138,12 +149,13 @@ export function WholesaleRequestForm({
                               [p.id]: e.target.value,
                             }))
                           }
-                          className="w-28 border border-ro-line bg-transparent px-2 py-1"
+                          className="min-h-10 w-28 border border-ro-line bg-transparent px-2 py-1"
                           disabled={(qtyById[p.id] ?? 0) < 1}
                         />
                       </td>
                       <td className="p-3">
                         <input
+                          dir="ltr"
                           value={currencyById[p.id] ?? p.currency}
                           onChange={(e) =>
                             setCurrencyById((prev) => ({
@@ -151,7 +163,7 @@ export function WholesaleRequestForm({
                               [p.id]: e.target.value.toUpperCase(),
                             }))
                           }
-                          className="w-24 border border-ro-line bg-transparent px-2 py-1"
+                          className="min-h-10 w-24 border border-ro-line bg-transparent px-2 py-1"
                           disabled={(qtyById[p.id] ?? 0) < 1}
                         />
                       </td>
@@ -164,8 +176,8 @@ export function WholesaleRequestForm({
         </table>
       </div>
 
-      <label className="block max-w-xl space-y-1 text-sm">
-        <span>Notes</span>
+      <label className="block max-w-xl space-y-1.5 text-sm">
+        <span className="font-medium">{t.wsNotes}</span>
         <textarea
           name="traderNotes"
           rows={3}
@@ -174,15 +186,17 @@ export function WholesaleRequestForm({
       </label>
 
       {state && !state.ok ? (
-        <p className="text-sm text-red-800">{state.error}</p>
+        <Banner tone="danger" alert>
+          {state.error}
+        </Banner>
       ) : null}
 
       <button
         type="submit"
         disabled={pending || selectedLines.length === 0}
-        className="bg-ro-purple px-5 py-3 text-sm text-ro-ivory disabled:opacity-60"
+        className="min-h-12 bg-ro-purple px-5 text-sm text-ro-ivory disabled:opacity-60"
       >
-        Submit wholesale request
+        {t.wsSubmit}
       </button>
     </form>
   );

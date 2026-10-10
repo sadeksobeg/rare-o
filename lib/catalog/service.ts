@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import type { ProductUpsertInput } from "@/lib/validation/schemas";
 import {
+  type CatalogSort,
   isLaunchCategorySlug,
   LAUNCH_CATEGORY_SLUGS,
 } from "@/lib/catalog/constants";
@@ -41,33 +42,95 @@ export async function getPublishedProductBySlug(slug: string) {
   });
 }
 
-export async function listPublishedProducts(filters?: {
+export type PublishedProductFilters = {
   categorySlug?: string;
   q?: string;
-}) {
+  /** Inclusive lower bound on retailPrice (currency-agnostic read filter). */
+  minPrice?: number;
+  /** Inclusive upper bound on retailPrice (currency-agnostic read filter). */
+  maxPrice?: number;
+  sort?: CatalogSort;
+  /** Max rows returned (omit for all). */
+  limit?: number;
+};
+
+function publishedWhere(
+  filters?: PublishedProductFilters
+): Prisma.ProductWhereInput {
   const q = filters?.q?.trim();
+  const hasMin = typeof filters?.minPrice === "number";
+  const hasMax = typeof filters?.maxPrice === "number";
+  return {
+    status: "published",
+    ...(filters?.categorySlug
+      ? { category: { slug: filters.categorySlug } }
+      : {}),
+    ...(hasMin || hasMax
+      ? {
+          retailPrice: {
+            ...(hasMin ? { gte: filters!.minPrice } : {}),
+            ...(hasMax ? { lte: filters!.maxPrice } : {}),
+          },
+        }
+      : {}),
+    ...(q
+      ? {
+          OR: [
+            { nameAr: { contains: q } },
+            { nameEn: { contains: q } },
+            { descriptionAr: { contains: q } },
+            { descriptionEn: { contains: q } },
+          ],
+        }
+      : {}),
+  };
+}
+
+function publishedOrderBy(
+  sort?: CatalogSort
+): Prisma.ProductOrderByWithRelationInput[] {
+  if (sort === "price-asc") {
+    return [{ retailPrice: "asc" }, { updatedAt: "desc" }];
+  }
+  if (sort === "price-desc") {
+    return [{ retailPrice: "desc" }, { updatedAt: "desc" }];
+  }
+  return [{ updatedAt: "desc" }];
+}
+
+export async function listPublishedProducts(filters?: PublishedProductFilters) {
   return prisma.product.findMany({
-    where: {
-      status: "published",
-      ...(filters?.categorySlug
-        ? { category: { slug: filters.categorySlug } }
-        : {}),
-      ...(q
-        ? {
-            OR: [
-              { nameAr: { contains: q } },
-              { nameEn: { contains: q } },
-              { descriptionAr: { contains: q } },
-              { descriptionEn: { contains: q } },
-            ],
-          }
-        : {}),
-    },
+    where: publishedWhere(filters),
     include: {
       category: true,
-      images: { orderBy: { sortOrder: "asc" }, take: 1 },
+      // Two images: primary + hover crossfade on the catalog card.
+      images: { orderBy: { sortOrder: "asc" }, take: 2 },
+    },
+    orderBy: publishedOrderBy(filters?.sort),
+    ...(filters?.limit ? { take: filters.limit } : {}),
+  });
+}
+
+export async function countPublishedProducts(
+  filters?: Omit<PublishedProductFilters, "sort" | "limit">
+) {
+  return prisma.product.count({ where: publishedWhere(filters) });
+}
+
+/** Same-category published products, excluding the current one (PDP related row). */
+export async function listRelatedPublishedProducts(
+  categoryId: string,
+  excludeId: string,
+  limit = 4
+) {
+  return prisma.product.findMany({
+    where: { status: "published", categoryId, id: { not: excludeId } },
+    include: {
+      category: true,
+      images: { orderBy: { sortOrder: "asc" }, take: 2 },
     },
     orderBy: { updatedAt: "desc" },
+    take: limit,
   });
 }
 

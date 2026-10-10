@@ -1,6 +1,19 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { listPublishedPublicOffers } from "@/lib/offers/service";
 import { getRequestDictionary } from "@/lib/i18n/server";
+import { storefrontMetadata } from "@/lib/seo";
+import { href } from "@/lib/href";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { locale, dict } = await getRequestDictionary();
+  return storefrontMetadata({
+    locale,
+    title: `${dict.offers.title} — ${dict.brand}`,
+    description: dict.offers.sub,
+    path: "/offers",
+  });
+}
 
 export default async function PublicOffersPage() {
   const offers = await listPublishedPublicOffers();
@@ -29,7 +42,7 @@ export default async function PublicOffersPage() {
             return (
               <li key={o.id} className="py-8">
                 <Link
-                  href={`/offers/${o.slug}`}
+                  href={href(`/offers/${o.slug}`, locale)}
                   className="group block space-y-2"
                 >
                   <h2 className="text-2xl tracking-wide group-hover:text-ro-purple">

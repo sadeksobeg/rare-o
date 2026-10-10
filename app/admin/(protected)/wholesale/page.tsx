@@ -1,52 +1,78 @@
 import Link from "next/link";
+import {
+  DataTable,
+  DataTableHead,
+  Td,
+  Th,
+  Tr,
+} from "@/components/admin/data-table";
+import { PageHeader } from "@/components/admin/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
+import { StatusChip } from "@/components/ui/status-chip";
+import { getRequestDictionary } from "@/lib/i18n/server";
+import { getStatusChipProps } from "@/lib/ui/status-labels";
 import { listWholesaleRequestsForAdmin } from "@/lib/wholesale/service";
 
 export default async function AdminWholesalePage() {
+  const { dict } = await getRequestDictionary();
+  const a = dict.admin;
+  const u = dict.adminUi;
   const requests = await listWholesaleRequestsForAdmin();
 
   return (
     <section className="space-y-6">
-      <h1 className="text-3xl">Wholesale requests</h1>
-      <p className="text-sm text-ro-muted">
-        Separate from retail handoff and trader deals. Quote / confirm /
-        complete only — no payment or shipping engine.
-      </p>
-      <div className="overflow-x-auto border border-ro-line">
-        <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-ro-line bg-ro-surface">
-            <tr>
-              <th className="p-3">Reference</th>
-              <th className="p-3">Trader</th>
-              <th className="p-3">Mode</th>
-              <th className="p-3">Status</th>
-              <th className="p-3">Lines</th>
-              <th className="p-3" />
-            </tr>
-          </thead>
+      <PageHeader title={a.wholesale} description={u.wholesaleLead} />
+      {requests.length === 0 ? (
+        <div className="border border-ro-line">
+          <EmptyState title={u.emptyTitle} body={u.emptyBody} />
+        </div>
+      ) : (
+        <DataTable>
+          <DataTableHead>
+            <Th>{u.colReference}</Th>
+            <Th>{u.colTrader}</Th>
+            <Th>{u.colMode}</Th>
+            <Th>{a.colStatus}</Th>
+            <Th>{u.colLines}</Th>
+            <Th />
+          </DataTableHead>
           <tbody>
             {requests.map((r) => (
-              <tr key={r.id} className="border-b border-ro-line">
-                <td className="p-3">{r.reference}</td>
-                <td className="p-3">
+              <Tr key={r.id}>
+                <Td className="font-medium">{r.reference}</Td>
+                <Td>
                   {r.trader.displayName}
-                  <div className="text-ro-muted">{r.trader.email}</div>
-                </td>
-                <td className="p-3">{r.requestMode}</td>
-                <td className="p-3">{r.status}</td>
-                <td className="p-3">{r._count.lines}</td>
-                <td className="p-3">
+                  <div className="text-ro-muted" dir="ltr">
+                    {r.trader.email}
+                  </div>
+                </Td>
+                <Td>
+                  {r.requestMode === "request_quote"
+                    ? u.modeRequestQuote
+                    : r.requestMode === "propose_price"
+                      ? u.modeProposePrice
+                      : r.requestMode}
+                </Td>
+                <Td>
+                  <StatusChip
+                    size="sm"
+                    {...getStatusChipProps(dict, "wholesale", r.status)}
+                  />
+                </Td>
+                <Td className="tabular-nums">{r._count.lines}</Td>
+                <Td>
                   <Link
                     href={`/admin/wholesale/${r.id}`}
-                    className="text-ro-purple"
+                    className="text-ro-plum hover:underline"
                   >
-                    Review
+                    {u.actionReview}
                   </Link>
-                </td>
-              </tr>
+                </Td>
+              </Tr>
             ))}
           </tbody>
-        </table>
-      </div>
+        </DataTable>
+      )}
     </section>
   );
 }

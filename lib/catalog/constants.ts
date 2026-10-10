@@ -16,3 +16,14 @@ export function isLaunchCategorySlug(
 ): slug is LaunchCategorySlug {
   return (LAUNCH_CATEGORY_SLUGS as readonly string[]).includes(slug);
 }
+
+/** Storefront catalog sort keys (URL `sort` param). */
+export const CATALOG_SORTS = ["new", "price-asc", "price-desc"] as const;
+export type CatalogSort = (typeof CATALOG_SORTS)[number];
+
+export function isCatalogSort(value: string | undefined): value is CatalogSort {
+  return !!value && (CATALOG_SORTS as readonly string[]).includes(value);
+}
+
+export const CATALOG_PAGE_SIZE = 12;
+export const CATALOG_MAX_LIMIT = 96;

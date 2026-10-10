@@ -6,13 +6,16 @@ import {
 } from "@/app/wholesale-actions";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import type { TraderDict } from "@/lib/ui/trader-labels";
 
 export function TraderWholesaleActions({
   requestId,
   status,
+  labels: t,
 }: {
   requestId: string;
   status: string;
+  labels: TraderDict;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -21,12 +24,10 @@ export function TraderWholesaleActions({
 
   return (
     <div className="space-y-4 border border-ro-line p-4">
-      <h2 className="text-lg">Actions</h2>
+      <h2 className="text-lg font-semibold">{t.wsActions}</h2>
       {status === "quote_provided" ? (
         <div className="space-y-3">
-          <p className="text-sm text-ro-muted">
-            Review the quotation, then accept (fulfillment intent) or decline.
-          </p>
+          <p className="text-sm text-ro-muted">{t.wsReviewQuote}</p>
           <form
             className="space-y-3"
             action={(fd) => {
@@ -36,7 +37,7 @@ export function TraderWholesaleActions({
                 const res = await traderRespondWholesaleQuoteAction(null, fd);
                 if (!res.ok) setError(res.error);
                 else {
-                  setMessage("Response recorded.");
+                  setMessage(t.wsResponseRecorded);
                   router.refresh();
                 }
               });
@@ -44,7 +45,7 @@ export function TraderWholesaleActions({
           >
             <input type="hidden" name="requestId" value={requestId} />
             <label className="block space-y-1 text-sm">
-              <span>Note (optional)</span>
+              <span>{t.wsNoteOptional}</span>
               <input
                 name="note"
                 className="w-full border border-ro-line bg-transparent px-3 py-2"
@@ -56,18 +57,18 @@ export function TraderWholesaleActions({
                 name="accept"
                 value="yes"
                 disabled={pending}
-                className="bg-ro-purple px-4 py-2 text-sm text-ro-ivory disabled:opacity-60"
+                className="bg-ro-purple min-h-11 px-4 py-2 text-sm text-ro-ivory disabled:opacity-60"
               >
-                Accept quotation
+                {t.wsAccept}
               </button>
               <button
                 type="submit"
                 name="accept"
                 value="no"
                 disabled={pending}
-                className="border border-ro-line px-4 py-2 text-sm disabled:opacity-60"
+                className="border border-ro-line min-h-11 px-4 py-2 text-sm disabled:opacity-60"
               >
-                Decline
+                {t.wsDecline}
               </button>
             </div>
           </form>
@@ -82,7 +83,7 @@ export function TraderWholesaleActions({
               const res = await traderCancelWholesaleRequestAction(fd);
               if (!res.ok) setError(res.error);
               else {
-                setMessage("Request cancelled.");
+                setMessage(t.wsCancelled);
                 router.refresh();
               }
             });
@@ -92,9 +93,9 @@ export function TraderWholesaleActions({
           <button
             type="submit"
             disabled={pending}
-            className="border border-ro-line px-4 py-2 text-sm disabled:opacity-60"
+            className="border border-ro-line min-h-11 px-4 py-2 text-sm disabled:opacity-60"
           >
-            Cancel request
+            {t.wsCancel}
           </button>
         </form>
       ) : null}
@@ -102,7 +103,7 @@ export function TraderWholesaleActions({
       {status !== "quote_provided" &&
       status !== "submitted" &&
       status !== "under_review" ? (
-        <p className="text-sm text-ro-muted">No trader actions for this status.</p>
+        <p className="text-sm text-ro-muted">{t.wsNoActions}</p>
       ) : null}
 
       {message ? <p className="text-sm text-ro-muted">{message}</p> : null}

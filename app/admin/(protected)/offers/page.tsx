@@ -1,56 +1,87 @@
 import Link from "next/link";
+import {
+  DataTable,
+  DataTableHead,
+  Td,
+  Th,
+  Tr,
+} from "@/components/admin/data-table";
+import { PageHeader } from "@/components/admin/page-header";
+import { ButtonLink } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { StatusChip } from "@/components/ui/status-chip";
+import { getRequestDictionary } from "@/lib/i18n/server";
 import { listPublicOffersForAdmin } from "@/lib/offers/service";
+import { getStatusChipProps } from "@/lib/ui/status-labels";
 
 export default async function AdminOffersPage() {
+  const { locale, dict } = await getRequestDictionary();
+  const a = dict.admin;
+  const u = dict.adminUi;
   const offers = await listPublicOffersForAdmin();
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-3xl">Public curated offers</h1>
-          <p className="mt-1 text-sm text-ro-muted">
-            Admin-curated presentations — not trader storefronts or seller
-            listings.
-          </p>
+      <PageHeader
+        title={a.offers}
+        description={u.offersLead}
+        action={
+          <ButtonLink href="/admin/offers/new" variant="primary" size="sm">
+            {u.newOffer}
+          </ButtonLink>
+        }
+      />
+      {offers.length === 0 ? (
+        <div className="border border-ro-line">
+          <EmptyState
+            title={u.emptyTitle}
+            body={u.emptyBody}
+            actionHref="/admin/offers/new"
+            actionLabel={u.newOffer}
+          />
         </div>
-        <Link
-          href="/admin/offers/new"
-          className="bg-ro-purple px-4 py-2 text-sm text-ro-ivory"
-        >
-          New offer
-        </Link>
-      </div>
-      <div className="overflow-x-auto border border-ro-line">
-        <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-ro-line bg-ro-surface">
-            <tr>
-              <th className="p-3">Slug</th>
-              <th className="p-3">Title (EN)</th>
-              <th className="p-3">Status</th>
-              <th className="p-3">Deal</th>
-              <th className="p-3" />
-            </tr>
-          </thead>
+      ) : (
+        <DataTable>
+          <DataTableHead>
+            <Th>{a.colSlug}</Th>
+            <Th>{u.colTitle}</Th>
+            <Th>{a.colStatus}</Th>
+            <Th>{u.colDeal}</Th>
+            <Th />
+          </DataTableHead>
           <tbody>
-            {offers.map((o) => (
-              <tr key={o.id} className="border-b border-ro-line">
-                <td className="p-3">{o.slug}</td>
-                <td className="p-3">{o.titleEn || o.titleAr}</td>
-                <td className="p-3">{o.status}</td>
-                <td className="p-3">
-                  {o.dealProposal?.reference ?? "—"}
-                </td>
-                <td className="p-3">
-                  <Link href={`/admin/offers/${o.id}`} className="text-ro-purple">
-                    Edit
-                  </Link>
-                </td>
-              </tr>
-            ))}
+            {offers.map((o) => {
+              const title =
+                locale === "ar"
+                  ? o.titleAr || o.titleEn
+                  : o.titleEn || o.titleAr;
+              return (
+                <Tr key={o.id}>
+                  <Td className="text-ro-muted" dir="ltr">
+                    {o.slug}
+                  </Td>
+                  <Td className="font-medium">{title}</Td>
+                  <Td>
+                    <StatusChip
+                      size="sm"
+                      {...getStatusChipProps(dict, "offer", o.status)}
+                    />
+                  </Td>
+                  <Td>{o.dealProposal?.reference ?? "—"}</Td>
+                  <Td>
+                    <Link
+                      href={`/admin/offers/${o.id}`}
+                      className="text-ro-plum hover:underline"
+                    >
+                      {a.edit}
+                    </Link>
+                  </Td>
+                </Tr>
+              );
+            })}
           </tbody>
-        </table>
-      </div>
+        </DataTable>
+      )}
     </section>
   );
 }
