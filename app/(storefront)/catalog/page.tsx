@@ -1,6 +1,13 @@
 import Link from "next/link";
-import { listPublishedProducts, listLaunchCategories } from "@/lib/catalog/service";
+import {
+  listPublishedProducts,
+  listLaunchCategories,
+} from "@/lib/catalog/service";
 import { getRequestDictionary } from "@/lib/i18n/server";
+import { ProductThumb } from "@/components/storefront/product-media";
+import { EmptyState } from "@/components/ui/empty-state";
+import { formatCurrency } from "@/lib/i18n/format";
+import { href } from "@/lib/href";
 
 export default async function CatalogPage({
   searchParams,
@@ -17,18 +24,27 @@ export default async function CatalogPage({
     listLaunchCategories(),
   ]);
 
+  const photoCaption =
+    locale === "ar" ? "الصورة قيد التصوير" : "Photography in progress";
+
   return (
     <section className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <h1 className="text-3xl">{dict.catalog.title}</h1>
+        <div>
+          <p className="ro-type-overline text-ro-plum">{dict.nav.catalog}</p>
+          <h1 className="ro-type-h1 mt-2">{dict.catalog.title}</h1>
+        </div>
         <form className="flex gap-2">
           <input
             name="q"
             defaultValue={params.q ?? ""}
-            placeholder={locale === "ar" ? "بحث" : "Search"}
-            className="border border-ro-line bg-transparent px-3 py-2 text-sm"
+            placeholder={dict.catalog.search}
+            className="h-11 rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-paper px-3 text-sm"
           />
-          <button type="submit" className="bg-ro-purple px-4 py-2 text-sm text-ro-ivory">
+          <button
+            type="submit"
+            className="h-11 rounded-[var(--ro-r-sm)] bg-ro-ink px-4 text-sm font-semibold text-ro-canvas"
+          >
             {dict.catalog.filters}
           </button>
         </form>
@@ -36,17 +52,17 @@ export default async function CatalogPage({
 
       <div className="flex flex-wrap gap-3 text-sm">
         <Link
-          href="/catalog"
-          className={!params.category ? "text-ro-purple" : "text-ro-muted"}
+          href={href("/catalog", locale)}
+          className={!params.category ? "text-ro-plum" : "text-ro-muted"}
         >
           {dict.catalog.allCategories}
         </Link>
         {categories.map((c) => (
           <Link
             key={c.id}
-            href={`/catalog?category=${c.slug}`}
+            href={`${href("/catalog", locale)}?category=${c.slug}`}
             className={
-              params.category === c.slug ? "text-ro-purple" : "text-ro-muted"
+              params.category === c.slug ? "text-ro-plum" : "text-ro-muted"
             }
           >
             {locale === "ar" ? c.nameAr : c.nameEn}
@@ -55,18 +71,43 @@ export default async function CatalogPage({
       </div>
 
       {products.length === 0 ? (
-        <p className="text-ro-muted">{dict.catalog.empty}</p>
+        <EmptyState
+          title={dict.catalog.empty}
+          body={dict.catalog.emptyHint}
+          actionHref={href("/", locale)}
+          actionLabel={dict.nav.home}
+        />
       ) : (
         <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((p) => {
-            const name = locale === "ar" ? p.nameAr || p.nameEn : p.nameEn || p.nameAr;
+            const name =
+              locale === "ar" ? p.nameAr || p.nameEn : p.nameEn || p.nameAr;
+            const image = p.images[0];
+            const alt =
+              locale === "ar"
+                ? image?.altAr || name || p.slug
+                : image?.altEn || name || p.slug;
             return (
-              <li key={p.id} className="border border-ro-line p-4">
-                <Link href={`/product/${p.slug}`} className="space-y-2">
-                  <div className="aspect-[4/3] bg-ro-surface" />
-                  <h2 className="text-lg">{name || p.slug}</h2>
-                  <p className="text-sm text-ro-muted">
-                    {Number(p.retailPrice).toLocaleString(locale)} {p.currency}
+              <li key={p.id}>
+                <Link
+                  href={href(`/product/${p.slug}`, locale)}
+                  className="group block space-y-3"
+                >
+                  <ProductThumb
+                    path={image?.path}
+                    alt={alt || p.slug}
+                    plateCaption={photoCaption}
+                  />
+                  <h2 className="text-lg font-semibold transition-colors group-hover:text-ro-plum">
+                    {name || p.slug}
+                  </h2>
+                  <p className="text-sm text-ro-muted tabular-nums">
+                    {formatCurrency(
+                      Number(p.retailPrice),
+                      p.currency,
+                      locale,
+                      dict.product.priceOnRequest
+                    )}
                   </p>
                 </Link>
               </li>

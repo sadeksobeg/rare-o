@@ -34,6 +34,7 @@ export function RequestForm({
     openWhatsApp: string;
     handoffHint: string;
     messagePreview: string;
+    listEmpty: string;
   };
 }) {
   const { items, clear } = useCart();
@@ -51,7 +52,7 @@ export function RequestForm({
   );
 
   if (items.length === 0 && !(result && result.ok)) {
-    return <p className="text-ro-muted">Cart is empty.</p>;
+    return <p className="text-ro-muted">{labels.listEmpty}</p>;
   }
 
   if (result?.ok && result.data && typeof result.data === "object") {

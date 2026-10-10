@@ -96,6 +96,8 @@ type Dict = {
   catalog: {
     title: string;
     empty: string;
+    emptyHint: string;
+    search: string;
     filters: string;
     allCategories: string;
   };
@@ -110,6 +112,7 @@ type Dict = {
     addToCart: string;
     unavailable: string;
     specs: string;
+    priceOnRequest: string;
   };
   cart: {
     title: string;
@@ -129,6 +132,7 @@ type Dict = {
     openWhatsApp: string;
     handoffHint: string;
     messagePreview: string;
+    listEmpty: string;
   };
   admin: {
     login: string;
@@ -138,6 +142,21 @@ type Dict = {
     customers: string;
     requests: string;
     inbox: string;
+    logout: string;
+    traders: string;
+    deals: string;
+    wholesale: string;
+    offers: string;
+  };
+  trader: {
+    brand: string;
+    overview: string;
+    deals: string;
+    newDeal: string;
+    wholesale: string;
+    wholesaleRequests: string;
+    offers: string;
+    profile: string;
     logout: string;
   };
   inbox: {
@@ -218,7 +237,7 @@ const ar: Dict = {
     home: "الرئيسية",
     catalog: "الكتالوج",
     offers: "عروض مختارة",
-    cart: "السلة",
+    cart: "قائمة الطلب",
     contact: "تواصل",
     admin: "الإدارة",
   },
@@ -309,7 +328,9 @@ const ar: Dict = {
   },
   catalog: {
     title: "الكتالوج",
-    empty: "لا توجد منتجات منشورة حالياً.",
+    empty: "المجموعة قيد التجهيز",
+    emptyHint: "نضيف قطعاً جديدة قريباً.",
+    search: "بحث",
     filters: "تصفية",
     allCategories: "كل الفئات",
   },
@@ -321,13 +342,14 @@ const ar: Dict = {
     relatedProduct: "منتج من الكتالوج",
   },
   product: {
-    addToCart: "أضف إلى سلة الطلب",
-    unavailable: "غير متاح حالياً",
+    addToCart: "أضف إلى قائمة الطلب",
+    unavailable: "غير متوفر حالياً",
     specs: "المواصفات",
+    priceOnRequest: "السعر عند الطلب",
   },
   cart: {
-    title: "سلة الطلب",
-    empty: "السلة فارغة.",
+    title: "قائمة الطلب",
+    empty: "قائمة الطلب فارغة.",
     continue: "متابعة الطلب",
     remove: "إزالة",
   },
@@ -345,6 +367,7 @@ const ar: Dict = {
     handoffHint:
       "هذه ليست عملية دفع. افتح واتساب لإرسال تفاصيل الطلب لفريق RARE OUD.",
     messagePreview: "نص الرسالة المعدّة:",
+    listEmpty: "قائمة الطلب فارغة.",
   },
   admin: {
     login: "تسجيل دخول الإدارة",
@@ -354,6 +377,21 @@ const ar: Dict = {
     customers: "العملاء",
     requests: "طلبات التجزئة",
     inbox: "صندوق واتساب",
+    logout: "خروج",
+    traders: "التجّار",
+    deals: "الصفقات",
+    wholesale: "الجملة",
+    offers: "العروض",
+  },
+  trader: {
+    brand: "بوابة التجّار",
+    overview: "الرئيسية",
+    deals: "صفقاتي",
+    newDeal: "اقتراح صفقة",
+    wholesale: "الجملة",
+    wholesaleRequests: "طلبات الجملة",
+    offers: "العروض العامة",
+    profile: "حسابي",
     logout: "خروج",
   },
   inbox: {
@@ -435,7 +473,7 @@ const en: Dict = {
     home: "Home",
     catalog: "Catalog",
     offers: "Curated offers",
-    cart: "Cart",
+    cart: "Request list",
     contact: "Contact",
     admin: "Admin",
   },
@@ -526,7 +564,9 @@ const en: Dict = {
   },
   catalog: {
     title: "Catalog",
-    empty: "No published products yet.",
+    empty: "The collection is being prepared",
+    emptyHint: "New pieces will appear here soon.",
+    search: "Search",
     filters: "Filters",
     allCategories: "All categories",
   },
@@ -538,13 +578,14 @@ const en: Dict = {
     relatedProduct: "Related catalog product",
   },
   product: {
-    addToCart: "Add to request cart",
+    addToCart: "Add to request list",
     unavailable: "Currently unavailable",
     specs: "Specifications",
+    priceOnRequest: "Price on request",
   },
   cart: {
-    title: "Request cart",
-    empty: "Your cart is empty.",
+    title: "Request list",
+    empty: "Your request list is empty.",
     continue: "Continue request",
     remove: "Remove",
   },
@@ -562,6 +603,7 @@ const en: Dict = {
     handoffHint:
       "This is not a payment. Open WhatsApp to send your request details to the RARE OUD team.",
     messagePreview: "Prepared message:",
+    listEmpty: "Your request list is empty.",
   },
   admin: {
     login: "Admin sign in",
@@ -571,6 +613,21 @@ const en: Dict = {
     customers: "Customers",
     requests: "Retail requests",
     inbox: "WhatsApp inbox",
+    logout: "Sign out",
+    traders: "Traders",
+    deals: "Deals",
+    wholesale: "Wholesale",
+    offers: "Offers",
+  },
+  trader: {
+    brand: "Trader portal",
+    overview: "Home",
+    deals: "My deals",
+    newDeal: "Propose deal",
+    wholesale: "Wholesale",
+    wholesaleRequests: "Wholesale requests",
+    offers: "Public offers",
+    profile: "Profile",
     logout: "Sign out",
   },
   inbox: {

@@ -18,6 +18,7 @@ export default async function RequestPage() {
         openWhatsApp: dict.request.openWhatsApp,
         handoffHint: dict.request.handoffHint,
         messagePreview: dict.request.messagePreview,
+        listEmpty: dict.request.listEmpty,
       }}
     />
   );

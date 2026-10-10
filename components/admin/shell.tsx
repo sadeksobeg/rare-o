@@ -18,23 +18,23 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
     { href: "/admin/categories", label: dict.admin.categories },
     { href: "/admin/customers", label: dict.admin.customers },
     { href: "/admin/requests", label: dict.admin.requests },
-    { href: "/admin/traders", label: "Traders" },
-    { href: "/admin/deals", label: "Deals" },
-    { href: "/admin/wholesale", label: "Wholesale" },
-    { href: "/admin/offers", label: "Offers" },
+    { href: "/admin/traders", label: dict.admin.traders },
+    { href: "/admin/deals", label: dict.admin.deals },
+    { href: "/admin/wholesale", label: dict.admin.wholesale },
+    { href: "/admin/offers", label: dict.admin.offers },
   ];
 
   return (
-    <div className="min-h-screen bg-ro-ivory text-ro-black">
-      <header className="border-b border-ro-line">
+    <div className="min-h-screen bg-ro-canvas text-ro-ink">
+      <header className="border-b border-ro-border">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4">
           <div className="flex flex-wrap items-center gap-6">
             <Link href="/admin" className="tracking-[0.2em]">
-              RARE OUD Admin
+              RARE OUD · {dict.admin.dashboard}
             </Link>
             <nav className="flex flex-wrap gap-4 text-sm text-ro-muted">
               {links.map((l) => (
-                <Link key={l.href} href={l.href} className="hover:text-ro-black">
+                <Link key={l.href} href={l.href} className="hover:text-ro-ink">
                   {l.label}
                 </Link>
               ))}
@@ -44,14 +44,19 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
             <AdminLocaleToggle locale={locale} label={dict.common.language} />
             <span className="text-ro-muted">{session.email}</span>
             <form action={adminLogoutAction}>
-              <button type="submit" className="border border-ro-line px-3 py-1">
+              <button
+                type="submit"
+                className="rounded-[var(--ro-r-sm)] border border-ro-border px-3 py-1"
+              >
                 {dict.admin.logout}
               </button>
             </form>
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+      <main id="main-content" className="mx-auto max-w-6xl px-4 py-8">
+        {children}
+      </main>
     </div>
   );
 }

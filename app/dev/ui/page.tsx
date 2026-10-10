@@ -1,5 +1,12 @@
 import { notFound } from "next/navigation";
 import { Rings, Grain, Axis, Emblem } from "@/components/brand";
+import { Button } from "@/components/ui/button";
+import { StatusChip } from "@/components/ui/status-chip";
+import { Banner } from "@/components/ui/banner";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Loader } from "@/components/ui/loader";
+import { MaterialPlate } from "@/components/storefront/material-plate";
 import { getRequestLocale } from "@/lib/i18n/server";
 
 export const metadata = {
@@ -129,20 +136,53 @@ export default async function DevUiPage() {
               : "Rings and cream on ink — brand-board reference."}
           </p>
           <div className="flex flex-wrap items-center gap-4">
-            <button
-              type="button"
-              className="rounded-[var(--ro-r-sm)] bg-ro-canvas px-6 py-3 text-sm font-semibold text-ro-ink"
-            >
+            <Button variant="inverse-primary">
               {locale === "ar" ? "استكشف المجموعة" : "Explore the collection"}
-            </button>
-            <button
-              type="button"
-              className="text-sm text-ro-canvas underline underline-offset-4"
-            >
+            </Button>
+            <Button variant="text" className="text-ro-canvas">
               {locale === "ar" ? "قصتنا" : "Our story"}
-            </button>
+            </Button>
             <Axis height={48} className="bg-ro-canvas opacity-40" />
           </div>
+        </section>
+
+        <section className="space-y-4">
+          <h2 className="ro-type-h2">Primitives</h2>
+          <div className="flex flex-wrap gap-3">
+            <Button>Primary</Button>
+            <Button variant="secondary">Secondary</Button>
+            <Button variant="danger">Danger</Button>
+            <Loader label="loading" />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <StatusChip tone="info" label="submitted" />
+            <StatusChip tone="attention" label="waiting" />
+            <StatusChip tone="success" label="accepted" />
+            <StatusChip tone="danger" label="failed" />
+          </div>
+          <Banner tone="info">
+            {locale === "ar"
+              ? "مثال على شريط تنبيه هادئ."
+              : "Sample calm banner."}
+          </Banner>
+          <div className="grid grid-cols-3 gap-3">
+            <Skeleton className="aspect-[4/5]" />
+            <Skeleton className="aspect-[4/5]" />
+            <Skeleton className="aspect-[4/5]" />
+          </div>
+          <div className="mx-auto max-w-xs">
+            <MaterialPlate
+              caption={
+                locale === "ar" ? "الصورة قيد التصوير" : "Photography in progress"
+              }
+            />
+          </div>
+          <EmptyState
+            title={locale === "ar" ? "لا نتائج" : "No results"}
+            body={locale === "ar" ? "جرّب مسح الفلاتر." : "Try clearing filters."}
+            actionHref="/catalog"
+            actionLabel={locale === "ar" ? "الكتالوج" : "Catalog"}
+          />
         </section>
       </main>
     </div>

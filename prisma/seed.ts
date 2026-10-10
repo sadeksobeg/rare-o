@@ -69,7 +69,7 @@ async function main() {
   });
 
   // Optional demo product uses explicitly labelled TEST currency (not a commercial default)
-  await prisma.product.upsert({
+  const demo = await prisma.product.upsert({
     where: { slug: "demo-string-instrument" },
     update: { wholesaleEligible: true },
     create: {
@@ -86,6 +86,32 @@ async function main() {
       wholesaleEligible: true,
     },
   });
+
+  const existingImages = await prisma.productImage.count({
+    where: { productId: demo.id },
+  });
+  if (existingImages === 0) {
+    await prisma.productImage.createMany({
+      data: [
+        {
+          productId: demo.id,
+          path: "/brand/editorial/instrument-dark.jpg",
+          altAr: "آلة وترية — منظر أمامي",
+          altEn: "String instrument — front view",
+          sortOrder: 0,
+          kind: "image",
+        },
+        {
+          productId: demo.id,
+          path: "/brand/editorial/hero-closeup.jpg",
+          altAr: "تفاصيل الحرفة",
+          altEn: "Craft detail",
+          sortOrder: 1,
+          kind: "image",
+        },
+      ],
+    });
+  }
 
   console.log("Seed complete:");
   console.log("- categories: string-instruments, accessories");
