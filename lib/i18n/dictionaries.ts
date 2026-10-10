@@ -16,6 +16,16 @@ type Dict = {
     heroLabel: string;
     ctaCatalog: string;
     ctaOffers: string;
+    ctaStory: string;
+    handoffTitle: string;
+    handoffStep1: string;
+    handoffStep2: string;
+    handoffStep3: string;
+    traderBandTitle: string;
+    traderBandLead: string;
+    traderBandCta: string;
+    latestPieces: string;
+    viewCollection: string;
     introEyebrow: string;
     introTitle: string;
     introBody: string;
@@ -264,11 +274,21 @@ const ar: Dict = {
     admin: "الإدارة",
   },
   home: {
-    headline: "ندرةٌ تُختار، وحضورٌ يُقدَّم بهدوء",
-    sub: "بيتٌ معاصر للعَود والخشب النادر — كتالوج دقيق، واكتشافٌ مُنَسَّق، وطلب يُجهَّز للنقاش مع الفريق.",
-    heroLabel: "بيت العَود النادر",
-    ctaCatalog: "تصفح الكتالوج",
+    headline: "عودٌ نادر، صُنع ليبقى",
+    sub: "قطع مختارة بعناية، تُصنع بيد حرفيّ وتُسلَّم بما يليق بها.",
+    heroLabel: "RARE OUD",
+    ctaCatalog: "استكشف المجموعة",
     ctaOffers: "عروض مختارة",
+    ctaStory: "قصتنا",
+    handoffTitle: "كيف يتم الطلب؟",
+    handoffStep1: "أضف القطع إلى قائمة الطلب",
+    handoffStep2: "أدخل بيانات التواصل",
+    handoffStep3: "افتح واتساب لإرسال الطلب للفريق",
+    traderBandTitle: "للتجّار",
+    traderBandLead: "اقترح صفقة، تفاوض، ونشحن لك من مخزون RARE OUD.",
+    traderBandCta: "دخول التجّار",
+    latestPieces: "أحدث القطع",
+    viewCollection: "عرض المجموعة",
     introEyebrow: "البيت",
     introTitle: "عمقٌ ثقافي، ودقّة معاصرة",
     introBody:
@@ -523,11 +543,21 @@ const en: Dict = {
     admin: "Admin",
   },
   home: {
-    headline: "Rarity, chosen. Presence, presented with quiet.",
-    sub: "A contemporary house of oud and rare wood — precise cataloguing, curated discovery, and retail requests prepared for considered conversation.",
-    heroLabel: "House of rare oud",
-    ctaCatalog: "Browse catalog",
+    headline: "A rare oud, made to last.",
+    sub: "Pieces chosen with care, shaped by hand, delivered with the respect they deserve.",
+    heroLabel: "RARE OUD",
+    ctaCatalog: "Explore the collection",
     ctaOffers: "Curated offers",
+    ctaStory: "Our story",
+    handoffTitle: "How requesting works",
+    handoffStep1: "Add pieces to your request list",
+    handoffStep2: "Enter your contact details",
+    handoffStep3: "Open WhatsApp to send the request to the team",
+    traderBandTitle: "For traders",
+    traderBandLead: "Propose a deal, negotiate, and we ship from RARE OUD stock.",
+    traderBandCta: "Trader sign in",
+    latestPieces: "Latest pieces",
+    viewCollection: "View collection",
     introEyebrow: "The house",
     introTitle: "Cultural depth, contemporary precision",
     introBody:

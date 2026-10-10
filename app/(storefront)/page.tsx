@@ -8,14 +8,17 @@ import {
   ProductsRail,
 } from "@/components/storefront/discovery/discovery-rail";
 import { AttributeExplorer } from "@/components/storefront/discovery/attribute-explorer";
-import { HomeHero } from "@/components/storefront/home/hero";
+import { HeroResonance } from "@/components/storefront/home/hero-resonance";
+import { TrustStrip } from "@/components/storefront/home/trust-strip";
 import { HomeBrandIntro } from "@/components/storefront/home/brand-intro";
 import { HomeOudEditorial } from "@/components/storefront/home/oud-editorial";
-import { HomePrinciples } from "@/components/storefront/home/principles";
 import { HomeFinalCta } from "@/components/storefront/home/final-cta";
+import { HandoffExplainer } from "@/components/storefront/handoff-explainer";
+import { TraderBand } from "@/components/storefront/trader-band";
 import { StorefrontFooter } from "@/components/storefront/footer";
 import { getHomepageDiscoveryData } from "@/lib/catalog/homepage";
 import { getRequestDictionary } from "@/lib/i18n/server";
+import { EDITORIAL } from "@/lib/brand/editorial";
 
 export default async function HomePage() {
   const { locale, dict } = await getRequestDictionary();
@@ -35,7 +38,13 @@ export default async function HomePage() {
   return (
     <HomepageShell dict={dict} locale={locale} data={data}>
       <div data-page="home">
-        <HomeHero dict={dict} locale={locale} product={data.heroProduct} />
+        <HeroResonance
+          dict={dict}
+          locale={locale}
+          imageSrc={EDITORIAL.instrumentDark}
+        />
+
+        <TrustStrip dict={dict} />
 
         <DiscoveryShortcuts
           dict={dict}
@@ -44,7 +53,9 @@ export default async function HomePage() {
           hasProducts={data.products.length > 0}
         />
 
-        <HomeBrandIntro dict={dict} />
+        <div id="story">
+          <HomeBrandIntro dict={dict} />
+        </div>
 
         <CategoryExplorer
           dict={dict}
@@ -112,7 +123,8 @@ export default async function HomePage() {
           />
         ) : null}
 
-        <HomePrinciples dict={dict} />
+        <HandoffExplainer dict={dict} />
+        <TraderBand dict={dict} />
         <HomeFinalCta dict={dict} />
         <StorefrontFooter dict={dict} locale={locale} />
       </div>
