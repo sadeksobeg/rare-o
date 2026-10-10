@@ -2,12 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { setLocaleAction } from "@/app/actions";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 import { useCart } from "@/components/storefront/cart-provider";
 import { BrandMark } from "@/components/storefront/brand-mark";
 import { cn } from "@/lib/utils";
+import { href, stripLocalePrefix } from "@/lib/href";
 import Link from "next/link";
 
 export function StorefrontHeader({
@@ -25,7 +25,9 @@ export function StorefrontHeader({
   const [cartPulse, setCartPulse] = useState(false);
   const prevCount = useRef(cartCount);
   const pathname = usePathname();
-  const isHome = pathname === "/";
+  const { path: barePath } = stripLocalePrefix(pathname || "/");
+  const isHome = barePath === "/";
+  const localeSwitchHref = href(barePath, nextLocale);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -52,8 +54,9 @@ export function StorefrontHeader({
   }, [cartCount]);
 
   const nav = [
-    { href: "/catalog", label: dict.nav.catalog },
-    { href: "/offers", label: dict.nav.offers },
+    { href: href("/catalog", locale), label: dict.nav.catalog },
+    { href: href("/offers", locale), label: dict.nav.offers },
+    { href: href("/contact", locale), label: dict.nav.contact },
   ];
 
   const overHero = isHome && !scrolled;
@@ -62,7 +65,7 @@ export function StorefrontHeader({
     if (isHome) {
       window.dispatchEvent(new Event("ro:open-search"));
     } else {
-      window.location.href = "/catalog";
+      window.location.href = href("/catalog", locale);
     }
   };
 
@@ -84,7 +87,7 @@ export function StorefrontHeader({
         )}
       >
         <Link
-          href="/"
+          href={href("/", locale)}
           className="group flex items-center gap-3.5"
           onClick={() => setOpen(false)}
         >
@@ -138,27 +141,22 @@ export function StorefrontHeader({
             {dict.home.search}
           </button>
 
-          <form
-            action={async () => {
-              await setLocaleAction(nextLocale);
-            }}
+          <Link
+            href={localeSwitchHref}
+            className={cn(
+              "min-w-[2.5rem] border px-2.5 py-1.5 text-center text-[0.65rem] tracking-[0.22em] transition-all duration-300",
+              overHero
+                ? "border-ro-line-on-dark text-ro-cream hover:border-ro-cream hover:bg-ro-cream hover:text-ro-black"
+                : "border-ro-line text-ro-black hover:border-ro-black hover:bg-ro-black hover:text-ro-cream"
+            )}
+            aria-label={dict.common.language}
+            hrefLang={nextLocale}
           >
-            <button
-              type="submit"
-              className={cn(
-                "min-w-[2.5rem] border px-2.5 py-1.5 text-[0.65rem] tracking-[0.22em] transition-all duration-300",
-                overHero
-                  ? "border-ro-line-on-dark text-ro-cream hover:border-ro-cream hover:bg-ro-cream hover:text-ro-black"
-                  : "border-ro-line text-ro-black hover:border-ro-black hover:bg-ro-black hover:text-ro-cream"
-              )}
-              aria-label={dict.common.language}
-            >
-              {dict.common.language}
-            </button>
-          </form>
+            {dict.common.language}
+          </Link>
 
           <Link
-            href="/cart"
+            href={href("/cart", locale)}
             className={cn(
               "group relative inline-flex items-center gap-2 border border-transparent px-2.5 py-1.5 text-[0.68rem] tracking-[0.18em] uppercase transition-all duration-300",
               overHero
@@ -247,7 +245,7 @@ export function StorefrontHeader({
               {dict.home.search}
             </button>
             <Link
-              href="/"
+              href={href("/", locale)}
               className="font-display border-b border-ro-line py-6 text-3xl tracking-wide"
               onClick={() => setOpen(false)}
             >
@@ -264,7 +262,7 @@ export function StorefrontHeader({
               </Link>
             ))}
             <Link
-              href="/cart"
+              href={href("/cart", locale)}
               className="font-display border-b border-ro-line py-6 text-3xl tracking-wide text-ro-muted"
               onClick={() => setOpen(false)}
             >

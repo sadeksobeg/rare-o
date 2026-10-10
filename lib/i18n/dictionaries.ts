@@ -228,6 +228,28 @@ type Dict = {
     create: string;
     menu: string;
     close: string;
+    email: string;
+    password: string;
+    signIn: string;
+  };
+  contact: {
+    title: string;
+    lead: string;
+    whatsapp: string;
+    hours: string;
+    location: string;
+    missingNumber: string;
+  };
+  privacy: {
+    title: string;
+    updated: string;
+    body: string;
+  };
+  auth: {
+    adminTitle: string;
+    traderTitle: string;
+    traderHint: string;
+    loginError: string;
   };
 };
 
@@ -464,6 +486,29 @@ const ar: Dict = {
     create: "إنشاء",
     menu: "القائمة",
     close: "إغلاق",
+    email: "البريد الإلكتروني",
+    password: "كلمة المرور",
+    signIn: "دخول",
+  },
+  contact: {
+    title: "تواصل معنا",
+    lead: "للاستفسار عن قطعة أو طلب تجاري، راسل فريق RARE OUD عبر واتساب.",
+    whatsapp: "تحدث معنا على واتساب",
+    hours: "الرد خلال ساعات العمل — الأحد إلى الخميس.",
+    location: "سوريا · شحن دولي حسب الاتفاق.",
+    missingNumber: "رقم واتساب غير مُعدّ بعد في البيئة.",
+  },
+  privacy: {
+    title: "سياسة الخصوصية",
+    updated: "آخر تحديث: أكتوبر 2026",
+    body:
+      "نجمع بيانات التواصل اللازمة لتجهيز طلبك (الاسم والهاتف والملاحظات ووجهة الشحن) ونستخدمها للتواصل عبر واتساب مع فريق RARE OUD فقط. لا نبيع بياناتك ولا نعالج مدفوعات إلكترونية عبر الموقع. ملفات تعريف الارتباط المستخدمة ضرورية للجلسة واللغة. للاستفسار راسلنا عبر صفحة التواصل.",
+  },
+  auth: {
+    adminTitle: "دخول الإدارة",
+    traderTitle: "دخول التجّار",
+    traderHint: "الحسابات تُنشأ من الإدارة فقط — لا تسجيل ذاتي عام.",
+    loginError: "البريد أو كلمة المرور غير صحيحة.",
   },
 };
 
@@ -700,6 +745,29 @@ const en: Dict = {
     create: "Create",
     menu: "Menu",
     close: "Close",
+    email: "Email",
+    password: "Password",
+    signIn: "Sign in",
+  },
+  contact: {
+    title: "Contact us",
+    lead: "For a piece inquiry or commercial request, message the RARE OUD team on WhatsApp.",
+    whatsapp: "Message us on WhatsApp",
+    hours: "We reply during business hours — Sunday to Thursday.",
+    location: "Syria · International shipping by arrangement.",
+    missingNumber: "WhatsApp number is not configured in the environment yet.",
+  },
+  privacy: {
+    title: "Privacy policy",
+    updated: "Last updated: October 2026",
+    body:
+      "We collect contact details needed to prepare your request (name, phone, notes, and destination) and use them only to communicate with the RARE OUD team via WhatsApp. We do not sell your data and the site does not process online payments. Cookies used are limited to session and language. Contact us via the contact page for questions.",
+  },
+  auth: {
+    adminTitle: "Admin sign in",
+    traderTitle: "Trader sign in",
+    traderHint: "Accounts are provisioned by RARE OUD admin. No public registration.",
+    loginError: "Email or password is incorrect.",
   },
 };
 

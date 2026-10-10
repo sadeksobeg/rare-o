@@ -114,7 +114,7 @@ export default async function HomePage() {
 
         <HomePrinciples dict={dict} />
         <HomeFinalCta dict={dict} />
-        <StorefrontFooter dict={dict} />
+        <StorefrontFooter dict={dict} locale={locale} />
       </div>
     </HomepageShell>
   );

@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import {
   defaultLocale,
   isLocale,
@@ -9,6 +9,10 @@ import { getDictionary, type Dictionary } from "@/lib/i18n/dictionaries";
 export const LOCALE_COOKIE = "ro_locale";
 
 export async function getRequestLocale(): Promise<Locale> {
+  const h = await headers();
+  const fromMiddleware = h.get("x-ro-locale");
+  if (fromMiddleware && isLocale(fromMiddleware)) return fromMiddleware;
+
   const jar = await cookies();
   const value = jar.get(LOCALE_COOKIE)?.value;
   if (value && isLocale(value)) return value;
