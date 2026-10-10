@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1800" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sbase" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0%" stop-color="#1A1220"/>
+      <stop offset="40%" stop-color="#0B080D"/>
+      <stop offset="100%" stop-color="#120E14"/>
+    </linearGradient>
+    <linearGradient id="beam" x1="0.7" y1="0" x2="0.2" y2="1">
+      <stop offset="0%" stop-color="#F4E7D8" stop-opacity="0.14"/>
+      <stop offset="35%" stop-color="#F4E7D8" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#F4E7D8" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="pool" cx="55%" cy="70%" r="40%">
+      <stop offset="0%" stop-color="#32104F" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#32104F" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1400" height="1800" fill="url(#sbase)"/>
+  <polygon points="900,0 1400,0 700,1800 200,1800" fill="url(#beam)"/>
+  <ellipse cx="780" cy="1280" rx="480" ry="260" fill="url(#pool)"/>
+  <g fill="none" stroke="#F4E7D8" stroke-opacity="0.05" stroke-width="1">
+    <path d="M100,300 H1300"/>
+    <path d="M100,900 H1300"/>
+    <path d="M100,1500 H1300"/>
+  </g>
+</svg>

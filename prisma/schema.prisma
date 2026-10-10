@@ -1,0 +1,395 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// Launch categories only: string-instruments, accessories
+model Category {
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  nameAr    String
+  nameEn    String
+  sortOrder Int       @default(0)
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id                String             @id @default(cuid())
+  slug              String             @unique
+  nameAr            String             @default("")
+  nameEn            String             @default("")
+  descriptionAr     String             @default("")
+  descriptionEn     String             @default("")
+  specsTextAr       String             @default("")
+  specsTextEn       String             @default("")
+  categoryId        String
+  category          Category           @relation(fields: [categoryId], references: [id])
+  /// Decimal as string-compatible; currency code is configurable (commercial default OPEN)
+  retailPrice       Decimal
+  currency          String
+  /// draft | published | archived
+  status            String             @default("draft")
+  /// available | unavailable — public retail flag ONLY (not inventory)
+  availability      String             @default("available")
+  /// Forward-looking flag for Week 3; no wholesale UI in Week 2
+  wholesaleEligible Boolean            @default(false)
+  images            ProductImage[]
+  requestLines      RetailRequestLine[]
+  dealProposals     DealProposal[]
+  curatedOffers     PublicCuratedOffer[]
+  wholesaleLines    WholesaleRequestLine[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  path      String
+  altAr     String  @default("")
+  altEn     String  @default("")
+  sortOrder Int     @default(0)
+  /// image | video
+  kind      String  @default("image")
+}
+
+/// Contact record — phone is NOT a unique business identity
+model Customer {
+  id        String          @id @default(cuid())
+  name      String
+  phone     String
+  notes     String?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  requests  RetailRequest[]
+
+  @@index([phone])
+}
+
+model RetailRequest {
+  id                  String              @id @default(cuid())
+  reference           String              @unique
+  locale              String
+  /// draft | ready_for_handoff | handoff_opened | in_follow_up | completed | cancelled
+  status              String              @default("draft")
+  customerName        String
+  customerPhone       String
+  customerNotes       String              @default("")
+  destinationCountry  String
+  shippingMethodCode  String?
+  shippingMethodLabel String?
+  subtotal            Decimal
+  currency            String
+  handoffPayloadJson  String
+  /// Stored/generated WhatsApp prefilled message text (Week 3 wa.me handoff)
+  handoffMessageText  String?
+  /// Built wa.me deep link — no WhatsApp Business API
+  whatsAppDeepLink    String?
+  handoffPreparedAt   DateTime?
+  handoffOpenedAt     DateTime?
+  customerId          String?
+  customer            Customer?           @relation(fields: [customerId], references: [id])
+  lines               RetailRequestLine[]
+  handoffEvents       RetailHandoffEvent[]
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  @@index([status])
+  @@index([customerPhone])
+}
+
+/// Auditable handoff / status events for RetailRequest (not a chat log)
+model RetailHandoffEvent {
+  id           String        @id @default(cuid())
+  requestId    String
+  request      RetailRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  /// prepared | opened | retriggered | status_changed
+  eventType    String
+  fromStatus   String?
+  toStatus     String?
+  /// customer | admin
+  actor        String
+  actorAdminId String?
+  note         String?
+  createdAt    DateTime      @default(now())
+
+  @@index([requestId])
+}
+
+model RetailRequestLine {
+  id                String        @id @default(cuid())
+  requestId         String
+  request           RetailRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  productId         String?
+  product           Product?      @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productNameAr     String
+  productNameEn     String
+  quantity          Int
+  unitPriceSnapshot Decimal
+  lineTotal         Decimal
+  currency          String
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+}
+
+/// Minimal admin-provisioned trader identity — not a marketplace seller account
+model TraderAccount {
+  id           String         @id @default(cuid())
+  email        String         @unique
+  passwordHash String
+  displayName  String
+  companyName  String         @default("")
+  phone        String         @default("")
+  /// active | disabled
+  status       String         @default("active")
+  adminNotes   String         @default("")
+  deals        DealProposal[]
+  wholesaleRequests WholesaleRequest[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+/// Trader commercial deal proposal — separate from RetailRequest / Wholesale
+model DealProposal {
+  id               String             @id @default(cuid())
+  reference        String             @unique
+  traderId         String
+  trader           TraderAccount      @relation(fields: [traderId], references: [id], onDelete: Restrict)
+  /// catalog | non_catalog
+  dealKind         String
+  title            String
+  /// Catalog deals may reference an existing RARE OUD Product (ownership stays with RARE OUD)
+  productId        String?
+  product          Product?           @relation(fields: [productId], references: [id], onDelete: SetNull)
+  /// Optional commercial fields — exact pricing rules remain OPEN; free-text covers ambiguity
+  proposedPrice    Decimal?
+  currency         String?
+  quantity         Int?
+  conditionsNotes  String             @default("")
+  /// proposed | negotiating | accepted | closed
+  status           String             @default("proposed")
+  entries          NegotiationEntry[]
+  curatedOffers    PublicCuratedOffer[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([traderId])
+  @@index([status])
+  @@index([dealKind])
+}
+
+/// Structured, auditable negotiation history — not real-time chat
+model NegotiationEntry {
+  id              String       @id @default(cuid())
+  dealId          String
+  deal            DealProposal @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  /// propose | continue | counter | accept | close
+  action          String
+  /// trader | admin
+  actorRole       String
+  actorTraderId   String?
+  actorAdminId    String?
+  message         String       @default("")
+  proposedPrice   Decimal?
+  currency        String?
+  quantity        Int?
+  conditionsNotes String?
+  createdAt       DateTime     @default(now())
+
+  @@index([dealId])
+}
+
+/// Optional curated public presentation — never auto-created from a deal
+model PublicCuratedOffer {
+  id             String        @id @default(cuid())
+  slug           String        @unique
+  titleAr        String        @default("")
+  titleEn        String        @default("")
+  summaryAr      String        @default("")
+  summaryEn      String        @default("")
+  /// draft | published | unpublished
+  status         String        @default("draft")
+  /// Optional source reference only — publishing is always an explicit admin action
+  dealProposalId String?
+  dealProposal   DealProposal? @relation(fields: [dealProposalId], references: [id], onDelete: SetNull)
+  productId      String?
+  product        Product?      @relation(fields: [productId], references: [id], onDelete: SetNull)
+  sortOrder      Int           @default(0)
+  publishedAt    DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([status])
+  @@index([dealProposalId])
+}
+
+/// Wholesale trader ordering — separate from RetailRequest and DealProposal
+model WholesaleRequest {
+  id                 String                 @id @default(cuid())
+  reference          String                 @unique
+  traderId           String
+  trader             TraderAccount          @relation(fields: [traderId], references: [id], onDelete: Restrict)
+  /// request_quote | propose_price
+  requestMode        String
+  /// submitted | under_review | quote_provided | confirmed | completed | cancelled
+  status             String                 @default("submitted")
+  traderNotes        String                 @default("")
+  /// Admin quotation response (simple Week 3 workflow)
+  quoteMessage       String?
+  quoteCurrency      String?
+  quotedAt           DateTime?
+  quotedByAdminId    String?
+  traderResponseNote String?
+  confirmedAt        DateTime?
+  completedAt        DateTime?
+  cancelledAt        DateTime?
+  lines              WholesaleRequestLine[]
+  events             WholesaleRequestEvent[]
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+
+  @@index([traderId])
+  @@index([status])
+  @@index([requestMode])
+}
+
+model WholesaleRequestLine {
+  id                         String           @id @default(cuid())
+  requestId                  String
+  request                    WholesaleRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  productId                  String?
+  product                    Product?         @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productNameAr              String
+  productNameEn              String
+  productSlugSnapshot        String
+  quantity                   Int
+  /// Trader-proposed unit price when requestMode=propose_price; null for request_quote
+  proposedUnitPrice          Decimal?
+  /// Admin-quoted unit price when a quotation is provided
+  quotedUnitPrice            Decimal?
+  currency                   String?
+  /// Catalog retail at submission — informational reference ONLY (not wholesale pricing)
+  catalogRetailPriceSnapshot Decimal?
+  catalogCurrencySnapshot    String?
+}
+
+/// Auditable wholesale lifecycle events (not chat)
+model WholesaleRequestEvent {
+  id            String           @id @default(cuid())
+  requestId     String
+  request       WholesaleRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  /// submitted | status_changed | quote_provided | trader_accepted | trader_declined
+  eventType     String
+  fromStatus    String?
+  toStatus      String?
+  /// trader | admin
+  actorRole     String
+  actorTraderId String?
+  actorAdminId  String?
+  note          String?
+  createdAt     DateTime         @default(now())
+
+  @@index([requestId])
+}
+
+/// WhatsApp communication domain (Stage A) — independent of Retail/Deal/Wholesale.
+/// Phase D: optional explicit primary link to one Week 3 domain record (not a merge).
+model WhatsAppConversation {
+  id                 String            @id @default(cuid())
+  /// Stable WhatsApp chat JID (one-to-one). Unique conversation identity.
+  waChatId           String            @unique
+  remoteJid          String
+  participantE164    String?
+  displayName        String?
+  lastMessageAt      DateTime?
+  lastMessagePreview String            @default("")
+  unreadCount        Int               @default(0)
+  /// none | retail_request | deal_proposal | wholesale_request — ONE active primary link
+  linkType           String            @default("none")
+  /// Domain record id when linked; null when linkType=none
+  linkId             String?
+  linkedAt           DateTime?
+  linkedByAdminId    String?
+  messages           WhatsAppMessage[]
+  linkAudits         WhatsAppLinkAudit[]
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@index([lastMessageAt])
+  @@index([participantE164])
+  @@index([linkType, linkId])
+}
+
+model WhatsAppMessage {
+  id             String               @id @default(cuid())
+  conversationId String
+  conversation   WhatsAppConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  /// inbound | outbound
+  direction      String
+  /// text | unsupported (Stage A text-only)
+  messageType    String               @default("text")
+  body           String               @default("")
+  /// Baileys/WhatsApp message id — inbound idempotency (unique when present)
+  waMessageId    String?              @unique
+  /// Admin action idempotency key — outbound (unique when present)
+  clientRequestId String?             @unique
+  /// received | pending | sending | sent | failed
+  status         String
+  /// Outbound attempt counter (bounded retry). Inbound stays 0.
+  attemptCount   Int                  @default(0)
+  lastAttemptAt  DateTime?
+  /// Safe operator error — never session/QR material
+  errorSafe      String?
+  /// WhatsApp-side timestamp when known
+  waTimestamp    DateTime?
+  adminId        String?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  @@index([conversationId, createdAt])
+  @@index([status])
+  @@index([direction])
+}
+
+/// Singleton connection health mirror for admin UI (Phase C). No secrets.
+model WhatsAppConnectionHealth {
+  /// Always "default" — single worker health row
+  id              String    @id @default("default")
+  /// CONNECTED | CONNECTING | DISCONNECTED | AUTHENTICATION_REQUIRED | ERROR
+  state           String    @default("DISCONNECTED")
+  detailSafe      String?
+  lastConnectedAt DateTime?
+  updatedAt       DateTime  @updatedAt
+}
+
+/// Simple auditable trail for explicit WhatsApp ↔ domain linking (Phase D).
+model WhatsAppLinkAudit {
+  id               String               @id @default(cuid())
+  conversationId   String
+  conversation     WhatsAppConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  /// set | change | clear
+  action           String
+  previousLinkType String?
+  previousLinkId   String?
+  /// none | retail_request | deal_proposal | wholesale_request
+  newLinkType      String
+  newLinkId        String?
+  adminId          String
+  createdAt        DateTime             @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([adminId])
+}

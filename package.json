@@ -1,0 +1,49 @@
+{
+  "name": "rare-oud-platform",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:generate": "node node_modules/prisma/build/index.js generate",
+    "db:migrate": "node node_modules/prisma/build/index.js migrate dev",
+    "db:seed": "node node_modules/tsx/dist/cli.mjs prisma/seed.ts",
+    "db:reset": "node node_modules/prisma/build/index.js migrate reset --force",
+    "test:week3": "node node_modules/tsx/dist/cli.mjs scripts/week3-regression.ts",
+    "test:wholesale-security": "node node_modules/tsx/dist/cli.mjs scripts/wholesale-security-checks.ts",
+    "test:whatsapp-phase-a": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-phase-a-checks.ts",
+    "test:whatsapp-phase-b": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-phase-b-checks.ts",
+    "test:whatsapp-phase-c": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-phase-c-checks.ts",
+    "test:whatsapp-phase-d": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-phase-d-checks.ts",
+    "test:whatsapp-phase-e": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-phase-e-checks.ts",
+    "worker:whatsapp": "node node_modules/tsx/dist/cli.mjs worker/whatsapp-worker.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "6.19.3",
+    "@whiskeysockets/baileys": "6.7.24",
+    "bcryptjs": "^2.4.3",
+    "clsx": "^2.1.1",
+    "jose": "^5.9.6",
+    "next": "15.3.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^2.6.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.3",
+    "prisma": "6.19.3",
+    "tailwindcss": "^4",
+    "tsx": "^4.19.3",
+    "typescript": "^5"
+  }
+}

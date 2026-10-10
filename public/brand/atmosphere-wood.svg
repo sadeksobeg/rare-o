@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1600" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0B080D"/>
+      <stop offset="45%" stop-color="#1A1220"/>
+      <stop offset="100%" stop-color="#120E14"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="70%" cy="35%" r="55%">
+      <stop offset="0%" stop-color="#32104F" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#32104F" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="grain" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F4E7D8" stop-opacity="0.07"/>
+      <stop offset="100%" stop-color="#F4E7D8" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="1600" fill="url(#base)"/>
+  <rect width="1200" height="1600" fill="url(#glow)"/>
+  <g fill="none" stroke="#F4E7D8" stroke-opacity="0.08" stroke-width="1.2">
+    <path d="M-40,180 C120,140 220,260 380,220 C540,180 620,320 820,280 C980,250 1100,360 1280,300"/>
+    <path d="M-40,260 C140,210 260,340 420,290 C600,230 700,390 900,340 C1040,310 1140,420 1280,380"/>
+    <path d="M-40,420 C160,380 280,520 460,470 C640,420 760,580 960,520 C1100,480 1180,600 1280,560"/>
+    <path d="M-40,580 C180,540 300,680 480,620 C680,550 780,740 980,680 C1120,640 1200,760 1280,720"/>
+    <path d="M-40,760 C200,700 340,860 520,790 C720,710 820,920 1040,850 C1160,810 1220,940 1280,900"/>
+    <path d="M-40,940 C220,880 360,1040 560,970 C760,890 880,1120 1080,1040 C1180,1000 1240,1120 1280,1080"/>
+    <path d="M-40,1120 C200,1060 380,1220 580,1140 C780,1060 900,1300 1100,1220 C1200,1180 1240,1300 1280,1260"/>
+    <path d="M-40,1300 C180,1240 400,1400 620,1320 C820,1240 940,1480 1140,1400 C1220,1360 1260,1480 1280,1440"/>
+  </g>
+  <g fill="none" stroke="#32104F" stroke-opacity="0.35" stroke-width="2">
+    <path d="M80,200 C260,320 340,480 300,680 C260,880 420,1040 560,1180"/>
+    <path d="M920,120 C1040,280 980,460 1080,640 C1180,820 1020,1000 1120,1220"/>
+  </g>
+  <rect width="1200" height="1600" fill="url(#grain)"/>
+</svg>

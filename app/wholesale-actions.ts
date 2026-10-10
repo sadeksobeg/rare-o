@@ -1,0 +1,247 @@
+"use server";
+
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+import type { ActionResult } from "@/app/actions";
+import { requireAdminSession } from "@/lib/auth/admin-session";
+import { requireTraderSession } from "@/lib/auth/trader-session";
+import {
+  wholesaleAdminTransitionSchema,
+  wholesaleQuoteSchema,
+  wholesaleRequestCreateSchema,
+  wholesaleRequestIdSchema,
+  wholesaleTraderRespondSchema,
+} from "@/lib/validation/schemas";
+import {
+  adminProvideWholesaleQuote,
+  adminTransitionWholesaleStatus,
+  createWholesaleRequest,
+  traderCancelWholesaleRequest,
+  traderRespondToWholesaleQuote,
+} from "@/lib/wholesale/service";
+import { isWholesaleStatus } from "@/lib/wholesale/constants";
+
+export async function traderCreateWholesaleRequestAction(
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireTraderSession();
+  } catch {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  let linesRaw: unknown = [];
+  try {
+    linesRaw = JSON.parse(String(formData.get("linesJson") || "[]"));
+  } catch {
+    return { ok: false, error: "Invalid lines payload" };
+  }
+
+  const parsed = wholesaleRequestCreateSchema.safeParse({
+    requestMode: formData.get("requestMode"),
+    traderNotes: formData.get("traderNotes") || "",
+    lines: linesRaw,
+  });
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid wholesale request",
+    };
+  }
+
+  try {
+    // traderId from session only
+    const request = await createWholesaleRequest({
+      traderId: session.sub,
+      requestMode: parsed.data.requestMode,
+      traderNotes: parsed.data.traderNotes,
+      lines: parsed.data.lines.map((l) => ({
+        productId: l.productId,
+        quantity: l.quantity,
+        proposedUnitPrice: l.proposedUnitPrice,
+        currency: l.currency,
+      })),
+    });
+    revalidatePath("/trader/wholesale");
+    redirect(`/trader/wholesale/${request.id}`);
+  } catch (e) {
+    if (typeof e === "object" && e && "digest" in e) throw e;
+    const msg = e instanceof Error ? e.message : "Create failed";
+    if (msg === "PRODUCT_NOT_WHOLESALE_ELIGIBLE") {
+      return {
+        ok: false,
+        error: "One or more products are not wholesale-eligible",
+      };
+    }
+    if (msg === "INVALID_QUANTITY") {
+      return { ok: false, error: "Invalid quantity" };
+    }
+    return { ok: false, error: msg };
+  }
+}
+
+export async function traderRespondWholesaleQuoteAction(
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireTraderSession();
+  } catch {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const parsed = wholesaleTraderRespondSchema.safeParse({
+    requestId: formData.get("requestId"),
+    accept: formData.get("accept"),
+    note: formData.get("note") || "",
+  });
+  if (!parsed.success) {
+    return { ok: false, error: "Invalid response" };
+  }
+
+  try {
+    const updated = await traderRespondToWholesaleQuote({
+      requestId: parsed.data.requestId,
+      traderId: session.sub,
+      accept: parsed.data.accept === "yes",
+      note: parsed.data.note,
+    });
+    revalidatePath(`/trader/wholesale/${updated.id}`);
+    revalidatePath("/trader/wholesale");
+    return { ok: true, data: { status: updated.status } };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Response failed";
+    if (msg === "REQUEST_NOT_FOUND") {
+      return { ok: false, error: "Not allowed" };
+    }
+    return { ok: false, error: msg };
+  }
+}
+
+export async function traderCancelWholesaleRequestAction(
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireTraderSession();
+  } catch {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const parsed = wholesaleRequestIdSchema.safeParse({
+    requestId: formData.get("requestId"),
+  });
+  if (!parsed.success) return { ok: false, error: "Invalid request" };
+
+  try {
+    const updated = await traderCancelWholesaleRequest({
+      requestId: parsed.data.requestId,
+      traderId: session.sub,
+      note: String(formData.get("note") || "") || undefined,
+    });
+    revalidatePath(`/trader/wholesale/${updated.id}`);
+    revalidatePath("/trader/wholesale");
+    return { ok: true };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Cancel failed";
+    if (msg === "REQUEST_NOT_FOUND") {
+      return { ok: false, error: "Not allowed" };
+    }
+    return { ok: false, error: msg };
+  }
+}
+
+export async function adminTransitionWholesaleAction(
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const parsed = wholesaleAdminTransitionSchema.safeParse({
+    requestId: formData.get("requestId"),
+    toStatus: formData.get("toStatus"),
+    note: formData.get("note") || "",
+  });
+  if (!parsed.success) return { ok: false, error: "Invalid transition" };
+  if (!isWholesaleStatus(parsed.data.toStatus)) {
+    return { ok: false, error: "Invalid status" };
+  }
+
+  try {
+    const updated = await adminTransitionWholesaleStatus({
+      requestId: parsed.data.requestId,
+      toStatus: parsed.data.toStatus,
+      actorAdminId: session.sub,
+      note: parsed.data.note || undefined,
+    });
+    revalidatePath(`/admin/wholesale/${updated.id}`);
+    revalidatePath("/admin/wholesale");
+    return { ok: true };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Transition failed";
+    return { ok: false, error: msg };
+  }
+}
+
+export async function adminProvideWholesaleQuoteAction(
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const parsed = wholesaleQuoteSchema.safeParse({
+    requestId: formData.get("requestId"),
+    quoteMessage: formData.get("quoteMessage") || "",
+    quoteCurrency: formData.get("quoteCurrency"),
+    lineQuotesJson: formData.get("lineQuotesJson"),
+  });
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid quotation",
+    };
+  }
+
+  let lineQuotes: Array<{ lineId: string; quotedUnitPrice: number }>;
+  try {
+    const raw = JSON.parse(parsed.data.lineQuotesJson) as unknown;
+    if (!Array.isArray(raw)) throw new Error("bad");
+    lineQuotes = raw.map((item) => {
+      const row = item as { lineId?: string; quotedUnitPrice?: unknown };
+      return {
+        lineId: String(row.lineId || ""),
+        quotedUnitPrice: Number(row.quotedUnitPrice),
+      };
+    });
+  } catch {
+    return { ok: false, error: "Invalid line quotes" };
+  }
+
+  try {
+    const updated = await adminProvideWholesaleQuote({
+      requestId: parsed.data.requestId,
+      actorAdminId: session.sub,
+      quoteMessage: parsed.data.quoteMessage,
+      quoteCurrency: parsed.data.quoteCurrency,
+      lineQuotes,
+    });
+    revalidatePath(`/admin/wholesale/${updated.id}`);
+    revalidatePath("/admin/wholesale");
+    return { ok: true, data: { status: updated.status } };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Quote failed";
+    return { ok: false, error: msg };
+  }
+}

@@ -1,0 +1,388 @@
+@import "tailwindcss";
+
+:root {
+  --ro-near-black: #0b080d;
+  --ro-deep-purple: #32104f;
+  --ro-warm-ivory: #f4e7d8;
+  --ro-cream: #f4e7d8;
+  --ro-ink-muted: rgba(11, 8, 13, 0.62);
+  --ro-line: rgba(11, 8, 13, 0.12);
+  --ro-surface: #efe3d4;
+  --ro-surface-dark: #120e14;
+  --ro-purple-soft: rgba(50, 16, 79, 0.1);
+  --ro-ivory-muted: rgba(244, 231, 216, 0.68);
+  --ro-line-on-dark: rgba(244, 231, 216, 0.16);
+  --ro-dur-enter: 900ms;
+  --ro-dur-shift: 600ms;
+  --ro-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ro-ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
+  --background: var(--ro-cream);
+  --foreground: var(--ro-near-black);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-ro-black: var(--ro-near-black);
+  --color-ro-purple: var(--ro-deep-purple);
+  --color-ro-ivory: var(--ro-cream);
+  --color-ro-cream: var(--ro-cream);
+  --color-ro-muted: var(--ro-ink-muted);
+  --color-ro-line: var(--ro-line);
+  --color-ro-surface: var(--ro-surface);
+  --color-ro-surface-dark: var(--ro-surface-dark);
+  --color-ro-purple-soft: var(--ro-purple-soft);
+  --color-ro-ivory-muted: var(--ro-ivory-muted);
+  --color-ro-line-on-dark: var(--ro-line-on-dark);
+  --font-sans: var(--font-arabic), var(--font-latin), system-ui, sans-serif;
+  --font-display: var(--font-display-ar), var(--font-display-lat), serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: rgba(50, 16, 79, 0.22);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.ro-grain {
+  background-image:
+    radial-gradient(ellipse 70% 55% at 72% 38%, rgba(50, 16, 79, 0.42), transparent 58%),
+    radial-gradient(ellipse 45% 35% at 18% 78%, rgba(244, 231, 216, 0.05), transparent 50%),
+    linear-gradient(165deg, #0b080d 0%, #120e14 45%, #1a1222 100%);
+}
+
+.ro-material-plane {
+  background:
+    linear-gradient(180deg, rgba(11, 8, 13, 0.12), rgba(11, 8, 13, 0.35)),
+    linear-gradient(145deg, #2c1a36 0%, #1a1220 40%, #0f0c12 100%);
+}
+
+.ro-material-plane-alt {
+  background:
+    linear-gradient(200deg, rgba(50, 16, 79, 0.45), rgba(11, 8, 13, 0.55)),
+    linear-gradient(120deg, #241628 0%, #140f18 55%, #0b080d 100%);
+}
+
+.ro-hairline {
+  box-shadow: inset 0 0 0 1px rgba(244, 231, 216, 0.14);
+}
+
+.ro-hairline-dark {
+  box-shadow: inset 0 0 0 1px rgba(11, 8, 13, 0.12);
+}
+
+.ro-mark-on-dark {
+  filter: invert(1) brightness(0.96) sepia(0.22) saturate(0.55) hue-rotate(340deg);
+}
+
+/* --- Motion primitives --- */
+
+.ro-reveal-base {
+  will-change: transform, opacity, clip-path;
+}
+
+.ro-anim-reveal-up {
+  opacity: 0;
+  transform: translateY(1.15rem);
+  transition:
+    opacity var(--ro-dur-enter) var(--ro-ease-out),
+    transform var(--ro-dur-enter) var(--ro-ease-out);
+}
+
+.ro-anim-reveal-up.is-visible,
+.ro-anim-reveal-up.is-reduced {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ro-anim-reveal-mask {
+  clip-path: inset(0 0 100% 0);
+  transform: translateY(0.75rem);
+  opacity: 0.35;
+  transition:
+    clip-path var(--ro-dur-enter) var(--ro-ease-out),
+    transform var(--ro-dur-enter) var(--ro-ease-out),
+    opacity var(--ro-dur-enter) var(--ro-ease-out);
+}
+
+.ro-anim-reveal-mask.is-visible,
+.ro-anim-reveal-mask.is-reduced {
+  clip-path: inset(0 0 0 0);
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.ro-anim-scale-reveal {
+  opacity: 0;
+  transform: scale(0.94);
+  transition:
+    opacity var(--ro-dur-enter) var(--ro-ease-out),
+    transform var(--ro-dur-enter) var(--ro-ease-out);
+}
+
+.ro-anim-scale-reveal.is-visible,
+.ro-anim-scale-reveal.is-reduced {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@keyframes ro-mark-reveal {
+  from {
+    clip-path: inset(42% 42% 42% 42%);
+    opacity: 0;
+    transform: scale(1.08);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ro-image-drift {
+  from {
+    transform: scale(1.06) translate3d(0, 2%, 0);
+  }
+  to {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+}
+
+/* ——— Hero V3 — editorial split ——— */
+
+.ro-hero-atmosphere {
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 35%, rgba(50, 16, 79, 0.32), transparent 65%),
+    linear-gradient(180deg, #120e14 0%, #0b080d 100%);
+}
+
+/* Fill the photo column — instrument is the mass */
+.ro-hero-oud {
+  filter: brightness(1.35) contrast(1.12) saturate(1.06);
+  object-position: 50% 18%;
+  transform: scale(1.45);
+  transform-origin: 50% 20%;
+}
+
+@media (min-width: 768px) {
+  .ro-hero-oud {
+    object-position: 48% 12%;
+    transform: scale(1.55);
+    transform-origin: 50% 15%;
+  }
+}
+
+@media (min-width: 1280px) {
+  .ro-hero-oud {
+    transform: scale(1.65);
+  }
+}
+
+/* Craft plane continuous with body — soft vertical dissolve */
+.ro-hero-craft {
+  -webkit-mask-image: linear-gradient(
+    to top,
+    #000 0%,
+    #000 40%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(to top, #000 0%, #000 40%, transparent 100%);
+}
+
+.ro-hero-craft img {
+  filter: brightness(1.18) contrast(1.06);
+}
+
+.ro-hero-seam {
+  background: linear-gradient(
+    to left,
+    rgba(11, 8, 13, 0.95),
+    transparent
+  );
+}
+
+[dir="ltr"] .ro-hero-seam {
+  background: linear-gradient(
+    to right,
+    rgba(11, 8, 13, 0.95),
+    transparent
+  );
+}
+
+.ro-hero-exit {
+  background: linear-gradient(
+    to top,
+    #f4e7d8 0%,
+    rgba(244, 231, 216, 0.65) 42%,
+    rgba(11, 8, 13, 0) 100%
+  );
+}
+
+@keyframes ro-hero-photo-settle {
+  from {
+    opacity: 0.65;
+    filter: brightness(0.85);
+  }
+  to {
+    opacity: 1;
+    filter: brightness(1);
+  }
+}
+
+@keyframes ro-hero-copy-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ro-hero-line {
+  from {
+    opacity: 0;
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(0.6rem);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ro-mark-reveal {
+    animation: ro-mark-reveal 1.25s var(--ro-ease-out) both;
+  }
+
+  .ro-image-drift {
+    animation: ro-image-drift 1.4s var(--ro-ease-soft) both;
+  }
+
+  .ro-hero-photo-settle {
+    animation: ro-hero-photo-settle 1.1s var(--ro-ease-soft) both;
+  }
+
+  .ro-hero-copy-in {
+    animation: ro-hero-copy-in 0.2s linear both;
+  }
+
+  .ro-hero-line-a {
+    animation: ro-hero-line 0.95s var(--ro-ease-out) 0.45s both;
+  }
+
+  .ro-hero-line-b {
+    animation: ro-hero-line 0.9s var(--ro-ease-out) 0.7s both;
+  }
+
+  .ro-hero-line-c {
+    animation: ro-hero-line 0.85s var(--ro-ease-out) 0.9s both;
+  }
+
+  .ro-hero-line-d {
+    animation: ro-hero-line 0.85s var(--ro-ease-out) 1.05s both;
+  }
+
+  .ro-hover-shift {
+    transition: transform var(--ro-dur-shift) var(--ro-ease-out);
+  }
+
+  .group:hover .ro-hover-shift,
+  .group:focus-within .ro-hover-shift {
+    transform: translateY(-3px);
+  }
+
+  .ro-section-bridge {
+    transition: transform 0.8s var(--ro-ease-out), opacity 0.8s var(--ro-ease-out);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ro-mark-reveal,
+  .ro-image-drift,
+  .ro-hero-photo-settle,
+  .ro-hero-copy-in,
+  .ro-hero-line-a,
+  .ro-hero-line-b,
+  .ro-hero-line-c,
+  .ro-hero-line-d {
+    animation: none;
+  }
+
+  .ro-anim-reveal-up,
+  .ro-anim-reveal-mask,
+  .ro-anim-scale-reveal {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+    transition: none;
+  }
+}
+
+@keyframes ro-panel-slide {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes ro-panel-slide-rtl {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ro-panel-slide {
+    animation: ro-panel-slide 0.55s var(--ro-ease-out) both;
+  }
+
+  [dir="rtl"] .ro-panel-slide {
+    animation-name: ro-panel-slide-rtl;
+  }
+}
+
+/* Horizontal editorial track */
+.ro-track {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 0.5rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.ro-track > * {
+  scroll-snap-align: start;
+  flex: 0 0 min(72vw, 22rem);
+}
+
+@media (min-width: 1024px) {
+  .ro-track > * {
+    flex-basis: min(38vw, 26rem);
+  }
+}
