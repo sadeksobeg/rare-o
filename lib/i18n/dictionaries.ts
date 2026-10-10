@@ -157,6 +157,46 @@ type Dict = {
     deals: string;
     wholesale: string;
     offers: string;
+    kpiRetail: string;
+    kpiDeals: string;
+    kpiWholesale: string;
+    kpiUnread: string;
+    kpiIdle: string;
+    recentRequests: string;
+    viewAll: string;
+    openInbox: string;
+    noRequests: string;
+    newProduct: string;
+    edit: string;
+    publishedCount: string;
+    connection: string;
+    outbound: string;
+    colThumb: string;
+    colSlug: string;
+    colName: string;
+    colStatus: string;
+    colAvailability: string;
+    colPrice: string;
+    colCategory: string;
+    imagesTitle: string;
+    imagesEmpty: string;
+    imagesLimits: string;
+    imagesAdd: string;
+    imagesAltAr: string;
+    imagesAltEn: string;
+    imagesPrimary: string;
+    imagesRemove: string;
+    imagesMoveEarlier: string;
+    imagesMoveLater: string;
+    imagesUploading: string;
+    imagesErrorType: string;
+    imagesErrorSize: string;
+    imagesErrorDim: string;
+    imagesErrorMax: string;
+    imagesErrorGeneric: string;
+    quickProduct: string;
+    quickOffer: string;
+    quickTrader: string;
   };
   trader: {
     brand: string;
@@ -168,6 +208,18 @@ type Dict = {
     offers: string;
     profile: string;
     logout: string;
+    welcome: string;
+    lead: string;
+    taskDealTitle: string;
+    taskDealBody: string;
+    taskWholesaleTitle: string;
+    taskWholesaleBody: string;
+    myDeals: string;
+    waitingTitle: string;
+    waitingIdle: string;
+    openRecord: string;
+    offersNow: string;
+    viewAllOffers: string;
   };
   inbox: {
     title: string;
@@ -424,6 +476,46 @@ const ar: Dict = {
     deals: "الصفقات",
     wholesale: "الجملة",
     offers: "العروض",
+    kpiRetail: "طلبات بانتظار الإدارة",
+    kpiDeals: "صفقات بانتظار الرد",
+    kpiWholesale: "جملة بانتظار الرد",
+    kpiUnread: "محادثات غير مقروءة",
+    kpiIdle: "لا شيء بانتظارك",
+    recentRequests: "أحدث طلبات التجزئة",
+    viewAll: "عرض الكل",
+    openInbox: "فتح الصندوق",
+    noRequests: "لا طلبات بعد.",
+    newProduct: "إضافة منتج",
+    edit: "تعديل",
+    publishedCount: "منتجات منشورة",
+    connection: "حالة واتساب",
+    outbound: "الإرسال",
+    colThumb: "صورة",
+    colSlug: "المعرّف",
+    colName: "الاسم",
+    colStatus: "الحالة",
+    colAvailability: "التوفر",
+    colPrice: "السعر",
+    colCategory: "الفئة",
+    imagesTitle: "صور المنتج",
+    imagesEmpty: "لا صور بعد — تظهر لوحة المادة في المتجر.",
+    imagesLimits: "JPEG أو PNG أو WebP · حتى 8 ميغابايت · الضلع الأطول ≥ 1600 بكسل · حد 8 صور",
+    imagesAdd: "إضافة صورة",
+    imagesAltAr: "النص البديل (عربي)",
+    imagesAltEn: "النص البديل (إنجليزي)",
+    imagesPrimary: "الرئيسية",
+    imagesRemove: "حذف",
+    imagesMoveEarlier: "تحريك للأمام",
+    imagesMoveLater: "تحريك للخلف",
+    imagesUploading: "جارٍ الرفع…",
+    imagesErrorType: "نوع الملف غير مدعوم.",
+    imagesErrorSize: "الملف أكبر من 8 ميغابايت.",
+    imagesErrorDim: "الضلع الأطول يجب أن يكون 1600 بكسل على الأقل.",
+    imagesErrorMax: "وصلت إلى الحد الأقصى (8 صور).",
+    imagesErrorGeneric: "تعذّر رفع الصورة.",
+    quickProduct: "منتج",
+    quickOffer: "عرض",
+    quickTrader: "حساب تاجر",
   },
   trader: {
     brand: "بوابة التجّار",
@@ -435,6 +527,18 @@ const ar: Dict = {
     offers: "العروض العامة",
     profile: "حسابي",
     logout: "خروج",
+    welcome: "أهلاً، {name}",
+    lead: "فاوض على الصفقات وقدّم طلبات الجملة من مخزون RARE OUD — هذه البوابة ليست متجراً.",
+    taskDealTitle: "اقترح صفقة",
+    taskDealBody: "قدّم عرضاً تجارياً على قطعة من الكتالوج أو خارجها.",
+    taskWholesaleTitle: "اطلب بالجملة",
+    taskWholesaleBody: "اختر القطع والكميات؛ الإدارة ترد بعرض السعر.",
+    myDeals: "صفقاتي ({n})",
+    waitingTitle: "بانتظارك",
+    waitingIdle: "لا شيء بانتظارك الآن",
+    openRecord: "فتح",
+    offersNow: "العروض المتاحة الآن",
+    viewAllOffers: "عرض الكل",
   },
   inbox: {
     title: "صندوق واتساب",
@@ -693,6 +797,46 @@ const en: Dict = {
     deals: "Deals",
     wholesale: "Wholesale",
     offers: "Offers",
+    kpiRetail: "Requests needing admin",
+    kpiDeals: "Deals awaiting reply",
+    kpiWholesale: "Wholesale awaiting reply",
+    kpiUnread: "Unread conversations",
+    kpiIdle: "Nothing waiting for you",
+    recentRequests: "Recent retail requests",
+    viewAll: "View all",
+    openInbox: "Open inbox",
+    noRequests: "No requests yet.",
+    newProduct: "New product",
+    edit: "Edit",
+    publishedCount: "Published products",
+    connection: "WhatsApp status",
+    outbound: "Outbound",
+    colThumb: "Thumb",
+    colSlug: "Slug",
+    colName: "Name",
+    colStatus: "Status",
+    colAvailability: "Availability",
+    colPrice: "Price",
+    colCategory: "Category",
+    imagesTitle: "Product images",
+    imagesEmpty: "No images yet — the material plate shows on the storefront.",
+    imagesLimits: "JPEG, PNG, or WebP · max 8 MB · longest side ≥ 1600 px · max 8 images",
+    imagesAdd: "Add image",
+    imagesAltAr: "Alt text (Arabic)",
+    imagesAltEn: "Alt text (English)",
+    imagesPrimary: "Primary",
+    imagesRemove: "Remove",
+    imagesMoveEarlier: "Move earlier",
+    imagesMoveLater: "Move later",
+    imagesUploading: "Uploading…",
+    imagesErrorType: "Unsupported file type.",
+    imagesErrorSize: "File exceeds 8 MB.",
+    imagesErrorDim: "Longest side must be at least 1600 px.",
+    imagesErrorMax: "Maximum of 8 images reached.",
+    imagesErrorGeneric: "Could not upload the image.",
+    quickProduct: "Product",
+    quickOffer: "Offer",
+    quickTrader: "Trader account",
   },
   trader: {
     brand: "Trader portal",
@@ -704,6 +848,18 @@ const en: Dict = {
     offers: "Public offers",
     profile: "Profile",
     logout: "Sign out",
+    welcome: "Welcome, {name}",
+    lead: "Negotiate deals and submit wholesale requests against RARE OUD stock — this is not a storefront.",
+    taskDealTitle: "Propose a deal",
+    taskDealBody: "Submit a commercial proposal on a catalog or non-catalog piece.",
+    taskWholesaleTitle: "Order wholesale",
+    taskWholesaleBody: "Choose pieces and quantities; admin responds with a quote.",
+    myDeals: "My deals ({n})",
+    waitingTitle: "Waiting on you",
+    waitingIdle: "Nothing waiting for you right now",
+    openRecord: "Open",
+    offersNow: "Offers available now",
+    viewAllOffers: "View all",
   },
   inbox: {
     title: "WhatsApp inbox",

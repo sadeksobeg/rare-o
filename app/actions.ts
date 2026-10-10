@@ -23,6 +23,13 @@ import {
   updateProduct,
 } from "@/lib/catalog/service";
 import {
+  attachProductImage,
+  removeProductImage,
+  reorderProductImage,
+  updateProductImageAlts,
+  type ImageActionError,
+} from "@/lib/catalog/images";
+import {
   createRetailRequestFromCart,
   markRetailHandoffOpened,
   retriggerRetailHandoff,
@@ -132,6 +139,96 @@ export async function upsertProductAction(
     if (typeof e === "object" && e && "digest" in e) throw e;
     return { ok: false, error: msg };
   }
+}
+
+function imageErrorMessage(code: ImageActionError): string {
+  switch (code) {
+    case "TYPE":
+      return "TYPE";
+    case "SIZE":
+      return "SIZE";
+    case "DIM":
+      return "DIM";
+    case "MAX":
+      return "MAX";
+    case "NOT_FOUND":
+      return "NOT_FOUND";
+    default:
+      return "GENERIC";
+  }
+}
+
+export async function attachProductImageAction(
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  try {
+    await requireAdminSession();
+  } catch {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const productId = String(formData.get("productId") || "");
+  const file = formData.get("file");
+  if (!productId || !(file instanceof File) || file.size === 0) {
+    return { ok: false, error: "GENERIC" };
+  }
+
+  const result = await attachProductImage({
+    productId,
+    file,
+    altAr: String(formData.get("altAr") || ""),
+    altEn: String(formData.get("altEn") || ""),
+  });
+
+  if (!result.ok) {
+    return { ok: false, error: imageErrorMessage(result.error) };
+  }
+
+  revalidatePath(`/admin/products/${productId}`);
+  revalidatePath("/admin/products");
+  revalidatePath("/catalog");
+  return { ok: true };
+}
+
+export async function removeProductImageAction(
+  formData: FormData
+): Promise<void> {
+  await requireAdminSession();
+  const imageId = String(formData.get("imageId") || "");
+  const productId = String(formData.get("productId") || "");
+  await removeProductImage(imageId);
+  revalidatePath(`/admin/products/${productId}`);
+  revalidatePath("/admin/products");
+  revalidatePath("/catalog");
+}
+
+export async function reorderProductImageAction(
+  formData: FormData
+): Promise<void> {
+  await requireAdminSession();
+  const imageId = String(formData.get("imageId") || "");
+  const productId = String(formData.get("productId") || "");
+  const direction = String(formData.get("direction") || "");
+  if (direction !== "earlier" && direction !== "later") return;
+  await reorderProductImage(imageId, direction);
+  revalidatePath(`/admin/products/${productId}`);
+  revalidatePath("/admin/products");
+  revalidatePath("/catalog");
+}
+
+export async function updateProductImageAltsAction(
+  formData: FormData
+): Promise<void> {
+  await requireAdminSession();
+  const imageId = String(formData.get("imageId") || "");
+  const productId = String(formData.get("productId") || "");
+  await updateProductImageAlts({
+    imageId,
+    altAr: String(formData.get("altAr") || ""),
+    altEn: String(formData.get("altEn") || ""),
+  });
+  revalidatePath(`/admin/products/${productId}`);
 }
 
 export async function updateCategoryFormAction(

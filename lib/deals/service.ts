@@ -271,6 +271,11 @@ export async function listDealsForTrader(traderId: string) {
     orderBy: { updatedAt: "desc" },
     include: {
       product: { select: { id: true, slug: true, nameEn: true, nameAr: true } },
+      entries: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        select: { actorRole: true },
+      },
       _count: { select: { entries: true } },
     },
   });
