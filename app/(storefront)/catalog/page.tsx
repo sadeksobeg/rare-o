@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import {
   countPublishedProducts,
   listLaunchCategories,
@@ -12,11 +13,22 @@ import { getRequestDictionary } from "@/lib/i18n/server";
 import { formatNumber } from "@/lib/i18n/format";
 import { href } from "@/lib/href";
 import { localizedName } from "@/lib/utils";
+import { storefrontMetadata } from "@/lib/seo";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HandoffExplainer } from "@/components/storefront/handoff-explainer";
 import { FilterBar } from "@/components/storefront/catalog/filter-bar";
 import { LoadMore } from "@/components/storefront/catalog/load-more";
 import { ProductGrid } from "@/components/storefront/catalog/product-grid";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { locale, dict } = await getRequestDictionary();
+  return storefrontMetadata({
+    locale,
+    title: `${dict.catalog.title} — ${dict.brand}`,
+    description: dict.seo.catalogDescription || dict.catalog.lead,
+    path: "/catalog",
+  });
+}
 
 type SearchParams = {
   type?: string;

@@ -16,6 +16,8 @@ export type CartItem = {
   price: number;
   currency: string;
   quantity: number;
+  /** Optional primary image path captured at add-time (display only). */
+  imagePath?: string | null;
 };
 
 type CartContextValue = {

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, Plus } from "lucide-react";
 import { useCart } from "@/components/storefront/cart-provider";
+import { useCartToast } from "@/components/storefront/use-cart-toast";
 import { cn } from "@/lib/utils";
 
 /** Desktop-only hover/focus quick add used by the catalog ProductCard. */
@@ -12,6 +13,7 @@ export function QuickAddButton({
   name,
   price,
   currency,
+  imagePath,
   label,
   addedLabel,
   className,
@@ -21,11 +23,13 @@ export function QuickAddButton({
   name: string;
   price: number;
   currency: string;
+  imagePath?: string | null;
   label: string;
   addedLabel: string;
   className?: string;
 }) {
   const { addItem } = useCart();
+  const notifyAdded = useCartToast();
   const [added, setAdded] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -43,7 +47,16 @@ export function QuickAddButton({
         aria-label={label}
         title={label}
         onClick={() => {
-          addItem({ productId, slug, name, price, currency, quantity: 1 });
+          addItem({
+            productId,
+            slug,
+            name,
+            price,
+            currency,
+            quantity: 1,
+            imagePath: imagePath ?? null,
+          });
+          notifyAdded(name, addedLabel);
           setAdded(true);
           if (timer.current) clearTimeout(timer.current);
           timer.current = setTimeout(() => setAdded(false), 1500);
@@ -62,9 +75,6 @@ export function QuickAddButton({
           <Plus className="size-5" aria-hidden />
         )}
       </button>
-      <span role="status" aria-live="polite" className="sr-only">
-        {added ? addedLabel : ""}
-      </span>
     </>
   );
 }

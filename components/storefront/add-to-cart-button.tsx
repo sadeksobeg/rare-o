@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
 import { useCart } from "@/components/storefront/cart-provider";
 import { Button } from "@/components/ui/button";
+import { useCartToast } from "@/components/storefront/use-cart-toast";
 
 export function AddToCartButton({
   productId,
@@ -11,6 +12,7 @@ export function AddToCartButton({
   name,
   price,
   currency,
+  imagePath,
   label,
   addedLabel,
   variant = "plain",
@@ -20,12 +22,14 @@ export function AddToCartButton({
   name: string;
   price: number;
   currency: string;
+  imagePath?: string | null;
   label: string;
   /** `pdp`: full-width primary button that confirms with `addedLabel` for 1.5 s. */
   addedLabel?: string;
   variant?: "plain" | "pdp";
 }) {
   const { addItem } = useCart();
+  const notifyAdded = useCartToast();
   const [added, setAdded] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -36,8 +40,18 @@ export function AddToCartButton({
     []
   );
 
-  const add = () =>
-    addItem({ productId, slug, name, price, currency, quantity: 1 });
+  const add = () => {
+    addItem({
+      productId,
+      slug,
+      name,
+      price,
+      currency,
+      quantity: 1,
+      imagePath: imagePath ?? null,
+    });
+    notifyAdded(name);
+  };
 
   if (variant === "pdp") {
     return (
@@ -55,7 +69,7 @@ export function AddToCartButton({
         {added && addedLabel ? (
           <>
             <Check className="size-4" aria-hidden />
-            <span role="status">{addedLabel}</span>
+            <span>{addedLabel}</span>
           </>
         ) : (
           label

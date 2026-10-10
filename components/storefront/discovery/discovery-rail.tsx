@@ -5,6 +5,8 @@ import type { HomepageOffer, HomepageProduct } from "@/lib/catalog/homepage";
 import { SectionLabel } from "@/components/storefront/section-label";
 import { MaterialField } from "@/components/storefront/material-field";
 import { localizedName } from "@/lib/utils";
+import { href } from "@/lib/href";
+import { OfferCard } from "@/components/storefront/offer-card";
 import { MosaicTile } from "./mosaic-tile";
 
 export function OffersRail({
@@ -33,17 +35,14 @@ export function OffersRail({
             const summary = localizedName(locale, o.summaryAr, o.summaryEn);
             return (
               <li key={o.id} className="min-w-[18rem] max-w-sm shrink-0">
-                <Link
-                  href={`/offers/${o.slug}`}
-                  className="group block space-y-4 border border-ro-line-on-dark p-5 transition-colors hover:border-ro-cream"
-                >
-                  <h3 className="font-display text-2xl tracking-wide group-hover:text-ro-cream">
-                    {title}
-                  </h3>
-                  {summary ? (
-                    <p className="text-sm text-ro-ivory-muted line-clamp-3">{summary}</p>
-                  ) : null}
-                </Link>
+                <OfferCard
+                  tone="dark"
+                  headingLevel={3}
+                  href={href(`/offers/${o.slug}`, locale)}
+                  title={title}
+                  summary={summary}
+                  ctaLabel={dict.offers.viewOffer}
+                />
               </li>
             );
           })}
@@ -106,7 +105,10 @@ export function RailPreviewCard({
 }) {
   const name = localizedName(locale, product.nameAr, product.nameEn, product.slug);
   return (
-    <Link href={`/product/${product.slug}`} className="block space-y-3">
+    <Link
+      href={href(`/product/${product.slug}`, locale)}
+      className="block space-y-3"
+    >
       <MaterialField
         src={product.images[0]?.path}
         alt={name}

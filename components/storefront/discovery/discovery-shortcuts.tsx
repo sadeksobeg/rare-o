@@ -1,19 +1,27 @@
 import Link from "next/link";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import type { Locale } from "@/lib/i18n/config";
+import { href } from "@/lib/href";
 
 export function DiscoveryShortcuts({
   dict,
+  locale = "ar",
   hasAvailable,
   hasOffers,
   hasProducts,
 }: {
   dict: Dictionary;
+  locale?: Locale;
   hasAvailable: boolean;
   hasOffers: boolean;
   hasProducts: boolean;
 }) {
   const items = [
-    { href: "/catalog", label: dict.home.shortcutCatalog, show: true },
+    {
+      href: href("/catalog", locale),
+      label: dict.home.shortcutCatalog,
+      show: true,
+    },
     {
       href: "#available",
       label: dict.home.shortcutAvailable,
@@ -22,7 +30,7 @@ export function DiscoveryShortcuts({
     { href: "#categories", label: dict.home.shortcutCategories, show: true },
     { href: "#latest", label: dict.home.shortcutLatest, show: hasProducts },
     {
-      href: hasOffers ? "/offers" : "#curated",
+      href: hasOffers ? href("/offers", locale) : "#curated",
       label: dict.home.shortcutOffers,
       show: hasOffers,
     },

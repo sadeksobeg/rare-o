@@ -34,7 +34,7 @@ export function StorefrontFooter({
           </p>
           <nav
             className="flex flex-col gap-3 text-sm text-ro-text-2"
-            aria-label="Footer"
+            aria-label={dict.home.footerExplore}
           >
             <Link href={href("/", locale)} className="hover:text-ro-canvas">
               {dict.nav.home}

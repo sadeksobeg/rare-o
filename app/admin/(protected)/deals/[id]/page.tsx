@@ -1,7 +1,18 @@
 import { NegotiationForm } from "@/components/deals/negotiation-form";
 import { adminCreateOfferDraftFromDealAction } from "@/app/deal-actions";
+import {
+  DetailItem,
+  DetailList,
+  DetailSection,
+} from "@/components/admin/detail-list";
+import { Button } from "@/components/ui/button";
+import { StatusChip } from "@/components/ui/status-chip";
+import { StatusStepper } from "@/components/ui/status-stepper";
 import { getDealForAdmin } from "@/lib/deals/service";
 import { isDealStatus, isOpenDealStatus } from "@/lib/deals/constants";
+import { formatCurrency, formatDate, formatNumber } from "@/lib/i18n/format";
+import { getRequestDictionary } from "@/lib/i18n/server";
+import { getStatusChipProps } from "@/lib/ui/status-labels";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -11,6 +22,12 @@ export default async function AdminDealDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const { locale, dict } = await getRequestDictionary();
+  const a = dict.admin;
+  const u = dict.adminUi;
+  const d = u.detail;
+  const t = dict.trader;
+
   let deal;
   try {
     deal = await getDealForAdmin(id);
@@ -19,106 +36,136 @@ export default async function AdminDealDetailPage({
   }
 
   const open = isDealStatus(deal.status) && isOpenDealStatus(deal.status);
+  const money = (value: unknown, currency: string | null | undefined) =>
+    currency
+      ? formatCurrency(
+          Number(value),
+          currency,
+          locale,
+          dict.product.priceOnRequest
+        )
+      : formatNumber(Number(value), locale, { maximumFractionDigits: 2 });
+  const productName = deal.product
+    ? (locale === "ar"
+        ? deal.product.nameAr || deal.product.nameEn
+        : deal.product.nameEn || deal.product.nameAr) || deal.product.slug
+    : null;
 
   return (
     <section className="space-y-8">
-      <div>
-        <p className="text-sm text-ro-muted">{deal.reference}</p>
-        <h1 className="text-3xl">{deal.title}</h1>
-        <p className="mt-2 text-sm">
-          {deal.dealKind} · {deal.status}
+      <div className="space-y-3">
+        <p className="text-sm text-ro-muted">
+          {a.deals} · <span dir="ltr">{deal.reference}</span>
         </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-[28px]">
+            {deal.title}
+          </h1>
+          <StatusChip {...getStatusChipProps(dict, "deal", deal.status)} />
+        </div>
+        <p className="text-sm">
+          <span className="text-ro-muted">{u.colKind}: </span>
+          {t.dealKind[deal.dealKind] ?? deal.dealKind}
+        </p>
+        <StatusStepper domain="deal" current={deal.status} dict={dict} />
       </div>
 
-      <dl className="grid gap-3 text-sm md:grid-cols-2">
-        <div>
-          <dt className="text-ro-muted">Trader</dt>
-          <dd>
-            {deal.trader.displayName} · {deal.trader.email}
-            {deal.trader.companyName ? (
-              <div className="text-ro-muted">{deal.trader.companyName}</div>
-            ) : null}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-ro-muted">Product reference</dt>
-          <dd>
-            {deal.product
-              ? `${deal.product.nameEn || deal.product.nameAr} (${deal.product.slug})`
-              : "Non-catalog — no product created"}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-ro-muted">Commercial snapshot</dt>
-          <dd>
-            {deal.proposedPrice != null
-              ? `${Number(deal.proposedPrice)} ${deal.currency ?? ""}`.trim()
-              : "—"}
-            {deal.quantity != null ? ` · qty ${deal.quantity}` : ""}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-ro-muted">Conditions</dt>
-          <dd className="whitespace-pre-wrap">
+      <DetailList>
+        <DetailItem label={u.colTrader}>
+          {deal.trader.displayName}
+          <span className="text-ro-muted"> · </span>
+          <span dir="ltr">{deal.trader.email}</span>
+          {deal.trader.companyName ? (
+            <div className="text-ro-muted">{deal.trader.companyName}</div>
+          ) : null}
+        </DetailItem>
+        <DetailItem label={d.productReference}>
+          {deal.product && productName ? (
+            <>
+              {productName}{" "}
+              <span className="text-ro-muted" dir="ltr">
+                ({deal.product.slug})
+              </span>
+            </>
+          ) : (
+            d.nonCatalogNoProduct
+          )}
+        </DetailItem>
+        <DetailItem label={d.commercialSnapshot}>
+          {deal.proposedPrice != null
+            ? money(deal.proposedPrice, deal.currency)
+            : "—"}
+          {deal.quantity != null ? ` · ${d.qty} ${deal.quantity}` : ""}
+        </DetailItem>
+        <DetailItem label={d.conditions}>
+          <span className="whitespace-pre-wrap">
             {deal.conditionsNotes || "—"}
-          </dd>
-        </div>
-      </dl>
+          </span>
+        </DetailItem>
+      </DetailList>
 
-      <div>
-        <h2 className="mb-3 text-lg">Negotiation history</h2>
+      <DetailSection title={d.negotiationHistory}>
         <ul className="divide-y divide-ro-line border border-ro-line">
           {deal.entries.map((e) => (
             <li key={e.id} className="space-y-1 p-4 text-sm">
-              <div className="flex flex-wrap gap-3">
-                <strong>{e.action}</strong>
-                <span className="text-ro-muted">{e.actorRole}</span>
+              <div className="flex flex-wrap items-center gap-3">
+                <strong>{t.dealAction[e.action] ?? e.action}</strong>
                 <span className="text-ro-muted">
-                  {e.createdAt.toISOString()}
+                  {t.actorRole[e.actorRole] ?? e.actorRole}
+                </span>
+                <span className="text-ro-muted">
+                  {formatDate(e.createdAt, locale, {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })}
                 </span>
               </div>
               {e.message ? <p>{e.message}</p> : null}
               {e.proposedPrice != null || e.quantity != null ? (
                 <p className="text-ro-muted">
-                  Terms:{" "}
+                  {d.terms}:{" "}
                   {e.proposedPrice != null
-                    ? `${Number(e.proposedPrice)} ${e.currency ?? ""}`
+                    ? money(e.proposedPrice, e.currency)
                     : ""}
-                  {e.quantity != null ? ` · qty ${e.quantity}` : ""}
+                  {e.quantity != null ? ` · ${d.qty} ${e.quantity}` : ""}
                 </p>
               ) : null}
             </li>
           ))}
         </ul>
-      </div>
+      </DetailSection>
 
-      {open ? <NegotiationForm dealId={deal.id} mode="admin" /> : null}
+      {open ? (
+        <NegotiationForm dealId={deal.id} mode="admin" labels={dict.trader} />
+      ) : null}
 
       <div className="space-y-3 border border-ro-line p-4">
-        <h2 className="text-lg">Public curated offer</h2>
-        <p className="text-sm text-ro-muted">
-          Optional and explicit. Accepting a deal never auto-publishes an offer.
-        </p>
+        <h2 className="text-lg font-semibold">{d.publicOfferTitle}</h2>
+        <p className="text-sm text-ro-muted">{d.publicOfferBody}</p>
         {deal.curatedOffers.length > 0 ? (
           <ul className="space-y-2 text-sm">
             {deal.curatedOffers.map((o) => (
-              <li key={o.id}>
-                <Link href={`/admin/offers/${o.id}`} className="text-ro-purple">
+              <li key={o.id} className="flex flex-wrap items-center gap-2">
+                <Link
+                  href={`/admin/offers/${o.id}`}
+                  className="text-ro-plum hover:underline"
+                  dir="ltr"
+                >
                   {o.slug}
-                </Link>{" "}
-                · {o.status}
+                </Link>
+                <StatusChip
+                  size="sm"
+                  {...getStatusChipProps(dict, "offer", o.status)}
+                />
               </li>
             ))}
           </ul>
         ) : null}
         <form action={adminCreateOfferDraftFromDealAction}>
           <input type="hidden" name="dealId" value={deal.id} />
-          <button
-            type="submit"
-            className="border border-ro-line px-4 py-2 text-sm"
-          >
-            Create draft offer from this deal
-          </button>
+          <Button type="submit" variant="secondary" size="sm">
+            {d.createDraftOffer}
+          </Button>
         </form>
       </div>
     </section>

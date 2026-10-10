@@ -79,11 +79,22 @@ export default async function AdminProductsPage() {
                   <td className="p-3">
                     <StatusChip
                       tone={productStatusTone(p.status)}
-                      label={p.status}
+                      label={dict.adminUi.productStatus[p.status] ?? p.status}
                       size="sm"
                     />
                   </td>
-                  <td className="p-3">{p.availability}</td>
+                  <td className="p-3">
+                    <StatusChip
+                      tone={
+                        p.availability === "available" ? "success" : "closed"
+                      }
+                      label={
+                        dict.adminUi.availability[p.availability] ??
+                        p.availability
+                      }
+                      size="sm"
+                    />
+                  </td>
                   <td className="p-3 tabular-nums">
                     {formatCurrency(
                       Number(p.retailPrice),

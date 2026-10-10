@@ -8,6 +8,7 @@ import { DiscoveryProvider, useDiscovery } from "./discovery-context";
 import { SearchOverlay } from "./search-overlay";
 import { QuickViewPanel } from "./quick-view-panel";
 import { CompareTray } from "./compare-tray";
+import { ENABLE_COMPARE } from "@/lib/features";
 
 function ShellListeners({
   dict,
@@ -30,7 +31,7 @@ function ShellListeners({
     <>
       <SearchOverlay dict={dict} locale={locale} items={searchIndex} />
       <QuickViewPanel dict={dict} locale={locale} />
-      <CompareTray dict={dict} locale={locale} />
+      {ENABLE_COMPARE ? <CompareTray dict={dict} locale={locale} /> : null}
     </>
   );
 }

@@ -5,7 +5,15 @@ import {
   adminRetriggerRetailHandoffAction,
   adminTransitionRetailRequestAction,
 } from "@/app/actions";
+import { Button } from "@/components/ui/button";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { RetailRequestStatus } from "@/lib/retail-request/constants";
+import {
+  controlClass,
+  controlLabelClass,
+  controlLabelTextClass,
+  formErrorClass,
+} from "@/lib/ui/form-classes";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -14,12 +22,15 @@ export function AdminRequestControls({
   nextStatuses,
   whatsAppDeepLink,
   canRetrigger,
+  labels,
 }: {
   requestId: string;
   nextStatuses: RetailRequestStatus[];
   whatsAppDeepLink: string | null;
   canRetrigger: boolean;
+  labels: Dictionary["adminUi"];
 }) {
+  const f = labels.form;
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -28,11 +39,8 @@ export function AdminRequestControls({
 
   return (
     <div className="space-y-4 border border-ro-line p-4">
-      <h2 className="text-lg">Operations</h2>
-      <p className="text-sm text-ro-muted">
-        Transitions are server-side and audited. Retrigger regenerates the
-        wa.me message on this same request — no duplicate RetailRequest.
-      </p>
+      <h2 className="text-lg font-semibold">{f.operations}</h2>
+      <p className="text-sm text-ro-muted">{f.operationsHint}</p>
 
       {nextStatuses.length > 0 ? (
         <form
@@ -44,44 +52,33 @@ export function AdminRequestControls({
               const res = await adminTransitionRetailRequestAction(fd);
               if (!res.ok) setError(res.error);
               else {
-                setMessage("Status updated.");
+                setMessage(f.statusUpdated);
                 router.refresh();
               }
             });
           }}
         >
           <input type="hidden" name="requestId" value={requestId} />
-          <label className="space-y-1 text-sm">
-            <span className="block text-ro-muted">Move to</span>
-            <select
-              name="toStatus"
-              required
-              className="border border-ro-line bg-transparent px-3 py-2"
-            >
+          <label className={controlLabelClass}>
+            <span className={controlLabelTextClass}>{f.moveTo}</span>
+            <select name="toStatus" required className={controlClass}>
               {nextStatuses.map((s) => (
                 <option key={s} value={s}>
-                  {s}
+                  {labels.status.retail[s] ?? s}
                 </option>
               ))}
             </select>
           </label>
-          <label className="space-y-1 text-sm">
-            <span className="block text-ro-muted">Note (optional)</span>
-            <input
-              name="note"
-              className="border border-ro-line bg-transparent px-3 py-2"
-            />
+          <label className={controlLabelClass}>
+            <span className={controlLabelTextClass}>{f.noteOptional}</span>
+            <input name="note" className={controlClass} />
           </label>
-          <button
-            type="submit"
-            disabled={pending}
-            className="bg-ro-purple px-4 py-2 text-sm text-ro-ivory disabled:opacity-60"
-          >
-            Apply transition
-          </button>
+          <Button type="submit" size="sm" loading={pending}>
+            {f.applyTransition}
+          </Button>
         </form>
       ) : (
-        <p className="text-sm text-ro-muted">Terminal status — no transitions.</p>
+        <p className="text-sm text-ro-muted">{f.terminalNoTransitions}</p>
       )}
 
       <div className="flex flex-wrap gap-3">
@@ -100,19 +97,20 @@ export function AdminRequestControls({
                   | { whatsAppDeepLink?: string | null }
                   | undefined;
                 if (data?.whatsAppDeepLink) setLink(data.whatsAppDeepLink);
-                setMessage("Handoff regenerated on the same request.");
+                setMessage(f.handoffRegenerated);
                 router.refresh();
               });
             }}
           >
             <input type="hidden" name="requestId" value={requestId} />
-            <button
+            <Button
               type="submit"
+              variant="secondary"
+              size="sm"
               disabled={pending}
-              className="border border-ro-line px-4 py-2 text-sm disabled:opacity-60"
             >
-              Retrigger handoff
-            </button>
+              {f.retrigger}
+            </Button>
           </form>
         ) : null}
 
@@ -131,7 +129,7 @@ export function AdminRequestControls({
                   | { whatsAppDeepLink?: string | null }
                   | undefined;
                 const openLink = data?.whatsAppDeepLink || link;
-                setMessage("Handoff marked opened.");
+                setMessage(f.handoffMarkedOpened);
                 router.refresh();
                 if (openLink) {
                   window.open(openLink, "_blank", "noopener,noreferrer");
@@ -140,19 +138,28 @@ export function AdminRequestControls({
             }}
           >
             <input type="hidden" name="requestId" value={requestId} />
-            <button
+            <Button
               type="submit"
+              variant="secondary"
+              size="sm"
               disabled={pending}
-              className="border border-ro-line px-4 py-2 text-sm disabled:opacity-60"
             >
-              Open WhatsApp handoff
-            </button>
+              {f.openHandoff}
+            </Button>
           </form>
         ) : null}
       </div>
 
-      {message ? <p className="text-sm text-ro-muted">{message}</p> : null}
-      {error ? <p className="text-sm text-red-800">{error}</p> : null}
+      {message ? (
+        <p role="status" className="text-sm text-ro-muted">
+          {message}
+        </p>
+      ) : null}
+      {error ? (
+        <p role="alert" className={formErrorClass}>
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

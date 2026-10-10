@@ -6,6 +6,7 @@ import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 import type { HomepageSearchItem } from "@/lib/catalog/homepage";
 import { localizedName } from "@/lib/utils";
+import { href } from "@/lib/href";
 import { useDiscovery } from "./discovery-context";
 
 export function SearchOverlay({
@@ -93,7 +94,10 @@ export function SearchOverlay({
                   e.preventDefault();
                   setActive((i) => Math.max(0, i - 1));
                 } else if (e.key === "Enter" && results[active]) {
-                  window.location.href = `/product/${results[active].slug}`;
+                  window.location.href = href(
+                    `/product/${results[active].slug}`,
+                    locale
+                  );
                 }
               }}
               placeholder={dict.home.searchPlaceholder}
@@ -130,7 +134,7 @@ export function SearchOverlay({
                   return (
                     <li key={item.id}>
                       <Link
-                        href={`/product/${item.slug}`}
+                        href={href(`/product/${item.slug}`, locale)}
                         onClick={closeSearch}
                         className={`flex items-center gap-4 px-4 py-3 transition-colors ${
                           i === active ? "bg-ro-surface" : "hover:bg-ro-surface/70"
@@ -166,7 +170,7 @@ export function SearchOverlay({
           {q.trim() ? (
             <div className="border-t border-ro-line px-4 py-3">
               <Link
-                href={`/catalog?q=${encodeURIComponent(q.trim())}`}
+                href={`${href("/catalog", locale)}?q=${encodeURIComponent(q.trim())}`}
                 onClick={closeSearch}
                 className="text-[0.7rem] tracking-[0.18em] text-ro-purple uppercase"
               >

@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 import { localizedName } from "@/lib/utils";
+import { href } from "@/lib/href";
 import { useDiscovery } from "./discovery-context";
 
 export function CompareTray({
@@ -102,7 +103,7 @@ export function CompareTray({
                           className="border-b border-ro-line p-3 text-start font-display text-lg font-normal"
                         >
                           <Link
-                            href={`/product/${p.slug}`}
+                            href={href(`/product/${p.slug}`, locale)}
                             className="hover:text-ro-purple"
                           >
                             {localizedName(locale, p.nameAr, p.nameEn, p.slug)}

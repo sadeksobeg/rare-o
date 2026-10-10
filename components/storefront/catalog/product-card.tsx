@@ -77,6 +77,7 @@ export function CatalogProductCard({
             name={name}
             price={price}
             currency={product.currency}
+            imagePath={primary?.path ?? null}
             label={dict.catalog.quickAdd}
             addedLabel={dict.catalog.quickAdded.replace("{name}", name)}
             className="absolute bottom-3 end-3 z-10"

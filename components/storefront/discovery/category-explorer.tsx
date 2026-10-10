@@ -5,6 +5,7 @@ import type { HomepageCategory } from "@/lib/catalog/homepage";
 import { SectionLabel } from "@/components/storefront/section-label";
 import { EDITORIAL } from "@/lib/brand/editorial";
 import { localizedName } from "@/lib/utils";
+import { href } from "@/lib/href";
 
 const categoryImage: Record<string, string> = {
   "string-instruments": EDITORIAL.oudHeritage,
@@ -59,7 +60,7 @@ export function CategoryExplorer({
                 className={large ? "lg:col-span-7" : "lg:col-span-5 lg:mt-16"}
               >
                 <Link
-                  href={`/catalog?category=${category.slug}`}
+                  href={`${href("/catalog", locale)}?category=${encodeURIComponent(category.slug)}`}
                   className="group relative block min-h-[320px] overflow-hidden bg-ro-black text-ro-cream md:min-h-[420px]"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}

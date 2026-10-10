@@ -9,6 +9,13 @@ type Dict = {
     cart: string;
     contact: string;
     admin: string;
+    story: string;
+    traders: string;
+    primaryAria: string;
+    mobileAria: string;
+    languageAria: string;
+    /** Supports `{n}` placeholder for the item count. */
+    cartAria: string;
   };
   home: {
     headline: string;
@@ -144,6 +151,8 @@ type Dict = {
     empty: string;
     back: string;
     relatedProduct: string;
+    viewOffer: string;
+    eyebrow: string;
   };
   product: {
     addToCart: string;
@@ -157,12 +166,36 @@ type Dict = {
     description: string;
     related: string;
     breadcrumb: string;
+    addedToast: string;
+    viewCart: string;
+    galleryLabel: string;
+    galleryShowImage: string;
+    galleryEnlarge: string;
+    galleryPrev: string;
+    galleryNext: string;
+    galleryCounter: string;
   };
   cart: {
     title: string;
     empty: string;
     continue: string;
     remove: string;
+    emptyTitle: string;
+    emptyBody: string;
+    listLabel: string;
+    /** `{n}` = total pieces. */
+    itemsCount: string;
+    /** `{name}` placeholder. */
+    qtyLabel: string;
+    /** `{name}` placeholder. */
+    removeAria: string;
+    increase: string;
+    decrease: string;
+    unitPrice: string;
+    lineTotal: string;
+    summaryTitle: string;
+    summaryTotal: string;
+    summaryNote: string;
   };
   request: {
     title: string;
@@ -177,6 +210,22 @@ type Dict = {
     handoffHint: string;
     messagePreview: string;
     listEmpty: string;
+    /** Contains a `{link}` placeholder replaced by the privacy link. */
+    privacyConsent: string;
+    privacyLink: string;
+    successTitle: string;
+    referenceLabel: string;
+    copyReference: string;
+    copyMessage: string;
+    copied: string;
+    copyFailed: string;
+    nextStep: string;
+    emptyTitle: string;
+    emptyBody: string;
+    summaryTitle: string;
+    backToCart: string;
+    submitting: string;
+    opening: string;
   };
   admin: {
     login: string;
@@ -292,6 +341,113 @@ type Dict = {
       wholesale: Record<string, string>;
       trader: Record<string, string>;
       offer: Record<string, string>;
+    };
+    /** Catalog product status (draft / published / archived). */
+    productStatus: Record<string, string>;
+    /** Retail availability flag (available / unavailable). */
+    availability: Record<string, string>;
+    /** Detail page headings, field labels and stepper copy. */
+    detail: {
+      retailEvent: Record<string, string>;
+      actor: Record<string, string>;
+      langAr: string;
+      langEn: string;
+      locale: string;
+      destination: string;
+      shippingMethod: string;
+      shippingUnconfirmed: string;
+      subtotal: string;
+      handoffPrepared: string;
+      handoffOpened: string;
+      lines: string;
+      qty: string;
+      storedMessage: string;
+      handoffPayload: string;
+      auditEvents: string;
+      noEvents: string;
+      traderNotes: string;
+      productReference: string;
+      nonCatalogNoProduct: string;
+      commercialSnapshot: string;
+      conditions: string;
+      negotiationHistory: string;
+      terms: string;
+      publicOfferTitle: string;
+      publicOfferBody: string;
+      createDraftOffer: string;
+      linesSnapshot: string;
+      proposedPrice: string;
+      noProposedPrice: string;
+      quotedUnit: string;
+      catalogRetailRef: string;
+      wholesaleRequestTitle: string;
+      editOffer: string;
+      newOfferTitle: string;
+      newOfferLead: string;
+      newProductTitle: string;
+      stepperLabel: string;
+      stepDone: string;
+      stepCurrent: string;
+      stepUpcoming: string;
+      stepEnded: string;
+    };
+    /** Control forms (request / wholesale / offer / product). */
+    form: {
+      operations: string;
+      operationsHint: string;
+      moveTo: string;
+      note: string;
+      noteOptional: string;
+      applyTransition: string;
+      apply: string;
+      statusUpdated: string;
+      terminalNoTransitions: string;
+      retrigger: string;
+      handoffRegenerated: string;
+      openHandoff: string;
+      handoffMarkedOpened: string;
+      adminOperations: string;
+      terminalStatus: string;
+      blockedUntilQuote: string;
+      provideQuote: string;
+      quoteHint: string;
+      quoteCurrency: string;
+      quotedUnitPrice: string;
+      quoteMessage: string;
+      saveQuote: string;
+      quoteSaved: string;
+      slug: string;
+      titleAr: string;
+      titleEn: string;
+      summaryAr: string;
+      summaryEn: string;
+      linkedDeal: string;
+      linkedProduct: string;
+      none: string;
+      sortOrder: string;
+      saveOffer: string;
+      createDraft: string;
+      offerCurrentStatus: string;
+      offerPublishNote: string;
+      setStatusTo: string;
+      productNameAr: string;
+      productNameEn: string;
+      descriptionAr: string;
+      descriptionEn: string;
+      specsAr: string;
+      specsEn: string;
+      category: string;
+      retailPrice: string;
+      currency: string;
+      currencyHelp: string;
+      currencyPlaceholder: string;
+      statusLabel: string;
+      availabilityLabel: string;
+      availabilityHelp: string;
+      wholesaleEligible: string;
+      wholesaleEligibleHelp: string;
+      saveProduct: string;
+      saving: string;
     };
   };
   trader: {
@@ -485,6 +641,7 @@ type Dict = {
     contextProduct: string;
     contextLines: string;
     contextLatestNegotiation: string;
+    contextReference: string;
     linkErrorUnsupported: string;
     linkErrorNotFound: string;
     linkErrorUnauthorized: string;
@@ -513,6 +670,8 @@ type Dict = {
     errorForbidden: string;
     errorSession: string;
     errorOffline: string;
+    backOnline: string;
+    toastDismiss: string;
     goToPortal: string;
     signOut: string;
     navOps: string;
@@ -537,6 +696,8 @@ type Dict = {
     traderTitle: string;
     traderHint: string;
     loginError: string;
+    showPassword: string;
+    hidePassword: string;
   };
   seo: {
     catalogDescription: string;
@@ -554,6 +715,12 @@ const ar: Dict = {
     cart: "قائمة الطلب",
     contact: "تواصل",
     admin: "الإدارة",
+    story: "قصتنا",
+    traders: "التجّار",
+    primaryAria: "التنقل الرئيسي",
+    mobileAria: "قائمة الجوال",
+    languageAria: "التبديل إلى الإنجليزية",
+    cartAria: "قائمة الطلب — {n} قطعة",
   },
   home: {
     headline: "عودٌ نادر، صُنع ليبقى",
@@ -691,6 +858,8 @@ const ar: Dict = {
     empty: "لا توجد عروض منشورة حالياً.",
     back: "كل العروض",
     relatedProduct: "منتج من الكتالوج",
+    viewOffer: "عرض التفاصيل",
+    eyebrow: "مختارات RARE OUD",
   },
   product: {
     addToCart: "أضف إلى قائمة الطلب",
@@ -704,12 +873,35 @@ const ar: Dict = {
     description: "الوصف",
     related: "قطع ذات صلة",
     breadcrumb: "مسار التنقل",
+    addedToast: "تمت إضافة {name} إلى قائمة الطلب",
+    viewCart: "عرض القائمة",
+    galleryLabel: "صور المنتج",
+    galleryShowImage: "عرض الصورة {n}",
+    galleryEnlarge: "تكبير الصورة",
+    galleryPrev: "الصورة السابقة",
+    galleryNext: "الصورة التالية",
+    galleryCounter: "الصورة {current} من {total}",
   },
   cart: {
     title: "قائمة الطلب",
     empty: "قائمة الطلب فارغة.",
     continue: "متابعة الطلب",
     remove: "إزالة",
+    emptyTitle: "قائمة الطلب فارغة",
+    emptyBody:
+      "أضف قطعاً من الكتالوج لتبدأ طلبك، ثم أرسله إلى فريق RARE OUD عبر واتساب.",
+    listLabel: "القطع في قائمة الطلب",
+    itemsCount: "{n} قطعة",
+    qtyLabel: "الكمية: {name}",
+    removeAria: "إزالة {name} من قائمة الطلب",
+    increase: "زيادة الكمية",
+    decrease: "إنقاص الكمية",
+    unitPrice: "سعر القطعة",
+    lineTotal: "الإجمالي",
+    summaryTitle: "ملخص الطلب",
+    summaryTotal: "المجموع المرجعي",
+    summaryNote:
+      "المجموع مرجعي وليس فاتورة — لا يوجد دفع على الموقع. يُؤكَّد السعر والشحن مع الفريق.",
   },
   request: {
     title: "تفاصيل الطلب",
@@ -726,6 +918,22 @@ const ar: Dict = {
       "هذه ليست عملية دفع. افتح واتساب لإرسال تفاصيل الطلب لفريق RARE OUD.",
     messagePreview: "نص الرسالة المعدّة:",
     listEmpty: "قائمة الطلب فارغة.",
+    privacyConsent:
+      "بتجهيز الطلب فإنك توافق على استخدام بياناتك للتواصل معك عبر واتساب فقط، وفق {link}.",
+    privacyLink: "سياسة الخصوصية",
+    successTitle: "تم تجهيز طلبك",
+    referenceLabel: "المرجع",
+    copyReference: "نسخ المرجع",
+    copyMessage: "نسخ نص الرسالة",
+    copied: "تم النسخ",
+    copyFailed: "تعذّر النسخ",
+    nextStep: "الخطوة التالية: افتح واتساب وأرسل الرسالة المعدّة إلى فريق RARE OUD.",
+    emptyTitle: "لا توجد قطع في طلبك",
+    emptyBody: "أضف قطعاً من الكتالوج أولاً، ثم عُد لإكمال الطلب.",
+    summaryTitle: "قطع الطلب",
+    backToCart: "العودة إلى قائمة الطلب",
+    submitting: "جارٍ التجهيز…",
+    opening: "جارٍ الفتح…",
   },
   admin: {
     login: "تسجيل دخول الإدارة",
@@ -871,6 +1079,124 @@ const ar: Dict = {
         published: "منشور",
         unpublished: "غير منشور",
       },
+    },
+    productStatus: {
+      draft: "مسودة",
+      published: "منشور",
+      archived: "مؤرشف",
+    },
+    availability: {
+      available: "متوفر",
+      unavailable: "غير متوفر",
+    },
+    detail: {
+      retailEvent: {
+        prepared: "تحضير التحويل",
+        opened: "فتح التحويل",
+        status_changed: "تغيير الحالة",
+        retriggered: "إعادة توليد التحويل",
+      },
+      actor: { customer: "العميل", admin: "الإدارة", trader: "التاجر" },
+      langAr: "العربية",
+      langEn: "الإنجليزية",
+      locale: "لغة الطلب",
+      destination: "بلد الوجهة",
+      shippingMethod: "طريقة الشحن",
+      shippingUnconfirmed: "غير محددة — يُؤكَّد مع الفريق",
+      subtotal: "المجموع الفرعي",
+      handoffPrepared: "تحضير التحويل",
+      handoffOpened: "فتح التحويل",
+      lines: "البنود",
+      qty: "الكمية",
+      storedMessage: "رسالة واتساب المحفوظة",
+      handoffPayload: "بيانات التحويل المهيكلة",
+      auditEvents: "سجل الأحداث",
+      noEvents: "لا أحداث بعد.",
+      traderNotes: "ملاحظات التاجر",
+      productReference: "المنتج المرتبط",
+      nonCatalogNoProduct: "خارج الكتالوج — لم يُنشأ منتج",
+      commercialSnapshot: "الشروط التجارية الحالية",
+      conditions: "الشروط والملاحظات",
+      negotiationHistory: "سجل التفاوض",
+      terms: "الشروط",
+      publicOfferTitle: "عرض عام منسّق",
+      publicOfferBody:
+        "اختياري وبقرار صريح. قبول الصفقة لا ينشر أي عرض تلقائياً.",
+      createDraftOffer: "إنشاء مسودة عرض من هذه الصفقة",
+      linesSnapshot: "البنود (لقطات تاريخية)",
+      proposedPrice: "السعر المقترح",
+      noProposedPrice: "لا سعر مقترح (وضع طلب عرض سعر)",
+      quotedUnit: "سعر الوحدة المعروض",
+      catalogRetailRef: "مرجع سعر التجزئة في الكتالوج",
+      wholesaleRequestTitle: "طلب جملة",
+      editOffer: "تعديل العرض",
+      newOfferTitle: "عرض منسّق جديد",
+      newOfferLead: "يُنشأ كمسودة. النشر العام يتطلب إجراء نشر صريحاً.",
+      newProductTitle: "منتج جديد",
+      stepperLabel: "مسار الحالة",
+      stepDone: "مكتملة",
+      stepCurrent: "الحالية",
+      stepUpcoming: "قادمة",
+      stepEnded: "منتهية",
+    },
+    form: {
+      operations: "العمليات",
+      operationsHint:
+        "الانتقالات تُنفَّذ على الخادم وتُسجَّل في السجل. إعادة التحويل تُنشئ رسالة واتساب جديدة على الطلب نفسه — دون طلب مكرر.",
+      moveTo: "الانتقال إلى",
+      note: "ملاحظة",
+      noteOptional: "ملاحظة (اختياري)",
+      applyTransition: "تطبيق الانتقال",
+      apply: "تطبيق",
+      statusUpdated: "تم تحديث الحالة.",
+      terminalNoTransitions: "حالة نهائية — لا انتقالات متاحة.",
+      retrigger: "إعادة توليد التحويل",
+      handoffRegenerated: "أُعيد توليد التحويل على الطلب نفسه.",
+      openHandoff: "فتح تحويل واتساب",
+      handoffMarkedOpened: "سُجّل فتح التحويل.",
+      adminOperations: "عمليات الإدارة",
+      terminalStatus: "حالة نهائية.",
+      blockedUntilQuote: "(محجوب حتى تقديم عرض السعر — استخدم نموذج العرض)",
+      provideQuote: "تقديم عرض سعر",
+      quoteHint:
+        "مسار عرض سعر بسيط فقط — دون دفع أو تكاليف شحن أو نظام محاسبي.",
+      quoteCurrency: "عملة العرض",
+      quotedUnitPrice: "سعر الوحدة المعروض",
+      quoteMessage: "رسالة العرض",
+      saveQuote: "حفظ العرض ← تم تقديم عرض السعر",
+      quoteSaved: "تم حفظ عرض السعر.",
+      slug: "المعرّف (Slug)",
+      titleAr: "العنوان (عربي)",
+      titleEn: "العنوان (إنجليزي)",
+      summaryAr: "الملخص (عربي)",
+      summaryEn: "الملخص (إنجليزي)",
+      linkedDeal: "صفقة مرتبطة (اختياري)",
+      linkedProduct: "منتج من الكتالوج (اختياري)",
+      none: "بدون",
+      sortOrder: "ترتيب العرض",
+      saveOffer: "حفظ العرض",
+      createDraft: "إنشاء مسودة",
+      offerCurrentStatus: "الحالة الحالية",
+      offerPublishNote: "النشر دائماً بقرار صريح.",
+      setStatusTo: "تعيين الحالة: {status}",
+      productNameAr: "الاسم (عربي)",
+      productNameEn: "الاسم (إنجليزي)",
+      descriptionAr: "الوصف (عربي)",
+      descriptionEn: "الوصف (إنجليزي)",
+      specsAr: "المواصفات (عربي)",
+      specsEn: "المواصفات (إنجليزي)",
+      category: "الفئة (مجموعة الإطلاق فقط)",
+      retailPrice: "سعر التجزئة",
+      currency: "رمز العملة",
+      currencyHelp: "قابل للضبط — القيمة التجارية الافتراضية ما زالت مفتوحة.",
+      currencyPlaceholder: "مثال: TEST لبيانات الاختبار فقط",
+      statusLabel: "الحالة",
+      availabilityLabel: "التوفر",
+      availabilityHelp: "علامة توفر للتجزئة، وليست مخزوناً.",
+      wholesaleEligible: "مؤهَّل للجملة",
+      wholesaleEligibleHelp: "علامة فقط — لا واجهة جملة مرتبطة بها حالياً.",
+      saveProduct: "حفظ المنتج",
+      saving: "جارٍ الحفظ…",
     },
   },
   trader: {
@@ -1099,6 +1425,7 @@ const ar: Dict = {
     contextProduct: "المنتج",
     contextLines: "البنود",
     contextLatestNegotiation: "آخر تفاوض",
+    contextReference: "المرجع / المعرّف",
     linkErrorUnsupported: "نوع ربط غير مدعوم.",
     linkErrorNotFound: "السجل غير موجود.",
     linkErrorUnauthorized: "غير مصرّح.",
@@ -1128,6 +1455,8 @@ const ar: Dict = {
     errorForbidden: "هذا القسم غير متاح لحسابك",
     errorSession: "انتهت جلستك. سجّل الدخول من جديد.",
     errorOffline: "لا يوجد اتصال بالإنترنت",
+    backOnline: "عاد الاتصال بالإنترنت",
+    toastDismiss: "إغلاق الإشعار",
     goToPortal: "الانتقال إلى بوابتك",
     signOut: "تسجيل الخروج",
     navOps: "التشغيل",
@@ -1153,6 +1482,8 @@ const ar: Dict = {
     traderTitle: "دخول التجّار",
     traderHint: "الحسابات تُنشأ من الإدارة فقط — لا تسجيل ذاتي عام.",
     loginError: "البريد أو كلمة المرور غير صحيحة.",
+    showPassword: "إظهار",
+    hidePassword: "إخفاء",
   },
   seo: {
     catalogDescription:
@@ -1173,6 +1504,12 @@ const en: Dict = {
     cart: "Request list",
     contact: "Contact",
     admin: "Admin",
+    story: "Our story",
+    traders: "Traders",
+    primaryAria: "Primary navigation",
+    mobileAria: "Mobile navigation",
+    languageAria: "Switch to Arabic",
+    cartAria: "Request list — {n} items",
   },
   home: {
     headline: "A rare oud, made to last.",
@@ -1310,6 +1647,8 @@ const en: Dict = {
     empty: "No published offers yet.",
     back: "All offers",
     relatedProduct: "Related catalog product",
+    viewOffer: "View offer",
+    eyebrow: "Curated by RARE OUD",
   },
   product: {
     addToCart: "Add to request list",
@@ -1323,12 +1662,35 @@ const en: Dict = {
     description: "Description",
     related: "Related pieces",
     breadcrumb: "Breadcrumb",
+    addedToast: "{name} added to your request list",
+    viewCart: "View list",
+    galleryLabel: "Product images",
+    galleryShowImage: "Show image {n}",
+    galleryEnlarge: "Enlarge image",
+    galleryPrev: "Previous image",
+    galleryNext: "Next image",
+    galleryCounter: "Image {current} of {total}",
   },
   cart: {
     title: "Request list",
     empty: "Your request list is empty.",
     continue: "Continue request",
     remove: "Remove",
+    emptyTitle: "Your request list is empty",
+    emptyBody:
+      "Add pieces from the catalog to start your request, then send it to the RARE OUD team on WhatsApp.",
+    listLabel: "Pieces in your request list",
+    itemsCount: "{n} pieces",
+    qtyLabel: "Quantity: {name}",
+    removeAria: "Remove {name} from the request list",
+    increase: "Increase quantity",
+    decrease: "Decrease quantity",
+    unitPrice: "Unit price",
+    lineTotal: "Total",
+    summaryTitle: "Request summary",
+    summaryTotal: "Reference total",
+    summaryNote:
+      "The total is a reference, not an invoice — nothing is paid on the site. Price and shipping are confirmed with the team.",
   },
   request: {
     title: "Request details",
@@ -1345,6 +1707,22 @@ const en: Dict = {
       "This is not a payment. Open WhatsApp to send your request details to the RARE OUD team.",
     messagePreview: "Prepared message:",
     listEmpty: "Your request list is empty.",
+    privacyConsent:
+      "By preparing this request you agree that your details are used only to contact you on WhatsApp, as described in our {link}.",
+    privacyLink: "privacy policy",
+    successTitle: "Your request is ready",
+    referenceLabel: "Reference",
+    copyReference: "Copy reference",
+    copyMessage: "Copy message text",
+    copied: "Copied",
+    copyFailed: "Could not copy",
+    nextStep: "Next: open WhatsApp and send the prepared message to the RARE OUD team.",
+    emptyTitle: "No pieces in your request",
+    emptyBody: "Add pieces from the catalog first, then come back to complete your request.",
+    summaryTitle: "Pieces in this request",
+    backToCart: "Back to request list",
+    submitting: "Preparing…",
+    opening: "Opening…",
   },
   admin: {
     login: "Admin sign in",
@@ -1490,6 +1868,125 @@ const en: Dict = {
         published: "Published",
         unpublished: "Unpublished",
       },
+    },
+    productStatus: {
+      draft: "Draft",
+      published: "Published",
+      archived: "Archived",
+    },
+    availability: {
+      available: "Available",
+      unavailable: "Unavailable",
+    },
+    detail: {
+      retailEvent: {
+        prepared: "Handoff prepared",
+        opened: "Handoff opened",
+        status_changed: "Status changed",
+        retriggered: "Handoff retriggered",
+      },
+      actor: { customer: "Customer", admin: "Admin", trader: "Trader" },
+      langAr: "Arabic",
+      langEn: "English",
+      locale: "Request language",
+      destination: "Destination",
+      shippingMethod: "Shipping method",
+      shippingUnconfirmed: "Not set — confirm with team",
+      subtotal: "Subtotal",
+      handoffPrepared: "Handoff prepared",
+      handoffOpened: "Handoff opened",
+      lines: "Lines",
+      qty: "Qty",
+      storedMessage: "Stored WhatsApp message",
+      handoffPayload: "Structured handoff payload",
+      auditEvents: "Audit events",
+      noEvents: "No events yet.",
+      traderNotes: "Trader notes",
+      productReference: "Product reference",
+      nonCatalogNoProduct: "Non-catalog — no product created",
+      commercialSnapshot: "Commercial snapshot",
+      conditions: "Conditions",
+      negotiationHistory: "Negotiation history",
+      terms: "Terms",
+      publicOfferTitle: "Public curated offer",
+      publicOfferBody:
+        "Optional and explicit. Accepting a deal never auto-publishes an offer.",
+      createDraftOffer: "Create draft offer from this deal",
+      linesSnapshot: "Lines (historical snapshots)",
+      proposedPrice: "Proposed",
+      noProposedPrice: "No proposed price (quote mode)",
+      quotedUnit: "Quoted unit",
+      catalogRetailRef: "Catalog retail ref.",
+      wholesaleRequestTitle: "Wholesale request",
+      editOffer: "Edit offer",
+      newOfferTitle: "New curated offer",
+      newOfferLead:
+        "Creates a draft. Public visibility requires an explicit publish action.",
+      newProductTitle: "New product",
+      stepperLabel: "Status progress",
+      stepDone: "Done",
+      stepCurrent: "Current",
+      stepUpcoming: "Upcoming",
+      stepEnded: "Ended",
+    },
+    form: {
+      operations: "Operations",
+      operationsHint:
+        "Transitions are server-side and audited. Retrigger regenerates the wa.me message on this same request — no duplicate request is created.",
+      moveTo: "Move to",
+      note: "Note",
+      noteOptional: "Note (optional)",
+      applyTransition: "Apply transition",
+      apply: "Apply",
+      statusUpdated: "Status updated.",
+      terminalNoTransitions: "Terminal status — no transitions.",
+      retrigger: "Retrigger handoff",
+      handoffRegenerated: "Handoff regenerated on the same request.",
+      openHandoff: "Open WhatsApp handoff",
+      handoffMarkedOpened: "Handoff marked opened.",
+      adminOperations: "Admin operations",
+      terminalStatus: "Terminal status.",
+      blockedUntilQuote: "(blocked until quote — use the quotation form)",
+      provideQuote: "Provide quotation",
+      quoteHint:
+        "Simple quote workflow only — no payment, shipping rates, or ERP.",
+      quoteCurrency: "Quote currency",
+      quotedUnitPrice: "Quoted unit price",
+      quoteMessage: "Quote message",
+      saveQuote: "Save quotation → quote provided",
+      quoteSaved: "Quotation saved.",
+      slug: "Slug",
+      titleAr: "Title (Arabic)",
+      titleEn: "Title (English)",
+      summaryAr: "Summary (Arabic)",
+      summaryEn: "Summary (English)",
+      linkedDeal: "Optional linked deal",
+      linkedProduct: "Optional catalog product",
+      none: "None",
+      sortOrder: "Sort order",
+      saveOffer: "Save offer",
+      createDraft: "Create draft",
+      offerCurrentStatus: "Current status",
+      offerPublishNote: "Publishing is always explicit.",
+      setStatusTo: "Set status: {status}",
+      productNameAr: "Name (Arabic)",
+      productNameEn: "Name (English)",
+      descriptionAr: "Description (Arabic)",
+      descriptionEn: "Description (English)",
+      specsAr: "Specs (Arabic)",
+      specsEn: "Specs (English)",
+      category: "Category (launch set only)",
+      retailPrice: "Retail price",
+      currency: "Currency code",
+      currencyHelp: "Configurable — commercial default is still open.",
+      currencyPlaceholder: "e.g. TEST for fixtures only",
+      statusLabel: "Status",
+      availabilityLabel: "Availability",
+      availabilityHelp: "Retail flag, not inventory.",
+      wholesaleEligible: "Wholesale eligible",
+      wholesaleEligibleHelp: "Flag only — no wholesale UI is attached to it yet.",
+      saveProduct: "Save product",
+      saving: "Saving…",
     },
   },
   trader: {
@@ -1719,6 +2216,7 @@ const en: Dict = {
     contextProduct: "Product",
     contextLines: "Lines",
     contextLatestNegotiation: "Latest negotiation",
+    contextReference: "Reference / ID",
     linkErrorUnsupported: "Unsupported link type.",
     linkErrorNotFound: "Record not found.",
     linkErrorUnauthorized: "Unauthorized.",
@@ -1749,6 +2247,8 @@ const en: Dict = {
     errorForbidden: "This area isn't available for your account",
     errorSession: "Your session has expired. Please sign in again.",
     errorOffline: "You're offline",
+    backOnline: "You're back online",
+    toastDismiss: "Dismiss notification",
     goToPortal: "Go to your portal",
     signOut: "Sign out",
     navOps: "Operations",
@@ -1774,6 +2274,8 @@ const en: Dict = {
     traderTitle: "Trader sign in",
     traderHint: "Accounts are provisioned by RARE OUD admin. No public registration.",
     loginError: "Email or password is incorrect.",
+    showPassword: "Show",
+    hidePassword: "Hide",
   },
   seo: {
     catalogDescription:

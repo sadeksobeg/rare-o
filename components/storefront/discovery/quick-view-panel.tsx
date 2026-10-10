@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 import { localizedName } from "@/lib/utils";
+import { href } from "@/lib/href";
 import { MaterialField } from "@/components/storefront/material-field";
 import { AddToCartButton } from "@/components/storefront/add-to-cart-button";
 import { RoButtonLink } from "@/components/ui/ro-button";
@@ -117,6 +118,7 @@ export function QuickViewPanel({
               name={name}
               price={Number(product.retailPrice)}
               currency={product.currency}
+              imagePath={product.images[0]?.path ?? null}
               label={dict.home.requestPiece}
             />
           ) : (
@@ -124,7 +126,10 @@ export function QuickViewPanel({
               {dict.product.unavailable}
             </span>
           )}
-          <RoButtonLink href={`/product/${product.slug}`} variant="secondary">
+          <RoButtonLink
+            href={href(`/product/${product.slug}`, locale)}
+            variant="secondary"
+          >
             {dict.home.viewDetails}
           </RoButtonLink>
         </div>

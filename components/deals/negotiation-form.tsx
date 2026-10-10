@@ -82,7 +82,8 @@ export function NegotiationForm({
             <span>{labels?.negCurrency ?? "Currency"}</span>
             <input
               name="currency"
-              placeholder="e.g. USD"
+              placeholder="USD"
+              dir="ltr"
               className="w-full border border-ro-line bg-transparent px-3 py-2"
             />
           </label>

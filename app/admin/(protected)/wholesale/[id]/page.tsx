@@ -1,4 +1,14 @@
 import { AdminWholesaleControls } from "@/components/admin/wholesale-controls";
+import {
+  DetailItem,
+  DetailList,
+  DetailSection,
+} from "@/components/admin/detail-list";
+import { StatusChip } from "@/components/ui/status-chip";
+import { StatusStepper } from "@/components/ui/status-stepper";
+import { formatCurrency, formatDate, formatNumber } from "@/lib/i18n/format";
+import { getRequestDictionary } from "@/lib/i18n/server";
+import { getStatusChipProps } from "@/lib/ui/status-labels";
 import { getWholesaleRequestForAdmin } from "@/lib/wholesale/service";
 import { notFound } from "next/navigation";
 
@@ -8,6 +18,12 @@ export default async function AdminWholesaleDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const { locale, dict } = await getRequestDictionary();
+  const a = dict.admin;
+  const u = dict.adminUi;
+  const d = u.detail;
+  const t = dict.trader;
+
   let request;
   try {
     request = await getWholesaleRequestForAdmin(id);
@@ -21,67 +37,107 @@ export default async function AdminWholesaleDetailPage({
     request.lines[0]?.catalogCurrencySnapshot ||
     "TEST";
 
+  const money = (value: unknown, currency: string | null | undefined) =>
+    currency
+      ? formatCurrency(
+          Number(value),
+          currency,
+          locale,
+          dict.product.priceOnRequest
+        )
+      : formatNumber(Number(value), locale, { maximumFractionDigits: 2 });
+  const productName = (l: { productNameAr: string; productNameEn: string }) =>
+    (locale === "ar"
+      ? l.productNameAr || l.productNameEn
+      : l.productNameEn || l.productNameAr) || "—";
+
   return (
     <section className="space-y-8">
-      <div>
-        <p className="text-sm text-ro-muted">{request.reference}</p>
-        <h1 className="text-3xl">Wholesale request</h1>
-        <p className="mt-2 text-sm">
-          {request.requestMode} · {request.status}
+      <div className="space-y-3">
+        <p className="text-sm text-ro-muted">{a.wholesale}</p>
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-[28px]">
+            {d.wholesaleRequestTitle}
+          </h1>
+          <span className="text-sm text-ro-muted" dir="ltr">
+            {request.reference}
+          </span>
+          <StatusChip
+            {...getStatusChipProps(dict, "wholesale", request.status)}
+          />
+        </div>
+        <p className="text-sm">
+          <span className="text-ro-muted">{u.colMode}: </span>
+          {t.requestMode[request.requestMode] ?? request.requestMode}
         </p>
+        <StatusStepper
+          domain="wholesale"
+          current={request.status}
+          dict={dict}
+        />
       </div>
 
-      <dl className="grid gap-3 text-sm md:grid-cols-2">
-        <div>
-          <dt className="text-ro-muted">Trader</dt>
-          <dd>
-            {request.trader.displayName} · {request.trader.email}
-            {request.trader.companyName ? (
-              <div className="text-ro-muted">{request.trader.companyName}</div>
-            ) : null}
-            {request.trader.phone ? (
-              <div className="text-ro-muted">{request.trader.phone}</div>
-            ) : null}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-ro-muted">Trader notes</dt>
-          <dd className="whitespace-pre-wrap">
+      <DetailList>
+        <DetailItem label={u.colTrader}>
+          {request.trader.displayName}
+          <span className="text-ro-muted"> · </span>
+          <span dir="ltr">{request.trader.email}</span>
+          {request.trader.companyName ? (
+            <div className="text-ro-muted">{request.trader.companyName}</div>
+          ) : null}
+          {request.trader.phone ? (
+            <div className="text-ro-muted" dir="ltr">
+              {request.trader.phone}
+            </div>
+          ) : null}
+        </DetailItem>
+        <DetailItem label={d.traderNotes}>
+          <span className="whitespace-pre-wrap">
             {request.traderNotes || "—"}
-          </dd>
-        </div>
-      </dl>
+          </span>
+        </DetailItem>
+      </DetailList>
 
-      <div>
-        <h2 className="mb-3 text-lg">Lines (historical snapshots)</h2>
+      <DetailSection title={d.linesSnapshot}>
         <ul className="divide-y divide-ro-line border border-ro-line text-sm">
           {request.lines.map((l) => (
             <li key={l.id} className="space-y-1 p-4">
-              <div>
-                {l.productNameEn || l.productNameAr} ({l.productSlugSnapshot})
+              <div className="font-medium">
+                {productName(l)}{" "}
+                <span className="text-ro-muted" dir="ltr">
+                  ({l.productSlugSnapshot})
+                </span>
               </div>
-              <div>Qty: {l.quantity}</div>
+              <div>
+                {d.qty}: {l.quantity}
+              </div>
               {l.proposedUnitPrice != null ? (
                 <div>
-                  Proposed: {Number(l.proposedUnitPrice)} {l.currency}
+                  {d.proposedPrice}: {money(l.proposedUnitPrice, l.currency)}
                 </div>
               ) : (
-                <div className="text-ro-muted">No proposed price (quote mode)</div>
+                <div className="text-ro-muted">{d.noProposedPrice}</div>
               )}
               {l.quotedUnitPrice != null ? (
                 <div>
-                  Quoted unit: {Number(l.quotedUnitPrice)}{" "}
-                  {request.quoteCurrency || l.currency}
+                  {d.quotedUnit}:{" "}
+                  {money(
+                    l.quotedUnitPrice,
+                    request.quoteCurrency || l.currency
+                  )}
                 </div>
               ) : null}
               <div className="text-ro-muted">
-                Catalog retail ref.: {Number(l.catalogRetailPriceSnapshot)}{" "}
-                {l.catalogCurrencySnapshot}
+                {d.catalogRetailRef}:{" "}
+                {money(
+                  l.catalogRetailPriceSnapshot,
+                  l.catalogCurrencySnapshot
+                )}
               </div>
             </li>
           ))}
         </ul>
-      </div>
+      </DetailSection>
 
       <AdminWholesaleControls
         requestId={request.id}
@@ -89,32 +145,47 @@ export default async function AdminWholesaleDetailPage({
         requestMode={request.requestMode}
         lines={request.lines.map((l) => ({
           id: l.id,
-          productNameEn: l.productNameEn || l.productNameAr,
+          productName: productName(l),
           quantity: l.quantity,
         }))}
         quoteCurrencyDefault={defaultCurrency}
+        labels={u}
       />
 
-      <div>
-        <h2 className="mb-3 text-lg">Audit events</h2>
-        <ul className="divide-y divide-ro-line border border-ro-line text-sm">
-          {request.events.map((e) => (
-            <li key={e.id} className="space-y-1 p-3">
-              <div className="flex flex-wrap gap-3">
-                <strong>{e.eventType}</strong>
-                <span className="text-ro-muted">{e.actorRole}</span>
-                <span className="text-ro-muted">
-                  {e.fromStatus ?? "—"} → {e.toStatus ?? "—"}
-                </span>
-                <span className="text-ro-muted">
-                  {e.createdAt.toISOString()}
-                </span>
-              </div>
-              {e.note ? <p className="text-ro-muted">{e.note}</p> : null}
-            </li>
-          ))}
-        </ul>
-      </div>
+      <DetailSection title={d.auditEvents}>
+        {request.events.length === 0 ? (
+          <p className="text-sm text-ro-muted">{d.noEvents}</p>
+        ) : (
+          <ul className="divide-y divide-ro-line border border-ro-line text-sm">
+            {request.events.map((e) => (
+              <li key={e.id} className="space-y-1 p-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <strong>{t.wholesaleEvent[e.eventType] ?? e.eventType}</strong>
+                  <span className="text-ro-muted">
+                    {t.actorRole[e.actorRole] ?? e.actorRole}
+                  </span>
+                  <span className="text-ro-muted">
+                    {e.fromStatus
+                      ? (u.status.wholesale[e.fromStatus] ?? e.fromStatus)
+                      : "—"}{" "}
+                    {locale === "ar" ? "←" : "→"}{" "}
+                    {e.toStatus
+                      ? (u.status.wholesale[e.toStatus] ?? e.toStatus)
+                      : "—"}
+                  </span>
+                  <span className="text-ro-muted">
+                    {formatDate(e.createdAt, locale, {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                  </span>
+                </div>
+                {e.note ? <p className="text-ro-muted">{e.note}</p> : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </DetailSection>
     </section>
   );
 }

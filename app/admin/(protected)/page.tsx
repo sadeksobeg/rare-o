@@ -4,7 +4,7 @@ import { StatusChip } from "@/components/ui/status-chip";
 import { getAdminHomeData } from "@/lib/admin/dashboard";
 import { formatCurrency, formatRelative } from "@/lib/i18n/format";
 import { getRequestDictionary } from "@/lib/i18n/server";
-import { getStatusMeta } from "@/lib/ui/status";
+import { getStatusChipProps } from "@/lib/ui/status-labels";
 import { ButtonLink } from "@/components/ui/button";
 
 export default async function AdminDashboardPage() {
@@ -88,7 +88,6 @@ export default async function AdminDashboardPage() {
               <li className="p-4 text-sm text-ro-muted">{a.noRequests}</li>
             ) : (
               data.recentRequests.map((r) => {
-                const meta = getStatusMeta("retail", r.status);
                 return (
                   <li key={r.id}>
                     <Link
@@ -98,8 +97,7 @@ export default async function AdminDashboardPage() {
                       <span className="font-medium">{r.reference}</span>
                       <span className="text-ro-muted">{r.customerName}</span>
                       <StatusChip
-                        tone={meta.tone}
-                        label={r.status}
+                        {...getStatusChipProps(dict, "retail", r.status)}
                         size="sm"
                       />
                       <span className="tabular-nums text-ro-muted">

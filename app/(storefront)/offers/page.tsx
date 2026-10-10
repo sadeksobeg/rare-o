@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { OfferCard } from "@/components/storefront/offer-card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { listPublishedPublicOffers } from "@/lib/offers/service";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { storefrontMetadata } from "@/lib/seo";
+import { localizedName } from "@/lib/utils";
 import { href } from "@/lib/href";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -21,42 +23,30 @@ export default async function PublicOffersPage() {
 
   return (
     <section className="space-y-10">
-      <div className="space-y-3">
-        <p className="text-sm tracking-[0.2em] text-ro-muted">{dict.brand}</p>
-        <h1 className="text-4xl tracking-wide">{dict.offers.title}</h1>
+      <header className="space-y-3">
+        <p className="text-sm text-ro-muted ltr:tracking-[0.2em]">{dict.brand}</p>
+        <h1 className="ro-type-h1">{dict.offers.title}</h1>
         <p className="max-w-2xl text-ro-muted">{dict.offers.sub}</p>
-      </div>
+      </header>
       {offers.length === 0 ? (
-        <p className="text-ro-muted">{dict.offers.empty}</p>
+        <EmptyState
+          title={dict.offers.empty}
+          actionHref={href("/catalog", locale)}
+          actionLabel={dict.nav.catalog}
+        />
       ) : (
-        <ul className="divide-y divide-ro-line border-y border-ro-line">
-          {offers.map((o) => {
-            const title =
-              locale === "ar"
-                ? o.titleAr || o.titleEn
-                : o.titleEn || o.titleAr;
-            const summary =
-              locale === "ar"
-                ? o.summaryAr || o.summaryEn
-                : o.summaryEn || o.summaryAr;
-            return (
-              <li key={o.id} className="py-8">
-                <Link
-                  href={href(`/offers/${o.slug}`, locale)}
-                  className="group block space-y-2"
-                >
-                  <h2 className="text-2xl tracking-wide group-hover:text-ro-purple">
-                    {title}
-                  </h2>
-                  {summary ? (
-                    <p className="max-w-2xl text-sm text-ro-muted line-clamp-3">
-                      {summary}
-                    </p>
-                  ) : null}
-                </Link>
-              </li>
-            );
-          })}
+        <ul className="grid gap-5 md:grid-cols-2 md:gap-6">
+          {offers.map((o) => (
+            <li key={o.id}>
+              <OfferCard
+                href={href(`/offers/${o.slug}`, locale)}
+                title={localizedName(locale, o.titleAr, o.titleEn, o.slug)}
+                summary={localizedName(locale, o.summaryAr, o.summaryEn)}
+                eyebrow={dict.offers.eyebrow}
+                ctaLabel={dict.offers.viewOffer}
+              />
+            </li>
+          ))}
         </ul>
       )}
     </section>

@@ -10,6 +10,8 @@ import { AddToCartButton } from "@/components/storefront/add-to-cart-button";
 import { RoButtonLink } from "@/components/ui/ro-button";
 import { EDITORIAL } from "@/lib/brand/editorial";
 import { localizedName } from "@/lib/utils";
+import { ENABLE_COMPARE } from "@/lib/features";
+import { href } from "@/lib/href";
 import { useDiscovery } from "./discovery-context";
 
 export function FeaturedInstrument({
@@ -64,7 +66,10 @@ export function FeaturedInstrument({
             {category}
           </p>
           <h2 className="font-display text-3xl tracking-wide md:text-4xl lg:text-[2.75rem]">
-            <Link href={`/product/${product.slug}`} className="hover:text-ro-purple">
+            <Link
+              href={href(`/product/${product.slug}`, locale)}
+              className="hover:text-ro-purple"
+            >
               {name}
             </Link>
           </h2>
@@ -89,6 +94,7 @@ export function FeaturedInstrument({
                 name={name}
                 price={Number(product.retailPrice)}
                 currency={product.currency}
+                imagePath={product.images[0]?.path ?? null}
                 label={dict.home.requestPiece}
               />
             ) : null}
@@ -99,17 +105,23 @@ export function FeaturedInstrument({
             >
               {dict.home.quickView}
             </button>
-            <button
-              type="button"
-              onClick={() => toggleCompare(product.id)}
-              className={`px-3 py-3 text-[0.65rem] tracking-[0.16em] uppercase ${
-                comparing ? "text-ro-purple" : "text-ro-muted hover:text-ro-black"
-              }`}
-            >
-              {comparing ? dict.home.compareRemove : dict.home.compareAdd}
-            </button>
+            {ENABLE_COMPARE ? (
+              <button
+                type="button"
+                onClick={() => toggleCompare(product.id)}
+                className={`px-3 py-3 text-[0.65rem] tracking-[0.16em] uppercase ${
+                  comparing ? "text-ro-purple" : "text-ro-muted hover:text-ro-black"
+                }`}
+              >
+                {comparing ? dict.home.compareRemove : dict.home.compareAdd}
+              </button>
+            ) : null}
           </div>
-          <RoButtonLink href={`/product/${product.slug}`} variant="ghost" className="self-start px-0">
+          <RoButtonLink
+            href={href(`/product/${product.slug}`, locale)}
+            variant="ghost"
+            className="self-start px-0"
+          >
             {dict.home.viewDetails}
           </RoButtonLink>
         </div>

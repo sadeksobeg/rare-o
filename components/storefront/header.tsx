@@ -10,6 +10,9 @@ import { cn } from "@/lib/utils";
 import { href, stripLocalePrefix } from "@/lib/href";
 import Link from "next/link";
 
+/** Scroll distance (px) after which the over-hero header turns solid. */
+const SCROLL_THRESHOLD = 80;
+
 export function StorefrontHeader({
   dict,
   locale,
@@ -30,7 +33,7 @@ export function StorefrontHeader({
   const localeSwitchHref = href(barePath, nextLocale);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onScroll = () => setScrolled(window.scrollY > SCROLL_THRESHOLD);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -53,11 +56,31 @@ export function StorefrontHeader({
     prevCount.current = cartCount;
   }, [cartCount]);
 
+  const isAr = locale === "ar";
+  /** Arabic must never be letter-spaced or uppercased (breaks joining). */
+  const navType = isAr
+    ? "text-[0.9rem] tracking-normal normal-case"
+    : "text-[0.68rem] tracking-[0.22em] uppercase";
+  const chipType = isAr
+    ? "text-[0.8rem] tracking-normal normal-case"
+    : "text-[0.65rem] tracking-[0.2em] uppercase";
+
   const nav = [
-    { href: href("/catalog", locale), label: dict.nav.catalog },
-    { href: href("/offers", locale), label: dict.nav.offers },
-    { href: href("/contact", locale), label: dict.nav.contact },
+    { key: "catalog", href: href("/catalog", locale), label: dict.nav.catalog },
+    { key: "offers", href: href("/offers", locale), label: dict.nav.offers },
+    {
+      key: "story",
+      href: isHome ? "#story" : `${href("/", locale)}#story`,
+      label: dict.nav.story,
+    },
+    {
+      key: "traders",
+      href: href("/trader/login", locale),
+      label: dict.nav.traders,
+    },
+    { key: "contact", href: href("/contact", locale), label: dict.nav.contact },
   ];
+  const cartAria = dict.nav.cartAria.replace("{n}", String(cartCount));
 
   const overHero = isHome && !scrolled;
 
@@ -105,14 +128,15 @@ export function StorefrontHeader({
 
         <nav
           className={cn(
-            "hidden items-center gap-12 text-[0.68rem] tracking-[0.22em] uppercase lg:flex",
+            "hidden items-center gap-10 lg:flex xl:gap-12",
+            navType,
             overHero ? "text-ro-ivory-muted" : "text-ro-muted"
           )}
-          aria-label="Primary"
+          aria-label={dict.nav.primaryAria}
         >
           {nav.map((item) => (
             <Link
-              key={item.href}
+              key={item.key}
               href={item.href}
               className={cn(
                 "relative py-1 transition-colors duration-300 after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-center after:scale-x-0 after:transition-transform after:duration-300 hover:after:scale-x-100",
@@ -131,7 +155,8 @@ export function StorefrontHeader({
             type="button"
             onClick={openSearch}
             className={cn(
-              "hidden border px-2.5 py-1.5 text-[0.65rem] tracking-[0.2em] uppercase transition-all duration-300 sm:inline-flex",
+              "hidden border px-2.5 py-1.5 transition-all duration-300 sm:inline-flex",
+              chipType,
               overHero
                 ? "border-ro-line-on-dark text-ro-cream hover:border-ro-cream"
                 : "border-ro-line text-ro-muted hover:border-ro-black hover:text-ro-black"
@@ -149,16 +174,19 @@ export function StorefrontHeader({
                 ? "border-ro-line-on-dark text-ro-cream hover:border-ro-cream hover:bg-ro-cream hover:text-ro-black"
                 : "border-ro-line text-ro-black hover:border-ro-black hover:bg-ro-black hover:text-ro-cream"
             )}
-            aria-label={dict.common.language}
+            aria-label={dict.nav.languageAria}
             hrefLang={nextLocale}
+            lang={nextLocale}
           >
             {dict.common.language}
           </Link>
 
           <Link
             href={href("/cart", locale)}
+            aria-label={cartAria}
             className={cn(
-              "group relative inline-flex items-center gap-2 border border-transparent px-2.5 py-1.5 text-[0.68rem] tracking-[0.18em] uppercase transition-all duration-300",
+              "group relative inline-flex items-center gap-2 border border-transparent px-2.5 py-1.5 transition-all duration-300",
+              chipType,
               overHero
                 ? "text-ro-ivory-muted hover:border-ro-line-on-dark hover:text-ro-cream"
                 : "text-ro-muted hover:border-ro-line hover:text-ro-black"
@@ -168,6 +196,7 @@ export function StorefrontHeader({
               {dict.nav.cart}
             </span>
             <span
+              aria-hidden
               className={cn(
                 "flex h-5 min-w-5 items-center justify-center px-1 text-[0.6rem] transition-transform duration-300",
                 cartPulse && "scale-125",
@@ -231,7 +260,7 @@ export function StorefrontHeader({
       >
         <nav
           className="mx-auto flex h-full max-w-[1440px] flex-col justify-between px-5 py-10 md:px-8"
-          aria-label="Mobile"
+          aria-label={dict.nav.mobileAria}
         >
           <div className="flex flex-col">
             <button
@@ -253,7 +282,7 @@ export function StorefrontHeader({
             </Link>
             {nav.map((item) => (
               <Link
-                key={item.href}
+                key={item.key}
                 href={item.href}
                 className="font-display border-b border-ro-line py-6 text-3xl tracking-wide"
                 onClick={() => setOpen(false)}
@@ -272,7 +301,14 @@ export function StorefrontHeader({
           </div>
           <div className="flex items-end justify-between gap-4 pb-8">
             <BrandMark variant="master" tone="on-light" size="lg" />
-            <p className="max-w-[11rem] text-end text-[0.65rem] leading-relaxed tracking-[0.14em] text-ro-muted uppercase">
+            <p
+              className={cn(
+                "max-w-[11rem] text-end leading-relaxed text-ro-muted",
+                isAr
+                  ? "text-xs tracking-normal normal-case"
+                  : "text-[0.65rem] tracking-[0.14em] uppercase"
+              )}
+            >
               {dict.home.footerTagline}
             </p>
           </div>

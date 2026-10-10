@@ -1,4 +1,5 @@
 import { CartView } from "@/components/storefront/cart-view";
+import { HandoffExplainer } from "@/components/storefront/handoff-explainer";
 import type { Metadata } from "next";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { storefrontMetadata } from "@/lib/seo";
@@ -19,11 +20,28 @@ export default async function CartPage() {
   return (
     <CartView
       locale={locale}
-      title={dict.cart.title}
-      empty={dict.cart.empty}
-      continueLabel={dict.cart.continue}
-      removeLabel={dict.cart.remove}
-      catalogLabel={dict.nav.catalog}
+      handoff={<HandoffExplainer dict={dict} compact />}
+      labels={{
+        title: dict.cart.title,
+        emptyTitle: dict.cart.emptyTitle,
+        emptyBody: dict.cart.emptyBody,
+        catalog: dict.nav.catalog,
+        continue: dict.cart.continue,
+        remove: dict.cart.remove,
+        listLabel: dict.cart.listLabel,
+        itemsCount: dict.cart.itemsCount,
+        qtyLabel: dict.cart.qtyLabel,
+        removeAria: dict.cart.removeAria,
+        increase: dict.cart.increase,
+        decrease: dict.cart.decrease,
+        unitPrice: dict.cart.unitPrice,
+        lineTotal: dict.cart.lineTotal,
+        summaryTitle: dict.cart.summaryTitle,
+        summaryTotal: dict.cart.summaryTotal,
+        summaryNote: dict.cart.summaryNote,
+        priceOnRequest: dict.product.priceOnRequest,
+        photoCaption: dict.catalog.photoCaption,
+      }}
     />
   );
 }

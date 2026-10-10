@@ -1,7 +1,10 @@
+import { PageHeader } from "@/components/admin/page-header";
 import { PublicOfferForm } from "@/components/admin/public-offer-form";
 import { prisma } from "@/lib/db/prisma";
+import { getRequestDictionary } from "@/lib/i18n/server";
 
 export default async function AdminNewOfferPage() {
+  const { locale, dict } = await getRequestDictionary();
   const [deals, products] = await Promise.all([
     prisma.dealProposal.findMany({
       orderBy: { updatedAt: "desc" },
@@ -11,17 +14,22 @@ export default async function AdminNewOfferPage() {
     prisma.product.findMany({
       where: { status: "published" },
       orderBy: { nameEn: "asc" },
-      select: { id: true, slug: true, nameEn: true },
+      select: { id: true, slug: true, nameEn: true, nameAr: true },
     }),
   ]);
 
   return (
     <section className="space-y-6">
-      <h1 className="text-3xl">New curated offer</h1>
-      <p className="text-sm text-ro-muted">
-        Creates a draft. Public visibility requires an explicit publish action.
-      </p>
-      <PublicOfferForm deals={deals} products={products} />
+      <PageHeader
+        title={dict.adminUi.detail.newOfferTitle}
+        description={dict.adminUi.detail.newOfferLead}
+      />
+      <PublicOfferForm
+        deals={deals}
+        products={products}
+        labels={dict.adminUi}
+        locale={locale}
+      />
     </section>
   );
 }

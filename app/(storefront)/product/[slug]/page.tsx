@@ -10,7 +10,8 @@ import { parseSpecs } from "@/lib/catalog/specs";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { AddToCartButton } from "@/components/storefront/add-to-cart-button";
 import { HandoffExplainer } from "@/components/storefront/handoff-explainer";
-import { ProductMedia } from "@/components/storefront/product-media";
+import { ProductGallery } from "@/components/storefront/product-gallery";
+import { StickyCtaBar } from "@/components/storefront/sticky-cta-bar";
 import { AvailabilityChip } from "@/components/storefront/catalog/availability-chip";
 import { PriceBlock } from "@/components/storefront/catalog/price-block";
 import { ProductGrid } from "@/components/storefront/catalog/product-grid";
@@ -131,7 +132,9 @@ export default async function ProductPage({
   );
 
   return (
-    <div className="space-y-12 md:space-y-16">
+    <div
+      className={`space-y-12 md:space-y-16${available ? " pb-20 md:pb-0" : ""}`}
+    >
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdString(jsonLd) }}
@@ -158,11 +161,20 @@ export default async function ProductPage({
       </nav>
 
       <section className="grid gap-8 lg:grid-cols-12 lg:gap-12">
-        <ProductMedia
+        <ProductGallery
           images={images}
           plateCaption={dict.catalog.photoCaption}
           priority
-          className="lg:col-span-7"
+          className="min-w-0 lg:col-span-7"
+          labels={{
+            gallery: dict.product.galleryLabel,
+            showImage: dict.product.galleryShowImage,
+            enlarge: dict.product.galleryEnlarge,
+            prev: dict.product.galleryPrev,
+            next: dict.product.galleryNext,
+            close: dict.common.close,
+            counter: dict.product.galleryCounter,
+          }}
         />
         <div className="space-y-5 lg:col-span-5 lg:sticky lg:top-24 lg:self-start">
           {categoryName ? (
@@ -206,16 +218,19 @@ export default async function ProductPage({
             </dl>
           ) : null}
           {available ? (
-            <AddToCartButton
-              variant="pdp"
-              productId={product.id}
-              slug={product.slug}
-              name={displayName}
-              price={priceNumber}
-              currency={product.currency}
-              label={dict.product.addToCart}
-              addedLabel={dict.product.added}
-            />
+            <div id="pdp-cta">
+              <AddToCartButton
+                variant="pdp"
+                productId={product.id}
+                slug={product.slug}
+                name={displayName}
+                price={priceNumber}
+                currency={product.currency}
+                imagePath={images[0]?.path ?? null}
+                label={dict.product.addToCart}
+                addedLabel={dict.product.added}
+              />
+            </div>
           ) : (
             <div className="space-y-3">
               <Button size="lg" className="w-full" disabled>
@@ -256,6 +271,32 @@ export default async function ProductPage({
       ) : null}
 
       <HandoffExplainer dict={dict} compact />
+
+      {available ? (
+        <StickyCtaBar watchId="pdp-cta">
+          <PriceBlock
+            size="pdp"
+            className="text-xl md:text-xl"
+            price={priceNumber}
+            currency={product.currency}
+            locale={locale}
+            onRequestLabel={dict.product.priceOnRequest}
+          />
+          <div className="min-w-0 flex-1 max-w-[14rem]">
+            <AddToCartButton
+              variant="pdp"
+              productId={product.id}
+              slug={product.slug}
+              name={displayName}
+              price={priceNumber}
+              currency={product.currency}
+              imagePath={images[0]?.path ?? null}
+              label={dict.product.addToCart}
+              addedLabel={dict.product.added}
+            />
+          </div>
+        </StickyCtaBar>
+      ) : null}
     </div>
   );
 }

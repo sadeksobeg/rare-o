@@ -6,6 +6,8 @@ import type { Locale } from "@/lib/i18n/config";
 import type { HomepageProduct } from "@/lib/catalog/homepage";
 import { MaterialField } from "@/components/storefront/material-field";
 import { cn, localizedName } from "@/lib/utils";
+import { ENABLE_COMPARE } from "@/lib/features";
+import { href } from "@/lib/href";
 import { useDiscovery } from "./discovery-context";
 
 export function MosaicTile({
@@ -58,7 +60,7 @@ export function MosaicTile({
             {category}
           </p>
           <h3 className="font-display text-xl text-ro-cream md:text-2xl">
-            <Link href={`/product/${product.slug}`}>{name}</Link>
+            <Link href={href(`/product/${product.slug}`, locale)}>{name}</Link>
           </h3>
           <p className="text-sm text-ro-ivory-muted">
             {price} {product.currency}
@@ -76,16 +78,18 @@ export function MosaicTile({
           >
             {dict.home.quickView}
           </button>
-          <button
-            type="button"
-            onClick={() => toggleCompare(product.id)}
-            className={cn(
-              "border border-ro-line-on-dark bg-ro-black/60 px-2.5 py-1.5 text-[0.6rem] tracking-[0.16em] uppercase backdrop-blur-sm",
-              comparing ? "text-ro-cream" : "text-ro-ivory-muted"
-            )}
-          >
-            {dict.home.compare}
-          </button>
+          {ENABLE_COMPARE ? (
+            <button
+              type="button"
+              onClick={() => toggleCompare(product.id)}
+              className={cn(
+                "border border-ro-line-on-dark bg-ro-black/60 px-2.5 py-1.5 text-[0.6rem] tracking-[0.16em] uppercase backdrop-blur-sm",
+                comparing ? "text-ro-cream" : "text-ro-ivory-muted"
+              )}
+            >
+              {dict.home.compare}
+            </button>
+          ) : null}
         </div>
       </div>
     </article>

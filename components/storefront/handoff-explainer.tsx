@@ -17,20 +17,43 @@ export function HandoffExplainer({
     dict.home.handoffStep3,
   ];
 
-  return (
-    <section
-      className={cn(
-        "mx-auto max-w-[880px] px-5",
-        compact ? "py-8" : "py-16 md:py-24",
-        className
-      )}
-    >
-      <h2
+  if (compact) {
+    return (
+      <section
+        aria-label={dict.home.handoffTitle}
         className={cn(
-          "text-center font-display tracking-wide",
-          compact ? "text-2xl" : "ro-type-h2"
+          "rounded-[var(--ro-r-sm)] border border-ro-border bg-ro-surface/60 p-4 md:p-5",
+          className
         )}
       >
+        <h2 className="text-sm font-semibold text-ro-ink">
+          {dict.home.handoffTitle}
+        </h2>
+        <ol className="mt-3 space-y-2.5">
+          {steps.map((step, i) => (
+            <li key={step} className="flex items-start gap-3">
+              <span
+                aria-hidden
+                className="flex size-6 shrink-0 items-center justify-center rounded-full border border-ro-border text-xs font-semibold text-ro-plum"
+              >
+                {i + 1}
+              </span>
+              <span className="pt-0.5 text-sm leading-snug text-ro-text-2">
+                {step}
+              </span>
+            </li>
+          ))}
+        </ol>
+        <p className="mt-3 text-xs leading-relaxed text-ro-muted">
+          {dict.request.handoffHint}
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <section className={cn("mx-auto max-w-[880px] px-5 py-16 md:py-24", className)}>
+      <h2 className="ro-type-h2 text-center font-display tracking-wide">
         {dict.home.handoffTitle}
       </h2>
       <ol className="mt-10 grid gap-8 md:grid-cols-3 md:gap-4">

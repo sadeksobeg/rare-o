@@ -10,7 +10,7 @@ export default async function EditProductPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { dict } = await getRequestDictionary();
+  const { locale, dict } = await getRequestDictionary();
   const [product, categories] = await Promise.all([
     getProductById(id),
     listLaunchCategories(),
@@ -37,6 +37,8 @@ export default async function EditProductPage({
       />
 
       <ProductForm
+        labels={dict.adminUi}
+        locale={locale}
         categories={categories}
         product={{
           id: product.id,

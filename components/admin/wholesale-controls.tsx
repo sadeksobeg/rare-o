@@ -4,6 +4,14 @@ import {
   adminProvideWholesaleQuoteAction,
   adminTransitionWholesaleAction,
 } from "@/app/wholesale-actions";
+import { Button } from "@/components/ui/button";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
+import {
+  controlClass,
+  controlLabelClass,
+  controlLabelTextClass,
+  formErrorClass,
+} from "@/lib/ui/form-classes";
 import { WHOLESALE_TRANSITIONS, type WholesaleStatus } from "@/lib/wholesale/constants";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
@@ -14,13 +22,17 @@ export function AdminWholesaleControls({
   requestMode,
   lines,
   quoteCurrencyDefault,
+  labels,
 }: {
   requestId: string;
   status: string;
   requestMode: string;
-  lines: Array<{ id: string; productNameEn: string; quantity: number }>;
+  /** `productName` is already resolved for the viewer's locale. */
+  lines: Array<{ id: string; productName: string; quantity: number }>;
   quoteCurrencyDefault: string;
+  labels: Dictionary["adminUi"];
 }) {
+  const f = labels.form;
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
@@ -46,7 +58,7 @@ export function AdminWholesaleControls({
 
   return (
     <div className="space-y-6 border border-ro-line p-4">
-      <h2 className="text-lg">Admin operations</h2>
+      <h2 className="text-lg font-semibold">{f.adminOperations}</h2>
 
       {nextStatuses.length > 0 ? (
         <form
@@ -58,49 +70,38 @@ export function AdminWholesaleControls({
               const res = await adminTransitionWholesaleAction(fd);
               if (!res.ok) setError(res.error);
               else {
-                setMessage("Status updated.");
+                setMessage(f.statusUpdated);
                 router.refresh();
               }
             });
           }}
         >
           <input type="hidden" name="requestId" value={requestId} />
-          <label className="space-y-1 text-sm">
-            <span className="block text-ro-muted">Move to</span>
-            <select
-              name="toStatus"
-              required
-              className="border border-ro-line bg-transparent px-3 py-2"
-            >
+          <label className={controlLabelClass}>
+            <span className={controlLabelTextClass}>{f.moveTo}</span>
+            <select name="toStatus" required className={controlClass}>
               {nextStatuses.map((s) => (
                 <option key={s} value={s}>
-                  {s}
+                  {labels.status.wholesale[s] ?? s}
                   {s === "confirmed" &&
                   status === "under_review" &&
                   requestMode === "request_quote"
-                    ? " (blocked until quote — use quotation form)"
+                    ? ` ${f.blockedUntilQuote}`
                     : ""}
                 </option>
               ))}
             </select>
           </label>
-          <label className="space-y-1 text-sm">
-            <span className="block text-ro-muted">Note</span>
-            <input
-              name="note"
-              className="border border-ro-line bg-transparent px-3 py-2"
-            />
+          <label className={controlLabelClass}>
+            <span className={controlLabelTextClass}>{f.note}</span>
+            <input name="note" className={controlClass} />
           </label>
-          <button
-            type="submit"
-            disabled={pending}
-            className="bg-ro-purple px-4 py-2 text-sm text-ro-ivory disabled:opacity-60"
-          >
-            Apply
-          </button>
+          <Button type="submit" size="sm" loading={pending}>
+            {f.apply}
+          </Button>
         </form>
       ) : (
-        <p className="text-sm text-ro-muted">Terminal status.</p>
+        <p className="text-sm text-ro-muted">{f.terminalStatus}</p>
       )}
 
       {canQuote ? (
@@ -113,68 +114,77 @@ export function AdminWholesaleControls({
               const res = await adminProvideWholesaleQuoteAction(null, fd);
               if (!res.ok) setError(res.error);
               else {
-                setMessage("Quotation saved.");
+                setMessage(f.quoteSaved);
                 router.refresh();
               }
             });
           }}
         >
-          <h3 className="text-base">Provide quotation</h3>
-          <p className="text-sm text-ro-muted">
-            Simple quote workflow only — no payment, shipping rates, or ERP.
-          </p>
+          <h3 className="text-base font-semibold">{f.provideQuote}</h3>
+          <p className="text-sm text-ro-muted">{f.quoteHint}</p>
           <input type="hidden" name="requestId" value={requestId} />
           <input type="hidden" name="lineQuotesJson" value={lineQuotesJson} />
-          <label className="block max-w-xs space-y-1 text-sm">
-            <span>Quote currency</span>
+          <label className={`${controlLabelClass} max-w-xs`}>
+            <span className={controlLabelTextClass}>{f.quoteCurrency}</span>
             <input
               name="quoteCurrency"
               required
+              dir="ltr"
               defaultValue={quoteCurrencyDefault}
-              className="w-full border border-ro-line bg-transparent px-3 py-2"
+              className={controlClass}
             />
           </label>
           <div className="space-y-2">
             {lines.map((l) => (
-              <label key={l.id} className="flex flex-wrap items-center gap-3 text-sm">
+              <label
+                key={l.id}
+                className="flex flex-wrap items-center gap-3 text-sm"
+              >
                 <span className="min-w-[12rem]">
-                  {l.productNameEn} × {l.quantity}
+                  {l.productName} × {l.quantity}
                 </span>
                 <input
                   type="number"
                   min={0}
                   step="0.01"
                   required
-                  placeholder="Quoted unit price"
+                  dir="ltr"
+                  aria-label={`${f.quotedUnitPrice} — ${l.productName}`}
+                  placeholder={f.quotedUnitPrice}
                   value={prices[l.id] ?? ""}
                   onChange={(e) =>
                     setPrices((prev) => ({ ...prev, [l.id]: e.target.value }))
                   }
-                  className="w-40 border border-ro-line bg-transparent px-2 py-1"
+                  className={`${controlClass} w-44`}
                 />
               </label>
             ))}
           </div>
-          <label className="block space-y-1 text-sm">
-            <span>Quote message</span>
-            <textarea
-              name="quoteMessage"
-              rows={3}
-              className="w-full border border-ro-line bg-transparent px-3 py-2"
-            />
+          <label className={controlLabelClass}>
+            <span className={controlLabelTextClass}>{f.quoteMessage}</span>
+            <textarea name="quoteMessage" rows={3} className={controlClass} />
           </label>
-          <button
+          <Button
             type="submit"
-            disabled={pending}
-            className="border border-ro-line px-4 py-2 text-sm disabled:opacity-60"
+            variant="secondary"
+            size="sm"
+            loading={pending}
           >
-            Save quotation → quote_provided
-          </button>
+            {f.saveQuote}
+          </Button>
         </form>
       ) : null}
 
-      {message ? <p className="text-sm text-ro-muted">{message}</p> : null}
-      {error ? <p className="text-sm text-red-800">{error}</p> : null}
+      {message ? (
+        <p role="status" className="text-sm text-ro-muted">
+          {message}
+        </p>
+      ) : null}
+      {error ? (
+        <p role="alert" className={formErrorClass}>
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

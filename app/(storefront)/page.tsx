@@ -12,7 +12,6 @@ import { TrustStrip } from "@/components/storefront/home/trust-strip";
 import { HomeOudEditorial } from "@/components/storefront/home/oud-editorial";
 import { HandoffExplainer } from "@/components/storefront/handoff-explainer";
 import { TraderBand } from "@/components/storefront/trader-band";
-import { StorefrontFooter } from "@/components/storefront/footer";
 import { ProductGrid } from "@/components/storefront/catalog/product-grid";
 import { getHomepageDiscoveryData } from "@/lib/catalog/homepage";
 import { getRequestDictionary } from "@/lib/i18n/server";
@@ -34,9 +33,13 @@ export default async function HomePage() {
   const { locale, dict } = await getRequestDictionary();
   const data = await getHomepageDiscoveryData();
 
-  const latest = data.latest
-    .filter((p) => p.id !== data.featuredInstrument?.id)
-    .slice(0, 8);
+  // Prefer non-featured latest; if that empties the rail (demo seed), fall back.
+  const latestExclusive = data.latest.filter(
+    (p) => p.id !== data.featuredInstrument?.id
+  );
+  const latest = (
+    latestExclusive.length > 0 ? latestExclusive : data.latest
+  ).slice(0, 8);
 
   return (
     <HomepageShell dict={dict} locale={locale} data={data}>
@@ -112,8 +115,6 @@ export default async function HomePage() {
 
         {/* H9 */}
         <TraderBand dict={dict} />
-
-        <StorefrontFooter dict={dict} locale={locale} />
       </div>
     </HomepageShell>
   );

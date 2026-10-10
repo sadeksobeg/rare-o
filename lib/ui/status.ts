@@ -140,3 +140,35 @@ export function getStatusMeta(
     }
   );
 }
+
+/**
+ * Happy-path status sequences used by StatusStepper.
+ * Off-path terminal statuses (cancelled / closed) are not part of the sequence
+ * and are rendered as an "ended" step by the stepper.
+ */
+export const STATUS_SEQUENCE: Record<
+  "retail" | "deal" | "wholesale",
+  readonly string[]
+> = {
+  retail: [
+    "draft",
+    "ready_for_handoff",
+    "handoff_opened",
+    "in_follow_up",
+    "completed",
+  ],
+  deal: ["proposed", "negotiating", "accepted"],
+  wholesale: [
+    "submitted",
+    "under_review",
+    "quote_provided",
+    "confirmed",
+    "completed",
+  ],
+};
+
+export function getStatusSequence(
+  domain: "retail" | "deal" | "wholesale"
+): readonly string[] {
+  return STATUS_SEQUENCE[domain];
+}

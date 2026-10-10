@@ -5,15 +5,37 @@ import {
   adminUpsertPublicOfferAction,
 } from "@/app/deal-actions";
 import type { ActionResult } from "@/app/actions";
+import { Button } from "@/components/ui/button";
+import { StatusChip } from "@/components/ui/status-chip";
+import { TextField } from "@/components/ui/text-field";
+import type { Locale } from "@/lib/i18n/config";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
+import {
+  controlClass,
+  controlLabelClass,
+  controlLabelTextClass,
+  formErrorClass,
+} from "@/lib/ui/form-classes";
+import { fmt } from "@/lib/ui/trader-labels";
 import { useRouter } from "next/navigation";
 import { useActionState, useTransition } from "react";
 
 const initial: ActionResult | null = null;
 
+function offerTone(status: string) {
+  return status === "published"
+    ? "success"
+    : status === "unpublished"
+      ? "closed"
+      : "neutral";
+}
+
 export function PublicOfferForm({
   offer,
   deals,
   products,
+  labels,
+  locale,
 }: {
   offer?: {
     id: string;
@@ -28,8 +50,11 @@ export function PublicOfferForm({
     status: string;
   };
   deals: Array<{ id: string; reference: string; title: string }>;
-  products: Array<{ id: string; slug: string; nameEn: string }>;
+  products: Array<{ id: string; slug: string; nameEn: string; nameAr: string }>;
+  labels: Dictionary["adminUi"];
+  locale: Locale;
 }) {
+  const f = labels.form;
   const [state, action, pending] = useActionState(
     adminUpsertPublicOfferAction,
     initial
@@ -37,63 +62,65 @@ export function PublicOfferForm({
   const router = useRouter();
   const [statusPending, startStatus] = useTransition();
 
+  const productName = (p: { nameEn: string; nameAr: string }) =>
+    (locale === "ar" ? p.nameAr || p.nameEn : p.nameEn || p.nameAr) || "—";
+
   return (
     <div className="space-y-6">
-      <form action={action} className="mx-auto max-w-2xl space-y-4">
+      <form action={action} className="max-w-2xl space-y-4">
         {offer ? <input type="hidden" name="id" value={offer.id} /> : null}
-        <label className="block space-y-1 text-sm">
-          <span>Slug</span>
-          <input
-            name="slug"
-            required
-            defaultValue={offer?.slug}
-            className="w-full border border-ro-line bg-transparent px-3 py-2"
-          />
-        </label>
+        <TextField
+          name="slug"
+          label={f.slug}
+          required
+          dir="ltr"
+          defaultValue={offer?.slug}
+          dense
+        />
         <div className="grid gap-3 sm:grid-cols-2">
-          <label className="block space-y-1 text-sm">
-            <span>Title (EN)</span>
-            <input
-              name="titleEn"
-              defaultValue={offer?.titleEn}
-              className="w-full border border-ro-line bg-transparent px-3 py-2"
-            />
-          </label>
-          <label className="block space-y-1 text-sm">
-            <span>Title (AR)</span>
-            <input
-              name="titleAr"
-              defaultValue={offer?.titleAr}
-              className="w-full border border-ro-line bg-transparent px-3 py-2"
-            />
-          </label>
-        </div>
-        <label className="block space-y-1 text-sm">
-          <span>Summary (EN)</span>
-          <textarea
-            name="summaryEn"
-            rows={4}
-            defaultValue={offer?.summaryEn}
-            className="w-full border border-ro-line bg-transparent px-3 py-2"
+          <TextField
+            name="titleAr"
+            label={f.titleAr}
+            dir="rtl"
+            defaultValue={offer?.titleAr}
+            dense
           />
-        </label>
-        <label className="block space-y-1 text-sm">
-          <span>Summary (AR)</span>
+          <TextField
+            name="titleEn"
+            label={f.titleEn}
+            dir="ltr"
+            defaultValue={offer?.titleEn}
+            dense
+          />
+        </div>
+        <label className={controlLabelClass}>
+          <span className={controlLabelTextClass}>{f.summaryAr}</span>
           <textarea
             name="summaryAr"
             rows={4}
+            dir="rtl"
             defaultValue={offer?.summaryAr}
-            className="w-full border border-ro-line bg-transparent px-3 py-2"
+            className={controlClass}
           />
         </label>
-        <label className="block space-y-1 text-sm">
-          <span>Optional linked deal</span>
+        <label className={controlLabelClass}>
+          <span className={controlLabelTextClass}>{f.summaryEn}</span>
+          <textarea
+            name="summaryEn"
+            rows={4}
+            dir="ltr"
+            defaultValue={offer?.summaryEn}
+            className={controlClass}
+          />
+        </label>
+        <label className={controlLabelClass}>
+          <span className={controlLabelTextClass}>{f.linkedDeal}</span>
           <select
             name="dealProposalId"
             defaultValue={offer?.dealProposalId ?? ""}
-            className="w-full border border-ro-line bg-transparent px-3 py-2"
+            className={controlClass}
           >
-            <option value="">None</option>
+            <option value="">{f.none}</option>
             {deals.map((d) => (
               <option key={d.id} value={d.id}>
                 {d.reference} — {d.title}
@@ -101,47 +128,49 @@ export function PublicOfferForm({
             ))}
           </select>
         </label>
-        <label className="block space-y-1 text-sm">
-          <span>Optional catalog product</span>
+        <label className={controlLabelClass}>
+          <span className={controlLabelTextClass}>{f.linkedProduct}</span>
           <select
             name="productId"
             defaultValue={offer?.productId ?? ""}
-            className="w-full border border-ro-line bg-transparent px-3 py-2"
+            className={controlClass}
           >
-            <option value="">None</option>
+            <option value="">{f.none}</option>
             {products.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.nameEn} ({p.slug})
+                {productName(p)} ({p.slug})
               </option>
             ))}
           </select>
         </label>
-        <label className="block space-y-1 text-sm">
-          <span>Sort order</span>
-          <input
-            name="sortOrder"
-            type="number"
-            defaultValue={offer?.sortOrder ?? 0}
-            className="w-full border border-ro-line bg-transparent px-3 py-2"
-          />
-        </label>
+        <TextField
+          name="sortOrder"
+          label={f.sortOrder}
+          type="number"
+          dir="ltr"
+          defaultValue={String(offer?.sortOrder ?? 0)}
+          dense
+        />
         {state && !state.ok ? (
-          <p className="text-sm text-red-800">{state.error}</p>
+          <p role="alert" className={formErrorClass}>
+            {state.error}
+          </p>
         ) : null}
-        <button
-          type="submit"
-          disabled={pending}
-          className="bg-ro-purple px-5 py-3 text-sm text-ro-ivory disabled:opacity-60"
-        >
-          {offer ? "Save offer" : "Create draft"}
-        </button>
+        <Button type="submit" loading={pending}>
+          {offer ? f.saveOffer : f.createDraft}
+        </Button>
       </form>
 
       {offer ? (
-        <div className="flex flex-wrap gap-3 border border-ro-line p-4">
-          <p className="w-full text-sm text-ro-muted">
-            Current status: <strong>{offer.status}</strong>. Publishing is
-            always explicit.
+        <div className="flex flex-wrap items-center gap-3 border border-ro-line p-4">
+          <p className="flex w-full flex-wrap items-center gap-2 text-sm text-ro-muted">
+            <span>{f.offerCurrentStatus}:</span>
+            <StatusChip
+              size="sm"
+              tone={offerTone(offer.status)}
+              label={labels.status.offer[offer.status] ?? offer.status}
+            />
+            <span>{f.offerPublishNote}</span>
           </p>
           {(["published", "unpublished", "draft"] as const).map((status) => (
             <form
@@ -155,13 +184,16 @@ export function PublicOfferForm({
             >
               <input type="hidden" name="id" value={offer.id} />
               <input type="hidden" name="status" value={status} />
-              <button
+              <Button
                 type="submit"
+                variant="secondary"
+                size="sm"
                 disabled={statusPending || offer.status === status}
-                className="border border-ro-line px-3 py-2 text-sm disabled:opacity-40"
               >
-                Set {status}
-              </button>
+                {fmt(f.setStatusTo, {
+                  status: labels.status.offer[status] ?? status,
+                })}
+              </Button>
             </form>
           ))}
         </div>
