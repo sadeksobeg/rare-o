@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { ImageUploader } from "@/components/admin/image-uploader";
 import { ProductForm } from "@/components/admin/product-form";
 import { getProductById, listLaunchCategories } from "@/lib/catalog/service";
+import { isPromoFeaturesEnabled } from "@/lib/config/feature-flags";
 import { getRequestDictionary } from "@/lib/i18n/server";
 
 export default async function EditProductPage({
@@ -40,6 +41,7 @@ export default async function EditProductPage({
         labels={dict.adminUi}
         locale={locale}
         categories={categories}
+        showCompareAtPrice={isPromoFeaturesEnabled()}
         product={{
           id: product.id,
           slug: product.slug,

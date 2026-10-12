@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/admin/page-header";
 import { PromoBandForm } from "@/components/admin/promo-band-form";
+import { isPromoFeaturesEnabled } from "@/lib/config/feature-flags";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { getPromoBandById } from "@/lib/promos/service";
 import { notFound } from "next/navigation";
@@ -9,6 +10,7 @@ export default async function AdminPromoDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  if (!isPromoFeaturesEnabled()) notFound();
   const { id } = await params;
   const { locale, dict } = await getRequestDictionary();
   const band = await getPromoBandById(id);

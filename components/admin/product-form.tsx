@@ -40,11 +40,14 @@ export function ProductForm({
   product,
   labels,
   locale,
+  showCompareAtPrice = false,
 }: {
   categories: CategoryOption[];
   product?: ProductValues;
   labels: Dictionary["adminUi"];
   locale: Locale;
+  /** Gated by RO_PROMO_FEATURES — default hidden. */
+  showCompareAtPrice?: boolean;
 }) {
   const f = labels.form;
   const [state, action, pending] = useActionState(upsertProductAction, initial);
@@ -118,7 +121,11 @@ export function ProductForm({
           ))}
         </select>
       </label>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div
+        className={
+          showCompareAtPrice ? "grid gap-3 sm:grid-cols-2" : "grid gap-3"
+        }
+      >
         <TextField
           name="retailPrice"
           label={f.retailPrice}
@@ -129,16 +136,20 @@ export function ProductForm({
           required
           dense
         />
-        <TextField
-          name="compareAtPrice"
-          label={f.compareAtPrice}
-          helper={f.compareAtHelp}
-          type="number"
-          step="0.01"
-          dir="ltr"
-          defaultValue={product?.compareAtPrice ?? ""}
-          dense
-        />
+        {showCompareAtPrice ? (
+          <TextField
+            name="compareAtPrice"
+            label={f.compareAtPrice}
+            helper={f.compareAtHelp}
+            type="number"
+            step="0.01"
+            dir="ltr"
+            defaultValue={product?.compareAtPrice ?? ""}
+            dense
+          />
+        ) : product?.compareAtPrice ? (
+          <input type="hidden" name="compareAtPrice" value={product.compareAtPrice} />
+        ) : null}
       </div>
       <TextField
         name="currency"

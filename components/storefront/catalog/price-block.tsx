@@ -1,5 +1,6 @@
 import { TEST_CURRENCY_CODE } from "@/lib/catalog/currency";
 import { resolveCompareAt } from "@/lib/catalog/pricing";
+import { isPromoFeaturesEnabled } from "@/lib/config/feature-flags";
 import { formatCurrency } from "@/lib/i18n/format";
 import type { Locale } from "@/lib/i18n/config";
 import { cn } from "@/lib/utils";
@@ -28,7 +29,11 @@ export function PriceBlock({
   size?: "card" | "pdp";
   className?: string;
 }) {
-  const { retail, compareAt, onSale } = resolveCompareAt(price, compareAtPrice);
+  const effectiveCompareAt = isPromoFeaturesEnabled() ? compareAtPrice : null;
+  const { retail, compareAt, onSale } = resolveCompareAt(
+    price,
+    effectiveCompareAt
+  );
   const code = currency?.trim();
   const displayCurrency =
     code && code !== TEST_CURRENCY_CODE ? code : null;

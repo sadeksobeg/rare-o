@@ -1,6 +1,7 @@
 import { PageHeader } from "@/components/admin/page-header";
 import { ProductForm } from "@/components/admin/product-form";
 import { listLaunchCategories } from "@/lib/catalog/service";
+import { isPromoFeaturesEnabled } from "@/lib/config/feature-flags";
 import { getRequestDictionary } from "@/lib/i18n/server";
 
 export default async function NewProductPage() {
@@ -13,6 +14,7 @@ export default async function NewProductPage() {
         categories={categories}
         labels={dict.adminUi}
         locale={locale}
+        showCompareAtPrice={isPromoFeaturesEnabled()}
       />
     </section>
   );

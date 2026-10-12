@@ -10,10 +10,13 @@ import { PageHeader } from "@/components/admin/page-header";
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusChip } from "@/components/ui/status-chip";
+import { isPromoFeaturesEnabled } from "@/lib/config/feature-flags";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { listPromoBandsForAdmin } from "@/lib/promos/service";
+import { notFound } from "next/navigation";
 
 export default async function AdminPromosPage() {
+  if (!isPromoFeaturesEnabled()) notFound();
   const { locale, dict } = await getRequestDictionary();
   const a = dict.admin;
   const u = dict.adminUi;

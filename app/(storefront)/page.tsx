@@ -14,6 +14,7 @@ import { TraderBand } from "@/components/storefront/trader-band";
 import { ProductGrid } from "@/components/storefront/catalog/product-grid";
 import { getHomepageDiscoveryData } from "@/lib/catalog/homepage";
 import { getRequestDictionary } from "@/lib/i18n/server";
+import { isPromoFeaturesEnabled } from "@/lib/config/feature-flags";
 import { listActivePromoBands } from "@/lib/promos/service";
 import { href } from "@/lib/href";
 import { localizedName } from "@/lib/utils";
@@ -34,9 +35,10 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export default async function HomePage() {
   const { locale, dict } = await getRequestDictionary();
+  const promoFeatures = isPromoFeaturesEnabled();
   const [data, promoBands] = await Promise.all([
     getHomepageDiscoveryData(),
-    listActivePromoBands(),
+    promoFeatures ? listActivePromoBands() : Promise.resolve([]),
   ]);
 
   const featuredId = data.featuredInstrument?.id;
@@ -84,7 +86,7 @@ export default async function HomePage() {
                     locale={locale}
                   />
                 ) : null}
-                {promoBands.length > 0 ? (
+                {promoFeatures && promoBands.length > 0 ? (
                   <PromoBands
                     locale={locale}
                     bands={promoBands.map((b) => ({

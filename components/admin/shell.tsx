@@ -9,6 +9,7 @@ import {
 import { OfflineBanner } from "@/components/system/offline-banner";
 import { AppToast } from "@/components/system/app-toast";
 import { getAdminSession } from "@/lib/auth/admin-session";
+import { isPromoFeaturesEnabled } from "@/lib/config/feature-flags";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { redirect } from "next/navigation";
 
@@ -18,6 +19,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
 
   const { locale, dict } = await getRequestDictionary();
   const a = dict.admin;
+  const promoFeatures = isPromoFeaturesEnabled();
 
   const groups: AdminNavGroup[] = [
     {
@@ -36,7 +38,9 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
         { href: "/admin/products", label: a.products },
         { href: "/admin/categories", label: a.categories },
         { href: "/admin/offers", label: a.offers },
-        { href: "/admin/promos", label: a.promos },
+        ...(promoFeatures
+          ? [{ href: "/admin/promos", label: a.promos }]
+          : []),
       ],
     },
     {
