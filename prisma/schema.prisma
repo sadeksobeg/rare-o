@@ -32,6 +32,8 @@ model Product {
   category          Category           @relation(fields: [categoryId], references: [id])
   /// Decimal as string-compatible; currency code is configurable (commercial default OPEN)
   retailPrice       Decimal
+  /// Optional prior / compare-at price; badge only when > retailPrice (admin-set, never invented)
+  compareAtPrice    Decimal?
   currency          String
   /// draft | published | archived
   status            String             @default("draft")
@@ -46,6 +48,32 @@ model Product {
   wholesaleLines    WholesaleRequestLine[]
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
+}
+
+/// Admin-managed homepage / storefront flyer bands (no fake content when unpublished)
+model PromoBand {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  titleAr     String    @default("")
+  titleEn     String    @default("")
+  bodyAr      String    @default("")
+  bodyEn      String    @default("")
+  ctaLabelAr  String    @default("")
+  ctaLabelEn  String    @default("")
+  /// Internal path only, e.g. /catalog or /offers/slug — validated in Zod
+  href        String
+  /// ink | plum | sand
+  tone        String    @default("ink")
+  imagePath   String?
+  sortOrder   Int       @default(0)
+  /// draft | published
+  status      String    @default("draft")
+  startsAt    DateTime?
+  endsAt      DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status, sortOrder])
 }
 
 model ProductImage {

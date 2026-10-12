@@ -1,4 +1,8 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { Rings } from "@/components/brand";
+import { Reveal } from "@/components/storefront/motion/reveal";
+import { ButtonLink } from "@/components/ui/button";
 import { getPublishedPublicOfferBySlug } from "@/lib/offers/service";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { notFound } from "next/navigation";
@@ -51,42 +55,69 @@ export default async function PublicOfferDetailPage({
 
   const { locale, dict } = await getRequestDictionary();
   const title =
-    locale === "ar" ? offer.titleAr || offer.titleEn : offer.titleEn || offer.titleAr;
+    locale === "ar"
+      ? offer.titleAr || offer.titleEn
+      : offer.titleEn || offer.titleAr;
   const summary =
     locale === "ar"
       ? offer.summaryAr || offer.summaryEn
       : offer.summaryEn || offer.summaryAr;
 
   return (
-    <article className="mx-auto max-w-3xl space-y-8">
-      <Link
-        href={href("/offers", locale)}
-        className="text-sm text-ro-muted hover:text-ro-purple"
-      >
-        ← {dict.offers.back}
-      </Link>
-      <header className="space-y-3 border-b border-ro-line pb-8">
-        <p className="text-sm tracking-[0.2em] text-ro-muted">{dict.brand}</p>
-        <h1 className="text-4xl tracking-wide">{title}</h1>
-      </header>
-      {summary ? (
-        <div className="whitespace-pre-wrap text-base leading-relaxed text-ro-muted">
-          {summary}
-        </div>
-      ) : null}
-      {offer.product ? (
-        <div className="border-t border-ro-line pt-6 text-sm">
-          <p className="text-ro-muted">{dict.offers.relatedProduct}</p>
+    <article className="space-y-0">
+      <section className="relative overflow-hidden border-b border-ro-line bg-[var(--ro-ink-950)] text-ro-canvas">
+        <Rings className="pointer-events-none absolute -end-24 -top-28 size-80 text-ro-canvas opacity-[0.08]" />
+        <div className="relative mx-auto max-w-3xl space-y-6 px-5 py-14 md:px-8 md:py-20">
           <Link
-            href={href(`/product/${offer.product.slug}`, locale)}
-            className="mt-1 inline-block text-ro-purple"
+            href={href("/offers", locale)}
+            className="inline-flex items-center gap-2 text-sm text-ro-text-muted hover:text-ro-canvas"
           >
-            {locale === "ar"
-              ? offer.product.nameAr || offer.product.nameEn
-              : offer.product.nameEn || offer.product.nameAr}
+            <ArrowRight className="size-3.5 rotate-180 rtl:rotate-0" aria-hidden />
+            {dict.offers.back}
           </Link>
+          <p className="ro-type-overline tracking-[0.28em] text-ro-text-muted">
+            {dict.offers.eyebrow}
+          </p>
+          <h1 className="font-display text-4xl tracking-wide md:text-5xl">
+            {title}
+          </h1>
         </div>
-      ) : null}
+      </section>
+
+      <Reveal>
+        <div className="mx-auto max-w-3xl space-y-10 px-5 py-12 md:px-8 md:py-16">
+          {summary ? (
+            <div className="whitespace-pre-wrap text-base leading-relaxed text-ro-text-2 md:text-lg">
+              {summary}
+            </div>
+          ) : null}
+          {offer.product ? (
+            <div className="border border-ro-line bg-ro-paper p-6 md:p-8">
+              <p className="ro-type-overline text-ro-plum">
+                {dict.offers.relatedProduct}
+              </p>
+              <p className="mt-3 font-display text-2xl tracking-wide">
+                {locale === "ar"
+                  ? offer.product.nameAr || offer.product.nameEn
+                  : offer.product.nameEn || offer.product.nameAr}
+              </p>
+              <div className="mt-6">
+                <ButtonLink
+                  href={href(`/product/${offer.product.slug}`, locale)}
+                  variant="primary"
+                  size="sm"
+                >
+                  {dict.home.viewProduct}
+                </ButtonLink>
+              </div>
+            </div>
+          ) : (
+            <ButtonLink href={href("/catalog", locale)} variant="secondary">
+              {dict.nav.catalog}
+            </ButtonLink>
+          )}
+        </div>
+      </Reveal>
     </article>
   );
 }

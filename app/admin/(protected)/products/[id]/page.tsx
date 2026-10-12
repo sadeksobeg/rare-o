@@ -51,6 +51,10 @@ export default async function EditProductPage({
           specsTextEn: product.specsTextEn,
           categoryId: product.categoryId,
           retailPrice: String(product.retailPrice),
+          compareAtPrice:
+            product.compareAtPrice != null
+              ? String(product.compareAtPrice)
+              : "",
           currency: product.currency,
           status: product.status,
           availability: product.availability,

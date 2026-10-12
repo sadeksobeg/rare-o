@@ -109,6 +109,8 @@ type Dict = {
     compareMax: string;
     price: string;
     requestPiece: string;
+    featuredOfferEyebrow: string;
+    featuredOfferCta: string;
   };
   catalog: {
     title: string;
@@ -174,6 +176,9 @@ type Dict = {
     galleryPrev: string;
     galleryNext: string;
     galleryCounter: string;
+    priceWas: string;
+    priceNow: string;
+    onSale: string;
   };
   cart: {
     title: string;
@@ -240,6 +245,7 @@ type Dict = {
     deals: string;
     wholesale: string;
     offers: string;
+    promos: string;
     kpiRetail: string;
     kpiDeals: string;
     kpiWholesale: string;
@@ -310,6 +316,11 @@ type Dict = {
     categoriesLead: string;
     offersLead: string;
     newOffer: string;
+    promosLead: string;
+    newPromo: string;
+    deletePromo: string;
+    promoStatus: Record<string, string>;
+    promoTone: Record<string, string>;
     searchPlaceholder: string;
     search: string;
     emptyTitle: string;
@@ -421,6 +432,17 @@ type Dict = {
       titleEn: string;
       summaryAr: string;
       summaryEn: string;
+      bodyAr: string;
+      bodyEn: string;
+      ctaLabelAr: string;
+      ctaLabelEn: string;
+      href: string;
+      hrefHelp: string;
+      tone: string;
+      imagePath: string;
+      startsAt: string;
+      endsAt: string;
+      savePromo: string;
       linkedDeal: string;
       linkedProduct: string;
       none: string;
@@ -438,6 +460,8 @@ type Dict = {
       specsEn: string;
       category: string;
       retailPrice: string;
+      compareAtPrice: string;
+      compareAtHelp: string;
       currency: string;
       currencyHelp: string;
       currencyPlaceholder: string;
@@ -816,6 +840,8 @@ const ar: Dict = {
     compareMax: "حد أقصى 3 قطع",
     price: "السعر",
     requestPiece: "أضف إلى الطلب",
+    featuredOfferEyebrow: "عرض مختار",
+    featuredOfferCta: "تفاصيل العرض",
   },
   catalog: {
     title: "الكتالوج",
@@ -881,6 +907,9 @@ const ar: Dict = {
     galleryPrev: "الصورة السابقة",
     galleryNext: "الصورة التالية",
     galleryCounter: "الصورة {current} من {total}",
+    priceWas: "كان",
+    priceNow: "الآن",
+    onSale: "سعر مخفّض",
   },
   cart: {
     title: "قائمة الطلب",
@@ -948,6 +977,7 @@ const ar: Dict = {
     deals: "الصفقات",
     wholesale: "الجملة",
     offers: "العروض",
+    promos: "الترويج",
     kpiRetail: "طلبات بانتظار الإدارة",
     kpiDeals: "صفقات بانتظار الرد",
     kpiWholesale: "جملة بانتظار الرد",
@@ -1022,6 +1052,19 @@ const ar: Dict = {
       "مجموعة الإطلاق فقط (الآلات الوترية، الإكسسوارات). يمكن تعديل التسميات والترتيب؛ إضافة فئات جديدة غير متاحة.",
     offersLead: "عروض عامة منسّقة من الإدارة — ليست متاجر للتجّار.",
     newOffer: "عرض جديد",
+    promosLead:
+      "شرائط ترويجية للصفحة الرئيسية — تظهر فقط عندما تكون منشورة وضمن الفترة إن وُجدت.",
+    newPromo: "شريط ترويجي جديد",
+    deletePromo: "حذف الشريط",
+    promoStatus: {
+      draft: "مسودة",
+      published: "منشور",
+    },
+    promoTone: {
+      ink: "حبر",
+      plum: "برقوقي",
+      sand: "رملي",
+    },
     searchPlaceholder: "ابحث بالاسم أو الهاتف",
     search: "بحث",
     emptyTitle: "لا يوجد شيء هنا بعد",
@@ -1170,6 +1213,17 @@ const ar: Dict = {
       titleEn: "العنوان (إنجليزي)",
       summaryAr: "الملخص (عربي)",
       summaryEn: "الملخص (إنجليزي)",
+      bodyAr: "النص (عربي)",
+      bodyEn: "النص (إنجليزي)",
+      ctaLabelAr: "نص الزر (عربي)",
+      ctaLabelEn: "نص الزر (إنجليزي)",
+      href: "رابط داخلي",
+      hrefHelp: "مسار داخلي يبدأ بـ / مثل /catalog أو /offers/slug",
+      tone: "النبرة البصرية",
+      imagePath: "مسار الصورة (اختياري)",
+      startsAt: "يبدأ في (اختياري)",
+      endsAt: "ينتهي في (اختياري)",
+      savePromo: "حفظ الشريط",
       linkedDeal: "صفقة مرتبطة (اختياري)",
       linkedProduct: "منتج من الكتالوج (اختياري)",
       none: "بدون",
@@ -1187,6 +1241,8 @@ const ar: Dict = {
       specsEn: "المواصفات (إنجليزي)",
       category: "الفئة (مجموعة الإطلاق فقط)",
       retailPrice: "سعر التجزئة",
+      compareAtPrice: "السعر السابق (اختياري)",
+      compareAtHelp: "اتركه فارغاً إن لم يكن هناك سعر سابق. يظهر الخصم فقط إذا كان أعلى من سعر التجزئة.",
       currency: "رمز العملة",
       currencyHelp: "قابل للضبط — القيمة التجارية الافتراضية ما زالت مفتوحة.",
       currencyPlaceholder: "مثال: TEST لبيانات الاختبار فقط",
@@ -1379,7 +1435,7 @@ const ar: Dict = {
     lastMessage: "آخر رسالة",
     unread: "غير مقروء",
     connection: "حالة الاتصال",
-    outboundDisabled: "الإرسال معطّل (WHATSAPP_OUTBOUND_ENABLED)",
+    outboundDisabled: "الإرسال معطّل",
     outboundEnabled: "الإرسال مفعّل",
     replyPlaceholder: "اكتب ردّاً نصياً…",
     send: "إرسال",
@@ -1605,6 +1661,8 @@ const en: Dict = {
     compareMax: "Up to 3 pieces",
     price: "Price",
     requestPiece: "Add to request",
+    featuredOfferEyebrow: "Featured offer",
+    featuredOfferCta: "View offer",
   },
   catalog: {
     title: "Catalog",
@@ -1670,6 +1728,9 @@ const en: Dict = {
     galleryPrev: "Previous image",
     galleryNext: "Next image",
     galleryCounter: "Image {current} of {total}",
+    priceWas: "Was",
+    priceNow: "Now",
+    onSale: "On offer",
   },
   cart: {
     title: "Request list",
@@ -1737,6 +1798,7 @@ const en: Dict = {
     deals: "Deals",
     wholesale: "Wholesale",
     offers: "Offers",
+    promos: "Promos",
     kpiRetail: "Requests needing admin",
     kpiDeals: "Deals awaiting reply",
     kpiWholesale: "Wholesale awaiting reply",
@@ -1811,6 +1873,19 @@ const en: Dict = {
       "Launch set only (String Musical Instruments, Accessories). Labels and order can be edited; adding categories is not available.",
     offersLead: "Admin-curated public presentations — not trader storefronts.",
     newOffer: "New offer",
+    promosLead:
+      "Homepage promo bands — shown only when published and inside any set date window.",
+    newPromo: "New promo band",
+    deletePromo: "Delete band",
+    promoStatus: {
+      draft: "Draft",
+      published: "Published",
+    },
+    promoTone: {
+      ink: "Ink",
+      plum: "Plum",
+      sand: "Sand",
+    },
     searchPlaceholder: "Search name or phone",
     search: "Search",
     emptyTitle: "Nothing here yet",
@@ -1960,6 +2035,17 @@ const en: Dict = {
       titleEn: "Title (English)",
       summaryAr: "Summary (Arabic)",
       summaryEn: "Summary (English)",
+      bodyAr: "Body (Arabic)",
+      bodyEn: "Body (English)",
+      ctaLabelAr: "CTA label (Arabic)",
+      ctaLabelEn: "CTA label (English)",
+      href: "Internal link",
+      hrefHelp: "Internal path starting with / e.g. /catalog or /offers/slug",
+      tone: "Visual tone",
+      imagePath: "Image path (optional)",
+      startsAt: "Starts at (optional)",
+      endsAt: "Ends at (optional)",
+      savePromo: "Save promo band",
       linkedDeal: "Optional linked deal",
       linkedProduct: "Optional catalog product",
       none: "None",
@@ -1977,6 +2063,8 @@ const en: Dict = {
       specsEn: "Specs (English)",
       category: "Category (launch set only)",
       retailPrice: "Retail price",
+      compareAtPrice: "Compare-at price (optional)",
+      compareAtHelp: "Leave empty if there is no prior price. A discount shows only when this is higher than retail.",
       currency: "Currency code",
       currencyHelp: "Configurable — commercial default is still open.",
       currencyPlaceholder: "e.g. TEST for fixtures only",
@@ -2170,7 +2258,7 @@ const en: Dict = {
     lastMessage: "Last message",
     unread: "Unread",
     connection: "Connection",
-    outboundDisabled: "Outbound disabled (WHATSAPP_OUTBOUND_ENABLED)",
+    outboundDisabled: "Outbound disabled",
     outboundEnabled: "Outbound enabled",
     replyPlaceholder: "Type a text reply…",
     send: "Send",

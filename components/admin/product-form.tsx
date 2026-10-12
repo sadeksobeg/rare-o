@@ -28,6 +28,7 @@ type ProductValues = {
   specsTextEn?: string;
   categoryId?: string;
   retailPrice?: string;
+  compareAtPrice?: string;
   currency?: string;
   status?: string;
   availability?: string;
@@ -129,16 +130,26 @@ export function ProductForm({
           dense
         />
         <TextField
-          name="currency"
-          label={f.currency}
-          helper={f.currencyHelp}
-          defaultValue={product?.currency ?? ""}
-          placeholder={f.currencyPlaceholder}
+          name="compareAtPrice"
+          label={f.compareAtPrice}
+          helper={f.compareAtHelp}
+          type="number"
+          step="0.01"
           dir="ltr"
-          required
+          defaultValue={product?.compareAtPrice ?? ""}
           dense
         />
       </div>
+      <TextField
+        name="currency"
+        label={f.currency}
+        helper={f.currencyHelp}
+        defaultValue={product?.currency ?? ""}
+        placeholder={f.currencyPlaceholder}
+        dir="ltr"
+        required
+        dense
+      />
       <div className="grid gap-3 sm:grid-cols-2">
         <label className={controlLabelClass}>
           <span className={controlLabelTextClass}>{f.statusLabel}</span>

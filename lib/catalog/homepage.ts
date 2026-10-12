@@ -19,6 +19,7 @@ export type HomepageProduct = {
   specsTextAr: string;
   specsTextEn: string;
   retailPrice: string;
+  compareAtPrice: string | null;
   currency: string;
   availability: string;
   updatedAt: string;
@@ -61,6 +62,8 @@ function mapProduct(
     specsTextAr: p.specsTextAr,
     specsTextEn: p.specsTextEn,
     retailPrice: p.retailPrice.toString(),
+    compareAtPrice:
+      p.compareAtPrice != null ? p.compareAtPrice.toString() : null,
     currency: p.currency,
     availability: p.availability,
     updatedAt: p.updatedAt.toISOString(),

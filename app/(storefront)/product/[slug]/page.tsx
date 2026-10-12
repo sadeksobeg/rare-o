@@ -185,9 +185,17 @@ export default async function ProductPage({
             <PriceBlock
               size="pdp"
               price={priceNumber}
+              compareAtPrice={
+                product.compareAtPrice != null
+                  ? Number(product.compareAtPrice)
+                  : null
+              }
               currency={product.currency}
               locale={locale}
               onRequestLabel={dict.product.priceOnRequest}
+              wasLabel={dict.product.priceWas}
+              nowLabel={dict.product.priceNow}
+              onSaleLabel={dict.product.onSale}
             />
             <AvailabilityChip
               size="md"
@@ -278,9 +286,16 @@ export default async function ProductPage({
             size="pdp"
             className="text-xl md:text-xl"
             price={priceNumber}
+            compareAtPrice={
+              product.compareAtPrice != null
+                ? Number(product.compareAtPrice)
+                : null
+            }
             currency={product.currency}
             locale={locale}
             onRequestLabel={dict.product.priceOnRequest}
+            wasLabel={dict.product.priceWas}
+            nowLabel={dict.product.priceNow}
           />
           <div className="min-w-0 flex-1 max-w-[14rem]">
             <AddToCartButton

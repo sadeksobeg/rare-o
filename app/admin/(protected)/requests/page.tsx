@@ -9,6 +9,7 @@ import {
 import { PageHeader } from "@/components/admin/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusChip } from "@/components/ui/status-chip";
+import { uiVisibleRetailRequestWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
 import { formatCurrency } from "@/lib/i18n/format";
 import { getRequestDictionary } from "@/lib/i18n/server";
@@ -19,6 +20,7 @@ export default async function AdminRequestsPage() {
   const a = dict.admin;
   const u = dict.adminUi;
   const requests = await prisma.retailRequest.findMany({
+    where: uiVisibleRetailRequestWhere,
     orderBy: { createdAt: "desc" },
     take: 100,
   });

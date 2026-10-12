@@ -1,31 +1,24 @@
-import { ButtonLink } from "@/components/ui/button";
-import { Rings } from "@/components/brand";
+import Link from "next/link";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
 export function TraderBand({ dict }: { dict: Dictionary }) {
   return (
-    <section className="ro-inverse relative overflow-hidden bg-[var(--ro-ink-950)] text-ro-canvas">
-      <div
-        className="pointer-events-none absolute inset-0 opacity-40"
-        style={{
-          background:
-            "radial-gradient(ellipse 50% 60% at 80% 50%, rgba(50,16,79,0.65), transparent 70%)",
-        }}
-        aria-hidden
-      />
-      <Rings
-        className="pointer-events-none absolute -end-16 top-1/2 h-72 w-72 -translate-y-1/2 text-ro-canvas opacity-20"
-        amberRingIndex={1}
-      />
-      <div className="relative mx-auto flex max-w-[1440px] flex-col gap-6 px-5 py-16 md:flex-row md:items-center md:justify-between md:px-10 md:py-20 lg:px-14">
-        <div className="max-w-xl space-y-3">
-          <h2 className="ro-type-h2">{dict.home.traderBandTitle}</h2>
-          <p className="text-ro-text-2">{dict.home.traderBandLead}</p>
-        </div>
-        <ButtonLink href="/trader/login" variant="inverse-primary">
-          {dict.home.traderBandCta}
-        </ButtonLink>
+    <section className="flex flex-col gap-3 border border-ro-plum bg-[var(--ro-plum-900)] p-4 text-[var(--ro-sand-100)] sm:flex-row sm:items-center sm:justify-between md:p-5">
+      <div>
+        <h2 className="font-display text-lg tracking-wide text-[var(--ro-sand-100)]">
+          {dict.home.traderBandTitle}
+        </h2>
+        {/* Part 01 §3.4: plum-300 on ink-950 family — readable on plum-900 */}
+        <p className="mt-1 text-sm text-[var(--ro-plum-300)]">
+          {dict.home.traderBandLead}
+        </p>
       </div>
+      <Link
+        href="/trader/login"
+        className="inline-flex h-10 shrink-0 items-center justify-center bg-[var(--ro-sand-100)] px-4 text-sm font-semibold !text-[var(--ro-ink-950)] hover:bg-white"
+      >
+        {dict.home.traderBandCta}
+      </Link>
     </section>
   );
 }

@@ -5,6 +5,7 @@ import {
   adminLoginSchema,
   categoryLabelUpdateSchema,
   productUpsertSchema,
+  promoBandUpsertSchema,
   retailRequestCreateSchema,
   retailRequestIdSchema,
   retailRequestTransitionSchema,
@@ -22,6 +23,11 @@ import {
   updateCategoryLabels,
   updateProduct,
 } from "@/lib/catalog/service";
+import {
+  createPromoBand,
+  deletePromoBand,
+  updatePromoBand,
+} from "@/lib/promos/service";
 import {
   attachProductImage,
   removeProductImage,
@@ -110,6 +116,7 @@ export async function upsertProductAction(
     specsTextEn: formData.get("specsTextEn") || "",
     categoryId: formData.get("categoryId"),
     retailPrice: formData.get("retailPrice"),
+    compareAtPrice: formData.get("compareAtPrice") ?? "",
     currency: formData.get("currency"),
     status: formData.get("status"),
     availability: formData.get("availability"),
@@ -456,4 +463,68 @@ export async function adminMarkRetailHandoffOpenedAction(
     const msg = e instanceof Error ? e.message : "Open failed";
     return { ok: false, error: msg };
   }
+}
+
+export async function upsertPromoBandAction(
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  try {
+    await requireAdminSession();
+  } catch {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const id = String(formData.get("id") || "");
+  const parsed = promoBandUpsertSchema.safeParse({
+    slug: formData.get("slug"),
+    titleAr: formData.get("titleAr") || "",
+    titleEn: formData.get("titleEn") || "",
+    bodyAr: formData.get("bodyAr") || "",
+    bodyEn: formData.get("bodyEn") || "",
+    ctaLabelAr: formData.get("ctaLabelAr") || "",
+    ctaLabelEn: formData.get("ctaLabelEn") || "",
+    href: formData.get("href"),
+    tone: formData.get("tone") || "ink",
+    imagePath: formData.get("imagePath") || "",
+    sortOrder: formData.get("sortOrder") || "0",
+    status: formData.get("status") || "draft",
+    startsAt: formData.get("startsAt") || "",
+    endsAt: formData.get("endsAt") || "",
+  });
+
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid promo",
+    };
+  }
+
+  try {
+    if (id) {
+      await updatePromoBand(id, parsed.data);
+    } else {
+      await createPromoBand(parsed.data);
+    }
+    revalidatePath("/");
+    revalidatePath("/admin/promos");
+    redirect("/admin/promos");
+  } catch (e) {
+    if (typeof e === "object" && e && "digest" in e) throw e;
+    const msg = e instanceof Error ? e.message : "Save failed";
+    if (msg.includes("Unique constraint")) {
+      return { ok: false, error: "Slug already exists" };
+    }
+    return { ok: false, error: msg };
+  }
+}
+
+export async function deletePromoBandAction(formData: FormData): Promise<void> {
+  await requireAdminSession();
+  const id = String(formData.get("id") || "");
+  if (!id) return;
+  await deletePromoBand(id);
+  revalidatePath("/");
+  revalidatePath("/admin/promos");
+  redirect("/admin/promos");
 }

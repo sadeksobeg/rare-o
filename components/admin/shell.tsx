@@ -36,6 +36,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
         { href: "/admin/products", label: a.products },
         { href: "/admin/categories", label: a.categories },
         { href: "/admin/offers", label: a.offers },
+        { href: "/admin/promos", label: a.promos },
       ],
     },
     {

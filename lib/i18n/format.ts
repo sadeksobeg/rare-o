@@ -1,3 +1,4 @@
+import { TEST_CURRENCY_CODE } from "@/lib/catalog/currency";
 import type { Locale } from "@/lib/i18n/config";
 
 const tz = process.env.APP_TIMEZONE || "Asia/Damascus";
@@ -20,16 +21,18 @@ export function formatCurrency(
   locale: Locale,
   onRequest: string
 ) {
-  if (value == null || !currency) return onRequest;
+  const code = currency?.trim();
+  // No currency, or non-display fixture code — never show "TEST" in UI.
+  if (value == null || !code || code === TEST_CURRENCY_CODE) return onRequest;
   try {
     return new Intl.NumberFormat(localeTag(locale), {
       style: "currency",
-      currency,
+      currency: code,
       maximumFractionDigits: 2,
     }).format(value);
   } catch {
-    // Non-ISO fixture codes (e.g. seed "TEST") — show amount + code
-    return `${formatNumber(value, locale, { maximumFractionDigits: 2 })} ${currency}`;
+    // Unknown / non-ISO code — treat as missing currency for storefront display.
+    return onRequest;
   }
 }
 

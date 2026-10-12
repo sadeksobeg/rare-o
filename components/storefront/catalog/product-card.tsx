@@ -15,6 +15,7 @@ export type CatalogCardProduct = {
   nameAr: string;
   nameEn: string;
   retailPrice: { toString(): string } | number | string;
+  compareAtPrice?: { toString(): string } | number | string | null;
   currency: string;
   availability: string;
   category?: { nameAr: string; nameEn: string } | null;
@@ -100,9 +101,17 @@ export function CatalogProductCard({
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <PriceBlock
             price={price}
+            compareAtPrice={
+              product.compareAtPrice != null
+                ? Number(product.compareAtPrice)
+                : null
+            }
             currency={product.currency}
             locale={locale}
             onRequestLabel={dict.product.priceOnRequest}
+            wasLabel={dict.product.priceWas}
+            nowLabel={dict.product.priceNow}
+            onSaleLabel={dict.product.onSale}
           />
           <AvailabilityChip
             availability={product.availability}

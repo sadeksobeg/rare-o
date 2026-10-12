@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
+import { uiVisibleRetailRequestWhere } from "@/lib/admin/ui-hidden";
 import { getInboxHealthView } from "@/lib/whatsapp/messaging/inbox";
 
 /** Admin home metrics — derived from existing tables only (no invented KPIs). */
@@ -14,7 +15,10 @@ export async function getAdminHomeData() {
   ] = await Promise.all([
     prisma.retailRequest.count({
       where: {
-        status: { in: ["draft", "handoff_opened", "in_follow_up"] },
+        AND: [
+          uiVisibleRetailRequestWhere,
+          { status: { in: ["draft", "handoff_opened", "in_follow_up"] } },
+        ],
       },
     }),
     prisma.dealProposal.count({
@@ -30,6 +34,7 @@ export async function getAdminHomeData() {
     }),
     getInboxHealthView(),
     prisma.retailRequest.findMany({
+      where: uiVisibleRetailRequestWhere,
       orderBy: { createdAt: "desc" },
       take: 8,
       select: {

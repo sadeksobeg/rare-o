@@ -34,6 +34,10 @@ export const productUpsertSchema = z.object({
   specsTextEn: z.string().max(10000).default(""),
   categoryId: z.string().min(1),
   retailPrice: z.coerce.number().nonnegative(),
+  compareAtPrice: z
+    .union([z.literal(""), z.coerce.number().nonnegative()])
+    .optional()
+    .transform((v) => (v === "" || v === undefined ? null : v)),
   currency: z
     .string()
     .trim()
@@ -43,6 +47,62 @@ export const productUpsertSchema = z.object({
   availability: z.enum(PRODUCT_AVAILABILITIES),
   wholesaleEligible: z.coerce.boolean().default(false),
 });
+
+const PROMO_TONES = ["ink", "plum", "sand"] as const;
+const PROMO_STATUSES = ["draft", "published"] as const;
+
+export const promoBandUpsertSchema = z
+  .object({
+    slug: z
+      .string()
+      .trim()
+      .min(1)
+      .max(120)
+      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Invalid slug"),
+    titleAr: z.string().max(200).default(""),
+    titleEn: z.string().max(200).default(""),
+    bodyAr: z.string().max(2000).default(""),
+    bodyEn: z.string().max(2000).default(""),
+    ctaLabelAr: z.string().max(80).default(""),
+    ctaLabelEn: z.string().max(80).default(""),
+    href: z
+      .string()
+      .trim()
+      .min(1)
+      .max(200)
+      .regex(/^\/[a-zA-Z0-9/_-]*$/, "Href must be an internal path starting with /"),
+    tone: z.enum(PROMO_TONES).default("ink"),
+    imagePath: z
+      .string()
+      .trim()
+      .max(300)
+      .optional()
+      .transform((v) => (v ? v : null)),
+    sortOrder: z.coerce.number().int().min(0).max(999).default(0),
+    status: z.enum(PROMO_STATUSES).default("draft"),
+    startsAt: z
+      .string()
+      .optional()
+      .transform((v) => {
+        if (!v?.trim()) return null;
+        const d = new Date(v);
+        return Number.isNaN(d.getTime()) ? null : d;
+      }),
+    endsAt: z
+      .string()
+      .optional()
+      .transform((v) => {
+        if (!v?.trim()) return null;
+        const d = new Date(v);
+        return Number.isNaN(d.getTime()) ? null : d;
+      }),
+  })
+  .refine(
+    (v) => !v.startsAt || !v.endsAt || v.endsAt >= v.startsAt,
+    { message: "endsAt must be after startsAt", path: ["endsAt"] }
+  );
+
+export type PromoBandUpsertInput = z.infer<typeof promoBandUpsertSchema>;
 
 export const categoryLabelUpdateSchema = z.object({
   id: z.string().min(1),

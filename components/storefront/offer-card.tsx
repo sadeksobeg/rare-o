@@ -15,6 +15,7 @@ export function OfferCard({
   ctaLabel,
   tone = "light",
   headingLevel = 2,
+  featured = false,
   className,
 }: {
   href: string;
@@ -24,6 +25,7 @@ export function OfferCard({
   ctaLabel: string;
   tone?: "light" | "dark";
   headingLevel?: 2 | 3;
+  featured?: boolean;
   className?: string;
 }) {
   const Heading = headingLevel === 3 ? "h3" : "h2";
@@ -32,10 +34,11 @@ export function OfferCard({
   return (
     <article
       className={cn(
-        "group relative flex h-full flex-col gap-4 overflow-hidden border p-6 transition-colors duration-300 md:p-7",
+        "group relative flex h-full flex-col gap-4 overflow-hidden border transition-[border-color,transform,background-color] duration-300",
+        featured ? "p-8 md:p-10" : "p-6 md:p-7",
         dark
-          ? "border-ro-line-on-dark text-ro-cream hover:border-ro-cream"
-          : "border-ro-line bg-ro-paper text-ro-black hover:border-ro-purple",
+          ? "border-ro-line-on-dark bg-[var(--ro-ink-950)] text-ro-cream hover:border-ro-cream"
+          : "border-ro-line bg-ro-paper text-ro-black hover:border-ro-plum",
         className
       )}
     >
@@ -55,7 +58,14 @@ export function OfferCard({
           {eyebrow}
         </p>
       ) : null}
-      <Heading className="relative font-display text-2xl leading-snug tracking-wide md:text-[1.7rem]">
+      <Heading
+        className={cn(
+          "relative font-display leading-snug tracking-wide",
+          featured
+            ? "text-3xl md:text-[2.1rem]"
+            : "text-2xl md:text-[1.7rem]"
+        )}
+      >
         <Link
           href={href}
           className="outline-offset-4 after:absolute after:inset-0 after:content-[''] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--ro-focus)]"
@@ -66,7 +76,8 @@ export function OfferCard({
       {summary ? (
         <p
           className={cn(
-            "relative line-clamp-3 text-sm leading-relaxed",
+            "relative leading-relaxed",
+            featured ? "line-clamp-4 text-base" : "line-clamp-3 text-sm",
             dark ? "text-ro-ivory-muted" : "text-ro-muted"
           )}
         >

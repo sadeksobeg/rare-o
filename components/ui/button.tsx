@@ -12,20 +12,21 @@ export type ButtonVariant =
 
 export type ButtonSize = "sm" | "md" | "lg";
 
+/* `!text-*` beats unlayered `a { color: inherit }` so Link labels stay visible. */
 const variantClass: Record<ButtonVariant, string> = {
   primary:
-    "bg-ro-ink text-ro-canvas hover:bg-ro-plum focus-visible:outline-[var(--ro-focus)]",
+    "bg-ro-ink !text-[var(--ro-sand-100)] hover:bg-ro-plum focus-visible:outline-[var(--ro-focus)]",
   secondary:
-    "border border-ro-ink bg-transparent text-ro-ink hover:bg-ro-sunken focus-visible:outline-[var(--ro-focus)]",
-  text: "bg-transparent text-ro-text-2 underline-offset-4 hover:text-ro-ink hover:underline focus-visible:outline-[var(--ro-focus)]",
+    "border border-ro-ink bg-transparent !text-ro-ink hover:bg-ro-sunken focus-visible:outline-[var(--ro-focus)]",
+  text: "bg-transparent !text-ro-text-2 underline-offset-4 hover:!text-ro-ink hover:underline focus-visible:outline-[var(--ro-focus)]",
   "inverse-primary":
-    "bg-ro-canvas text-ro-ink hover:bg-white focus-visible:outline-ro-canvas",
+    "bg-ro-canvas !text-ro-ink hover:bg-white focus-visible:outline-ro-canvas",
   "inverse-secondary":
-    "border border-ro-line-on-dark bg-transparent text-ro-canvas hover:border-ro-canvas focus-visible:outline-ro-canvas",
+    "border border-ro-line-on-dark bg-transparent !text-ro-canvas hover:border-ro-canvas focus-visible:outline-ro-canvas",
   danger:
-    "bg-[var(--ro-danger-700)] text-ro-canvas hover:opacity-90 focus-visible:outline-[var(--ro-danger-700)]",
+    "bg-[var(--ro-danger-700)] !text-[var(--ro-sand-100)] hover:opacity-90 focus-visible:outline-[var(--ro-danger-700)]",
   quiet:
-    "border-0 bg-transparent text-ro-text-2 hover:text-ro-ink focus-visible:outline-[var(--ro-focus)]",
+    "border-0 bg-transparent !text-ro-text-2 hover:!text-ro-ink focus-visible:outline-[var(--ro-focus)]",
 };
 
 const sizeClass: Record<ButtonSize, string> = {

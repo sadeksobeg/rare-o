@@ -8,6 +8,7 @@ import {
 import { PageHeader } from "@/components/admin/page-header";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { uiVisibleCustomerWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
 import { formatDate } from "@/lib/i18n/format";
 import { getRequestDictionary } from "@/lib/i18n/server";
@@ -26,12 +27,17 @@ export default async function AdminCustomersPage({
   const customers = await prisma.customer.findMany({
     where: query
       ? {
-          OR: [
-            { name: { contains: query } },
-            { phone: { contains: query } },
+          AND: [
+            uiVisibleCustomerWhere,
+            {
+              OR: [
+                { name: { contains: query } },
+                { phone: { contains: query } },
+              ],
+            },
           ],
         }
-      : undefined,
+      : uiVisibleCustomerWhere,
     orderBy: { createdAt: "desc" },
     take: 100,
     include: {

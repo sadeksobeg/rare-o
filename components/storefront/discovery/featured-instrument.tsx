@@ -1,19 +1,17 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 import type { HomepageProduct } from "@/lib/catalog/homepage";
-import { MaterialField } from "@/components/storefront/material-field";
-import { SectionLabel } from "@/components/storefront/section-label";
 import { AddToCartButton } from "@/components/storefront/add-to-cart-button";
-import { RoButtonLink } from "@/components/ui/ro-button";
-import { EDITORIAL } from "@/lib/brand/editorial";
+import { PriceBlock } from "@/components/storefront/catalog/price-block";
 import { localizedName } from "@/lib/utils";
-import { ENABLE_COMPARE } from "@/lib/features";
 import { href } from "@/lib/href";
 import { useDiscovery } from "./discovery-context";
 
+/** Spotlight product panel for the home spotlight grid. */
 export function FeaturedInstrument({
   dict,
   locale,
@@ -23,7 +21,7 @@ export function FeaturedInstrument({
   locale: Locale;
   product: HomepageProduct;
 }) {
-  const { openQuickView, toggleCompare, compareIds } = useDiscovery();
+  const { openQuickView } = useDiscovery();
   const name = localizedName(locale, product.nameAr, product.nameEn, product.slug);
   const category = localizedName(
     locale,
@@ -36,96 +34,83 @@ export function FeaturedInstrument({
     product.descriptionEn
   );
   const available = product.availability !== "unavailable";
-  const price = Number(product.retailPrice).toLocaleString(locale);
-  const comparing = compareIds.includes(product.id);
+  const image = product.images[0];
 
   return (
-    <section className="border-b border-ro-line bg-ro-cream">
-      <div className="mx-auto grid max-w-[1440px] lg:grid-cols-12">
-        <div className="relative min-h-[420px] overflow-hidden bg-ro-black lg:col-span-8 lg:min-h-[640px]">
-          {/* Editorial atmosphere behind catalog imagery */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={EDITORIAL.instrumentDark}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover opacity-50"
-          />
-          <div className="absolute inset-0 bg-ro-black/25" />
-          <MaterialField
-            src={product.images[0]?.path}
+    <article className="grid h-full overflow-hidden border border-ro-line bg-ro-paper sm:grid-cols-[140px_1fr] lg:grid-cols-[180px_1fr]">
+      <div className="relative aspect-[4/5] bg-[var(--ro-ink-900)] sm:aspect-auto sm:min-h-[220px]">
+        {image?.path ? (
+          <Image
+            src={image.path}
             alt={name}
-            tone="dark"
-            className="absolute inset-[8%] md:inset-[10%]"
+            fill
+            sizes="180px"
+            className="object-cover"
           />
-        </div>
-        <div className="flex flex-col justify-center gap-6 px-5 py-12 md:px-8 lg:col-span-4 lg:px-10 lg:py-16">
-          <SectionLabel tone="purple">
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-xs tracking-widest text-ro-canvas/40">
+            {dict.brand}
+          </div>
+        )}
+      </div>
+      <div className="flex flex-col justify-between gap-3 p-4 md:p-5">
+        <div className="space-y-2">
+          <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ro-plum">
             {dict.home.featuredInstrumentEyebrow}
-          </SectionLabel>
-          <p className="text-[0.65rem] tracking-[0.22em] text-ro-muted uppercase">
-            {category}
+            {category ? ` · ${category}` : ""}
           </p>
-          <h2 className="font-display text-3xl tracking-wide md:text-4xl lg:text-[2.75rem]">
+          <h2 className="font-display text-xl tracking-wide md:text-2xl">
             <Link
               href={href(`/product/${product.slug}`, locale)}
-              className="hover:text-ro-purple"
+              className="hover:text-ro-plum"
             >
               {name}
             </Link>
           </h2>
-          <div className="flex flex-wrap gap-3 text-sm text-ro-muted">
-            <span>
-              {price} {product.currency}
-            </span>
-            <span className="text-[0.65rem] tracking-[0.16em] uppercase">
+          {description ? (
+            <p className="line-clamp-2 text-sm text-ro-text-2">{description}</p>
+          ) : null}
+          <div className="flex flex-wrap items-end gap-2">
+            <PriceBlock
+              price={Number(product.retailPrice)}
+              compareAtPrice={
+                product.compareAtPrice != null
+                  ? Number(product.compareAtPrice)
+                  : null
+              }
+              currency={product.currency}
+              locale={locale}
+              onRequestLabel={dict.product.priceOnRequest}
+              wasLabel={dict.product.priceWas}
+              nowLabel={dict.product.priceNow}
+              onSaleLabel={dict.product.onSale}
+            />
+            <span className="text-xs text-ro-muted">
               {available ? dict.home.available : dict.home.unavailable}
             </span>
           </div>
-          {description ? (
-            <p className="text-sm leading-relaxed text-ro-muted line-clamp-5">
-              {description}
-            </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {available ? (
+            <AddToCartButton
+              productId={product.id}
+              slug={product.slug}
+              name={name}
+              price={Number(product.retailPrice)}
+              currency={product.currency}
+              imagePath={image?.path ?? null}
+              label={dict.home.requestPiece}
+            />
           ) : null}
-          <div className="flex flex-wrap gap-3 pt-2">
-            {available ? (
-              <AddToCartButton
-                productId={product.id}
-                slug={product.slug}
-                name={name}
-                price={Number(product.retailPrice)}
-                currency={product.currency}
-                imagePath={product.images[0]?.path ?? null}
-                label={dict.home.requestPiece}
-              />
-            ) : null}
-            <button
-              type="button"
-              onClick={() => openQuickView(product.id)}
-              className="border border-ro-line px-5 py-3 text-[0.7rem] tracking-[0.16em] uppercase hover:border-ro-purple"
-            >
-              {dict.home.quickView}
-            </button>
-            {ENABLE_COMPARE ? (
-              <button
-                type="button"
-                onClick={() => toggleCompare(product.id)}
-                className={`px-3 py-3 text-[0.65rem] tracking-[0.16em] uppercase ${
-                  comparing ? "text-ro-purple" : "text-ro-muted hover:text-ro-black"
-                }`}
-              >
-                {comparing ? dict.home.compareRemove : dict.home.compareAdd}
-              </button>
-            ) : null}
-          </div>
-          <RoButtonLink
-            href={href(`/product/${product.slug}`, locale)}
-            variant="ghost"
-            className="self-start px-0"
+          <button
+            type="button"
+            onClick={() => openQuickView(product.id)}
+            className="h-11 border border-ro-line px-4 text-sm font-semibold hover:border-ro-plum"
           >
-            {dict.home.viewDetails}
-          </RoButtonLink>
+            {dict.home.quickView}
+          </button>
         </div>
       </div>
-    </section>
+    </article>
   );
 }

@@ -204,7 +204,6 @@ body {
 }
 
 a {
-  color: inherit;
   text-decoration: none;
 }
 
@@ -324,9 +323,10 @@ html[lang="ar"] .ro-type-overline {
   box-shadow: inset 0 0 0 1px rgba(11, 8, 13, 0.12);
 }
 
+/* Black PNG marks → sand-100 on dark surfaces (footer / over-hero header). */
 .ro-mark-on-dark {
-  filter: invert(1) brightness(0.96) sepia(0.22) saturate(0.55)
-    hue-rotate(340deg);
+  filter: brightness(0) invert(1)
+    sepia(0.35) saturate(0.45) hue-rotate(340deg) brightness(0.96);
 }
 
 /* --- Motion primitives --- */
@@ -622,5 +622,104 @@ html[lang="ar"] .ro-type-overline {
 @media (min-width: 1024px) {
   .ro-track > * {
     flex-basis: min(38vw, 26rem);
+  }
+}
+
+/* —— Home manuscript surface —— */
+.ro-ms-grid {
+  background-image:
+    linear-gradient(rgba(244, 231, 216, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244, 231, 216, 0.045) 1px, transparent 1px);
+  background-size: 72px 72px;
+}
+
+.ro-ms-grid-ink {
+  background-image:
+    linear-gradient(rgba(11, 8, 13, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(11, 8, 13, 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+.ro-ms-rule {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--ro-amber-500) 12%,
+    var(--ro-amber-400) 50%,
+    var(--ro-amber-500) 88%,
+    transparent
+  );
+  opacity: 0.55;
+}
+
+.ro-ms-rule-ink {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(11, 8, 13, 0.35) 20%,
+    rgba(11, 8, 13, 0.55) 50%,
+    rgba(11, 8, 13, 0.35) 80%,
+    transparent
+  );
+}
+
+.ro-ms-brand {
+  font-family: var(--ro-font-display);
+  font-weight: var(--ro-display-weight);
+  font-size: clamp(4.5rem, 14vw, 11rem);
+  line-height: 0.86;
+  letter-spacing: 0.18em;
+}
+
+.ro-ms-giant {
+  font-family: var(--ro-font-display);
+  font-weight: var(--ro-display-weight);
+  font-size: clamp(5rem, 16vw, 12rem);
+  line-height: 0.8;
+  letter-spacing: -0.02em;
+}
+
+.ro-ms-vlabel {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  letter-spacing: 0.28em;
+}
+
+[dir="rtl"] .ro-ms-vlabel {
+  transform: rotate(180deg);
+}
+
+@keyframes ro-ms-drift {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ro-ms-enter {
+    animation: ro-ms-drift 0.9s var(--ro-ease-enter) both;
+  }
+  .ro-ms-enter-delay {
+    animation: ro-ms-drift 0.95s var(--ro-ease-enter) 0.12s both;
+  }
+  .ro-ms-enter-late {
+    animation: ro-ms-drift 1s var(--ro-ease-enter) 0.24s both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ro-ms-enter,
+  .ro-ms-enter-delay,
+  .ro-ms-enter-late {
+    animation: none;
   }
 }

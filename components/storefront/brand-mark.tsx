@@ -35,12 +35,13 @@ export function BrandMark({
     // eslint-disable-next-line @next/next/no-img-element -- brand marks need CSS tone filters
     <img
       src={srcMap[variant]}
-      alt=""
-      aria-hidden
+      alt="RARE OUD"
       decoding={priority ? "sync" : "async"}
       fetchPriority={priority ? "high" : "auto"}
+      width={variant === "master" ? 72 : 36}
+      height={variant === "master" ? 72 : 36}
       className={cn(
-        "object-contain select-none",
+        "object-contain object-center select-none",
         sizeMap[size],
         tone === "on-dark" && "ro-mark-on-dark",
         className

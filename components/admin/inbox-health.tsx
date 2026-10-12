@@ -26,13 +26,11 @@ export function InboxHealthBanner({
   health: InboxHealthView;
   dict: Dictionary;
 }) {
+  // Connection state only — never surface detailSafe / worker / env strings in UI.
   return (
     <div className="flex flex-wrap items-center gap-3 border border-ro-line bg-ro-surface px-4 py-3 text-sm">
       <span className="text-ro-muted">{dict.inbox.connection}:</span>
       <span className="font-medium">{healthLabel(dict, health.state)}</span>
-      {health.detailSafe ? (
-        <span className="text-ro-muted">· {health.detailSafe}</span>
-      ) : null}
       <span
         className={
           health.outboundEnabled
