@@ -233,3 +233,154 @@ export async function adminGetBusinessContextAction(
   const data = await getBusinessContextForConversation(conversationId);
   return { ok: true, data };
 }
+
+/**
+ * Re-queue a failed outbound message as pending (same row — no duplicate).
+ * Does not touch Baileys adapter; the worker drains pending as usual.
+ * Idempotent: if already pending/sending/sent, returns without duplicating.
+ */
+export async function adminRetryWhatsAppMessageAction(
+  formData: FormData
+): Promise<ActionResult & { data?: { messageId: string; status: string } }> {
+  try {
+    await requireAdminSession();
+  } catch {
+    return { ok: false, error: "UNAUTHORIZED" };
+  }
+
+  const messageId = String(formData.get("messageId") || "").trim();
+  if (!messageId) return { ok: false, error: "INVALID_INPUT" };
+
+  const row = await prisma.whatsAppMessage.findUnique({
+    where: { id: messageId },
+    select: {
+      id: true,
+      direction: true,
+      status: true,
+      attemptCount: true,
+      conversationId: true,
+    },
+  });
+  if (!row || row.direction !== "outbound") {
+    return { ok: false, error: "NOT_FOUND" };
+  }
+  if (row.status === "sent" || row.status === "pending" || row.status === "sending") {
+    return { ok: true, data: { messageId: row.id, status: row.status } };
+  }
+  if (row.status !== "failed") {
+    return { ok: false, error: "NOT_RETRYABLE" };
+  }
+
+  const { MAX_OUTBOUND_ATTEMPTS } = await import(
+    "@/lib/whatsapp/messaging/reliability"
+  );
+  if (row.attemptCount >= MAX_OUTBOUND_ATTEMPTS) {
+    return { ok: false, error: "MAX_ATTEMPTS" };
+  }
+
+  await prisma.whatsAppMessage.update({
+    where: { id: messageId },
+    data: { status: "pending", errorSafe: null },
+  });
+
+  revalidatePath("/admin/inbox");
+  revalidatePath(`/admin/inbox/${row.conversationId}`);
+  return { ok: true, data: { messageId: row.id, status: "pending" } };
+}
+
+export type LinkableRecordHit = {
+  id: string;
+  reference: string;
+  label: string;
+  linkType: "retail_request" | "deal_proposal" | "wholesale_request";
+};
+
+/** Search domain records for A17 RecordPicker (reference / title). */
+export async function adminSearchLinkableRecordsAction(
+  formData: FormData
+): Promise<ActionResult & { data?: LinkableRecordHit[] }> {
+  try {
+    await requireAdminSession();
+  } catch {
+    return { ok: false, error: "UNAUTHORIZED" };
+  }
+
+  const linkType = String(formData.get("linkType") || "").trim();
+  const q = String(formData.get("q") || "").trim().slice(0, 80);
+
+  if (
+    linkType !== "retail_request" &&
+    linkType !== "deal_proposal" &&
+    linkType !== "wholesale_request"
+  ) {
+    return { ok: false, error: "UNSUPPORTED_LINK_TYPE" };
+  }
+
+  const take = 20;
+  if (linkType === "retail_request") {
+    const rows = await prisma.retailRequest.findMany({
+      where: q
+        ? {
+            OR: [
+              { reference: { contains: q } },
+              { customerName: { contains: q } },
+              { customerPhone: { contains: q } },
+            ],
+          }
+        : undefined,
+      orderBy: { updatedAt: "desc" },
+      take,
+      select: { id: true, reference: true, customerName: true },
+    });
+    return {
+      ok: true,
+      data: rows.map((r) => ({
+        id: r.id,
+        reference: r.reference,
+        label: r.customerName || r.reference,
+        linkType: "retail_request" as const,
+      })),
+    };
+  }
+
+  if (linkType === "deal_proposal") {
+    const rows = await prisma.dealProposal.findMany({
+      where: q
+        ? {
+            OR: [
+              { reference: { contains: q } },
+              { title: { contains: q } },
+            ],
+          }
+        : undefined,
+      orderBy: { updatedAt: "desc" },
+      take,
+      select: { id: true, reference: true, title: true },
+    });
+    return {
+      ok: true,
+      data: rows.map((r) => ({
+        id: r.id,
+        reference: r.reference,
+        label: r.title || r.reference,
+        linkType: "deal_proposal" as const,
+      })),
+    };
+  }
+
+  const rows = await prisma.wholesaleRequest.findMany({
+    where: q ? { reference: { contains: q } } : undefined,
+    orderBy: { updatedAt: "desc" },
+    take,
+    select: { id: true, reference: true },
+  });
+  return {
+    ok: true,
+    data: rows.map((r) => ({
+      id: r.id,
+      reference: r.reference,
+      label: r.reference,
+      linkType: "wholesale_request" as const,
+    })),
+  };
+}

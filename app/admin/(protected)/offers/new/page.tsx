@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/admin/page-header";
 import { PublicOfferForm } from "@/components/admin/public-offer-form";
+import { uiVisibleDealWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
 import { getRequestDictionary } from "@/lib/i18n/server";
 
@@ -7,6 +8,7 @@ export default async function AdminNewOfferPage() {
   const { locale, dict } = await getRequestDictionary();
   const [deals, products] = await Promise.all([
     prisma.dealProposal.findMany({
+      where: uiVisibleDealWhere(),
       orderBy: { updatedAt: "desc" },
       take: 100,
       select: { id: true, reference: true, title: true },

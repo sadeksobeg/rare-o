@@ -5,11 +5,11 @@ import { getStatusSequence } from "@/lib/ui/status";
 
 type StepperDomain = "retail" | "deal" | "wholesale";
 
+type StepState = "done" | "current" | "upcoming" | "blocked";
+
 /**
- * Thin, read-only progress strip for retail / deal / wholesale status sequences.
- * Presentational only: it never changes status and encodes no business rules.
- * Statuses outside the happy path (cancelled / closed) render as a trailing
- * "ended" step with the sequence left un-highlighted.
+ * P18 — horizontal desktop / vertical mobile.
+ * States: done / current / upcoming / blocked (off-path terminal).
  */
 export function StatusStepper({
   domain,
@@ -27,10 +27,7 @@ export function StatusStepper({
   const index = sequence.indexOf(current);
   const offPath = index === -1;
 
-  type Step = {
-    value: string;
-    state: "done" | "current" | "upcoming" | "ended";
-  };
+  type Step = { value: string; state: StepState };
   const steps: Step[] = sequence.map((value, i) => ({
     value,
     state: offPath
@@ -41,19 +38,22 @@ export function StatusStepper({
           ? "current"
           : "upcoming",
   }));
-  if (offPath) steps.push({ value: current, state: "ended" });
+  if (offPath) steps.push({ value: current, state: "blocked" });
 
-  const stateText: Record<Step["state"], string> = {
+  const stateText: Record<StepState, string> = {
     done: d.stepDone,
     current: d.stepCurrent,
     upcoming: d.stepUpcoming,
-    ended: d.stepEnded,
+    blocked: d.stepEnded,
   };
 
   return (
     <ol
       aria-label={d.stepperLabel}
-      className={cn("flex flex-wrap items-center gap-x-2 gap-y-2", className)}
+      className={cn(
+        "flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center md:gap-x-2 md:gap-y-2",
+        className
+      )}
     >
       {steps.map((step, i) => (
         <li
@@ -65,8 +65,8 @@ export function StatusStepper({
             <span
               aria-hidden
               className={cn(
-                "h-px w-4 sm:w-6",
-                step.state === "upcoming" || step.state === "ended"
+                "hidden h-px w-4 sm:w-6 md:block",
+                step.state === "upcoming" || step.state === "blocked"
                   ? "bg-ro-line"
                   : "bg-[var(--ro-plum-900)]"
               )}
@@ -81,7 +81,7 @@ export function StatusStepper({
                 "bg-[var(--ro-plum-100)] text-[var(--ro-plum-900)]",
               step.state === "upcoming" &&
                 "border border-ro-line text-ro-muted",
-              step.state === "ended" &&
+              step.state === "blocked" &&
                 "bg-[#E6E0EA] font-semibold text-[var(--ro-ink-500)]"
             )}
           >
@@ -92,7 +92,7 @@ export function StatusStepper({
                 step.state === "current" && "bg-ro-canvas",
                 step.state === "done" && "bg-[var(--ro-plum-900)]",
                 step.state === "upcoming" && "bg-[var(--ro-ink-300)]",
-                step.state === "ended" && "bg-[var(--ro-ink-500)]"
+                step.state === "blocked" && "bg-[var(--ro-ink-500)]"
               )}
             />
             {getStatusLabel(dict, domain, step.value)}
@@ -103,3 +103,6 @@ export function StatusStepper({
     </ol>
   );
 }
+
+/** Alias matching Part 02 P18 naming. */
+export const Stepper = StatusStepper;

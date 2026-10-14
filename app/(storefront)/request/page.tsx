@@ -1,5 +1,6 @@
 import { RequestForm } from "@/components/storefront/request-form";
 import type { Metadata } from "next";
+import { getPublishedPublicOfferBySlug } from "@/lib/offers/service";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { storefrontMetadata } from "@/lib/seo";
 
@@ -14,15 +15,38 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-export default async function RequestPage() {
+export default async function RequestPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ offer?: string }>;
+}) {
   const { locale, dict } = await getRequestDictionary();
+  const sp = await searchParams;
+  let notesDefault = "";
+  if (sp.offer) {
+    const offer = await getPublishedPublicOfferBySlug(sp.offer);
+    if (offer) {
+      const title =
+        locale === "ar"
+          ? offer.titleAr || offer.titleEn
+          : offer.titleEn || offer.titleAr;
+      notesDefault =
+        locale === "ar"
+          ? `استفسار عن العرض: ${title}`
+          : `Inquiry about offer: ${title}`;
+    }
+  }
+
   return (
     <RequestForm
       locale={locale}
+      notesDefault={notesDefault}
       labels={{
         title: dict.request.title,
         name: dict.request.name,
         phone: dict.request.phone,
+        phonePlaceholder: dict.request.phonePlaceholder,
+        phoneHelper: dict.request.phoneHelper,
         notes: dict.request.notes,
         country: dict.request.country,
         shippingNote: dict.request.shippingNote,

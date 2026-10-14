@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import {
   DataTable,
   DataTableHead,
@@ -7,22 +8,83 @@ import {
   Tr,
 } from "@/components/admin/data-table";
 import { PageHeader } from "@/components/admin/page-header";
+import { AdminTableFilters } from "@/components/admin/table-filters";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusChip } from "@/components/ui/status-chip";
 import { getRequestDictionary } from "@/lib/i18n/server";
+import { wholesaleNextActor } from "@/lib/ui/status";
 import { getStatusChipProps } from "@/lib/ui/status-labels";
+import { WHOLESALE_STATUSES } from "@/lib/wholesale/constants";
 import { listWholesaleRequestsForAdmin } from "@/lib/wholesale/service";
 
-export default async function AdminWholesalePage() {
+export default async function AdminWholesalePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; q?: string }>;
+}) {
+  const { tab: tabRaw, q: qRaw } = await searchParams;
   const { dict } = await getRequestDictionary();
   const a = dict.admin;
   const u = dict.adminUi;
   const requests = await listWholesaleRequestsForAdmin();
+  const q = qRaw?.trim().toLowerCase() ?? "";
+  const tab = tabRaw?.trim() || "all";
+
+  const rows = requests.map((r) => ({
+    r,
+    waiting: wholesaleNextActor(r.status) === "admin",
+  }));
+
+  const counts: Record<string, number> = {
+    all: rows.length,
+    waiting: rows.filter((x) => x.waiting).length,
+  };
+  for (const s of WHOLESALE_STATUSES) {
+    counts[s] = rows.filter((x) => x.r.status === s).length;
+  }
+
+  const filtered = rows.filter(({ r, waiting }) => {
+    if (tab === "waiting") {
+      if (!waiting) return false;
+    } else if (tab !== "all" && r.status !== tab) {
+      return false;
+    }
+    if (!q) return true;
+    const hay = [r.reference, r.trader.displayName, r.trader.email]
+      .join(" ")
+      .toLowerCase();
+    return hay.includes(q);
+  });
+
+  const statusLabel = (status: string) =>
+    u.status.wholesale[status] ??
+    dict.trader.wholesaleStatus[status] ??
+    status;
 
   return (
     <section className="space-y-6">
       <PageHeader title={a.wholesale} description={u.wholesaleLead} />
-      {requests.length === 0 ? (
+      <Suspense fallback={null}>
+        <AdminTableFilters
+          tabsLabel={u.filterTabs}
+          searchLabel={u.search}
+          searchPlaceholder={u.searchPlaceholder}
+          tabs={[
+            { id: "all", label: u.filterAll, count: counts.all },
+            {
+              id: "waiting",
+              label: u.filterWaiting,
+              count: counts.waiting,
+            },
+            ...WHOLESALE_STATUSES.map((s) => ({
+              id: s,
+              label: statusLabel(s),
+              count: counts[s] ?? 0,
+            })),
+          ]}
+        />
+      </Suspense>
+      {filtered.length === 0 ? (
         <div className="border border-ro-line">
           <EmptyState title={u.emptyTitle} body={u.emptyBody} />
         </div>
@@ -33,11 +95,12 @@ export default async function AdminWholesalePage() {
             <Th>{u.colTrader}</Th>
             <Th>{u.colMode}</Th>
             <Th>{a.colStatus}</Th>
+            <Th>{u.colShipping}</Th>
             <Th>{u.colLines}</Th>
             <Th />
           </DataTableHead>
           <tbody>
-            {requests.map((r) => (
+            {filtered.map(({ r, waiting }) => (
               <Tr key={r.id}>
                 <Td className="font-medium">{r.reference}</Td>
                 <Td>
@@ -54,11 +117,21 @@ export default async function AdminWholesalePage() {
                       : r.requestMode}
                 </Td>
                 <Td>
-                  <StatusChip
-                    size="sm"
-                    {...getStatusChipProps(dict, "wholesale", r.status)}
-                  />
+                  <span className="flex flex-wrap items-center gap-2">
+                    <StatusChip
+                      size="sm"
+                      {...getStatusChipProps(dict, "wholesale", r.status)}
+                    />
+                    {waiting ? (
+                      <StatusChip
+                        size="sm"
+                        tone="attention"
+                        label={u.waitingOnYou}
+                      />
+                    ) : null}
+                  </span>
                 </Td>
+                <Td className="text-ro-muted">{u.shippingPlaceholder}</Td>
                 <Td className="tabular-nums">{r._count.lines}</Td>
                 <Td>
                   <Link

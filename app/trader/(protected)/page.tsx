@@ -1,15 +1,18 @@
 import Link from "next/link";
 import { Handshake, Package } from "lucide-react";
+import { DealCard } from "@/components/trader/deal-card";
 import { TaskCard } from "@/components/trader/task-card";
-import { StatusChip } from "@/components/ui/status-chip";
+import { Timeline } from "@/components/ui/timeline";
 import { requireTraderSession } from "@/lib/auth/trader-session";
 import { listDealsForTrader } from "@/lib/deals/service";
+import { formatDate, formatRelative } from "@/lib/i18n/format";
 import { listPublishedPublicOffers } from "@/lib/offers/service";
 import { listWholesaleRequestsForTrader } from "@/lib/wholesale/service";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { dealNextActor, getStatusMeta } from "@/lib/ui/status";
 import {
   dealStatusLabel,
+  fmt,
   wholesaleStatusLabel,
 } from "@/lib/ui/trader-labels";
 
@@ -36,18 +39,39 @@ export default async function TraderHomePage() {
     ...waitingDeals.map((d) => ({
       key: `deal-${d.id}`,
       href: `/trader/deals/${d.id}`,
-      title: d.reference,
-      meta: getStatusMeta("deal", d.status),
+      reference: d.reference,
+      title: d.title,
+      tone: getStatusMeta("deal", d.status).tone,
       label: dealStatusLabel(t, d.status),
     })),
     ...waitingWholesale.map((w) => ({
       key: `ws-${w.id}`,
       href: `/trader/wholesale/${w.id}`,
-      title: w.reference,
-      meta: getStatusMeta("wholesale", w.status),
+      reference: w.reference,
+      title: undefined as string | undefined,
+      tone: getStatusMeta("wholesale", w.status).tone,
       label: wholesaleStatusLabel(t, w.status),
     })),
   ];
+
+  const activity = [
+    ...deals.map((d) => ({
+      id: `deal-${d.id}`,
+      at: d.updatedAt,
+      title: fmt(t.activityDeal, { ref: d.reference }),
+      actor: t.actorRole.trader,
+      href: `/trader/deals/${d.id}`,
+    })),
+    ...wholesale.map((w) => ({
+      id: `ws-${w.id}`,
+      at: w.updatedAt,
+      title: fmt(t.activityWholesale, { ref: w.reference }),
+      actor: t.actorRole.trader,
+      href: `/trader/wholesale/${w.id}`,
+    })),
+  ]
+    .sort((a, b) => b.at.getTime() - a.at.getTime())
+    .slice(0, 5);
 
   const offerPreview = offers.slice(0, 4);
   const welcome = t.welcome.replace("{name}", session.displayName);
@@ -70,21 +94,17 @@ export default async function TraderHomePage() {
               {t.waitingIdle}
             </p>
           ) : (
-            <ul className="divide-y divide-ro-line border border-ro-line">
+            <ul className="space-y-3">
               {waiting.map((item) => (
                 <li key={item.key}>
-                  <Link
+                  <DealCard
                     href={item.href}
-                    className="flex flex-wrap items-center justify-between gap-2 p-4 text-sm hover:bg-ro-sunken"
-                  >
-                    <span className="font-medium">{item.title}</span>
-                    <StatusChip
-                      tone={item.meta.tone}
-                      label={item.label}
-                      size="sm"
-                    />
-                    <span className="text-ro-plum">{t.openRecord}</span>
-                  </Link>
+                    reference={item.reference}
+                    title={item.title}
+                    tone={item.tone}
+                    statusLabel={item.label}
+                    waitingLabel={t.waitingOnYou}
+                  />
                 </li>
               ))}
             </ul>
@@ -106,7 +126,7 @@ export default async function TraderHomePage() {
           />
           <Link
             href="/trader/deals"
-            className="inline-block text-sm text-ro-plum hover:underline"
+            className="inline-flex min-h-11 items-center border border-ro-line px-4 text-sm font-medium text-ro-plum transition-colors hover:border-ro-ink/35 hover:bg-ro-sunken"
           >
             {myDeals}
           </Link>
@@ -131,7 +151,9 @@ export default async function TraderHomePage() {
                   ? o.titleAr || o.titleEn || o.slug
                   : o.titleEn || o.titleAr || o.slug;
               const summary =
-                locale === "ar" ? o.summaryAr || o.summaryEn : o.summaryEn || o.summaryAr;
+                locale === "ar"
+                  ? o.summaryAr || o.summaryEn
+                  : o.summaryEn || o.summaryAr;
               return (
                 <li
                   key={o.id}
@@ -151,6 +173,35 @@ export default async function TraderHomePage() {
           </ul>
         </div>
       ) : null}
+
+      <div className="space-y-3">
+        <h2 className="text-lg font-semibold">{t.recentActivity}</h2>
+        {activity.length === 0 ? (
+          <p className="text-sm text-ro-muted">{t.recentActivityEmpty}</p>
+        ) : (
+          <Timeline
+            label={t.recentActivity}
+            events={activity.map((ev) => ({
+              id: ev.id,
+              title: ev.title,
+              actor: ev.actor,
+              relativeTime: formatRelative(ev.at, locale),
+              absoluteTime: formatDate(ev.at, locale, {
+                dateStyle: "medium",
+                timeStyle: "short",
+              }),
+              detail: (
+                <Link
+                  href={ev.href}
+                  className="text-ro-plum hover:underline"
+                >
+                  {t.openRecord}
+                </Link>
+              ),
+            }))}
+          />
+        )}
+      </div>
     </section>
   );
 }

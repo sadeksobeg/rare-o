@@ -14,6 +14,7 @@ import { ProductGallery } from "@/components/storefront/product-gallery";
 import { StickyCtaBar } from "@/components/storefront/sticky-cta-bar";
 import { AvailabilityChip } from "@/components/storefront/catalog/availability-chip";
 import { PriceBlock } from "@/components/storefront/catalog/price-block";
+import { ProductBadges } from "@/components/storefront/catalog/product-badges";
 import { ProductGrid } from "@/components/storefront/catalog/product-grid";
 import { SpecTable } from "@/components/storefront/catalog/spec-table";
 import { Button, ButtonLink } from "@/components/ui/button";
@@ -101,6 +102,7 @@ export default async function ProductPage({
 
   const images = product.images.map((img) => ({
     path: img.path,
+    kind: img.kind,
     alt:
       (locale === "ar" ? img.altAr || img.altEn : img.altEn || img.altAr) ||
       name ||
@@ -161,21 +163,27 @@ export default async function ProductPage({
       </nav>
 
       <section className="grid gap-8 lg:grid-cols-12 lg:gap-12">
-        <ProductGallery
-          images={images}
-          plateCaption={dict.catalog.photoCaption}
-          priority
-          className="min-w-0 lg:col-span-7"
-          labels={{
-            gallery: dict.product.galleryLabel,
-            showImage: dict.product.galleryShowImage,
-            enlarge: dict.product.galleryEnlarge,
-            prev: dict.product.galleryPrev,
-            next: dict.product.galleryNext,
-            close: dict.common.close,
-            counter: dict.product.galleryCounter,
-          }}
-        />
+        <div className="relative min-w-0 lg:col-span-7">
+          <ProductBadges
+            product={product}
+            locale={locale}
+            className="z-20"
+          />
+          <ProductGallery
+            images={images}
+            plateCaption={dict.catalog.photoCaption}
+            priority
+            labels={{
+              gallery: dict.product.galleryLabel,
+              showImage: dict.product.galleryShowImage,
+              enlarge: dict.product.galleryEnlarge,
+              prev: dict.product.galleryPrev,
+              next: dict.product.galleryNext,
+              close: dict.common.close,
+              counter: dict.product.galleryCounter,
+            }}
+          />
+        </div>
         <div className="space-y-5 lg:col-span-5 lg:sticky lg:top-24 lg:self-start">
           {categoryName ? (
             <p className="ro-type-overline text-ro-plum">{categoryName}</p>
@@ -257,6 +265,7 @@ export default async function ProductPage({
               </ButtonLink>
             </div>
           )}
+          <HandoffExplainer dict={dict} compact />
         </div>
       </section>
 
@@ -277,8 +286,6 @@ export default async function ProductPage({
           <ProductGrid products={related} locale={locale} dict={dict} />
         </section>
       ) : null}
-
-      <HandoffExplainer dict={dict} compact />
 
       {available ? (
         <StickyCtaBar watchId="pdp-cta">

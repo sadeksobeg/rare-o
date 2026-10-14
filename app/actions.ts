@@ -70,16 +70,16 @@ export async function adminLoginAction(
     password: formData.get("password"),
   });
   if (!parsed.success) {
-    return { ok: false, error: "Invalid credentials payload" };
+    return { ok: false, error: "LOGIN_INVALID" };
   }
 
   const admin = await prisma.adminUser.findUnique({
     where: { email: parsed.data.email.toLowerCase() },
   });
-  if (!admin) return { ok: false, error: "Invalid email or password" };
+  if (!admin) return { ok: false, error: "LOGIN_INVALID" };
 
   const valid = await verifyPassword(parsed.data.password, admin.passwordHash);
-  if (!valid) return { ok: false, error: "Invalid email or password" };
+  if (!valid) return { ok: false, error: "LOGIN_INVALID" };
 
   const token = await createAdminSessionToken({
     sub: admin.id,
@@ -121,10 +121,29 @@ export async function upsertProductAction(
     status: formData.get("status"),
     availability: formData.get("availability"),
     wholesaleEligible: formData.get("wholesaleEligible") === "on",
+    badgeNew: formData.get("badgeNew") === "on",
+    badgeFeatured: formData.get("badgeFeatured") === "on",
+    badgeSale: formData.get("badgeSale") === "on",
   });
 
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid product" };
+  }
+
+  if (parsed.data.status === "published") {
+    if (!parsed.data.nameAr.trim()) {
+      return { ok: false, error: "PUBLISH_NEEDS_NAME_AR" };
+    }
+    if (id) {
+      const imageCount = await prisma.productImage.count({
+        where: { productId: id },
+      });
+      if (imageCount < 1) {
+        return { ok: false, error: "PUBLISH_NEEDS_IMAGE" };
+      }
+    } else {
+      return { ok: false, error: "PUBLISH_NEEDS_IMAGE" };
+    }
   }
 
   try {

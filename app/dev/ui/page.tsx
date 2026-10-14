@@ -7,6 +7,9 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Loader } from "@/components/ui/loader";
 import { MaterialPlate } from "@/components/storefront/material-plate";
+import { PrimitivesB1Gallery } from "@/components/dev/primitives-b1-gallery";
+import { PrimitivesB2Gallery } from "@/components/dev/primitives-b2-gallery";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getRequestLocale } from "@/lib/i18n/server";
 
 export const metadata = {
@@ -40,6 +43,87 @@ export default async function DevUiPage() {
   }
 
   const locale = await getRequestLocale();
+  const dict = getDictionary(locale);
+  const b1 =
+    locale === "ar"
+      ? {
+          locale: "ar" as const,
+          switchOn: dict.common.switchOn,
+          switchOff: dict.common.switchOff,
+          selectLabel: "الدولة",
+          selectHelper: "اختر من القائمة",
+          selectError: "هذا الحقل مطلوب",
+          selectDisabled: "غير متاح حالياً",
+          optA: "سوريا",
+          optB: "الإمارات",
+          optC: "أخرى",
+          checkLabel: "أوافق على المتابعة",
+          checkDisabled: "خيار معطّل",
+          checkError: "يجب الموافقة للمتابعة",
+          radioGroup: "طريقة التواصل",
+          radioA: "واتساب",
+          radioB: "هاتف",
+          switchLabel: "الإشعارات",
+          switchDisabled: "خيار النظام",
+          cardPlain: "بطاقة عادية",
+          cardInverse: "بطاقة معكوسة",
+          cardMedia: "بطاقة بوسائط",
+          cardInteractive: "بطاقة تفاعلية (رابط)",
+          cardBody: "نص توضيحي قصير داخل البطاقة.",
+          tabsLabel: "أقسام العرض",
+          tabOne: "الكل",
+          tabTwo: "غير مقروءة",
+          tabThree: "معطّل",
+          tabPanel: "محتوى اللوحة",
+          menuLabel: "إجراءات",
+          menuEdit: "تعديل",
+          menuShare: "مشاركة",
+          menuDelete: "حذف",
+          menuDisabled: "غير متاح",
+          statesTitle: "الحالات",
+          defaultState: "افتراضي",
+          errorState: "خطأ",
+          disabledState: "معطّل",
+        }
+      : {
+          locale: "en" as const,
+          switchOn: dict.common.switchOn,
+          switchOff: dict.common.switchOff,
+          selectLabel: "Country",
+          selectHelper: "Choose from the list",
+          selectError: "This field is required",
+          selectDisabled: "Unavailable right now",
+          optA: "Syria",
+          optB: "UAE",
+          optC: "Other",
+          checkLabel: "I agree to continue",
+          checkDisabled: "Disabled option",
+          checkError: "Consent is required",
+          radioGroup: "Contact method",
+          radioA: "WhatsApp",
+          radioB: "Phone",
+          switchLabel: "Notifications",
+          switchDisabled: "System option",
+          cardPlain: "Plain card",
+          cardInverse: "Inverse card",
+          cardMedia: "Media card",
+          cardInteractive: "Interactive card (link)",
+          cardBody: "Short supporting copy inside the card.",
+          tabsLabel: "Demo sections",
+          tabOne: "All",
+          tabTwo: "Unread",
+          tabThree: "Disabled",
+          tabPanel: "Panel content",
+          menuLabel: "Actions",
+          menuEdit: "Edit",
+          menuShare: "Share",
+          menuDelete: "Delete",
+          menuDisabled: "Unavailable",
+          statesTitle: "States",
+          defaultState: "default",
+          errorState: "error",
+          disabledState: "disabled",
+        };
 
   return (
     <div className="min-h-screen bg-ro-canvas text-ro-ink">
@@ -147,7 +231,7 @@ export default async function DevUiPage() {
         </section>
 
         <section className="space-y-4">
-          <h2 className="ro-type-h2">Primitives</h2>
+          <h2 className="ro-type-h2">Primitives (P1)</h2>
           <div className="flex flex-wrap gap-3">
             <Button>Primary</Button>
             <Button variant="secondary">Secondary</Button>
@@ -182,6 +266,124 @@ export default async function DevUiPage() {
             body={locale === "ar" ? "جرّب مسح الفلاتر." : "Try clearing filters."}
             actionHref="/catalog"
             actionLabel={locale === "ar" ? "الكتالوج" : "Catalog"}
+          />
+        </section>
+
+        <section className="space-y-4" id="p2-b1">
+          <h2 className="ro-type-h2">
+            {locale === "ar"
+              ? "بدائيات P2 — الشريحة B1"
+              : "P2 primitives — Slice B1"}
+          </h2>
+          <p className="max-w-2xl text-sm text-ro-text-2">
+            {locale === "ar"
+              ? "Select · Checkbox/Radio · Switch · Card · Tabs · Menu/Popover — الحالات، والعربية/الإنجليزية عبر مبدّل اللغة، والفاتح و.ro-inverse."
+              : "Select · Checkbox/Radio · Switch · Card · Tabs · Menu/Popover — all states; AR/EN via locale switch; light and .ro-inverse."}
+          </p>
+          <PrimitivesB1Gallery copy={b1} />
+        </section>
+
+        <section className="space-y-4" id="p2-b2">
+          <h2 className="ro-type-h2">
+            {locale === "ar"
+              ? "بدائيات P2 — الشريحة B2"
+              : "P2 primitives — Slice B2"}
+          </h2>
+          <p className="max-w-2xl text-sm text-ro-text-2">
+            {locale === "ar"
+              ? "Timeline · KeyValueList · Pagination · Breadcrumb · Divider، ومواءمة الجزئية: Button · TextField · StatusChip · Dialog · Toast · Skeleton · EmptyState · Banner · Loader · Stepper."
+              : "Timeline · KeyValueList · Pagination · Breadcrumb · Divider, plus PARTIAL alignment: Button · TextField · StatusChip · Dialog · Toast · Skeleton · EmptyState · Banner · Loader · Stepper."}
+          </p>
+          <PrimitivesB2Gallery
+            copy={
+              locale === "ar"
+                ? {
+                    locale: "ar",
+                    dict,
+                    sectionLight: "سطح فاتح",
+                    sectionInverse: "سطح .ro-inverse",
+                    btnPrimary: "حفظ",
+                    btnSecondary: "إلغاء",
+                    btnText: "تفاصيل",
+                    btnDanger: "حذف",
+                    btnQuiet: "المزيد",
+                    btnInverseP: "استكشف",
+                    btnInverseS: "قصتنا",
+                    btnRipple: "ابتدائي مع تموج",
+                    fieldLabel: "الاسم",
+                    fieldHelper: "كما يظهر للعميل",
+                    fieldError: "هذا الحقل مطلوب",
+                    fieldDense: "حقل مكثّف (40)",
+                    fieldCounter: "ملاحظة قصيرة",
+                    areaLabel: "التفاصيل",
+                    dialogOpen: "فتح الحوار",
+                    dialogTitle: "تفاصيل السجل",
+                    dialogBody: "محتوى الحوار — على الشاشات الضيقة يصبح ورقة سفلية.",
+                    confirmOpen: "تأكيد خطر",
+                    confirmTitle: "حذف السجل؟",
+                    confirmBody: "لا يمكن التراجع عن هذا الإجراء.",
+                    toastInfo: "تم الحفظ.",
+                    toastError: "تعذّر الحفظ.",
+                    toastFireInfo: "إشعار معلومات",
+                    toastFireError: "إشعار خطأ (ثابت)",
+                    emptyTitle: "لا نتائج",
+                    emptyBody: "جرّب مسح الفلاتر.",
+                    emptyAction: "مسح الفلاتر",
+                    bannerInfo: "تنبيه هادئ للمعلومة.",
+                    bannerDanger: "تنبيه خطأ — role=alert.",
+                    timelineTitle: "فتح التحويل",
+                    kvRef: "المرجع",
+                    kvStatus: "الحالة",
+                    kvCustomer: "العميل",
+                    crumbHome: "الرئيسية",
+                    crumbRequests: "الطلبات",
+                    crumbDetail: "RO-1042",
+                    pageOf: dict.common.paginationPageOf,
+                  }
+                : {
+                    locale: "en",
+                    dict,
+                    sectionLight: "Light surface",
+                    sectionInverse: ".ro-inverse surface",
+                    btnPrimary: "Save",
+                    btnSecondary: "Cancel",
+                    btnText: "Details",
+                    btnDanger: "Delete",
+                    btnQuiet: "More",
+                    btnInverseP: "Explore",
+                    btnInverseS: "Our story",
+                    btnRipple: "Primary with ripple",
+                    fieldLabel: "Name",
+                    fieldHelper: "As shown to the customer",
+                    fieldError: "This field is required",
+                    fieldDense: "Dense field (40)",
+                    fieldCounter: "Short note",
+                    areaLabel: "Details",
+                    dialogOpen: "Open dialog",
+                    dialogTitle: "Record details",
+                    dialogBody: "Dialog content — becomes a bottom sheet below 640px.",
+                    confirmOpen: "Destructive confirm",
+                    confirmTitle: "Delete record?",
+                    confirmBody: "This action cannot be undone.",
+                    toastInfo: "Saved.",
+                    toastError: "Could not save.",
+                    toastFireInfo: "Info toast",
+                    toastFireError: "Error toast (persists)",
+                    emptyTitle: "No results",
+                    emptyBody: "Try clearing filters.",
+                    emptyAction: "Clear filters",
+                    bannerInfo: "Calm informational banner.",
+                    bannerDanger: "Error banner — role=alert.",
+                    timelineTitle: "Handoff opened",
+                    kvRef: "Reference",
+                    kvStatus: "Status",
+                    kvCustomer: "Customer",
+                    crumbHome: "Home",
+                    crumbRequests: "Requests",
+                    crumbDetail: "RO-1042",
+                    pageOf: dict.common.paginationPageOf,
+                  }
+            }
           />
         </section>
       </main>

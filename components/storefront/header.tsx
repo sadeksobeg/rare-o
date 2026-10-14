@@ -94,13 +94,23 @@ export function StorefrontHeader({
 
   return (
     <header
+      data-over-hero={overHero ? "true" : "false"}
       className={cn(
-        "sticky top-0 z-50 transition-[background-color,border-color,color,backdrop-filter] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-        overHero
-          ? "border-b border-transparent bg-transparent text-ro-cream"
-          : scrolled
-            ? "border-b border-ro-line bg-ro-cream/95 text-ro-black backdrop-blur-md"
-            : "border-b border-transparent bg-ro-cream text-ro-black"
+        "z-50 transition-[background-color,border-color,color,backdrop-filter] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        /* Home: fixed over the hero (hero at y=0). Solid sand-100 cream after 80px — no translucent/grey blur. */
+        isHome
+          ? cn(
+              "fixed inset-x-0 top-0",
+              overHero
+                ? "border-b border-transparent bg-transparent text-ro-cream"
+                : "border-b border-ro-line bg-[var(--ro-sand-100)] text-ro-black"
+            )
+          : cn(
+              "sticky top-0",
+              scrolled
+                ? "border-b border-ro-line bg-[var(--ro-sand-100)] text-ro-black"
+                : "border-b border-transparent bg-ro-cream text-ro-black"
+            )
       )}
     >
       <div
@@ -117,11 +127,11 @@ export function StorefrontHeader({
           <BrandMark
             variant="small"
             tone={overHero ? "on-dark" : "on-light"}
-            size="sm"
+            size="md"
             priority
             className="transition-transform duration-500 group-hover:scale-[1.04]"
           />
-          <span className="font-display text-[1.05rem] tracking-[0.32em] transition-colors duration-500 md:text-xl">
+          <span className="font-display text-[1.25rem] tracking-[0.28em] transition-colors duration-500 md:text-[1.55rem]">
             {dict.brand}
           </span>
         </Link>
@@ -130,7 +140,8 @@ export function StorefrontHeader({
           className={cn(
             "hidden items-center gap-10 lg:flex xl:gap-12",
             navType,
-            overHero ? "text-ro-ivory-muted" : "text-ro-muted"
+            /* Solid sand (not ivory-muted rgba) so over-hero contrast stays ≥ 4.5 on ink. */
+            overHero ? "text-ro-cream" : "text-ro-muted"
           )}
           aria-label={dict.nav.primaryAria}
         >

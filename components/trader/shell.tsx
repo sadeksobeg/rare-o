@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { traderLogoutAction } from "@/app/deal-actions";
 import { AdminLocaleToggle } from "@/components/admin/locale-toggle";
+import { BrandWallpaper } from "@/components/brand";
 import { OfflineBanner } from "@/components/system/offline-banner";
 import { AppToast } from "@/components/system/app-toast";
 import {
@@ -53,7 +54,13 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
 
   return (
     <AppToast dismissLabel={dict.common.toastDismiss}>
-      <div className="min-h-screen bg-ro-canvas text-ro-ink">
+      <div className="relative min-h-screen overflow-x-clip bg-[var(--ro-sand-100)] text-ro-ink">
+        <BrandWallpaper
+          tone="cream"
+          patternId="ro-trader-wallpaper"
+          className="z-0 opacity-[0.55]"
+        />
+        <div className="relative z-10">
         <OfflineBanner />
         <header className="sticky top-0 z-30 border-b border-ro-line bg-ro-paper/95 backdrop-blur">
           <div className="mx-auto flex h-14 max-w-[1120px] items-center justify-between gap-4 px-4">
@@ -87,6 +94,7 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
         <TraderBottomTabs tabs={tabs} />
+        </div>
       </div>
     </AppToast>
   );

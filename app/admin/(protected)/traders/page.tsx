@@ -13,6 +13,7 @@ import { PageHeader } from "@/components/admin/page-header";
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusChip } from "@/components/ui/status-chip";
+import { uiVisibleTraderWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { getStatusChipProps } from "@/lib/ui/status-labels";
@@ -22,6 +23,7 @@ export default async function AdminTradersPage() {
   const a = dict.admin;
   const u = dict.adminUi;
   const traders = await prisma.traderAccount.findMany({
+    where: uiVisibleTraderWhere(),
     orderBy: { createdAt: "desc" },
     include: { _count: { select: { deals: true } } },
   });

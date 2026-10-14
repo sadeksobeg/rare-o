@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import {
   DataTable,
   DataTableHead,
@@ -7,22 +8,89 @@ import {
   Tr,
 } from "@/components/admin/data-table";
 import { PageHeader } from "@/components/admin/page-header";
+import { AdminTableFilters } from "@/components/admin/table-filters";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusChip } from "@/components/ui/status-chip";
+import { DEAL_STATUSES } from "@/lib/deals/constants";
 import { listDealsForAdmin } from "@/lib/deals/service";
 import { getRequestDictionary } from "@/lib/i18n/server";
+import { dealNextActor } from "@/lib/ui/status";
 import { getStatusChipProps } from "@/lib/ui/status-labels";
 
-export default async function AdminDealsPage() {
+export default async function AdminDealsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; q?: string }>;
+}) {
+  const { tab: tabRaw, q: qRaw } = await searchParams;
   const { dict } = await getRequestDictionary();
   const a = dict.admin;
   const u = dict.adminUi;
   const deals = await listDealsForAdmin();
+  const q = qRaw?.trim().toLowerCase() ?? "";
+
+  const rows = deals.map((d) => {
+    const last = (d.entries[0]?.actorRole ?? null) as "trader" | "admin" | null;
+    const waiting = dealNextActor(d.status, last) === "admin";
+    return { d, waiting, last };
+  });
+
+  const counts: Record<string, number> = {
+    all: rows.length,
+    waiting: rows.filter((r) => r.waiting).length,
+  };
+  for (const s of DEAL_STATUSES) {
+    counts[s] = rows.filter((r) => r.d.status === s).length;
+  }
+
+  const tab = tabRaw?.trim() || "all";
+  const filtered = rows.filter(({ d, waiting }) => {
+    if (tab === "waiting") {
+      if (!waiting) return false;
+    } else if (tab !== "all" && d.status !== tab) {
+      return false;
+    }
+    if (!q) return true;
+    const hay = [
+      d.reference,
+      d.title,
+      d.trader.displayName,
+      d.trader.email,
+    ]
+      .join(" ")
+      .toLowerCase();
+    return hay.includes(q);
+  });
+
+  const statusLabel = (status: string) =>
+    u.status.deal[status] ??
+    dict.trader.dealStatus[status] ??
+    status;
 
   return (
     <section className="space-y-6">
       <PageHeader title={a.deals} description={u.dealsLead} />
-      {deals.length === 0 ? (
+      <Suspense fallback={null}>
+        <AdminTableFilters
+          tabsLabel={u.filterTabs}
+          searchLabel={u.search}
+          searchPlaceholder={u.searchPlaceholder}
+          tabs={[
+            { id: "all", label: u.filterAll, count: counts.all },
+            {
+              id: "waiting",
+              label: u.filterWaiting,
+              count: counts.waiting,
+            },
+            ...DEAL_STATUSES.map((s) => ({
+              id: s,
+              label: statusLabel(s),
+              count: counts[s] ?? 0,
+            })),
+          ]}
+        />
+      </Suspense>
+      {filtered.length === 0 ? (
         <div className="border border-ro-line">
           <EmptyState title={u.emptyTitle} body={u.emptyBody} />
         </div>
@@ -38,7 +106,7 @@ export default async function AdminDealsPage() {
             <Th />
           </DataTableHead>
           <tbody>
-            {deals.map((d) => (
+            {filtered.map(({ d, waiting }) => (
               <Tr key={d.id}>
                 <Td className="font-medium">{d.reference}</Td>
                 <Td>
@@ -56,10 +124,19 @@ export default async function AdminDealsPage() {
                       : d.dealKind}
                 </Td>
                 <Td>
-                  <StatusChip
-                    size="sm"
-                    {...getStatusChipProps(dict, "deal", d.status)}
-                  />
+                  <span className="flex flex-wrap items-center gap-2">
+                    <StatusChip
+                      size="sm"
+                      {...getStatusChipProps(dict, "deal", d.status)}
+                    />
+                    {waiting ? (
+                      <StatusChip
+                        size="sm"
+                        tone="attention"
+                        label={u.waitingOnYou}
+                      />
+                    ) : null}
+                  </span>
                 </Td>
                 <Td className="tabular-nums">{d._count.entries}</Td>
                 <Td>

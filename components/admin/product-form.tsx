@@ -33,6 +33,9 @@ type ProductValues = {
   status?: string;
   availability?: string;
   wholesaleEligible?: boolean;
+  badgeNew?: boolean;
+  badgeFeatured?: boolean;
+  badgeSale?: boolean;
 };
 
 export function ProductForm({
@@ -54,6 +57,15 @@ export function ProductForm({
 
   const categoryName = (c: CategoryOption) =>
     (locale === "ar" ? c.nameAr || c.nameEn : c.nameEn || c.nameAr) || c.slug;
+
+  const errorText =
+    state && !state.ok
+      ? state.error === "PUBLISH_NEEDS_NAME_AR"
+        ? f.publishNeedsNameAr
+        : state.error === "PUBLISH_NEEDS_IMAGE"
+          ? f.publishNeedsImage
+          : state.error
+      : null;
 
   return (
     <form action={action} className="max-w-2xl space-y-4">
@@ -167,6 +179,7 @@ export function ProductForm({
           <select
             name="status"
             defaultValue={product?.status ?? "draft"}
+            aria-describedby="publish-rules-help"
             className={controlClass}
           >
             {(["draft", "published", "archived"] as const).map((s) => (
@@ -175,6 +188,12 @@ export function ProductForm({
               </option>
             ))}
           </select>
+          <span
+            id="publish-rules-help"
+            className="block text-xs text-ro-muted"
+          >
+            {f.publishRulesHint}
+          </span>
         </label>
         <label className={controlLabelClass}>
           <span className={controlLabelTextClass}>
@@ -200,6 +219,29 @@ export function ProductForm({
           </span>
         </label>
       </div>
+      <fieldset className="space-y-3 rounded-[var(--ro-r-sm)] border border-ro-line p-4">
+        <legend className={controlLabelTextClass}>شارات المتجر</legend>
+        <p className="text-xs text-ro-muted">
+          تظهر على بطاقة المنتج وصورة القطعة. يتحكم الأدمن بكل شارة بشكل مستقل.
+        </p>
+        {(
+          [
+            ["badgeNew", "جديد", product?.badgeNew],
+            ["badgeFeatured", "مميّز", product?.badgeFeatured],
+            ["badgeSale", "خصم", product?.badgeSale],
+          ] as const
+        ).map(([name, label, checked]) => (
+          <label key={name} className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              name={name}
+              defaultChecked={checked}
+              className="size-4"
+            />
+            <span>{label}</span>
+          </label>
+        ))}
+      </fieldset>
       <label className="flex items-start gap-2 text-sm">
         <input
           type="checkbox"
@@ -214,9 +256,9 @@ export function ProductForm({
           </span>
         </span>
       </label>
-      {state && !state.ok ? (
+      {errorText ? (
         <p role="alert" className={formErrorClass}>
-          {state.error}
+          {errorText}
         </p>
       ) : null}
       <Button type="submit" loading={pending}>

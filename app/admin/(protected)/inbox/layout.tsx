@@ -1,6 +1,6 @@
 import { InboxConversationList } from "@/components/admin/inbox-conversation-list";
 import type { InboxListRow } from "@/components/admin/inbox-conversation-list";
-import { InboxHealthBanner } from "@/components/admin/inbox-health";
+import { InboxConnectionBanner } from "@/components/admin/inbox-connection-banner";
 import { PageHeader } from "@/components/admin/page-header";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import {
@@ -21,8 +21,8 @@ function formatWhen(iso: string | null, locale: string): string {
 }
 
 /**
- * Inbox shell: header + health banner, then list | thread panes.
- * The thread page adds a third (business context) pane on wide screens.
+ * AD-03 inbox shell: banner + list | thread.
+ * ≥1280: list 340 + thread flex (+ context from thread page).
  */
 export default async function AdminInboxLayout({
   children,
@@ -35,36 +35,37 @@ export default async function AdminInboxLayout({
     getInboxHealthView(),
   ]);
 
-  const rows: InboxListRow[] = conversations.map((c) => ({
-    id: c.id,
-    displayLabel: c.displayLabel,
-    preview: c.lastMessagePreview || "—",
-    whenLabel: formatWhen(c.lastMessageAt, locale),
-    linkLabel: c.link.linked
-      ? `${dict.inbox.linkedAs}: ${
-          c.link.linkType === "retail_request"
-            ? dict.inbox.typeRetail
-            : c.link.linkType === "deal_proposal"
-              ? dict.inbox.typeDeal
-              : dict.inbox.typeWholesale
-        }`
-      : dict.inbox.notLinked,
-    hasUnread: c.hasUnread,
-    unreadCount: c.unreadCount,
-  }));
+  const rows: InboxListRow[] = conversations.map((c) => {
+    const linkLabel = c.link.linked
+      ? c.link.linkType === "retail_request"
+        ? dict.inbox.typeRetail
+        : c.link.linkType === "deal_proposal"
+          ? dict.inbox.typeDeal
+          : dict.inbox.typeWholesale
+      : dict.inbox.notLinked;
+    return {
+      id: c.id,
+      displayLabel: c.displayLabel,
+      preview: c.lastMessagePreview || "—",
+      whenLabel: formatWhen(c.lastMessageAt, locale),
+      linkLabel,
+      linked: c.link.linked,
+      hasUnread: c.hasUnread,
+      unreadCount: c.unreadCount,
+      searchText: c.displayLabel.toLowerCase(),
+    };
+  });
 
   return (
-    <section className="space-y-4">
+    <section
+      data-admin-inbox
+      className="flex min-h-[calc(100vh-5.5rem)] flex-col gap-3"
+    >
       <PageHeader title={dict.inbox.title} description={dict.inbox.subtitle} />
-      <InboxHealthBanner health={health} dict={dict} />
-      <div className="grid gap-4 lg:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)]">
-        <InboxConversationList
-          rows={rows}
-          heading={dict.inbox.conversations}
-          unreadLabel={dict.inbox.unread}
-          emptyLabel={dict.inbox.empty}
-        />
-        <div className="min-w-0">{children}</div>
+      <InboxConnectionBanner health={health} dict={dict} />
+      <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[340px_minmax(0,1fr)]">
+        <InboxConversationList rows={rows} dict={dict} />
+        <div className="flex min-h-0 min-w-0 flex-col">{children}</div>
       </div>
     </section>
   );

@@ -19,6 +19,7 @@ import { HandoffExplainer } from "@/components/storefront/handoff-explainer";
 import { FilterBar } from "@/components/storefront/catalog/filter-bar";
 import { LoadMore } from "@/components/storefront/catalog/load-more";
 import { ProductGrid } from "@/components/storefront/catalog/product-grid";
+import { Reveal } from "@/components/storefront/motion";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { locale, dict } = await getRequestDictionary();
@@ -92,15 +93,31 @@ export default async function CatalogPage({
   );
 
   return (
-    <div className="space-y-8">
-      <header className="space-y-3">
-        <p className="ro-type-overline text-ro-plum">{dict.nav.catalog}</p>
-        <h1 className="ro-type-h1">{dict.catalog.title}</h1>
-        <p className="max-w-[60ch] text-ro-text-2">{dict.catalog.lead}</p>
-        <p className="text-sm text-ro-muted tabular-nums">
-          {formatNumber(total, locale)} {dict.home.pieces}
-        </p>
-      </header>
+    <div className="relative space-y-6 md:space-y-8">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 -top-6 h-56 opacity-70"
+        style={{
+          background:
+            "radial-gradient(ellipse 50% 70% at 90% 0%, rgba(82,39,124,0.08), transparent 70%)",
+        }}
+      />
+      <Reveal>
+        <header className="ro-section-accent relative space-y-3 pt-3">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="space-y-3">
+              <p className="ro-type-overline text-ro-plum">{dict.nav.catalog}</p>
+              <h1 className="ro-type-h1 md:text-5xl">{dict.catalog.title}</h1>
+              <p className="max-w-[52ch] text-ro-text-2 md:text-lg">
+                {dict.catalog.lead}
+              </p>
+            </div>
+            <p className="text-sm text-ro-muted tabular-nums">
+              {formatNumber(total, locale)} {dict.home.pieces}
+            </p>
+          </div>
+        </header>
+      </Reveal>
 
       {catalogTotal === 0 ? (
         <EmptyState

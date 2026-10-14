@@ -12,77 +12,98 @@ export function StorefrontFooter({
   locale: Locale;
 }) {
   const year = new Date().getFullYear();
+  const isAr = locale === "ar";
 
   return (
-    <footer className="ro-inverse bg-ro-ink text-ro-canvas">
-      <div className="mx-auto grid max-w-[1440px] gap-14 px-5 py-16 md:grid-cols-12 md:gap-10 md:px-8 md:py-20 lg:px-12">
-        <div className="space-y-6 md:col-span-5">
-          <div className="flex items-center gap-4">
-            <BrandMark variant="master" tone="on-dark" size="md" />
-            <p className="font-display text-2xl tracking-[0.28em] md:text-3xl">
-              {dict.brand}
+    <footer className="ro-inverse relative overflow-hidden bg-[var(--ro-ink-950)] text-ro-canvas">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 50% 40% at 80% 0%, rgba(82,39,124,0.18), transparent 70%), linear-gradient(180deg, #121016 0%, #0b080d 100%)",
+        }}
+      />
+
+      <div className="relative z-[1] mx-auto max-w-[1440px] px-5 pt-16 md:px-8 md:pt-20 lg:px-12">
+        <div className="grid gap-12 border-b border-[color-mix(in_srgb,var(--ro-sand-200)_14%,transparent)] pb-14 md:grid-cols-12 md:gap-10">
+          <div className="space-y-5 md:col-span-5">
+            <Link
+              href={href("/", locale)}
+              className="inline-flex items-center gap-4 transition-opacity hover:opacity-90"
+            >
+              <BrandMark variant="master" tone="on-dark" size="md" />
+              <span className="font-display text-2xl tracking-[0.26em] md:text-3xl">
+                {dict.brand}
+              </span>
+            </Link>
+            <p className="max-w-sm text-sm leading-relaxed text-[var(--ro-ink-200)]">
+              {dict.home.footerTagline}
             </p>
           </div>
-          <p className="max-w-sm text-sm leading-relaxed text-ro-text-2">
-            {dict.home.footerTagline}
-          </p>
-        </div>
 
-        <div className="md:col-span-3 md:col-start-7">
-          <p className="ro-type-overline mb-5 text-ro-text-muted">
-            {dict.home.footerExplore}
-          </p>
-          <nav
-            className="flex flex-col gap-3 text-sm text-ro-text-2"
-            aria-label={dict.home.footerExplore}
-          >
-            <Link href={href("/", locale)} className="hover:text-ro-canvas">
-              {dict.nav.home}
-            </Link>
-            <Link
-              href={href("/catalog", locale)}
-              className="hover:text-ro-canvas"
+          <div className="md:col-span-3 md:col-start-7">
+            <p className="ro-type-overline mb-5 text-[var(--ro-amber-500)]">
+              {dict.home.footerExplore}
+            </p>
+            <nav
+              className="flex flex-col gap-3.5 text-sm text-[var(--ro-ink-200)]"
+              aria-label={dict.home.footerExplore}
             >
-              {dict.nav.catalog}
-            </Link>
-            <Link
-              href={href("/offers", locale)}
-              className="hover:text-ro-canvas"
-            >
-              {dict.nav.offers}
-            </Link>
-            <Link
-              href={href("/contact", locale)}
-              className="hover:text-ro-canvas"
-            >
-              {dict.nav.contact}
-            </Link>
-            <Link
-              href={href("/privacy", locale)}
-              className="hover:text-ro-canvas"
-            >
-              {dict.privacy.title}
-            </Link>
-          </nav>
-        </div>
+              {(
+                [
+                  ["/", dict.nav.home],
+                  ["/catalog", dict.nav.catalog],
+                  ["/offers", dict.nav.offers],
+                  ["/contact", dict.nav.contact],
+                  ["/privacy", dict.privacy.title],
+                ] as const
+              ).map(([path, label]) => (
+                <Link
+                  key={path}
+                  href={href(path, locale)}
+                  className="w-fit transition-colors hover:text-ro-canvas"
+                >
+                  {label}
+                </Link>
+              ))}
+            </nav>
+          </div>
 
-        <div className="md:col-span-3">
-          <p className="ro-type-overline mb-5 text-ro-text-muted">
-            {dict.common.language}
-          </p>
-          <div className="flex gap-3 text-sm">
-            <Link href={href("/", "ar")} className="hover:text-ro-canvas">
-              ع
-            </Link>
-            <Link href={href("/", "en")} className="hover:text-ro-canvas">
-              EN
-            </Link>
+          <div className="md:col-span-3">
+            <p className="ro-type-overline mb-5 text-[var(--ro-amber-500)]">
+              {isAr ? "اللغة" : "Language"}
+            </p>
+            <div className="flex flex-col gap-3 text-sm">
+              <Link
+                href={href("/", "ar")}
+                hrefLang="ar"
+                lang="ar"
+                className={
+                  isAr
+                    ? "font-medium text-ro-canvas"
+                    : "text-[var(--ro-ink-200)] transition-colors hover:text-ro-canvas"
+                }
+              >
+                العربية
+              </Link>
+              <Link
+                href={href("/", "en")}
+                hrefLang="en"
+                lang="en"
+                className={
+                  !isAr
+                    ? "font-medium text-ro-canvas"
+                    : "text-[var(--ro-ink-200)] transition-colors hover:text-ro-canvas"
+                }
+              >
+                English
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="border-t border-ro-border">
-        <div className="mx-auto flex max-w-[1440px] flex-col gap-2 px-5 py-6 text-xs text-ro-text-muted md:flex-row md:items-center md:justify-between md:px-8 lg:px-12">
+        <div className="flex flex-col gap-2 py-6 text-xs text-[var(--ro-plum-300)] md:flex-row md:items-center md:justify-between">
           <p>
             © {year} {dict.brand}. {dict.home.footerRights}
           </p>

@@ -20,6 +20,7 @@ export function LoginForm({
   brand = "RARE OUD",
   showPasswordLabel = "Show",
   hidePasswordLabel = "Hide",
+  loginErrorLabel,
   inverse = false,
   localeSlot,
 }: {
@@ -35,11 +36,21 @@ export function LoginForm({
   brand?: string;
   showPasswordLabel?: string;
   hidePasswordLabel?: string;
+  /** Localized generic credentials error (maps LOGIN_INVALID). */
+  loginErrorLabel?: string;
   inverse?: boolean;
   localeSlot?: React.ReactNode;
 }) {
   const [state, formAction, pending] = useActionState(action, initial);
   const [reveal, setReveal] = useState(false);
+
+  const errorText =
+    state && !state.ok
+      ? state.error === "LOGIN_INVALID" ||
+        state.error === "Invalid email or password"
+        ? (loginErrorLabel ?? state.error)
+        : state.error
+      : null;
 
   return (
     <div
@@ -59,8 +70,8 @@ export function LoginForm({
             }}
             aria-hidden
           />
-          <Grain className="absolute inset-0 text-ro-canvas opacity-[0.06]" />
-          <Rings className="pointer-events-none absolute inset-0 m-auto h-[min(70vw,28rem)] w-[min(70vw,28rem)] text-ro-canvas opacity-[0.12]" />
+          <Grain className="absolute inset-0 z-0 text-ro-canvas opacity-[0.06]" />
+          <Rings className="pointer-events-none absolute inset-0 z-0 m-auto h-[min(70vw,28rem)] w-[min(70vw,28rem)] text-ro-canvas opacity-[0.12]" />
         </>
       ) : null}
 
@@ -108,9 +119,9 @@ export function LoginForm({
               {reveal ? hidePasswordLabel : showPasswordLabel}
             </button>
           </div>
-          {state && !state.ok ? (
+          {errorText ? (
             <Banner tone="danger" alert>
-              {state.error}
+              {errorText}
             </Banner>
           ) : null}
           <Button type="submit" className="w-full" loading={pending}>

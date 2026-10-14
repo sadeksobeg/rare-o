@@ -18,7 +18,7 @@ import {
 } from "@/lib/ui/form-classes";
 import { fmt } from "@/lib/ui/trader-labels";
 import { useRouter } from "next/navigation";
-import { useActionState, useTransition } from "react";
+import { useActionState, useState, useTransition } from "react";
 
 const initial: ActionResult | null = null;
 
@@ -28,6 +28,22 @@ function offerTone(status: string) {
     : status === "unpublished"
       ? "closed"
       : "neutral";
+}
+
+function publishErrorLabel(
+  f: Dictionary["adminUi"]["form"],
+  code: string
+): string {
+  switch (code) {
+    case "PUBLISH_NEEDS_TITLE_AR":
+      return f.publishNeedsTitleAr;
+    case "PUBLISH_NEEDS_SUMMARY_AR":
+      return f.publishNeedsSummaryAr;
+    case "PUBLISH_NEEDS_PRODUCT_OR_PLATE":
+      return f.publishNeedsProductOrPlate;
+    default:
+      return code;
+  }
 }
 
 export function PublicOfferForm({
@@ -61,6 +77,7 @@ export function PublicOfferForm({
   );
   const router = useRouter();
   const [statusPending, startStatus] = useTransition();
+  const [statusError, setStatusError] = useState<string | null>(null);
 
   const productName = (p: { nameEn: string; nameAr: string }) =>
     (locale === "ar" ? p.nameAr || p.nameEn : p.nameEn || p.nameAr) || "—";
@@ -162,7 +179,7 @@ export function PublicOfferForm({
       </form>
 
       {offer ? (
-        <div className="flex flex-wrap items-center gap-3 border border-ro-line p-4">
+        <div className="space-y-3 border border-ro-line p-4">
           <p className="flex w-full flex-wrap items-center gap-2 text-sm text-ro-muted">
             <span>{f.offerCurrentStatus}:</span>
             <StatusChip
@@ -172,30 +189,58 @@ export function PublicOfferForm({
             />
             <span>{f.offerPublishNote}</span>
           </p>
-          {(["published", "unpublished", "draft"] as const).map((status) => (
-            <form
-              key={status}
-              action={(fd) => {
-                startStatus(async () => {
-                  await adminSetPublicOfferStatusAction(fd);
-                  router.refresh();
-                });
-              }}
-            >
-              <input type="hidden" name="id" value={offer.id} />
-              <input type="hidden" name="status" value={status} />
-              <Button
-                type="submit"
-                variant="secondary"
-                size="sm"
-                disabled={statusPending || offer.status === status}
+          {statusError ? (
+            <p role="alert" className={formErrorClass}>
+              {publishErrorLabel(f, statusError)}
+            </p>
+          ) : null}
+          <div className="flex flex-wrap items-end gap-3">
+            {(["published", "unpublished", "draft"] as const).map((status) => (
+              <form
+                key={status}
+                className="space-y-2"
+                action={(fd) => {
+                  startStatus(async () => {
+                    setStatusError(null);
+                    const result = await adminSetPublicOfferStatusAction(fd);
+                    if (!result.ok) {
+                      setStatusError(result.error);
+                      return;
+                    }
+                    router.refresh();
+                  });
+                }}
               >
-                {fmt(f.setStatusTo, {
-                  status: labels.status.offer[status] ?? status,
-                })}
-              </Button>
-            </form>
-          ))}
+                <input type="hidden" name="id" value={offer.id} />
+                <input type="hidden" name="status" value={status} />
+                {status === "published" && !offer.productId ? (
+                  <label className="flex max-w-xs items-start gap-2 text-xs text-ro-muted">
+                    <input
+                      type="checkbox"
+                      name="plateAck"
+                      className="mt-0.5"
+                    />
+                    <span>
+                      <span className="font-medium text-ro-ink">
+                        {f.plateAck}
+                      </span>
+                      <span className="mt-0.5 block">{f.plateAckHelp}</span>
+                    </span>
+                  </label>
+                ) : null}
+                <Button
+                  type="submit"
+                  variant="secondary"
+                  size="sm"
+                  disabled={statusPending || offer.status === status}
+                >
+                  {fmt(f.setStatusTo, {
+                    status: labels.status.offer[status] ?? status,
+                  })}
+                </Button>
+              </form>
+            ))}
+          </div>
         </div>
       ) : null}
     </div>

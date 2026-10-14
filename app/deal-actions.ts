@@ -1,5 +1,6 @@
 "use server";
 
+import { randomBytes } from "node:crypto";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
@@ -68,6 +69,17 @@ export async function traderLogoutAction(): Promise<void> {
   redirect("/trader/login");
 }
 
+function generateTempPassword(length = 14): string {
+  const alphabet =
+    "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+  const bytes = randomBytes(length);
+  let out = "";
+  for (let i = 0; i < length; i++) {
+    out += alphabet[bytes[i]! % alphabet.length]!;
+  }
+  return out;
+}
+
 export async function adminCreateTraderAction(
   _prev: ActionResult | null,
   formData: FormData
@@ -78,9 +90,10 @@ export async function adminCreateTraderAction(
     return { ok: false, error: "Unauthorized" };
   }
 
+  const tempPassword = generateTempPassword();
   const parsed = traderCreateSchema.safeParse({
     email: formData.get("email"),
-    password: formData.get("password"),
+    password: tempPassword,
     displayName: formData.get("displayName"),
     companyName: formData.get("companyName") || "",
     phone: formData.get("phone") || "",
@@ -96,7 +109,14 @@ export async function adminCreateTraderAction(
   try {
     await createTraderAccount(parsed.data);
     revalidatePath("/admin/traders");
-    return { ok: true, message: "Trader created" };
+    return {
+      ok: true,
+      message: "Trader created",
+      data: {
+        tempPassword,
+        email: parsed.data.email.trim().toLowerCase(),
+      },
+    };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Create failed";
     if (msg === "TRADER_EMAIL_EXISTS") {
@@ -349,8 +369,13 @@ export async function adminSetPublicOfferStatusAction(
     return { ok: false, error: "Invalid status" };
   }
 
+  const plateAck =
+    formData.get("plateAck") === "on" || formData.get("plateAck") === "true";
+
   try {
-    await setPublicOfferStatus(parsed.data.id, parsed.data.status);
+    await setPublicOfferStatus(parsed.data.id, parsed.data.status, {
+      plateAck,
+    });
     revalidatePath("/admin/offers");
     revalidatePath(`/admin/offers/${parsed.data.id}`);
     revalidatePath("/offers");

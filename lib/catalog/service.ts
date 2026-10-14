@@ -158,6 +158,9 @@ export async function createProduct(input: ProductUpsertInput) {
       status: input.status,
       availability: input.availability,
       wholesaleEligible: input.wholesaleEligible,
+      badgeNew: input.badgeNew,
+      badgeFeatured: input.badgeFeatured,
+      badgeSale: input.badgeSale,
     },
   });
 }
@@ -187,6 +190,9 @@ export async function updateProduct(id: string, input: ProductUpsertInput) {
       status: input.status,
       availability: input.availability,
       wholesaleEligible: input.wholesaleEligible,
+      badgeNew: input.badgeNew,
+      badgeFeatured: input.badgeFeatured,
+      badgeSale: input.badgeSale,
     },
   });
 }

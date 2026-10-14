@@ -2,12 +2,46 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { useState, type ComponentType } from "react";
+import {
+  LayoutDashboard,
+  MessageSquare,
+  ShoppingBag,
+  Handshake,
+  Package,
+  Boxes,
+  Tags,
+  Percent,
+  Users,
+  Store,
+  Menu,
+  X,
+  type LucideProps,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type AdminNavItem = { href: string; label: string };
 export type AdminNavGroup = { title: string; items: AdminNavItem[] };
+
+type IconComp = ComponentType<LucideProps>;
+
+const NAV_ICONS: Record<string, IconComp> = {
+  "/admin": LayoutDashboard,
+  "/admin/inbox": MessageSquare,
+  "/admin/requests": ShoppingBag,
+  "/admin/deals": Handshake,
+  "/admin/wholesale": Package,
+  "/admin/products": Boxes,
+  "/admin/categories": Tags,
+  "/admin/offers": Percent,
+  "/admin/promos": Percent,
+  "/admin/customers": Users,
+  "/admin/traders": Store,
+};
+
+function iconFor(href: string): IconComp {
+  return NAV_ICONS[href] ?? LayoutDashboard;
+}
 
 function itemActive(pathname: string, href: string) {
   if (href === "/admin") return pathname === "/admin";
@@ -17,40 +51,56 @@ function itemActive(pathname: string, href: string) {
 function NavList({
   groups,
   onNavigate,
+  collapsed = false,
 }: {
   groups: AdminNavGroup[];
   onNavigate?: () => void;
+  collapsed?: boolean;
 }) {
   const pathname = usePathname();
   return (
-    <div className="space-y-6">
+    <div className={cn(collapsed ? "space-y-1" : "space-y-6")}>
       {groups.map((group) => (
         <div key={group.title}>
-          <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-ro-muted">
-            {group.title}
-          </p>
-          <ul className="mt-2 space-y-0.5">
+          {!collapsed ? (
+            <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-ro-muted">
+              {group.title}
+            </p>
+          ) : null}
+          <ul className={cn(!collapsed && "mt-2 space-y-0.5", collapsed && "space-y-1")}>
             {group.items.map((item) => {
               const active = itemActive(pathname, item.href);
+              const Icon = iconFor(item.href);
               return (
                 <li key={item.href}>
                   <Link
                     href={item.href}
                     onClick={onNavigate}
+                    aria-label={item.label}
+                    title={item.label}
+                    aria-current={active ? "page" : undefined}
                     className={cn(
-                      "relative flex items-center px-3 py-2 text-sm transition-colors",
+                      "relative flex items-center transition-colors",
+                      collapsed
+                        ? "mx-auto size-10 justify-center"
+                        : "gap-2.5 px-3 py-2 text-sm",
                       active
-                        ? "bg-white/5 font-semibold text-[var(--ro-sand-100)]"
+                        ? "bg-white/10 font-semibold text-[var(--ro-sand-100)]"
                         : "text-[var(--ro-ink-300)] hover:bg-white/5 hover:text-[var(--ro-sand-100)]"
                     )}
                   >
-                    {active ? (
+                    {active && !collapsed ? (
                       <span
                         aria-hidden
                         className="absolute inset-y-1 start-0 w-0.5 bg-[var(--ro-sand-100)]"
                       />
                     ) : null}
-                    {item.label}
+                    <Icon
+                      className="size-4 shrink-0"
+                      strokeWidth={1.5}
+                      aria-hidden
+                    />
+                    {!collapsed ? <span>{item.label}</span> : null}
                   </Link>
                 </li>
               );
@@ -69,13 +119,36 @@ export function AdminSidebar({
   groups: AdminNavGroup[];
   brand: string;
 }) {
+  const pathname = usePathname();
+  /** AD-03: sidebar auto-collapses to 72px on the inbox route. */
+  const collapsed =
+    pathname === "/admin/inbox" || pathname.startsWith("/admin/inbox/");
+
   return (
-    <aside className="hidden w-64 shrink-0 flex-col bg-[var(--ro-ink-900)] text-[var(--ro-sand-100)] lg:flex">
-      <div className="border-b border-white/10 px-4 py-5 tracking-[0.2em] text-xs font-semibold">
-        {brand}
+    <aside
+      data-admin-sidebar={collapsed ? "collapsed" : "expanded"}
+      className={cn(
+        "hidden shrink-0 flex-col bg-[var(--ro-ink-900)] text-[var(--ro-sand-100)] lg:flex",
+        collapsed ? "w-[72px]" : "w-64"
+      )}
+    >
+      <div
+        className={cn(
+          "border-b border-white/10 py-5 text-xs font-semibold tracking-[0.2em]",
+          collapsed ? "px-2 text-center" : "px-4"
+        )}
+        title={brand}
+      >
+        {collapsed ? "RO" : brand}
       </div>
-      <nav aria-label="Admin" className="flex-1 overflow-y-auto px-2 py-4">
-        <NavList groups={groups} />
+      <nav
+        aria-label="Admin"
+        className={cn(
+          "flex-1 overflow-y-auto py-4",
+          collapsed ? "px-1" : "px-2"
+        )}
+      >
+        <NavList groups={groups} collapsed={collapsed} />
       </nav>
     </aside>
   );

@@ -147,27 +147,38 @@ export function ProductGallery({
         >
           {images.map((img, i) => (
             <li
-              key={img.path}
+              key={`${img.path}-${i}`}
               className="relative aspect-[4/5] w-full shrink-0 snap-center"
             >
-              <button
-                type="button"
-                aria-label={`${labels.enlarge}: ${img.alt}`}
-                className="absolute inset-0 cursor-zoom-in focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
-                onClick={() => {
-                  select(i, { scroll: false });
-                  setLightboxOpen(true);
-                }}
-              >
-                <Image
+              {img.kind === "video" ? (
+                <video
                   src={img.path}
-                  alt={img.alt}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 58vw"
-                  className="object-cover"
-                  priority={priority && i === 0}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  controls
+                  playsInline
+                  preload="metadata"
+                  aria-label={img.alt}
                 />
-              </button>
+              ) : (
+                <button
+                  type="button"
+                  aria-label={`${labels.enlarge}: ${img.alt}`}
+                  className="absolute inset-0 cursor-zoom-in focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
+                  onClick={() => {
+                    select(i, { scroll: false });
+                    setLightboxOpen(true);
+                  }}
+                >
+                  <Image
+                    src={img.path}
+                    alt={img.alt}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 58vw"
+                    className="object-cover"
+                    priority={priority && i === 0}
+                  />
+                </button>
+              )}
             </li>
           ))}
         </ul>

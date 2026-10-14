@@ -36,6 +36,9 @@ export default async function TraderWholesaleCatalogPage() {
           nameAr: p.nameAr,
           currency: p.currency,
           retailPrice: Number(p.retailPrice),
+          categorySlug: p.category?.slug ?? null,
+          categoryNameEn: p.category?.nameEn ?? null,
+          categoryNameAr: p.category?.nameAr ?? null,
         }))}
       />
     </section>

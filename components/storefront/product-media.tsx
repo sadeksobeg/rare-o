@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 export type MediaItem = {
   path: string;
   alt: string;
+  /** image | video — admin-uploaded media kind */
+  kind?: "image" | "video" | string;
 };
 
 export function ProductMedia({
@@ -91,7 +93,7 @@ export function ProductThumb({
         alt={alt}
         fill
         sizes="(max-width: 640px) 50vw, 33vw"
-        className="object-cover"
+        className="ro-media-zoom object-cover"
       />
     </div>
   );

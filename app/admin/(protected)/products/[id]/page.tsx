@@ -61,6 +61,9 @@ export default async function EditProductPage({
           status: product.status,
           availability: product.availability,
           wholesaleEligible: product.wholesaleEligible,
+          badgeNew: product.badgeNew,
+          badgeFeatured: product.badgeFeatured,
+          badgeSale: product.badgeSale,
         }}
       />
     </section>

@@ -3,11 +3,14 @@ import { cn } from "@/lib/utils";
 export function Grain({
   className,
   opacity = 0.08,
+  patternId = "ro-grain-pattern",
 }: {
   className?: string;
   opacity?: number;
+  /** Unique when multiple Grain instances share a page. */
+  patternId?: string;
 }) {
-  const id = "ro-grain-pattern";
+  const id = patternId;
   return (
     <svg
       className={cn("pointer-events-none h-full w-full text-current", className)}

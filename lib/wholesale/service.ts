@@ -1,3 +1,4 @@
+import { uiVisibleWholesaleWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
 import {
   WHOLESALE_QTY_TECHNICAL_MAX,
@@ -192,7 +193,7 @@ export async function getWholesaleRequestForTrader(
 
 export async function listWholesaleRequestsForTrader(traderId: string) {
   return prisma.wholesaleRequest.findMany({
-    where: { traderId },
+    where: { AND: [{ traderId }, uiVisibleWholesaleWhere()] },
     orderBy: { updatedAt: "desc" },
     include: {
       lines: true,
@@ -216,6 +217,7 @@ export async function getWholesaleRequestForAdmin(requestId: string) {
 
 export async function listWholesaleRequestsForAdmin() {
   return prisma.wholesaleRequest.findMany({
+    where: uiVisibleWholesaleWhere(),
     orderBy: { updatedAt: "desc" },
     take: 200,
     include: {

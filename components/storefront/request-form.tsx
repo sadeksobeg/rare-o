@@ -29,12 +29,15 @@ type SuccessData = {
 export function RequestForm({
   locale,
   labels,
+  notesDefault = "",
 }: {
   locale: Locale;
   labels: {
     title: string;
     name: string;
     phone: string;
+    phonePlaceholder: string;
+    phoneHelper: string;
     notes: string;
     country: string;
     shippingNote: string;
@@ -62,6 +65,7 @@ export function RequestForm({
     catalog: string;
     itemsCount: string;
   };
+  notesDefault?: string;
 }) {
   const { items, clear } = useCart();
   const [result, setResult] = useState<ActionResult | null>(null);
@@ -192,6 +196,8 @@ export function RequestForm({
           dir="ltr"
           inputMode="tel"
           autoComplete="tel"
+          placeholder={labels.phonePlaceholder}
+          helper={labels.phoneHelper}
         />
         <TextField
           label={labels.country}
@@ -204,6 +210,7 @@ export function RequestForm({
           <textarea
             name="customerNotes"
             rows={3}
+            defaultValue={notesDefault}
             className="w-full rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-paper px-3 py-2 text-ro-ink outline-none transition-colors focus:border-[var(--ro-plum-900)] focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-[var(--ro-focus)]"
           />
         </label>
@@ -213,6 +220,10 @@ export function RequestForm({
             {result.error}
           </p>
         ) : null}
+
+        <Button type="submit" size="lg" className="w-full" loading={pending}>
+          {pending ? labels.submitting : labels.submit}
+        </Button>
 
         <p className="text-xs leading-relaxed text-ro-muted">
           {consentBefore}
@@ -224,10 +235,6 @@ export function RequestForm({
           </Link>
           {consentAfter}
         </p>
-
-        <Button type="submit" size="lg" className="w-full" loading={pending}>
-          {pending ? labels.submitting : labels.submit}
-        </Button>
       </form>
     </section>
   );

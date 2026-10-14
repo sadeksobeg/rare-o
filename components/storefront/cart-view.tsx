@@ -71,7 +71,20 @@ export function CartView({
       <h2 className="text-sm font-semibold text-ro-ink">
         {labels.summaryTitle}
       </h2>
-      <dl className="mt-4 space-y-2 text-sm">
+      <ul className="mt-3 space-y-1.5 text-sm text-ro-text-2">
+        {items.map((item) => (
+          <li
+            key={`sum-${item.productId}`}
+            className="flex items-baseline justify-between gap-3"
+          >
+            <span className="min-w-0 truncate">{item.name}</span>
+            <span className="shrink-0 tabular-nums text-ro-muted">
+              × {fmt(item.quantity)}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <dl className="mt-4 space-y-2 border-t border-ro-border pt-3 text-sm">
         <div className="flex items-baseline justify-between gap-4">
           <dt className="text-ro-muted">{piecesText}</dt>
           <dd className="tabular-nums text-ro-ink">

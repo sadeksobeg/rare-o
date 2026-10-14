@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { BusinessContextPanel } from "@/components/admin/business-context-panel";
-import { InboxComposer } from "@/components/admin/inbox-composer";
-import { InboxLinkControls } from "@/components/admin/inbox-link-controls";
+import { InboxContextShell } from "@/components/admin/inbox-context-shell";
+import { LinkedRecordPanel } from "@/components/admin/linked-record-panel";
+import { MessageThread } from "@/components/admin/message-thread";
 import { getRequestDictionary } from "@/lib/i18n/server";
-import type { Dictionary } from "@/lib/i18n/dictionaries";
 import {
   getInboxConversation,
   getInboxHealthView,
@@ -11,48 +10,6 @@ import {
 } from "@/lib/whatsapp/messaging/inbox";
 import { getBusinessContextForConversation } from "@/lib/whatsapp/messaging/linking";
 import { notFound } from "next/navigation";
-
-function formatWhen(iso: string | null, locale: string): string {
-  if (!iso) return "—";
-  try {
-    return new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }).format(new Date(iso));
-  } catch {
-    return iso;
-  }
-}
-
-function statusLabel(dict: Dictionary, status: string): string {
-  switch (status) {
-    case "pending":
-      return dict.inbox.statusPending;
-    case "sending":
-      return dict.inbox.statusSending;
-    case "sent":
-      return dict.inbox.statusSent;
-    case "failed":
-      return dict.inbox.statusFailed;
-    case "received":
-      return dict.inbox.statusReceived;
-    default:
-      return status;
-  }
-}
-
-function linkTypeLabel(dict: Dictionary, linkType: string): string {
-  switch (linkType) {
-    case "retail_request":
-      return dict.inbox.typeRetail;
-    case "deal_proposal":
-      return dict.inbox.typeDeal;
-    case "wholesale_request":
-      return dict.inbox.typeWholesale;
-    default:
-      return dict.inbox.notLinked;
-  }
-}
 
 export default async function AdminWhatsAppConversationPage({
   params,
@@ -72,87 +29,46 @@ export default async function AdminWhatsAppConversationPage({
     await markConversationRead(conversation.id);
   }
 
+  const panelProps = {
+    conversationId: conversation.id,
+    link: conversation.link,
+    context,
+    dict,
+    locale,
+  } as const;
+
   return (
-    <section className="space-y-4">
-      <div className="space-y-1">
-        <Link
-          href="/admin/inbox"
-          className="text-sm text-ro-plum hover:underline lg:hidden"
-        >
-          ← {dict.inbox.backToList}
-        </Link>
-        <h2 className="text-xl font-semibold" dir="auto">
-          {conversation.displayLabel}
-        </h2>
-        <p className="text-sm text-ro-muted">
-          {conversation.link.linked
-            ? `${dict.inbox.linkedAs}: ${linkTypeLabel(dict, conversation.link.linkType)}`
-            : dict.inbox.notLinked}
-          <span className="mx-2 text-ro-line">·</span>
-          <span className="font-mono text-xs">{conversation.waChatId}</span>
-        </p>
-      </div>
-
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)]">
-        <div className="min-w-0 space-y-4">
-          <div className="space-y-3 border border-ro-line p-4 xl:max-h-[calc(100vh-24rem)] xl:overflow-y-auto">
-            {conversation.messages.length === 0 ? (
-              <p className="text-sm text-ro-muted">{dict.inbox.noMessages}</p>
-            ) : (
-              conversation.messages.map((m) => {
-                const isOut = m.direction === "outbound";
-                const failed = m.status === "failed";
-                const when = formatWhen(m.waTimestamp ?? m.createdAt, locale);
-                return (
-                  <article
-                    key={m.id}
-                    className={`max-w-[min(100%,36rem)] space-y-1 border border-ro-line p-3 text-sm ${
-                      isOut ? "ms-auto bg-ro-surface" : "me-auto bg-transparent"
-                    } ${failed ? "border-ro-purple" : ""}`}
-                  >
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-ro-muted">
-                      <span>
-                        {isOut ? dict.inbox.outbound : dict.inbox.inbound}
-                      </span>
-                      <span>·</span>
-                      <span>{statusLabel(dict, m.status)}</span>
-                      <span>·</span>
-                      <span>{when}</span>
-                    </div>
-                    {m.messageType === "unsupported" ? (
-                      <p className="text-ro-muted">{dict.inbox.unsupported}</p>
-                    ) : (
-                      <p className="whitespace-pre-wrap break-words">{m.body}</p>
-                    )}
-                    {failed && m.errorSafe ? (
-                      <p className="text-xs text-ro-purple">{m.errorSafe}</p>
-                    ) : null}
-                  </article>
-                );
-              })
-            )}
-          </div>
-
-          <InboxComposer
-            conversationId={conversation.id}
-            outboundEnabled={health.outboundEnabled}
-            dict={dict}
-          />
+    <div className="flex min-h-0 flex-1 flex-col gap-3 xl:flex-row">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="mb-2 lg:hidden">
+          <Link
+            href="/admin/inbox"
+            className="text-sm font-semibold text-ro-plum hover:underline"
+          >
+            ← {dict.inbox.backToList}
+          </Link>
         </div>
-
-        <div className="space-y-4">
-          <BusinessContextPanel
-            context={context}
-            dict={dict}
-            locale={locale}
-          />
-          <InboxLinkControls
-            conversationId={conversation.id}
-            link={conversation.link}
-            dict={dict}
-          />
-        </div>
+        <MessageThread
+          conversationId={conversation.id}
+          displayLabel={conversation.displayLabel}
+          phoneHint={conversation.waChatId}
+          messages={conversation.messages}
+          health={health}
+          dict={dict}
+          locale={locale}
+          headerExtra={
+            <div className="flex items-center gap-2 xl:hidden">
+              <InboxContextShell dict={dict}>
+                <LinkedRecordPanel {...panelProps} />
+              </InboxContextShell>
+            </div>
+          }
+        />
       </div>
-    </section>
+      {/* ≥1280: fixed 320 context column */}
+      <div className="hidden w-[320px] shrink-0 overflow-y-auto xl:block">
+        <LinkedRecordPanel {...panelProps} />
+      </div>
+    </div>
   );
 }

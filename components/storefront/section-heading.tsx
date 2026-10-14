@@ -18,8 +18,9 @@ export function SectionHeading({
   return (
     <div
       className={cn(
-        "max-w-2xl space-y-4",
+        "ro-section-accent max-w-2xl space-y-4 pt-3",
         align === "center" && "mx-auto text-center",
+        align === "center" && "before:inset-inline-start-1/2 before:-translate-x-1/2",
         className
       )}
     >

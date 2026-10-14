@@ -1,155 +1,170 @@
 # P0 — Reconciliation (read-only)
 
-**Date:** 2026-10-10  
-**Baseline:** git `master` (post plan commit `236801e`)  
-**Rule:** No UI code changes in P0. Plan files 00–07 not edited.  
-**Owner gate:** Review conflicts → approve proposed **D27+** → then `START PHASE 1`.
+**Date:** 2026-10-12  
+**Baseline:** git `master` @ `316beea` (`ui: hide out-of-scope promo features`)  
+**Sources:** PLAN.md Parts 00–07 + Appendix S; `prisma/schema.prisma`; live routes under `app/`  
+**Rule:** No application code in this phase. PLAN.md not edited.  
+**Owner gate:** Review §7 conflicts → approve proposed **D27+** (via `DECISIONS-ADDENDUM.md`, not PLAN.md) → then next approved slice.
+
+**Note on codebase maturity:** Much of P1–P7 already exists on `master` from prior UI work. This document re-reconciles the **locked plan** against **as-built now**, so remaining gaps and decision-lock items are explicit before further slices.
 
 ---
 
-## 1. Routes & file paths (plan 03–05 vs codebase)
+## 1. Routes & file paths (plan Parts 03–05 vs codebase)
 
 ### 1.1 Storefront
 
 | Plan ID | Path | Exists? | File / note |
 |---------|------|---------|-------------|
-| SF-01 | `/` | YES | `app/(storefront)/page.tsx` — stack differs from H1–H9; rewrite in P4c |
-| SF-02 | `/catalog` | YES | `app/(storefront)/catalog/page.tsx` — query today: `category`, `q` only |
-| SF-03 | `/product/[slug]` | YES | `app/(storefront)/product/[slug]/page.tsx` — **no product images rendered** |
-| SF-04 | `/cart` | YES | `app/(storefront)/cart/page.tsx` — labels say cart; D7 keeps route |
+| SF-01 | `/` | YES | `app/(storefront)/page.tsx` — commerce-ordered stack (hero, shortcuts, spotlight, shop, categories, editorial, handoff, trader band). Differs from locked H1–H9 section names; treat as P4c drift to re-align or accept as implementation of same jobs |
+| SF-02 | `/catalog` | YES | `app/(storefront)/catalog/page.tsx` — `type`/`category`, `q`, `min`/`max`, `sort` (D33-style) |
+| SF-03 | `/product/[slug]` | YES | `app/(storefront)/product/[slug]/page.tsx` — gallery + `PriceBlock` |
+| SF-04 | `/cart` | YES | `app/(storefront)/cart/page.tsx` — route kept (D7); UI naming = request list |
 | SF-05 | `/request` | YES | `app/(storefront)/request/page.tsx` + `RequestForm` |
 | SF-06 | `/offers` | YES | `app/(storefront)/offers/page.tsx` |
 | SF-07 | `/offers/[slug]` | YES | `app/(storefront)/offers/[slug]/page.tsx` |
-| SF-08 | `/contact` | **NEW** | Missing — create in P4d |
-| SF-09 | `/privacy` | **NEW** | Missing — create in P4d |
-| SF-10 | `not-found` / `error` / `loading` | **NEW** | No `app/**/loading.tsx`, `error.tsx`, `not-found.tsx` found |
-| — | `/en/*` locale prefix | **NEW** | Middleware has admin/trader JWT only — P3 |
-| — | `/dev/ui` | **NEW** | P1 |
+| SF-08 | `/contact` | YES | `app/(storefront)/contact/page.tsx` |
+| SF-09 | `/privacy` | YES | `app/(storefront)/privacy/page.tsx` |
+| SF-10 | system | PARTIAL | `app/not-found.tsx`, `app/(storefront)/{error,loading}.tsx` present; verify parity of all plan SF-10 copy/states in later gate |
+| — | `/en/*` | YES | `middleware.ts` rewrite + `x-ro-locale` / `ro_locale` cookie |
+| — | `/dev/ui` | YES | `app/dev/ui/page.tsx` (production `notFound` expected per plan) |
+| — | `/forbidden` | YES | `app/forbidden/page.tsx` — cross-role 403 |
 
 ### 1.2 Admin
 
 | Plan ID | Path | Exists? | Note |
 |---------|------|---------|------|
-| AD-01 | `/admin/login` | YES | EN hard-coded |
-| AD-02 | `/admin` | YES | KPIs ≠ plan’s four nextActor KPIs |
-| AD-03 | `/admin/inbox`, `/[id]` | YES | Health + list exist; 3-pane layout pending |
+| AD-01 | `/admin/login` | YES | Dictionary + locale toggle |
+| AD-02 | `/admin` | YES | Four KPIs via `getAdminHomeData`; ActionQueue ≈ recent retail only (see §4) |
+| AD-03 | `/admin/inbox`, `/[id]` | YES | Health banner + list/thread; confirm 3-pane vs stacked at breakpoints |
 | AD-04 | `/admin/requests`, `/[id]` | YES | |
 | AD-05 | `/admin/deals`, `/[id]` | YES | |
-| AD-06 | `/admin/wholesale`, `/[id]` | YES | |
-| AD-07 | `/admin/products`, `/new`, `/[id]` | YES | **No ImageUploader / ProductImage write path** |
-| AD-08 | `/admin/categories` | YES | Labels only; **no category image field** |
-| AD-09 | `/admin/offers`… | YES | |
-| AD-10 | `/admin/customers` | YES | |
-| AD-11 | `/admin/traders` | YES | |
-| — | `/admin` 403 view | **NEW** | Today: redirect to login (middleware) |
+| AD-06 | `/admin/wholesale`, `/[id]` | YES | Shipping UI limited by schema (§2.4 / C13) |
+| AD-07 | `/admin/products`, `/new`, `/[id]` | YES | `ImageUploader` + `lib/catalog/images.ts` write path |
+| AD-08 | `/admin/categories` | YES | No category image field (Material Plate OK) |
+| AD-09 | `/admin/offers`… | YES | Single optional `productId`; no validity dates |
+| AD-10 | `/admin/customers` | YES | Regression fixtures filtered from UI (`lib/admin/ui-hidden.ts`) |
+| AD-11 | `/admin/traders` | YES | No `lastSignIn` column in schema |
+| — | `/admin/promos`… | YES (code) | **Hidden** when `RO_PROMO_FEATURES` off (default); not in Appendix S |
 
 ### 1.3 Trader
 
 | Plan ID | Path | Exists? | Note |
 |---------|------|---------|------|
-| TR-01 | `/trader/login` | YES | EN hard-coded |
-| TR-02 | `/trader` | YES | No “بانتظارك” / TaskCards yet |
+| TR-01 | `/trader/login` | YES | |
+| TR-02 | `/trader` | YES | TaskCards / waiting block — verify against TR-02 acceptance |
 | TR-03 | `/trader/deals` | YES | |
-| TR-04 | `/trader/deals/new` | YES | Form exists; Wizard UX pending |
+| TR-04 | `/trader/deals/new` | YES | |
 | TR-05 | `/trader/deals/[id]` | YES | |
 | TR-06 | `/trader/wholesale` | YES | |
 | TR-07 | `/trader/wholesale/requests` | YES | |
-| TR-08 | `/trader/wholesale/[id]` | YES | |
+| TR-08 | `/trader/wholesale/[id]` | YES | Shipping block blocked by missing schema fields |
 | TR-09 | `/trader/offers` | YES | |
 | TR-10 | `/trader/profile` | YES | |
-| — | Bottom tab bar T01 | **NEW** | Shell is top-nav only |
+| T01 | Bottom tabs | YES | `TraderBottomTabs` in `components/trader/shell.tsx` |
 
 ---
 
-## 2. Schema / field mapping (critical UI items)
+## 2. Schema / field mapping (Parts 04–05 columns & forms)
 
 ### 2.1 Product & images
 
 | UI item (plan) | Schema / code | Status |
 |----------------|---------------|--------|
-| Product name AR/EN | `Product.nameAr/nameEn` | OK |
-| Description | `descriptionAr/En` | OK |
-| Specs structured / SpecTable / SpecEditor | **Only** `specsTextAr` / `specsTextEn` free text | **GAP** — render as prose / parse lines; no attribute schema |
-| Price / null “Price on request” | `retailPrice Decimal` **required**; Zod `nonnegative` | **CONFLICT C2** |
-| Availability chip | `availability` available\|unavailable | OK |
-| Status draft/published/archived | `status` | OK |
+| Name AR/EN | `Product.nameAr` / `nameEn` | OK |
+| Description AR/EN | `descriptionAr` / `descriptionEn` | OK |
+| Specs / SpecTable / SpecEditor | `specsTextAr` / `specsTextEn` only | **GAP** — free text + soft parse (`lib/catalog/specs.ts`); no attribute schema |
+| Price + “Price on request” | `retailPrice` **Decimal required**; `currency` **String required** | **CONFLICT C2** — D6 needs empty/missing display path; seed uses fixture `TEST` (UI maps to on-request) |
+| compareAtPrice / sale badge | `compareAtPrice Decimal?` | Present; **UI gated** by `RO_PROMO_FEATURES` (default off) — out of Appendix S |
+| Availability | `availability` available\|unavailable | OK |
+| Status | draft\|published\|archived | OK |
 | Wholesale eligible | `wholesaleEligible` | OK |
-| Images path, alt, order | `ProductImage.path`, `altAr/En`, `sortOrder`, `kind` | OK model |
-| Primary image flag | **No** `isPrimary` — use `sortOrder === 0` | OK convention |
-| Image upload action | **No** app upload/write for ProductImage | **GAP C1** |
-| Category image | **No** field on `Category` | Use Material Plate (plan allows) |
+| Featured toggle | **No field** | **MISSING** — omit or report if form shows it |
+| Images | `ProductImage.path`, `altAr`, `altEn`, `sortOrder`, `kind` | OK |
+| Primary image | No `isPrimary` — use lowest `sortOrder` | OK convention |
+| Upload | `lib/catalog/images.ts` → `public/uploads/{productId}/` | OK (max 8, 8 MB, long side ≥ 1600) |
+| Category image | **No** `Category` image field | Material Plate (plan allows) |
 
 ### 2.2 Retail request (SF-05 / AD-04)
 
 | UI item | Schema | Status |
 |---------|--------|--------|
-| name | `customerName` | OK |
-| phone | `customerPhone` | OK |
-| note | `customerNotes` | OK |
-| city (plan SF-05) | **Missing** | **CONFLICT C3** — use `destinationCountry` (+ optional notes); do not invent city |
-| shipping method | `shippingMethodCode/Label` optional | OK — keep if form already uses it |
-| lines | `RetailRequestLine` | OK |
-| statuses | draft → cancelled (6 values) | OK — map in status.ts |
-| handoff events | `RetailHandoffEvent` | OK |
-| WhatsApp deep link | `whatsAppDeepLink`, `handoffMessageText` | OK |
+| Name / phone / notes | `customerName`, `customerPhone`, `customerNotes` | OK |
+| City (plan SF-05 wording) | **No city** — `destinationCountry` | **CONFLICT C3** |
+| Shipping method | `shippingMethodCode` / `shippingMethodLabel` optional | OK if form exposes them |
+| Lines | `RetailRequestLine` | OK |
+| Statuses | draft → cancelled (6) | OK → §3.1 |
+| Handoff | `RetailHandoffEvent`, `whatsAppDeepLink`, `handoffMessageText` | OK |
+| List “التحويل” column | Derive from handoff events / timestamps | OK (read helper) |
 
 ### 2.3 Deals & negotiation
 
 | UI item | Schema | Status |
 |---------|--------|--------|
-| dealKind catalog\|non_catalog | OK | |
-| title, productId, proposedPrice, currency, quantity, conditionsNotes | OK | |
-| statuses proposed\|negotiating\|accepted\|closed | OK | |
-| NegotiationEntry actions | propose\|continue\|counter\|accept\|close | OK |
-| nextActor | **Derived** (not stored) | Implement in `lib/ui/status.ts` |
+| `dealKind`, title, productId, price, currency, qty, conditionsNotes | OK | |
+| Statuses | proposed\|negotiating\|accepted\|closed | OK |
+| NegotiationEntry.action | propose\|continue\|counter\|accept\|close | OK |
+| nextActor | **Derived** via `lib/ui/status.ts` + `dealNextActor` | OK draft |
 
 ### 2.4 Wholesale
 
 | UI item | Schema | Status |
 |---------|--------|--------|
 | requestMode, lines, quote fields, events | OK | |
-| statuses (6) | OK | |
-| MOQ / discounts | Must not invent | Boundary OK |
+| Statuses (6) | OK | |
+| Quote / MOQ / discounts | Must not invent | Boundary OK — show stored admin quote only |
+| Carrier / tracking / shipped date (AD-06, TR-08) | **No fields** on `WholesaleRequest` | **CONFLICT C13 — MISSING** |
 
 ### 2.5 Public curated offer
 
 | UI item | Schema | Status |
 |---------|--------|--------|
 | slug, titles, summaries, status | OK | |
-| Linked product | `productId` optional **single** | OK |
-| Included products grid | **No** M2M | **CONFLICT C4** — show 0–1 product card |
-| Validity / end date | **No field** | **CONFLICT C4** — omit validity UI |
-| Image | Via product images or Material Plate | OK |
+| Linked product | optional single `productId` | OK |
+| Multi-product inclusion grid | **No M2M** | **CONFLICT C4** |
+| Validity / end date | **No field** | **CONFLICT C4** |
+| Dedicated offer image | **No** — product images or Material Plate | OK |
 
-### 2.6 WhatsApp
+### 2.6 Customers & traders
+
+| UI item | Schema | Status |
+|---------|--------|--------|
+| Customer notes | `Customer.notes` | OK |
+| Request count / last request | Aggregate on `RetailRequest` | OK |
+| Trader company / phone / status | `TraderAccount` | OK |
+| Last sign-in | **No field** | **MISSING** — omit column |
+| Temporary password show-once | Auth/create action (not a stored cleartext field) | Process OK if UI matches |
+
+### 2.7 WhatsApp
 
 | UI item | Source | Status |
 |---------|--------|--------|
-| Conversation list fields | `WhatsAppConversation` | OK |
+| Conversation fields | `WhatsAppConversation` | OK |
 | unreadCount | column | OK |
-| Messages direction/status | inbound/outbound; received\|pending\|sending\|sent\|failed | OK |
+| Message direction / type / status | inbound\|outbound; text\|unsupported; received\|pending\|sending\|sent\|failed | OK |
 | Link types | none\|retail_request\|deal_proposal\|wholesale_request | OK |
-| Connection health | `WhatsAppConnectionHealth.state` + `getInboxHealthView` | OK |
-| States vs plan A18 | Code also has `RECONNECTING` | Map → progress / CONNECTING |
-| Outbound pause switch | `WHATSAPP_OUTBOUND_ENABLED` env via `isOutboundEnabled()` | **GAP C6** — read-only UI OK; toggle = scope decision |
-| Rate-limit message | Partial via errorSafe | Soft |
+| Connection health | `WhatsAppConnectionHealth` + `getInboxHealthView` | OK — **UI shows dictionary state only** (no `detailSafe`) |
+| Extra adapter state `RECONNECTING` | In Baileys adapter | Map to progress / CONNECTING in banner |
+| Outbound pause | `WHATSAPP_OUTBOUND_ENABLED` via `isOutboundEnabled()` | **CONFLICT C6** — read-only in UI |
 
-### 2.7 Contact config
+### 2.8 Out-of-scope present in schema (not Appendix S)
 
-| UI item | Source | Status |
-|---------|--------|--------|
-| `lib/config/contact.ts` | **Missing** | **NEW** in P4d (number from env) |
+| Item | Status |
+|------|--------|
+| `PromoBand` model + `/admin/promos` + storefront bands | Code+data kept; **hidden** behind `RO_PROMO_FEATURES` (default off) — prior owner decision |
+| `Product.compareAtPrice` + discount badges | Same gate |
 
 ---
 
-## 3. Draft `lib/ui/status.ts` mapping (for owner approval)
+## 3. Draft `lib/ui/status.ts` (owner approval)
 
-Tone vocabulary (file 01): `neutral | info | progress | attention | success | danger | closed`.
+Tone vocabulary (Part 01 §3.3): `neutral | info | progress | attention | success | danger | closed`.  
+File already exists at `lib/ui/status.ts` with the table below (proposed defaults). **Owner must still approve** tone / `nextActor` (especially negotiating + ready_for_handoff).
 
 ### 3.1 RetailRequest
 
-| value | tone | labelKey (proposed) | nextActor |
-|-------|------|---------------------|-----------|
+| value | tone | labelKey | nextActor |
+|-------|------|----------|-----------|
 | `draft` | neutral | `status.retail.draft` | `admin` |
 | `ready_for_handoff` | info | `status.retail.ready_for_handoff` | `customer` |
 | `handoff_opened` | progress | `status.retail.handoff_opened` | `admin` |
@@ -162,7 +177,7 @@ Tone vocabulary (file 01): `neutral | info | progress | attention | success | da
 | value | tone | labelKey | nextActor |
 |-------|------|----------|-----------|
 | `proposed` | info | `status.deal.proposed` | `admin` |
-| `negotiating` | progress | `status.deal.negotiating` | **last NegotiationEntry.actorRole inverted** (if last=admin → trader; if last=trader → admin); if none → admin |
+| `negotiating` | progress | `status.deal.negotiating` | **Invert last `NegotiationEntry.actorRole`** (`dealNextActor`); if none → `admin` |
 | `accepted` | success | `status.deal.accepted` | `none` |
 | `closed` | closed | `status.deal.closed` | `none` |
 
@@ -177,7 +192,7 @@ Tone vocabulary (file 01): `neutral | info | progress | attention | success | da
 | `completed` | success | `status.wholesale.completed` | `none` |
 | `cancelled` | closed | `status.wholesale.cancelled` | `none` |
 
-### 3.4 WhatsApp message status (delivery footer)
+### 3.4 WhatsApp message status
 
 | value | tone | labelKey | nextActor |
 |-------|------|----------|-----------|
@@ -187,32 +202,32 @@ Tone vocabulary (file 01): `neutral | info | progress | attention | success | da
 | `sent` | success | `status.wa.sent` | `none` |
 | `failed` | danger | `status.wa.failed` | `admin` |
 
-### 3.5 Connection health → Banner tones
+### 3.5 Connection health → banner
 
 | state | Banner tone |
 |-------|-------------|
-| `CONNECTED` | success (collapsed) |
+| `CONNECTED` | success |
 | `CONNECTING` / `RECONNECTING` | progress |
 | `DISCONNECTED` / `ERROR` | danger |
 | `AUTHENTICATION_REQUIRED` | attention |
 
-**Action required:** Approve or edit nextActor rules especially for `negotiating` and `ready_for_handoff` (customer vs admin).
+**Action required:** Approve or edit `nextActor` for `negotiating` and `ready_for_handoff`.
 
 ---
 
 ## 4. Data availability (dashboard & feeds)
 
-| Need (plan AD-02) | Source today | Status |
-|-------------------|--------------|--------|
-| KPI: طلبات جديدة (nextActor=admin) | Derive from RetailRequest statuses in §3.1 | **Extend** `getDashboardCounts` or add `getAdminActionCounts` in P5a (allowed read helper) |
-| KPI: صفقات بانتظار الرد | Derive from DealProposal + last entry | **NEW query** P5a |
-| KPI: جملة بانتظار الرد | Wholesale where nextActor=admin | **NEW query** P5a |
-| KPI: محادثات غير مقروءة | `unreadCount > 0` count | **OK** via prisma |
-| ActionQueue (max 8, age sort) | Merge three domains | **NEW** read helper P5a — no invented metrics |
-| ActivityFeed last 10 | No unified Activity table | **GAP C5** — union recent `RetailHandoffEvent` + `NegotiationEntry` + `WholesaleRequestEvent` + inbound WA (minimal) |
-| ConnectionCard state | `getInboxHealthView` | OK |
-| Outbound switch | env only | **C6** |
-| Existing `getDashboardCounts` | product + retail buckets | Keep for secondary or replace UI with new four KPIs |
+| Need (AD-02) | Source today | Status |
+|--------------|--------------|--------|
+| KPI: طلبات جديدة (`nextActor = admin`) | `getAdminHomeData` counts statuses `draft`, `handoff_opened`, `in_follow_up` | **PARTIAL** — not driven by `status.ts`; omits/includes may drift from approved nextActor (e.g. `draft` vs `ready_for_handoff`) |
+| KPI: صفقات بانتظار الرد | counts `proposed`, `negotiating` | **PARTIAL** — negotiating should use `dealNextActor` + last entry |
+| KPI: جملة بانتظار الرد | counts `submitted`, `under_review`, `confirmed` | **PARTIAL** — `confirmed` may or may not be admin-next after approval |
+| KPI: محادثات غير مقروءة | `whatsAppConversation.unreadCount > 0` | OK |
+| ActionQueue (max 8, merge 3 domains, oldest first) | `recentRequests` = retail only, newest first | **GAP C5b** |
+| ActivityFeed last 10 | No Activity table | **GAP C5** — union `RetailHandoffEvent` + `NegotiationEntry` + `WholesaleRequestEvent` (+ optional inbound WA) |
+| ConnectionCard | `getInboxHealthView` | OK |
+| Outbound pause flag | `isOutboundEnabled()` / env | Read-only (**C6**) |
+| Published product count | Secondary metric on dashboard today | Extra vs plan four KPIs — hide or keep as non-KPI meta (**report, do not invent**) |
 
 ---
 
@@ -220,44 +235,48 @@ Tone vocabulary (file 01): `neutral | info | progress | attention | success | da
 
 | Topic | Finding |
 |-------|---------|
-| Model | `ProductImage`: path, altAr, altEn, sortOrder, kind (`image`\|`video`) |
-| Storage | `public/uploads/` gitignored except `.gitkeep` |
-| Write path | **Missing** — ProductForm does not attach images |
-| Primary | Convention: lowest `sortOrder` |
-| Plan limits | Max 8 images; min long side 1600 px — enforce in upload action when added |
-| Storefront today | Catalog/PDP use empty surface boxes; discovery uses `<img>` sometimes |
-| P4a requirement | `next/image` + Material Plate; upload can ship in P5d if products seeded with paths earlier |
+| Model | `ProductImage`: `path`, `altAr`, `altEn`, `sortOrder`, `kind` (`image`\|`video`) |
+| Primary | Lowest `sortOrder` |
+| Storage | `public/uploads/{productId}/` |
+| Limits | Max 8 images; 8 MB; longest side ≥ 1600 px (`lib/catalog/images.ts`) |
+| Admin UI | `components/admin/image-uploader.tsx` on product edit |
+| Storefront | Prefer `next/image` + Material Plate when empty (Part 01 §10) |
+| Brand marks | PNG in `public/brand/`; SVG delivery still A1/A2 (D26) |
 
 ---
 
-## 6. Middleware design (P3 — no JWT logic change)
+## 6. Middleware design (locale + 403; JWT untouched)
 
-Current (`middleware.ts`): JWT verify for `/admin/*` (except login) and `/trader/*` (except login); wrong role → redirect to that portal’s login.
+**As built** (`middleware.ts`):
 
-**Proposed additions (without weakening auth):**
+1. **Storefront English:** `/en` and `/en/*` → strip prefix, `rewrite` to unprefixed path, set `x-ro-locale=en` + cookie `ro_locale`. Arabic storefront paths get `withLocale(ar)`. No `Accept-Language` auto-redirect (matches D11).
+2. **Admin / trader guards:** JWT verify via existing cookies (`ro_admin_session` / `ro_trader_session`). Missing/invalid → login + `returnTo`. **Cross-role** → `/forbidden?portal=…` (not login). Crypto/secret checks unchanged.
+3. **Matcher** covers storefront pages + portals; `/forbidden` short-circuits.
 
-1. **Storefront locale rewrite:** if path starts with `/en/` or equals `/en`, strip prefix, set request header/cookie `ro_locale=en`, rewrite to unprefixed path. Arabic paths leave locale `ar` (default). Do **not** auto-redirect by `Accept-Language`.
-2. **Cross-role 403:** if valid **trader** JWT hits `/admin/*` → rewrite/redirect to a dedicated **403 page** (not login). Same for **admin** JWT on `/trader/*`. Today both go to login — plan wants explicit 403 copy.
-3. JWT secret/role checks remain unchanged.
+**Fit to plan P3:** Locale rewrite and 403 handling are already in place. Remaining work is acceptance verification (equivalent URLs on language switch, trader on admin sees 403 copy), not a new JWT design.
 
 ---
 
-## 7. Conflict list & proposed resolutions (→ D27+)
+## 7. Conflict list & proposed minimal resolutions (→ D27+)
 
 | ID | Conflict | Severity | Proposed resolution (needs owner) |
 |----|----------|----------|-----------------------------------|
-| **C1** | No ProductImage upload UI/API | P0 for catalog quality | **D27:** Allow minimal server action + local `public/uploads` write in P5d (or P4a if needed for demo). Types/size limits per plan. No cloud CDN required. |
-| **C2** | Null price / “Price on request” vs required Decimal | Medium | **D28a (recommended for launch):** Keep required price; dictionary string unused until schema opens. **D28b:** Allow `retailPrice` nullable + Zod optional — small schema migration. |
-| **C3** | Plan “city” vs schema `destinationCountry` | Medium | **D29:** UI labels country (not city); optional note covers city. No schema change. |
-| **C4** | Offer validity + multi-product inclusion | Medium | **D30:** Omit validity; show single linked product only; no fake product lists. |
-| **C5** | No ActivityFeed table | Low | **D31:** Read-only union query of existing event tables; if too heavy, show retail handoff events only in v1. |
-| **C6** | Outbound kill-switch is env-only | Medium | **D32a:** ConnectionCard shows read-only outbound state. **D32b (scope):** Persist toggle — **out of UI-only scope**; require explicit backend approval. Prefer **D32a**. |
-| **C7** | Catalog filters `type/min/max/sort` vs `category/q` | Medium | **D33:** Map `type`→category slug; add price/sort in `listPublishedProducts` (read filter only, no new entities). |
-| **C8** | SpecEditor “schema-defined attributes” | Low | **D34:** SpecEditor = bilingual textarea for `specsText*`; SpecTable = split lines `label: value` when `:` present, else single block. |
-| **C9** | SF-05 omits shipping fields present in Zod | Low | **D35:** Keep destination country (+ shipping picker if already in form); do not remove domain fields to match short copy. |
-| **C10** | Cost breakdown file missing | Process | **D36:** Proceed on locked UI plan; insert `docs/scope/cost-breakdown-scope.md` when available; no silent scope add. |
-| **C11** | Home discovery modules vs H1–H9 | Low | Replace in P4c; delete dead modules in P7 (already planned). |
-| **C12** | Compare feature | None | Keep dormant behind flag (D9). |
+| **C2** | D6 “Price on request” vs required `retailPrice` + `currency` | Medium | **D28a:** Keep required price; on-request only when currency missing/fixture/`TEST`. **D28b:** Nullable `retailPrice` + optional currency (schema migration). Prefer **D28a** unless owner wants true empty prices. |
+| **C3** | Plan “city” vs `destinationCountry` | Medium | **D29:** Label/UI = country; city only inside optional notes. No schema change. |
+| **C4** | Offer validity + multi-product grid | Medium | **D30:** Omit validity UI; show 0–1 linked product; no invented lists. |
+| **C5** | No ActivityFeed table | Low | **D31:** Read-only union of existing event tables; if heavy, retail handoff events only in v1. |
+| **C5b** | ActionQueue not merged / not age-sorted | Medium | **D31b:** New read helper merging retail/deal/wholesale where `nextActor=admin`, oldest first, max 8. |
+| **C6** | Outbound kill-switch env-only | Medium | **D32a (recommended):** ConnectionCard read-only outbound state. **D32b:** Persist in-app toggle — needs explicit backend/scope approval. Prefer **D32a**. |
+| **C8** | SpecEditor “attributes” | Low | **D34:** Bilingual textarea for `specsText*`; SpecTable soft-parses `label: value` lines. |
+| **C13** | Wholesale shipping (carrier, tracking, shipped date) absent from schema | High for AD-06 / TR-08 | **D37a:** Omit shipping UI until schema exists. **D37b:** Minimal schema fields + migration (scope change). Prefer **D37a** unless owner adds fields. |
+| **C14** | Trader “last sign-in” column absent | Low | **D38:** Omit column; no invented timestamp. |
+| **C15** | Product “featured” toggle absent | Low | **D39:** Omit; featured = first published / homepage helper only. |
+| **C16** | Dashboard KPI status sets ≠ `status.ts` nextActor | Medium | **D40:** Drive KPI counts from approved §3 tables (and `dealNextActor`). |
+| **C17** | Home stack vs locked H1–H9 naming | Low | **D41a:** Accept current ordered commerce home as fulfilling the same jobs. **D41b:** Re-slice to exact H1–H9 labels in a storefront pass. |
+| **C18** | PromoBand / compareAt / discount badges | Process | **Already decided:** hide behind `RO_PROMO_FEATURES` (default off); code+data kept. Record as **D42** in addendum. |
+| **C10** | Cost breakdown scope file | Resolved | `docs/scope/cost-breakdown-scope.md` exists (Appendix S extract). |
+
+**Closed / mitigated since prior P0 draft:** ProductImage upload (was C1) — present; locale + 403 middleware — present; catalog price/sort filters — present; cost-breakdown file — present.
 
 ---
 
@@ -265,47 +284,55 @@ Current (`middleware.ts`): JWT verify for `/admin/*` (except login) and `/trader
 
 | Rule | Plan vs code | Result |
 |------|--------------|--------|
-| No payment UI | D7/D8 + explainer | OK |
-| No trader inventory/storefront | Trader routes deals/wholesale only | OK |
-| No self-registration | WhatsApp “request account” link only | OK |
-| Three domains, no Order | Schema separate | OK |
-| WhatsApp Baileys, no broadcast | Inbox text only | OK |
-| No invented MOQ/discounts | QuoteCard shows admin values only | OK |
+| No payment UI | D7/D8 + handoff explainer | OK |
+| Traders own no products | Trader deals/wholesale against client stock | OK |
+| No trader self-registration | Admin-provisioned `TraderAccount` | OK |
+| Three domains, no generic Order | Separate models/routes | OK |
+| WhatsApp via Baileys only | Adapter + worker paths | OK |
+| WA text never changes business status | Linking/composer do not transition domain status | OK |
+| No invented MOQ/discounts/shipping rates | Quote/shipping only from stored fields | OK — shipping fields themselves missing (C13) |
+| Appendix S extras (Promos/compareAt) | Hidden by flag | OK pending D42 record |
 
-No boundary violation requiring plan rewrite.
+No boundary violation requiring a plan rewrite.
 
 ---
 
-## 9. Recommended Decision Lock additions (paste into `00-index.md` after approval)
+## 9. Recommended Decision Lock additions (after approval → `DECISIONS-ADDENDUM.md`)
 
 | # | Decision | Value |
 |---|----------|--------|
-| D27 | Product image upload | Minimal local upload to `public/uploads` + ProductImage rows in P5d |
-| D28 | Missing price | **Choose:** (a) required price at launch **or** (b) nullable + “Price on request” |
-| D29 | Request address fields | Country (+ notes); no city field |
+| D28 | Missing / on-request price | **Choose D28a or D28b** (§7 C2) |
+| D29 | Request geography | Country (+ notes); no city field |
 | D30 | Offer model UI | Single optional product; no validity date |
 | D31 | Activity feed | Union of existing domain events |
-| D32 | Outbound control | Read-only in UI (env); no in-app toggle in v1 |
-| D33 | Catalog query | Extend list filters for category/price/sort |
+| D31b | ActionQueue | Merged nextActor=admin rows, oldest first, max 8 |
+| D32 | Outbound control | Read-only in UI (env); no in-app toggle in v1 unless D32b approved |
 | D34 | Specs | Free-text bilingual; soft parse for table |
-| D35 | Request form | Keep destinationCountry / shipping as in Zod |
-| D36 | Cost breakdown file | Deferred; plan remains SoT for UI |
+| D37 | Wholesale shipping | Omit UI (**D37a**) or add schema (**D37b**) |
+| D38 | Trader last sign-in | Omit |
+| D39 | Product featured flag | Omit |
+| D40 | Dashboard KPIs | Derive from approved status/`nextActor` table |
+| D41 | Home section stack | Accept current (**a**) or re-align to H1–H9 (**b**) |
+| D42 | Promo / compareAt / discount UI | Hidden behind `RO_PROMO_FEATURES` (default off); code+data kept |
 
 ---
 
 ## 10. P0 gate checklist
 
-- [x] Route existence table  
-- [x] Schema field mapping  
-- [x] Status draft for owner  
-- [x] Dashboard / WA / image / middleware notes  
-- [x] Conflict list with minimal resolutions  
-- [ ] **Owner approval of D27–D36 (especially D28, D32)**  
-- [ ] Then: `START PHASE 1 — FOUNDATIONS`
+- [x] Route existence table (Parts 03–05)
+- [x] Schema field mapping for columns / forms / KeyValueList sources
+- [x] Draft status table (tone, labelKey, nextActor) for owner approval
+- [x] Dashboard / unread / activity / WA connection / outbound-pause
+- [x] Image model notes
+- [x] Middleware locale + 403 design (as-built + fit)
+- [x] Conflict list with minimal resolutions
+- [ ] **Owner approval of remaining D28–D42 (especially D28, D32, D37, D40, D41)**
+- [ ] Then: proceed only on the next user-approved step (Decision Lock addendum / next phase)
 
 ---
 
 ## 11. Explicit stop
 
-**P0 complete as documentation.** No application code was changed in this phase.  
-Awaiting: conflict resolutions → then Phase 1 only.
+**P0 complete as documentation.** `docs/ui-planning/plan/RECONCILIATION.md` produced; PLAN.md not edited; no application code in this phase.
+
+**Awaiting:** conflict resolutions + status-table approval → then STOP until you confirm the next step.

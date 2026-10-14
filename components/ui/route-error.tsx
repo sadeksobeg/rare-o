@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo } from "react";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { defaultLocale, isLocale } from "@/lib/i18n/config";
@@ -21,9 +22,17 @@ export function RouteError({
     <div className="mx-auto flex min-h-[50vh] max-w-lg flex-col items-center justify-center px-6 py-16 text-center">
       <h1 className="text-2xl font-semibold">{dict.common.errorTitle}</h1>
       <p className="mt-3 text-sm text-ro-muted">{dict.common.errorBody}</p>
-      <Button type="button" variant="primary" className="mt-8" onClick={reset}>
-        {dict.common.errorRetry}
-      </Button>
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <Button type="button" variant="primary" onClick={reset}>
+          {dict.common.errorRetry}
+        </Button>
+        <Link
+          href="/contact"
+          className="inline-flex min-h-11 items-center border border-ro-line px-4 text-sm font-medium text-ro-plum hover:bg-ro-sunken"
+        >
+          {dict.nav.contact}
+        </Link>
+      </div>
     </div>
   );
 }

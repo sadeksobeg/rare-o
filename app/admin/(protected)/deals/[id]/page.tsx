@@ -1,16 +1,12 @@
-import { NegotiationForm } from "@/components/deals/negotiation-form";
+import { NegotiationThread } from "@/components/deals/negotiation-thread";
 import { adminCreateOfferDraftFromDealAction } from "@/app/deal-actions";
-import {
-  DetailItem,
-  DetailList,
-  DetailSection,
-} from "@/components/admin/detail-list";
+import { DetailItem, DetailList } from "@/components/admin/detail-list";
 import { Button } from "@/components/ui/button";
 import { StatusChip } from "@/components/ui/status-chip";
 import { StatusStepper } from "@/components/ui/status-stepper";
 import { getDealForAdmin } from "@/lib/deals/service";
 import { isDealStatus, isOpenDealStatus } from "@/lib/deals/constants";
-import { formatCurrency, formatDate, formatNumber } from "@/lib/i18n/format";
+import { formatCurrency, formatNumber } from "@/lib/i18n/format";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { getStatusChipProps } from "@/lib/ui/status-labels";
 import Link from "next/link";
@@ -104,40 +100,18 @@ export default async function AdminDealDetailPage({
         </DetailItem>
       </DetailList>
 
-      <DetailSection title={d.negotiationHistory}>
-        <ul className="divide-y divide-ro-line border border-ro-line">
-          {deal.entries.map((e) => (
-            <li key={e.id} className="space-y-1 p-4 text-sm">
-              <div className="flex flex-wrap items-center gap-3">
-                <strong>{t.dealAction[e.action] ?? e.action}</strong>
-                <span className="text-ro-muted">
-                  {t.actorRole[e.actorRole] ?? e.actorRole}
-                </span>
-                <span className="text-ro-muted">
-                  {formatDate(e.createdAt, locale, {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })}
-                </span>
-              </div>
-              {e.message ? <p>{e.message}</p> : null}
-              {e.proposedPrice != null || e.quantity != null ? (
-                <p className="text-ro-muted">
-                  {d.terms}:{" "}
-                  {e.proposedPrice != null
-                    ? money(e.proposedPrice, e.currency)
-                    : ""}
-                  {e.quantity != null ? ` · ${d.qty} ${e.quantity}` : ""}
-                </p>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      </DetailSection>
-
-      {open ? (
-        <NegotiationForm dealId={deal.id} mode="admin" labels={dict.trader} />
-      ) : null}
+      <NegotiationThread
+        entries={deal.entries}
+        dealId={deal.id}
+        mode="admin"
+        open={open}
+        locale={locale}
+        labels={t}
+        title={u.negotiationThread}
+        money={money}
+        termsLabel={d.terms}
+        qtyLabel={d.qty}
+      />
 
       <div className="space-y-3 border border-ro-line p-4">
         <h2 className="text-lg font-semibold">{d.publicOfferTitle}</h2>

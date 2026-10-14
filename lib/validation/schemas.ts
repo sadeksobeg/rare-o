@@ -46,6 +46,9 @@ export const productUpsertSchema = z.object({
   status: z.enum(PRODUCT_STATUSES),
   availability: z.enum(PRODUCT_AVAILABILITIES),
   wholesaleEligible: z.coerce.boolean().default(false),
+  badgeNew: z.coerce.boolean().default(false),
+  badgeFeatured: z.coerce.boolean().default(false),
+  badgeSale: z.coerce.boolean().default(false),
 });
 
 const PROMO_TONES = ["ink", "plum", "sand"] as const;

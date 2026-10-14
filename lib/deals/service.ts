@@ -1,3 +1,4 @@
+import { uiVisibleDealWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
 import {
   DEAL_KINDS,
@@ -267,7 +268,7 @@ export async function getDealForTrader(dealId: string, traderId: string) {
 
 export async function listDealsForTrader(traderId: string) {
   return prisma.dealProposal.findMany({
-    where: { traderId },
+    where: { AND: [{ traderId }, uiVisibleDealWhere()] },
     orderBy: { updatedAt: "desc" },
     include: {
       product: { select: { id: true, slug: true, nameEn: true, nameAr: true } },
@@ -297,6 +298,7 @@ export async function getDealForAdmin(dealId: string) {
 
 export async function listDealsForAdmin() {
   return prisma.dealProposal.findMany({
+    where: uiVisibleDealWhere(),
     orderBy: { updatedAt: "desc" },
     take: 200,
     include: {
@@ -304,6 +306,11 @@ export async function listDealsForAdmin() {
         select: { id: true, email: true, displayName: true, companyName: true },
       },
       product: { select: { id: true, slug: true, nameEn: true, nameAr: true } },
+      entries: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        select: { actorRole: true },
+      },
       _count: { select: { entries: true } },
     },
   });

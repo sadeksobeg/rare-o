@@ -13,17 +13,16 @@ import Link from "next/link";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/** P11 — transient, non-blocking notifications announced via an ARIA live region. */
+/** P11 — max 3; 5 s auto-dismiss; errors persist with dismiss. */
 
-export type ToastTone = "success" | "info";
+export type ToastTone = "success" | "info" | "error";
 
 export type ToastInput = {
   message: string;
   tone?: ToastTone;
-  /** Optional inline link (e.g. "View request list"). */
   actionLabel?: string;
   actionHref?: string;
-  /** Milliseconds before auto-dismiss. Defaults to 5000. */
+  /** Milliseconds before auto-dismiss. Errors ignore this (persist). */
   duration?: number;
 };
 
@@ -37,7 +36,6 @@ type ToastContextValue = {
 const DEFAULT_DURATION = 5000;
 const MAX_VISIBLE = 3;
 
-/** Safe fallback so components outside a provider (admin/trader shells) never throw. */
 const noopContext: ToastContextValue = {
   toast: () => -1,
   dismiss: () => {},
@@ -55,21 +53,25 @@ function ToastCard({
   onDismiss: (id: number) => void;
 }) {
   const [paused, setPaused] = useState(false);
+  const isError = item.tone === "error";
   const duration = item.duration ?? DEFAULT_DURATION;
 
   useEffect(() => {
-    if (paused) return;
+    if (isError || paused) return;
     const timer = window.setTimeout(() => onDismiss(item.id), duration);
     return () => window.clearTimeout(timer);
-  }, [paused, duration, item.id, onDismiss]);
+  }, [paused, duration, item.id, onDismiss, isError]);
 
   return (
     <div
+      role={isError ? "alert" : undefined}
       className={cn(
-        "pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-[var(--ro-r-sm)] border px-4 py-3 text-sm shadow-[var(--ro-e2)]",
-        item.tone === "info"
-          ? "border-ro-border bg-ro-canvas text-ro-ink"
-          : "border-ro-ink bg-ro-ink text-ro-canvas"
+        "pointer-events-auto flex w-full max-w-none items-center gap-3 rounded-[var(--ro-r-sm)] border px-4 py-3 text-sm shadow-[var(--ro-e2)] md:max-w-sm",
+        item.tone === "info" && "border-ro-border bg-ro-canvas text-ro-ink",
+        item.tone === "error" &&
+          "border-[var(--ro-danger-700)] bg-[var(--ro-danger-100)] text-[var(--ro-danger-700)]",
+        (!item.tone || item.tone === "success") &&
+          "border-ro-ink bg-ro-ink text-ro-canvas"
       )}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
@@ -103,7 +105,6 @@ export function ToastProvider({
   dismissLabel,
 }: {
   children: React.ReactNode;
-  /** Localized accessible name for the dismiss button. */
   dismissLabel: string;
 }) {
   const [items, setItems] = useState<ToastItem[]>([]);
@@ -124,12 +125,11 @@ export function ToastProvider({
   return (
     <ToastContext.Provider value={value}>
       {children}
-      {/* Live region stays mounted so screen readers pick up inserted toasts. */}
       <div
         role="status"
         aria-live="polite"
         aria-atomic="false"
-        className="pointer-events-none fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] z-[90] flex flex-col items-center gap-2 px-4 md:bottom-6"
+        className="pointer-events-none fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] z-[90] flex flex-col items-stretch gap-2 px-4 md:inset-x-auto md:inset-inline-end-6 md:bottom-6 md:items-end"
       >
         {items.map((item) => (
           <ToastCard

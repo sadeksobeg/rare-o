@@ -57,7 +57,7 @@ export function FeaturedInstrument({
         <div className="space-y-2">
           <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ro-plum">
             {dict.home.featuredInstrumentEyebrow}
-            {category ? ` · ${category}` : ""}
+            {category ? `  ${category}` : ""}
           </p>
           <h2 className="font-display text-xl tracking-wide md:text-2xl">
             <Link

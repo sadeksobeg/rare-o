@@ -91,6 +91,29 @@ export default async function PublicOfferDetailPage({
               {summary}
             </div>
           ) : null}
+          <div className="flex flex-wrap gap-3">
+            <ButtonLink
+              href={href(
+                `/request?offer=${encodeURIComponent(offer.slug)}`,
+                locale
+              )}
+              variant="primary"
+            >
+              {dict.offers.askAbout}
+            </ButtonLink>
+            {offer.product ? (
+              <ButtonLink
+                href={href(`/product/${offer.product.slug}`, locale)}
+                variant="secondary"
+              >
+                {dict.home.viewProduct}
+              </ButtonLink>
+            ) : (
+              <ButtonLink href={href("/catalog", locale)} variant="secondary">
+                {dict.nav.catalog}
+              </ButtonLink>
+            )}
+          </div>
           {offer.product ? (
             <div className="border border-ro-line bg-ro-paper p-6 md:p-8">
               <p className="ro-type-overline text-ro-plum">
@@ -101,21 +124,8 @@ export default async function PublicOfferDetailPage({
                   ? offer.product.nameAr || offer.product.nameEn
                   : offer.product.nameEn || offer.product.nameAr}
               </p>
-              <div className="mt-6">
-                <ButtonLink
-                  href={href(`/product/${offer.product.slug}`, locale)}
-                  variant="primary"
-                  size="sm"
-                >
-                  {dict.home.viewProduct}
-                </ButtonLink>
-              </div>
             </div>
-          ) : (
-            <ButtonLink href={href("/catalog", locale)} variant="secondary">
-              {dict.nav.catalog}
-            </ButtonLink>
-          )}
+          ) : null}
         </div>
       </Reveal>
     </article>

@@ -1,12 +1,22 @@
-import Link from "next/link";
 import { traderLoginAction } from "@/app/deal-actions";
 import { LoginForm } from "@/components/auth/login-form";
 import { AdminLocaleToggle } from "@/components/admin/locale-toggle";
+import { whatsAppGreetingLink } from "@/lib/config/contact";
 import { getRequestDictionary } from "@/lib/i18n/server";
-import { href } from "@/lib/href";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function TraderLoginPage() {
   const { locale, dict } = await getRequestDictionary();
+  const accountRequestHref =
+    whatsAppGreetingLink(
+      locale === "ar"
+        ? "مرحباً، أود طلب حساب تاجر في منصة RARE OUD."
+        : "Hello — I would like to request a trader account on RARE OUD."
+    ) || "/contact";
 
   return (
     <LoginForm
@@ -17,12 +27,14 @@ export default async function TraderLoginPage() {
         <>
           <p>{dict.auth.traderHint}</p>
           <p className="mt-2">
-            <Link
-              href={href("/contact", locale)}
+            <a
+              href={accountRequestHref}
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-ro-plum hover:underline"
             >
-              {dict.contact.whatsapp}
-            </Link>
+              {dict.trader.accountRequestHelp}
+            </a>
           </p>
         </>
       }

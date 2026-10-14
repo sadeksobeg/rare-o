@@ -18,7 +18,7 @@ export default async function NewTraderDealPage() {
       <h1 className="font-display text-3xl font-semibold tracking-tight">
         {t.newDealTitle}
       </h1>
-      <p className="max-w-xl text-sm text-ro-muted">{t.newDealLead}</p>
+      <p className="max-w-[45rem] text-sm text-ro-muted">{t.newDealLead}</p>
       <NewDealForm products={products} labels={t} locale={locale} />
     </section>
   );

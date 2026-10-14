@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ProductThumb } from "@/components/storefront/product-media";
 import { AvailabilityChip } from "@/components/storefront/catalog/availability-chip";
 import { PriceBlock } from "@/components/storefront/catalog/price-block";
+import { ProductBadges } from "@/components/storefront/catalog/product-badges";
 import { QuickAddButton } from "@/components/storefront/catalog/quick-add-button";
 import { href } from "@/lib/href";
 import type { Locale } from "@/lib/i18n/config";
@@ -18,6 +19,9 @@ export type CatalogCardProduct = {
   compareAtPrice?: { toString(): string } | number | string | null;
   currency: string;
   availability: string;
+  badgeNew?: boolean;
+  badgeFeatured?: boolean;
+  badgeSale?: boolean;
   category?: { nameAr: string; nameEn: string } | null;
   images: { path: string; altAr: string; altEn: string }[];
 };
@@ -50,13 +54,14 @@ export function CatalogProductCard({
 
   return (
     <article className={cn("group relative", className)}>
-      <div className="relative">
+      <div className="ro-card-lift relative overflow-hidden rounded-[var(--ro-r-xs)]">
         <ProductThumb
           path={primary?.path}
           alt={primary ? altFor(primary) : name}
           plateCaption={dict.catalog.photoCaption}
           className={cn(!available && "opacity-80")}
         />
+        <ProductBadges product={product} locale={locale} />
         {secondary ? (
           <div
             aria-hidden
@@ -67,7 +72,7 @@ export function CatalogProductCard({
               alt=""
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"
-              className="object-cover"
+              className="ro-media-zoom object-cover"
             />
           </div>
         ) : null}

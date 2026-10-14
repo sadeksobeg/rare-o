@@ -1,4 +1,4 @@
-import { NegotiationForm } from "@/components/deals/negotiation-form";
+import { NegotiationThread } from "@/components/deals/negotiation-thread";
 import { Banner } from "@/components/ui/banner";
 import { StatusChip } from "@/components/ui/status-chip";
 import { requireTraderSession } from "@/lib/auth/trader-session";
@@ -9,7 +9,6 @@ import { dealNextActor, getStatusMeta } from "@/lib/ui/status";
 import {
   dealStatusLabel,
   fmt,
-  formatDateTime,
   formatMoney,
 } from "@/lib/ui/trader-labels";
 import { notFound } from "next/navigation";
@@ -26,7 +25,6 @@ export default async function TraderDealDetailPage({
 
   let deal;
   try {
-    // Ownership enforced: traderId from session, not from URL alone
     deal = await getDealForTrader(id, session.sub);
   } catch {
     notFound();
@@ -71,11 +69,7 @@ export default async function TraderDealDetailPage({
       <dl className="grid gap-3 text-sm md:grid-cols-2">
         <div>
           <dt className="text-ro-muted">{t.dealProduct}</dt>
-          <dd>
-            {deal.product
-              ? `${productName} (${deal.product.slug})`
-              : t.dealNonCatalog}
-          </dd>
+          <dd>{deal.product ? productName : t.dealNonCatalog}</dd>
         </div>
         <div>
           <dt className="text-ro-muted">{t.dealSnapshot}</dt>
@@ -94,45 +88,24 @@ export default async function TraderDealDetailPage({
         </div>
       </dl>
 
-      <div>
-        <h2 className="mb-3 text-lg font-semibold">{t.dealHistory}</h2>
-        <ul className="divide-y divide-ro-line border border-ro-line">
-          {deal.entries.map((e) => (
-            <li key={e.id} className="space-y-1 p-4 text-sm">
-              <div className="flex flex-wrap items-center gap-3">
-                <strong>{t.dealAction[e.action] ?? e.action}</strong>
-                <span className="text-ro-muted">
-                  {t.actorRole[e.actorRole] ?? e.actorRole}
-                </span>
-                <span className="text-ro-muted">
-                  {formatDateTime(locale, e.createdAt)}
-                </span>
-              </div>
-              {e.message ? <p>{e.message}</p> : null}
-              {e.proposedPrice != null || e.quantity != null ? (
-                <p className="text-ro-muted">
-                  {t.dealTerms}:{" "}
-                  {e.proposedPrice != null
-                    ? formatMoney(e.proposedPrice, e.currency)
-                    : ""}
-                  {e.quantity != null ? ` · ${t.dealQtyShort} ${e.quantity}` : ""}
-                </p>
-              ) : null}
-              {e.conditionsNotes ? (
-                <p className="text-ro-muted">{e.conditionsNotes}</p>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      </div>
+      <NegotiationThread
+        entries={deal.entries}
+        dealId={deal.id}
+        mode="trader"
+        open={open}
+        locale={locale}
+        labels={t}
+        title={t.dealHistory}
+        money={(v, c) => formatMoney(v as number, c)}
+        termsLabel={t.dealTerms}
+        qtyLabel={t.dealQtyShort}
+      />
 
-      {open ? (
-        <NegotiationForm dealId={deal.id} mode="trader" labels={t} />
-      ) : (
+      {!open ? (
         <p className="text-sm text-ro-muted">
           {fmt(t.dealClosed, { status: statusText })}
         </p>
-      )}
+      ) : null}
     </section>
   );
 }

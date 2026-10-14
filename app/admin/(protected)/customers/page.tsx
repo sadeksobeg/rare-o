@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { uiVisibleCustomerWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
-import { formatDate } from "@/lib/i18n/format";
+import { formatDate, formatRelative } from "@/lib/i18n/format";
 import { getRequestDictionary } from "@/lib/i18n/server";
 
 export default async function AdminCustomersPage({
@@ -28,7 +28,7 @@ export default async function AdminCustomersPage({
     where: query
       ? {
           AND: [
-            uiVisibleCustomerWhere,
+            uiVisibleCustomerWhere(),
             {
               OR: [
                 { name: { contains: query } },
@@ -37,11 +37,16 @@ export default async function AdminCustomersPage({
             },
           ],
         }
-      : uiVisibleCustomerWhere,
+      : uiVisibleCustomerWhere(),
     orderBy: { createdAt: "desc" },
     take: 100,
     include: {
       _count: { select: { requests: true } },
+      requests: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        select: { createdAt: true, reference: true },
+      },
     },
   });
 
@@ -69,24 +74,38 @@ export default async function AdminCustomersPage({
           <DataTableHead>
             <Th>{a.colName}</Th>
             <Th>{u.colPhone}</Th>
-            <Th>{u.colNotes}</Th>
             <Th>{u.colRequests}</Th>
+            <Th>{u.colLastRequest}</Th>
             <Th>{u.colCreated}</Th>
           </DataTableHead>
           <tbody>
-            {customers.map((c) => (
-              <Tr key={c.id}>
-                <Td className="font-medium">{c.name}</Td>
-                <Td>
-                  <span dir="ltr">{c.phone}</span>
-                </Td>
-                <Td className="text-ro-muted">{c.notes ?? "—"}</Td>
-                <Td className="tabular-nums">{c._count.requests}</Td>
-                <Td className="text-ro-muted">
-                  {formatDate(c.createdAt, locale, { dateStyle: "medium" })}
-                </Td>
-              </Tr>
-            ))}
+            {customers.map((c) => {
+              const last = c.requests[0];
+              return (
+                <Tr key={c.id}>
+                  <Td className="font-medium">{c.name}</Td>
+                  <Td>
+                    <span dir="ltr">{c.phone}</span>
+                  </Td>
+                  <Td className="tabular-nums">{c._count.requests}</Td>
+                  <Td className="text-ro-muted">
+                    {last ? (
+                      <>
+                        <span className="block font-medium text-ro-ink">
+                          {last.reference}
+                        </span>
+                        {formatRelative(last.createdAt, locale)}
+                      </>
+                    ) : (
+                      "—"
+                    )}
+                  </Td>
+                  <Td className="text-ro-muted">
+                    {formatDate(c.createdAt, locale, { dateStyle: "medium" })}
+                  </Td>
+                </Tr>
+              );
+            })}
           </tbody>
         </DataTable>
       )}

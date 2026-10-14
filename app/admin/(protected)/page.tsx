@@ -1,12 +1,12 @@
-import Link from "next/link";
-import { InboxHealthBanner } from "@/components/admin/inbox-health";
-import { StatusChip } from "@/components/ui/status-chip";
-import { getAdminHomeData } from "@/lib/admin/dashboard";
-import { formatCurrency, formatRelative } from "@/lib/i18n/format";
-import { getRequestDictionary } from "@/lib/i18n/server";
-import { getStatusChipProps } from "@/lib/ui/status-labels";
+import { ActionQueue } from "@/components/admin/action-queue";
+import { ActivityFeed } from "@/components/admin/activity-feed";
+import { ConnectionCard } from "@/components/admin/connection-card";
+import { KpiTile } from "@/components/admin/kpi-tile";
 import { ButtonLink } from "@/components/ui/button";
+import { getAdminHomeData } from "@/lib/admin/dashboard";
+import { getRequestDictionary } from "@/lib/i18n/server";
 
+/** AD-02 — Dashboard: KPIs, ActionQueue, ConnectionCard, ActivityFeed. */
 export default async function AdminDashboardPage() {
   const { locale, dict } = await getRequestDictionary();
   const data = await getAdminHomeData();
@@ -42,105 +42,48 @@ export default async function AdminDashboardPage() {
           <h1 className="text-2xl font-semibold tracking-tight sm:text-[28px]">
             {a.dashboard}
           </h1>
-          <p className="mt-1 text-sm text-ro-muted">
-            {a.publishedCount}: {data.published}
-          </p>
         </div>
         <ButtonLink href="/admin/products/new" variant="primary" size="sm">
           {a.newProduct}
         </ButtonLink>
       </div>
 
+      {/* KPIs: 2×2 mobile, 4-up desktop */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {kpis.map((kpi) => (
-          <Link
+          <KpiTile
             key={kpi.href + kpi.label}
+            label={kpi.label}
+            value={kpi.value}
             href={kpi.href}
-            className="border border-ro-line bg-ro-surface p-4 transition-colors hover:border-ro-ink/30"
-          >
-            <p className="text-xs text-ro-muted">{kpi.label}</p>
-            {kpi.value === 0 ? (
-              <p className="mt-2 text-sm text-[var(--ro-success-700)]">
-                {a.kpiIdle}
-              </p>
-            ) : (
-              <p className="mt-2 text-[28px] font-semibold tabular-nums leading-none">
-                {kpi.value}
-              </p>
-            )}
-          </Link>
+            idleLabel={a.kpiIdle}
+          />
         ))}
       </div>
 
+      {/*
+        Mobile order (390): connection → queue → feed
+        Desktop: queue (1–7) | connection (8–12), then feed full width
+      */}
       <div className="grid gap-6 lg:grid-cols-12">
-        <div className="space-y-3 lg:col-span-7">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold">{a.recentRequests}</h2>
-            <Link
-              href="/admin/requests"
-              className="text-sm text-ro-plum hover:underline"
-            >
-              {a.viewAll}
-            </Link>
-          </div>
-          <ul className="divide-y divide-ro-line border border-ro-line">
-            {data.recentRequests.length === 0 ? (
-              <li className="p-4 text-sm text-ro-muted">{a.noRequests}</li>
-            ) : (
-              data.recentRequests.map((r) => {
-                return (
-                  <li key={r.id}>
-                    <Link
-                      href={`/admin/requests/${r.id}`}
-                      className="flex flex-wrap items-center justify-between gap-2 p-4 text-sm transition-colors hover:bg-ro-sunken"
-                    >
-                      <span className="font-medium">{r.reference}</span>
-                      <span className="text-ro-muted">{r.customerName}</span>
-                      <StatusChip
-                        {...getStatusChipProps(dict, "retail", r.status)}
-                        size="sm"
-                      />
-                      <span className="tabular-nums text-ro-muted">
-                        {formatCurrency(
-                          Number(r.subtotal),
-                          r.currency,
-                          locale,
-                          dict.product.priceOnRequest
-                        )}
-                      </span>
-                      <span
-                        className="text-xs text-ro-muted"
-                        title={r.createdAt.toISOString()}
-                      >
-                        {formatRelative(r.createdAt, locale)}
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })
-            )}
-          </ul>
-        </div>
-
-        <div className="space-y-3 lg:col-span-5">
-          <h2 className="text-lg font-semibold">{a.connection}</h2>
-          <InboxHealthBanner health={data.health} dict={dict} />
-          <div className="flex flex-wrap gap-2 border border-ro-line p-4 text-sm">
-            <span className="w-full text-xs text-ro-muted">{a.outbound}</span>
-            <ButtonLink href="/admin/products/new" variant="secondary" size="sm">
-              {a.quickProduct}
-            </ButtonLink>
-            <ButtonLink href="/admin/offers" variant="secondary" size="sm">
-              {a.quickOffer}
-            </ButtonLink>
-            <ButtonLink href="/admin/traders" variant="secondary" size="sm">
-              {a.quickTrader}
-            </ButtonLink>
-            <ButtonLink href="/admin/inbox" variant="text" size="sm">
-              {a.openInbox}
-            </ButtonLink>
-          </div>
-        </div>
+        <ConnectionCard
+          health={data.health}
+          dict={dict}
+          locale={locale}
+          className="order-1 lg:order-2 lg:col-span-5"
+        />
+        <ActionQueue
+          rows={data.actionQueue}
+          dict={dict}
+          locale={locale}
+          className="order-2 lg:order-1 lg:col-span-7"
+        />
+        <ActivityFeed
+          items={data.activityFeed}
+          dict={dict}
+          locale={locale}
+          className="order-3 lg:col-span-12"
+        />
       </div>
     </section>
   );

@@ -1,6 +1,6 @@
 /**
- * Draft status mapping (P0) — applied defaults from DECISIONS-APPLIED.md
- * Label keys resolve via dictionaries.status.* in later phases.
+ * Status mapping — approved in DECISIONS-ADDENDUM.md (status table + D40).
+ * `ready_for_handoff.nextActor = admin` (storefront creation state).
  */
 
 export type StatusTone =
@@ -29,7 +29,8 @@ export const RETAIL_STATUS: Record<string, StatusMeta> = {
   ready_for_handoff: {
     tone: "info",
     labelKey: "status.retail.ready_for_handoff",
-    nextActor: "customer",
+    /** Creation state from storefront — first admin-visible (D40 / addendum). */
+    nextActor: "admin",
   },
   handoff_opened: {
     tone: "progress",
@@ -139,6 +140,32 @@ export function getStatusMeta(
       nextActor: "none",
     }
   );
+}
+
+/**
+ * Status values whose table `nextActor` is `admin` (static rows only).
+ * For deals in `negotiating`, use `dealNextActor` with the last entry instead.
+ */
+export function statusesAwaitingAdmin(
+  domain: "retail" | "deal" | "wholesale"
+): string[] {
+  const table =
+    domain === "retail"
+      ? RETAIL_STATUS
+      : domain === "deal"
+        ? DEAL_STATUS
+        : WHOLESALE_STATUS;
+  return Object.entries(table)
+    .filter(([, meta]) => meta.nextActor === "admin")
+    .map(([value]) => value);
+}
+
+export function retailNextActor(status: string): NextActor {
+  return getStatusMeta("retail", status).nextActor;
+}
+
+export function wholesaleNextActor(status: string): NextActor {
+  return getStatusMeta("wholesale", status).nextActor;
 }
 
 /**

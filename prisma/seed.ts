@@ -28,10 +28,10 @@ type SeedProduct = {
 const DEMO_PRODUCTS: SeedProduct[] = [
   {
     slug: "demo-string-instrument",
-    nameAr: "عود ورشة — نموذج تجريبي",
-    nameEn: "Workshop oud — demo piece",
-    descriptionAr: "قطعة تجريبية للتحقق من المنصة والعرض التجاري.",
-    descriptionEn: "Fixture piece for platform and commercial display verification.",
+    nameAr: "عود ورشة",
+    nameEn: "Workshop oud",
+    descriptionAr: "عود ورشة بنبرة دافئة مناسب للممارسة والعرض.",
+    descriptionEn: "A workshop oud with a warm tone for practice and display.",
     category: "string-instruments",
     retailPrice: 2098,
     compareAtPrice: 2490,
@@ -256,7 +256,7 @@ async function main() {
   const name = process.env.ADMIN_NAME ?? "RARE OUD Admin";
   const passwordHash = await bcrypt.hash(password, 12);
 
-  await prisma.adminUser.upsert({
+  const admin = await prisma.adminUser.upsert({
     where: { email },
     update: { passwordHash, name },
     create: { email, passwordHash, name },
@@ -265,7 +265,7 @@ async function main() {
   const traderEmail = process.env.TRADER_EMAIL ?? "trader@rareoud.local";
   const traderPassword = process.env.TRADER_PASSWORD ?? "ChangeMeNow!";
   const traderHash = await bcrypt.hash(traderPassword, 12);
-  await prisma.traderAccount.upsert({
+  const trader = await prisma.traderAccount.upsert({
     where: { email: traderEmail },
     update: {
       passwordHash: traderHash,
@@ -404,12 +404,95 @@ async function main() {
     },
   });
 
+  // Deal awaiting trader action (negotiating + last actor admin → nextActor trader)
+  /** Demo (not regression): visible in UI. Regression uses DL-SEED-* / Reg Trader *. */
+  const waitingRef = "DL-DEMO-WAIT";
+  await prisma.dealProposal.upsert({
+    where: { reference: waitingRef },
+    update: {
+      status: "negotiating",
+      title: "عرض مقابل على عود ورشة",
+      dealKind: "catalog",
+      productId: demo.id,
+      traderId: trader.id,
+      proposedPrice: 1800,
+      currency: "USD",
+      quantity: 2,
+      conditionsNotes: "تسليم خلال أسبوعين",
+    },
+    create: {
+      reference: waitingRef,
+      traderId: trader.id,
+      dealKind: "catalog",
+      title: "عرض مقابل على عود ورشة",
+      productId: demo.id,
+      proposedPrice: 1800,
+      currency: "USD",
+      quantity: 2,
+      conditionsNotes: "تسليم خلال أسبوعين",
+      status: "negotiating",
+      entries: {
+        create: [
+          {
+            action: "propose",
+            actorRole: "trader",
+            actorTraderId: trader.id,
+            message: "نقترح 1700 دولار لقطعتين.",
+            proposedPrice: 1700,
+            currency: "USD",
+            quantity: 2,
+          },
+          {
+            action: "counter",
+            actorRole: "admin",
+            actorAdminId: admin.id,
+            message: "يمكننا الاتفاق على 1800 دولار لقطعتين.",
+            proposedPrice: 1800,
+            currency: "USD",
+            quantity: 2,
+          },
+        ],
+      },
+    },
+  });
+  const waitingDeal = await prisma.dealProposal.findUnique({
+    where: { reference: waitingRef },
+  });
+  if (waitingDeal) {
+    await prisma.negotiationEntry.deleteMany({ where: { dealId: waitingDeal.id } });
+    await prisma.negotiationEntry.createMany({
+      data: [
+        {
+          dealId: waitingDeal.id,
+          action: "propose",
+          actorRole: "trader",
+          actorTraderId: trader.id,
+          message: "نقترح 1700 دولار لقطعتين.",
+          proposedPrice: 1700,
+          currency: "USD",
+          quantity: 2,
+        },
+        {
+          dealId: waitingDeal.id,
+          action: "counter",
+          actorRole: "admin",
+          actorAdminId: admin.id,
+          message: "يمكننا الاتفاق على 1800 دولار لقطعتين.",
+          proposedPrice: 1800,
+          currency: "USD",
+          quantity: 2,
+        },
+      ],
+    });
+  }
+
   console.log("Seed complete:");
   console.log("- categories: string-instruments, accessories");
-  console.log(`- products: ${DEMO_PRODUCTS.length} published demo fixtures`);
+  console.log(`- products: ${DEMO_PRODUCTS.length} published fixtures`);
   console.log(`- admin: ${email}`);
   console.log(`- trader: ${traderEmail}`);
-  console.log(`- demo currency: ${TEST_CURRENCY_CODE} (test fixture only)`);
+  console.log(`- waiting deal: ${waitingRef} (nextActor=trader)`);
+  console.log(`- fixture currency: ${TEST_CURRENCY_CODE} (test only)`);
   console.log("- offers + promo bands seeded (admin-editable)");
   console.log("");
   console.log(

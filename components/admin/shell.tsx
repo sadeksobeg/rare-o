@@ -88,7 +88,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
           </header>
           <main
             id="main-content"
-            className="mx-auto w-full max-w-[1440px] flex-1 px-4 py-6 sm:px-6 lg:px-8"
+            className="mx-auto w-full max-w-[1440px] flex-1 px-4 py-6 has-[[data-admin-inbox]]:max-w-none has-[[data-admin-inbox]]:px-3 has-[[data-admin-inbox]]:py-4 sm:px-6 lg:px-8"
           >
             {children}
           </main>

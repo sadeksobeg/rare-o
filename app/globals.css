@@ -43,8 +43,8 @@
   --ro-bg-raised: var(--ro-sand-50);
   --ro-bg-sunken: var(--ro-sand-200);
   --ro-text: var(--ro-ink-950);
-  --ro-text-2: var(--ro-ink-600);
-  --ro-text-muted: var(--ro-ink-500);
+  --ro-text-2: var(--ro-ink-700);
+  --ro-text-muted: var(--ro-ink-600);
   --ro-link: var(--ro-plum-900);
   --ro-link-hover: var(--ro-plum-700);
   --ro-border-subtle: rgba(11, 8, 13, 0.14);
@@ -222,6 +222,14 @@ a {
   font-weight: var(--ro-display-weight);
   font-size: calc(clamp(3rem, 2rem + 5vw, 6.5rem) * var(--ro-display-scale));
   line-height: var(--ro-lh-heading);
+  /* Room for Arabic tashkeel — avoid clipping marks above/below letters */
+  overflow: visible;
+  padding-block: 0.12em 0.18em;
+}
+
+:where([lang="ar"], [dir="rtl"]) .ro-type-display-xl {
+  line-height: 1.55;
+  padding-block: 0.18em 0.28em;
 }
 
 .ro-type-h1 {
@@ -349,6 +357,42 @@ html[lang="ar"] .ro-type-overline {
   transform: translateY(0);
 }
 
+/* Declarative section enter (stagger via --ro-reveal-delay) */
+.ro-reveal-up {
+  opacity: 0;
+  transform: translateY(1rem);
+}
+
+.ro-section-accent {
+  position: relative;
+}
+
+.ro-section-accent::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  width: 2.5rem;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--ro-amber-500),
+    color-mix(in srgb, var(--ro-amber-400) 40%, transparent)
+  );
+  opacity: 0.85;
+}
+
+.ro-card-lift {
+  transition:
+    transform var(--ro-dur-base) var(--ro-ease-enter),
+    box-shadow var(--ro-dur-base) var(--ro-ease-enter);
+}
+
+.ro-media-zoom {
+  transition: transform var(--ro-dur-shift) var(--ro-ease-resonance);
+  will-change: transform;
+}
+
 .ro-anim-reveal-mask {
   clip-path: inset(0 0 100% 0);
   transform: translateY(0.75rem);
@@ -387,6 +431,72 @@ html[lang="ar"] .ro-type-overline {
   }
   50% {
     opacity: 0.92;
+  }
+}
+
+@keyframes ro-oud-breathe {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0) scale(1.015) rotate(0.6deg);
+  }
+}
+
+@keyframes ro-oud-sway-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-1.2deg);
+  }
+  50% {
+    transform: translate3d(-4px, -14px, 0) rotate(1.4deg);
+  }
+}
+
+@keyframes ro-oud-sway-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(1deg);
+  }
+  50% {
+    transform: translate3d(5px, -12px, 0) rotate(-1.6deg);
+  }
+}
+
+@keyframes ro-oud-enter {
+  from {
+    transform: translate3d(0, 2.75rem, 0) scale(0.9);
+    filter: brightness(0.7);
+  }
+  to {
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: brightness(1);
+  }
+}
+
+/* Exploded parts → dock into one instrument */
+@keyframes ro-oud-dock {
+  from {
+    transform: translate3d(var(--ro-oud-ex, 0), var(--ro-oud-ey, 0), 0)
+      rotate(var(--ro-oud-er, 0deg)) scale(0.94);
+    filter: brightness(0.82);
+  }
+  to {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+    filter: brightness(1);
+  }
+}
+
+@keyframes ro-oud-halo-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.06);
   }
 }
 
@@ -501,14 +611,90 @@ html[lang="ar"] .ro-type-overline {
   }
   to {
     opacity: 1;
-    clip-path: inset(0 0 0 0);
+    /* none — inset(0) still clips Arabic tashkeel that sits outside the line box */
+    clip-path: none;
     transform: translateY(0);
+  }
+}
+
+@keyframes ro-hero-line-fade {
+  from {
+    opacity: 0;
+    transform: translateY(0.6rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ro-hero-light-sweep {
+  0% {
+    transform: translateX(-35%) skewX(-12deg);
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.55;
+  }
+  42% {
+    opacity: 0.2;
+  }
+  100% {
+    transform: translateX(120%) skewX(-12deg);
+    opacity: 0;
+  }
+}
+
+@keyframes ro-hero-scroll-pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scaleY(0.7);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scaleY(1);
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .ro-rings-idle {
     animation: ro-rings-pulse 8s var(--ro-ease-resonance) infinite;
+  }
+
+  .ro-oud-idle,
+  .ro-oud-idle-lead {
+    animation: ro-oud-breathe 7.5s var(--ro-ease-resonance) infinite;
+    transform-origin: 50% 72%;
+    will-change: transform;
+  }
+
+  .ro-oud-idle-slow,
+  .ro-oud-idle-sway-a {
+    animation: ro-oud-sway-a 9.5s var(--ro-ease-resonance) infinite;
+    transform-origin: 50% 78%;
+    will-change: transform;
+  }
+
+  .ro-oud-idle-lag,
+  .ro-oud-idle-sway-b {
+    animation: ro-oud-sway-b 8.2s var(--ro-ease-resonance) 0.45s infinite;
+    transform-origin: 50% 76%;
+    will-change: transform;
+  }
+
+  .ro-oud-enter {
+    animation: ro-oud-enter 1.05s var(--ro-ease-enter) both;
+  }
+
+  .ro-oud-dock {
+    animation: ro-oud-dock 1.2s var(--ro-ease-enter) both;
+  }
+
+  .ro-oud-idle .ro-oud-halo,
+  .ro-oud-idle-lead .ro-oud-halo {
+    animation: ro-oud-halo-pulse 7.5s var(--ro-ease-resonance) infinite;
+    transform-origin: center;
   }
 
   .ro-mark-reveal {
@@ -532,7 +718,8 @@ html[lang="ar"] .ro-type-overline {
   }
 
   .ro-hero-line-b {
-    animation: ro-hero-line 0.9s var(--ro-ease-enter) 0.7s both;
+    /* No clip-path: vocalized Arabic display marks must not be cropped */
+    animation: ro-hero-line-fade 0.9s var(--ro-ease-enter) 0.7s both;
   }
 
   .ro-hero-line-c {
@@ -543,6 +730,29 @@ html[lang="ar"] .ro-type-overline {
     animation: ro-hero-line 0.85s var(--ro-ease-enter) 1.05s both;
   }
 
+  .ro-hero-feat {
+    animation: ro-hero-line-fade 0.7s var(--ro-ease-enter) both;
+  }
+
+  .ro-hero-light-sweep {
+    background: linear-gradient(
+      105deg,
+      transparent 0%,
+      transparent 42%,
+      rgba(244, 231, 216, 0.06) 49%,
+      rgba(184, 134, 63, 0.11) 51%,
+      rgba(244, 231, 216, 0.04) 55%,
+      transparent 62%,
+      transparent 100%
+    );
+    animation: ro-hero-light-sweep 11s var(--ro-ease-resonance) 1.4s infinite;
+  }
+
+  .ro-hero-scroll-cue span {
+    animation: ro-hero-scroll-pulse 2.4s var(--ro-ease-resonance) infinite;
+    transform-origin: top center;
+  }
+
   .ro-hover-shift {
     transition: transform var(--ro-dur-shift) var(--ro-ease-enter);
   }
@@ -551,10 +761,79 @@ html[lang="ar"] .ro-type-overline {
   .group:focus-within .ro-hover-shift {
     transform: translateY(-3px);
   }
+
+  .ro-reveal-up {
+    animation: ro-ms-drift 0.85s var(--ro-ease-enter)
+      var(--ro-reveal-delay, 0ms) both;
+  }
+
+  .group:hover .ro-card-lift,
+  .group:focus-within .ro-card-lift {
+    transform: translateY(-4px);
+    box-shadow: var(--ro-e2);
+  }
+
+  .group:hover .ro-media-zoom,
+  .group:focus-within .ro-media-zoom {
+    transform: scale(1.04);
+  }
+
+  .ro-dialog[open] {
+    animation: ro-dialog-fade 0.28s var(--ro-ease-enter) both;
+  }
+
+  .ro-dialog[open]::backdrop {
+    animation: ro-dialog-backdrop 0.28s var(--ro-ease-enter) both;
+  }
+
+  @media (max-width: 639px) {
+    .ro-dialog[open] {
+      animation: ro-sheet-up 0.4s var(--ro-ease-enter) both;
+    }
+  }
+}
+
+@keyframes ro-dialog-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ro-dialog-backdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ro-sheet-up {
+  from {
+    opacity: 0.85;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .ro-rings-idle,
+  .ro-oud-idle,
+  .ro-oud-idle-lead,
+  .ro-oud-idle-slow,
+  .ro-oud-idle-sway-a,
+  .ro-oud-idle-lag,
+  .ro-oud-idle-sway-b,
+  .ro-oud-enter,
+  .ro-oud-dock,
+  .ro-oud-idle .ro-oud-halo,
+  .ro-oud-idle-lead .ro-oud-halo,
   .ro-mark-reveal,
   .ro-image-drift,
   .ro-hero-photo-settle,
@@ -562,7 +841,13 @@ html[lang="ar"] .ro-type-overline {
   .ro-hero-line-a,
   .ro-hero-line-b,
   .ro-hero-line-c,
-  .ro-hero-line-d {
+  .ro-hero-line-d,
+  .ro-hero-feat,
+  .ro-hero-light-sweep,
+  .ro-hero-scroll-cue span,
+  .ro-reveal-up,
+  .ro-dialog[open],
+  .ro-dialog[open]::backdrop {
     animation: none;
   }
 
@@ -573,6 +858,24 @@ html[lang="ar"] .ro-type-overline {
     transform: none;
     clip-path: none;
     transition: none;
+  }
+
+  .ro-reveal-up {
+    opacity: 1;
+    transform: none;
+  }
+
+  .ro-card-lift,
+  .ro-media-zoom {
+    transition: none;
+  }
+
+  .group:hover .ro-card-lift,
+  .group:focus-within .ro-card-lift,
+  .group:hover .ro-media-zoom,
+  .group:focus-within .ro-media-zoom {
+    transform: none;
+    box-shadow: none;
   }
 }
 
@@ -720,6 +1023,216 @@ html[lang="ar"] .ro-type-overline {
   .ro-ms-enter,
   .ro-ms-enter-delay,
   .ro-ms-enter-late {
+    animation: none;
+  }
+}
+
+/* P01 storefront primary — resonance ring ripple from pointer */
+.ro-btn-ripple {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(244, 231, 216, 0.75);
+  pointer-events: none;
+  animation: ro-btn-ripple 600ms var(--ro-ease-resonance) forwards;
+}
+.ro-btn-ripple--ink {
+  border-color: color-mix(in srgb, var(--ro-ink-950) 55%, transparent);
+}
+@keyframes ro-btn-ripple {
+  from {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(28);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ro-btn-ripple {
+    display: none;
+  }
+}
+
+/* P12 Skeleton shimmer */
+.ro-skeleton {
+  background-color: var(--ro-sand-300);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(251, 246, 238, 0.55) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: ro-skeleton-shimmer 1.4s linear infinite;
+}
+@keyframes ro-skeleton-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ro-skeleton {
+    animation: none;
+    background-image: none;
+  }
+}
+
+/* P08 Dialog — lock page scroll while modal open */
+html.ro-scroll-lock {
+  overflow: hidden;
+}
+
+/* P10 Tabs — edge fade when the list scrolls on narrow viewports */
+.ro-tabs-scroll {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 12px,
+    #000 calc(100% - 12px),
+    transparent
+  );
+}
+@media (min-width: 640px) {
+  .ro-tabs-scroll {
+    mask-image: none;
+  }
+}
+html[dir="rtl"] .ro-tabs-scroll {
+  mask-image: linear-gradient(
+    to left,
+    transparent,
+    #000 12px,
+    #000 calc(100% - 12px),
+    transparent
+  );
+}
+@media (min-width: 640px) {
+  html[dir="rtl"] .ro-tabs-scroll {
+    mask-image: none;
+  }
+}
+
+/* P09 Menu — Popover API + CSS anchor (fallback: under trigger) */
+.ro-menu-popover {
+  inset: unset;
+  top: calc(anchor(bottom, 100%) + 4px);
+  left: anchor(left, 0);
+  position: absolute;
+}
+.ro-menu-popover--end {
+  left: unset;
+  right: anchor(right, 0);
+}
+@supports (anchor-name: --x) {
+  .ro-menu-popover {
+    position: absolute;
+  }
+}
+html[dir="rtl"] .ro-menu-popover:not(.ro-menu-popover--end) {
+  left: unset;
+  right: anchor(right, 0);
+}
+html[dir="rtl"] .ro-menu-popover--end {
+  right: unset;
+  left: anchor(left, 0);
+}
+
+/* When CSS anchor is unavailable, keep popover near the relative parent */
+@supports not (anchor-name: --x) {
+  .ro-menu-popover {
+    top: calc(100% + 4px);
+    left: 0;
+    right: auto;
+  }
+  .ro-menu-popover--end {
+    left: auto;
+    right: 0;
+  }
+  html[dir="rtl"] .ro-menu-popover:not(.ro-menu-popover--end) {
+    left: auto;
+    right: 0;
+  }
+  html[dir="rtl"] .ro-menu-popover--end {
+    left: 0;
+    right: auto;
+  }
+}
+
+/* ─── Atelier cinematic language — plum identity (no gold accent) ─── */
+.ro-atelier {
+  --ro-atelier-void: #06040a;
+  --ro-atelier-ink: var(--ro-ink-950);
+  --ro-atelier-accent: var(--ro-plum-300);
+  --ro-atelier-accent-deep: var(--ro-plum-700);
+  --ro-atelier-ivory: var(--ro-sand-100);
+  --ro-atelier-line: color-mix(in srgb, var(--ro-plum-300) 50%, transparent);
+}
+
+.ro-atelier-stage {
+  background-color: var(--ro-atelier-void, #06040a);
+  color: var(--ro-sand-100);
+}
+
+.ro-atelier-headline {
+  color: color-mix(in srgb, var(--ro-sand-100) 82%, var(--ro-plum-300));
+  text-shadow: 0 0 80px color-mix(in srgb, var(--ro-plum-700) 35%, transparent);
+}
+
+.ro-atelier-frame {
+  border: 1px solid color-mix(in srgb, var(--ro-plum-300) 40%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--ro-sand-100) 4%, transparent),
+    0 24px 80px -40px rgba(0, 0, 0, 0.85);
+}
+
+.ro-btn-atelier-ghost {
+  border: 1px solid color-mix(in srgb, var(--ro-plum-300) 70%, transparent) !important;
+  background: transparent !important;
+  color: var(--ro-sand-100) !important;
+  box-shadow: none !important;
+}
+.ro-btn-atelier-ghost:hover {
+  border-color: var(--ro-plum-300) !important;
+  background: color-mix(in srgb, var(--ro-plum-700) 28%, transparent) !important;
+}
+
+.ro-btn-atelier-solid {
+  background: var(--ro-sand-100) !important;
+  color: var(--ro-ink-950) !important;
+  border: none !important;
+  box-shadow: 0 8px 28px -12px rgba(0, 0, 0, 0.45) !important;
+}
+.ro-btn-atelier-solid:hover {
+  filter: brightness(1.04);
+}
+
+@keyframes ro-atelier-breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ro-atelier-glow {
+    animation: ro-atelier-breathe 9s var(--ro-ease-resonance) infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ro-atelier-glow {
     animation: none;
   }
 }

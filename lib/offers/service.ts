@@ -77,8 +77,21 @@ export async function updatePublicCuratedOffer(
 
 export async function setPublicOfferStatus(
   id: string,
-  status: PublicOfferStatus
+  status: PublicOfferStatus,
+  opts?: { plateAck?: boolean }
 ) {
+  if (status === "published") {
+    const offer = await prisma.publicCuratedOffer.findUnique({
+      where: { id },
+    });
+    if (!offer) throw new Error("OFFER_NOT_FOUND");
+    if (!offer.titleAr.trim()) throw new Error("PUBLISH_NEEDS_TITLE_AR");
+    if (!offer.summaryAr.trim()) throw new Error("PUBLISH_NEEDS_SUMMARY_AR");
+    if (!offer.productId && !opts?.plateAck) {
+      throw new Error("PUBLISH_NEEDS_PRODUCT_OR_PLATE");
+    }
+  }
+
   return prisma.publicCuratedOffer.update({
     where: { id },
     data: {

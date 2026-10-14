@@ -12,6 +12,7 @@
     "db:migrate": "node node_modules/prisma/build/index.js migrate dev",
     "db:seed": "node node_modules/tsx/dist/cli.mjs prisma/seed.ts",
     "db:reset": "node node_modules/prisma/build/index.js migrate reset --force",
+    "test:slice-a-kpi": "node node_modules/tsx/dist/cli.mjs scripts/slice-a-kpi-retail.ts",
     "test:week3": "node node_modules/tsx/dist/cli.mjs scripts/week3-regression.ts",
     "test:wholesale-security": "node node_modules/tsx/dist/cli.mjs scripts/wholesale-security-checks.ts",
     "test:whatsapp-phase-a": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-phase-a-checks.ts",

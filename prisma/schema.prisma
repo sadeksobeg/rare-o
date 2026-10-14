@@ -41,6 +41,10 @@ model Product {
   availability      String             @default("available")
   /// Forward-looking flag for Week 3; no wholesale UI in Week 2
   wholesaleEligible Boolean            @default(false)
+  /// Admin storefront badges (independent toggles)
+  badgeNew          Boolean            @default(false)
+  badgeFeatured     Boolean            @default(false)
+  badgeSale         Boolean            @default(false)
   images            ProductImage[]
   requestLines      RetailRequestLine[]
   dealProposals     DealProposal[]
