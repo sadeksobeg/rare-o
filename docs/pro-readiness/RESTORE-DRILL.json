@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "at": "2026-10-18T13:33:40.252Z",
+  "source": "prisma/dev.db",
+  "restoredPath": "backups\\restore-drill-1792330420206\\restored.db",
+  "counts": {
+    "products": 14,
+    "deals": 14,
+    "retail": 7,
+    "traders": 5,
+    "waConv": 1
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "base": "http://127.0.0.1:3001",
+  "threshold": "critical|serious → fail",
+  "routes": [
+    {
+      "url": "http://127.0.0.1:3001/?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "seriousOrCritical": []
+    },
+    {
+      "url": "http://127.0.0.1:3001/catalog?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "seriousOrCritical": []
+    },
+    {
+      "url": "http://127.0.0.1:3001/cart?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "seriousOrCritical": []
+    },
+    {
+      "url": "http://127.0.0.1:3001/request?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "seriousOrCritical": []
+    },
+    {
+      "url": "http://127.0.0.1:3001/admin/login?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "seriousOrCritical": []
+    },
+    {
+      "url": "http://127.0.0.1:3001/trader/login?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "seriousOrCritical": []
+    }
+  ]
+}
