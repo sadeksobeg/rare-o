@@ -186,6 +186,22 @@ No particle glows, no sale-ticker motion, no urgency pulse on prices.
 
 ---
 
+## 12. Identity notes — as-built (2026-10-18)
+
+| Topic | As-built | Owner action |
+|-------|----------|--------------|
+| Logo / emblem | PNG paths `/brand/mark-master.png`, `/brand/mark-small.png` in `components/brand/emblem.tsx` | Deliver **A1/A2 SVG** — see [OWNER-ASSETS.md](../pro-readiness/OWNER-ASSETS.md) |
+| Color tokens | CSS variables in `app/globals.css` (sand/ink/plum/cream family) | Confirm cream `#F4E7D8` vs any print brand book delta |
+| Typography | Cormorant, Amiri, Source Sans 3, IBM Plex Sans Arabic in `app/layout.tsx` | Confirm A-TYPO or approve web stack |
+| Brand motifs | Rings, grain, axis, emblem components in `components/brand/` | A7 **done** in code |
+| Photography | Mix of `public/brand/hero-*`, editorial JPGs, Material Plate for missing SKU shots | **A5/A6** owner shoots |
+| Privacy / legal chrome | Placeholder banner + section bodies in `dict.privacy` | Counsel-approved AR/EN copy |
+| Curated / anti–flash-sale | Offer markers quiet; no trader logos on storefront cards | Keep for launch QA |
+
+**Single-brand rule holds:** one RARE OUD house publicly; trader identity only inside trader/admin tools.
+
+---
+
 ## Stage 4 summary (revised)
 
 **Confirmed:** Palette and personality unchanged; deals must look curated/serious/premium — never discount-store; AR+EN visual readiness; anti flash-sale rules explicit.  

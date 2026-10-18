@@ -232,3 +232,19 @@ See also Discovery §9 Open / Deferred:
 **Assumptions:** Optional accounts; curated Offers nav; planning negotiation labels.  
 **Open/Deferred:** Non-catalog ops/conversion path, negotiation channel, new/regular rules, shipping availability/pricing, WA template, closure states, trader-as-shopper.  
 **Plain-language takeaway:** Shoppers see one bilingual RARE OUD store that can ship to Syria and beyond once destination rules exist. Traders negotiate opportunities and request wholesale. One admin runs the control room.
+
+---
+
+## 11. As-built sitemap alignment (2026-10-18)
+
+Logical IA in §1 is **still the contract**. Implemented App Router paths (high level):
+
+| Area | Implemented routes | Delta vs Week 1 IA |
+|------|-------------------|-------------------|
+| Storefront | `/`, `/catalog`, `/product/[slug]`, `/offers`, `/cart`, `/request`, `/contact`, `/privacy` (+ `/en/*`) | Home layout richer than wireframe SF-01; optional customer accounts **not** built |
+| Trader | `/trader/login`, `/trader`, `/trader/deals`, `/trader/deals/new`, `/trader/deals/[id]`, `/trader/wholesale`, `/trader/wholesale/requests`, `/trader/wholesale/[id]`, `/trader/offers`, `/trader/profile`, `/trader/notifications` | Matches dual-path deals + wholesale; wizard UX not extracted |
+| Admin | `/admin/login`, `/admin`, `/admin/inbox`, `/admin/requests`, `/admin/deals`, `/admin/wholesale`, `/admin/products`, `/admin/categories`, `/admin/offers`, `/admin/customers`, `/admin/customers/[id]`, `/admin/traders` | Categories: **two launch categories** edit-only; promos gated behind flag |
+| System | `/forbidden`, `not-found`, health `api/health` | Cross-role 403 present |
+
+**Wireframe → route mapping:** [06-wireframe-to-route-map.md](./06-wireframe-to-route-map.md)  
+**Owner assets still blocking polish:** [../pro-readiness/OWNER-ASSETS.md](../pro-readiness/OWNER-ASSETS.md)

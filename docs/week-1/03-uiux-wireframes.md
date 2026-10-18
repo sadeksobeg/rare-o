@@ -401,3 +401,12 @@ flowchart TD
 **Decided:** Storefront bilingual + curated offers; retail flow Country → destination-dependent methods → details → WhatsApp (charges deferred; Syria + international capable); auto WhatsApp prep; trader negotiation board (not reject-primary); dual-path propose deal with non-catalog ≠ auto product; wholesale qty + propose/quote; single-admin inbox.  
 **Open/Deferred:** Non-catalog conversion workflow, negotiation channel, new/regular rules, MOQ values, shipping availability/pricing, WA template, final closure states, trader-as-shopper.  
 **Plain-language takeaway:** Screens support serious commercial conversation with RARE OUD — not bargain checkouts or seller shops.
+
+---
+
+## As-built mapping (2026-10-18)
+
+Wireframe IDs above are **structural intent**. For screen-by-screen routes, conformance marks, and known DEVIATES (e.g. home H1–H9 vs current `/`), use:
+
+- [06-wireframe-to-route-map.md](./06-wireframe-to-route-map.md)
+- [../ui-planning/plan/CONFORMANCE.md](../ui-planning/plan/CONFORMANCE.md) (Parts 03–05)

@@ -1,10 +1,10 @@
 # Conformance inventory (plan Parts 01–05 vs as-built)
 
-**Date:** 2026-10-12  
-**Baseline:** `master` @ `316beea` + `DECISIONS-ADDENDUM.md` (D28–D42)  
-**Method:** Read-only file evidence against PLAN.md Parts 01–05. Cross-checked with a second inventory pass ([Conformance inventory P1-P6](bb546fad-38d5-45ce-a41e-b54d2dae9aba)); same verdicts. D32a applies: outbound stays **read-only** (no in-app Switch).  
+**Date:** 2026-10-18  
+**Baseline:** working tree @ `c685097` + `DECISIONS-ADDENDUM.md` (D28–D42)  
+**Method:** Read-only file evidence against PLAN Parts **01–05** (focus: **02-components §3–4**, **04-admin**, related **03/05** deal surfaces). Prior inventory (2026-10-12) retained where unchanged. D32a applies: outbound stays **read-only** (no in-app Switch).  
 **Marks:** `MATCH` | `PARTIAL` | `MISSING` | `DEVIATES`  
-**Rule:** No code changes in this step.
+**Rule:** Documentation-only refresh (C5); no code changes in this step.
 
 **How to read:** Prefer groups with many `DEVIATES` / `MISSING` for rework. `PARTIAL` often means “exists under another name / incomplete states.”
 
@@ -15,10 +15,10 @@
 | Phase | MATCH | PARTIAL | MISSING | DEVIATES | Verdict |
 |-------|------:|--------:|--------:|---------:|---------|
 | P1 Foundations | High | Few | Low | Low | Mostly done — polish gallery / tokens only |
-| P2 Primitives | Low | Some | **Many P03–P24** | — | **Needs real primitive pass** |
+| P2 Primitives | Low–Med | Some | **Many P03–P24** | — | **Needs real primitive pass**; P19 Timeline exists (deal/inbox-adjacent) |
 | P3 Chrome / routing | Medium | Some | Low | Low | Shells + locale + 403 present; polish |
 | P4 Storefront | Medium | Home **DEVIATES** | EditorialSplit name | Home stack, hero | **Home (D41b) + gap fill** |
-| P5 Admin | Medium | Dashboard / inbox | ActionQueue, ActivityFeed, KpiTile as A05 | KPI status sets | **Dashboard + inbox layout** |
+| P5 Admin | Medium | Dashboard / inbox / AD-08 | ActionQueue, ActivityFeed, KpiTile as A05 | KPI status sets | **Dashboard + inbox layout**; A17 RecordPicker **MATCH** |
 | P6 Trader | Medium | Forms not Wizard | ProductPicker / BuilderSummaryBar | — | **Wizard / picker extraction** |
 
 ---
@@ -63,7 +63,7 @@
 | P16 Breadcrumb | MISSING | — | Add for admin detail |
 | P17 Table base | PARTIAL | Via `components/admin/data-table.tsx` | Extract shared semantic table primitive |
 | P18 Stepper | PARTIAL | `components/ui/status-stepper.tsx` | Match P18 done/current/upcoming/blocked |
-| P19 Timeline | MISSING | — | Add for handoff / negotiation / wholesale events |
+| P19 Timeline | PARTIAL | `components/ui/timeline.tsx`; used in `components/deals/negotiation-thread.tsx` | Extend to retail handoff / wholesale lifecycle on detail pages |
 | P20 KeyValueList | MISSING | `detail-list` / dl ad-hoc | Extract KeyValueList |
 | P21 Banner | PARTIAL | `components/ui/banner.tsx` | Tone + role=alert for errors |
 | P22 Loader | PARTIAL | `components/ui/loader.tsx` | Three-ring motif sizes 24/40 |
@@ -112,7 +112,7 @@
 |----|------|----------|--------------|
 | A01 AdminShell | PARTIAL | `admin/shell.tsx` + `nav.tsx` | Collapse 72, WA connection dot, unread badge |
 | A02 PageHeader | PARTIAL | `admin/page-header.tsx` | Spec sizes + max 1 primary |
-| A03 FilterToolbar | MISSING | Filters inline on pages | Extract sticky FilterToolbar |
+| A03 FilterToolbar | PARTIAL | `components/admin/table-filters.tsx` (`AdminTableFilters`) on `app/admin/(protected)/{products,requests,deals,wholesale}/page.tsx` — tabs + URL search | Rename/extract A03: sticky under PageHeader, result count, extra filter popovers |
 | A04 DataTable | PARTIAL | `admin/data-table.tsx` | Card list &lt;768, kebab, aria-sort |
 | A05 KpiTile | MISSING | Dashboard inlines numbers | Extract KpiTile + zero success state |
 | A06 ActionQueue | MISSING | Recent retail list only | Merge nextActor=admin (D31b) |
@@ -125,10 +125,10 @@
 | A13 ConversationList | PARTIAL | `inbox-conversation-list.tsx` | Tabs الكل/غير مقروءة/مرتبطة/غير مرتبطة |
 | A14 MessageBubble | PARTIAL | Inbox thread markup | Extract bubble + failed retry |
 | A15 Composer | PARTIAL | `inbox-composer.tsx` | Disable reasons + length counter |
-| A16 LinkedRecordPanel | PARTIAL | `business-context-panel.tsx` / link controls | Confirm + audit |
-| A17 RecordPicker | MISSING | Link controls type+id | Dialog picker with search |
+| A16 LinkedRecordPanel | PARTIAL | `components/admin/linked-record-panel.tsx` (+ `business-context-panel.tsx`) | ConfirmDialog + audit trail polish per A16 |
+| A17 RecordPicker | MATCH | `components/admin/record-picker.tsx`; wired from `linked-record-panel.tsx`; search via `adminSearchLinkableRecordsAction` in `app/whatsapp-actions.ts` | — |
 | A18 InboxConnectionBanner | PARTIAL | `inbox-health.tsx` | Full-width banner tones per state |
-| A19 NegotiationThread | MATCH | `components/deals/negotiation-thread.tsx` + form action bar | Used on admin + trader deal detail |
+| A19 NegotiationThread | MATCH | `components/deals/negotiation-thread.tsx` + `NegotiationForm`; mounted on `app/admin/(protected)/deals/[id]/page.tsx` and `app/trader/(protected)/deals/[id]/page.tsx` | — |
 | A20 DetailLayout | PARTIAL | Page grids ad-hoc | Standard 8/4 ≥1024 |
 | T01 TraderShell | PARTIAL | `trader/shell.tsx` + bottom tabs | Match 64 px labels + dots for waiting |
 | T02 TaskCard | MATCH | `task-card.tsx` | — |
@@ -187,12 +187,12 @@
 | AD-02 Dashboard | DEVIATES | `admin/(protected)/page.tsx` + `getAdminHomeData` | KPIs from approved nextActor (**include `ready_for_handoff`**); A06 merge; A07 feed; drop/extra published meta |
 | AD-03 Inbox | PARTIAL | inbox pages + list/composer/health | 3-pane ≥1280; A18 banner; tabs |
 | AD-04 Requests | PARTIAL | requests list/detail | Handoff column; status menu valid-only |
-| AD-05 Deals | PARTIAL | deals pages | بانتظارك chip; NegotiationThread |
+| AD-05 Deals | PARTIAL | deals list/detail; **NegotiationThread MATCH** on `[id]` | بانتظارك chip; detail A20 layout |
 | AD-06 Wholesale | PARTIAL | wholesale pages | After **D37b**: carrier / tracking / shippedAt entry |
-| AD-07 Products | PARTIAL | products + ImageUploader | Publish rules (image + AR name) |
-| AD-08 Categories | PARTIAL | categories page | Dialog create; no delete with products |
+| AD-07 Products | PARTIAL | `app/admin/(protected)/products/*`; `ImageUploader` on `[id]`; publish guard in `upsertProductAction` (`app/actions.ts`: `PUBLISH_NEEDS_NAME_AR`, `PUBLISH_NEEDS_IMAGE`); hints in `components/admin/product-form.tsx` | Client-side disable publish when rules unmet; full AD-07 list layout + sticky save bar |
+| AD-08 Categories | PARTIAL | `app/admin/(protected)/categories/page.tsx` — inline edit for **launch slugs only** via `listLaunchCategories` / `updateCategoryFormAction`; `assertNoUnrestrictedCategoryCreate()` in `lib/catalog/service.ts` | Plan table + Dialog create/edit; move up/down; delete guard with product count |
 | AD-09 Offers | PARTIAL | offers admin | D30; plate ack |
-| AD-10 Customers | PARTIAL | customers page | Detail drawer; ui-hidden regression |
+| AD-10 Customers | PARTIAL | List: `app/admin/(protected)/customers/page.tsx` (`uiVisibleCustomerWhere`, search); detail route `customers/[id]/page.tsx` (contact, notes, requests table) | Linked conversations; drawer vs full page; internal note editing if in schema |
 | AD-11 Traders | PARTIAL | traders + forms | Show-once password; omit lastSignIn (D38) |
 | Promos CRUD | DEVIATES (gated) | `/admin/promos` + `RO_PROMO_FEATURES` | Keep hidden (D42) |
 
@@ -238,8 +238,21 @@
 
 ---
 
+## C5 targeted spot-check (2026-10-18)
+
+| Focus item | Mark | Evidence paths |
+|------------|------|----------------|
+| A03 FilterToolbar | PARTIAL | `components/admin/table-filters.tsx` → admin list routes (see A03 row) |
+| A17 RecordPicker | MATCH | `components/admin/record-picker.tsx`, `linked-record-panel.tsx`, `app/whatsapp-actions.ts` |
+| A19 NegotiationThread | MATCH | `components/deals/negotiation-thread.tsx`, admin + trader deal `[id]` pages |
+| AD-07 publish rules | PARTIAL | `app/actions.ts` + `product-form.tsx` (+ images on edit page) |
+| AD-08 categories | PARTIAL | `categories/page.tsx`, launch-only update actions |
+| AD-10 customer detail | PARTIAL | `customers/page.tsx`, `customers/[id]/page.tsx` (no inbox links yet) |
+
+---
+
 ## Explicit stop
 
-`DECISIONS-ADDENDUM.md` recorded. `CONFORMANCE.md` produced. **No code, schema, or dependency changes.**  
+`DECISIONS-ADDENDUM.md` recorded. **2026-10-18:** C5 documentation refresh only — **no code, schema, or dependency changes.**  
 
 Awaiting your selection of which phases need real rework vs light fix.
