@@ -14,10 +14,16 @@ function withLocale(
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-ro-locale", locale);
 
+  // Clone the request URL so search params (filters, q, sort) survive EN rewrites.
+  // `new URL("/catalog", request.url)` drops the query string.
   const response = rewritePath
-    ? NextResponse.rewrite(new URL(rewritePath, request.url), {
-        request: { headers: requestHeaders },
-      })
+    ? (() => {
+        const target = request.nextUrl.clone();
+        target.pathname = rewritePath;
+        return NextResponse.rewrite(target, {
+          request: { headers: requestHeaders },
+        });
+      })()
     : NextResponse.next({
         request: { headers: requestHeaders },
       });
@@ -88,6 +94,35 @@ async function guardRole(
   return NextResponse.redirect(loginUrl);
 }
 
+/**
+ * Logged-in traders must not land on public /offers — that swaps the portal
+ * shell for the storefront and looks like lost permissions.
+ */
+async function redirectTraderFromPublicOffers(
+  request: NextRequest,
+  barePath: string
+): Promise<NextResponse | null> {
+  if (barePath !== "/offers" && !barePath.startsWith("/offers/")) {
+    return null;
+  }
+
+  const secret = process.env.AUTH_SECRET;
+  if (!secret || secret.length < 16) return null;
+
+  const role = await readRole(
+    request.cookies.get(TRADER_COOKIE)?.value,
+    secret
+  );
+  if (role !== "trader") return null;
+
+  const slug =
+    barePath === "/offers" ? "" : barePath.slice("/offers/".length).split("/")[0];
+  const targetPath = slug ? `/trader/offers/${slug}` : "/trader/offers";
+  const url = new URL(targetPath, request.url);
+  url.search = request.nextUrl.search;
+  return NextResponse.redirect(url);
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -106,6 +141,11 @@ export async function middleware(request: NextRequest) {
     ) {
       return NextResponse.redirect(new URL(stripped, request.url));
     }
+    const traderOffers = await redirectTraderFromPublicOffers(
+      request,
+      stripped
+    );
+    if (traderOffers) return traderOffers;
     return withLocale(request, "en", stripped);
   }
 
@@ -128,6 +168,11 @@ export async function middleware(request: NextRequest) {
     !pathname.startsWith("/api") &&
     !pathname.startsWith("/forbidden")
   ) {
+    const traderOffers = await redirectTraderFromPublicOffers(
+      request,
+      pathname
+    );
+    if (traderOffers) return traderOffers;
     return withLocale(request, "ar");
   }
 
