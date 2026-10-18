@@ -116,7 +116,10 @@ export default async function ProductPage({
     images: product.images.map((img) => absoluteUrl(img.path)),
     price: Number.isFinite(priceNumber) ? priceNumber : null,
     // schema.org expects ISO 4217; skip non-ISO fixture codes.
-    currency: /^[A-Z]{3}$/.test(product.currency) ? product.currency : null,
+    currency:
+      product.currency && /^[A-Z]{3}$/.test(product.currency)
+        ? product.currency
+        : null,
     url: absoluteUrl(href(`/product/${product.slug}`, locale)),
     available,
   });
@@ -241,7 +244,7 @@ export default async function ProductPage({
                 slug={product.slug}
                 name={displayName}
                 price={priceNumber}
-                currency={product.currency}
+                currency={product.currency ?? ""}
                 imagePath={images[0]?.path ?? null}
                 label={dict.product.addToCart}
                 addedLabel={dict.product.added}
@@ -311,7 +314,7 @@ export default async function ProductPage({
               slug={product.slug}
               name={displayName}
               price={priceNumber}
-              currency={product.currency}
+              currency={product.currency ?? ""}
               imagePath={images[0]?.path ?? null}
               label={dict.product.addToCart}
               addedLabel={dict.product.added}

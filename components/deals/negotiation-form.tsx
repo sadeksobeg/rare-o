@@ -13,6 +13,12 @@ import type { TraderDict } from "@/lib/ui/trader-labels";
 const fieldClass =
   "w-full rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-paper px-3 py-2.5 text-sm text-ro-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]";
 
+type ConflictWarning = {
+  reference: string;
+  traderDisplayName: string;
+  status: string;
+};
+
 /** Structured negotiation action bar (A19) — not free chat. */
 export function NegotiationForm({
   dealId,
@@ -28,6 +34,7 @@ export function NegotiationForm({
   const [pending, startTransition] = useTransition();
   const [result, setResult] = useState<ActionResult | null>(null);
   const [action, setAction] = useState("continue");
+  const [warnings, setWarnings] = useState<ConflictWarning[]>([]);
 
   return (
     <form
@@ -40,7 +47,15 @@ export function NegotiationForm({
               ? await adminNegotiateAction(null, fd)
               : await traderNegotiateAction(null, fd);
           setResult(res);
-          if (res.ok) router.refresh();
+          if (res.ok) {
+            const data = res.data as
+              | { conflictWarnings?: ConflictWarning[] }
+              | undefined;
+            setWarnings(data?.conflictWarnings ?? []);
+            router.refresh();
+          } else {
+            setWarnings([]);
+          }
         });
       }}
     >
@@ -50,7 +65,7 @@ export function NegotiationForm({
         </h3>
         <p className="text-sm text-ro-muted">
           {labels?.negHint ??
-            "Structured negotiation — not chat. Choose continue, counter, accept, or close."}
+            "Structured negotiation — not chat. Choose continue, counter, accept, reject, or close."}
         </p>
       </div>
       <input type="hidden" name="dealId" value={dealId} />
@@ -71,12 +86,31 @@ export function NegotiationForm({
           <option value="accept">
             {labels?.dealAction.accept ?? "Accept"}
           </option>
+          {mode === "admin" ? (
+            <option value="reject">
+              {labels?.dealAction.reject ?? "Reject"}
+            </option>
+          ) : null}
           <option value="close">{labels?.dealAction.close ?? "Close"}</option>
         </select>
       </label>
       <label className="block space-y-1 text-sm">
-        <span className="text-ro-muted">{labels?.negMessage ?? "Message"}</span>
-        <textarea name="message" rows={3} className={fieldClass} />
+        <span className="text-ro-muted">
+          {action === "reject"
+            ? (labels?.negRejectReason ?? "Reject reason (optional)")
+            : (labels?.negMessage ?? "Message")}
+        </span>
+        <textarea
+          name="message"
+          rows={3}
+          className={fieldClass}
+          placeholder={
+            action === "reject"
+              ? (labels?.negRejectReasonHint ??
+                "Optional reason shown to the trader")
+              : undefined
+          }
+        />
       </label>
       {action === "counter" ? (
         <div className="grid gap-3 sm:grid-cols-3">
@@ -118,6 +152,25 @@ export function NegotiationForm({
             </span>
             <textarea name="conditionsNotes" rows={2} className={fieldClass} />
           </label>
+        </div>
+      ) : null}
+      {warnings.length > 0 ? (
+        <div
+          role="status"
+          data-conflict-warning="1"
+          className="space-y-1 border border-[var(--ro-attention-border,var(--ro-line))] bg-[var(--ro-attention-bg,var(--ro-paper))] p-3 text-sm"
+        >
+          <p className="font-semibold">
+            {labels?.conflictWarningTitle ??
+              "Warning: other active catalog deals on this product"}
+          </p>
+          <ul className="list-inside list-disc text-ro-muted">
+            {warnings.map((w) => (
+              <li key={w.reference}>
+                {w.reference} · {w.traderDisplayName} · {w.status}
+              </li>
+            ))}
+          </ul>
         </div>
       ) : null}
       {result && !result.ok ? (

@@ -239,10 +239,10 @@ async function main() {
     actorAdminId: admin!.id,
     message: "admin continue",
   });
-  assert(continued.status === "negotiating", "continue → negotiating");
+  assert(continued.deal.status === "negotiating", "continue → negotiating");
 
   const countered = await addNegotiationEntry({
-    dealId: continued.id,
+    dealId: continued.deal.id,
     action: "counter",
     actorRole: "admin",
     actorAdminId: admin!.id,
@@ -251,22 +251,22 @@ async function main() {
     currency: "TEST",
     quantity: 2,
   });
-  assert(countered.status === "negotiating", "counter stays negotiating");
-  assert(Number(countered.proposedPrice) === 75, "counter updates commercial snapshot");
+  assert(countered.deal.status === "negotiating", "counter stays negotiating");
+  assert(Number(countered.deal.proposedPrice) === 75, "counter updates commercial snapshot");
 
   const accepted = await addNegotiationEntry({
-    dealId: countered.id,
+    dealId: countered.deal.id,
     action: "accept",
     actorRole: "trader",
     actorTraderId: traderA.id,
     message: "trader accept",
   });
-  assert(accepted.status === "accepted", "accept → accepted");
+  assert(accepted.deal.status === "accepted", "accept → accepted");
 
   await expectThrow(
     () =>
       addNegotiationEntry({
-        dealId: accepted.id,
+        dealId: accepted.deal.id,
         action: "continue",
         actorRole: "admin",
         actorAdminId: admin!.id,
@@ -317,8 +317,11 @@ async function main() {
   const draftOffer = await createPublicCuratedOffer({
     slug: `reg-draft-${Date.now()}`,
     titleEn: "Draft offer",
+    titleAr: "عرض مسودة",
     summaryEn: "private draft",
-    dealProposalId: accepted.id,
+    summaryAr: "مسودة خاصة",
+    dealProposalId: accepted.deal.id,
+    productId: product!.id,
   });
   assert(draftOffer.status === "draft", "new offer starts draft");
   const publicBySlug = await getPublishedPublicOfferBySlug(draftOffer.slug);

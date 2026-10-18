@@ -21,13 +21,13 @@ export function SpecTable({
     <section className={cn("space-y-4", className)}>
       {heading ? <h2 className="ro-type-h2">{heading}</h2> : null}
       {rows.length > 0 ? (
-        <dl className="grid border-t border-ro-border md:grid-cols-2 md:gap-x-10">
+        <dl className="grid border-t border-[color-mix(in_srgb,var(--ro-plum-900)_12%,var(--ro-border-subtle))] md:grid-cols-2 md:gap-x-10">
           {rows.map((row, i) => (
             <div
               key={`${row.label}-${i}`}
-              className="flex items-baseline justify-between gap-6 border-b border-ro-border py-3"
+              className="flex items-baseline justify-between gap-6 border-b border-[color-mix(in_srgb,var(--ro-plum-900)_10%,var(--ro-border-subtle))] py-3.5"
             >
-              <dt className="text-sm text-ro-muted">{row.label}</dt>
+              <dt className="text-sm tracking-wide text-ro-muted">{row.label}</dt>
               <dd className="text-sm font-medium text-ro-ink text-end">
                 {row.value}
               </dd>

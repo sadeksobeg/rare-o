@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import {
   createRetailRequestAction,
@@ -72,6 +72,8 @@ export function RequestForm({
   const [pending, startTransition] = useTransition();
   const [opening, setOpening] = useState(false);
   const [openError, setOpenError] = useState<string | null>(null);
+  /** One idempotency key per mount — double-submit / retry reuses it. */
+  const idempotencyKeyRef = useRef<string | null>(null);
 
   const linesJson = useMemo(
     () =>
@@ -172,6 +174,10 @@ export function RequestForm({
       <form
         className="space-y-5"
         action={(formData) => {
+          if (!idempotencyKeyRef.current) {
+            idempotencyKeyRef.current = crypto.randomUUID();
+          }
+          formData.set("idempotencyKey", idempotencyKeyRef.current);
           startTransition(async () => {
             const res = await createRetailRequestAction(null, formData);
             setResult(res);

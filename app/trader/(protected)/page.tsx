@@ -1,11 +1,18 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { Handshake, Package } from "lucide-react";
 import { DealCard } from "@/components/trader/deal-card";
 import { TaskCard } from "@/components/trader/task-card";
+import { TraderPageHeader } from "@/components/trader/page-header";
+import { PortalReveal } from "@/components/portal/reveal";
 import { Timeline } from "@/components/ui/timeline";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ButtonLink } from "@/components/ui/button";
 import { requireTraderSession } from "@/lib/auth/trader-session";
 import { listDealsForTrader } from "@/lib/deals/service";
 import { formatDate, formatRelative } from "@/lib/i18n/format";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
+import type { Locale } from "@/lib/i18n/config";
 import { listPublishedPublicOffers } from "@/lib/offers/service";
 import { listWholesaleRequestsForTrader } from "@/lib/wholesale/service";
 import { getRequestDictionary } from "@/lib/i18n/server";
@@ -16,14 +23,19 @@ import {
   wholesaleStatusLabel,
 } from "@/lib/ui/trader-labels";
 
-export default async function TraderHomePage() {
-  const session = await requireTraderSession();
-  const { locale, dict } = await getRequestDictionary();
+async function TraderHomeBody({
+  traderId,
+  locale,
+  dict,
+}: {
+  traderId: string;
+  locale: Locale;
+  dict: Dictionary;
+}) {
   const t = dict.trader;
-
   const [deals, wholesale, offers] = await Promise.all([
-    listDealsForTrader(session.sub),
-    listWholesaleRequestsForTrader(session.sub),
+    listDealsForTrader(traderId),
+    listWholesaleRequestsForTrader(traderId),
     listPublishedPublicOffers(),
   ]);
 
@@ -74,72 +86,86 @@ export default async function TraderHomePage() {
     .slice(0, 5);
 
   const offerPreview = offers.slice(0, 4);
-  const welcome = t.welcome.replace("{name}", session.displayName);
   const myDeals = t.myDeals.replace("{n}", String(deals.length));
 
   return (
-    <section className="space-y-10">
-      <header className="space-y-2">
-        <h1 className="font-display text-3xl font-semibold tracking-tight">
-          {welcome}
-        </h1>
-        <p className="max-w-2xl text-sm text-ro-muted">{t.lead}</p>
-      </header>
-
-      <div className="grid gap-8 lg:grid-cols-12">
-        <div className="space-y-3 lg:col-span-7">
-          <h2 className="text-lg font-semibold">{t.waitingTitle}</h2>
-          {waiting.length === 0 ? (
-            <p className="border border-ro-line bg-[var(--ro-success-100)] px-4 py-3 text-sm text-[var(--ro-success-700)]">
-              {t.waitingIdle}
-            </p>
-          ) : (
-            <ul className="space-y-3">
-              {waiting.map((item) => (
-                <li key={item.key}>
-                  <DealCard
-                    href={item.href}
-                    reference={item.reference}
-                    title={item.title}
-                    tone={item.tone}
-                    statusLabel={item.label}
-                    waitingLabel={t.waitingOnYou}
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
+    <div className="space-y-10">
+      {/* TR-02 desktop: waiting + tasks balanced 6/6 */}
+      <PortalReveal className="grid items-stretch gap-6 lg:grid-cols-12 lg:gap-8">
+        <div className="flex flex-col space-y-3 lg:col-span-6">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="font-display text-xl font-semibold">
+              {t.waitingTitle}
+            </h2>
+            {waiting.length > 0 ? (
+              <span className="text-xs tabular-nums text-ro-muted">
+                {waiting.length}
+              </span>
+            ) : null}
+          </div>
+          <div className="ro-portal-card flex min-h-[12rem] flex-1 flex-col border p-4 sm:p-5">
+            {waiting.length === 0 ? (
+              <div className="flex flex-1 flex-col justify-center gap-3">
+                <p className="text-sm font-medium text-[var(--ro-success-700)]">
+                  {t.waitingIdle}
+                </p>
+                <p className="text-sm text-ro-muted">{t.lead}</p>
+                <ButtonLink
+                  href="/trader/deals"
+                  variant="secondary"
+                  size="sm"
+                  className="self-start"
+                >
+                  {myDeals}
+                </ButtonLink>
+              </div>
+            ) : (
+              <ul className="space-y-3">
+                {waiting.map((item) => (
+                  <li key={item.key}>
+                    <DealCard
+                      href={item.href}
+                      reference={item.reference}
+                      title={item.title}
+                      tone={item.tone}
+                      statusLabel={item.label}
+                      waitingLabel={t.waitingOnYou}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
 
-        <div className="space-y-3 lg:col-span-5">
-          <TaskCard
-            href="/trader/deals/new"
-            title={t.taskDealTitle}
-            body={t.taskDealBody}
-            icon={Handshake}
-          />
-          <TaskCard
-            href="/trader/wholesale"
-            title={t.taskWholesaleTitle}
-            body={t.taskWholesaleBody}
-            icon={Package}
-          />
-          <Link
-            href="/trader/deals"
-            className="inline-flex min-h-11 items-center border border-ro-line px-4 text-sm font-medium text-ro-plum transition-colors hover:border-ro-ink/35 hover:bg-ro-sunken"
-          >
-            {myDeals}
-          </Link>
+        <div className="flex flex-col space-y-3 lg:col-span-6">
+          <h2 className="font-display text-xl font-semibold">
+            {t.homeTasksTitle}
+          </h2>
+          <div className="grid flex-1 gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+            <TaskCard
+              href="/trader/deals/new"
+              title={t.taskDealTitle}
+              body={t.taskDealBody}
+              icon={Handshake}
+            />
+            <TaskCard
+              href="/trader/wholesale"
+              title={t.taskWholesaleTitle}
+              body={t.taskWholesaleBody}
+              icon={Package}
+            />
+          </div>
         </div>
-      </div>
+      </PortalReveal>
 
       {offerPreview.length > 0 ? (
-        <div className="space-y-3">
+        <PortalReveal className="space-y-3">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold">{t.offersNow}</h2>
+            <h2 className="font-display text-xl font-semibold">{t.offersNow}</h2>
             <Link
               href="/trader/offers"
-              className="text-sm text-ro-plum hover:underline"
+              className="text-sm font-medium text-ro-plum transition-colors hover:text-[var(--ro-plum-900)] hover:underline"
             >
               {t.viewAllOffers}
             </Link>
@@ -155,12 +181,14 @@ export default async function TraderHomePage() {
                   ? o.summaryAr || o.summaryEn
                   : o.summaryEn || o.summaryAr;
               return (
-                <li
-                  key={o.id}
-                  className="w-64 shrink-0 border border-ro-line bg-ro-surface p-4"
-                >
-                  <Link href="/trader/offers" className="block space-y-2">
-                    <p className="font-semibold leading-snug">{title}</p>
+                <li key={o.id} className="w-64 shrink-0">
+                  <Link
+                    href={`/trader/offers/${o.slug}`}
+                    className="ro-portal-card group block space-y-2 border p-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
+                  >
+                    <p className="font-display font-semibold leading-snug transition-colors group-hover:text-[var(--ro-plum-900)]">
+                      {title}
+                    </p>
                     {summary ? (
                       <p className="line-clamp-2 text-xs text-ro-muted">
                         {summary}
@@ -171,37 +199,73 @@ export default async function TraderHomePage() {
               );
             })}
           </ul>
-        </div>
+        </PortalReveal>
       ) : null}
 
-      <div className="space-y-3">
-        <h2 className="text-lg font-semibold">{t.recentActivity}</h2>
+      <PortalReveal className="space-y-3">
+        <h2 className="font-display text-xl font-semibold">
+          {t.recentActivity}
+        </h2>
         {activity.length === 0 ? (
-          <p className="text-sm text-ro-muted">{t.recentActivityEmpty}</p>
+          <p className="ro-portal-card border p-4 text-sm text-ro-muted">
+            {t.recentActivityEmpty}
+          </p>
         ) : (
-          <Timeline
-            label={t.recentActivity}
-            events={activity.map((ev) => ({
-              id: ev.id,
-              title: ev.title,
-              actor: ev.actor,
-              relativeTime: formatRelative(ev.at, locale),
-              absoluteTime: formatDate(ev.at, locale, {
-                dateStyle: "medium",
-                timeStyle: "short",
-              }),
-              detail: (
-                <Link
-                  href={ev.href}
-                  className="text-ro-plum hover:underline"
-                >
-                  {t.openRecord}
-                </Link>
-              ),
-            }))}
-          />
+          <div className="ro-portal-card border p-4">
+            <Timeline
+              label={t.recentActivity}
+              events={activity.map((ev) => ({
+                id: ev.id,
+                title: ev.title,
+                actor: ev.actor,
+                relativeTime: formatRelative(ev.at, locale),
+                absoluteTime: formatDate(ev.at, locale, {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                }),
+                detail: (
+                  <Link
+                    href={ev.href}
+                    className="font-semibold text-ro-plum hover:underline"
+                  >
+                    {t.openRecord}
+                  </Link>
+                ),
+              }))}
+            />
+          </div>
         )}
-      </div>
+      </PortalReveal>
+    </div>
+  );
+}
+
+export default async function TraderHomePage() {
+  const session = await requireTraderSession();
+  const { locale, dict } = await getRequestDictionary();
+  const t = dict.trader;
+  const welcome = t.welcome.replace("{name}", session.displayName);
+
+  return (
+    <section className="space-y-10 p-5 sm:p-8 md:p-10">
+      <TraderPageHeader title={welcome} description={t.lead} />
+      <Suspense
+        fallback={
+          <div className="space-y-6" aria-busy="true">
+            <div className="grid gap-4 lg:grid-cols-2">
+              <Skeleton className="h-48" />
+              <Skeleton className="h-48" />
+            </div>
+            <Skeleton className="h-40 w-full" />
+          </div>
+        }
+      >
+        <TraderHomeBody
+          traderId={session.sub}
+          locale={locale}
+          dict={dict}
+        />
+      </Suspense>
     </section>
   );
 }

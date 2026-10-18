@@ -96,3 +96,16 @@ export function hasAuthStateFiles(authDir: string): boolean {
     return false;
   }
 }
+
+/**
+ * Explicit session wipe after an admin-initiated logout so a fresh pairing
+ * can start clean. Removes only the contents of the (already validated) auth dir.
+ */
+export function wipeAuthState(authDir: string): void {
+  const resolved = path.resolve(authDir);
+  assertAuthDirNotPublic(resolved);
+  if (!authDirExists(resolved)) return;
+  for (const name of fs.readdirSync(resolved)) {
+    fs.rmSync(path.join(resolved, name), { recursive: true, force: true });
+  }
+}

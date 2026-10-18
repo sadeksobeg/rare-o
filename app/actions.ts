@@ -65,6 +65,9 @@ export async function adminLoginAction(
   _prev: ActionResult | null,
   formData: FormData
 ): Promise<ActionResult> {
+  const { clearLoginFailures, isLoginLocked, recordLoginFailure } =
+    await import("@/lib/auth/rate-limit");
+
   const parsed = adminLoginSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
@@ -73,14 +76,27 @@ export async function adminLoginAction(
     return { ok: false, error: "LOGIN_INVALID" };
   }
 
+  const email = parsed.data.email.toLowerCase();
+  const lock = isLoginLocked("admin", email);
+  if (lock.locked) {
+    return { ok: false, error: "LOGIN_LOCKED" };
+  }
+
   const admin = await prisma.adminUser.findUnique({
-    where: { email: parsed.data.email.toLowerCase() },
+    where: { email },
   });
-  if (!admin) return { ok: false, error: "LOGIN_INVALID" };
+  if (!admin) {
+    recordLoginFailure("admin", email);
+    return { ok: false, error: "LOGIN_INVALID" };
+  }
 
   const valid = await verifyPassword(parsed.data.password, admin.passwordHash);
-  if (!valid) return { ok: false, error: "LOGIN_INVALID" };
+  if (!valid) {
+    recordLoginFailure("admin", email);
+    return { ok: false, error: "LOGIN_INVALID" };
+  }
 
+  clearLoginFailures("admin", email);
   const token = await createAdminSessionToken({
     sub: admin.id,
     email: admin.email,
@@ -147,12 +163,17 @@ export async function upsertProductAction(
   }
 
   try {
+    // Always land on the edit page so image/video upload is visible next.
     if (id) {
       await updateProduct(id, parsed.data);
-    } else {
-      await createProduct(parsed.data);
+      revalidatePath(`/admin/products/${id}`);
+      revalidatePath("/admin/products");
+      revalidatePath("/catalog");
+      redirect(`/admin/products/${id}`);
     }
-    redirect("/admin/products");
+    const created = await createProduct(parsed.data);
+    revalidatePath("/admin/products");
+    redirect(`/admin/products/${created.id}`);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Save failed";
     if (msg === "INVALID_CATEGORY") {
@@ -298,6 +319,7 @@ export async function createRetailRequestAction(
     shippingMethodLabel: formData.get("shippingMethodLabel") || null,
     lines,
     status: "ready_for_handoff",
+    idempotencyKey: formData.get("idempotencyKey") || undefined,
   });
 
   if (!parsed.success) {
@@ -426,6 +448,8 @@ export async function adminRetriggerRetailHandoffAction(
       actorAdminId: session.sub,
     });
     revalidatePath(`/admin/requests/${parsed.data.requestId}`);
+    revalidatePath("/admin/requests");
+    revalidatePath("/admin");
     return {
       ok: true,
       data: {

@@ -1,5 +1,6 @@
-import Link from "next/link";
+import { TraderPageHeader } from "@/components/trader/page-header";
 import { WholesaleRequestForm } from "@/components/trader/wholesale-request-form";
+import { ButtonLink } from "@/components/ui/button";
 import { requireTraderSession } from "@/lib/auth/trader-session";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { listWholesaleEligibleProducts } from "@/lib/wholesale/service";
@@ -11,36 +12,38 @@ export default async function TraderWholesaleCatalogPage() {
   const products = await listWholesaleEligibleProducts();
 
   return (
-    <section className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="font-display text-3xl font-semibold tracking-tight">
-            {t.wsTitle}
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm text-ro-muted">{t.wsLead}</p>
-        </div>
-        <Link
-          href="/trader/wholesale/requests"
-          className="inline-flex min-h-11 items-center border border-ro-line px-4 text-sm"
-        >
-          {t.wsMyRequests}
-        </Link>
-      </div>
-      <WholesaleRequestForm
-        labels={t}
-        locale={locale}
-        products={products.map((p) => ({
-          id: p.id,
-          slug: p.slug,
-          nameEn: p.nameEn,
-          nameAr: p.nameAr,
-          currency: p.currency,
-          retailPrice: Number(p.retailPrice),
-          categorySlug: p.category?.slug ?? null,
-          categoryNameEn: p.category?.nameEn ?? null,
-          categoryNameAr: p.category?.nameAr ?? null,
-        }))}
+    <section className="space-y-6 p-5 sm:p-8 md:p-10">
+      <TraderPageHeader
+        title={t.wsTitle}
+        description={t.wsLead}
+        action={
+          <ButtonLink
+            href="/trader/wholesale/requests"
+            variant="secondary"
+            size="sm"
+          >
+            {t.wsMyRequests}
+          </ButtonLink>
+        }
       />
+      <div className="ro-portal-card border p-4 sm:p-6">
+        <WholesaleRequestForm
+          labels={t}
+          locale={locale}
+          products={products.map((p) => ({
+            id: p.id,
+            slug: p.slug,
+            nameEn: p.nameEn,
+            nameAr: p.nameAr,
+            currency: p.currency ?? "",
+            retailPrice:
+              p.retailPrice != null ? Number(p.retailPrice) : undefined,
+            categorySlug: p.category?.slug ?? null,
+            categoryNameEn: p.category?.nameEn ?? null,
+            categoryNameAr: p.category?.nameAr ?? null,
+          }))}
+        />
+      </div>
     </section>
   );
 }

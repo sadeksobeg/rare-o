@@ -15,15 +15,15 @@ export type CatalogCardProduct = {
   slug: string;
   nameAr: string;
   nameEn: string;
-  retailPrice: { toString(): string } | number | string;
+  retailPrice: { toString(): string } | number | string | null;
   compareAtPrice?: { toString(): string } | number | string | null;
-  currency: string;
+  currency: string | null;
   availability: string;
   badgeNew?: boolean;
   badgeFeatured?: boolean;
   badgeSale?: boolean;
   category?: { nameAr: string; nameEn: string } | null;
-  images: { path: string; altAr: string; altEn: string }[];
+  images: { path: string; altAr: string; altEn: string; kind?: string }[];
 };
 
 /**
@@ -58,6 +58,7 @@ export function CatalogProductCard({
         <ProductThumb
           path={primary?.path}
           alt={primary ? altFor(primary) : name}
+          kind={primary?.kind}
           plateCaption={dict.catalog.photoCaption}
           className={cn(!available && "opacity-80")}
         />
@@ -82,7 +83,7 @@ export function CatalogProductCard({
             slug={product.slug}
             name={name}
             price={price}
-            currency={product.currency}
+            currency={product.currency ?? ""}
             imagePath={primary?.path ?? null}
             label={dict.catalog.quickAdd}
             addedLabel={dict.catalog.quickAdded.replace("{name}", name)}

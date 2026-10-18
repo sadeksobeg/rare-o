@@ -5,13 +5,26 @@
  * Set `RO_SHOW_UI_FIXTURES=1` to reveal them in development only.
  */
 
-const HIDDEN_CUSTOMER_NAMES = ["Regression Customer"];
+const HIDDEN_CUSTOMER_NAMES = [
+  "Regression Customer",
+  "عميل تجريبي",
+  "اختبار",
+];
 const HIDDEN_CUSTOMER_PHONES = ["+10000000001"];
 
-const HIDDEN_TRADER_NAMES = ["Reg Trader A", "Reg Trader B"];
+const HIDDEN_TRADER_NAMES = [
+  "Reg Trader A",
+  "Reg Trader B",
+  "Demo Trader",
+  "Sec Trader A",
+  "Sec Trader B",
+];
 const HIDDEN_TRADER_EMAILS = [
   "reg-trader-a@rareoud.local",
   "reg-trader-b@rareoud.local",
+  "trader@rareoud.local",
+  "sec-trader-a@rareoud.local",
+  "sec-trader-b@rareoud.local",
 ];
 
 const HIDDEN_DEAL_TITLES = [
@@ -62,8 +75,11 @@ export function isUiHiddenReference(ref: string | null | undefined): boolean {
   const r = ref.trim().toUpperCase();
   return (
     r.startsWith("DL-SEED-") ||
+    r.startsWith("DL-DEMO-") ||
     r.startsWith("WS-SEED-") ||
-    r.startsWith("REG-")
+    r.startsWith("WS-DEMO-") ||
+    r.startsWith("REG-") ||
+    r.startsWith("DP-PD-")
   );
 }
 
@@ -117,6 +133,7 @@ export function uiVisibleDealWhere(): Where {
       OR: [
         { title: { in: HIDDEN_DEAL_TITLES } },
         { reference: { startsWith: "DL-SEED-" } },
+        { reference: { startsWith: "DL-DEMO-" } },
         { reference: { startsWith: "REG-" } },
         { trader: { displayName: { in: HIDDEN_TRADER_NAMES } } },
         { trader: { email: { in: HIDDEN_TRADER_EMAILS } } },
@@ -131,6 +148,7 @@ export function uiVisibleWholesaleWhere(): Where {
     NOT: {
       OR: [
         { reference: { startsWith: "WS-SEED-" } },
+        { reference: { startsWith: "WS-DEMO-" } },
         { reference: { startsWith: "REG-" } },
         { trader: { displayName: { in: HIDDEN_TRADER_NAMES } } },
         { trader: { email: { in: HIDDEN_TRADER_EMAILS } } },

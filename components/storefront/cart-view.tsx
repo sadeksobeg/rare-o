@@ -41,7 +41,17 @@ export function CartView({
   /** Server-rendered compact HandoffExplainer. */
   handoff?: React.ReactNode;
 }) {
-  const { items, removeItem, setQuantity } = useCart();
+  const { items, hydrated, removeItem, setQuantity } = useCart();
+
+  if (!hydrated) {
+    return (
+      <div
+        className="mx-auto max-w-[1440px] px-5 py-24 md:px-8"
+        aria-busy="true"
+        aria-label={labels.title}
+      />
+    );
+  }
 
   if (items.length === 0) {
     return (

@@ -21,6 +21,7 @@ import { MAX_BAILEYS_RECONNECT_ATTEMPTS } from "@/lib/whatsapp/messaging/reliabi
 import {
   ensureAuthDir,
   hasAuthStateFiles,
+  wipeAuthState,
   type WhatsAppSessionStoreConfig,
 } from "@/lib/whatsapp/session-store";
 import {
@@ -178,7 +179,48 @@ export class BaileysWhatsAppAdapter implements WhatsAppAdapter {
 
   async requestAuthentication(): Promise<void> {
     // Opening with empty/invalid creds causes Baileys to emit QR via connection.update
+    // Manual (admin / supervisor) retry resets the automatic backoff budget.
+    this.reconnectAttempt = 0;
     await this.connect();
+  }
+
+  /**
+   * Request a phone pairing code instead of QR. Opens the socket if needed.
+   * Code is emitted through onPairingCode only — never logged.
+   */
+  async requestPairingCode(phoneDigits: string): Promise<void> {
+    if (this.stopped) {
+      throw new Error("ADAPTER_STOPPED");
+    }
+    const phone = phoneDigits.replace(/\D/g, "");
+    if (phone.length < 7 || phone.length > 15) {
+      throw new Error("INVALID_PHONE");
+    }
+    if (this.state === "CONNECTED") {
+      throw new Error("ALREADY_LINKED");
+    }
+
+    if (!this.sock) {
+      this.reconnectAttempt = 0;
+      await this.connect();
+    }
+    const sock = this.sock;
+    if (!sock) {
+      throw new Error("SOCKET_NOT_OPEN");
+    }
+    // Baileys requires the socket handshake to have started before pairing.
+    await new Promise((resolve) => setTimeout(resolve, 1_500));
+
+    const code = await sock.requestPairingCode(phone);
+    await this.setHealth(
+      "AUTHENTICATION_REQUIRED",
+      "Pairing code available for authorized admin authentication"
+    );
+    await this.events.onPairingCode?.({
+      code,
+      phone,
+      createdAt: nowIso(),
+    });
   }
 
   async stop(): Promise<void> {
@@ -209,9 +251,14 @@ export class BaileysWhatsAppAdapter implements WhatsAppAdapter {
     }
     this.sock = null;
     this.clearReconnectTimer();
+    try {
+      wipeAuthState(this.session.authDir);
+    } catch {
+      // wipe failure must not crash the worker; next pairing will surface errors
+    }
     await this.setHealth(
       "AUTHENTICATION_REQUIRED",
-      "Logged out - QR authentication required"
+      "Logged out - authentication required"
     );
   }
 
@@ -313,6 +360,7 @@ export class BaileysWhatsAppAdapter implements WhatsAppAdapter {
 
     try {
       ensureAuthDir(this.session.authDir);
+      this.closeSocketQuietly();
       await this.setHealth("CONNECTING", "Opening Baileys socket");
 
       const { state, saveCreds } = await loadMultiFileAuthState(
@@ -470,6 +518,20 @@ export class BaileysWhatsAppAdapter implements WhatsAppAdapter {
     this.reconnectTimer = setTimeout(() => {
       void this.openSocket();
     }, delay);
+  }
+
+  /** Tear down any previous socket so reconnect never leaves two live sockets. */
+  private closeSocketQuietly(): void {
+    const sock = this.sock;
+    this.sock = null;
+    if (!sock) return;
+    try {
+      sock.ev.removeAllListeners("connection.update");
+      sock.ev.removeAllListeners("messages.upsert");
+      sock.end(undefined);
+    } catch {
+      // ignore teardown errors
+    }
   }
 
   private clearReconnectTimer(): void {

@@ -22,6 +22,8 @@ export type CartItem = {
 
 type CartContextValue = {
   items: CartItem[];
+  /** False until localStorage has been read (avoid empty-state flash). */
+  hydrated: boolean;
   addItem: (item: CartItem) => void;
   removeItem: (productId: string) => void;
   setQuantity: (productId: string, quantity: number) => void;
@@ -31,46 +33,56 @@ type CartContextValue = {
 const CartContext = createContext<CartContextValue | null>(null);
 const STORAGE_KEY = "ro_cart_v1";
 
+function readStoredCart(): CartItem[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    return Array.isArray(parsed) ? (parsed as CartItem[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [ready, setReady] = useState(false);
+  /** `undefined` = not hydrated yet — never write to storage in that state. */
+  const [items, setItems] = useState<CartItem[] | undefined>(undefined);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setItems(JSON.parse(raw) as CartItem[]);
-    } catch {
-      /* ignore */
-    }
-    setReady(true);
+    setItems(readStoredCart());
   }, []);
 
   useEffect(() => {
-    if (!ready) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }, [items, ready]);
+    if (items === undefined) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    } catch {
+      /* ignore quota / private mode */
+    }
+  }, [items]);
 
   const addItem = useCallback((item: CartItem) => {
     setItems((prev) => {
-      const existing = prev.find((p) => p.productId === item.productId);
+      const list = prev ?? [];
+      const existing = list.find((p) => p.productId === item.productId);
       if (existing) {
-        return prev.map((p) =>
+        return list.map((p) =>
           p.productId === item.productId
             ? { ...p, quantity: Math.min(99, p.quantity + item.quantity) }
             : p
         );
       }
-      return [...prev, item];
+      return [...list, item];
     });
   }, []);
 
   const removeItem = useCallback((productId: string) => {
-    setItems((prev) => prev.filter((p) => p.productId !== productId));
+    setItems((prev) => (prev ?? []).filter((p) => p.productId !== productId));
   }, []);
 
   const setQuantity = useCallback((productId: string, quantity: number) => {
     setItems((prev) =>
-      prev
+      (prev ?? [])
         .map((p) =>
           p.productId === productId
             ? { ...p, quantity: Math.max(1, Math.min(99, quantity)) }
@@ -82,9 +94,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clear = useCallback(() => setItems([]), []);
 
+  const resolved = items ?? [];
+
   const value = useMemo(
-    () => ({ items, addItem, removeItem, setQuantity, clear }),
-    [items, addItem, removeItem, setQuantity, clear]
+    () => ({
+      items: resolved,
+      hydrated: items !== undefined,
+      addItem,
+      removeItem,
+      setQuantity,
+      clear,
+    }),
+    [resolved, items, addItem, removeItem, setQuantity, clear]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

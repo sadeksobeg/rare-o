@@ -4,7 +4,7 @@ import { StatusChip } from "@/components/ui/status-chip";
 import { cn } from "@/lib/utils";
 import type { StatusTone } from "@/lib/ui/status";
 
-/** Mobile-first record card for trader deal / wholesale lists. */
+/** Interactive record card — press + hover lift. */
 export function DealCard({
   href,
   reference,
@@ -28,14 +28,16 @@ export function DealCard({
     <Link
       href={href}
       className={cn(
-        "group flex min-h-20 items-center gap-3 border border-ro-line bg-ro-surface px-4 py-3 transition-colors hover:border-ro-ink/35",
+        "ro-portal-card group flex min-h-20 items-center gap-3 border px-4 py-3.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]",
         className
       )}
     >
       <span className="min-w-0 flex-1 space-y-1.5">
-        <span className="block text-xs text-ro-muted">{reference}</span>
+        <span className="block text-xs tracking-wide text-ro-muted">
+          {reference}
+        </span>
         {title ? (
-          <span className="font-display block text-base font-semibold leading-snug">
+          <span className="font-display block text-base font-semibold leading-snug transition-colors group-hover:text-[var(--ro-plum-900)]">
             {title}
           </span>
         ) : null}
@@ -48,7 +50,7 @@ export function DealCard({
         </span>
       </span>
       <ChevronRight
-        className="size-5 shrink-0 text-ro-muted transition-transform group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5"
+        className="size-5 shrink-0 text-[var(--ro-plum-800)] transition-transform duration-[var(--ro-dur-fast)] group-hover:translate-x-1 group-active:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-1"
         aria-hidden
       />
     </Link>

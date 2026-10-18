@@ -216,13 +216,24 @@ export function ProductGallery({
                       : "opacity-70 hover:opacity-100"
                   )}
                 >
-                  <Image
-                    src={img.path}
-                    alt=""
-                    fill
-                    sizes="72px"
-                    className="object-cover"
-                  />
+                  {img.kind === "video" ? (
+                    <video
+                      src={img.path}
+                      muted
+                      playsInline
+                      preload="metadata"
+                      className="absolute inset-0 h-full w-full object-cover"
+                      aria-hidden
+                    />
+                  ) : (
+                    <Image
+                      src={img.path}
+                      alt=""
+                      fill
+                      sizes="72px"
+                      className="object-cover"
+                    />
+                  )}
                 </button>
               </li>
             );
@@ -244,13 +255,24 @@ export function ProductGallery({
             <h2 id={titleId} className="sr-only">
               {current.alt}
             </h2>
-            <Image
-              src={current.path}
-              alt={current.alt}
-              fill
-              sizes="96vw"
-              className="object-contain"
-            />
+            {current.kind === "video" ? (
+              <video
+                src={current.path}
+                className="absolute inset-0 h-full w-full object-contain"
+                controls
+                playsInline
+                autoPlay
+                aria-label={current.alt}
+              />
+            ) : (
+              <Image
+                src={current.path}
+                alt={current.alt}
+                fill
+                sizes="96vw"
+                className="object-contain"
+              />
+            )}
             <button
               type="button"
               aria-label={labels.close}

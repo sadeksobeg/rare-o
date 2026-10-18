@@ -299,6 +299,9 @@ type Dict = {
     imagesEmpty: string;
     imagesLimits: string;
     imagesAdd: string;
+    imagesFileLabel: string;
+    imagesKindVideo: string;
+    imagesAfterSaveHint: string;
     imagesAltAr: string;
     imagesAltEn: string;
     imagesPrimary: string;
@@ -330,6 +333,7 @@ type Dict = {
     colNotes: string;
     colRequests: string;
     colCreated: string;
+    colLastEvent: string;
     colItems: string;
     colHandoff: string;
     colLastRequest: string;
@@ -419,6 +423,10 @@ type Dict = {
       handoffOpened: string;
       lines: string;
       qty: string;
+      customerNotes: string;
+      linkedConversation: string;
+      linkedConversationOpen: string;
+      linkedConversationNone: string;
       storedMessage: string;
       handoffPayload: string;
       auditEvents: string;
@@ -474,6 +482,11 @@ type Dict = {
       quoteMessage: string;
       saveQuote: string;
       quoteSaved: string;
+      shippingTitle: string;
+      carrier: string;
+      trackingReference: string;
+      saveShipping: string;
+      shippingSaved: string;
       slug: string;
       titleAr: string;
       titleEn: string;
@@ -541,6 +554,7 @@ type Dict = {
     logout: string;
     welcome: string;
     lead: string;
+    homeTasksTitle: string;
     taskDealTitle: string;
     taskDealBody: string;
     taskWholesaleTitle: string;
@@ -633,10 +647,15 @@ type Dict = {
     dealClosed: string;
     dealWaitingBanner: string;
     dealWaitingAdmin: string;
+    dealRejected: string;
+    dealRejectedWithReason: string;
     negTitle: string;
     negHint: string;
     negAction: string;
     negMessage: string;
+    negRejectReason: string;
+    negRejectReasonHint: string;
+    conflictWarningTitle: string;
     negPrice: string;
     negCurrency: string;
     negQty: string;
@@ -695,10 +714,28 @@ type Dict = {
     profilePhone: string;
     profileStatus: string;
     profileNote: string;
+    prefsTitle: string;
+    prefsLead: string;
+    prefsCategories: string;
+    prefsCategoriesHint: string;
+    prefsNotes: string;
+    prefsSave: string;
+    prefsSaved: string;
+    notifications: string;
+    notificationsTitle: string;
+    notificationsLead: string;
+    notificationsEmpty: string;
+    notificationsEmptyBody: string;
+    notificationsMarkAll: string;
+    notificationsMarkRead: string;
+    notificationsOpen: string;
     offersTitle: string;
     offersLead: string;
     offersEmpty: string;
-    offersOpenPublic: string;
+    /** Back link on trader offer detail (stays in /trader). */
+    offersBack: string;
+    offersRelatedProduct: string;
+    offersStartDeal: string;
   };
   inbox: {
     title: string;
@@ -791,6 +828,18 @@ type Dict = {
     confirmUnlink: string;
     lengthNearLimit: string;
     emptyThread: string;
+    /** WhatsApp account pairing panel (admin link account) */
+    pairingTitle: string;
+    pairingHint: string;
+    pairingPhone: string;
+    pairingSubmit: string;
+    pairingAwaiting: string;
+    pairingCodeLabel: string;
+    pairingQrOptional: string;
+    pairingConnected: string;
+    pairingNotLinked: string;
+    pairingError: string;
+    pairingLogout: string;
   };
   common: {
     language: string;
@@ -879,8 +928,8 @@ const ar: Dict = {
     cartAria: "قائمة الطلب ({n} قطعة)",
   },
   home: {
-    /** Hero H1 only — full tashkeel for Arabic identity */
-    headline: "عُودٌ نَادِرٌ صُنِعَ لِيَبْقَى",
+    /** Hero H1 — light tashkeel so marks stay attached in Amiri */
+    headline: "عودٌ نادر صُنع ليبقى",
     sub: "قطع مختارة بعناية تُصنع بيد حرفيّ وتُسلَّم بما يليق بها.",
     heroLabel: "RARE OUD",
     ctaCatalog: "استكشف المجموعة",
@@ -1158,10 +1207,15 @@ const ar: Dict = {
     colAvailability: "التوفر",
     colPrice: "السعر",
     colCategory: "الفئة",
-    imagesTitle: "صور المنتج",
-    imagesEmpty: "لا صور بعد — تظهر لوحة المادة في المتجر.",
-    imagesLimits: "JPEG أو PNG أو WebP · حتى 8 ميغابايت · الضلع الأطول ≥ 1600 بكسل · حد 8 صور",
-    imagesAdd: "إضافة صورة",
+    imagesTitle: "صور وفيديو المنتج",
+    imagesEmpty: "لا وسائط بعد — ارفع صورة أو فيديو أعلاه.",
+    imagesLimits:
+      "صورة: JPEG / PNG / WebP حتى 8 ميغابايت (الضلع الأطول ≥ 1600 بكسل) · فيديو: MP4 / WebM حتى 48 ميغابايت · حد 8 ملفات",
+    imagesAdd: "رفع صورة أو فيديو",
+    imagesFileLabel: "اختر صورة أو فيديو",
+    imagesKindVideo: "فيديو",
+    imagesAfterSaveHint:
+      "احفظ بيانات المنتج أولاً — بعدها ستُفتح صفحة التعديل لرفع الصور والفيديو.",
     imagesAltAr: "النص البديل (عربي)",
     imagesAltEn: "النص البديل (إنجليزي)",
     imagesPrimary: "الرئيسية",
@@ -1169,11 +1223,11 @@ const ar: Dict = {
     imagesMoveEarlier: "تحريك للأمام",
     imagesMoveLater: "تحريك للخلف",
     imagesUploading: "جارٍ الرفع…",
-    imagesErrorType: "نوع الملف غير مدعوم.",
-    imagesErrorSize: "الملف أكبر من 8 ميغابايت.",
-    imagesErrorDim: "الضلع الأطول يجب أن يكون 1600 بكسل على الأقل.",
-    imagesErrorMax: "وصلت إلى الحد الأقصى (8 صور).",
-    imagesErrorGeneric: "تعذّر رفع الصورة.",
+    imagesErrorType: "نوع الملف غير مدعوم. استخدم صورة JPEG/PNG/WebP أو فيديو MP4/WebM.",
+    imagesErrorSize: "الملف أكبر من الحد المسموح (8 ميغابايت للصورة أو 48 للفيديو).",
+    imagesErrorDim: "للصور: الضلع الأطول يجب أن يكون 1600 بكسل على الأقل.",
+    imagesErrorMax: "وصلت إلى الحد الأقصى (8 ملفات).",
+    imagesErrorGeneric: "تعذّر رفع الملف.",
     quickProduct: "منتج",
     quickOffer: "عرض",
     quickTrader: "حساب تاجر",
@@ -1193,6 +1247,7 @@ const ar: Dict = {
     colNotes: "ملاحظات",
     colRequests: "الطلبات",
     colCreated: "تاريخ الإنشاء",
+    colLastEvent: "آخر حدث",
     colItems: "البنود",
     colHandoff: "التحويل",
     colLastRequest: "آخر طلب",
@@ -1283,6 +1338,7 @@ const ar: Dict = {
         proposed: "مقترحة",
         negotiating: "قيد التفاوض",
         accepted: "مقبولة",
+        rejected: "مرفوضة",
         closed: "مغلقة",
       },
       wholesale: {
@@ -1331,6 +1387,11 @@ const ar: Dict = {
       handoffOpened: "فتح التحويل",
       lines: "البنود",
       qty: "الكمية",
+      customerNotes: "ملاحظات العميل",
+      linkedConversation: "محادثة واتساب المرتبطة",
+      linkedConversationOpen: "فتح في الصندوق",
+      linkedConversationNone:
+        "لا محادثة مرتبطة بعد — اربط المحادثة من صندوق الوارد عند اكتمال اتصال واتساب.",
       storedMessage: "رسالة واتساب المحفوظة",
       handoffPayload: "بيانات التحويل المهيكلة",
       auditEvents: "سجل الأحداث",
@@ -1388,6 +1449,11 @@ const ar: Dict = {
       quoteMessage: "رسالة العرض",
       saveQuote: "حفظ العرض ← تم تقديم عرض السعر",
       quoteSaved: "تم حفظ عرض السعر.",
+      shippingTitle: "بيانات الشحن",
+      carrier: "شركة الشحن",
+      trackingReference: "رقم التتبع",
+      saveShipping: "حفظ الشحن",
+      shippingSaved: "تم حفظ بيانات الشحن.",
       slug: "المعرّف (Slug)",
       titleAr: "العنوان (عربي)",
       titleEn: "العنوان (إنجليزي)",
@@ -1457,6 +1523,7 @@ const ar: Dict = {
     logout: "خروج",
     welcome: "أهلاً، {name}",
     lead: "فاوض على الصفقات وقدّم طلبات الجملة من مخزون RARE OUD — هذه البوابة ليست متجراً.",
+    homeTasksTitle: "ابدأ من هنا",
     taskDealTitle: "اقترح صفقة",
     taskDealBody: "قدّم عرضاً تجارياً على قطعة من الكتالوج أو خارجها.",
     taskWholesaleTitle: "اطلب بالجملة",
@@ -1471,6 +1538,7 @@ const ar: Dict = {
       proposed: "مقترحة",
       negotiating: "قيد التفاوض",
       accepted: "مقبولة",
+      rejected: "مرفوضة",
       closed: "مغلقة",
     },
     wholesaleStatus: {
@@ -1495,6 +1563,7 @@ const ar: Dict = {
       continue: "متابعة",
       counter: "عرض مقابل",
       accept: "قبول",
+      reject: "رفض",
       close: "إغلاق",
     },
     wholesaleEvent: {
@@ -1580,10 +1649,15 @@ const ar: Dict = {
     dealClosed: "هذه الصفقة {status}. التفاوض مغلق.",
     dealWaitingBanner: "ردّت الإدارة — بانتظار ردّك على هذه الصفقة.",
     dealWaitingAdmin: "بانتظار ردّ إدارة RARE OUD.",
+    dealRejected: "رُفضت هذه الصفقة.",
+    dealRejectedWithReason: "رُفضت هذه الصفقة: {reason}",
     negTitle: "ردّك في التفاوض",
-    negHint: "تفاوض منظّم وليس محادثة. اختر متابعة أو عرضاً مقابلاً أو قبولاً أو إغلاقاً.",
+    negHint: "تفاوض منظّم وليس محادثة. اختر متابعة أو عرضاً مقابلاً أو قبولاً أو رفضاً أو إغلاقاً.",
     negAction: "الإجراء",
     negMessage: "الرسالة",
+    negRejectReason: "سبب الرفض (اختياري)",
+    negRejectReasonHint: "يظهر السبب للتاجر إن وُجد",
+    conflictWarningTitle: "تحذير: صفقات نشطة أخرى على نفس المنتج",
     negPrice: "السعر المقترح",
     negCurrency: "العملة",
     negQty: "الكمية",
@@ -1643,11 +1717,31 @@ const ar: Dict = {
     profilePhone: "الهاتف",
     profileStatus: "الحالة",
     profileNote:
-      "تغييرات الحساب تتم عبر إدارة RARE OUD. هذه ليست هوية بائع عامة.",
+      "تغييرات الحساب تتم عبر إدارة RARE OUD. حدّث تفضيلات الصفقات أدناه لمساعدة المطابقة.",
+    prefsTitle: "تفضيلات الصفقات",
+    prefsLead:
+      "أخبر الإدارة بأنواع المنتجات التي تهمّك — لا يظهر هذا للمتسوقين.",
+    prefsCategories: "فئات الاهتمام",
+    prefsCategoriesHint: "اختر فئة أو أكثر من فئات الإطلاق.",
+    prefsNotes: "ملاحظات التفضيل",
+    prefsSave: "حفظ التفضيلات",
+    prefsSaved: "تم حفظ التفضيلات.",
+    notifications: "الإشعارات",
+    notificationsTitle: "مركز الحالة",
+    notificationsLead:
+      "تحديثات عن صفقاتك وطلبات الجملة — اقرأها من هنا دون مغادرة البوابة.",
+    notificationsEmpty: "لا إشعارات بعد",
+    notificationsEmptyBody:
+      "عند رد الإدارة على صفقة أو طلب جملة سيظهر التحديث هنا.",
+    notificationsMarkAll: "تعليم الكل كمقروء",
+    notificationsMarkRead: "مقروء",
+    notificationsOpen: "فتح",
     offersTitle: "العروض العامة المختارة",
     offersLead: "عروض RARE OUD المنشورة فقط — وليست متاجر للتجّار.",
     offersEmpty: "لا توجد عروض منشورة بعد.",
-    offersOpenPublic: "فتح صفحة العروض العامة",
+    offersBack: "العودة إلى العروض",
+    offersRelatedProduct: "المنتج المرتبط",
+    offersStartDeal: "بدء صفقة من هذا العرض",
   },
   inbox: {
     title: "صندوق واتساب",
@@ -1668,7 +1762,7 @@ const ar: Dict = {
     statusSent: "أُرسلت",
     statusFailed: "فشل الإرسال",
     statusReceived: "مستلمة",
-    unsupported: "رسالة غير نصية — افتحها من تطبيق واتساب على الهاتف",
+    unsupported: "مرفق",
     sendFailed: "لم تُرسل — إعادة المحاولة",
     sendBlocked: "لا يمكن الإرسال بينما الإرسال معطّل.",
     sendSuccess: "أُدرجت الرسالة في قائمة الإرسال.",
@@ -1726,7 +1820,7 @@ const ar: Dict = {
     rateLimited: "تم بلوغ حد الإرسال، حاول بعد قليل",
     linkAccount: "ربط الحساب",
     reconnect: "إعادة الاتصال",
-    nonText: "رسالة غير نصية — افتحها من تطبيق واتساب على الهاتف",
+    nonText: "مرفق",
     retry: "إعادة المحاولة",
     newMessages: "رسائل جديدة ↓",
     linkRecord: "ربط بسجل",
@@ -1738,6 +1832,18 @@ const ar: Dict = {
     confirmUnlink: "تأكيد إزالة الربط",
     lengthNearLimit: "قرب الحد الأقصى",
     emptyThread: "لا رسائل بعد",
+    pairingTitle: "ربط حساب واتساب",
+    pairingHint:
+      "أدخل رقم الهاتف مع رمز الدولة، ثم أدخل الرمز الظاهر في واتساب على الهاتف: الأجهزة المرتبطة ← ربط جهاز ← الربط برقم الهاتف.",
+    pairingPhone: "رقم الهاتف مع رمز الدولة (أرقام فقط)",
+    pairingSubmit: "طلب رمز الربط",
+    pairingAwaiting: "بانتظار إدخال الرمز على الهاتف",
+    pairingCodeLabel: "رمز الربط",
+    pairingQrOptional: "عرض رمز QR أيضاً",
+    pairingConnected: "الحساب مرتبط ومتصل",
+    pairingNotLinked: "لا يوجد حساب مرتبط",
+    pairingError: "تعذّر ربط الحساب، تحقق من الرقم وحاول مرة أخرى",
+    pairingLogout: "تسجيل الخروج من الحساب",
   },
   common: {
     language: "EN",
@@ -2112,10 +2218,15 @@ const en: Dict = {
     colAvailability: "Availability",
     colPrice: "Price",
     colCategory: "Category",
-    imagesTitle: "Product images",
-    imagesEmpty: "No images yet — the material plate shows on the storefront.",
-    imagesLimits: "JPEG, PNG, or WebP · max 8 MB · longest side ≥ 1600 px · max 8 images",
-    imagesAdd: "Add image",
+    imagesTitle: "Product images & video",
+    imagesEmpty: "No media yet — upload an image or video below.",
+    imagesLimits:
+      "Image: JPEG / PNG / WebP up to 8 MB (longest side ≥ 1600 px) · Video: MP4 / WebM up to 48 MB · max 8 files",
+    imagesAdd: "Upload image or video",
+    imagesFileLabel: "Choose image or video",
+    imagesKindVideo: "Video",
+    imagesAfterSaveHint:
+      "Save the product details first — you will then open the edit page to upload images and video.",
     imagesAltAr: "Alt text (Arabic)",
     imagesAltEn: "Alt text (English)",
     imagesPrimary: "Primary",
@@ -2123,11 +2234,12 @@ const en: Dict = {
     imagesMoveEarlier: "Move earlier",
     imagesMoveLater: "Move later",
     imagesUploading: "Uploading…",
-    imagesErrorType: "Unsupported file type.",
-    imagesErrorSize: "File exceeds 8 MB.",
-    imagesErrorDim: "Longest side must be at least 1600 px.",
-    imagesErrorMax: "Maximum of 8 images reached.",
-    imagesErrorGeneric: "Could not upload the image.",
+    imagesErrorType:
+      "Unsupported file type. Use JPEG/PNG/WebP images or MP4/WebM video.",
+    imagesErrorSize: "File exceeds the limit (8 MB for images, 48 MB for video).",
+    imagesErrorDim: "For images: longest side must be at least 1600 px.",
+    imagesErrorMax: "Maximum of 8 media files reached.",
+    imagesErrorGeneric: "Could not upload the file.",
     quickProduct: "Product",
     quickOffer: "Offer",
     quickTrader: "Trader account",
@@ -2147,6 +2259,7 @@ const en: Dict = {
     colNotes: "Notes",
     colRequests: "Requests",
     colCreated: "Created",
+    colLastEvent: "Last event",
     colItems: "Items",
     colHandoff: "Handoff",
     colLastRequest: "Last request",
@@ -2238,6 +2351,7 @@ const en: Dict = {
         proposed: "Proposed",
         negotiating: "Negotiating",
         accepted: "Accepted",
+        rejected: "Rejected",
         closed: "Closed",
       },
       wholesale: {
@@ -2286,6 +2400,11 @@ const en: Dict = {
       handoffOpened: "Handoff opened",
       lines: "Lines",
       qty: "Qty",
+      customerNotes: "Customer notes",
+      linkedConversation: "Linked WhatsApp conversation",
+      linkedConversationOpen: "Open in inbox",
+      linkedConversationNone:
+        "No linked conversation yet — link from the inbox once WhatsApp is connected.",
       storedMessage: "Stored WhatsApp message",
       handoffPayload: "Structured handoff payload",
       auditEvents: "Audit events",
@@ -2344,6 +2463,11 @@ const en: Dict = {
       quoteMessage: "Quote message",
       saveQuote: "Save quotation → quote provided",
       quoteSaved: "Quotation saved.",
+      shippingTitle: "Shipping details",
+      carrier: "Carrier",
+      trackingReference: "Tracking reference",
+      saveShipping: "Save shipping",
+      shippingSaved: "Shipping details saved.",
       slug: "Slug",
       titleAr: "Title (Arabic)",
       titleEn: "Title (English)",
@@ -2415,6 +2539,7 @@ const en: Dict = {
     logout: "Sign out",
     welcome: "Welcome, {name}",
     lead: "Negotiate deals and submit wholesale requests against RARE OUD stock — this is not a storefront.",
+    homeTasksTitle: "Start here",
     taskDealTitle: "Propose a deal",
     taskDealBody: "Submit a commercial proposal on a catalog or non-catalog piece.",
     taskWholesaleTitle: "Order wholesale",
@@ -2429,6 +2554,7 @@ const en: Dict = {
       proposed: "Proposed",
       negotiating: "Negotiating",
       accepted: "Accepted",
+      rejected: "Rejected",
       closed: "Closed",
     },
     wholesaleStatus: {
@@ -2453,6 +2579,7 @@ const en: Dict = {
       continue: "Continue",
       counter: "Counter",
       accept: "Accept",
+      reject: "Reject",
       close: "Close",
     },
     wholesaleEvent: {
@@ -2538,11 +2665,17 @@ const en: Dict = {
     dealClosed: "This deal is {status}. Negotiation is closed.",
     dealWaitingBanner: "RARE OUD has responded — your reply is needed on this deal.",
     dealWaitingAdmin: "Waiting for a reply from RARE OUD.",
+    dealRejected: "This deal was rejected.",
+    dealRejectedWithReason: "This deal was rejected: {reason}",
     negTitle: "Negotiation response",
     negHint:
-      "Structured negotiation — not chat. Choose continue, counter, accept, or close.",
+      "Structured negotiation — not chat. Choose continue, counter, accept, reject, or close.",
     negAction: "Action",
     negMessage: "Message",
+    negRejectReason: "Reject reason (optional)",
+    negRejectReasonHint: "Shown to the trader when provided",
+    conflictWarningTitle:
+      "Warning: other active catalog deals on this product",
     negPrice: "Proposed price",
     negCurrency: "Currency",
     negQty: "Quantity",
@@ -2602,11 +2735,31 @@ const en: Dict = {
     profilePhone: "Phone",
     profileStatus: "Status",
     profileNote:
-      "Profile changes are managed by RARE OUD admin. This is not a public seller identity.",
+      "Profile changes are managed by RARE OUD admin. Update deal preferences below to help matching.",
+    prefsTitle: "Deal preferences",
+    prefsLead:
+      "Tell admin which product types interest you — never shown to shoppers.",
+    prefsCategories: "Interest categories",
+    prefsCategoriesHint: "Select one or more launch categories.",
+    prefsNotes: "Preference notes",
+    prefsSave: "Save preferences",
+    prefsSaved: "Preferences saved.",
+    notifications: "Notifications",
+    notificationsTitle: "Status center",
+    notificationsLead:
+      "Updates on your deals and wholesale requests — stay informed inside the portal.",
+    notificationsEmpty: "No notifications yet",
+    notificationsEmptyBody:
+      "When admin responds on a deal or wholesale request, it will appear here.",
+    notificationsMarkAll: "Mark all read",
+    notificationsMarkRead: "Read",
+    notificationsOpen: "Open",
     offersTitle: "Public curated offers",
     offersLead: "Published RARE OUD presentations only — not trader storefronts.",
     offersEmpty: "No published offers yet.",
-    offersOpenPublic: "Open public offers page",
+    offersBack: "Back to offers",
+    offersRelatedProduct: "Related product",
+    offersStartDeal: "Start a deal from this offer",
   },
   inbox: {
     title: "WhatsApp inbox",
@@ -2627,7 +2780,7 @@ const en: Dict = {
     statusSent: "Sent",
     statusFailed: "Failed",
     statusReceived: "Received",
-    unsupported: "Non-text message — open it in WhatsApp on your phone",
+    unsupported: "Attachment",
     sendFailed: "Not sent — retry",
     sendBlocked: "Cannot send while outbound is disabled.",
     sendSuccess: "Message queued for delivery.",
@@ -2686,7 +2839,7 @@ const en: Dict = {
     rateLimited: "Sending limit reached, try again shortly",
     linkAccount: "Link account",
     reconnect: "Reconnect",
-    nonText: "Non-text message — open it in WhatsApp on your phone",
+    nonText: "Attachment",
     retry: "Retry",
     newMessages: "New messages ↓",
     linkRecord: "Link to record",
@@ -2698,6 +2851,18 @@ const en: Dict = {
     confirmUnlink: "Confirm unlink",
     lengthNearLimit: "Near character limit",
     emptyThread: "No messages yet",
+    pairingTitle: "Link WhatsApp account",
+    pairingHint:
+      "Enter the phone number with country code, then type the code shown here into WhatsApp on that phone: Linked devices → Link a device → Link with phone number.",
+    pairingPhone: "Phone with country code (digits only)",
+    pairingSubmit: "Request pairing code",
+    pairingAwaiting: "Waiting for the code to be entered on the phone",
+    pairingCodeLabel: "Pairing code",
+    pairingQrOptional: "Also show QR code",
+    pairingConnected: "Account linked and connected",
+    pairingNotLinked: "No account linked",
+    pairingError: "Could not link the account. Check the number and try again",
+    pairingLogout: "Log out account",
   },
   common: {
     language: "العربية",

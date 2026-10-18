@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import type { ActionResult } from "@/app/actions";
 import { requireAdminSession } from "@/lib/auth/admin-session";
@@ -15,11 +14,24 @@ import {
 import {
   adminProvideWholesaleQuote,
   adminTransitionWholesaleStatus,
+  adminUpdateWholesaleShipping,
   createWholesaleRequest,
   traderCancelWholesaleRequest,
   traderRespondToWholesaleQuote,
 } from "@/lib/wholesale/service";
 import { isWholesaleStatus } from "@/lib/wholesale/constants";
+
+/** Keep admin dashboard queue/KPIs in sync when wholesale records change. */
+function revalidateWholesaleSurfaces(requestId?: string) {
+  revalidatePath("/trader/wholesale");
+  revalidatePath("/trader/wholesale/requests");
+  revalidatePath("/admin");
+  revalidatePath("/admin/wholesale");
+  if (requestId) {
+    revalidatePath(`/trader/wholesale/${requestId}`);
+    revalidatePath(`/admin/wholesale/${requestId}`);
+  }
+}
 
 export async function traderCreateWholesaleRequestAction(
   _prev: ActionResult | null,
@@ -64,10 +76,10 @@ export async function traderCreateWholesaleRequestAction(
         currency: l.currency,
       })),
     });
-    revalidatePath("/trader/wholesale");
-    redirect(`/trader/wholesale/${request.id}`);
+    revalidateWholesaleSurfaces(request.id);
+    // Client navigates — avoids blocking submit on detail-page RSC compile.
+    return { ok: true, data: { id: request.id, reference: request.reference } };
   } catch (e) {
-    if (typeof e === "object" && e && "digest" in e) throw e;
     const msg = e instanceof Error ? e.message : "Create failed";
     if (msg === "PRODUCT_NOT_WHOLESALE_ELIGIBLE") {
       return {
@@ -109,8 +121,7 @@ export async function traderRespondWholesaleQuoteAction(
       accept: parsed.data.accept === "yes",
       note: parsed.data.note,
     });
-    revalidatePath(`/trader/wholesale/${updated.id}`);
-    revalidatePath("/trader/wholesale");
+    revalidateWholesaleSurfaces(updated.id);
     return { ok: true, data: { status: updated.status } };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Response failed";
@@ -142,8 +153,7 @@ export async function traderCancelWholesaleRequestAction(
       traderId: session.sub,
       note: String(formData.get("note") || "") || undefined,
     });
-    revalidatePath(`/trader/wholesale/${updated.id}`);
-    revalidatePath("/trader/wholesale");
+    revalidateWholesaleSurfaces(updated.id);
     return { ok: true };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Cancel failed";
@@ -181,8 +191,7 @@ export async function adminTransitionWholesaleAction(
       actorAdminId: session.sub,
       note: parsed.data.note || undefined,
     });
-    revalidatePath(`/admin/wholesale/${updated.id}`);
-    revalidatePath("/admin/wholesale");
+    revalidateWholesaleSurfaces(updated.id);
     return { ok: true };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Transition failed";
@@ -237,11 +246,43 @@ export async function adminProvideWholesaleQuoteAction(
       quoteCurrency: parsed.data.quoteCurrency,
       lineQuotes,
     });
-    revalidatePath(`/admin/wholesale/${updated.id}`);
-    revalidatePath("/admin/wholesale");
+    revalidateWholesaleSurfaces(updated.id);
     return { ok: true, data: { status: updated.status } };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Quote failed";
+    return { ok: false, error: msg };
+  }
+}
+
+export async function adminUpdateWholesaleShippingAction(
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const requestId = String(formData.get("requestId") || "").trim();
+  const carrier = String(formData.get("carrier") || "").trim();
+  const trackingReference = String(
+    formData.get("trackingReference") || ""
+  ).trim();
+  if (!requestId) return { ok: false, error: "Invalid request" };
+
+  try {
+    const updated = await adminUpdateWholesaleShipping({
+      requestId,
+      actorAdminId: session.sub,
+      carrier,
+      trackingReference,
+      shippedAt: new Date(),
+    });
+    revalidateWholesaleSurfaces(updated.id);
+    return { ok: true };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Shipping update failed";
     return { ok: false, error: msg };
   }
 }

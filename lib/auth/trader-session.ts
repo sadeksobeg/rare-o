@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/db/prisma";
@@ -76,18 +77,20 @@ export async function clearTraderSessionCookie(): Promise<void> {
   jar.delete(COOKIE_NAME);
 }
 
-export async function getTraderSession(): Promise<TraderSession | null> {
-  const jar = await cookies();
-  const token = jar.get(COOKIE_NAME)?.value;
-  if (!token) return null;
-  return verifyTraderSessionToken(token);
-}
+export const getTraderSession = cache(
+  async (): Promise<TraderSession | null> => {
+    const jar = await cookies();
+    const token = jar.get(COOKIE_NAME)?.value;
+    if (!token) return null;
+    return verifyTraderSessionToken(token);
+  }
+);
 
 /**
  * Server-side trader auth. Identity always comes from the session cookie —
  * never trust a client-supplied traderId.
  */
-export async function requireTraderSession(): Promise<TraderSession> {
+export const requireTraderSession = cache(async (): Promise<TraderSession> => {
   const session = await getTraderSession();
   if (!session) {
     throw new Error("UNAUTHORIZED");
@@ -104,6 +107,6 @@ export async function requireTraderSession(): Promise<TraderSession> {
     email: trader.email,
     displayName: trader.displayName,
   };
-}
+});
 
 export const TRADER_SESSION_COOKIE = COOKIE_NAME;

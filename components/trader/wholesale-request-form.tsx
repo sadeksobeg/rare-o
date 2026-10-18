@@ -11,7 +11,8 @@ import { Banner } from "@/components/ui/banner";
 import { Dialog } from "@/components/ui/dialog";
 import type { Locale } from "@/lib/i18n/config";
 import { fmt, type TraderDict } from "@/lib/ui/trader-labels";
-import { useActionState, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useActionState, useEffect, useMemo, useState } from "react";
 
 const initial: ActionResult | null = null;
 
@@ -35,12 +36,23 @@ export function WholesaleRequestForm({
   const [qtyById, setQtyById] = useState<Record<string, number>>({});
   const [priceById, setPriceById] = useState<Record<string, string>>({});
   const [currencyById, setCurrencyById] = useState<Record<string, string>>({});
+  const router = useRouter();
   const [notes, setNotes] = useState("");
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [navigating, setNavigating] = useState(false);
   const [state, action, pending] = useActionState(
     traderCreateWholesaleRequestAction,
     initial
   );
+
+  useEffect(() => {
+    if (!state?.ok || !state.data || typeof state.data !== "object") return;
+    const id = (state.data as { id?: string }).id;
+    if (!id || navigating) return;
+    setNavigating(true);
+    setReviewOpen(false);
+    router.push(`/trader/wholesale/${id}`);
+  }, [state, router, navigating]);
 
   const selected = useMemo(() => {
     return products
@@ -192,10 +204,10 @@ export function WholesaleRequestForm({
 
           <button
             type="submit"
-            disabled={pending || selected.length === 0}
+            disabled={pending || navigating || selected.length === 0}
             className="min-h-12 w-full bg-ro-purple px-5 text-sm text-ro-ivory disabled:opacity-60"
           >
-            {pending ? t.submitting : t.wsSubmit}
+            {pending || navigating ? t.submitting : t.wsSubmit}
           </button>
         </form>
       </Dialog>

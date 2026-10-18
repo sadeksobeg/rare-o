@@ -45,3 +45,6 @@ public/uploads/*
 # WhatsApp Baileys session (high-value secret — never commit)
 .wa-auth/
 **/.wa-auth/
+
+# Local backup / restore-drill copies (never commit DB dumps)
+backups/

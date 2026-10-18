@@ -65,11 +65,13 @@ export function ProductThumb({
   alt,
   plateCaption,
   className,
+  kind,
 }: {
   path?: string | null;
   alt: string;
   plateCaption: string;
   className?: string;
+  kind?: string;
 }) {
   if (!path) {
     return (
@@ -78,6 +80,26 @@ export function ProductThumb({
         caption={plateCaption}
         className={cn("aspect-[4/5] w-full", className)}
       />
+    );
+  }
+
+  if (kind === "video") {
+    return (
+      <div
+        className={cn(
+          "relative aspect-[4/5] overflow-hidden rounded-[var(--ro-r-xs)] bg-ro-sunken",
+          className
+        )}
+      >
+        <video
+          src={path}
+          className="size-full object-cover"
+          muted
+          playsInline
+          preload="metadata"
+          aria-label={alt}
+        />
+      </div>
     );
   }
 

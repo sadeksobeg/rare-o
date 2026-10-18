@@ -61,10 +61,10 @@ function mapProduct(
     descriptionEn: p.descriptionEn,
     specsTextAr: p.specsTextAr,
     specsTextEn: p.specsTextEn,
-    retailPrice: p.retailPrice.toString(),
+    retailPrice: p.retailPrice != null ? p.retailPrice.toString() : "",
     compareAtPrice:
       p.compareAtPrice != null ? p.compareAtPrice.toString() : null,
-    currency: p.currency,
+    currency: p.currency ?? "",
     availability: p.availability,
     updatedAt: p.updatedAt.toISOString(),
     category: {

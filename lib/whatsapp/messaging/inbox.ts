@@ -1,8 +1,11 @@
 /**
  * Admin inbox read models — safe DTOs only.
- * Never include session files, QR, Baileys socket, or credentials.
+ * Never include session files, Baileys socket, or credentials.
+ * Health view carries ephemeral admin pairing display (code / QR) only —
+ * consumed by admin-protected UI, never logged.
  */
 
+import { cache } from "react";
 import type { PrismaClient } from "@prisma/client";
 
 import { prisma as defaultPrisma } from "@/lib/db/prisma";
@@ -60,6 +63,13 @@ export type InboxHealthView = {
   lastConnectedAt: string | null;
   updatedAt: string | null;
   outboundEnabled: boolean;
+  /** Admin-only pairing display (ephemeral; null once expired / cleared) */
+  pairingPhone: string | null;
+  pairingCode: string | null;
+  qrDataUrl: string | null;
+  pairingExpiresAt: string | null;
+  /** none | pair | qr | reconnect | logout */
+  linkCommand: string;
 };
 
 /**
@@ -101,9 +111,9 @@ function toLinkSummary(row: {
   return { linked: false, linkType: "none", linkId: null };
 }
 
-export async function listInboxConversations(
-  db: DbClient = defaultPrisma,
-  take = 100
+async function listInboxConversationsImpl(
+  db: DbClient,
+  take: number
 ): Promise<InboxConversationListItem[]> {
   const rows = await db.whatsAppConversation.findMany({
     orderBy: [{ lastMessageAt: "desc" }, { updatedAt: "desc" }],
@@ -136,6 +146,21 @@ export async function listInboxConversations(
   }));
 }
 
+/** Per-request cache for default inbox list (layout + children share one query). */
+const listInboxConversationsCached = cache((take: number) =>
+  listInboxConversationsImpl(defaultPrisma, take)
+);
+
+export async function listInboxConversations(
+  db: DbClient = defaultPrisma,
+  take = 100
+): Promise<InboxConversationListItem[]> {
+  if (db === defaultPrisma) {
+    return listInboxConversationsCached(take);
+  }
+  return listInboxConversationsImpl(db, take);
+}
+
 export async function getInboxConversation(
   conversationId: string,
   db: DbClient = defaultPrisma
@@ -154,7 +179,8 @@ export async function getInboxConversation(
         ],
       },
     },
-  });  if (!row) return null;
+  });
+  if (!row) return null;
 
   return {
     id: row.id,
@@ -198,14 +224,18 @@ export async function markConversationRead(
 }
 
 /**
- * Safe connection health for admin UI. Never returns QR/session material.
+ * Safe connection health for admin UI. Never returns session material;
+ * pairing code / QR are ephemeral and hidden once expired.
  */
-export async function getInboxHealthView(
-  db: DbClient = defaultPrisma
+async function getInboxHealthViewImpl(
+  db: DbClient
 ): Promise<InboxHealthView> {
   const row = await db.whatsAppConnectionHealth.findUnique({
     where: { id: WHATSAPP_CONNECTION_HEALTH_ID },
   });
+
+  const pairingExpired =
+    !!row?.pairingExpiresAt && row.pairingExpiresAt.getTime() < Date.now();
 
   return {
     state: row?.state ?? "DISCONNECTED",
@@ -213,5 +243,23 @@ export async function getInboxHealthView(
     lastConnectedAt: toIso(row?.lastConnectedAt ?? null),
     updatedAt: toIso(row?.updatedAt ?? null),
     outboundEnabled: isOutboundEnabled(),
+    pairingPhone: row?.pairingPhone ?? null,
+    pairingCode: pairingExpired ? null : (row?.pairingCode ?? null),
+    qrDataUrl: pairingExpired ? null : (row?.qrDataUrl ?? null),
+    pairingExpiresAt: toIso(row?.pairingExpiresAt ?? null),
+    linkCommand: row?.linkCommand ?? "none",
   };
+}
+
+const getInboxHealthViewCached = cache(() =>
+  getInboxHealthViewImpl(defaultPrisma)
+);
+
+export async function getInboxHealthView(
+  db: DbClient = defaultPrisma
+): Promise<InboxHealthView> {
+  if (db === defaultPrisma) {
+    return getInboxHealthViewCached();
+  }
+  return getInboxHealthViewImpl(db);
 }

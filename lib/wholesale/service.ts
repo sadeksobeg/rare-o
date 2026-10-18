@@ -1,5 +1,6 @@
 import { uiVisibleWholesaleWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
+import { notifyTrader } from "@/lib/trader/notifications";
 import {
   WHOLESALE_QTY_TECHNICAL_MAX,
   canTransitionWholesale,
@@ -75,8 +76,8 @@ export async function createWholesaleRequest(input: CreateWholesaleRequestInput)
     quantity: number;
     proposedUnitPrice: number | null;
     currency: string | null;
-    catalogRetailPriceSnapshot: number;
-    catalogCurrencySnapshot: string;
+    catalogRetailPriceSnapshot: number | null;
+    catalogCurrencySnapshot: string | null;
   }> = [];
 
   for (const line of input.lines) {
@@ -122,8 +123,9 @@ export async function createWholesaleRequest(input: CreateWholesaleRequestInput)
       quantity: line.quantity,
       proposedUnitPrice,
       currency,
-      catalogRetailPriceSnapshot: Number(product.retailPrice),
-      catalogCurrencySnapshot: product.currency,
+      catalogRetailPriceSnapshot:
+        product.retailPrice != null ? Number(product.retailPrice) : null,
+      catalogCurrencySnapshot: product.currency ?? null,
     });
   }
 
@@ -158,7 +160,7 @@ export async function createWholesaleRequest(input: CreateWholesaleRequestInput)
           toStatus: status,
           actorRole: "trader",
           actorTraderId: input.traderId,
-          note: `Mode: ${input.requestMode}`,
+          note: null,
         },
       },
     },
@@ -265,7 +267,7 @@ export async function adminTransitionWholesaleStatus(input: {
   if (input.toStatus === "completed") data.completedAt = now;
   if (input.toStatus === "cancelled") data.cancelledAt = now;
 
-  return prisma.wholesaleRequest.update({
+  const updated = await prisma.wholesaleRequest.update({
     where: { id: request.id },
     data: {
       ...data,
@@ -282,6 +284,18 @@ export async function adminTransitionWholesaleStatus(input: {
     },
     include: { lines: true, events: { orderBy: { createdAt: "asc" } } },
   });
+
+  await notifyTrader({
+    traderId: updated.traderId,
+    domain: "wholesale",
+    titleAr: `تحديث طلب جملة · ${updated.reference}`,
+    titleEn: `Wholesale update · ${updated.reference}`,
+    bodyAr: `الحالة: ${input.toStatus}`,
+    bodyEn: `Status: ${input.toStatus}`,
+    href: `/trader/wholesale/${updated.id}`,
+  });
+
+  return updated;
 }
 
 export type QuoteLineInput = {
@@ -335,7 +349,7 @@ export async function adminProvideWholesaleQuote(input: {
   const to: WholesaleStatus = "quote_provided";
   const now = new Date();
 
-  return prisma.$transaction(async (tx) => {
+  const updated = await prisma.$transaction(async (tx) => {
     for (const q of input.lineQuotes) {
       await tx.wholesaleRequestLine.update({
         where: { id: q.lineId },
@@ -372,6 +386,18 @@ export async function adminProvideWholesaleQuote(input: {
       },
     });
   });
+
+  await notifyTrader({
+    traderId: updated.traderId,
+    domain: "wholesale",
+    titleAr: `عرض سعر جملة · ${updated.reference}`,
+    titleEn: `Wholesale quote · ${updated.reference}`,
+    bodyAr: "وصلك عرض سعر من الإدارة — راجع وردّ.",
+    bodyEn: "Admin sent a wholesale quote — review and respond.",
+    href: `/trader/wholesale/${updated.id}`,
+  });
+
+  return updated;
 }
 
 export async function traderRespondToWholesaleQuote(input: {
@@ -446,6 +472,50 @@ export async function traderCancelWholesaleRequest(input: {
           note: input.note?.trim() || "Cancelled by trader",
         },
       },
+    },
+  });
+}
+
+/** D37b / Appendix S 8.3 — admin sets carrier + tracking. */
+export async function adminUpdateWholesaleShipping(input: {
+  requestId: string;
+  actorAdminId: string;
+  carrier: string;
+  trackingReference: string;
+  shippedAt?: Date | null;
+}) {
+  const request = await prisma.wholesaleRequest.findUnique({
+    where: { id: input.requestId },
+  });
+  if (!request) throw new Error("REQUEST_NOT_FOUND");
+
+  const carrier = input.carrier.trim();
+  const trackingReference = input.trackingReference.trim();
+  if (!carrier || !trackingReference) {
+    throw new Error("SHIPPING_FIELDS_REQUIRED");
+  }
+
+  return prisma.wholesaleRequest.update({
+    where: { id: request.id },
+    data: {
+      carrier,
+      trackingReference,
+      shippedAt: input.shippedAt ?? new Date(),
+      events: {
+        create: {
+          eventType: "status_changed",
+          fromStatus: request.status,
+          toStatus: request.status,
+          actorRole: "admin",
+          actorAdminId: input.actorAdminId,
+          note: `Shipping: ${carrier} / ${trackingReference}`,
+        },
+      },
+    },
+    include: {
+      lines: true,
+      events: { orderBy: { createdAt: "asc" } },
+      trader: true,
     },
   });
 }

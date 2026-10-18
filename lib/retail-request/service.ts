@@ -30,6 +30,20 @@ export async function createRetailRequestFromCart(
 ) {
   assertNoWhatsAppBusinessApiSend();
 
+  // Idempotent re-submit: same key returns the originally created request
+  if (input.idempotencyKey) {
+    const existing = await prisma.retailRequest.findUnique({
+      where: { idempotencyKey: input.idempotencyKey },
+      include: { lines: true },
+    });
+    if (existing) {
+      return {
+        request: existing,
+        handoffPayload: parsePayload(existing.handoffPayloadJson),
+      };
+    }
+  }
+
   const productIds = input.lines.map((l) => l.productId);
   const products: Product[] = await prisma.product.findMany({
     where: { id: { in: productIds } },
@@ -52,6 +66,9 @@ export async function createRetailRequestFromCart(
     if (product.status !== "published") throw new Error("PRODUCT_NOT_PUBLISHED");
     if (product.availability !== "available") {
       throw new Error("PRODUCT_UNAVAILABLE");
+    }
+    if (product.retailPrice == null || !product.currency) {
+      throw new Error("PRODUCT_PRICE_ON_REQUEST");
     }
     const unit = Number(product.retailPrice);
     resolvedLines.push({
@@ -156,6 +173,7 @@ export async function createRetailRequestFromCart(
       handoffMessageText,
       whatsAppDeepLink,
       handoffPreparedAt,
+      idempotencyKey: input.idempotencyKey ?? null,
       customerId: customer.id,
       lines: {
         create: resolvedLines.map((l) => ({
@@ -182,9 +200,26 @@ export async function createRetailRequestFromCart(
           : undefined,
     },
     include: { lines: true },
+  }).catch(async (e: unknown) => {
+    // Concurrent duplicate submit lost the unique-key race: return the winner
+    const isUniqueViolation =
+      typeof e === "object" &&
+      e !== null &&
+      (e as { code?: string }).code === "P2002";
+    if (input.idempotencyKey && isUniqueViolation) {
+      const winner = await prisma.retailRequest.findUnique({
+        where: { idempotencyKey: input.idempotencyKey },
+        include: { lines: true },
+      });
+      if (winner) {
+        await prisma.customer.delete({ where: { id: customer.id } }).catch(() => {});
+        return winner;
+      }
+    }
+    throw e;
   });
 
-  return { request, handoffPayload };
+  return { request, handoffPayload: parsePayload(request.handoffPayloadJson) };
 }
 
 export async function markRetailHandoffOpened(input: {

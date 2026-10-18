@@ -33,7 +33,10 @@ export const productUpsertSchema = z.object({
   specsTextAr: z.string().max(10000).default(""),
   specsTextEn: z.string().max(10000).default(""),
   categoryId: z.string().min(1),
-  retailPrice: z.coerce.number().nonnegative(),
+  /** Empty = price on request (D28b); must pair with currency */
+  retailPrice: z
+    .union([z.literal(""), z.coerce.number().nonnegative()])
+    .transform((v) => (v === "" || v === undefined ? null : v)),
   compareAtPrice: z
     .union([z.literal(""), z.coerce.number().nonnegative()])
     .optional()
@@ -41,14 +44,33 @@ export const productUpsertSchema = z.object({
   currency: z
     .string()
     .trim()
-    .transform((v) => v.toUpperCase())
-    .refine(isCurrencyCode, "Currency must be a short uppercase code"),
+    .transform((v) => {
+      const c = v.toUpperCase();
+      return c === "" ? null : c;
+    }),
   status: z.enum(PRODUCT_STATUSES),
   availability: z.enum(PRODUCT_AVAILABILITIES),
   wholesaleEligible: z.coerce.boolean().default(false),
   badgeNew: z.coerce.boolean().default(false),
   badgeFeatured: z.coerce.boolean().default(false),
   badgeSale: z.coerce.boolean().default(false),
+}).superRefine((data, ctx) => {
+  const hasPrice = data.retailPrice != null;
+  const hasCurrency = !!data.currency;
+  if (hasPrice !== hasCurrency) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "retailPrice and currency must both be set or both empty",
+      path: hasPrice ? ["currency"] : ["retailPrice"],
+    });
+  }
+  if (data.currency && !isCurrencyCode(data.currency)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Currency must be a short uppercase code",
+      path: ["currency"],
+    });
+  }
 });
 
 const PROMO_TONES = ["ink", "plum", "sand"] as const;
@@ -129,6 +151,8 @@ export const retailRequestCreateSchema = z.object({
   shippingMethodLabel: z.string().trim().max(120).nullable().optional(),
   lines: z.array(cartLineSchema).min(1),
   status: z.enum(RETAIL_REQUEST_CREATE_STATUSES).default("ready_for_handoff"),
+  /** Client-generated UUID — duplicate submits return the same request */
+  idempotencyKey: z.string().uuid().optional(),
 });
 
 export const retailRequestTransitionSchema = z.object({

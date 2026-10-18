@@ -32,6 +32,14 @@ export type WhatsAppQrPayload = {
   createdAt: string;
 };
 
+export type WhatsAppPairingCodePayload = {
+  /** Pairing code for admin display only — never log */
+  code: string;
+  /** E.164 digits of the phone being linked (no +) */
+  phone: string;
+  createdAt: string;
+};
+
 export type WhatsAppInboundTextEvent = {
   waMessageId: string;
   waChatId: string;
@@ -85,6 +93,7 @@ export type WhatsAppSendTextResult =
 export type WhatsAppAdapterEvents = {
   onHealth?: (health: WhatsAppHealth) => void | Promise<void>;
   onQr?: (payload: WhatsAppQrPayload) => void | Promise<void>;
+  onPairingCode?: (payload: WhatsAppPairingCodePayload) => void | Promise<void>;
   onInboundText?: (
     event: WhatsAppInboundTextEvent
   ) => void | Promise<void>;
@@ -103,9 +112,16 @@ export interface WhatsAppAdapter {
   stop(): Promise<void>;
   /** Begin or continue QR auth; emits onQr when a QR is available */
   requestAuthentication(): Promise<void>;
+  /** Request a phone pairing code (digits only, country code included, no +) */
+  requestPairingCode?(phoneE164: string): Promise<void>;
   /** Controlled logout — clears in-memory socket; session wipe is explicit */
   logout(): Promise<void>;
   sendText(input: WhatsAppSendTextInput): Promise<WhatsAppSendTextResult>;
+}
+
+/** WHATSAPP_ADAPTER=fake — E2E without a real phone / Baileys socket. */
+export function isFakeWhatsAppAdapter(): boolean {
+  return process.env.WHATSAPP_ADAPTER?.trim().toLowerCase() === "fake";
 }
 
 export function isOutboundEnabled(): boolean {

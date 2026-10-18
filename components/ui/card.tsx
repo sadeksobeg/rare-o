@@ -34,7 +34,7 @@ export function Card(props: StaticProps | LinkProps) {
   const shell = cn(
     "rounded-[var(--ro-r-sm)] text-ro-ink transition-[box-shadow,transform] duration-[var(--ro-dur-fast)] ease-[var(--ro-ease-standard)]",
     variant === "plain" &&
-      "border border-ro-border bg-ro-paper p-5 md:p-6",
+      "ro-portal-card border border-ro-border bg-ro-paper p-5 md:p-6",
     variant === "inverse" &&
       "ro-inverse border border-ro-line-on-dark bg-[var(--ro-ink-900)] p-5 text-ro-canvas md:p-6",
     variant === "media" &&

@@ -37,6 +37,9 @@ export async function traderLoginAction(
   _prev: ActionResult | null,
   formData: FormData
 ): Promise<ActionResult> {
+  const { clearLoginFailures, isLoginLocked, recordLoginFailure } =
+    await import("@/lib/auth/rate-limit");
+
   const parsed = traderLoginSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
@@ -45,16 +48,27 @@ export async function traderLoginAction(
     return { ok: false, error: "Invalid credentials payload" };
   }
 
+  const email = parsed.data.email.toLowerCase();
+  const lock = isLoginLocked("trader", email);
+  if (lock.locked) {
+    return { ok: false, error: "LOGIN_LOCKED" };
+  }
+
   const trader = await prisma.traderAccount.findUnique({
-    where: { email: parsed.data.email.toLowerCase() },
+    where: { email },
   });
   if (!trader || trader.status !== "active") {
+    recordLoginFailure("trader", email);
     return { ok: false, error: "Invalid email or password" };
   }
 
   const valid = await verifyPassword(parsed.data.password, trader.passwordHash);
-  if (!valid) return { ok: false, error: "Invalid email or password" };
+  if (!valid) {
+    recordLoginFailure("trader", email);
+    return { ok: false, error: "Invalid email or password" };
+  }
 
+  clearLoginFailures("trader", email);
   const token = await createTraderSessionToken({
     sub: trader.id,
     email: trader.email,
@@ -194,10 +208,14 @@ export async function traderCreateDealAction(
       conditionsNotes: parsed.data.conditionsNotes,
       message: parsed.data.message,
     });
+    // Do not redirect here — waiting for the detail RSC (cold compile) made
+    // submit feel stuck for tens of seconds. Client navigates after ok.
     revalidatePath("/trader/deals");
-    redirect(`/trader/deals/${deal.id}`);
+    revalidatePath("/trader");
+    revalidatePath("/admin");
+    revalidatePath("/admin/deals");
+    return { ok: true, data: { id: deal.id, reference: deal.reference } };
   } catch (e) {
-    if (typeof e === "object" && e && "digest" in e) throw e;
     const msg = e instanceof Error ? e.message : "Create failed";
     return { ok: false, error: msg };
   }
@@ -231,7 +249,7 @@ export async function traderNegotiateAction(
   }
 
   try {
-    const updated = await addNegotiationEntry({
+    const { deal } = await addNegotiationEntry({
       dealId: parsed.data.dealId,
       action: parsed.data.action,
       actorRole: "trader",
@@ -242,9 +260,13 @@ export async function traderNegotiateAction(
       quantity: parsed.data.quantity,
       conditionsNotes: parsed.data.conditionsNotes,
     });
-    revalidatePath(`/trader/deals/${updated.id}`);
+    revalidatePath(`/trader/deals/${deal.id}`);
     revalidatePath("/trader/deals");
-    return { ok: true, data: { status: updated.status } };
+    revalidatePath("/trader");
+    revalidatePath("/admin");
+    revalidatePath(`/admin/deals/${deal.id}`);
+    revalidatePath("/admin/deals");
+    return { ok: true, data: { status: deal.status } };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Negotiation failed";
     if (msg === "FORBIDDEN" || msg === "DEAL_NOT_FOUND") {
@@ -282,7 +304,7 @@ export async function adminNegotiateAction(
   }
 
   try {
-    const updated = await addNegotiationEntry({
+    const { deal, conflictWarnings } = await addNegotiationEntry({
       dealId: parsed.data.dealId,
       action: parsed.data.action,
       actorRole: "admin",
@@ -293,9 +315,21 @@ export async function adminNegotiateAction(
       quantity: parsed.data.quantity,
       conditionsNotes: parsed.data.conditionsNotes,
     });
-    revalidatePath(`/admin/deals/${updated.id}`);
+    revalidatePath(`/admin/deals/${deal.id}`);
     revalidatePath("/admin/deals");
-    return { ok: true, data: { status: updated.status } };
+    revalidatePath("/trader");
+    revalidatePath("/trader/notifications");
+    return {
+      ok: true,
+      data: {
+        status: deal.status,
+        conflictWarnings: conflictWarnings.map((w) => ({
+          reference: w.reference,
+          traderDisplayName: w.traderDisplayName,
+          status: w.status,
+        })),
+      },
+    };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Negotiation failed";
     return { ok: false, error: msg };
@@ -379,12 +413,18 @@ export async function adminSetPublicOfferStatusAction(
     revalidatePath("/admin/offers");
     revalidatePath(`/admin/offers/${parsed.data.id}`);
     revalidatePath("/offers");
+    revalidatePath("/trader/offers");
     return { ok: true };
   } catch (e) {
-    return {
-      ok: false,
-      error: e instanceof Error ? e.message : "Status update failed",
-    };
+    const msg = e instanceof Error ? e.message : "Status update failed";
+    if (msg === "PUBLISH_NEEDS_ACCEPTED_DEAL") {
+      return {
+        ok: false,
+        error:
+          "Publish blocked — linked deal must be accepted before this offer can go live on the storefront.",
+      };
+    }
+    return { ok: false, error: msg };
   }
 }
 

@@ -7,13 +7,19 @@ import {
 import type { StatusTone } from "@/lib/ui/status";
 
 const toneClass: Record<StatusTone, string> = {
-  neutral: "bg-[var(--ro-sand-300)] text-[var(--ro-ink-600)]",
-  info: "bg-[var(--ro-plum-100)] text-[var(--ro-plum-900)]",
-  progress: "bg-[var(--ro-progress-100)] text-[var(--ro-progress-700)]",
-  attention: "bg-[var(--ro-amber-100)] text-[var(--ro-amber-800)]",
-  success: "bg-[var(--ro-success-100)] text-[var(--ro-success-700)]",
-  danger: "bg-[var(--ro-danger-100)] text-[var(--ro-danger-700)]",
-  closed: "bg-[#E6E0EA] text-[var(--ro-ink-500)]",
+  neutral:
+    "border border-[color-mix(in_srgb,var(--ro-ink-950)_12%,transparent)] bg-[var(--ro-sand-300)] text-[var(--ro-ink-700)]",
+  info: "border border-[color-mix(in_srgb,var(--ro-plum-900)_14%,transparent)] bg-[var(--ro-plum-100)] text-[var(--ro-plum-900)]",
+  progress:
+    "border border-[color-mix(in_srgb,var(--ro-progress-700)_14%,transparent)] bg-[var(--ro-progress-100)] text-[var(--ro-progress-700)]",
+  attention:
+    "border border-[color-mix(in_srgb,var(--ro-amber-800)_16%,transparent)] bg-[var(--ro-amber-100)] text-[var(--ro-amber-800)]",
+  success:
+    "border border-[color-mix(in_srgb,var(--ro-success-700)_14%,transparent)] bg-[var(--ro-success-100)] text-[var(--ro-success-700)]",
+  danger:
+    "border border-[color-mix(in_srgb,var(--ro-danger-700)_14%,transparent)] bg-[var(--ro-danger-100)] text-[var(--ro-danger-700)]",
+  closed:
+    "border border-[color-mix(in_srgb,var(--ro-ink-950)_10%,transparent)] bg-[#E6E0EA] text-[var(--ro-ink-500)]",
 };
 
 type BoundProps = {

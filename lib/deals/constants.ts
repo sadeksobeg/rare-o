@@ -8,6 +8,7 @@ export const DEAL_STATUSES = [
   "proposed",
   "negotiating",
   "accepted",
+  "rejected",
   "closed",
 ] as const;
 export type DealStatus = (typeof DEAL_STATUSES)[number];
@@ -17,6 +18,7 @@ export const NEGOTIATION_ACTIONS = [
   "continue",
   "counter",
   "accept",
+  "reject",
   "close",
 ] as const;
 export type NegotiationAction = (typeof NEGOTIATION_ACTIONS)[number];
@@ -36,6 +38,7 @@ export const OPEN_DEAL_NEGOTIATION_ACTIONS = [
   "continue",
   "counter",
   "accept",
+  "reject",
   "close",
 ] as const;
 
@@ -61,6 +64,7 @@ export function nextDealStatusForAction(
 ): DealStatus {
   if (action === "propose") return "proposed";
   if (action === "accept") return "accepted";
+  if (action === "reject") return "rejected";
   if (action === "close") return "closed";
   if (action === "continue" || action === "counter") {
     if (!isOpenDealStatus(current)) return current;

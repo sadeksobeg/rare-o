@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 export type BrandWallpaperTone = "cream" | "ink";
 
 /**
- * Cream-surface identity wallpaper only (storefront + trader shells).
+ * Cream-surface identity wallpaper (storefront + admin/trader portal shells).
  * Real brand mark stamps + filled notes/plectrum — never on hero/inverse.
  */
 export function BrandWallpaper({

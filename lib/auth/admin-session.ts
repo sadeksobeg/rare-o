@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
@@ -82,14 +83,24 @@ export async function clearAdminSessionCookie(): Promise<void> {
 }
 
 /**
+ * JWT-only session for shell chrome. Middleware already guards /admin routes;
+ * avoids a DB round-trip on every soft navigation.
+ */
+export const getAdminSessionChrome = cache(
+  async (): Promise<AdminSession | null> => {
+    const jar = await cookies();
+    const token = jar.get(COOKIE_NAME)?.value;
+    if (!token) return null;
+    return verifyAdminSessionToken(token);
+  }
+);
+
+/**
  * Returns a session only when the JWT is an admin role AND the AdminUser still exists.
  * Prevents trader JWTs (same AUTH_SECRET) from being treated as admin sessions.
  */
-export async function getAdminSession(): Promise<AdminSession | null> {
-  const jar = await cookies();
-  const token = jar.get(COOKIE_NAME)?.value;
-  if (!token) return null;
-  const session = await verifyAdminSessionToken(token);
+export const getAdminSession = cache(async (): Promise<AdminSession | null> => {
+  const session = await getAdminSessionChrome();
   if (!session) return null;
   const exists = await prisma.adminUser.findUnique({
     where: { id: session.sub },
@@ -97,7 +108,7 @@ export async function getAdminSession(): Promise<AdminSession | null> {
   });
   if (!exists) return null;
   return session;
-}
+});
 
 export async function requireAdminSession(): Promise<AdminSession> {
   const session = await getAdminSession();

@@ -1,7 +1,12 @@
+import { Suspense } from "react";
 import { InboxConversationList } from "@/components/admin/inbox-conversation-list";
 import type { InboxListRow } from "@/components/admin/inbox-conversation-list";
 import { InboxConnectionBanner } from "@/components/admin/inbox-connection-banner";
 import { PageHeader } from "@/components/admin/page-header";
+import { WhatsAppLinkAccount } from "@/components/admin/whatsapp-link-account";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
+import type { Locale } from "@/lib/i18n/config";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import {
   getInboxHealthView,
@@ -20,16 +25,15 @@ function formatWhen(iso: string | null, locale: string): string {
   }
 }
 
-/**
- * AD-03 inbox shell: banner + list | thread.
- * ≥1280: list 340 + thread flex (+ context from thread page).
- */
-export default async function AdminInboxLayout({
+async function InboxListShell({
+  locale,
+  dict,
   children,
 }: {
+  locale: Locale;
+  dict: Dictionary;
   children: React.ReactNode;
 }) {
-  const { locale, dict } = await getRequestDictionary();
   const [conversations, health] = await Promise.all([
     listInboxConversations(),
     getInboxHealthView(),
@@ -57,16 +61,49 @@ export default async function AdminInboxLayout({
   });
 
   return (
+    <>
+      <InboxConnectionBanner health={health} dict={dict} />
+      <WhatsAppLinkAccount health={health} dict={dict} />
+      <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[340px_minmax(0,1fr)]">
+        <InboxConversationList rows={rows} dict={dict} />
+        <div className="flex min-h-0 min-w-0 flex-col">{children}</div>
+      </div>
+    </>
+  );
+}
+
+/**
+ * AD-03 inbox shell: banner + list | thread.
+ * Header paints immediately; list/health stream so thread children can show sooner.
+ */
+export default async function AdminInboxLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { locale, dict } = await getRequestDictionary();
+
+  return (
     <section
       data-admin-inbox
       className="flex min-h-[calc(100vh-5.5rem)] flex-col gap-3"
     >
       <PageHeader title={dict.inbox.title} description={dict.inbox.subtitle} />
-      <InboxConnectionBanner health={health} dict={dict} />
-      <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[340px_minmax(0,1fr)]">
-        <InboxConversationList rows={rows} dict={dict} />
-        <div className="flex min-h-0 min-w-0 flex-col">{children}</div>
-      </div>
+      <Suspense
+        fallback={
+          <div className="space-y-3" aria-busy="true">
+            <Skeleton className="h-10 w-full" />
+            <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[340px_minmax(0,1fr)]">
+              <Skeleton className="min-h-[320px] w-full" />
+              <div className="flex min-h-0 min-w-0 flex-col">{children}</div>
+            </div>
+          </div>
+        }
+      >
+        <InboxListShell locale={locale} dict={dict}>
+          {children}
+        </InboxListShell>
+      </Suspense>
     </section>
   );
 }

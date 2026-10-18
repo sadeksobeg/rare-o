@@ -4,11 +4,17 @@ import { TEST_CURRENCY_CODE } from "../lib/catalog/currency";
 
 const prisma = new PrismaClient();
 
+/** Storefront demo currency — ISO 4217 so prices render (never TEST on storefront). */
+const DEMO_CURRENCY = "USD";
+
 const IMAGES = {
   instrument: "/brand/editorial/instrument-dark.jpg",
   closeup: "/brand/editorial/hero-closeup.jpg",
   heritage: "/brand/editorial/oud-heritage.jpg",
   signature: "/brand/editorial/hero-signature.jpg",
+  /** Prefer atelier cutouts for oud SKUs when available. */
+  oudPrimary: "/brand/hero-oud-atelier-f.png",
+  oudAlt: "/brand/hero-oud-atelier-e.png",
 } as const;
 
 type SeedProduct = {
@@ -17,6 +23,8 @@ type SeedProduct = {
   nameEn: string;
   descriptionAr: string;
   descriptionEn: string;
+  specsTextAr: string;
+  specsTextEn: string;
   category: "string-instruments" | "accessories";
   retailPrice: number;
   compareAtPrice?: number | null;
@@ -25,6 +33,22 @@ type SeedProduct = {
   images: Array<{ path: string; altAr: string; altEn: string }>;
 };
 
+const OUD_SPECS_AR = [
+  "الوجه: خشب شوح متين",
+  "القصعة: جوز مطبق",
+  "الأوتار: 11 وتراً",
+  "بيت المفاتيح: 11 وتداً",
+  "التشطيب: ورنيش يدوي",
+].join("\n");
+
+const OUD_SPECS_EN = [
+  "Soundboard: spruce",
+  "Bowl: laminated walnut",
+  "Strings: 11 courses",
+  "Pegbox: 11 pegs",
+  "Finish: hand-rubbed varnish",
+].join("\n");
+
 const DEMO_PRODUCTS: SeedProduct[] = [
   {
     slug: "demo-string-instrument",
@@ -32,13 +56,15 @@ const DEMO_PRODUCTS: SeedProduct[] = [
     nameEn: "Workshop oud",
     descriptionAr: "عود ورشة بنبرة دافئة مناسب للممارسة والعرض.",
     descriptionEn: "A workshop oud with a warm tone for practice and display.",
+    specsTextAr: OUD_SPECS_AR,
+    specsTextEn: OUD_SPECS_EN,
     category: "string-instruments",
     retailPrice: 2098,
     compareAtPrice: 2490,
     wholesaleEligible: true,
     images: [
-      { path: IMAGES.instrument, altAr: "عود — منظر أمامي", altEn: "Oud — front view" },
-      { path: IMAGES.closeup, altAr: "تفاصيل الحرفة", altEn: "Craft detail" },
+      { path: IMAGES.oudPrimary, altAr: "عود — منظر أمامي", altEn: "Oud — front view" },
+      { path: IMAGES.oudAlt, altAr: "تفاصيل الحرفة", altEn: "Craft detail" },
     ],
   },
   {
@@ -47,12 +73,26 @@ const DEMO_PRODUCTS: SeedProduct[] = [
     nameEn: "Classic oud 21",
     descriptionAr: "عود بتركيبة متوازنة للعزف اليومي والاستوديو.",
     descriptionEn: "A balanced oud for daily practice and studio sessions.",
+    specsTextAr: [
+      "الوجه: شوح مختار",
+      "القصعة: جوز هندي",
+      "المقياس: قياسي كلاسيك",
+      "الأوتار: 11 وتراً",
+      "الوزن التقريبي: 850 غ",
+    ].join("\n"),
+    specsTextEn: [
+      "Soundboard: select spruce",
+      "Bowl: Indian walnut",
+      "Scale: classic standard",
+      "Strings: 11 courses",
+      "Approx. weight: 850 g",
+    ].join("\n"),
     category: "string-instruments",
     retailPrice: 3180,
     compareAtPrice: 3550,
     images: [
-      { path: IMAGES.heritage, altAr: "عود كلاسيك", altEn: "Classic oud" },
-      { path: IMAGES.closeup, altAr: "تفصيل الوجه", altEn: "Face detail" },
+      { path: IMAGES.oudPrimary, altAr: "عود كلاسيك", altEn: "Classic oud" },
+      { path: IMAGES.oudAlt, altAr: "تفصيل الوجه", altEn: "Face detail" },
     ],
   },
   {
@@ -61,11 +101,25 @@ const DEMO_PRODUCTS: SeedProduct[] = [
     nameEn: "Concert premium oud",
     descriptionAr: "اختيار للحفلات بنبرة أوضح واستجابة سريعة.",
     descriptionEn: "A concert choice with clearer tone and quick response.",
+    specsTextAr: [
+      "الوجه: شوح ألماني",
+      "القصعة: خشب الورد",
+      "الوردة: نقش يدوي",
+      "الأوتار: 11 وتراً",
+      "الاستخدام: مسرح واستوديو",
+    ].join("\n"),
+    specsTextEn: [
+      "Soundboard: German spruce",
+      "Bowl: rosewood",
+      "Rosette: hand-carved",
+      "Strings: 11 courses",
+      "Use: stage and studio",
+    ].join("\n"),
     category: "string-instruments",
     retailPrice: 4920,
     images: [
-      { path: IMAGES.signature, altAr: "عود حفلات", altEn: "Concert oud" },
-      { path: IMAGES.instrument, altAr: "منظر جانبي", altEn: "Side view" },
+      { path: IMAGES.oudAlt, altAr: "عود حفلات", altEn: "Concert oud" },
+      { path: IMAGES.oudPrimary, altAr: "منظر جانبي", altEn: "Side view" },
     ],
   },
   {
@@ -74,6 +128,18 @@ const DEMO_PRODUCTS: SeedProduct[] = [
     nameEn: "Atelier violin",
     descriptionAr: "كمان ورشة بلمسة دافئة مناسب للعزف الفردي.",
     descriptionEn: "An atelier violin with a warm character for solo play.",
+    specsTextAr: [
+      "الحجم: 4/4",
+      "الوجه: شوح",
+      "الجانب والظهر: قيقب",
+      "التشطيب: ورنيش زيتي",
+    ].join("\n"),
+    specsTextEn: [
+      "Size: 4/4",
+      "Top: spruce",
+      "Back & sides: maple",
+      "Finish: oil varnish",
+    ].join("\n"),
     category: "string-instruments",
     retailPrice: 2750,
     compareAtPrice: 2990,
@@ -88,6 +154,18 @@ const DEMO_PRODUCTS: SeedProduct[] = [
     nameEn: "Studio cello",
     descriptionAr: "تشيلو للتسجيل والممارسة بثقل متزن.",
     descriptionEn: "A studio cello with balanced weight for recording and practice.",
+    specsTextAr: [
+      "الحجم: 4/4",
+      "الوجه: شوح",
+      "الجانب والظهر: قيقب",
+      "الحالة: غير متوفر حالياً",
+    ].join("\n"),
+    specsTextEn: [
+      "Size: 4/4",
+      "Top: spruce",
+      "Back & sides: maple",
+      "Status: currently unavailable",
+    ].join("\n"),
     category: "string-instruments",
     retailPrice: 6100,
     availability: "unavailable",
@@ -101,6 +179,18 @@ const DEMO_PRODUCTS: SeedProduct[] = [
     nameEn: "Selected qanun",
     descriptionAr: "قانون منشور ضمن مختارات الموسم.",
     descriptionEn: "A qanun published within this season’s selection.",
+    specsTextAr: [
+      "الأوتار: فولاذ ونيلون",
+      "اللوح: جوز",
+      "العربات: معدنية مضبوطة",
+      "الحالة: منشور للطلب",
+    ].join("\n"),
+    specsTextEn: [
+      "Strings: steel and nylon",
+      "Deck: walnut",
+      "Levers: precision metal",
+      "Status: published for request",
+    ].join("\n"),
     category: "string-instruments",
     retailPrice: 3850,
     wholesaleEligible: true,
@@ -115,6 +205,18 @@ const DEMO_PRODUCTS: SeedProduct[] = [
     nameEn: "Hard-shell case",
     descriptionAr: "حماية للسفر والتخزين اليومي.",
     descriptionEn: "Protection for travel and everyday storage.",
+    specsTextAr: [
+      "المادة: ABS مقوّى",
+      "البطانة: إسفنج كثيف",
+      "الأقفال: معدنية",
+      "التوافق: عود قياسي",
+    ].join("\n"),
+    specsTextEn: [
+      "Shell: reinforced ABS",
+      "Lining: dense foam",
+      "Latches: metal",
+      "Fits: standard oud",
+    ].join("\n"),
     category: "accessories",
     retailPrice: 420,
     compareAtPrice: 490,
@@ -128,6 +230,18 @@ const DEMO_PRODUCTS: SeedProduct[] = [
     nameEn: "Leather strap",
     descriptionAr: "حمّالة جلدية بتشطيب هادئ.",
     descriptionEn: "A leather strap with a quiet finish.",
+    specsTextAr: [
+      "المادة: جلد طبيعي",
+      "العرض: 5 سم",
+      "الطول: قابل للتعديل",
+      "اللون: بني داكن",
+    ].join("\n"),
+    specsTextEn: [
+      "Material: natural leather",
+      "Width: 5 cm",
+      "Length: adjustable",
+      "Color: dark brown",
+    ].join("\n"),
     category: "accessories",
     retailPrice: 180,
     images: [
@@ -140,6 +254,16 @@ const DEMO_PRODUCTS: SeedProduct[] = [
     nameEn: "Rosewood pick set",
     descriptionAr: "ثلاث ريش بدرجات سماكة مختلفة.",
     descriptionEn: "Three picks in varying thicknesses.",
+    specsTextAr: [
+      "المادة: خشب الورد",
+      "العدد: 3 قطع",
+      "السماكة: خفيفة / متوسطة / ثقيلة",
+    ].join("\n"),
+    specsTextEn: [
+      "Material: rosewood",
+      "Count: 3 pieces",
+      "Gauge: light / medium / heavy",
+    ].join("\n"),
     category: "accessories",
     retailPrice: 65,
     images: [
@@ -152,6 +276,18 @@ const DEMO_PRODUCTS: SeedProduct[] = [
     nameEn: "Digital tuner",
     descriptionAr: "موالف سريع للتمرين والاستوديو.",
     descriptionEn: "A quick tuner for practice and studio work.",
+    specsTextAr: [
+      "الشاشة: LED",
+      "المدى: كروماتي",
+      "الطاقة: بطارية زر",
+      "التثبيت: مشبك",
+    ].join("\n"),
+    specsTextEn: [
+      "Display: LED",
+      "Range: chromatic",
+      "Power: button cell",
+      "Mount: clip-on",
+    ].join("\n"),
     category: "accessories",
     retailPrice: 95,
     compareAtPrice: 120,
@@ -172,10 +308,12 @@ async function upsertProduct(
       nameEn: product.nameEn,
       descriptionAr: product.descriptionAr,
       descriptionEn: product.descriptionEn,
+      specsTextAr: product.specsTextAr,
+      specsTextEn: product.specsTextEn,
       categoryId: categoryIds[product.category]!,
       retailPrice: product.retailPrice,
       compareAtPrice: product.compareAtPrice ?? null,
-      currency: TEST_CURRENCY_CODE,
+      currency: DEMO_CURRENCY,
       status: "published",
       availability: product.availability ?? "available",
       wholesaleEligible: product.wholesaleEligible ?? false,
@@ -186,31 +324,30 @@ async function upsertProduct(
       nameEn: product.nameEn,
       descriptionAr: product.descriptionAr,
       descriptionEn: product.descriptionEn,
+      specsTextAr: product.specsTextAr,
+      specsTextEn: product.specsTextEn,
       categoryId: categoryIds[product.category]!,
       retailPrice: product.retailPrice,
       compareAtPrice: product.compareAtPrice ?? null,
-      currency: TEST_CURRENCY_CODE,
+      currency: DEMO_CURRENCY,
       status: "published",
       availability: product.availability ?? "available",
       wholesaleEligible: product.wholesaleEligible ?? false,
     },
   });
 
-  const existingImages = await prisma.productImage.count({
-    where: { productId: row.id },
+  // Keep demo media in sync with seed (safe for local/demo; fixtures stay editorial).
+  await prisma.productImage.deleteMany({ where: { productId: row.id } });
+  await prisma.productImage.createMany({
+    data: product.images.map((img, i) => ({
+      productId: row.id,
+      path: img.path,
+      altAr: img.altAr,
+      altEn: img.altEn,
+      sortOrder: i,
+      kind: "image",
+    })),
   });
-  if (existingImages === 0) {
-    await prisma.productImage.createMany({
-      data: product.images.map((img, i) => ({
-        productId: row.id,
-        path: img.path,
-        altAr: img.altAr,
-        altEn: img.altEn,
-        sortOrder: i,
-        kind: "image",
-      })),
-    });
-  }
 
   return row;
 }
@@ -492,7 +629,8 @@ async function main() {
   console.log(`- admin: ${email}`);
   console.log(`- trader: ${traderEmail}`);
   console.log(`- waiting deal: ${waitingRef} (nextActor=trader)`);
-  console.log(`- fixture currency: ${TEST_CURRENCY_CODE} (test only)`);
+  console.log(`- storefront demo currency: ${DEMO_CURRENCY}`);
+  console.log(`- regression fixture currency: ${TEST_CURRENCY_CODE} (hidden in UI)`);
   console.log("- offers + promo bands seeded (admin-editable)");
   console.log("");
   console.log(

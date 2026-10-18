@@ -1,5 +1,6 @@
 import { uiVisibleDealWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
+import { findCatalogDealConflicts } from "@/lib/deals/conflict";
 import {
   DEAL_KINDS,
   isDealStatus,
@@ -11,6 +12,7 @@ import {
   type NegotiationActorRole,
 } from "@/lib/deals/constants";
 import { hashPassword } from "@/lib/auth/trader-session";
+import { notifyTrader } from "@/lib/trader/notifications";
 
 function buildDealReference(now = new Date()): string {
   const y = now.getUTCFullYear();
@@ -83,6 +85,7 @@ export async function createDealProposal(input: CreateDealInput) {
     if (!product) throw new Error("PRODUCT_NOT_FOUND");
     // Reference only — does not transfer ownership or create catalog rows
     productId = product.id;
+    // Owner decision: never block traders on product conflict (admin warning on accept).
   } else {
     if (input.productId) throw new Error("NON_CATALOG_MUST_NOT_REFERENCE_PRODUCT");
     productId = null;
@@ -122,20 +125,8 @@ export async function createDealProposal(input: CreateDealInput) {
         },
       },
     },
-    include: {
-      entries: { orderBy: { createdAt: "asc" } },
-      product: true,
-      trader: {
-        select: {
-          id: true,
-          email: true,
-          displayName: true,
-          companyName: true,
-          phone: true,
-          status: true,
-        },
-      },
-    },
+    /** Slim write payload — detail pages load full relations separately. */
+    select: { id: true, reference: true, status: true, productId: true },
   });
 }
 
@@ -178,6 +169,21 @@ export async function addNegotiationEntry(input: AddNegotiationInput) {
 
   const nextStatus = nextDealStatusForAction(deal.status, input.action);
 
+  let conflictWarnings: Awaited<ReturnType<typeof findCatalogDealConflicts>> =
+    [];
+  if (
+    input.action === "accept" &&
+    input.actorRole === "admin" &&
+    deal.dealKind === "catalog" &&
+    deal.productId
+  ) {
+    conflictWarnings = await findCatalogDealConflicts({
+      productId: deal.productId,
+      excludeDealId: deal.id,
+      otherThanTraderId: deal.traderId,
+    });
+  }
+
   const price =
     input.proposedPrice === undefined ? undefined : input.proposedPrice;
   const currency =
@@ -185,7 +191,7 @@ export async function addNegotiationEntry(input: AddNegotiationInput) {
       ? undefined
       : input.currency?.trim().toUpperCase() || null;
 
-  return prisma.$transaction(async (tx) => {
+  const updated = await prisma.$transaction(async (tx) => {
     await tx.negotiationEntry.create({
       data: {
         dealId: deal.id,
@@ -225,22 +231,59 @@ export async function addNegotiationEntry(input: AddNegotiationInput) {
     return tx.dealProposal.update({
       where: { id: deal.id },
       data: dealUpdate,
-      include: {
-        entries: { orderBy: { createdAt: "asc" } },
-        product: true,
-        trader: {
-          select: {
-            id: true,
-            email: true,
-            displayName: true,
-            companyName: true,
-            phone: true,
-            status: true,
-          },
-        },
+      select: {
+        id: true,
+        status: true,
+        proposedPrice: true,
+        currency: true,
+        quantity: true,
+        traderId: true,
+        reference: true,
+        title: true,
       },
     });
   });
+
+  // Notify the trader when admin acts (status center — §3.4).
+  if (input.actorRole === "admin") {
+    const actionLabelAr =
+      input.action === "accept"
+        ? "تم قبول الصفقة"
+        : input.action === "reject"
+          ? "رُفضت الصفقة"
+          : input.action === "close"
+            ? "أُغلقت الصفقة"
+            : input.action === "counter"
+              ? "عرض مقابل من الإدارة"
+              : "تحديث على الصفقة";
+    const actionLabelEn =
+      input.action === "accept"
+        ? "Deal accepted"
+        : input.action === "reject"
+          ? "Deal rejected"
+          : input.action === "close"
+            ? "Deal closed"
+            : input.action === "counter"
+              ? "Admin counter-offer"
+              : "Deal update";
+    const rejectReason =
+      input.action === "reject" ? input.message?.trim() || "" : "";
+    await notifyTrader({
+      traderId: updated.traderId,
+      domain: "deal",
+      titleAr: `${actionLabelAr} · ${updated.reference}`,
+      titleEn: `${actionLabelEn} · ${updated.reference}`,
+      bodyAr: rejectReason
+        ? `${updated.title} — ${rejectReason}`
+        : updated.title,
+      bodyEn: rejectReason
+        ? `${updated.title} — ${rejectReason}`
+        : updated.title,
+      href: `/trader/deals/${updated.id}`,
+    });
+  }
+
+  return { deal: updated, conflictWarnings };
 }
 
 /** Trader-scoped fetch — enforces ownership by session traderId. */

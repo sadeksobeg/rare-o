@@ -4,6 +4,7 @@
  * Uses prefilled wa.me deep links + stored message text only.
  * Does NOT call WhatsApp Business API.
  * Does NOT implement inbox / conversation UI.
+ * Live Baileys/QR linking is implemented via the WhatsApp worker (§09).
  */
 
 import type { HandoffPayload } from "@/lib/retail-request/types";
@@ -28,12 +29,10 @@ export function getWhatsAppBusinessE164(): string {
 }
 
 export function buildHandoffMessageText(payload: HandoffPayload): string {
+  const isAr = payload.locale === "ar";
   const lineBlock = payload.lines
     .map((l) => {
-      const name =
-        payload.locale === "ar"
-          ? l.nameAr || l.nameEn
-          : l.nameEn || l.nameAr;
+      const name = isAr ? l.nameAr || l.nameEn : l.nameEn || l.nameAr;
       return `- ${name} × ${l.qty} (${l.lineTotal} ${l.currency})`;
     })
     .join("\n");
@@ -41,11 +40,30 @@ export function buildHandoffMessageText(payload: HandoffPayload): string {
   const shipping =
     payload.shippingMethodLabel ||
     payload.shippingMethodCode ||
-    "(confirm with team)";
+    (isAr ? "(يُؤكَّد مع الفريق)" : "(confirm with team)");
 
   const notes = payload.customer.notes?.trim()
     ? payload.customer.notes.trim()
-    : "(none)";
+    : isAr
+      ? "(لا ملاحظات)"
+      : "(none)";
+
+  if (isAr) {
+    return [
+      "RARE OUD — تحويل طلب تجزئة",
+      `المرجع: ${payload.reference}`,
+      `العميل: ${payload.customer.name}`,
+      `الهاتف: ${payload.customer.phone}`,
+      `الوجهة: ${payload.destinationCountry}`,
+      `تفضيل الشحن: ${shipping}`,
+      `المجموع الفرعي: ${payload.subtotal} ${payload.currency}`,
+      "البنود:",
+      lineBlock,
+      `ملاحظات: ${notes}`,
+      "",
+      "هذا تحويل طلب — وليس طلباً مدفوعاً عبر الموقع.",
+    ].join("\n");
+  }
 
   return [
     "RARE OUD — Retail request handoff",

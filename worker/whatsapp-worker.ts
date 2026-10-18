@@ -7,9 +7,10 @@
  *   WHATSAPP_AUTH_DIR          Session directory (default: ./.wa-auth)
  *   WHATSAPP_CONNECT_ON_START  "true" to open socket immediately (default: false)
  *   WHATSAPP_OUTBOUND_ENABLED  Kill switch for outbound sends (default: false)
+ *   WHATSAPP_ADAPTER           "baileys" (default) | "fake" (E2E — no phone, no socket)
  *
  * Security:
- * - Do not print QR payloads or session file contents.
+ * - Do not print QR payloads, pairing codes, phone numbers or session file contents.
  * - Do not authenticate a production WhatsApp account until VPS/session
  *   storage is ready. Local default keeps the socket closed until connect.
  *
@@ -17,11 +18,26 @@
  * - On start: recover interrupted `sending` outbound rows.
  * - Drain pending only when CONNECTED + kill switch on.
  * - Kill switch re-checked at dispatch and adapter send boundaries.
+ *
+ * Admin pairing:
+ * - Polls linkCommand (pair | qr | reconnect | logout) every 2s and executes it.
+ * - Pairing code / QR are stored for admin display only (never logged).
+ * - Supervises ERROR state: retries connect periodically when a session exists.
+ * - No broadcast / mass messaging.
  */
 
 import path from "node:path";
 
+import { prisma } from "@/lib/db/prisma";
 import { BaileysWhatsAppAdapter } from "@/lib/whatsapp/baileys-adapter";
+import { createFakeAdapter } from "@/lib/whatsapp/fake-adapter";
+import { WHATSAPP_CONNECTION_HEALTH_ID } from "@/lib/whatsapp/messaging/constants";
+import {
+  buildQrDataUrl,
+  clearPairingDisplay,
+  processLinkCommands,
+  upsertPairingDisplay,
+} from "@/lib/whatsapp/messaging/pairing";
 import {
   dispatchPendingOutbound,
   persistInboundText,
@@ -35,9 +51,17 @@ import {
   hasAuthStateFiles,
   resolveWhatsAppAuthDir,
 } from "@/lib/whatsapp/session-store";
-import { isOutboundEnabled } from "@/lib/whatsapp/types";
+import {
+  isFakeWhatsAppAdapter,
+  isOutboundEnabled,
+  type WhatsAppAdapter,
+  type WhatsAppAdapterEvents,
+} from "@/lib/whatsapp/types";
 
 const OUTBOUND_POLL_MS = 5_000;
+const LINK_COMMAND_POLL_MS = 2_000;
+/** Retry connect while ERROR and a session exists (Baileys exhausted its own backoff). */
+const SUPERVISE_RETRY_MS = 60_000;
 
 function envFlag(name: string, defaultValue = false): boolean {
   const raw = process.env[name]?.trim().toLowerCase();
@@ -54,6 +78,7 @@ function parseArgs(argv: string[]): { connect: boolean } {
 
 async function main(): Promise<void> {
   const { connect } = parseArgs(process.argv.slice(2));
+  const fake = isFakeWhatsAppAdapter();
   const session = createSessionStoreConfig();
   ensureAuthDir(session.authDir);
 
@@ -61,6 +86,7 @@ async function main(): Promise<void> {
     path.relative(process.cwd(), session.authDir) || session.authDir;
 
   console.log("[whatsapp-worker] starting");
+  console.log(`[whatsapp-worker] adapter=${fake ? "fake" : "baileys"}`);
   console.log(`[whatsapp-worker] authDir=${authDirDisplay}`);
   console.log(
     `[whatsapp-worker] authFilesPresent=${hasAuthStateFiles(session.authDir)}`
@@ -85,70 +111,109 @@ async function main(): Promise<void> {
   }
 
   let outboundTimer: ReturnType<typeof setInterval> | null = null;
+  let linkTimer: ReturnType<typeof setInterval> | null = null;
+  let lastSupervisedAt = 0;
+  let pollingLinkCommands = false;
 
-  const adapter = new BaileysWhatsAppAdapter({
-    session,
-    connectOnStart: connect,
-    events: {
-      onHealth: async (health) => {
-        console.log(
-          `[whatsapp-worker] health state=${health.state}` +
-            (health.detail ? ` detail=${health.detail}` : "")
+  const events: WhatsAppAdapterEvents = {
+    onHealth: async (health) => {
+      console.log(
+        `[whatsapp-worker] health state=${health.state}` +
+          (health.detail ? ` detail=${health.detail}` : "")
+      );
+      try {
+        await upsertConnectionHealth(health);
+        // Linked — pairing material is no longer needed
+        if (health.state === "CONNECTED") {
+          await clearPairingDisplay();
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(
+          `[whatsapp-worker] health persist failed: ${message.slice(0, 200)}`
         );
-        try {
-          await upsertConnectionHealth(health);
-        } catch (err) {
-          const message = err instanceof Error ? err.message : String(err);
-          console.error(
-            `[whatsapp-worker] health persist failed: ${message.slice(0, 200)}`
-          );
-        }
-      },
-      onQr: () => {
-        console.log(
-          "[whatsapp-worker] QR event received (payload not printed - use admin channel when wired)"
-        );
-      },
-      onInboundText: async (event) => {
-        try {
-          const result = await persistInboundText(event);
-          if (!result.ok) {
-            console.error(
-              `[whatsapp-worker] inbound persist failed: ${result.error}`
-            );
-            return;
-          }
-          console.log(
-            `[whatsapp-worker] inbound text waMessageId=${event.waMessageId} created=${result.created} chars=${event.text.length}`
-          );
-        } catch (err) {
-          const message = err instanceof Error ? err.message : String(err);
-          console.error(
-            `[whatsapp-worker] inbound handler error: ${message.slice(0, 200)}`
-          );
-        }
-      },
-      onInboundUnsupported: async (event) => {
-        try {
-          const result = await persistUnsupportedInbound(event);
-          if (!result.ok) {
-            console.error(
-              `[whatsapp-worker] unsupported persist failed: ${result.error}`
-            );
-            return;
-          }
-          console.log(
-            `[whatsapp-worker] inbound unsupported waMessageId=${event.waMessageId} kind=${event.kindHint ?? "unknown"} created=${result.created}`
-          );
-        } catch (err) {
-          const message = err instanceof Error ? err.message : String(err);
-          console.error(
-            `[whatsapp-worker] unsupported handler error: ${message.slice(0, 200)}`
-          );
-        }
-      },
+      }
     },
-  });
+    onQr: async ({ qr }) => {
+      // NEVER log QR contents — store for the authorized admin channel only
+      console.log("[whatsapp-worker] QR event received (stored for admin display)");
+      try {
+        const dataUrl = await buildQrDataUrl(qr);
+        if (dataUrl) {
+          await upsertPairingDisplay({ qr: dataUrl });
+        }
+      } catch {
+        console.error("[whatsapp-worker] QR display persist failed");
+      }
+    },
+    onPairingCode: async ({ code, phone }) => {
+      // NEVER log the code or phone
+      console.log(
+        "[whatsapp-worker] pairing code issued (stored for admin display)"
+      );
+      try {
+        await upsertPairingDisplay({ code, phone });
+      } catch {
+        console.error("[whatsapp-worker] pairing display persist failed");
+      }
+    },
+    onInboundText: async (event) => {
+      try {
+        const result = await persistInboundText(event);
+        if (!result.ok) {
+          console.error(
+            `[whatsapp-worker] inbound persist failed: ${result.error}`
+          );
+          return;
+        }
+        console.log(
+          `[whatsapp-worker] inbound text waMessageId=${event.waMessageId} created=${result.created} chars=${event.text.length}`
+        );
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(
+          `[whatsapp-worker] inbound handler error: ${message.slice(0, 200)}`
+        );
+      }
+    },
+    onInboundUnsupported: async (event) => {
+      try {
+        const result = await persistUnsupportedInbound(event);
+        if (!result.ok) {
+          console.error(
+            `[whatsapp-worker] unsupported persist failed: ${result.error}`
+          );
+          return;
+        }
+        console.log(
+          `[whatsapp-worker] inbound unsupported waMessageId=${event.waMessageId} kind=${event.kindHint ?? "unknown"} created=${result.created}`
+        );
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(
+          `[whatsapp-worker] unsupported handler error: ${message.slice(0, 200)}`
+        );
+      }
+    },
+  };
+
+  let fakeConnectOnStart = false;
+  if (fake) {
+    // Fake mode: server actions drive DB state directly — resume it, don't reset it.
+    const row = await prisma.whatsAppConnectionHealth.findUnique({
+      where: { id: WHATSAPP_CONNECTION_HEALTH_ID },
+      select: { state: true },
+    });
+    fakeConnectOnStart = connect || row?.state === "CONNECTED";
+  }
+
+  const adapter: WhatsAppAdapter = fake
+    ? createFakeAdapter(events, { connectOnStart: fakeConnectOnStart })
+    : new BaileysWhatsAppAdapter({
+        session,
+        connectOnStart: connect,
+        events,
+      });
 
   const drainOutbound = async () => {
     if (!isOutboundEnabled()) return;
@@ -171,13 +236,54 @@ async function main(): Promise<void> {
     }
   };
 
+  /** Poll admin link commands + supervise stuck ERROR state. */
+  const pollLinkCommands = async () => {
+    if (pollingLinkCommands) return;
+    pollingLinkCommands = true;
+    try {
+      const result = await processLinkCommands(adapter);
+      if (result.processed) {
+        console.log(
+          `[whatsapp-worker] link command=${result.command} ok=${result.ok}` +
+            (result.ok ? "" : ` error=${result.error ?? "unknown"}`)
+        );
+        return;
+      }
+
+      // Supervisor: Baileys gave up reconnecting but a session still exists
+      if (
+        !fake &&
+        connect &&
+        adapter.getHealth().state === "ERROR" &&
+        hasAuthStateFiles(session.authDir) &&
+        Date.now() - lastSupervisedAt >= SUPERVISE_RETRY_MS
+      ) {
+        lastSupervisedAt = Date.now();
+        console.log("[whatsapp-worker] supervisor retrying connect");
+        await adapter.requestAuthentication();
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(
+        `[whatsapp-worker] link poll error: ${message.slice(0, 200)}`
+      );
+    } finally {
+      pollingLinkCommands = false;
+    }
+  };
+
   outboundTimer = setInterval(() => {
     void drainOutbound();
   }, OUTBOUND_POLL_MS);
 
+  linkTimer = setInterval(() => {
+    void pollLinkCommands();
+  }, LINK_COMMAND_POLL_MS);
+
   const shutdown = async (signal: string) => {
     console.log(`[whatsapp-worker] ${signal} - stopping`);
     if (outboundTimer) clearInterval(outboundTimer);
+    if (linkTimer) clearInterval(linkTimer);
     await adapter.stop();
     process.exit(0);
   };
@@ -188,9 +294,9 @@ async function main(): Promise<void> {
   await adapter.start();
   void drainOutbound();
 
-  if (!connect) {
+  if (!connect && !fake) {
     console.log(
-      "[whatsapp-worker] idle (socket not opened). Pass --connect or set WHATSAPP_CONNECT_ON_START=true when ready."
+      "[whatsapp-worker] idle (socket not opened). Pass --connect or set WHATSAPP_CONNECT_ON_START=true when ready, or use admin Link account."
     );
   }
 

@@ -96,6 +96,24 @@ export default async function AdminWholesaleDetailPage({
             {request.traderNotes || "—"}
           </span>
         </DetailItem>
+        <DetailItem label={u.form.carrier}>
+          {request.carrier || "—"}
+        </DetailItem>
+        <DetailItem label={u.form.trackingReference}>
+          {request.trackingReference ? (
+            <span dir="ltr">{request.trackingReference}</span>
+          ) : (
+            "—"
+          )}
+        </DetailItem>
+        <DetailItem label={u.form.shippingTitle}>
+          {request.shippedAt
+            ? formatDate(request.shippedAt, locale, {
+                dateStyle: "medium",
+                timeStyle: "short",
+              })
+            : "—"}
+        </DetailItem>
       </DetailList>
 
       <DetailSection title={d.linesSnapshot}>

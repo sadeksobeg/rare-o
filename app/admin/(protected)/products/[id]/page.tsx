@@ -33,6 +33,7 @@ export default async function EditProductPage({
           altAr: img.altAr,
           altEn: img.altEn,
           sortOrder: img.sortOrder,
+          kind: img.kind,
         }))}
         dict={dict.admin}
       />
@@ -52,12 +53,13 @@ export default async function EditProductPage({
           specsTextAr: product.specsTextAr,
           specsTextEn: product.specsTextEn,
           categoryId: product.categoryId,
-          retailPrice: String(product.retailPrice),
+          retailPrice:
+            product.retailPrice != null ? String(product.retailPrice) : "",
           compareAtPrice:
             product.compareAtPrice != null
               ? String(product.compareAtPrice)
               : "",
-          currency: product.currency,
+          currency: product.currency ?? "",
           status: product.status,
           availability: product.availability,
           wholesaleEligible: product.wholesaleEligible,

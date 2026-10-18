@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useTransition } from "react";
 import { cn } from "@/lib/utils";
 
 export type ListFilterTab = {
@@ -10,7 +10,7 @@ export type ListFilterTab = {
   count?: number;
 };
 
-/** URL-driven underline tabs for trader deal / wholesale lists (TR-03 / TR-07). */
+/** Interactive segmented tabs — pending feedback + selected pill. */
 export function ListFilterTabs({
   tabs,
   param = "tab",
@@ -21,43 +21,62 @@ export function ListFilterTabs({
   label: string;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const [pending, startTransition] = useTransition();
   const active = searchParams.get(param) || tabs[0]?.id || "all";
 
   return (
     <div
       role="tablist"
       aria-label={label}
-      className="flex gap-1 overflow-x-auto overscroll-x-contain border-b border-ro-border pb-px [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      aria-busy={pending || undefined}
+      className={cn(
+        "ro-portal-tablist flex gap-1 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        pending && "opacity-75"
+      )}
     >
       {tabs.map((tab) => {
         const selected = tab.id === active;
-        const next = new URLSearchParams(searchParams.toString());
-        if (tab.id === "all" || tab.id === tabs[0]?.id) next.delete(param);
-        else next.set(param, tab.id);
-        const qs = next.toString();
-        const href = qs ? `${pathname}?${qs}` : pathname;
         return (
-          <Link
+          <button
             key={tab.id}
-            href={href}
+            type="button"
             role="tab"
             aria-selected={selected}
-            scroll={false}
             className={cn(
-              "inline-flex h-11 shrink-0 items-center gap-1.5 border-b-2 px-3 text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]",
+              "inline-flex h-10 shrink-0 items-center gap-1.5 px-3 text-sm transition-[color,background-color,box-shadow,transform] duration-[var(--ro-dur-fast)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)] active:scale-[0.98]",
               selected
-                ? "border-[var(--ro-plum-900)] font-semibold text-ro-ink"
-                : "border-transparent text-ro-text-2 hover:text-ro-ink"
+                ? "font-semibold text-[var(--ro-plum-900)]"
+                : "text-ro-text-2 hover:text-[var(--ro-plum-800)]"
             )}
+            onClick={() => {
+              if (selected) return;
+              const next = new URLSearchParams(searchParams.toString());
+              if (tab.id === "all" || tab.id === tabs[0]?.id) next.delete(param);
+              else next.set(param, tab.id);
+              next.delete("page");
+              const qs = next.toString();
+              const href = qs ? `${pathname}?${qs}` : pathname;
+              startTransition(() => {
+                router.replace(href, { scroll: false });
+              });
+            }}
           >
             {tab.label}
             {tab.count != null ? (
-              <span className="tabular-nums text-xs text-ro-muted">
-                ({tab.count})
+              <span
+                className={cn(
+                  "rounded-full px-1.5 py-0.5 text-[0.65rem] tabular-nums",
+                  selected
+                    ? "bg-[var(--ro-plum-100)] text-[var(--ro-plum-900)]"
+                    : "bg-ro-sunken text-ro-muted"
+                )}
+              >
+                {tab.count}
               </span>
             ) : null}
-          </Link>
+          </button>
         );
       })}
     </div>

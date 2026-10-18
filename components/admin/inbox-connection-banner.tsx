@@ -46,7 +46,7 @@ export function InboxConnectionBanner({
     message = i.authRequired;
     action = (
       <Link
-        href="/admin/inbox"
+        href="/admin/inbox#whatsapp-link-account"
         className="text-sm font-semibold underline-offset-2 hover:underline"
       >
         {i.linkAccount}
@@ -57,7 +57,7 @@ export function InboxConnectionBanner({
     message = i.error;
     action = (
       <Link
-        href="/admin/inbox"
+        href="/admin/inbox#whatsapp-link-account"
         className="text-sm font-semibold underline-offset-2 hover:underline"
       >
         {i.reconnect}
@@ -69,7 +69,7 @@ export function InboxConnectionBanner({
     message = i.disconnected;
     action = (
       <Link
-        href="/admin/inbox"
+        href="/admin/inbox#whatsapp-link-account"
         className="text-sm font-semibold underline-offset-2 hover:underline"
       >
         {i.reconnect}

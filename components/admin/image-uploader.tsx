@@ -12,12 +12,13 @@ import {
 import { Button } from "@/components/ui/button";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
-type ImageRow = {
+type MediaRow = {
   id: string;
   path: string;
   altAr: string;
   altEn: string;
   sortOrder: number;
+  kind?: string;
 };
 
 const initial: ActionResult | null = null;
@@ -43,7 +44,7 @@ export function ImageUploader({
   dict,
 }: {
   productId: string;
-  images: ImageRow[];
+  images: MediaRow[];
   dict: Dictionary["admin"];
 }) {
   const [state, action, pending] = useActionState(
@@ -53,9 +54,11 @@ export function ImageUploader({
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <section className="space-y-4 border border-ro-line p-4">
+    <section className="ro-portal-card space-y-4 border p-4 sm:p-5">
       <div>
-        <h2 className="text-lg font-semibold">{dict.imagesTitle}</h2>
+        <h2 className="font-display text-lg font-semibold text-ro-ink">
+          {dict.imagesTitle}
+        </h2>
         <p className="mt-1 text-xs text-ro-muted">{dict.imagesLimits}</p>
       </div>
 
@@ -63,94 +66,112 @@ export function ImageUploader({
         <p className="text-sm text-ro-muted">{dict.imagesEmpty}</p>
       ) : (
         <ul className="space-y-4">
-          {images.map((img, index) => (
-            <li
-              key={img.id}
-              className="flex flex-col gap-3 border border-ro-line p-3 sm:flex-row"
-            >
-              <div className="relative size-24 shrink-0 overflow-hidden bg-ro-sunken">
-                <Image
-                  src={img.path}
-                  alt={img.altAr || img.altEn || ""}
-                  fill
-                  sizes="96px"
-                  className="object-cover"
-                />
-                {index === 0 ? (
-                  <span className="absolute start-1 top-1 bg-ro-ink px-1.5 py-0.5 text-[10px] text-ro-canvas">
-                    {dict.imagesPrimary}
-                  </span>
-                ) : null}
-              </div>
-              <div className="min-w-0 flex-1 space-y-2">
-                <form
-                  action={updateProductImageAltsAction}
-                  className="grid gap-2 sm:grid-cols-2"
-                >
-                  <input type="hidden" name="imageId" value={img.id} />
-                  <input type="hidden" name="productId" value={productId} />
-                  <label className="block space-y-1 text-xs">
-                    <span>{dict.imagesAltAr}</span>
-                    <input
-                      name="altAr"
-                      defaultValue={img.altAr}
-                      className="w-full border border-ro-line bg-transparent px-2 py-1.5 text-sm"
+          {images.map((img, index) => {
+            const isVideo = img.kind === "video";
+            return (
+              <li
+                key={img.id}
+                className="flex flex-col gap-3 border border-ro-line p-3 sm:flex-row"
+              >
+                <div className="relative size-24 shrink-0 overflow-hidden bg-ro-sunken">
+                  {isVideo ? (
+                    <video
+                      src={img.path}
+                      className="size-full object-cover"
+                      muted
+                      playsInline
+                      preload="metadata"
                     />
-                  </label>
-                  <label className="block space-y-1 text-xs">
-                    <span>{dict.imagesAltEn}</span>
-                    <input
-                      name="altEn"
-                      defaultValue={img.altEn}
-                      className="w-full border border-ro-line bg-transparent px-2 py-1.5 text-sm"
+                  ) : (
+                    <Image
+                      src={img.path}
+                      alt={img.altAr || img.altEn || ""}
+                      fill
+                      sizes="96px"
+                      className="object-cover"
                     />
-                  </label>
-                  <div className="sm:col-span-2">
-                    <Button type="submit" variant="quiet" size="sm">
-                      {dict.edit}
-                    </Button>
-                  </div>
-                </form>
-                <div className="flex flex-wrap gap-2">
-                  <form action={reorderProductImageAction}>
-                    <input type="hidden" name="imageId" value={img.id} />
-                    <input type="hidden" name="productId" value={productId} />
-                    <input type="hidden" name="direction" value="earlier" />
-                    <Button
-                      type="submit"
-                      variant="secondary"
-                      size="sm"
-                      disabled={index === 0}
-                      aria-label={dict.imagesMoveEarlier}
-                    >
-                      ↑
-                    </Button>
-                  </form>
-                  <form action={reorderProductImageAction}>
-                    <input type="hidden" name="imageId" value={img.id} />
-                    <input type="hidden" name="productId" value={productId} />
-                    <input type="hidden" name="direction" value="later" />
-                    <Button
-                      type="submit"
-                      variant="secondary"
-                      size="sm"
-                      disabled={index === images.length - 1}
-                      aria-label={dict.imagesMoveLater}
-                    >
-                      ↓
-                    </Button>
-                  </form>
-                  <form action={removeProductImageAction}>
-                    <input type="hidden" name="imageId" value={img.id} />
-                    <input type="hidden" name="productId" value={productId} />
-                    <Button type="submit" variant="danger" size="sm">
-                      {dict.imagesRemove}
-                    </Button>
-                  </form>
+                  )}
+                  {index === 0 ? (
+                    <span className="absolute start-1 top-1 bg-ro-ink px-1.5 py-0.5 text-[10px] text-ro-canvas">
+                      {dict.imagesPrimary}
+                    </span>
+                  ) : null}
+                  {isVideo ? (
+                    <span className="absolute end-1 bottom-1 bg-[var(--ro-plum-900)] px-1.5 py-0.5 text-[10px] text-[var(--ro-sand-50)]">
+                      {dict.imagesKindVideo}
+                    </span>
+                  ) : null}
                 </div>
-              </div>
-            </li>
-          ))}
+                <div className="min-w-0 flex-1 space-y-2">
+                  <form
+                    action={updateProductImageAltsAction}
+                    className="grid gap-2 sm:grid-cols-2"
+                  >
+                    <input type="hidden" name="imageId" value={img.id} />
+                    <input type="hidden" name="productId" value={productId} />
+                    <label className="block space-y-1 text-xs">
+                      <span>{dict.imagesAltAr}</span>
+                      <input
+                        name="altAr"
+                        defaultValue={img.altAr}
+                        className="w-full border border-ro-line bg-transparent px-2 py-1.5 text-sm"
+                      />
+                    </label>
+                    <label className="block space-y-1 text-xs">
+                      <span>{dict.imagesAltEn}</span>
+                      <input
+                        name="altEn"
+                        defaultValue={img.altEn}
+                        className="w-full border border-ro-line bg-transparent px-2 py-1.5 text-sm"
+                      />
+                    </label>
+                    <div className="sm:col-span-2">
+                      <Button type="submit" variant="quiet" size="sm">
+                        {dict.edit}
+                      </Button>
+                    </div>
+                  </form>
+                  <div className="flex flex-wrap gap-2">
+                    <form action={reorderProductImageAction}>
+                      <input type="hidden" name="imageId" value={img.id} />
+                      <input type="hidden" name="productId" value={productId} />
+                      <input type="hidden" name="direction" value="earlier" />
+                      <Button
+                        type="submit"
+                        variant="secondary"
+                        size="sm"
+                        disabled={index === 0}
+                        aria-label={dict.imagesMoveEarlier}
+                      >
+                        ↑
+                      </Button>
+                    </form>
+                    <form action={reorderProductImageAction}>
+                      <input type="hidden" name="imageId" value={img.id} />
+                      <input type="hidden" name="productId" value={productId} />
+                      <input type="hidden" name="direction" value="later" />
+                      <Button
+                        type="submit"
+                        variant="secondary"
+                        size="sm"
+                        disabled={index === images.length - 1}
+                        aria-label={dict.imagesMoveLater}
+                      >
+                        ↓
+                      </Button>
+                    </form>
+                    <form action={removeProductImageAction}>
+                      <input type="hidden" name="imageId" value={img.id} />
+                      <input type="hidden" name="productId" value={productId} />
+                      <Button type="submit" variant="danger" size="sm">
+                        {dict.imagesRemove}
+                      </Button>
+                    </form>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
 
@@ -172,14 +193,17 @@ export function ImageUploader({
             />
           </label>
         </div>
-        <input
-          ref={inputRef}
-          type="file"
-          name="file"
-          accept="image/jpeg,image/png,image/webp"
-          required
-          className="block w-full text-sm"
-        />
+        <label className="block space-y-1 text-sm">
+          <span className="font-medium">{dict.imagesFileLabel}</span>
+          <input
+            ref={inputRef}
+            type="file"
+            name="file"
+            accept="image/jpeg,image/png,image/webp,video/mp4,video/webm"
+            required
+            className="mt-1 block w-full text-sm"
+          />
+        </label>
         <Button type="submit" variant="primary" size="sm" loading={pending}>
           {pending ? dict.imagesUploading : dict.imagesAdd}
         </Button>

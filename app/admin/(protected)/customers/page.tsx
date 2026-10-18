@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   DataTable,
   DataTableHead,
@@ -77,6 +78,7 @@ export default async function AdminCustomersPage({
             <Th>{u.colRequests}</Th>
             <Th>{u.colLastRequest}</Th>
             <Th>{u.colCreated}</Th>
+            <Th />
           </DataTableHead>
           <tbody>
             {customers.map((c) => {
@@ -102,6 +104,14 @@ export default async function AdminCustomersPage({
                   </Td>
                   <Td className="text-ro-muted">
                     {formatDate(c.createdAt, locale, { dateStyle: "medium" })}
+                  </Td>
+                  <Td>
+                    <Link
+                      href={`/admin/customers/${c.id}`}
+                      className="text-ro-plum hover:underline"
+                    >
+                      {u.actionView}
+                    </Link>
                   </Td>
                 </Tr>
               );

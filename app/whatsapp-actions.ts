@@ -12,6 +12,14 @@ import {
   markConversationRead,
 } from "@/lib/whatsapp/messaging/inbox";
 import { enqueueOutboundText } from "@/lib/whatsapp/messaging/service";
+import {
+  applyFakeLogout,
+  applyFakePairing,
+  applyFakeReconnect,
+  normalizePairingPhone,
+  setLinkCommand,
+} from "@/lib/whatsapp/messaging/pairing";
+import { isFakeWhatsAppAdapter } from "@/lib/whatsapp/types";
 import { MAX_OUTBOUND_TEXT_LENGTH } from "@/lib/whatsapp/messaging/constants";
 import {
   clearConversationBusinessLink,
@@ -383,4 +391,68 @@ export async function adminSearchLinkableRecordsAction(
       linkType: "wholesale_request" as const,
     })),
   };
+}
+
+/**
+ * Admin WhatsApp account linking (pairing).
+ * Fake mode (WHATSAPP_ADAPTER=fake) mutates the DB directly — no worker needed.
+ * Real mode queues a linkCommand the worker polls and executes.
+ * Never broadcasts; pairs a single account only.
+ */
+export async function adminRequestWhatsAppPairingAction(
+  phone: string,
+  wantQr = false
+): Promise<ActionResult> {
+  try {
+    await requireAdminSession();
+  } catch {
+    return { ok: false, error: "UNAUTHORIZED" };
+  }
+
+  const digits = normalizePairingPhone(String(phone ?? ""));
+  if (!digits) return { ok: false, error: "INVALID_PHONE" };
+
+  if (isFakeWhatsAppAdapter()) {
+    const res = await applyFakePairing(digits, Boolean(wantQr));
+    if (!res.ok) return { ok: false, error: res.error };
+  } else {
+    await setLinkCommand(wantQr ? "qr" : "pair", digits);
+  }
+
+  revalidatePath("/admin/inbox");
+  return { ok: true };
+}
+
+export async function adminWhatsAppReconnectAction(): Promise<ActionResult> {
+  try {
+    await requireAdminSession();
+  } catch {
+    return { ok: false, error: "UNAUTHORIZED" };
+  }
+
+  if (isFakeWhatsAppAdapter()) {
+    await applyFakeReconnect();
+  } else {
+    await setLinkCommand("reconnect");
+  }
+
+  revalidatePath("/admin/inbox");
+  return { ok: true };
+}
+
+export async function adminWhatsAppLogoutAction(): Promise<ActionResult> {
+  try {
+    await requireAdminSession();
+  } catch {
+    return { ok: false, error: "UNAUTHORIZED" };
+  }
+
+  if (isFakeWhatsAppAdapter()) {
+    await applyFakeLogout();
+  } else {
+    await setLinkCommand("logout");
+  }
+
+  revalidatePath("/admin/inbox");
+  return { ok: true };
 }

@@ -23,16 +23,13 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center px-6 py-16 text-center",
+        "ro-portal-card flex flex-col items-center border px-6 py-16 text-center",
         className
       )}
       data-variant={variant}
     >
-      <Rings
-        className="mb-6 size-24 text-ro-ink opacity-[0.28]"
-        idle
-      />
-      <h3 className="text-lg font-semibold text-ro-ink">{title}</h3>
+      <Rings className="mb-6 size-24 text-[var(--ro-plum-800)] opacity-[0.38]" idle />
+      <h3 className="font-display text-xl font-semibold text-ro-ink">{title}</h3>
       {body ? (
         <p className="mt-2 line-clamp-2 max-w-md text-sm text-ro-text-2">
           {body}

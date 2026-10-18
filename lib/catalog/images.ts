@@ -5,20 +5,61 @@ import { randomBytes } from "node:crypto";
 import { prisma } from "@/lib/db/prisma";
 import { probeImageDimensions } from "@/lib/catalog/image-dimensions";
 
-const MAX_IMAGES = 8;
-const MAX_BYTES = 8 * 1024 * 1024;
+const MAX_MEDIA = 8;
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+const MAX_VIDEO_BYTES = 48 * 1024 * 1024;
 const MIN_LONG_SIDE = 1600;
-const ALLOWED = new Set([
+
+const ALLOWED_IMAGE = new Set([
   "image/jpeg",
   "image/png",
   "image/webp",
 ]);
 
+const ALLOWED_VIDEO = new Set(["video/mp4", "video/webm"]);
+
 const EXT: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/png": "png",
   "image/webp": "webp",
+  "video/mp4": "mp4",
+  "video/webm": "webm",
 };
+
+/** Magic-byte sniff — do not trust client MIME alone. */
+function detectMediaMagic(buf: Buffer): "image" | "video" | null {
+  if (buf.length < 12) return null;
+  // JPEG
+  if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return "image";
+  // PNG
+  if (
+    buf[0] === 0x89 &&
+    buf[1] === 0x50 &&
+    buf[2] === 0x4e &&
+    buf[3] === 0x47
+  ) {
+    return "image";
+  }
+  // WEBP: RIFF....WEBP
+  if (
+    buf.toString("ascii", 0, 4) === "RIFF" &&
+    buf.toString("ascii", 8, 12) === "WEBP"
+  ) {
+    return "image";
+  }
+  // MP4 / ISO BMFF: ....ftyp
+  if (buf.toString("ascii", 4, 8) === "ftyp") return "video";
+  // WebM / Matroska EBML
+  if (
+    buf[0] === 0x1a &&
+    buf[1] === 0x45 &&
+    buf[2] === 0xdf &&
+    buf[3] === 0xa3
+  ) {
+    return "video";
+  }
+  return null;
+}
 
 export type ImageActionError =
   | "TYPE"
@@ -50,18 +91,30 @@ export async function attachProductImage(input: {
     select: { id: true, _count: { select: { images: true } } },
   });
   if (!product) return { ok: false, error: "NOT_FOUND" };
-  if (product._count.images >= MAX_IMAGES) {
+  if (product._count.images >= MAX_MEDIA) {
     return { ok: false, error: "MAX" };
   }
 
   const type = input.file.type;
-  if (!ALLOWED.has(type)) return { ok: false, error: "TYPE" };
-  if (input.file.size > MAX_BYTES) return { ok: false, error: "SIZE" };
+  const isImage = ALLOWED_IMAGE.has(type);
+  const isVideo = ALLOWED_VIDEO.has(type);
+  if (!isImage && !isVideo) return { ok: false, error: "TYPE" };
+
+  const maxBytes = isVideo ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
+  if (input.file.size > maxBytes) return { ok: false, error: "SIZE" };
 
   const buf = Buffer.from(await input.file.arrayBuffer());
-  const dims = probeImageDimensions(buf);
-  if (!dims || Math.max(dims.width, dims.height) < MIN_LONG_SIDE) {
-    return { ok: false, error: "DIM" };
+
+  const magicKind = detectMediaMagic(buf);
+  if (!magicKind) return { ok: false, error: "TYPE" };
+  if (isImage && magicKind !== "image") return { ok: false, error: "TYPE" };
+  if (isVideo && magicKind !== "video") return { ok: false, error: "TYPE" };
+
+  if (isImage) {
+    const dims = probeImageDimensions(buf);
+    if (!dims || Math.max(dims.width, dims.height) < MIN_LONG_SIDE) {
+      return { ok: false, error: "DIM" };
+    }
   }
 
   const ext = EXT[type] ?? "bin";
@@ -83,7 +136,7 @@ export async function attachProductImage(input: {
       altAr: input.altAr?.trim() || "",
       altEn: input.altEn?.trim() || "",
       sortOrder: (maxSort._max.sortOrder ?? -1) + 1,
-      kind: "image",
+      kind: isVideo ? "video" : "image",
     },
   });
 

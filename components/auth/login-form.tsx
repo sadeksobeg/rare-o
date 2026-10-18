@@ -47,6 +47,7 @@ export function LoginForm({
   const errorText =
     state && !state.ok
       ? state.error === "LOGIN_INVALID" ||
+        state.error === "LOGIN_LOCKED" ||
         state.error === "Invalid email or password"
         ? (loginErrorLabel ?? state.error)
         : state.error

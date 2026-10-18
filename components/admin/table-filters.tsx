@@ -58,6 +58,7 @@ function AdminSearchField({
         const value = String(data.get("q") ?? "").trim();
         if (value) next.set("q", value);
         else next.delete("q");
+        next.delete("page");
         const qs = next.toString();
         router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
       }}

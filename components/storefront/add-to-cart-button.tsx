@@ -21,7 +21,7 @@ export function AddToCartButton({
   slug: string;
   name: string;
   price: number;
-  currency: string;
+  currency: string | null;
   imagePath?: string | null;
   label: string;
   /** `pdp`: full-width primary button that confirms with `addedLabel` for 1.5 s. */
@@ -46,7 +46,7 @@ export function AddToCartButton({
       slug,
       name,
       price,
-      currency,
+      currency: currency ?? "",
       quantity: 1,
       imagePath: imagePath ?? null,
     });

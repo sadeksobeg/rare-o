@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Plus } from "lucide-react";
 import { DealCard } from "@/components/trader/deal-card";
+import { TraderPageHeader } from "@/components/trader/page-header";
+import { ButtonLink } from "@/components/ui/button";
 import { ListFilterTabs } from "@/components/ui/list-filter-tabs";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusChip } from "@/components/ui/status-chip";
@@ -61,18 +63,21 @@ export default async function TraderWholesaleRequestsPage({
   });
 
   return (
-    <section className="relative space-y-6 pb-20 md:pb-0">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <h1 className="font-display text-3xl font-semibold tracking-tight">
-          {t.wsMyRequests}
-        </h1>
-        <Link
-          href="/trader/wholesale"
-          className="hidden min-h-11 items-center bg-ro-ink px-4 text-sm font-semibold text-ro-canvas md:inline-flex"
-        >
-          {t.wsNewRequest}
-        </Link>
-      </div>
+    <section className="ro-portal-stagger relative space-y-6 p-5 pb-20 sm:p-8 md:p-10 md:pb-10">
+      <TraderPageHeader
+        title={t.wsMyRequests}
+        action={
+          <ButtonLink
+            href="/trader/wholesale"
+            variant="primary"
+            size="sm"
+            className="hidden md:inline-flex"
+          >
+            <Plus className="size-4" aria-hidden />
+            {t.wsNewRequest}
+          </ButtonLink>
+        }
+      />
 
       <Suspense fallback={null}>
         <ListFilterTabs
@@ -166,7 +171,7 @@ export default async function TraderWholesaleRequestsPage({
       <Link
         href="/trader/wholesale"
         aria-label={t.wsNewRequest}
-        className="fixed bottom-20 end-4 z-30 inline-flex size-14 items-center justify-center rounded-full bg-ro-ink text-ro-canvas shadow-[0_8px_24px_rgba(11,8,13,0.28)] md:hidden"
+        className="fixed bottom-20 end-4 z-30 inline-flex size-14 items-center justify-center rounded-full bg-[linear-gradient(165deg,var(--ro-plum-700),var(--ro-plum-900))] text-[var(--ro-sand-100)] shadow-[0_12px_32px_-8px_color-mix(in_srgb,var(--ro-plum-900)_70%,transparent)] transition-transform duration-[var(--ro-dur-fast)] hover:scale-105 active:scale-95 md:hidden"
       >
         <Plus className="size-6" aria-hidden />
       </Link>

@@ -6,6 +6,7 @@ import { Banner } from "@/components/ui/banner";
 import { Wizard } from "@/components/ui/wizard";
 import type { Locale } from "@/lib/i18n/config";
 import { fmt, type TraderDict } from "@/lib/ui/trader-labels";
+import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 
 const initial: ActionResult | null = null;
@@ -60,6 +61,7 @@ export function NewDealForm({
   labels: TraderDict;
   locale: Locale;
 }) {
+  const router = useRouter();
   const [state, action, pending] = useActionState(
     traderCreateDealAction,
     initial
@@ -67,7 +69,21 @@ export function NewDealForm({
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [hydrated, setHydrated] = useState(false);
   const [stepError, setStepError] = useState<string | null>(null);
+  const [navigating, setNavigating] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (!state?.ok || !state.data || typeof state.data !== "object") return;
+    const id = (state.data as { id?: string }).id;
+    if (!id || navigating) return;
+    setNavigating(true);
+    try {
+      sessionStorage.removeItem(DRAFT_KEY);
+    } catch {
+      /* ignore */
+    }
+    router.push(`/trader/deals/${id}`);
+  }, [state, router, navigating]);
 
   const steps = useMemo(
     () => [
@@ -207,10 +223,10 @@ export function NewDealForm({
           draft.step === steps.length - 1 ? (
             <button
               type="submit"
-              disabled={pending}
+              disabled={pending || navigating}
               className="min-h-11 bg-ro-purple px-5 text-sm text-ro-ivory disabled:opacity-60"
             >
-              {pending ? t.submitting : t.submitProposal}
+              {pending || navigating ? t.submitting : t.submitProposal}
             </button>
           ) : null
         }

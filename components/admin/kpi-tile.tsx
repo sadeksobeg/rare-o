@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
+import { AnimatedValue } from "@/components/portal/animated-value";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
-/** A05 — label, big tabular number, link to filtered list; loading / zero / populated. */
+/** A05 — interactive KPI tile with count-up and press feedback. */
 export function KpiTile({
   label,
   value,
@@ -14,7 +16,6 @@ export function KpiTile({
   label: string;
   value: number;
   href: string;
-  /** Zero-state copy — e.g. لا شيء بانتظارك (success tone). */
   idleLabel: string;
   loading?: boolean;
   className?: string;
@@ -22,10 +23,7 @@ export function KpiTile({
   if (loading) {
     return (
       <div
-        className={cn(
-          "border border-ro-border bg-ro-paper p-4",
-          className
-        )}
+        className={cn("ro-portal-kpi border border-ro-border p-4", className)}
         aria-busy="true"
         aria-label={label}
       >
@@ -39,18 +37,24 @@ export function KpiTile({
     <Link
       href={href}
       className={cn(
-        "block border border-ro-border bg-ro-paper p-4 transition-colors duration-[var(--ro-dur-fast)] hover:border-ro-ink/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]",
+        "ro-portal-kpi group block border p-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]",
         className
       )}
     >
-      <p className="text-xs text-ro-muted">{label}</p>
+      <div className="flex items-start justify-between gap-2">
+        <p className="ro-type-overline text-[var(--ro-plum-800)]">{label}</p>
+        <ChevronLeft
+          className="size-4 shrink-0 text-[var(--ro-plum-800)] opacity-0 transition-[opacity,transform] duration-[var(--ro-dur-fast)] group-hover:translate-x-[-2px] group-hover:opacity-100 rtl:rotate-180 rtl:group-hover:translate-x-[2px]"
+          aria-hidden
+        />
+      </div>
       {value === 0 ? (
-        <p className="mt-2 text-sm font-medium text-[var(--ro-success-700)]">
+        <p className="mt-3 text-sm font-medium text-[var(--ro-success-700)]">
           {idleLabel}
         </p>
       ) : (
-        <p className="mt-2 text-[28px] font-semibold tabular-nums leading-none text-ro-ink">
-          {value}
+        <p className="mt-3 font-display text-[2rem] font-semibold leading-none text-ro-ink">
+          <AnimatedValue value={value} />
         </p>
       )}
     </Link>

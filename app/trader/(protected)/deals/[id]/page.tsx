@@ -66,6 +66,24 @@ export default async function TraderDealDetailPage({
         <Banner tone="info">{t.dealWaitingAdmin}</Banner>
       ) : null}
 
+      {deal.status === "rejected"
+        ? (() => {
+            const rejectEntry = [...deal.entries]
+              .reverse()
+              .find((e) => e.action === "reject");
+            const reason = rejectEntry?.message?.trim();
+            return (
+              <div data-reject-reason={reason ? "1" : "0"}>
+                <Banner tone="danger">
+                  {reason
+                    ? fmt(t.dealRejectedWithReason, { reason })
+                    : t.dealRejected}
+                </Banner>
+              </div>
+            );
+          })()
+        : null}
+
       <dl className="grid gap-3 text-sm md:grid-cols-2">
         <div>
           <dt className="text-ro-muted">{t.dealProduct}</dt>

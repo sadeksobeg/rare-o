@@ -1,0 +1,101 @@
+import Link from "next/link";
+import {
+  traderMarkAllNotificationsReadAction,
+  traderMarkNotificationReadAction,
+} from "@/app/trader-portal-actions";
+import { TraderPageHeader } from "@/components/trader/page-header";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { requireTraderSession } from "@/lib/auth/trader-session";
+import { formatRelative } from "@/lib/i18n/format";
+import { getRequestDictionary } from "@/lib/i18n/server";
+import {
+  listTraderNotifications,
+} from "@/lib/trader/notifications";
+import { cn } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
+
+export default async function TraderNotificationsPage() {
+  const session = await requireTraderSession();
+  const { locale, dict } = await getRequestDictionary();
+  const t = dict.trader;
+  const items = await listTraderNotifications(session.sub, 50);
+  const unread = items.filter((n) => !n.readAt).length;
+
+  return (
+    <section className="space-y-8 p-5 sm:p-8 md:p-10">
+      <TraderPageHeader
+        title={t.notificationsTitle}
+        description={t.notificationsLead}
+        action={
+          unread > 0 ? (
+            <form action={traderMarkAllNotificationsReadAction}>
+              <Button type="submit" variant="secondary" size="sm">
+                {t.notificationsMarkAll}
+              </Button>
+            </form>
+          ) : null
+        }
+      />
+
+      {items.length === 0 ? (
+        <EmptyState
+          title={t.notificationsEmpty}
+          body={t.notificationsEmptyBody}
+          actionHref="/trader"
+          actionLabel={t.overview}
+        />
+      ) : (
+        <ul className="ro-portal-card divide-y divide-ro-border border overflow-hidden">
+          {items.map((n) => {
+            const title = locale === "ar" ? n.titleAr : n.titleEn;
+            const body = locale === "ar" ? n.bodyAr : n.bodyEn;
+            const unreadRow = !n.readAt;
+            return (
+              <li key={n.id}>
+                <div
+                  className={cn(
+                    "flex flex-wrap items-start gap-3 px-4 py-3.5",
+                    unreadRow &&
+                      "bg-[color-mix(in_srgb,var(--ro-plum-50)_55%,transparent)]"
+                  )}
+                >
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <p className="font-semibold text-ro-ink">{title}</p>
+                    {body ? (
+                      <p className="text-sm text-ro-muted">{body}</p>
+                    ) : null}
+                    <p className="text-xs text-ro-muted">
+                      {formatRelative(n.createdAt, locale)}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 flex-wrap items-center gap-2">
+                    <Link
+                      href={n.href}
+                      className="text-sm font-semibold text-ro-plum hover:underline"
+                    >
+                      {t.notificationsOpen}
+                    </Link>
+                    {unreadRow ? (
+                      <form action={traderMarkNotificationReadAction}>
+                        <input
+                          type="hidden"
+                          name="notificationId"
+                          value={n.id}
+                        />
+                        <Button type="submit" variant="quiet" size="sm">
+                          {t.notificationsMarkRead}
+                        </Button>
+                      </form>
+                    ) : null}
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}

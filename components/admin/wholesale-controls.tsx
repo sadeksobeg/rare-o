@@ -3,6 +3,7 @@
 import {
   adminProvideWholesaleQuoteAction,
   adminTransitionWholesaleAction,
+  adminUpdateWholesaleShippingAction,
 } from "@/app/wholesale-actions";
 import { Button } from "@/components/ui/button";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -171,6 +172,43 @@ export function AdminWholesaleControls({
             loading={pending}
           >
             {f.saveQuote}
+          </Button>
+        </form>
+      ) : null}
+
+      {(status === "confirmed" || status === "completed") ? (
+        <form
+          className="space-y-3 border-t border-ro-line pt-4"
+          action={(fd) => {
+            startTransition(async () => {
+              setError(null);
+              setMessage(null);
+              const res = await adminUpdateWholesaleShippingAction(fd);
+              if (!res.ok) setError(res.error);
+              else {
+                setMessage(f.shippingSaved);
+                router.refresh();
+              }
+            });
+          }}
+        >
+          <h3 className="text-base font-semibold">{f.shippingTitle}</h3>
+          <input type="hidden" name="requestId" value={requestId} />
+          <label className={controlLabelClass}>
+            <span className={controlLabelTextClass}>{f.carrier}</span>
+            <input name="carrier" required className={controlClass} />
+          </label>
+          <label className={controlLabelClass}>
+            <span className={controlLabelTextClass}>{f.trackingReference}</span>
+            <input
+              name="trackingReference"
+              required
+              dir="ltr"
+              className={controlClass}
+            />
+          </label>
+          <Button type="submit" variant="secondary" size="sm" loading={pending}>
+            {f.saveShipping}
           </Button>
         </form>
       ) : null}

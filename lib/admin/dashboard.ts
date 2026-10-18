@@ -29,7 +29,10 @@ export type ActivityFeedDomain = "retail" | "deal" | "wholesale";
 export type ActivityFeedItem = {
   id: string;
   domain: ActivityFeedDomain;
-  title: string;
+  /** Record reference shown in the feed title */
+  reference: string;
+  /** Raw event/action key — UI maps via dictionary (never render Latin in AR) */
+  eventKey: string;
   href: string;
   at: Date;
   actor: string;
@@ -280,7 +283,8 @@ export async function getActivityFeedItems(
     ...handoffs.map((e) => ({
       id: `retail-${e.id}`,
       domain: "retail" as const,
-      title: `${e.request.reference} · ${e.eventType}`,
+      reference: e.request.reference,
+      eventKey: e.eventType,
       href: `/admin/requests/${e.request.id}`,
       at: e.createdAt,
       actor: e.actor,
@@ -291,7 +295,8 @@ export async function getActivityFeedItems(
       .map((e) => ({
         id: `deal-${e.id}`,
         domain: "deal" as const,
-        title: `${e.deal.reference} · ${e.action}`,
+        reference: e.deal.reference,
+        eventKey: e.action,
         href: `/admin/deals/${e.deal.id}`,
         at: e.createdAt,
         actor: e.actorRole,
@@ -302,7 +307,8 @@ export async function getActivityFeedItems(
       .map((e) => ({
         id: `wholesale-${e.id}`,
         domain: "wholesale" as const,
-        title: `${e.request.reference} · ${e.eventType}`,
+        reference: e.request.reference,
+        eventKey: e.eventType,
         href: `/admin/wholesale/${e.request.id}`,
         at: e.createdAt,
         actor: e.actorRole,

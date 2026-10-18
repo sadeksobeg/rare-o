@@ -83,12 +83,21 @@ export async function setPublicOfferStatus(
   if (status === "published") {
     const offer = await prisma.publicCuratedOffer.findUnique({
       where: { id },
+      include: {
+        dealProposal: { select: { id: true, status: true, reference: true } },
+      },
     });
     if (!offer) throw new Error("OFFER_NOT_FOUND");
     if (!offer.titleAr.trim()) throw new Error("PUBLISH_NEEDS_TITLE_AR");
     if (!offer.summaryAr.trim()) throw new Error("PUBLISH_NEEDS_SUMMARY_AR");
     if (!offer.productId && !opts?.plateAck) {
       throw new Error("PUBLISH_NEEDS_PRODUCT_OR_PLATE");
+    }
+    // 3.7 — linked trader deal must be accepted before storefront publish
+    if (offer.dealProposalId) {
+      if (!offer.dealProposal || offer.dealProposal.status !== "accepted") {
+        throw new Error("PUBLISH_NEEDS_ACCEPTED_DEAL");
+      }
     }
   }
 

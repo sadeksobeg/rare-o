@@ -7,6 +7,7 @@
 
 export {
   WHATSAPP_CONNECTION_STATES,
+  isFakeWhatsAppAdapter,
   isOutboundEnabled,
   type WhatsAppAdapter,
   type WhatsAppAdapterEvents,
@@ -14,6 +15,7 @@ export {
   type WhatsAppHealth,
   type WhatsAppInboundTextEvent,
   type WhatsAppInboundUnsupportedEvent,
+  type WhatsAppPairingCodePayload,
   type WhatsAppQrPayload,
   type WhatsAppSendTextInput,
   type WhatsAppSendTextResult,

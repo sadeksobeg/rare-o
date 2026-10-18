@@ -6,7 +6,7 @@ export type ProductBadgeFlags = {
   badgeFeatured?: boolean;
   badgeSale?: boolean;
   compareAtPrice?: { toString(): string } | number | string | null;
-  retailPrice?: { toString(): string } | number | string;
+  retailPrice?: { toString(): string } | number | string | null;
 };
 
 const copy = {

@@ -70,6 +70,11 @@ export const DEAL_STATUS: Record<string, StatusMeta> = {
     labelKey: "status.deal.accepted",
     nextActor: "none",
   },
+  rejected: {
+    tone: "danger",
+    labelKey: "status.deal.rejected",
+    nextActor: "none",
+  },
   closed: {
     tone: "closed",
     labelKey: "status.deal.closed",

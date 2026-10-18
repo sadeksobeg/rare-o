@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ComponentType } from "react";
 import {
@@ -18,6 +17,8 @@ import {
   X,
   type LucideProps,
 } from "lucide-react";
+import { Emblem } from "@/components/brand";
+import { PendingNavLink } from "@/components/ui/pending-nav-link";
 import { cn } from "@/lib/utils";
 
 export type AdminNavItem = { href: string; label: string };
@@ -63,45 +64,57 @@ function NavList({
       {groups.map((group) => (
         <div key={group.title}>
           {!collapsed ? (
-            <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-ro-muted">
+            <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ro-ink-300)]">
               {group.title}
             </p>
           ) : null}
-          <ul className={cn(!collapsed && "mt-2 space-y-0.5", collapsed && "space-y-1")}>
+          <ul
+            className={cn(
+              !collapsed && "mt-2 space-y-0.5",
+              collapsed && "space-y-1"
+            )}
+          >
             {group.items.map((item) => {
               const active = itemActive(pathname, item.href);
               const Icon = iconFor(item.href);
               return (
                 <li key={item.href}>
-                  <Link
+                  <PendingNavLink
                     href={item.href}
                     onClick={onNavigate}
                     aria-label={item.label}
                     title={item.label}
                     aria-current={active ? "page" : undefined}
+                    data-active={active ? "true" : undefined}
                     className={cn(
-                      "relative flex items-center transition-colors",
+                      "relative flex items-center transition-[color,background-color,transform,box-shadow] duration-[var(--ro-dur-fast)]",
                       collapsed
-                        ? "mx-auto size-10 justify-center"
-                        : "gap-2.5 px-3 py-2 text-sm",
+                        ? "mx-auto size-10 justify-center rounded-[var(--ro-r-sm)]"
+                        : "gap-2.5 rounded-[var(--ro-r-sm)] px-3 py-2 text-sm",
                       active
-                        ? "bg-white/10 font-semibold text-[var(--ro-sand-100)]"
-                        : "text-[var(--ro-ink-300)] hover:bg-white/5 hover:text-[var(--ro-sand-100)]"
+                        ? "font-semibold"
+                        : "text-[var(--ro-ink-300)] hover:bg-white/8 hover:text-[var(--ro-sand-100)]",
+                      collapsed &&
+                        active &&
+                        "bg-[color-mix(in_srgb,var(--ro-sand-100)_16%,transparent)] text-[var(--ro-sand-50)]"
                     )}
                   >
                     {active && !collapsed ? (
                       <span
                         aria-hidden
-                        className="absolute inset-y-1 start-0 w-0.5 bg-[var(--ro-sand-100)]"
+                        className="absolute inset-y-1.5 start-0 w-1 rounded-full bg-[var(--ro-plum-300)] shadow-[0_0_12px_color-mix(in_srgb,var(--ro-plum-300)_55%,transparent)]"
                       />
                     ) : null}
                     <Icon
-                      className="size-4 shrink-0"
-                      strokeWidth={1.5}
+                      className={cn(
+                        "size-4 shrink-0 transition-transform duration-[var(--ro-dur-fast)]",
+                        active && "scale-110"
+                      )}
+                      strokeWidth={active ? 2 : 1.5}
                       aria-hidden
                     />
                     {!collapsed ? <span>{item.label}</span> : null}
-                  </Link>
+                  </PendingNavLink>
                 </li>
               );
             })}
@@ -128,18 +141,23 @@ export function AdminSidebar({
     <aside
       data-admin-sidebar={collapsed ? "collapsed" : "expanded"}
       className={cn(
-        "hidden shrink-0 flex-col bg-[var(--ro-ink-900)] text-[var(--ro-sand-100)] lg:flex",
+        "ro-portal-sidebar hidden shrink-0 flex-col text-[var(--ro-sand-100)] lg:flex",
         collapsed ? "w-[72px]" : "w-64"
       )}
     >
       <div
         className={cn(
-          "border-b border-white/10 py-5 text-xs font-semibold tracking-[0.2em]",
-          collapsed ? "px-2 text-center" : "px-4"
+          "ro-portal-sidebar-brand flex items-center gap-3 py-5",
+          collapsed ? "justify-center px-2" : "px-4"
         )}
         title={brand}
       >
-        {collapsed ? "RO" : brand}
+        <Emblem variant="small" className="size-8" />
+        {!collapsed ? (
+          <span className="text-[0.7rem] font-semibold tracking-[0.2em] text-[var(--ro-ink-950)]">
+            {brand}
+          </span>
+        ) : null}
       </div>
       <nav
         aria-label="Admin"
@@ -168,7 +186,7 @@ export function AdminMobileNav({
     <div className="lg:hidden">
       <button
         type="button"
-        className="inline-flex size-10 items-center justify-center border border-ro-line"
+        className="inline-flex size-10 items-center justify-center border border-ro-line bg-ro-paper/80"
         aria-label={menuLabel}
         aria-expanded={open}
         onClick={() => setOpen(true)}
@@ -183,7 +201,7 @@ export function AdminMobileNav({
             aria-label={closeLabel}
             onClick={() => setOpen(false)}
           />
-          <div className="relative z-10 flex h-full w-[min(18rem,85vw)] flex-col bg-[var(--ro-ink-900)] text-[var(--ro-sand-100)]">
+          <div className="ro-portal-sidebar relative z-10 flex h-full w-[min(18rem,85vw)] flex-col text-[var(--ro-sand-100)]">
             <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
               <span className="text-xs tracking-[0.2em]">{menuLabel}</span>
               <button

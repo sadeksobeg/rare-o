@@ -66,8 +66,10 @@ export function ConnectionCard({
 
   return (
     <section className={cn("space-y-3", className)}>
-      <h2 className="text-lg font-semibold text-ro-ink">{a.connection}</h2>
-      <div className="space-y-4 border border-ro-border bg-ro-paper p-4">
+      <h2 className="font-display text-xl font-semibold text-ro-ink">
+        {a.connection}
+      </h2>
+      <div className="ro-portal-card space-y-4 border p-4">
         <div className="flex flex-wrap items-center gap-2">
           <StatusChip
             tone={healthTone(health.state)}

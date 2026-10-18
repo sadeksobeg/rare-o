@@ -97,6 +97,31 @@ export default async function TraderWholesaleDetailPage({
         </div>
       ) : null}
 
+      {request.carrier || request.trackingReference ? (
+        <div className="ro-portal-card space-y-2 border p-4 text-sm">
+          <h2 className="font-semibold">{dict.adminUi.form.shippingTitle}</h2>
+          {request.carrier ? (
+            <p>
+              <span className="text-ro-muted">{dict.adminUi.form.carrier}: </span>
+              {request.carrier}
+            </p>
+          ) : null}
+          {request.trackingReference ? (
+            <p>
+              <span className="text-ro-muted">
+                {dict.adminUi.form.trackingReference}:{" "}
+              </span>
+              <span dir="ltr">{request.trackingReference}</span>
+            </p>
+          ) : null}
+          {request.shippedAt ? (
+            <p className="text-ro-muted">
+              {formatDateTime(locale, request.shippedAt)}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
       <div>
         <h2 className="mb-3 text-lg font-semibold">{t.wsLines}</h2>
         <ul className="divide-y divide-ro-line border border-ro-line text-sm">
