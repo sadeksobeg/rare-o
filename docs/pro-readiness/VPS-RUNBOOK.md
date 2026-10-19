@@ -88,3 +88,14 @@ npm run smoke:prod -- http://127.0.0.1:3000   # skips HTTPS redirect check
 ```
 
 If Docker daemon is unavailable on the workstation: stop with condition **(c)** — start Docker Desktop / install Docker, then re-run `config` + build.
+
+## RPO / RTO (targets)
+
+| Metric | Target | Mechanism |
+|--------|--------|-----------|
+| **RPO** (max data loss) | **24 hours** | Daily `backup` service / `npm run backup:daily`; optional off-site sync via `npm run backup:offsite -- --dry-run` then rclone |
+| **RTO** (time to restore service) | **4 hours** | Restore DB + uploads from latest `backups/daily-*`, redeploy previous known-good image tag, `prisma migrate deploy`, smoke |
+
+**Readiness:** `GET /api/ready` returns 503 until DB and required env are healthy — use behind load balancer after deploy.
+
+**Liveness:** `GET /api/health` — DB ping only; keep for Docker `HEALTHCHECK`.

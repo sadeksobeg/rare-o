@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: rareoud
+          POSTGRES_PASSWORD: rareoud
+          POSTGRES_DB: rareoud
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U rareoud"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://rareoud:rareoud@localhost:5432/rareoud?schema=public
+      AUTH_SECRET: ci-auth-secret-min-16-chars
+      WHATSAPP_BUSINESS_E164: "963900000000"
+      ADMIN_EMAIL: admin@rareoud.local
+      ADMIN_PASSWORD: ChangeMeNow!
+      TRADER_EMAIL: trader@rareoud.local
+      TRADER_PASSWORD: ChangeMeNow!
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Prisma generate & migrate
+        run: |
+          npm run db:generate
+          npm run db:migrate
+
+      - name: Unit checks (E2)
+        run: npm run test:e2-unit
+
+      - name: Week 3 regression
+        run: npm run db:seed && npm run test:week3
+
+      - name: Build
+        run: npm run build
+
+      - name: Docker build
+        run: |
+          docker build \
+            --build-arg NPM_REGISTRY=https://registry.npmjs.org \
+            --build-arg DATABASE_URL="${DATABASE_URL}" \
+            -t rare-oud-platform:ci .
+
+      - name: Security audit
+        run: npm run security:audit
+        continue-on-error: true
