@@ -1,0 +1,2 @@
+slug,nameAr,nameEn,category,price,currency,descriptionAr,descriptionEn,specsAr,specsEn,availability,imageFiles
+example-oud-piece,عود نموذجي,Example oud piece,string-instruments,2500,USD,"وصف عربي مختصر للمنتج.","Short English product description.","الوجه: شوح\nالقصعة: جوز","Soundboard: spruce\nBowl: walnut",available,

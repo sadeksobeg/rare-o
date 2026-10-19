@@ -193,6 +193,8 @@ export const config = {
     "/offers/:path*",
     "/contact",
     "/privacy",
+    "/terms",
+    "/cookies",
     "/forbidden",
     "/admin/:path*",
     "/trader/:path*",

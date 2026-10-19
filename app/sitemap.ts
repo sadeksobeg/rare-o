@@ -7,7 +7,15 @@ import { absoluteUrl } from "@/lib/seo";
 // Reads published rows from the database at request time.
 export const dynamic = "force-dynamic";
 
-const STATIC_PATHS = ["/", "/catalog", "/offers", "/contact", "/privacy"];
+const STATIC_PATHS = [
+  "/",
+  "/catalog",
+  "/offers",
+  "/contact",
+  "/privacy",
+  "/terms",
+  "/cookies",
+];
 
 function entry(
   path: string,

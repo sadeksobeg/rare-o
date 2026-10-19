@@ -43,7 +43,11 @@
     "test:whatsapp-phase-c": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-phase-c-checks.ts",
     "test:whatsapp-phase-d": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-phase-d-checks.ts",
     "test:whatsapp-phase-e": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-phase-e-checks.ts",
-    "worker:whatsapp": "node node_modules/tsx/dist/cli.mjs worker/whatsapp-worker.ts"
+    "worker:whatsapp": "node node_modules/tsx/dist/cli.mjs worker/whatsapp-worker.ts",
+    "catalog:import": "node node_modules/tsx/dist/cli.mjs scripts/catalog-import.ts",
+    "purge:demo": "node node_modules/tsx/dist/cli.mjs scripts/purge-demo.ts",
+    "check:placeholders": "node scripts/check-placeholder.mjs",
+    "seo:validate": "node scripts/seo-validate.mjs"
   },
   "dependencies": {
     "@prisma/client": "6.19.3",
