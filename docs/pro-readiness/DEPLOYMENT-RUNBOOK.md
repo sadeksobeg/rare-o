@@ -5,6 +5,7 @@
 - Next.js 15 app + Prisma **PostgreSQL 16** (D2; see `POSTGRES-D2.md`; SQLite is the documented fallback, see `SQLITE-VS-POSTGRES.md`)
 - Optional WhatsApp worker (`npm run worker:whatsapp`)
 - Reverse proxy with TLS (Caddy / nginx)
+- **Docker production package (D3):** `Dockerfile`, `docker-compose.prod.yml`, `deploy/Caddyfile`, `.env.production.example` — step-by-step VPS: [`VPS-RUNBOOK.md`](./VPS-RUNBOOK.md). Smoke: `npm run smoke:prod -- https://DOMAIN`.
 
 ## VPS checklist
 

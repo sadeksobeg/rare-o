@@ -1,0 +1,78 @@
+﻿docker : #0 building with "desktop-linux" instance using docker driver
+At C:\Users\ASUS\AppData\Local\Temp\ps-script-a8bf59f4-d1fa-4955-95ab-d9627467970f.ps1:99 char:1
++ docker build --build-arg NPM_REGISTRY=https://registry.npmmirror.com  ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (#0 building wit...g docker driver:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 2.28kB done
+#1 DONE 0.0s
+
+#2 [auth] library/node:pull token for registry-1.docker.io
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/node:20-bookworm-slim
+#3 DONE 15.9s
+
+#4 [deps 1/5] FROM 
+docker.io/library/node:20-bookworm-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0
+#4 resolve 
+docker.io/library/node:20-bookworm-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0 0.0s 
+done
+#4 DONE 0.0s
+
+#5 [runner  3/13] RUN groupadd --system --gid 1001 nodejs   && useradd --system --uid 1001 --gid nodejs nextjs
+#5 CACHED
+
+#6 [deps 2/5] WORKDIR /app
+#6 CACHED
+
+#7 [deps 4/5] COPY prisma ./prisma
+#7 CACHED
+
+#8 [internal] load .dockerignore
+#8 transferring context: 348B done
+#8 DONE 0.0s
+
+#9 [internal] load build context
+#9 transferring context: 28.69kB 0.0s done
+#9 DONE 0.0s
+
+#10 [deps 5/5] RUN npm config set registry "https://registry.npmmirror.com"   && npm config set fetch-retries 8   && 
+npm config set fetch-retry-mintimeout 20000   && npm config set fetch-retry-maxtimeout 300000   && npm config set 
+fetch-timeout 600000   && npm ci --no-audit --no-fund
+#10 304.6 npm warn deprecated eslint@9.39.5: This version is no longer supported. Please see 
+https://eslint.org/version-support for other options.
+#10 1099.7 npm error code ECONNRESET
+#10 1099.7 npm error network aborted
+#10 1099.7 npm error network This is a problem related to network connectivity.
+#10 1099.7 npm error network In most cases you are behind a proxy or have bad network settings.
+#10 1099.7 npm error network
+#10 1099.7 npm error network If you are behind a proxy, please make sure that the
+#10 1099.7 npm error network 'proxy' config is set properly.  See: 'npm help config'
+#10 1099.7 npm error A complete log of this run can be found in: /root/.npm/_logs/2026-10-19T08_29_05_163Z-debug-0.log
+#10 ERROR: process "/bin/sh -c npm config set registry \"$NPM_REGISTRY\"   && npm config set fetch-retries 8   && npm 
+config set fetch-retry-mintimeout 20000   && npm config set fetch-retry-maxtimeout 300000   && npm config set 
+fetch-timeout 600000   && npm ci --no-audit --no-fund" did not complete successfully: exit code: 1
+------
+ > [deps 5/5] RUN npm config set registry "https://registry.npmmirror.com"   && npm config set fetch-retries 8   && 
+npm config set fetch-retry-mintimeout 20000   && npm config set fetch-retry-maxtimeout 300000   && npm config set 
+fetch-timeout 600000   && npm ci --no-audit --no-fund:
+304.6 npm warn deprecated eslint@9.39.5: This version is no longer supported. Please see 
+https://eslint.org/version-support for other options.
+1099.7 npm error code ECONNRESET
+1099.7 npm error network aborted
+1099.7 npm error network This is a problem related to network connectivity.
+1099.7 npm error network In most cases you are behind a proxy or have bad network settings.
+1099.7 npm error network
+1099.7 npm error network If you are behind a proxy, please make sure that the
+1099.7 npm error network 'proxy' config is set properly.  See: 'npm help config'
+1099.7 npm error A complete log of this run can be found in: /root/.npm/_logs/2026-10-19T08_29_05_163Z-debug-0.log
+------
+ERROR: failed to build: failed to solve: process "/bin/sh -c npm config set registry \"$NPM_REGISTRY\"   && npm config 
+set fetch-retries 8   && npm config set fetch-retry-mintimeout 20000   && npm config set fetch-retry-maxtimeout 300000 
+  && npm config set fetch-timeout 600000   && npm ci --no-audit --no-fund" did not complete successfully: exit code: 1
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/iinq28drfl2xh0olkhmf0zn37

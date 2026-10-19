@@ -26,6 +26,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Required for the multi-stage production Dockerfile (standalone server).
+  output: "standalone",
   images: { formats: ["image/avif", "image/webp"] },
   experimental: {
     optimizePackageImports: ["lucide-react"],

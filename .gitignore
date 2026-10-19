@@ -20,6 +20,8 @@ dist
 # Env
 .env
 .env*.local
+.env.production
+.env.production.verify
 
 # Prisma
 prisma/*.db

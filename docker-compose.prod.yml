@@ -1,0 +1,146 @@
+# Production stack — local verify / VPS. Does NOT deploy by itself.
+# Usage:
+#   cp .env.production.example .env.production   # fill secrets + DOMAIN
+#   docker compose -f docker-compose.prod.yml --env-file .env.production config
+#   docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+
+name: rare-oud-prod
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-rareoud}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-rareoud}
+    volumes:
+      - rare_oud_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - rareoud
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rare-oud-web:prod
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-rareoud}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-rareoud}?schema=public
+      AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@rareoud.local}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set ADMIN_PASSWORD}
+      ADMIN_NAME: ${ADMIN_NAME:-RARE OUD Admin}
+      WHATSAPP_BUSINESS_E164: ${WHATSAPP_BUSINESS_E164:-}
+      WHATSAPP_AUTH_DIR: /app/.wa-auth
+      WHATSAPP_ADAPTER: ${WHATSAPP_ADAPTER:-baileys}
+      WHATSAPP_CONNECT_ON_START: "false"
+      WHATSAPP_OUTBOUND_ENABLED: ${WHATSAPP_OUTBOUND_ENABLED:-false}
+      NEXT_PUBLIC_SITE_URL: https://${DOMAIN:?set DOMAIN}
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: 0.0.0.0
+    volumes:
+      - rare_oud_uploads:/app/public/uploads
+      - rare_oud_wa_auth:/app/.wa-auth
+    # Host bind for local smoke (Caddy still fronts 80/443 when profile `tls` is on).
+    ports:
+      - "${WEB_HOST_PORT:-3000}:3000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      start_period: 45s
+      retries: 5
+    networks:
+      - rareoud
+
+  worker:
+    image: rare-oud-web:prod
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-rareoud}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-rareoud}?schema=public
+      AUTH_SECRET: ${AUTH_SECRET}
+      WHATSAPP_AUTH_DIR: /app/.wa-auth
+      WHATSAPP_ADAPTER: ${WHATSAPP_ADAPTER:-baileys}
+      WHATSAPP_CONNECT_ON_START: ${WHATSAPP_CONNECT_ON_START:-false}
+      WHATSAPP_OUTBOUND_ENABLED: ${WHATSAPP_OUTBOUND_ENABLED:-false}
+      NODE_ENV: production
+    volumes:
+      - rare_oud_uploads:/app/public/uploads
+      - rare_oud_wa_auth:/app/.wa-auth
+    command: ["node", "node_modules/tsx/dist/cli.mjs", "worker/whatsapp-worker.ts"]
+    networks:
+      - rareoud
+
+  caddy:
+    # Enable with: docker compose … --profile tls up
+    # (requires a real DOMAIN with DNS A/AAAA pointing at the host)
+    profiles: ["tls"]
+    image: caddy:2.8-alpine
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - rare_oud_caddy_data:/data
+      - rare_oud_caddy_config:/config
+    networks:
+      - rareoud
+
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGHOST: postgres
+      PGUSER: ${POSTGRES_USER:-rareoud}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB:-rareoud}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-7}
+      BACKUP_ROOT: /backups
+    volumes:
+      - rare_oud_uploads:/uploads:ro
+      - rare_oud_wa_auth:/wa-auth:ro
+      - rare_oud_backups:/backups
+      - ./deploy/backup-loop.sh:/backup-loop.sh:ro
+    entrypoint: ["/bin/sh", "/backup-loop.sh"]
+    networks:
+      - rareoud
+
+volumes:
+  rare_oud_pgdata:
+  rare_oud_uploads:
+  rare_oud_wa_auth:
+  rare_oud_caddy_data:
+  rare_oud_caddy_config:
+  rare_oud_backups:
+
+networks:
+  rareoud:
+    driver: bridge

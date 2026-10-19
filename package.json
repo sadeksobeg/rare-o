@@ -19,6 +19,8 @@
     "db:seed:demo": "node node_modules/tsx/dist/cli.mjs prisma/seed-demo.ts",
     "check:ar-enums": "node node_modules/tsx/dist/cli.mjs scripts/check-ar-enums.ts",
     "backup:daily": "node scripts/backup-daily.mjs",
+    "backup:prune": "node scripts/backup-prune.mjs",
+    "smoke:prod": "node scripts/smoke-prod.mjs",
     "test:c1-audit": "node scripts/c1-page-audit.mjs",
     "test:c6-axe-lh": "node scripts/c6-axe-lighthouse.mjs",
     "test:c6-restore": "node scripts/c6-restore-drill.mjs",
