@@ -1,20 +1,27 @@
 import path from "node:path";
 import { test, expect } from "@playwright/test";
 import { disconnectPrisma, goLocale, loginAdmin } from "./helpers";
+import { disconnectEnsureSeed, ensureE2EFixtures } from "./ensure-seed";
 
 const FIXTURES = path.join(__dirname, "fixtures");
 const SAMPLE_MP4 = path.join(FIXTURES, "sample-product.mp4");
 const SAMPLE_JPG = path.join(FIXTURES, "sample-product.jpg");
 
-test.afterAll(async () => {
-  await disconnectPrisma();
+test.beforeAll(async () => {
+  await ensureE2EFixtures();
 });
 
-async function skipIfMissing(page: import("@playwright/test").Page, url: string) {
-  const res = await page.goto(url, { waitUntil: "domcontentloaded" }).catch(() => null);
-  if (!res || res.status() === 404) {
-    test.skip(true, `Route missing: ${url}`);
-  }
+test.afterAll(async () => {
+  await disconnectPrisma();
+  await disconnectEnsureSeed();
+});
+
+async function expectRouteOk(
+  page: import("@playwright/test").Page,
+  url: string
+) {
+  const res = await page.goto(url, { waitUntil: "domcontentloaded" });
+  expect(res?.status(), `route ${url}`).not.toBe(404);
 }
 
 test.describe("D1 admin media + guards", () => {
@@ -22,15 +29,15 @@ test.describe("D1 admin media + guards", () => {
     page,
   }) => {
     await loginAdmin(page);
-    await skipIfMissing(page, "/admin/products/new?lang=en");
+    await expectRouteOk(page, "/admin/products/new?lang=en");
 
     const slug = `e2e-d1-${Date.now()}`;
     await page.goto("/admin/products/new?lang=en");
 
-    const newBanner = page.getByText(/upload images|رفع الصور|after save/i);
-    if ((await newBanner.count()) === 0) {
-      test.skip(true, "Admin new product UI not present");
-    }
+    await expect(
+      page.getByText(/upload images|رفع الصور|after save/i),
+      "admin new product UI"
+    ).toBeVisible();
 
     await page.locator('input[name="slug"]').fill(slug);
     await page.locator('input[name="nameEn"]').fill("E2E D1 Product");
@@ -41,9 +48,7 @@ test.describe("D1 admin media + guards", () => {
     await page.waitForURL(/\/admin\/products\/[^/]+/, { timeout: 30_000 });
 
     const fileInput = page.locator('input[type="file"][name="file"]');
-    if ((await fileInput.count()) === 0) {
-      test.skip(true, "ImageUploader file input missing on edit page");
-    }
+    await expect(fileInput, "ImageUploader on edit page").toBeVisible();
 
     await expect(page.getByText(/no media yet|لا وسائط/i)).toBeVisible();
 
@@ -60,7 +65,7 @@ test.describe("D1 admin media + guards", () => {
 
     await fileInput.setInputFiles(SAMPLE_JPG);
     await page
-      .locator('form')
+      .locator("form")
       .filter({ has: fileInput })
       .getByRole("button", { name: /upload|رفع/i })
       .click();
@@ -70,7 +75,7 @@ test.describe("D1 admin media + guards", () => {
     for (let i = 0; i < Math.min(slotsLeft, 2); i += 1) {
       await fileInput.setInputFiles(SAMPLE_JPG);
       await page
-        .locator('form')
+        .locator("form")
         .filter({ has: fileInput })
         .getByRole("button", { name: /upload|رفع/i })
         .click();
@@ -79,7 +84,7 @@ test.describe("D1 admin media + guards", () => {
 
     await fileInput.setInputFiles(SAMPLE_MP4);
     await page
-      .locator('form')
+      .locator("form")
       .filter({ has: fileInput })
       .getByRole("button", { name: /upload|رفع/i })
       .click();
@@ -96,39 +101,37 @@ test.describe("D1 admin media + guards", () => {
 
   test("category delete blocked when products exist", async ({ page }) => {
     await loginAdmin(page);
-    await skipIfMissing(page, "/admin/categories?lang=en");
+    await expectRouteOk(page, "/admin/categories?lang=en");
 
     const rows = page.locator("tbody tr");
     const count = await rows.count();
-    if (count === 0) {
-      test.skip(true, "Categories admin table missing or empty");
-    }
+    expect(count, "categories admin table").toBeGreaterThan(0);
 
+    let found = false;
     for (let i = 0; i < count; i += 1) {
       const row = rows.nth(i);
       const productCell = row.locator("td").nth(4);
       const n = parseInt((await productCell.innerText()).replace(/\D/g, ""), 10);
       if (n > 0) {
+        found = true;
         const deleteBtn = row.getByRole("button", { name: /delete|حذف/i });
         await expect(deleteBtn).toBeDisabled();
         const title = await deleteBtn.getAttribute("title");
         expect(title?.length).toBeGreaterThan(0);
-        return;
+        break;
       }
     }
-    test.skip(true, "No category with products in seed");
+    expect(found, "category with products in seed").toBe(true);
   });
 
   test("create trader shows temp password once", async ({ page }) => {
     await loginAdmin(page);
-    await skipIfMissing(page, "/admin/traders?lang=en");
+    await expectRouteOk(page, "/admin/traders?lang=en");
 
     const form = page.locator("#create-trader form, form").filter({
       has: page.locator('input[name="email"]'),
     });
-    if ((await form.count()) === 0) {
-      test.skip(true, "Create trader form missing");
-    }
+    await expect(form, "create trader form").toBeVisible();
 
     const email = `e2e-trader-${Date.now()}@rareoud.test`;
     await form.locator('input[name="email"]').fill(email);
@@ -149,12 +152,10 @@ test.describe("D1 admin media + guards", () => {
 
   test("customer detail opens from list", async ({ page }) => {
     await loginAdmin(page);
-    await skipIfMissing(page, "/admin/customers?lang=en");
+    await expectRouteOk(page, "/admin/customers?lang=en");
 
     const viewLink = page.getByRole("link", { name: /view|عرض/i }).first();
-    if ((await viewLink.count()) === 0) {
-      test.skip(true, "No customers in seed");
-    }
+    await expect(viewLink, "customers in seed (ensure-seed)").toBeVisible();
     await viewLink.click();
     await page.waitForURL(/\/admin\/customers\/[^/]+/, { timeout: 15_000 });
     await expect(page.locator("h1, h2").first()).toBeVisible();

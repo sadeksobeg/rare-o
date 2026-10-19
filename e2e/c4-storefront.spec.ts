@@ -5,9 +5,15 @@ import {
   expectHandoffSuccess,
   goLocale,
 } from "./helpers";
+import { disconnectEnsureSeed, ensureE2EFixtures } from "./ensure-seed";
+
+test.beforeAll(async () => {
+  await ensureE2EFixtures();
+});
 
 test.afterAll(async () => {
   await disconnectPrisma();
+  await disconnectEnsureSeed();
 });
 
 test.describe("C4 storefront UX", () => {
@@ -27,7 +33,9 @@ test.describe("C4 storefront UX", () => {
     }
 
     await goLocale(page, "/catalog?q=zzzz-no-match-e2e", "en");
-    const empty = page.getByRole("heading", { level: 2 }).or(page.locator("text=/no results|لا نتائج/i"));
+    const empty = page
+      .getByRole("heading", { level: 2 })
+      .or(page.locator("text=/no results|لا نتائج/i"));
     if (totalBefore > 0) {
       await expect(empty.first()).toBeVisible({ timeout: 10_000 });
     }
@@ -35,17 +43,17 @@ test.describe("C4 storefront UX", () => {
 
   test("cart add and remove", async ({ page }) => {
     const added = await addFirstProductViaPdp(page);
-    test.skip(!added, "No add-to-cart target on catalog");
+    expect(added, "published catalog product required (db:seed)").toBe(true);
 
     await goLocale(page, "/cart", "en");
     await expect(page.locator("ul[aria-label]").first()).toBeVisible({
       timeout: 15_000,
     });
 
-    const remove = page.getByRole("button", { name: /remove|إزالة|حذف/i }).first();
-    if ((await remove.count()) === 0) {
-      test.skip(true, "Remove control not found");
-    }
+    const remove = page
+      .getByRole("button", { name: /remove|إزالة|حذف/i })
+      .first();
+    await expect(remove, "cart remove control").toBeVisible({ timeout: 10_000 });
     await remove.click();
     await expect(page.locator("[data-variant]").first()).toBeVisible({
       timeout: 15_000,
@@ -54,11 +62,11 @@ test.describe("C4 storefront UX", () => {
 
   test("unavailable product PDP handling", async ({ page }) => {
     await goLocale(page, "/product/cello-studio", "en");
-    if ((await page.locator("h1").count()) === 0) {
-      test.skip(true, "cello-studio fixture not seeded");
-    }
+    await expect(page.locator("h1").first()).toBeVisible({ timeout: 15_000 });
     const disabledAdd = page.locator("button[disabled]").filter({ hasText: /.+/ });
-    const unavailableCopy = page.locator("text=/unavailable|غير متوفر|contact us|تواصل/i");
+    const unavailableCopy = page.locator(
+      "text=/unavailable|غير متوفر|contact us|تواصل/i"
+    );
     const sawUnavailable =
       (await disabledAdd.first().isVisible().catch(() => false)) ||
       (await unavailableCopy.first().isVisible().catch(() => false));
@@ -84,9 +92,11 @@ test.describe("C4 storefront UX", () => {
     await goLocale(page, "/", "ar");
     const header = page.locator("header");
     await expect(header).toBeVisible();
-    const samples = header.locator("a, button").filter({ hasNot: page.locator(".sr-only") });
+    const samples = header
+      .locator("a, button")
+      .filter({ hasNot: page.locator(".sr-only") });
     const count = Math.min(await samples.count(), 6);
-    test.skip(count === 0, "No header controls to measure");
+    expect(count, "header interactive controls").toBeGreaterThan(0);
     for (let i = 0; i < count; i += 1) {
       const box = await samples.nth(i).boundingBox();
       if (!box) continue;
@@ -103,7 +113,7 @@ test.describe("C4 storefront UX", () => {
 
   test("request flow smoke", async ({ page }) => {
     const added = await addFirstProductViaPdp(page);
-    test.skip(!added, "No catalog product for request smoke");
+    expect(added, "catalog product for request smoke").toBe(true);
 
     await goLocale(page, "/request", "en");
     await expect(page.locator('input[name="customerName"]')).toBeVisible({
@@ -116,17 +126,7 @@ test.describe("C4 storefront UX", () => {
       .getByRole("button", { name: /prepare request for handoff|تجهيز الطلب/i })
       .click();
     const alert = page.locator("form [role='alert']");
-    if (await alert.isVisible({ timeout: 5_000 }).catch(() => false)) {
-      test.skip(true, `Request submit failed: ${await alert.innerText()}`);
-    }
-    try {
-      await expectHandoffSuccess(page);
-    } catch (e) {
-      const msg = String(e);
-      if (msg.includes("idempotencyKey")) {
-        test.skip(true, "Apply DB migrations (RetailRequest.idempotencyKey)");
-      }
-      throw e;
-    }
+    await expect(alert).toBeHidden({ timeout: 5_000 });
+    await expectHandoffSuccess(page);
   });
 });

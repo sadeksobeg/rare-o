@@ -6,9 +6,15 @@ import {
   loginTrader,
   traderCredentials,
 } from "./helpers";
+import { disconnectEnsureSeed, ensureE2EFixtures } from "./ensure-seed";
+
+test.beforeAll(async () => {
+  await ensureE2EFixtures();
+});
 
 test.afterAll(async () => {
   await disconnectPrisma();
+  await disconnectEnsureSeed();
 });
 
 test.describe("C3 trader deals and portal guards", () => {
@@ -24,25 +30,23 @@ test.describe("C3 trader deals and portal guards", () => {
     await expect(page.locator("h1").first()).toBeVisible();
 
     const titleInput = page.locator('input[type="text"]').first();
-    if ((await titleInput.count()) === 0) {
-      test.skip(true, "New deal wizard not available");
-    }
+    await expect(titleInput, "deal wizard title field").toBeVisible();
     await titleInput.fill(`E2E deal ${Date.now()}`);
 
     const productSelect = page.locator("select").filter({ has: page.locator("option") });
     const options = productSelect.locator("option");
-    if ((await options.count()) < 2) {
-      test.skip(true, "No published products for catalog deal");
-    }
+    expect(await options.count(), "published products for catalog deal").toBeGreaterThanOrEqual(
+      2
+    );
     await productSelect.selectOption({ index: 1 });
 
     await page.getByRole("button", { name: /next|التالي/i }).click();
     await page.getByRole("button", { name: /next|التالي/i }).click();
 
-    const submit = page.getByRole("button", { name: /submit|proposal|إرسال|عرض/i });
-    if ((await submit.count()) === 0) {
-      test.skip(true, "Deal submit control missing");
-    }
+    const submit = page.getByRole("button", {
+      name: /submit|proposal|إرسال|عرض/i,
+    });
+    await expect(submit, "deal submit control").toBeVisible();
     await submit.click();
 
     await page.waitForURL(/\/trader\/deals\/[^/]+/, { timeout: 45_000 });
@@ -54,7 +58,9 @@ test.describe("C3 trader deals and portal guards", () => {
       await bar.locator('input[name="currency"]').fill("USD");
       await bar.locator('input[name="quantity"]').fill("1");
       await bar.getByRole("button", { name: /submit|entry|تسجيل/i }).click();
-      await expect(bar.getByRole("status").or(bar.locator("p.text-ro-muted"))).toBeVisible({
+      await expect(
+        bar.getByRole("status").or(bar.locator("p.text-ro-muted"))
+      ).toBeVisible({
         timeout: 15_000,
       });
     }
@@ -64,9 +70,9 @@ test.describe("C3 trader deals and portal guards", () => {
     await loginAdmin(page);
     await page.goto("/admin/deals?lang=en");
     const dealLink = page.locator('a[href^="/admin/deals/"]').first();
-    if ((await dealLink.count()) === 0) {
-      test.skip(true, "No deals in admin list (run db:seed)");
-    }
+    await expect(dealLink, "admin deals list (db:seed)").toBeVisible({
+      timeout: 15_000,
+    });
     await dealLink.click();
     await expect(page.locator('[data-component="negotiation-action-bar"]')).toBeVisible({
       timeout: 20_000,
@@ -78,17 +84,16 @@ test.describe("C3 trader deals and portal guards", () => {
   test("IDOR: trader cannot open another trader deal", async ({ page }) => {
     const { email } = traderCredentials();
     const foreign = await foreignDealForTrader(email);
-    if (!foreign) {
-      test.skip(true, "Need a second trader deal (run db:seed:demo or add trader)");
-      return;
-    }
-    if (foreign.ownerEmail === email) {
-      test.skip(
-        true,
-        "Foreign deal owner matches login trader (check TRADER_EMAIL / seed)"
-      );
-      return;
-    }
+    expect(
+      foreign,
+      "foreign trader deal fixture (ensure-seed / db:seed)"
+    ).toBeTruthy();
+    if (!foreign) return;
+
+    expect(
+      foreign.ownerEmail,
+      "foreign deal must not belong to login trader"
+    ).not.toBe(email);
 
     await loginTrader(page);
     const res = await page.goto(`/trader/deals/${foreign.id}?lang=en`);
@@ -97,8 +102,6 @@ test.describe("C3 trader deals and portal guards", () => {
     const showsNegotiation =
       (await page.locator('[data-component="negotiation-action-bar"]').count()) >
       0;
-    // Primary security assertion: foreign commercial payload must not render.
-    // Next may surface 404 UI as HTTP 200 depending on RSC streaming.
     expect(
       !showsForeignRef && !showsNegotiation,
       `IDOR leak: status=${res?.status()} showsRef=${showsForeignRef} negotiate=${showsNegotiation} snippet=${body.slice(0, 180)}`

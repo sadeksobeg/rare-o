@@ -7,6 +7,7 @@ import {
   goLocale,
   loginAdmin,
 } from "./helpers";
+import { disconnectEnsureSeed, ensureE2EFixtures } from "./ensure-seed";
 
 /**
  * WhatsApp admin pairing expects the dev server (and ideally the worker) with
@@ -16,8 +17,13 @@ import {
 const fakeAdapter =
   process.env.WHATSAPP_ADAPTER?.trim().toLowerCase() === "fake";
 
+test.beforeAll(async () => {
+  await ensureE2EFixtures();
+});
+
 test.afterAll(async () => {
   await disconnectPrisma();
+  await disconnectEnsureSeed();
 });
 
 test.describe("C2 retail handoff + WhatsApp inbox", () => {
@@ -28,7 +34,7 @@ test.describe("C2 retail handoff + WhatsApp inbox", () => {
     }, idempotencyKey);
 
     const added = await addFirstProductViaPdp(page);
-    test.skip(!added, "No published catalog products to add");
+    expect(added, "published catalog product required (db:seed)").toBe(true);
 
     async function fillAndSubmit() {
       await goLocale(page, "/request", "en");
@@ -41,15 +47,7 @@ test.describe("C2 retail handoff + WhatsApp inbox", () => {
     }
 
     await fillAndSubmit();
-    try {
-      await expectHandoffSuccess(page);
-    } catch (e) {
-      const msg = String(e);
-      if (msg.includes("idempotencyKey")) {
-        test.skip(true, "Apply DB migrations (RetailRequest.idempotencyKey)");
-      }
-      throw e;
-    }
+    await expectHandoffSuccess(page);
     const referenceFirst = await page
       .locator("bdi")
       .first()
@@ -57,20 +55,13 @@ test.describe("C2 retail handoff + WhatsApp inbox", () => {
       .catch(() => null);
 
     const addedAgain = await addFirstProductViaPdp(page);
-    test.skip(!addedAgain, "Could not re-add product for idempotency pass");
+    expect(addedAgain, "second add-to-cart for idempotency pass").toBe(true);
 
     await fillAndSubmit();
-    try {
-      await expectHandoffSuccess(page);
-    } catch (e) {
-      const msg = String(e);
-      if (msg.includes("idempotencyKey")) {
-        test.skip(true, "Apply DB migrations (RetailRequest.idempotencyKey)");
-      }
-      throw e;
-    }
+    await expectHandoffSuccess(page);
 
     const dbCount = await countRetailRequestsByIdempotencyKey(idempotencyKey);
+    expect(dbCount).toBeGreaterThanOrEqual(0);
     if (dbCount >= 0) {
       expect(dbCount).toBe(1);
     }
@@ -87,18 +78,17 @@ test.describe("C2 retail handoff + WhatsApp inbox", () => {
       if (popup) {
         await popup.waitForLoadState("domcontentloaded").catch(() => undefined);
         const popupUrl = popup.url();
-        // Some browsers report about:blank until navigation settles
         if (popupUrl && popupUrl !== "about:blank") {
           expect(popupUrl).toMatch(/wa\.me/);
         }
         await popup.close().catch(() => undefined);
       }
-      // Server-side handoff always stores wa.me when E164 is configured
       await expect(page.locator("pre").first()).toBeVisible();
     } else {
       test.info().annotations.push({
         type: "note",
-        description: "Deep link button hidden — check WHATSAPP_BUSINESS_E164 on server",
+        description:
+          "Deep link button hidden — set WHATSAPP_BUSINESS_E164 on the dev server",
       });
     }
   });
@@ -118,7 +108,6 @@ test.describe("C2 retail handoff + WhatsApp inbox", () => {
 
     const state = await panel.getAttribute("data-whatsapp-link-account");
     if (state === "connected") {
-      // Already linked (e.g. prior fake session) — logout to exercise the form.
       const logout = panel.getByRole("button", { name: /log ?out|تسجيل الخروج|فصل/i });
       if (await logout.isVisible().catch(() => false)) {
         await logout.click();

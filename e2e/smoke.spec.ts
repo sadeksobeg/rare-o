@@ -20,4 +20,13 @@ test.describe("storefront smoke", () => {
     const body = await res.json();
     expect(body.ok).toBe(true);
   });
+
+  test("ready endpoint", async ({ request }) => {
+    const res = await request.get("/api/ready");
+    const body = await res.json();
+    expect(typeof body.ready).toBe("boolean");
+    if (body.ready) {
+      expect(res.ok()).toBeTruthy();
+    }
+  });
 });
