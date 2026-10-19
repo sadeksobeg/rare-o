@@ -390,6 +390,11 @@ export async function createRetailRequestAction(
   _prev: ActionResult | null,
   formData: FormData
 ): Promise<ActionResult> {
+  const honeypot = String(formData.get("companyWebsite") || "").trim();
+  if (honeypot) {
+    return { ok: false, error: "Invalid request" };
+  }
+
   const linesRaw = String(formData.get("linesJson") || "[]");
   let lines: unknown = [];
   try {
@@ -413,6 +418,26 @@ export async function createRetailRequestAction(
 
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid request" };
+  }
+
+  const { headers } = await import("next/headers");
+  const { checkRetailRequestRateLimit } = await import(
+    "@/lib/auth/public-rate-limit"
+  );
+  const h = await headers();
+  const clientKey =
+    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    h.get("x-real-ip")?.trim() ||
+    "local";
+  const rl = checkRetailRequestRateLimit({
+    clientKey,
+    phone: parsed.data.customerPhone,
+  });
+  if (!rl.allowed) {
+    return {
+      ok: false,
+      error: `Rate limit exceeded — retry in ${rl.retryAfterSec ?? 60}s`,
+    };
   }
 
   try {

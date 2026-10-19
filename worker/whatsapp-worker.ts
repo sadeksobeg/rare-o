@@ -52,6 +52,10 @@ import {
   resolveWhatsAppAuthDir,
 } from "@/lib/whatsapp/session-store";
 import {
+  hydrateAuthDirFromEncrypted,
+  registerAuthDirSealOnExit,
+} from "@/lib/security/wa-auth-crypto";
+import {
   isFakeWhatsAppAdapter,
   isOutboundEnabled,
   type WhatsAppAdapter,
@@ -81,6 +85,10 @@ async function main(): Promise<void> {
   const fake = isFakeWhatsAppAdapter();
   const session = createSessionStoreConfig();
   ensureAuthDir(session.authDir);
+  if (!fake) {
+    hydrateAuthDirFromEncrypted(session.authDir);
+    registerAuthDirSealOnExit(session.authDir);
+  }
 
   const authDirDisplay =
     path.relative(process.cwd(), session.authDir) || session.authDir;

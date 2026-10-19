@@ -187,6 +187,14 @@ export function RequestForm({
       >
         <input type="hidden" name="locale" value={locale} />
         <input type="hidden" name="linesJson" value={linesJson} />
+        <input
+          type="text"
+          name="companyWebsite"
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          className="absolute left-[-9999px] h-px w-px overflow-hidden opacity-0"
+        />
 
         <TextField
           label={labels.name}
