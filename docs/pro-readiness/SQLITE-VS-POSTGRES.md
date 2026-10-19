@@ -1,5 +1,7 @@
 # SQLite vs PostgreSQL — decision memo (no migration in this program)
 
+> **Update — Closure D2 (2026-10-19):** PostgreSQL 16 is implemented on branch `feat/postgres-d2` (compose, `0_init` migration, data-copy script with verification, pg_dump backup + restore drill). Results and the SQLite fallback procedure are in `POSTGRES-D2.md`. The memo below is kept as the original decision record; its 'later' migration plan has now been executed on the branch.
+
 ## Current state
 
 - Production-capable **SQLite** via Prisma (`provider = "sqlite"`).

@@ -11,7 +11,7 @@ Not related to the separate Vision presentation prototype.
 
 ## Stack
 
-Next.js 15 · React 19 · TypeScript · Tailwind CSS v4 · Prisma (SQLite) · Zod
+Next.js 15 · React 19 · TypeScript · Tailwind CSS v4 · Prisma (PostgreSQL 16; SQLite fallback documented) · Zod
 
 ## Scripts
 

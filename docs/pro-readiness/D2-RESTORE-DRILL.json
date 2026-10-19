@@ -1,0 +1,155 @@
+{
+  "ok": true,
+  "at": "2026-10-19T06:28:52.361Z",
+  "tools": "docker",
+  "backupDir": "backups\\restore-drill-pg-1792391332360",
+  "dump": {
+    "file": "db.dump",
+    "bytes": 70746,
+    "sha256": "d09f9b12530c13faf239c70a8b93e3ee522059619747a9b352911049ced1a80a"
+  },
+  "uploads": {
+    "source": "public/uploads",
+    "files": 1,
+    "mismatches": []
+  },
+  "waAuth": {
+    "source": ".wa-auth",
+    "files": 0,
+    "mismatches": []
+  },
+  "tables": [
+    {
+      "table": "AdminUser",
+      "source": 1,
+      "restored": 1,
+      "ok": true
+    },
+    {
+      "table": "Category",
+      "source": 2,
+      "restored": 2,
+      "ok": true
+    },
+    {
+      "table": "Customer",
+      "source": 15,
+      "restored": 15,
+      "ok": true
+    },
+    {
+      "table": "DealProposal",
+      "source": 18,
+      "restored": 18,
+      "ok": true
+    },
+    {
+      "table": "NegotiationEntry",
+      "source": 44,
+      "restored": 44,
+      "ok": true
+    },
+    {
+      "table": "Product",
+      "source": 17,
+      "restored": 17,
+      "ok": true
+    },
+    {
+      "table": "ProductImage",
+      "source": 15,
+      "restored": 15,
+      "ok": true
+    },
+    {
+      "table": "PromoBand",
+      "source": 2,
+      "restored": 2,
+      "ok": true
+    },
+    {
+      "table": "PublicCuratedOffer",
+      "source": 9,
+      "restored": 9,
+      "ok": true
+    },
+    {
+      "table": "RetailHandoffEvent",
+      "source": 39,
+      "restored": 39,
+      "ok": true
+    },
+    {
+      "table": "RetailRequest",
+      "source": 15,
+      "restored": 15,
+      "ok": true
+    },
+    {
+      "table": "RetailRequestLine",
+      "source": 15,
+      "restored": 15,
+      "ok": true
+    },
+    {
+      "table": "TraderAccount",
+      "source": 6,
+      "restored": 6,
+      "ok": true
+    },
+    {
+      "table": "TraderNotification",
+      "source": 17,
+      "restored": 17,
+      "ok": true
+    },
+    {
+      "table": "WhatsAppConnectionHealth",
+      "source": 1,
+      "restored": 1,
+      "ok": true
+    },
+    {
+      "table": "WhatsAppConversation",
+      "source": 1,
+      "restored": 1,
+      "ok": true
+    },
+    {
+      "table": "WhatsAppLinkAudit",
+      "source": 0,
+      "restored": 0,
+      "ok": true
+    },
+    {
+      "table": "WhatsAppMessage",
+      "source": 3,
+      "restored": 3,
+      "ok": true
+    },
+    {
+      "table": "WholesaleRequest",
+      "source": 12,
+      "restored": 12,
+      "ok": true
+    },
+    {
+      "table": "WholesaleRequestEvent",
+      "source": 39,
+      "restored": 39,
+      "ok": true
+    },
+    {
+      "table": "WholesaleRequestLine",
+      "source": 12,
+      "restored": 12,
+      "ok": true
+    },
+    {
+      "table": "_prisma_migrations",
+      "source": 1,
+      "restored": 1,
+      "ok": true
+    }
+  ]
+}

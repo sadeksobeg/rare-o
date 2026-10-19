@@ -27,6 +27,7 @@ import {
   linkConversationToBusinessRecord,
 } from "@/lib/whatsapp/messaging/linking";
 import { prisma } from "@/lib/db/prisma";
+import { containsCI } from "@/lib/db/search";
 
 /**
  * Admin WhatsApp actions — authorize every call server-side.
@@ -330,9 +331,9 @@ export async function adminSearchLinkableRecordsAction(
       where: q
         ? {
             OR: [
-              { reference: { contains: q } },
-              { customerName: { contains: q } },
-              { customerPhone: { contains: q } },
+              { reference: containsCI(q) },
+              { customerName: containsCI(q) },
+              { customerPhone: containsCI(q) },
             ],
           }
         : undefined,
@@ -356,8 +357,8 @@ export async function adminSearchLinkableRecordsAction(
       where: q
         ? {
             OR: [
-              { reference: { contains: q } },
-              { title: { contains: q } },
+              { reference: containsCI(q) },
+              { title: containsCI(q) },
             ],
           }
         : undefined,
@@ -377,7 +378,7 @@ export async function adminSearchLinkableRecordsAction(
   }
 
   const rows = await prisma.wholesaleRequest.findMany({
-    where: q ? { reference: { contains: q } } : undefined,
+    where: q ? { reference: containsCI(q) } : undefined,
     orderBy: { updatedAt: "desc" },
     take,
     select: { id: true, reference: true },

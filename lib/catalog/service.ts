@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
+import { containsCI } from "@/lib/db/search";
 import type { ProductUpsertInput } from "@/lib/validation/schemas";
 import {
   type CatalogSort,
@@ -91,10 +92,10 @@ function publishedWhere(
     ...(q
       ? {
           OR: [
-            { nameAr: { contains: q } },
-            { nameEn: { contains: q } },
-            { descriptionAr: { contains: q } },
-            { descriptionEn: { contains: q } },
+            { nameAr: containsCI(q) },
+            { nameEn: containsCI(q) },
+            { descriptionAr: containsCI(q) },
+            { descriptionEn: containsCI(q) },
           ],
         }
       : {}),

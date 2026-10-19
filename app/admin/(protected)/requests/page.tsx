@@ -13,6 +13,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { StatusChip } from "@/components/ui/status-chip";
 import { uiVisibleRetailRequestWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
+import { containsCI } from "@/lib/db/search";
 import { formatRelative } from "@/lib/i18n/format";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import {
@@ -68,9 +69,9 @@ export default async function AdminRequestsPage({
         ? [
             {
               OR: [
-                { reference: { contains: q } },
-                { customerName: { contains: q } },
-                { customerPhone: { contains: q } },
+                { reference: containsCI(q) },
+                { customerName: containsCI(q) },
+                { customerPhone: containsCI(q) },
               ],
             },
           ]

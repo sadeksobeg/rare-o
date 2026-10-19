@@ -1,0 +1,176 @@
+{
+  "at": "2026-10-19T06:20:39.700Z",
+  "ok": true,
+  "mode": "migrate",
+  "source": "prisma/dev.db",
+  "tables": [
+    {
+      "table": "Category",
+      "sqlite": 2,
+      "postgres": 2,
+      "sqliteIdHash": "04e83729aed0e55b",
+      "postgresIdHash": "04e83729aed0e55b",
+      "ok": true
+    },
+    {
+      "table": "Product",
+      "sqlite": 16,
+      "postgres": 16,
+      "sqliteIdHash": "ad580823d1d3673c",
+      "postgresIdHash": "ad580823d1d3673c",
+      "ok": true
+    },
+    {
+      "table": "PromoBand",
+      "sqlite": 2,
+      "postgres": 2,
+      "sqliteIdHash": "085c72facfda4e7c",
+      "postgresIdHash": "085c72facfda4e7c",
+      "ok": true
+    },
+    {
+      "table": "ProductImage",
+      "sqlite": 15,
+      "postgres": 15,
+      "sqliteIdHash": "24d59544c7a41287",
+      "postgresIdHash": "24d59544c7a41287",
+      "ok": true
+    },
+    {
+      "table": "Customer",
+      "sqlite": 13,
+      "postgres": 13,
+      "sqliteIdHash": "70670b0d82d34436",
+      "postgresIdHash": "70670b0d82d34436",
+      "ok": true
+    },
+    {
+      "table": "RetailRequest",
+      "sqlite": 13,
+      "postgres": 13,
+      "sqliteIdHash": "9a8e4069d934e5c5",
+      "postgresIdHash": "9a8e4069d934e5c5",
+      "ok": true
+    },
+    {
+      "table": "RetailHandoffEvent",
+      "sqlite": 34,
+      "postgres": 34,
+      "sqliteIdHash": "900edbab5683a12d",
+      "postgresIdHash": "900edbab5683a12d",
+      "ok": true
+    },
+    {
+      "table": "RetailRequestLine",
+      "sqlite": 13,
+      "postgres": 13,
+      "sqliteIdHash": "4b9850f66ca53614",
+      "postgresIdHash": "4b9850f66ca53614",
+      "ok": true
+    },
+    {
+      "table": "AdminUser",
+      "sqlite": 1,
+      "postgres": 1,
+      "sqliteIdHash": "a5df11e7a8e874fe",
+      "postgresIdHash": "a5df11e7a8e874fe",
+      "ok": true
+    },
+    {
+      "table": "TraderAccount",
+      "sqlite": 6,
+      "postgres": 6,
+      "sqliteIdHash": "3b7cc2c2cd8c0d4a",
+      "postgresIdHash": "3b7cc2c2cd8c0d4a",
+      "ok": true
+    },
+    {
+      "table": "TraderNotification",
+      "sqlite": 12,
+      "postgres": 12,
+      "sqliteIdHash": "579f439cbee46703",
+      "postgresIdHash": "579f439cbee46703",
+      "ok": true
+    },
+    {
+      "table": "DealProposal",
+      "sqlite": 16,
+      "postgres": 16,
+      "sqliteIdHash": "f9b21625ab630410",
+      "postgresIdHash": "f9b21625ab630410",
+      "ok": true
+    },
+    {
+      "table": "NegotiationEntry",
+      "sqlite": 39,
+      "postgres": 39,
+      "sqliteIdHash": "2fff278f48ba6dfd",
+      "postgresIdHash": "2fff278f48ba6dfd",
+      "ok": true
+    },
+    {
+      "table": "PublicCuratedOffer",
+      "sqlite": 8,
+      "postgres": 8,
+      "sqliteIdHash": "81208275e4f711d3",
+      "postgresIdHash": "81208275e4f711d3",
+      "ok": true
+    },
+    {
+      "table": "WholesaleRequest",
+      "sqlite": 10,
+      "postgres": 10,
+      "sqliteIdHash": "b02a1bf791564aff",
+      "postgresIdHash": "b02a1bf791564aff",
+      "ok": true
+    },
+    {
+      "table": "WholesaleRequestLine",
+      "sqlite": 10,
+      "postgres": 10,
+      "sqliteIdHash": "f15c76111a4184c0",
+      "postgresIdHash": "f15c76111a4184c0",
+      "ok": true
+    },
+    {
+      "table": "WholesaleRequestEvent",
+      "sqlite": 32,
+      "postgres": 32,
+      "sqliteIdHash": "e12a3e941721ede2",
+      "postgresIdHash": "e12a3e941721ede2",
+      "ok": true
+    },
+    {
+      "table": "WhatsAppConversation",
+      "sqlite": 1,
+      "postgres": 1,
+      "sqliteIdHash": "a9e96d4644978a35",
+      "postgresIdHash": "a9e96d4644978a35",
+      "ok": true
+    },
+    {
+      "table": "WhatsAppMessage",
+      "sqlite": 3,
+      "postgres": 3,
+      "sqliteIdHash": "f4c9e1e4d7052cc7",
+      "postgresIdHash": "f4c9e1e4d7052cc7",
+      "ok": true
+    },
+    {
+      "table": "WhatsAppConnectionHealth",
+      "sqlite": 1,
+      "postgres": 1,
+      "sqliteIdHash": "01666ec060466c14",
+      "postgresIdHash": "01666ec060466c14",
+      "ok": true
+    },
+    {
+      "table": "WhatsAppLinkAudit",
+      "sqlite": 0,
+      "postgres": 0,
+      "sqliteIdHash": "e3b0c44298fc1c14",
+      "postgresIdHash": "e3b0c44298fc1c14",
+      "ok": true
+    }
+  ]
+}

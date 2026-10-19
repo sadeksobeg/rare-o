@@ -9,12 +9,9 @@
  * Run: npm run test:whatsapp-phase-b
  */
 
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
-import { execSync } from "node:child_process";
 
 import { PrismaClient } from "@prisma/client";
+import { createIsolatedDb } from "./lib/isolated-db";
 
 import {
   dispatchOutboundMessage,
@@ -121,18 +118,8 @@ async function setupIsolatedDb(): Promise<{
   dbPath: string;
   cleanup: () => Promise<void>;
 }> {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "rare-oud-wa-pb-"));
-  const dbPath = path.join(dir, "phase-b-test.db");
-  const url = `file:${dbPath.replace(/\\/g, "/")}`;
-
-  execSync(
-    `node node_modules/prisma/build/index.js migrate deploy`,
-    {
-      cwd: process.cwd(),
-      env: { ...process.env, DATABASE_URL: url },
-      stdio: "pipe",
-    }
-  );
+  const iso = await createIsolatedDb("rare-oud-wa-pb");
+  const url = iso.url;
 
   const db = new PrismaClient({
     datasources: { db: { url } },
@@ -142,10 +129,10 @@ async function setupIsolatedDb(): Promise<{
 
   return {
     db,
-    dbPath,
+    dbPath: iso.url,
     cleanup: async () => {
       await db.$disconnect();
-      fs.rmSync(dir, { recursive: true, force: true });
+      await iso.cleanup();
     },
   };
 }

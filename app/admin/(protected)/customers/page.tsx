@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { uiVisibleCustomerWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
+import { containsCI } from "@/lib/db/search";
 import { formatDate, formatRelative } from "@/lib/i18n/format";
 import { getRequestDictionary } from "@/lib/i18n/server";
 
@@ -32,8 +33,8 @@ export default async function AdminCustomersPage({
             uiVisibleCustomerWhere(),
             {
               OR: [
-                { name: { contains: query } },
-                { phone: { contains: query } },
+                { name: containsCI(query) },
+                { phone: containsCI(query) },
               ],
             },
           ],
