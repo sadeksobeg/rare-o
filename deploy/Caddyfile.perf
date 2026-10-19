@@ -1,0 +1,23 @@
+# Local production-like reverse proxy for Lighthouse (Brotli + HTTP/2).
+# App must listen on host :3001. Run:
+#   docker run --rm -p 8443:443 -p 8080:80 \
+#     -v ./deploy/Caddyfile.perf:/etc/caddy/Caddyfile:ro \
+#     -v rare_oud_caddy_perf_data:/data \
+#     caddy:2.8-alpine
+#
+# Then measure against https://127.0.0.1:8443 (accept self-signed) or http://127.0.0.1:8080
+
+{
+	auto_https disable_redirects
+}
+
+:80 {
+	encode zstd gzip
+	reverse_proxy host.docker.internal:3001
+}
+
+:443 {
+	tls internal
+	encode zstd gzip
+	reverse_proxy host.docker.internal:3001
+}

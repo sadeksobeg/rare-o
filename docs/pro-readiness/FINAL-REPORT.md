@@ -1,8 +1,9 @@
-# FINAL REPORT — Closure Round D (D1–D4 complete)
+# FINAL REPORT — Closure Round D + E (in progress / agent batches complete)
 
 **Date:** 2026-10-19  
 **Scope:** Appendix S items 1.1–4.3, 6.x–9.3 (+ 8.x, 7.x). One row per item.  
-**Batches:** D1 fix/prove · D2 Postgres merged · D3 Docker package · D4 clean-install regression.
+**Batches:** D1–D4 · E1 perf · E2 tests · E3 security · E4 CI/delivery · E5 content · E6 handover.  
+**Not closed:** UAT, live WA, VPS deploy, owner assets (see OWNER ACTIONS / handover).
 
 ## Owner decisions (locked)
 
@@ -29,7 +30,7 @@
 | 2.3 | Search & Filters | PASS | Catalog URL filters; c4 E2E |
 | 2.4 | Shopping Cart | PASS | `/cart`; c4 E2E |
 | 2.5 | Request Finalization Flow | PASS | `/request` → wa.me; c2 + week3 |
-| 2.6 | Responsive Design | PARTIAL | Layout PASS (C1 132/0; c4). D4 Lighthouse mobile medians: Home **0.79**, Catalog **0.78**, Product **0.77**, Request **0.81** — all &lt; 0.85 threshold. Root cause in opportunities: `uses-responsive-images` / catalog thumbs. Code mitigations remain (next/image hero WebP, vector wallpaper, locale fonts, dynamic overlays). |
+| 2.6 | Responsive Design | PARTIAL | Layout PASS. E1 5-run medians (`test:lh-budget`): Home **0.82**, Catalog **0.81**, Product **0.80**, Request **0.84** — still &lt;0.85. Admin/Trader soft ≥0.87. See `E1-PERF-REPORT.md`. |
 | 3.1 | Trader Registration & Onboarding | PASS | Admin creates trader; d1 password-once |
 | 3.2 | Trader Profile & Preferences | PASS | `/trader/profile` |
 | 3.3 | Trader Request Visibility | PASS | IDOR week3 + c3 E2E |
@@ -44,7 +45,7 @@
 | 6.2 | Customer Management | PASS | Detail + WA conversation links (D1) |
 | 7.1 | Encryption & Secure Storage | PARTIAL | bcrypt + JWT; Postgres 16 at-rest = OS/volume |
 | 7.2 | Daily Backup | PASS | `backup:daily` / compose `backup` + `test:d2-restore` (DB+uploads+WA checksums) |
-| 7.3 | QA & Testing | PASS | D4 clean `npm ci` + full suite artefacts below |
+| 7.3 | QA & Testing | PARTIAL | E1/E2: suite strong but Playwright `test.skip` remains and Lighthouse storefront &lt;0.85 until E2 closes skips + E1 meets budget |
 | 7.4 | Deployment & Launch | OWNER-ACTION | Package: `Dockerfile`, `docker-compose.prod.yml`, `VPS-RUNBOOK.md`. Local `compose config` PASS; image build on this workstation FAIL (Docker→npm `ECONNRESET` — `D3-DOCKER-BUILD.txt`). VPS execute = owner. |
 | 7.5 | Domain & SSL | OWNER-ACTION | Caddy `--profile tls` + auto-HTTPS; DNS/domain = owner |
 | 8.1 | Wholesale Submission | PASS | Trader wholesale wizard |

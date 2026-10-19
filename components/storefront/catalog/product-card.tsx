@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ProductThumb } from "@/components/storefront/product-media";
 import { AvailabilityChip } from "@/components/storefront/catalog/availability-chip";
@@ -43,7 +42,6 @@ export function CatalogProductCard({
 }) {
   const name = localizedName(locale, product.nameAr, product.nameEn, product.slug);
   const primary = product.images[0];
-  const secondary = product.images[1];
   const altFor = (img: { altAr: string; altEn: string }) =>
     localizedName(locale, img.altAr, img.altEn, name);
   const available = product.availability !== "unavailable";
@@ -63,20 +61,6 @@ export function CatalogProductCard({
           className={cn(!available && "opacity-80")}
         />
         <ProductBadges product={product} locale={locale} />
-        {secondary ? (
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 overflow-hidden rounded-[var(--ro-r-xs)] opacity-0 transition-opacity duration-[var(--ro-dur-slow)] ease-[var(--ro-ease-standard)] group-hover:opacity-100"
-          >
-            <Image
-              src={secondary.path}
-              alt=""
-              fill
-              sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"
-              className="ro-media-zoom object-cover"
-            />
-          </div>
-        ) : null}
         {available ? (
           <QuickAddButton
             productId={product.id}

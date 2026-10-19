@@ -8,10 +8,9 @@ import { cn } from "@/lib/utils";
  * Single hero oud — atelier-f (warm gold-rim cutout).
  * Mouse parallax + idle breathe.
  */
-const SRC = "/brand/hero-oud-atelier-f.webp";
+const SRC = "/brand/hero-oud-atelier-f-e1.webp";
 /* Slight plum rim to sit in brand light — keep wood natural */
 /* Soft rim without drop-shadow (drop-shadow tanks Lighthouse paint). */
-const FILTER = "brightness(1.08) contrast(1.04) saturate(1.03)";
 
 export function HeroOudField({
   className,
@@ -124,13 +123,13 @@ export function HeroOudField({
             <Image
               src={SRC}
               alt=""
-              width={480}
-              height={1020}
+              width={360}
+              height={765}
               priority
-              sizes="(max-width: 768px) 70vw, 480px"
+              sizes="(max-width: 390px) 55vw, (max-width: 768px) 45vw, 360px"
+              quality={70}
               draggable={false}
               className="pointer-events-none h-full w-auto max-w-none select-none"
-              style={{ filter: FILTER }}
             />
           </div>
         </div>

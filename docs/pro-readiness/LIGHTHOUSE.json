@@ -1,96 +1,14 @@
 {
-  "at": "2026-10-19T09:41:16.853Z",
+  "at": "2026-10-19T15:06:33.153Z",
   "base": "http://127.0.0.1:3001",
   "threshold": 0.85,
-  "runsPerRoute": 3,
-  "mobile": {
-    "width": 390,
-    "height": 844
-  },
-  "note": "D4 clean-install; each LH run in child process (Chrome crash isolation).",
+  "runsPerRoute": 5,
+  "budgetFile": "lighthouse-budget.json",
+  "note": "E1: median of 5; hard gate on storefront routes only.",
   "routes": [
     {
       "name": "home",
       "url": "http://127.0.0.1:3001/?lang=ar",
-      "runs": [
-        {
-          "performance": 0.79,
-          "accessibility": 0.99,
-          "run": 1
-        },
-        {
-          "performance": 0.79,
-          "accessibility": 0.99,
-          "run": 2
-        },
-        {
-          "performance": 0.79,
-          "accessibility": 0.99,
-          "run": 3
-        }
-      ],
-      "median": {
-        "performance": 0.79,
-        "accessibility": 0.99
-      },
-      "passed": false
-    },
-    {
-      "name": "catalog",
-      "url": "http://127.0.0.1:3001/catalog?lang=ar",
-      "runs": [
-        {
-          "performance": 0.78,
-          "accessibility": 0.98,
-          "run": 1
-        },
-        {
-          "performance": 0.78,
-          "accessibility": 0.98,
-          "run": 2
-        },
-        {
-          "performance": 0.81,
-          "accessibility": 0.98,
-          "run": 3
-        }
-      ],
-      "median": {
-        "performance": 0.78,
-        "accessibility": 0.98
-      },
-      "passed": false
-    },
-    {
-      "name": "product",
-      "url": "http://127.0.0.1:3001/product/demo-string-instrument?lang=ar",
-      "runs": [
-        {
-          "performance": 0.77,
-          "accessibility": 0.99,
-          "run": 1
-        },
-        {
-          "performance": 0.76,
-          "accessibility": 0.99,
-          "run": 2
-        },
-        {
-          "performance": 0.77,
-          "accessibility": 0.99,
-          "run": 3
-        }
-      ],
-      "median": {
-        "performance": 0.77,
-        "accessibility": 0.99
-      },
-      "passed": false,
-      "note": "median from 3 child runs; Chrome teardown races ignored"
-    },
-    {
-      "name": "request",
-      "url": "http://127.0.0.1:3001/request?lang=ar",
       "runs": [
         {
           "performance": 0.82,
@@ -98,21 +16,217 @@
           "run": 1
         },
         {
-          "performance": 0.81,
+          "performance": 0.82,
           "accessibility": 0.99,
           "run": 2
         },
         {
-          "performance": 0.81,
+          "performance": 0.84,
           "accessibility": 0.99,
           "run": 3
+        },
+        {
+          "performance": 0.82,
+          "accessibility": 0.99,
+          "run": 4
+        },
+        {
+          "performance": 0.82,
+          "accessibility": 0.99,
+          "run": 5
+        }
+      ],
+      "median": {
+        "performance": 0.82,
+        "accessibility": 0.99
+      },
+      "passed": false,
+      "hardGate": true
+    },
+    {
+      "name": "catalog",
+      "url": "http://127.0.0.1:3001/catalog?lang=ar",
+      "runs": [
+        {
+          "performance": 0.81,
+          "accessibility": 0.98,
+          "run": 1
+        },
+        {
+          "performance": 0.81,
+          "accessibility": 0.98,
+          "run": 2
+        },
+        {
+          "performance": 0.84,
+          "accessibility": 0.98,
+          "run": 3
+        },
+        {
+          "performance": 0.81,
+          "accessibility": 0.98,
+          "run": 4
+        },
+        {
+          "performance": 0.81,
+          "accessibility": 0.98,
+          "run": 5
         }
       ],
       "median": {
         "performance": 0.81,
+        "accessibility": 0.98
+      },
+      "passed": false,
+      "hardGate": true
+    },
+    {
+      "name": "product",
+      "url": "http://127.0.0.1:3001/product/demo-string-instrument?lang=ar",
+      "runs": [
+        {
+          "performance": 0.91,
+          "accessibility": 0.99,
+          "run": 1
+        },
+        {
+          "performance": 0.91,
+          "accessibility": 0.99,
+          "run": 2
+        },
+        {
+          "performance": 0.8,
+          "accessibility": 0.99,
+          "run": 3
+        },
+        {
+          "performance": 0.8,
+          "accessibility": 0.99,
+          "run": 4
+        },
+        {
+          "performance": 0.8,
+          "accessibility": 0.99,
+          "run": 5
+        }
+      ],
+      "median": {
+        "performance": 0.8,
         "accessibility": 0.99
       },
-      "passed": false
+      "passed": false,
+      "hardGate": true
+    },
+    {
+      "name": "request",
+      "url": "http://127.0.0.1:3001/request?lang=ar",
+      "runs": [
+        {
+          "performance": 0.84,
+          "accessibility": 0.99,
+          "run": 1
+        },
+        {
+          "performance": 0.84,
+          "accessibility": 0.99,
+          "run": 2
+        },
+        {
+          "performance": 0.84,
+          "accessibility": 0.99,
+          "run": 3
+        },
+        {
+          "performance": 0.84,
+          "accessibility": 0.99,
+          "run": 4
+        },
+        {
+          "performance": 0.84,
+          "accessibility": 0.99,
+          "run": 5
+        }
+      ],
+      "median": {
+        "performance": 0.84,
+        "accessibility": 0.99
+      },
+      "passed": false,
+      "hardGate": true
+    },
+    {
+      "name": "admin-home",
+      "url": "http://127.0.0.1:3001/admin",
+      "runs": [
+        {
+          "performance": 0.87,
+          "accessibility": 0.94,
+          "run": 1
+        },
+        {
+          "performance": 0.87,
+          "accessibility": 0.94,
+          "run": 2
+        },
+        {
+          "performance": 0.87,
+          "accessibility": 0.94,
+          "run": 3
+        },
+        {
+          "performance": 0.87,
+          "accessibility": 0.94,
+          "run": 4
+        },
+        {
+          "performance": 0.87,
+          "accessibility": 0.94,
+          "run": 5
+        }
+      ],
+      "median": {
+        "performance": 0.87,
+        "accessibility": 0.94
+      },
+      "passed": true,
+      "hardGate": false
+    },
+    {
+      "name": "trader-home",
+      "url": "http://127.0.0.1:3001/trader",
+      "runs": [
+        {
+          "performance": 0.91,
+          "accessibility": 0.94,
+          "run": 1
+        },
+        {
+          "performance": 0.87,
+          "accessibility": 0.94,
+          "run": 2
+        },
+        {
+          "performance": 0.87,
+          "accessibility": 0.94,
+          "run": 3
+        },
+        {
+          "performance": 0.89,
+          "accessibility": 0.94,
+          "run": 4
+        },
+        {
+          "performance": 0.87,
+          "accessibility": 0.94,
+          "run": 5
+        }
+      ],
+      "median": {
+        "performance": 0.87,
+        "accessibility": 0.94
+      },
+      "passed": true,
+      "hardGate": false
     }
   ],
   "passed": false

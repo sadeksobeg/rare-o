@@ -28,12 +28,16 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   // Required for the multi-stage production Dockerfile (standalone server).
   output: "standalone",
-  images: { formats: ["image/avif", "image/webp"] },
+  images: {
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [640, 750, 828, 1080, 1200],
+    imageSizes: [64, 96, 128, 256, 384],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+  },
   experimental: {
     optimizePackageImports: ["lucide-react"],
   },
   // Expose the promo UI gate to client components (PriceBlock in client trees).
-  // Default empty / off — set RO_PROMO_FEATURES=1 to enable.
   env: {
     RO_PROMO_FEATURES: process.env.RO_PROMO_FEATURES ?? "",
   },
@@ -46,7 +50,27 @@ const nextConfig: NextConfig = {
         value: "max-age=63072000; includeSubDomains; preload",
       });
     }
-    return [{ source: "/:path*", headers }];
+    return [
+      { source: "/:path*", headers },
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/brand/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=604800, stale-while-revalidate=86400",
+          },
+        ],
+      },
+    ];
   },
 };
 

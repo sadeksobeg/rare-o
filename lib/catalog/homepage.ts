@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db/prisma";
 import { listLaunchCategories } from "@/lib/catalog/service";
 import { listPublishedPublicOffers } from "@/lib/offers/service";
@@ -86,13 +87,13 @@ async function fetchPublishedProducts() {
     where: { status: "published" },
     include: {
       category: true,
-      images: { orderBy: { sortOrder: "asc" }, take: 2 },
+      images: { orderBy: { sortOrder: "asc" }, take: 1 },
     },
     orderBy: { updatedAt: "desc" },
   });
 }
 
-export async function getHomepageDiscoveryData() {
+async function loadHomepageDiscoveryData() {
   const [rawProducts, categories, rawOffers] = await Promise.all([
     fetchPublishedProducts(),
     listLaunchCategories(),
@@ -174,8 +175,14 @@ export async function getHomepageDiscoveryData() {
   };
 }
 
+export const getHomepageDiscoveryData = unstable_cache(
+  loadHomepageDiscoveryData,
+  ["homepage-discovery-v1"],
+  { revalidate: 60 }
+);
+
 export type HomepageDiscoveryData = Awaited<
-  ReturnType<typeof getHomepageDiscoveryData>
+  ReturnType<typeof loadHomepageDiscoveryData>
 >;
 
 export type HomepageSearchItem = HomepageDiscoveryData["searchIndex"][number];

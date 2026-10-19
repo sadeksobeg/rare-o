@@ -114,7 +114,8 @@ export function ProductThumb({
         src={path}
         alt={alt}
         fill
-        sizes="(max-width: 640px) 50vw, 33vw"
+        sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 240px"
+        quality={72}
         className="ro-media-zoom object-cover"
       />
     </div>
