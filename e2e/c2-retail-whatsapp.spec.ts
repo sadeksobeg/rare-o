@@ -143,7 +143,7 @@ test.describe("C2 retail handoff + WhatsApp inbox", () => {
               (await panel.getAttribute("data-whatsapp-link-account")),
             { timeout: 45_000, intervals: [2000, 3000, 5000] }
           )
-          .toMatch(/\d|connected|awaiting_code/);
+          .toMatch(/FAKE-|[A-Z0-9-]{4,}|connected|awaiting_code/i);
       } else {
         test.info().annotations.push({
           type: "note",

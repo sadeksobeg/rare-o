@@ -316,8 +316,15 @@ async function main(): Promise<void> {
       where: { id: "default" },
     });
     assert(health?.state === "CONNECTED", "connection health persisted");
+    // Ignore schema column names like qrDataUrl — assert no QR *payload* is stored.
+    const healthPayload = JSON.stringify({
+      detailSafe: health?.detailSafe,
+      pairingCode: (health as { pairingCode?: string | null })?.pairingCode,
+      qrDataUrl: (health as { qrDataUrl?: string | null })?.qrDataUrl,
+    });
     assert(
-      !JSON.stringify(health).toLowerCase().includes("qr"),
+      !/data:image|BEGIN:|pairingCode":"[A-Z0-9]{4,}/i.test(healthPayload) &&
+        !(health as { qrDataUrl?: string | null })?.qrDataUrl,
       "health row has no QR material"
     );
 

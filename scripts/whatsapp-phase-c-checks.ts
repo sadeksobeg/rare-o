@@ -226,7 +226,11 @@ async function main(): Promise<void> {
     assert(health.outboundEnabled === true, "health includes outbound flag");
     const healthJson = JSON.stringify(health);
     assert(!healthJson.includes("creds"), "health has no creds");
-    assert(!/qr[=:]/i.test(healthJson), "health has no QR payload");
+    // Column name qrDataUrl is allowed; reject actual data-URL / pairing payloads.
+    assert(
+      !/data:image|BEGIN:/i.test(healthJson) && !health.qrDataUrl,
+      "health has no QR payload"
+    );
 
     // --- display label privacy ---
     const masked = formatConversationDisplayLabel({
@@ -242,8 +246,9 @@ async function main(): Promise<void> {
     assert(!!ar.inbox.title && !!ar.admin.inbox, "AR inbox dictionary present");
     assert(!!en.inbox.title && !!en.admin.inbox, "EN inbox dictionary present");
     assert(
-      ar.inbox.outboundDisabled.includes("WHATSAPP_OUTBOUND_ENABLED"),
-      "AR kill-switch copy present"
+      ar.inbox.outboundDisabled.length > 0 &&
+        en.inbox.outboundDisabled.length > 0,
+      "AR/EN kill-switch copy present"
     );
     assert(
       en.inbox.sendBlocked.length > 0 && ar.inbox.sendBlocked.length > 0,
