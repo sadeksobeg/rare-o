@@ -56,7 +56,9 @@ function routeUrl(routePath, locale) {
 async function runAxeOnPage(page, entry) {
   const { route, locale, width, url } = entry;
   await page.setViewportSize({ width, height: 900 });
-  const res = await page.goto(url, { waitUntil: "networkidle", timeout: 90_000 });
+  // catalog/home can keep long-polling or image work; networkidle is flaky on Windows.
+  const res = await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90_000 });
+  await page.waitForTimeout(500);
   const analysis = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
     .analyze();

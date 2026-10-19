@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-19T06:39:44.491Z",
+  "at": "2026-10-19T09:41:16.853Z",
   "base": "http://127.0.0.1:3001",
   "threshold": 0.85,
   "runsPerRoute": 3,
@@ -7,7 +7,7 @@
     "width": 390,
     "height": 844
   },
-  "note": "Prefer `next start` for stable performance scores.",
+  "note": "D4 clean-install; each LH run in child process (Chrome crash isolation).",
   "routes": [
     {
       "name": "home",
@@ -16,61 +16,16 @@
         {
           "performance": 0.79,
           "accessibility": 0.99,
-          "fetchTime": "2026-10-19T06:37:24.569Z",
-          "opportunities": [
-            {
-              "id": "uses-responsive-images",
-              "title": "Properly size images",
-              "score": 0,
-              "savingsMs": 140
-            },
-            {
-              "id": "offscreen-images",
-              "title": "Defer offscreen images",
-              "score": 0.5,
-              "savingsMs": 0
-            }
-          ],
           "run": 1
         },
         {
           "performance": 0.79,
           "accessibility": 0.99,
-          "fetchTime": "2026-10-19T06:37:40.145Z",
-          "opportunities": [
-            {
-              "id": "uses-responsive-images",
-              "title": "Properly size images",
-              "score": 0,
-              "savingsMs": 110
-            },
-            {
-              "id": "offscreen-images",
-              "title": "Defer offscreen images",
-              "score": 0.5,
-              "savingsMs": 0
-            }
-          ],
           "run": 2
         },
         {
-          "performance": 0.8,
+          "performance": 0.79,
           "accessibility": 0.99,
-          "fetchTime": "2026-10-19T06:37:50.889Z",
-          "opportunities": [
-            {
-              "id": "uses-responsive-images",
-              "title": "Properly size images",
-              "score": 0,
-              "savingsMs": 110
-            },
-            {
-              "id": "offscreen-images",
-              "title": "Defer offscreen images",
-              "score": 0.5,
-              "savingsMs": 0
-            }
-          ],
           "run": 3
         }
       ],
@@ -78,20 +33,6 @@
         "performance": 0.79,
         "accessibility": 0.99
       },
-      "opportunities": [
-        {
-          "id": "uses-responsive-images",
-          "title": "Properly size images",
-          "score": 0,
-          "savingsMs": 140
-        },
-        {
-          "id": "offscreen-images",
-          "title": "Defer offscreen images",
-          "score": 0.5,
-          "savingsMs": 0
-        }
-      ],
       "passed": false
     },
     {
@@ -101,43 +42,16 @@
         {
           "performance": 0.78,
           "accessibility": 0.98,
-          "fetchTime": "2026-10-19T06:38:11.092Z",
-          "opportunities": [
-            {
-              "id": "uses-responsive-images",
-              "title": "Properly size images",
-              "score": 0.5,
-              "savingsMs": 0
-            }
-          ],
           "run": 1
         },
         {
           "performance": 0.78,
           "accessibility": 0.98,
-          "fetchTime": "2026-10-19T06:38:20.836Z",
-          "opportunities": [
-            {
-              "id": "uses-responsive-images",
-              "title": "Properly size images",
-              "score": 0.5,
-              "savingsMs": 0
-            }
-          ],
           "run": 2
         },
         {
-          "performance": 0.78,
+          "performance": 0.81,
           "accessibility": 0.98,
-          "fetchTime": "2026-10-19T06:38:30.446Z",
-          "opportunities": [
-            {
-              "id": "uses-responsive-images",
-              "title": "Properly size images",
-              "score": 0.5,
-              "savingsMs": 0
-            }
-          ],
           "run": 3
         }
       ],
@@ -145,121 +59,52 @@
         "performance": 0.78,
         "accessibility": 0.98
       },
-      "opportunities": [
-        {
-          "id": "uses-responsive-images",
-          "title": "Properly size images",
-          "score": 0.5,
-          "savingsMs": 0
-        }
-      ],
       "passed": false
     },
     {
       "name": "product",
-      "url": "http://127.0.0.1:3001/product/qanun-select?lang=ar",
+      "url": "http://127.0.0.1:3001/product/demo-string-instrument?lang=ar",
       "runs": [
         {
-          "performance": 0.81,
+          "performance": 0.77,
           "accessibility": 0.99,
-          "fetchTime": "2026-10-19T06:38:48.616Z",
-          "opportunities": [
-            {
-              "id": "uses-responsive-images",
-              "title": "Properly size images",
-              "score": 0.5,
-              "savingsMs": 0
-            }
-          ],
           "run": 1
+        },
+        {
+          "performance": 0.76,
+          "accessibility": 0.99,
+          "run": 2
         },
         {
           "performance": 0.77,
           "accessibility": 0.99,
-          "fetchTime": "2026-10-19T06:38:57.531Z",
-          "opportunities": [
-            {
-              "id": "uses-responsive-images",
-              "title": "Properly size images",
-              "score": 0.5,
-              "savingsMs": 0
-            }
-          ],
-          "run": 2
-        },
-        {
-          "performance": 0.78,
-          "accessibility": 0.99,
-          "fetchTime": "2026-10-19T06:39:06.523Z",
-          "opportunities": [
-            {
-              "id": "uses-responsive-images",
-              "title": "Properly size images",
-              "score": 0.5,
-              "savingsMs": 0
-            }
-          ],
           "run": 3
         }
       ],
       "median": {
-        "performance": 0.78,
+        "performance": 0.77,
         "accessibility": 0.99
       },
-      "opportunities": [
-        {
-          "id": "uses-responsive-images",
-          "title": "Properly size images",
-          "score": 0.5,
-          "savingsMs": 0
-        }
-      ],
-      "passed": false
+      "passed": false,
+      "note": "median from 3 child runs; Chrome teardown races ignored"
     },
     {
       "name": "request",
       "url": "http://127.0.0.1:3001/request?lang=ar",
       "runs": [
         {
-          "performance": 0.81,
+          "performance": 0.82,
           "accessibility": 0.99,
-          "fetchTime": "2026-10-19T06:39:23.430Z",
-          "opportunities": [
-            {
-              "id": "uses-responsive-images",
-              "title": "Properly size images",
-              "score": 0.5,
-              "savingsMs": 0
-            }
-          ],
           "run": 1
         },
         {
           "performance": 0.81,
           "accessibility": 0.99,
-          "fetchTime": "2026-10-19T06:39:31.055Z",
-          "opportunities": [
-            {
-              "id": "uses-responsive-images",
-              "title": "Properly size images",
-              "score": 0.5,
-              "savingsMs": 0
-            }
-          ],
           "run": 2
         },
         {
           "performance": 0.81,
           "accessibility": 0.99,
-          "fetchTime": "2026-10-19T06:39:38.569Z",
-          "opportunities": [
-            {
-              "id": "uses-responsive-images",
-              "title": "Properly size images",
-              "score": 0.5,
-              "savingsMs": 0
-            }
-          ],
           "run": 3
         }
       ],
@@ -267,14 +112,6 @@
         "performance": 0.81,
         "accessibility": 0.99
       },
-      "opportunities": [
-        {
-          "id": "uses-responsive-images",
-          "title": "Properly size images",
-          "score": 0.5,
-          "savingsMs": 0
-        }
-      ],
       "passed": false
     }
   ],

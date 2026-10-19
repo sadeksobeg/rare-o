@@ -1,19 +1,19 @@
 {
   "ok": true,
-  "at": "2026-10-19T06:03:24.353Z",
-  "backupDir": "backups\\restore-drill-1792389804345",
+  "at": "2026-10-19T08:54:41.677Z",
+  "backupDir": "backups\\restore-drill-1792400081667",
   "copies": [
     {
       "source": "prisma/dev.db",
-      "dest": "backups\\restore-drill-1792389804345\\dev.db"
+      "dest": "backups\\restore-drill-1792400081667\\dev.db"
     },
     {
       "source": "public/uploads",
-      "dest": "backups\\restore-drill-1792389804345\\uploads"
+      "dest": "backups\\restore-drill-1792400081667\\uploads"
     },
     {
       "source": ".wa-auth",
-      "dest": "backups\\restore-drill-1792389804345\\wa-auth"
+      "dest": "backups\\restore-drill-1792400081667\\wa-auth"
     }
   ],
   "fileCount": 2,

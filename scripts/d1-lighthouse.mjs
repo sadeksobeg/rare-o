@@ -92,7 +92,12 @@ async function resolveProductUrl() {
 
 async function runLighthouseOnce(url) {
   const chrome = await chromeLauncher.launch({
-    chromeFlags: ["--headless", "--no-sandbox", "--disable-gpu"],
+    chromeFlags: [
+      "--headless=new",
+      "--no-sandbox",
+      "--disable-gpu",
+      "--disable-dev-shm-usage",
+    ],
   });
   try {
     const result = await lighthouse(url, {
@@ -129,22 +134,40 @@ async function runLighthouseOnce(url) {
       opportunities,
     };
   } finally {
-    await chrome.kill();
+    try {
+      await chrome.kill();
+    } catch {
+      /* ignore */
+    }
   }
+}
+
+async function runLighthouseOnceRetried(url, attempts = 3) {
+  let lastErr;
+  for (let i = 0; i < attempts; i += 1) {
+    try {
+      return await runLighthouseOnce(url);
+    } catch (e) {
+      lastErr = e;
+      console.warn(`[d1-lh] run attempt ${i + 1}/${attempts} failed:`, e.message);
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+  }
+  throw lastErr;
 }
 
 async function auditRoute(name, url) {
   // Discard one cold-cache warmup so median reflects steady `next start` performance.
   console.log(`[d1-lh] ${name} warmup`);
   try {
-    await runLighthouseOnce(url);
+    await runLighthouseOnceRetried(url, 2);
   } catch (e) {
     console.warn(`[d1-lh] ${name} warmup skipped:`, e.message);
   }
   const runs = [];
   for (let i = 0; i < RUNS; i += 1) {
     console.log(`[d1-lh] ${name} run ${i + 1}/${RUNS}`);
-    runs.push({ ...(await runLighthouseOnce(url)), run: i + 1 });
+    runs.push({ ...(await runLighthouseOnceRetried(url)), run: i + 1 });
   }
   const perf = median(runs.map((r) => r.performance));
   const a11y = median(runs.map((r) => r.accessibility));

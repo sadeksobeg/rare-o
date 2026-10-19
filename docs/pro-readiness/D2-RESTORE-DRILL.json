@@ -1,12 +1,12 @@
 {
   "ok": true,
-  "at": "2026-10-19T06:32:49.257Z",
+  "at": "2026-10-19T08:54:34.200Z",
   "tools": "docker",
-  "backupDir": "backups\\restore-drill-pg-1792391569257",
+  "backupDir": "backups\\restore-drill-pg-1792400074199",
   "dump": {
     "file": "db.dump",
-    "bytes": 71938,
-    "sha256": "fde60f09cd72c0e2a8d59ae6a60f2183061848a4fe270940da857f87e4a26f99"
+    "bytes": 74778,
+    "sha256": "4f264d0648278f6ec41e979d86c5cb25e6ad6f46addfc7737bae019e45be39d5"
   },
   "uploads": {
     "source": "public/uploads",
@@ -33,26 +33,26 @@
     },
     {
       "table": "Customer",
-      "source": 16,
-      "restored": 16,
+      "source": 24,
+      "restored": 24,
       "ok": true
     },
     {
       "table": "DealProposal",
-      "source": 20,
-      "restored": 20,
+      "source": 22,
+      "restored": 22,
       "ok": true
     },
     {
       "table": "NegotiationEntry",
-      "source": 49,
-      "restored": 49,
+      "source": 54,
+      "restored": 54,
       "ok": true
     },
     {
       "table": "Product",
-      "source": 18,
-      "restored": 18,
+      "source": 21,
+      "restored": 21,
       "ok": true
     },
     {
@@ -69,38 +69,38 @@
     },
     {
       "table": "PublicCuratedOffer",
-      "source": 10,
-      "restored": 10,
+      "source": 11,
+      "restored": 11,
       "ok": true
     },
     {
       "table": "RetailHandoffEvent",
-      "source": 43,
-      "restored": 43,
+      "source": 57,
+      "restored": 57,
       "ok": true
     },
     {
       "table": "RetailRequest",
-      "source": 16,
-      "restored": 16,
+      "source": 24,
+      "restored": 24,
       "ok": true
     },
     {
       "table": "RetailRequestLine",
-      "source": 16,
-      "restored": 16,
+      "source": 24,
+      "restored": 24,
       "ok": true
     },
     {
       "table": "TraderAccount",
-      "source": 6,
-      "restored": 6,
+      "source": 8,
+      "restored": 8,
       "ok": true
     },
     {
       "table": "TraderNotification",
-      "source": 22,
-      "restored": 22,
+      "source": 27,
+      "restored": 27,
       "ok": true
     },
     {
@@ -129,20 +129,20 @@
     },
     {
       "table": "WholesaleRequest",
-      "source": 14,
-      "restored": 14,
+      "source": 16,
+      "restored": 16,
       "ok": true
     },
     {
       "table": "WholesaleRequestEvent",
-      "source": 46,
-      "restored": 46,
+      "source": 53,
+      "restored": 53,
       "ok": true
     },
     {
       "table": "WholesaleRequestLine",
-      "source": 14,
-      "restored": 14,
+      "source": 16,
+      "restored": 16,
       "ok": true
     },
     {
