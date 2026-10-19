@@ -17,6 +17,9 @@
     "test:c1-audit": "node scripts/c1-page-audit.mjs",
     "test:c6-axe-lh": "node scripts/c6-axe-lighthouse.mjs",
     "test:c6-restore": "node scripts/c6-restore-drill.mjs",
+    "test:d1-axe": "node scripts/d1-axe-full.mjs",
+    "test:d1-restore": "node scripts/d1-restore-drill.mjs",
+    "test:d1-lh": "node scripts/d1-lighthouse.mjs",
     "test:e2e": "node node_modules/@playwright/test/cli.js test",
     "db:reset": "node node_modules/prisma/build/index.js migrate reset --force",
     "test:slice-a-kpi": "node node_modules/tsx/dist/cli.mjs scripts/slice-a-kpi-retail.ts",
@@ -59,6 +62,7 @@
     "lighthouse": "^12.2.1",
     "prisma": "6.19.3",
     "puppeteer-core": "^23.11.1",
+    "sharp": "^0.33.5",
     "tailwindcss": "^4",
     "tsx": "^4.19.3",
     "typescript": "^5"

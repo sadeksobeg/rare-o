@@ -69,6 +69,8 @@ export default async function AdminWholesalePage({
           tabsLabel={u.filterTabs}
           searchLabel={u.search}
           searchPlaceholder={u.searchPlaceholder}
+          resultCount={filtered.length}
+          resultLabel={u.resultsLabel}
           tabs={[
             { id: "all", label: u.filterAll, count: counts.all },
             {

@@ -21,6 +21,21 @@ export async function listLaunchCategories() {
   });
 }
 
+/** Every category (launch + admin-created), ordered for admin pickers. */
+export async function listAllCategories() {
+  return prisma.category.findMany({
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+  });
+}
+
+/** Admin categories table: all categories with product counts. */
+export async function listAdminCategories() {
+  return prisma.category.findMany({
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    include: { _count: { select: { products: true } } },
+  });
+}
+
 export async function listAdminProducts() {
   return prisma.product.findMany({
     include: { category: true, images: { orderBy: { sortOrder: "asc" } } },
@@ -138,7 +153,7 @@ export async function createProduct(input: ProductUpsertInput) {
   const category = await prisma.category.findUnique({
     where: { id: input.categoryId },
   });
-  if (!category || !isLaunchCategorySlug(category.slug)) {
+  if (!category) {
     throw new Error("INVALID_CATEGORY");
   }
 
@@ -169,7 +184,7 @@ export async function updateProduct(id: string, input: ProductUpsertInput) {
   const category = await prisma.category.findUnique({
     where: { id: input.categoryId },
   });
-  if (!category || !isLaunchCategorySlug(category.slug)) {
+  if (!category) {
     throw new Error("INVALID_CATEGORY");
   }
 
@@ -204,7 +219,7 @@ export async function updateCategoryLabels(input: {
   sortOrder: number;
 }) {
   const existing = await prisma.category.findUnique({ where: { id: input.id } });
-  if (!existing || !isLaunchCategorySlug(existing.slug)) {
+  if (!existing) {
     throw new Error("INVALID_CATEGORY");
   }
   return prisma.category.update({
@@ -217,7 +232,36 @@ export async function updateCategoryLabels(input: {
   });
 }
 
-/** Creation of new category slugs is intentionally not exposed in Week 2 */
-export function assertNoUnrestrictedCategoryCreate(): void {
-  // Extension boundary: Week 2 forbids unrestricted create-category workflows.
+/** AD-08 — admin creates a category (slug is unique and immutable after create). */
+export async function createCategory(input: {
+  slug: string;
+  nameAr: string;
+  nameEn: string;
+  sortOrder: number;
+}) {
+  const clash = await prisma.category.findUnique({ where: { slug: input.slug } });
+  if (clash) throw new Error("SLUG_EXISTS");
+  return prisma.category.create({
+    data: {
+      slug: input.slug,
+      nameAr: input.nameAr,
+      nameEn: input.nameEn,
+      sortOrder: input.sortOrder,
+    },
+  });
+}
+
+/**
+ * AD-08 — delete a category. Rejected when products reference it, and for
+ * the core launch categories the storefront depends on.
+ */
+export async function deleteCategory(id: string) {
+  const existing = await prisma.category.findUnique({
+    where: { id },
+    include: { _count: { select: { products: true } } },
+  });
+  if (!existing) throw new Error("INVALID_CATEGORY");
+  if (isLaunchCategorySlug(existing.slug)) throw new Error("CATEGORY_LAUNCH");
+  if (existing._count.products > 0) throw new Error("CATEGORY_HAS_PRODUCTS");
+  return prisma.category.delete({ where: { id } });
 }

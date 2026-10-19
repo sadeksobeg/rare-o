@@ -4,7 +4,7 @@ export type BrandWallpaperTone = "cream" | "ink";
 
 /**
  * Cream-surface identity wallpaper (storefront + admin/trader portal shells).
- * Real brand mark stamps + filled notes/plectrum — never on hero/inverse.
+ * Vector-only filled notes/beam/plectrum — never on hero/inverse.
  */
 export function BrandWallpaper({
   tone = "cream",
@@ -77,49 +77,6 @@ export function BrandWallpaper({
             height="400"
             patternUnits="userSpaceOnUse"
           >
-            <image
-              href="/brand/mark-small.png"
-              x="28"
-              y="36"
-              width="56"
-              height="56"
-              opacity="0.14"
-              preserveAspectRatio="xMidYMid meet"
-            />
-            <g transform="rotate(18 254 204)">
-              <image
-                href="/brand/mark-small.png"
-                x="230"
-                y="180"
-                width="48"
-                height="48"
-                opacity="0.1"
-                preserveAspectRatio="xMidYMid meet"
-              />
-            </g>
-            <g transform="rotate(-14 270 48)">
-              <image
-                href="/brand/mark-small.png"
-                x="250"
-                y="28"
-                width="40"
-                height="40"
-                opacity="0.09"
-                preserveAspectRatio="xMidYMid meet"
-              />
-            </g>
-            <g transform="rotate(-8 82 302)">
-              <image
-                href="/brand/mark-small.png"
-                x="60"
-                y="280"
-                width="44"
-                height="44"
-                opacity="0.11"
-                preserveAspectRatio="xMidYMid meet"
-              />
-            </g>
-
             <g fill={fill}>
               <use
                 href={`#${patternId}-note`}

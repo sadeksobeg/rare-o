@@ -1,13 +1,35 @@
 {
   "ok": true,
-  "at": "2026-10-18T13:33:40.252Z",
-  "source": "prisma/dev.db",
-  "restoredPath": "backups\\restore-drill-1792330420206\\restored.db",
-  "counts": {
-    "products": 14,
-    "deals": 14,
-    "retail": 7,
-    "traders": 5,
-    "waConv": 1
-  }
+  "at": "2026-10-19T06:03:24.353Z",
+  "backupDir": "backups\\restore-drill-1792389804345",
+  "copies": [
+    {
+      "source": "prisma/dev.db",
+      "dest": "backups\\restore-drill-1792389804345\\dev.db"
+    },
+    {
+      "source": "public/uploads",
+      "dest": "backups\\restore-drill-1792389804345\\uploads"
+    },
+    {
+      "source": ".wa-auth",
+      "dest": "backups\\restore-drill-1792389804345\\wa-auth"
+    }
+  ],
+  "fileCount": 2,
+  "totalBytes": 425984,
+  "checksums": {
+    "dev.db": "8e0f667cbc0b0211f92cad60b8a776f53c7609db441c84ccdbcd07791afa32fa",
+    "uploads/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "files": [
+    {
+      "path": "dev.db",
+      "bytes": 425984
+    },
+    {
+      "path": "uploads/.gitkeep",
+      "bytes": 0
+    }
+  ]
 }

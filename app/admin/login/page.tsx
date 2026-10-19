@@ -24,7 +24,11 @@ export default async function AdminLoginPage() {
       loginErrorLabel={dict.auth.loginError}
       inverse
       localeSlot={
-        <AdminLocaleToggle locale={locale} label={dict.common.language} />
+        <AdminLocaleToggle
+          locale={locale}
+          label={dict.common.language}
+          tone="on-dark"
+        />
       }
     />
   );

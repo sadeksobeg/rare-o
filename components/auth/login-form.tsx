@@ -90,7 +90,7 @@ export function LoginForm({
             <p className="font-display text-sm tracking-[0.28em]">{brand}</p>
             <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
             {hint ? (
-              <div className="text-sm text-ro-muted">{hint}</div>
+              <div className="text-sm text-[var(--ro-ink-700)]">{hint}</div>
             ) : null}
           </div>
 

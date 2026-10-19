@@ -8,7 +8,10 @@ import {
   getInboxHealthView,
   markConversationRead,
 } from "@/lib/whatsapp/messaging/inbox";
-import { getBusinessContextForConversation } from "@/lib/whatsapp/messaging/linking";
+import {
+  getBusinessContextForConversation,
+  listRecentLinkAudits,
+} from "@/lib/whatsapp/messaging/linking";
 import { notFound } from "next/navigation";
 
 export default async function AdminWhatsAppConversationPage({
@@ -18,10 +21,11 @@ export default async function AdminWhatsAppConversationPage({
 }) {
   const { id } = await params;
   const { locale, dict } = await getRequestDictionary();
-  const [conversation, health, context] = await Promise.all([
+  const [conversation, health, context, audits] = await Promise.all([
     getInboxConversation(id),
     getInboxHealthView(),
     getBusinessContextForConversation(id),
+    listRecentLinkAudits(id, 5),
   ]);
   if (!conversation) notFound();
 
@@ -33,6 +37,7 @@ export default async function AdminWhatsAppConversationPage({
     conversationId: conversation.id,
     link: conversation.link,
     context,
+    audits,
     dict,
     locale,
   } as const;

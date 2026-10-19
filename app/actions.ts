@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import {
   adminLoginSchema,
+  categoryCreateSchema,
   categoryLabelUpdateSchema,
   productUpsertSchema,
   promoBandUpsertSchema,
@@ -19,7 +20,9 @@ import {
 } from "@/lib/auth/admin-session";
 import { prisma } from "@/lib/db/prisma";
 import {
+  createCategory,
   createProduct,
+  deleteCategory,
   updateCategoryLabels,
   updateProduct,
 } from "@/lib/catalog/service";
@@ -177,7 +180,7 @@ export async function upsertProductAction(
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Save failed";
     if (msg === "INVALID_CATEGORY") {
-      return { ok: false, error: "Category must be one of the two launch categories" };
+      return { ok: false, error: "Category not found" };
     }
     if (msg.includes("Unique constraint")) {
       return { ok: false, error: "Slug already exists" };
@@ -295,6 +298,92 @@ export async function updateCategoryFormAction(
 
   await updateCategoryLabels(parsed.data);
   redirect("/admin/categories");
+}
+
+function revalidateCategoryPaths() {
+  revalidatePath("/admin/categories");
+  revalidatePath("/admin/products");
+  revalidatePath("/catalog");
+}
+
+/** AD-08 — edit labels + sortOrder (dialog form; returns a result, no redirect). */
+export async function updateCategoryAction(
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  try {
+    await requireAdminSession();
+  } catch {
+    return { ok: false, error: "Unauthorized" };
+  }
+  const parsed = categoryLabelUpdateSchema.safeParse({
+    id: formData.get("id"),
+    nameAr: formData.get("nameAr"),
+    nameEn: formData.get("nameEn"),
+    sortOrder: formData.get("sortOrder"),
+  });
+  if (!parsed.success) return { ok: false, error: "CATEGORY_INVALID" };
+  try {
+    await updateCategoryLabels(parsed.data);
+  } catch {
+    return { ok: false, error: "CATEGORY_INVALID" };
+  }
+  revalidateCategoryPaths();
+  return { ok: true };
+}
+
+/** AD-08 — create a category. */
+export async function createCategoryAction(
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  try {
+    await requireAdminSession();
+  } catch {
+    return { ok: false, error: "Unauthorized" };
+  }
+  const parsed = categoryCreateSchema.safeParse({
+    slug: formData.get("slug"),
+    nameAr: formData.get("nameAr"),
+    nameEn: formData.get("nameEn"),
+    sortOrder: formData.get("sortOrder") || "0",
+  });
+  if (!parsed.success) return { ok: false, error: "CATEGORY_INVALID" };
+  try {
+    await createCategory(parsed.data);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "";
+    if (msg === "SLUG_EXISTS" || msg.includes("Unique constraint")) {
+      return { ok: false, error: "CATEGORY_SLUG_EXISTS" };
+    }
+    return { ok: false, error: "CATEGORY_INVALID" };
+  }
+  revalidateCategoryPaths();
+  return { ok: true };
+}
+
+/** AD-08 — delete a category; rejected server-side when it still has products. */
+export async function deleteCategoryAction(
+  formData: FormData
+): Promise<ActionResult> {
+  try {
+    await requireAdminSession();
+  } catch {
+    return { ok: false, error: "Unauthorized" };
+  }
+  const id = String(formData.get("id") || "");
+  if (!id) return { ok: false, error: "CATEGORY_INVALID" };
+  try {
+    await deleteCategory(id);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "";
+    if (msg === "CATEGORY_HAS_PRODUCTS" || msg === "CATEGORY_LAUNCH") {
+      return { ok: false, error: msg };
+    }
+    return { ok: false, error: "CATEGORY_INVALID" };
+  }
+  revalidateCategoryPaths();
+  return { ok: true };
 }
 
 export async function createRetailRequestAction(

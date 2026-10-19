@@ -136,6 +136,19 @@ export const categoryLabelUpdateSchema = z.object({
   sortOrder: z.coerce.number().int().min(0).max(100),
 });
 
+export const categoryCreateSchema = z.object({
+  slug: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .min(2)
+    .max(80)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  nameAr: z.string().trim().min(1).max(120),
+  nameEn: z.string().trim().min(1).max(120),
+  sortOrder: z.coerce.number().int().min(0).max(100),
+});
+
 export const cartLineSchema = z.object({
   productId: z.string().min(1),
   quantity: z.coerce.number().int().min(1).max(99),

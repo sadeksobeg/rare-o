@@ -1,4 +1,4 @@
-import { BrandWallpaper } from "@/components/brand";
+import { DeferredBrandWallpaper } from "@/components/brand/deferred-wallpaper";
 import { StorefrontHeader } from "@/components/storefront/header";
 import { StorefrontFooter } from "@/components/storefront/footer";
 import { StorefrontProviders } from "@/components/storefront/providers";
@@ -16,7 +16,7 @@ export default async function StorefrontLayout({
     <StorefrontProviders toastDismissLabel={dict.common.toastDismiss}>
       {/* No overflow-x-clip here: it forces y-clip and crops hero instruments */}
       <div className="relative flex min-h-screen flex-col bg-[var(--ro-sand-100)] text-ro-ink">
-        <BrandWallpaper
+        <DeferredBrandWallpaper
           tone="cream"
           patternId="ro-sf-wallpaper"
           className="z-0 opacity-[0.85]"

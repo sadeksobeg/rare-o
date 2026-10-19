@@ -35,6 +35,7 @@ export function EditorialSplit({
               src={imageSrc}
               alt={imageAlt ?? ""}
               fill
+              loading="lazy"
               className="object-cover"
               sizes="(max-width: 1024px) 100vw, 58vw"
             />

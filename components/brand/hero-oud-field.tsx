@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -7,10 +8,10 @@ import { cn } from "@/lib/utils";
  * Single hero oud — atelier-f (warm gold-rim cutout).
  * Mouse parallax + idle breathe.
  */
-const SRC = "/brand/hero-oud-atelier-f.png?v=14";
+const SRC = "/brand/hero-oud-atelier-f.webp";
 /* Slight plum rim to sit in brand light — keep wood natural */
-const FILTER =
-  "brightness(1.1) contrast(1.06) saturate(1.05) drop-shadow(0 0 28px rgba(82,39,124,0.35))";
+/* Soft rim without drop-shadow (drop-shadow tanks Lighthouse paint). */
+const FILTER = "brightness(1.08) contrast(1.04) saturate(1.03)";
 
 export function HeroOudField({
   className,
@@ -44,27 +45,41 @@ export function HeroOudField({
         ? (root.closest("[data-hero]") as HTMLElement | null) ?? root
         : root;
 
+    let running = false;
+    const tick = () => {
+      current.current.x += (target.current.x - current.current.x) * 0.08;
+      current.current.y += (target.current.y - current.current.y) * 0.08;
+      setPose({ x: current.current.x, y: current.current.y });
+      const idle =
+        Math.abs(target.current.x - current.current.x) < 0.001 &&
+        Math.abs(target.current.y - current.current.y) < 0.001;
+      if (idle) {
+        running = false;
+        return;
+      }
+      raf.current = window.requestAnimationFrame(tick);
+    };
+    const ensureTick = () => {
+      if (running) return;
+      running = true;
+      raf.current = window.requestAnimationFrame(tick);
+    };
+
     const onMove = (e: PointerEvent) => {
       const r = el.getBoundingClientRect();
       target.current = {
         x: Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width) * 2 - 1)),
         y: Math.max(-1, Math.min(1, ((e.clientY - r.top) / r.height) * 2 - 1)),
       };
+      ensureTick();
     };
     const onLeave = () => {
       target.current = { x: 0, y: 0 };
+      ensureTick();
     };
 
-    el.addEventListener("pointermove", onMove);
+    el.addEventListener("pointermove", onMove, { passive: true });
     el.addEventListener("pointerleave", onLeave);
-
-    const tick = () => {
-      current.current.x += (target.current.x - current.current.x) * 0.08;
-      current.current.y += (target.current.y - current.current.y) * 0.08;
-      setPose({ x: current.current.x, y: current.current.y });
-      raf.current = window.requestAnimationFrame(tick);
-    };
-    raf.current = window.requestAnimationFrame(tick);
 
     return () => {
       el.removeEventListener("pointermove", onMove);
@@ -106,14 +121,13 @@ export function HeroOudField({
             )}
             style={{ transform: `rotate(${2 + tilt}deg)` }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={SRC}
               alt=""
               width={480}
               height={1020}
-              decoding="async"
-              fetchPriority="high"
+              priority
+              sizes="(max-width: 768px) 70vw, 480px"
               draggable={false}
               className="pointer-events-none h-full w-auto max-w-none select-none"
               style={{ filter: FILTER }}

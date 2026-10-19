@@ -393,6 +393,22 @@ type Dict = {
     categoryNameAr: string;
     categoryNameEn: string;
     categorySortOrder: string;
+    resultsLabel: string;
+    categorySlug: string;
+    categoryProducts: string;
+    categoryActions: string;
+    categoryCreate: string;
+    categoryEdit: string;
+    categoryDelete: string;
+    categoryDeleteConfirm: string;
+    categoryDeleteBlocked: string;
+    categoryDeleteLaunch: string;
+    categorySlugExists: string;
+    categoryInvalid: string;
+    categorySaved: string;
+    customerWaTitle: string;
+    customerWaEmpty: string;
+    customerWaOpen: string;
     kindCatalog: string;
     kindNonCatalog: string;
     modeRequestQuote: string;
@@ -778,6 +794,11 @@ type Dict = {
     linkClear: string;
     linkChange: string;
     linkedAs: string;
+    linkHistory: string;
+    linkAuditSet: string;
+    linkAuditChange: string;
+    linkAuditClear: string;
+    linkConfirmHint: string;
     openLinkedRecord: string;
     typeRetail: string;
     typeDeal: string;
@@ -1272,7 +1293,7 @@ const ar: Dict = {
       "جهات الاتصال الناتجة عن طلبات التجزئة. يمكن البحث بالهاتف وهو ليس هوية فريدة.",
     tradersLead: "حسابات التجّار تُنشأ من الإدارة فقط. لا تسجيل عام.",
     categoriesLead:
-      "مجموعة الإطلاق فقط (الآلات الوترية، الإكسسوارات). يمكن تعديل التسميات والترتيب؛ إضافة فئات جديدة غير متاحة.",
+      "إدارة فئات الكتالوج: إنشاء وتعديل الأسماء والترتيب. لا يمكن حذف فئة تحتوي على منتجات.",
     offersLead: "عروض عامة منسّقة من الإدارة — ليست متاجر للتجّار.",
     newOffer: "عرض جديد",
     promosLead:
@@ -1321,6 +1342,22 @@ const ar: Dict = {
     categoryNameAr: "الاسم (عربي)",
     categoryNameEn: "الاسم (إنجليزي)",
     categorySortOrder: "ترتيب العرض",
+    resultsLabel: "نتيجة",
+    categorySlug: "المعرّف (slug)",
+    categoryProducts: "المنتجات",
+    categoryActions: "إجراءات",
+    categoryCreate: "فئة جديدة",
+    categoryEdit: "تعديل الفئة",
+    categoryDelete: "حذف",
+    categoryDeleteConfirm: "حذف هذه الفئة نهائياً؟",
+    categoryDeleteBlocked: "لا يمكن حذف فئة تحتوي على منتجات. انقل المنتجات أو احذفها أولاً.",
+    categoryDeleteLaunch: "فئات الإطلاق الأساسية لا تُحذف.",
+    categorySlugExists: "هذا المعرّف مستخدم بالفعل.",
+    categoryInvalid: "بيانات الفئة غير صالحة.",
+    categorySaved: "تم الحفظ.",
+    customerWaTitle: "محادثات واتساب",
+    customerWaEmpty: "لا توجد محادثات واتساب مرتبطة برقم هذا العميل.",
+    customerWaOpen: "فتح المحادثة",
     kindCatalog: "من الكتالوج",
     kindNonCatalog: "خارج الكتالوج",
     modeRequestQuote: "طلب عرض سعر",
@@ -1784,6 +1821,11 @@ const ar: Dict = {
     linkClear: "إزالة الربط",
     linkChange: "تغيير الربط",
     linkedAs: "مرتبط بـ",
+    linkHistory: "سجل الربط",
+    linkAuditSet: "ربط",
+    linkAuditChange: "تغيير الربط",
+    linkAuditClear: "إزالة الربط",
+    linkConfirmHint: "الربط لا يغيّر حالة السجل التجاري.",
     openLinkedRecord: "فتح السجل في الإدارة",
     typeRetail: "طلب تجزئة",
     typeDeal: "اقتراح صفقة",
@@ -2284,7 +2326,7 @@ const en: Dict = {
       "Contact records from retail requests. Phone is searchable but not a unique identity.",
     tradersLead: "Accounts are provisioned by admin only. No public registration.",
     categoriesLead:
-      "Launch set only (String Musical Instruments, Accessories). Labels and order can be edited; adding categories is not available.",
+      "Manage catalog categories: create, edit names and order. A category with products cannot be deleted.",
     offersLead: "Admin-curated public presentations — not trader storefronts.",
     newOffer: "New offer",
     promosLead:
@@ -2334,6 +2376,23 @@ const en: Dict = {
     categoryNameAr: "Name (Arabic)",
     categoryNameEn: "Name (English)",
     categorySortOrder: "Sort order",
+    resultsLabel: "results",
+    categorySlug: "Slug",
+    categoryProducts: "Products",
+    categoryActions: "Actions",
+    categoryCreate: "New category",
+    categoryEdit: "Edit category",
+    categoryDelete: "Delete",
+    categoryDeleteConfirm: "Delete this category permanently?",
+    categoryDeleteBlocked:
+      "A category with products cannot be deleted. Move or delete its products first.",
+    categoryDeleteLaunch: "Core launch categories cannot be deleted.",
+    categorySlugExists: "That slug is already in use.",
+    categoryInvalid: "Invalid category data.",
+    categorySaved: "Saved.",
+    customerWaTitle: "WhatsApp conversations",
+    customerWaEmpty: "No WhatsApp conversations match this customer's phone.",
+    customerWaOpen: "Open conversation",
     kindCatalog: "Catalog",
     kindNonCatalog: "Non-catalog",
     modeRequestQuote: "Request quote",
@@ -2802,6 +2861,11 @@ const en: Dict = {
     linkClear: "Remove link",
     linkChange: "Change link",
     linkedAs: "Linked as",
+    linkHistory: "Link history",
+    linkAuditSet: "Linked",
+    linkAuditChange: "Link changed",
+    linkAuditClear: "Link removed",
+    linkConfirmHint: "Linking never changes the business record status.",
     openLinkedRecord: "Open admin record",
     typeRetail: "Retail request",
     typeDeal: "Deal proposal",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { upsertProductAction, type ActionResult } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/text-field";
@@ -44,6 +44,7 @@ export function ProductForm({
   labels,
   locale,
   showCompareAtPrice = false,
+  imageCount = 0,
 }: {
   categories: CategoryOption[];
   product?: ProductValues;
@@ -51,9 +52,23 @@ export function ProductForm({
   locale: Locale;
   /** Gated by RO_PROMO_FEATURES — default hidden. */
   showCompareAtPrice?: boolean;
+  /** Images already attached to the product (0 on create). */
+  imageCount?: number;
 }) {
   const f = labels.form;
   const [state, action, pending] = useActionState(upsertProductAction, initial);
+  const [nameAr, setNameAr] = useState(product?.nameAr ?? "");
+  const [status, setStatus] = useState(product?.status ?? "draft");
+
+  const hasNameAr = nameAr.trim().length > 0;
+  const hasImage = imageCount > 0;
+  const canPublish = hasNameAr && hasImage;
+  const publishBlocked = status === "published" && !canPublish;
+  const publishBlockedText = !hasNameAr
+    ? f.publishNeedsNameAr
+    : !hasImage
+      ? f.publishNeedsImage
+      : null;
 
   const categoryName = (c: CategoryOption) =>
     (locale === "ar" ? c.nameAr || c.nameEn : c.nameEn || c.nameAr) || c.slug;
@@ -82,7 +97,8 @@ export function ProductForm({
         <TextField
           name="nameAr"
           label={f.productNameAr}
-          defaultValue={product?.nameAr}
+          value={nameAr}
+          onChange={(e) => setNameAr(e.target.value)}
           dir="rtl"
           dense
         />
@@ -178,12 +194,17 @@ export function ProductForm({
           <span className={controlLabelTextClass}>{f.statusLabel}</span>
           <select
             name="status"
-            defaultValue={product?.status ?? "draft"}
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
             aria-describedby="publish-rules-help"
             className={controlClass}
           >
             {(["draft", "published", "archived"] as const).map((s) => (
-              <option key={s} value={s}>
+              <option
+                key={s}
+                value={s}
+                disabled={s === "published" && !canPublish && status !== "published"}
+              >
                 {labels.productStatus[s] ?? s}
               </option>
             ))}
@@ -192,7 +213,7 @@ export function ProductForm({
             id="publish-rules-help"
             className="block text-xs text-ro-muted"
           >
-            {f.publishRulesHint}
+            {publishBlockedText ?? f.publishRulesHint}
           </span>
         </label>
         <label className={controlLabelClass}>
@@ -261,9 +282,16 @@ export function ProductForm({
           {errorText}
         </p>
       ) : null}
-      <Button type="submit" loading={pending}>
-        {pending ? f.saving : f.saveProduct}
-      </Button>
+      {publishBlocked && publishBlockedText ? (
+        <p role="alert" className={formErrorClass}>
+          {publishBlockedText}
+        </p>
+      ) : null}
+      <div className="z-20 border-t border-ro-line bg-ro-surface/95 py-3 backdrop-blur md:sticky md:bottom-0">
+        <Button type="submit" loading={pending} disabled={publishBlocked}>
+          {pending ? f.saving : f.saveProduct}
+        </Button>
+      </div>
     </form>
   );
 }

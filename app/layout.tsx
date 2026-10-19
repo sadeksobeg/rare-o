@@ -11,7 +11,7 @@ import { dirForLocale } from "@/lib/i18n/config";
 
 const amiri = Amiri({
   subsets: ["arabic", "latin"],
-  weight: ["400", "700"],
+  weight: ["400"],
   variable: "--font-amiri",
   display: "swap",
 });
@@ -54,7 +54,13 @@ export default async function RootLayout({
     <html
       lang={locale}
       dir={dir}
-      className={`${amiri.variable} ${cormorant.variable} ${source.variable} ${plexAr.variable}`}
+      className={
+        // Only the active locale's font variables are applied; unused vars
+        // fall back via globals.css so the other locale's files never load.
+        locale === "ar"
+          ? `${amiri.variable} ${plexAr.variable}`
+          : `${cormorant.variable} ${source.variable}`
+      }
     >
       <body className="min-h-screen antialiased">
         <a href="#main-content" className="ro-skip-link">

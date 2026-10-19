@@ -14,8 +14,8 @@ const sizeMap: Record<MarkSize, string> = {
 };
 
 const srcMap: Record<MarkVariant, string> = {
-  small: "/brand/mark-small.png",
-  master: "/brand/mark-master.png",
+  small: "/brand/mark-small.webp",
+  master: "/brand/mark-master.webp",
 };
 
 export function BrandMark({

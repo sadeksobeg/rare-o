@@ -1,66 +1,38 @@
 {
+  "at": "2026-10-19T06:13:24.221Z",
   "base": "http://127.0.0.1:3001",
   "threshold": 0.85,
+  "runsPerRoute": 3,
   "mobile": {
     "width": 390,
     "height": 844
   },
-  "note": "Run against `next start` (production) for perf thresholds; next dev is expected to score lower.",
+  "note": "Prefer `next start` for stable performance scores.",
   "routes": [
     {
       "name": "home",
-      "path": "/",
-      "locale": "ar",
       "url": "http://127.0.0.1:3001/?lang=ar",
-      "performance": 0.69,
-      "accessibility": 0.99,
-      "fetchTime": "2026-10-18T13:44:54.812Z"
+      "error": "Protocol error (Storage.getUsageAndQuota): Protocol error (Storage.getUsageAndQuota): Quota information is not available",
+      "passed": false
     },
     {
       "name": "catalog",
-      "path": "/catalog",
-      "locale": "ar",
       "url": "http://127.0.0.1:3001/catalog?lang=ar",
-      "performance": 0.8,
-      "accessibility": 0.98,
-      "fetchTime": "2026-10-18T13:45:11.329Z"
+      "error": "ENOSPC: no space left on device, open 'C:\\Users\\ASUS\\AppData\\Local\\Temp\\lighthouse.25709488\\chrome.pid'",
+      "passed": false
     },
     {
       "name": "product",
-      "path": "/catalog",
-      "locale": "ar",
-      "note": "catalog proxy if no product URL",
-      "url": "http://127.0.0.1:3001/catalog?lang=ar",
-      "performance": 0.77,
-      "accessibility": 0.98,
-      "fetchTime": "2026-10-18T13:45:24.608Z"
+      "url": "http://127.0.0.1:3001/product/demo-string-instrument?lang=ar",
+      "error": "ENOSPC: no space left on device, open 'C:\\Users\\ASUS\\AppData\\Local\\Temp\\lighthouse.25806158\\chrome.pid'",
+      "passed": false
     },
     {
       "name": "request",
-      "path": "/request",
-      "locale": "ar",
       "url": "http://127.0.0.1:3001/request?lang=ar",
-      "performance": 0.81,
-      "accessibility": 0.99,
-      "fetchTime": "2026-10-18T13:45:34.056Z"
-    },
-    {
-      "name": "admin_login",
-      "path": "/admin/login",
-      "locale": "en",
-      "url": "http://127.0.0.1:3001/admin/login?lang=en",
-      "performance": 0.94,
-      "accessibility": 0.94,
-      "fetchTime": "2026-10-18T13:45:42.390Z"
-    },
-    {
-      "name": "trader_login",
-      "path": "/trader/login",
-      "locale": "en",
-      "url": "http://127.0.0.1:3001/trader/login?lang=en",
-      "performance": 0.9,
-      "accessibility": 0.94,
-      "fetchTime": "2026-10-18T13:45:49.890Z"
+      "error": "ENOSPC: no space left on device, open 'C:\\Users\\ASUS\\AppData\\Local\\Temp\\lighthouse.32099089\\chrome.pid'",
+      "passed": false
     }
-  ]
+  ],
+  "passed": false
 }

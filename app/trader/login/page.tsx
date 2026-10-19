@@ -31,7 +31,7 @@ export default async function TraderLoginPage() {
               href={accountRequestHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-ro-plum hover:underline"
+              className="font-medium text-[var(--ro-plum-900)] underline-offset-2 hover:underline"
             >
               {dict.trader.accountRequestHelp}
             </a>
@@ -45,7 +45,11 @@ export default async function TraderLoginPage() {
       hidePasswordLabel={dict.auth.hidePassword}
       inverse
       localeSlot={
-        <AdminLocaleToggle locale={locale} label={dict.common.language} />
+        <AdminLocaleToggle
+          locale={locale}
+          label={dict.common.language}
+          tone="on-dark"
+        />
       }
     />
   );

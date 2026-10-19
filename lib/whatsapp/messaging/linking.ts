@@ -286,6 +286,46 @@ function toIso(d: Date): string {
   return d.toISOString();
 }
 
+export type LinkAuditEntry = {
+  id: string;
+  action: "set" | "change" | "clear";
+  previousLinkType: string | null;
+  newLinkType: string;
+  newLinkId: string | null;
+  createdAt: string;
+};
+
+/** Most recent link/unlink audit rows for a conversation (newest first). */
+export async function listRecentLinkAudits(
+  conversationId: string,
+  limit = 5,
+  db: DbClient = defaultPrisma
+): Promise<LinkAuditEntry[]> {
+  const rows = await db.whatsAppLinkAudit.findMany({
+    where: { conversationId: conversationId.trim() },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    select: {
+      id: true,
+      action: true,
+      previousLinkType: true,
+      newLinkType: true,
+      newLinkId: true,
+      createdAt: true,
+    },
+  });
+  return rows.map((r) => ({
+    id: r.id,
+    action: (r.action === "change" || r.action === "clear"
+      ? r.action
+      : "set") as LinkAuditEntry["action"],
+    previousLinkType: r.previousLinkType,
+    newLinkType: r.newLinkType,
+    newLinkId: r.newLinkId,
+    createdAt: toIso(r.createdAt),
+  }));
+}
+
 /**
  * Load compact business context for a linked conversation.
  * Domain status is the source of truth — never derived from messages.

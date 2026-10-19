@@ -26,6 +26,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  images: { formats: ["image/avif", "image/webp"] },
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
+  },
   // Expose the promo UI gate to client components (PriceBlock in client trees).
   // Default empty / off — set RO_PROMO_FEATURES=1 to enable.
   env: {

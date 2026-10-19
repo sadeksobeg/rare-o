@@ -112,8 +112,8 @@
   --foreground: var(--ro-text);
 
   /* type defaults (overridden by html[lang]) */
-  --ro-font-display: var(--font-cormorant), var(--font-amiri), serif;
-  --ro-font-ui: var(--font-source), var(--font-plex-ar), system-ui, sans-serif;
+  --ro-font-display: var(--font-cormorant, ui-serif), var(--font-amiri, ui-serif), serif;
+  --ro-font-ui: var(--font-source, system-ui), var(--font-plex-ar, system-ui), system-ui, sans-serif;
   --ro-display-weight: 500;
   --ro-display-scale: 1;
   --ro-ui-scale: 1;
@@ -142,8 +142,8 @@
 }
 
 html[lang="ar"] {
-  --ro-font-display: var(--font-amiri), var(--font-cormorant), serif;
-  --ro-font-ui: var(--font-plex-ar), var(--font-source), system-ui, sans-serif;
+  --ro-font-display: var(--font-amiri, ui-serif), var(--font-cormorant, ui-serif), serif;
+  --ro-font-ui: var(--font-plex-ar, system-ui), var(--font-source, system-ui), system-ui, sans-serif;
   --ro-display-weight: 400;
   --ro-display-scale: 0.94;
   --ro-ui-scale: 1.06;
@@ -153,8 +153,8 @@ html[lang="ar"] {
 }
 
 html[lang="en"] {
-  --ro-font-display: var(--font-cormorant), var(--font-amiri), serif;
-  --ro-font-ui: var(--font-source), var(--font-plex-ar), system-ui, sans-serif;
+  --ro-font-display: var(--font-cormorant, ui-serif), var(--font-amiri, ui-serif), serif;
+  --ro-font-ui: var(--font-source, system-ui), var(--font-plex-ar, system-ui), system-ui, sans-serif;
   --ro-display-weight: 500;
   --ro-display-scale: 1;
   --ro-ui-scale: 1;

@@ -1,13 +1,13 @@
-import { PageHeader } from "@/components/admin/page-header";
+﻿import { PageHeader } from "@/components/admin/page-header";
 import { ProductForm } from "@/components/admin/product-form";
 import { Banner } from "@/components/ui/banner";
-import { listLaunchCategories } from "@/lib/catalog/service";
+import { listAllCategories } from "@/lib/catalog/service";
 import { isPromoFeaturesEnabled } from "@/lib/config/feature-flags";
 import { getRequestDictionary } from "@/lib/i18n/server";
 
 export default async function NewProductPage() {
   const { locale, dict } = await getRequestDictionary();
-  const categories = await listLaunchCategories();
+  const categories = await listAllCategories();
   return (
     <section className="space-y-6">
       <PageHeader title={dict.adminUi.detail.newProductTitle} />

@@ -125,6 +125,8 @@ export default async function AdminRequestsPage({
           tabsLabel={u.filterTabs}
           searchLabel={u.search}
           searchPlaceholder={u.searchPlaceholder}
+          resultCount={totalFiltered}
+          resultLabel={u.resultsLabel}
           tabs={[
             { id: "all", label: u.filterAll, count: counts.all },
             ...RETAIL_REQUEST_STATUSES.map((s) => ({

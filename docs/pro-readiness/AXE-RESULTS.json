@@ -1,41 +1,937 @@
 {
+  "at": "2026-10-19T06:11:12.810Z",
   "base": "http://127.0.0.1:3001",
-  "threshold": "critical|serious → fail",
-  "routes": [
+  "gate": "critical|serious → exit 1",
+  "widths": [
+    390,
+    1440
+  ],
+  "locales": [
+    "ar",
+    "en"
+  ],
+  "routeCount": 23,
+  "pageCount": 92,
+  "failed": false,
+  "results": [
     {
+      "route": "/",
+      "locale": "ar",
+      "width": 390,
       "url": "http://127.0.0.1:3001/?lang=ar",
       "status": 200,
       "violationCount": 0,
+      "failed": false,
       "seriousOrCritical": []
     },
     {
+      "route": "/catalog",
+      "locale": "ar",
+      "width": 390,
       "url": "http://127.0.0.1:3001/catalog?lang=ar",
       "status": 200,
       "violationCount": 0,
+      "failed": false,
       "seriousOrCritical": []
     },
     {
+      "route": "/cart",
+      "locale": "ar",
+      "width": 390,
       "url": "http://127.0.0.1:3001/cart?lang=ar",
       "status": 200,
       "violationCount": 0,
+      "failed": false,
       "seriousOrCritical": []
     },
     {
+      "route": "/request",
+      "locale": "ar",
+      "width": 390,
       "url": "http://127.0.0.1:3001/request?lang=ar",
       "status": 200,
       "violationCount": 0,
+      "failed": false,
       "seriousOrCritical": []
     },
     {
+      "route": "/offers",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/offers?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/contact",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/contact?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/privacy",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/privacy?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/login",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/admin/login?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/admin?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/requests",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/admin/requests?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/deals",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/admin/deals?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/wholesale",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/admin/wholesale?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/customers",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/admin/customers?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/inbox",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/admin/inbox?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/traders",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/admin/traders?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/products",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/admin/products?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/categories",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/admin/categories?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader/login",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/trader/login?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/trader?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader/deals",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/trader/deals?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader/wholesale",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/trader/wholesale?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader/offers",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/trader/offers?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader/profile",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/trader/profile?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/catalog",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/catalog?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/cart",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/cart?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/request",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/request?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/offers",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/offers?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/contact",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/contact?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/privacy",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/privacy?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/login",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/admin/login?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/admin?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/requests",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/admin/requests?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/deals",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/admin/deals?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/wholesale",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/admin/wholesale?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/customers",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/admin/customers?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/inbox",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/admin/inbox?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/traders",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/admin/traders?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/products",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/admin/products?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/categories",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/admin/categories?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader/login",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/trader/login?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/trader?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader/deals",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/trader/deals?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader/wholesale",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/trader/wholesale?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader/offers",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/trader/offers?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader/profile",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/trader/profile?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/en?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/catalog",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/en/catalog?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/cart",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/en/cart?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/request",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/en/request?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/offers",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/en/offers?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/contact",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/en/contact?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/privacy",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/en/privacy?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/login",
+      "locale": "en",
+      "width": 390,
       "url": "http://127.0.0.1:3001/admin/login?lang=en",
       "status": 200,
       "violationCount": 0,
+      "failed": false,
       "seriousOrCritical": []
     },
     {
+      "route": "/admin",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/admin?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/requests",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/admin/requests?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/deals",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/admin/deals?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/wholesale",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/admin/wholesale?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/customers",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/admin/customers?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/inbox",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/admin/inbox?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/traders",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/admin/traders?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/products",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/admin/products?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/categories",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/admin/categories?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader/login",
+      "locale": "en",
+      "width": 390,
       "url": "http://127.0.0.1:3001/trader/login?lang=en",
       "status": 200,
       "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/trader?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader/deals",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/trader/deals?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader/wholesale",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/trader/wholesale?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader/offers",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/trader/offers?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader/profile",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3001/trader/profile?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/en?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/catalog",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/en/catalog?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/cart",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/en/cart?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/request",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/en/request?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/offers",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/en/offers?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/contact",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/en/contact?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/privacy",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/en/privacy?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/login",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/admin/login?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/admin?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/requests",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/admin/requests?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/deals",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/admin/deals?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/wholesale",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/admin/wholesale?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/customers",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/admin/customers?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/inbox",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/admin/inbox?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/traders",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/admin/traders?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/products",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/admin/products?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/categories",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/admin/categories?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader/login",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/trader/login?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/trader?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader/deals",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/trader/deals?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader/wholesale",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/trader/wholesale?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader/offers",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/trader/offers?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/trader/profile",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3001/trader/profile?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
       "seriousOrCritical": []
     }
   ]

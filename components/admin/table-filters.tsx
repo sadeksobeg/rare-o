@@ -7,22 +7,34 @@ import { cn } from "@/lib/utils";
 
 /**
  * Admin list chrome: status/attention tabs + search (URL `tab` + `q`).
+ * Sticky under the page header; optional result count next to search.
  */
 export function AdminTableFilters({
   tabs,
   tabsLabel,
   searchPlaceholder,
   searchLabel,
+  resultCount,
+  resultLabel,
   className,
 }: {
   tabs: readonly ListFilterTab[];
   tabsLabel: string;
   searchPlaceholder: string;
   searchLabel: string;
+  /** Rows matching the current filters. */
+  resultCount?: number;
+  /** Noun shown after the count (e.g. "results"). */
+  resultLabel?: string;
   className?: string;
 }) {
   return (
-    <div className={cn("space-y-3", className)}>
+    <div
+      className={cn(
+        "sticky top-0 z-20 space-y-3 border-b border-ro-line bg-ro-surface/95 py-3 backdrop-blur",
+        className
+      )}
+    >
       <Suspense fallback={null}>
         <ListFilterTabs tabs={tabs} label={tabsLabel} />
       </Suspense>
@@ -30,18 +42,26 @@ export function AdminTableFilters({
         <AdminSearchField
           placeholder={searchPlaceholder}
           label={searchLabel}
+          resultCount={resultCount}
+          resultLabel={resultLabel}
         />
       </Suspense>
     </div>
   );
 }
 
+export const FilterToolbar = AdminTableFilters;
+
 function AdminSearchField({
   placeholder,
   label,
+  resultCount,
+  resultLabel,
 }: {
   placeholder: string;
   label: string;
+  resultCount?: number;
+  resultLabel?: string;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -79,6 +99,16 @@ function AdminSearchField({
       >
         {label}
       </button>
+      {typeof resultCount === "number" ? (
+        <p
+          role="status"
+          aria-live="polite"
+          className="flex h-11 items-center text-sm tabular-nums text-ro-muted"
+        >
+          <span className="font-semibold text-ro-ink">{resultCount}</span>
+          {resultLabel ? <span className="ms-1">{resultLabel}</span> : null}
+        </p>
+      ) : null}
     </form>
   );
 }

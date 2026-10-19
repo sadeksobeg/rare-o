@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { ImageUploader } from "@/components/admin/image-uploader";
 import { ProductForm } from "@/components/admin/product-form";
-import { getProductById, listLaunchCategories } from "@/lib/catalog/service";
+import { getProductById, listAllCategories } from "@/lib/catalog/service";
 import { isPromoFeaturesEnabled } from "@/lib/config/feature-flags";
 import { getRequestDictionary } from "@/lib/i18n/server";
 
@@ -14,7 +14,7 @@ export default async function EditProductPage({
   const { locale, dict } = await getRequestDictionary();
   const [product, categories] = await Promise.all([
     getProductById(id),
-    listLaunchCategories(),
+    listAllCategories(),
   ]);
   if (!product) notFound();
 
@@ -43,6 +43,7 @@ export default async function EditProductPage({
         locale={locale}
         categories={categories}
         showCompareAtPrice={isPromoFeaturesEnabled()}
+        imageCount={product.images.length}
         product={{
           id: product.id,
           slug: product.slug,

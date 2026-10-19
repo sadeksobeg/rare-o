@@ -203,7 +203,7 @@ export default async function HomePage() {
             title={dict.home.oudTitle}
             body={dict.home.oudBody}
             pullQuote={dict.home.oudDetail}
-            imageSrc="/brand/editorial-wood-grain.jpg"
+            imageSrc="/brand/editorial-wood-grain.webp"
             imageAlt=""
           />
         </div>
