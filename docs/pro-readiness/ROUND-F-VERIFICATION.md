@@ -74,12 +74,12 @@
 | F0-02 | F0 | Auto regen counts script | `scripts/regen-final-report-counts.mjs` | `npm run report:counts` (2026-10-20) | PROVEN |
 | F0-03 | F0 | COUNTS.json artifact | `docs/pro-readiness/COUNTS.json` | emitted by `report:counts` (2026-10-20) | PROVEN |
 | F0-04 | F0 | FINAL-REPORT generated counts block | `docs/pro-readiness/FINAL-REPORT.md` | `<!-- COUNTS:BEGIN -->` section (2026-10-20) | PROVEN |
-| F1-01 | F1 | CI Playwright all projects ×3 | `.github/workflows/ci.yml` | planned F1 — **no CI run** (no git remote) | BLOCKED |
-| F1-02 | F1 | CI Lighthouse median gate ≥0.85 | `.github/workflows/ci.yml` | planned F1 — no git remote | BLOCKED |
-| F1-03 | F1 | CI Caddy TLS smoke | `.github/workflows/ci.yml` | planned F1 — no git remote | BLOCKED |
-| F1-04 | F1 | CI Docker build on Ubuntu | `.github/workflows/ci.yml` | planned F1 — no git remote | BLOCKED |
-| F1-05 | F1 | CI audit fail on high/critical | `.github/workflows/ci.yml` | planned F1 — no git remote | BLOCKED |
-| F1-06 | F1 | Private GitHub push guide | `docs/pro-readiness/GITHUB-PRIVATE-PUSH.md` | F1 deliverable — not written yet | UNPROVEN |
+| F1-01 | F1 | CI Playwright all projects ×3 | `.github/workflows/ci.yml`, `playwright.config.ts`, `scripts/ci-caddy-smoke.sh` (orchestration) | workflow prepared — **no CI run** (no git remote) | BLOCKED |
+| F1-02 | F1 | CI Lighthouse median gate ≥0.85 | `.github/workflows/ci.yml`, `scripts/e1-lh-budget.mjs`, artifact `LIGHTHOUSE.json` | workflow prepared (LH step `continue-on-error` until F2) — no git remote | BLOCKED |
+| F1-03 | F1 | CI Caddy TLS smoke | `.github/workflows/ci.yml`, `scripts/ci-caddy-smoke.sh`, `docker-compose.ci-caddy.yml`, `deploy/Caddyfile.ci` | workflow prepared — no git remote | BLOCKED |
+| F1-04 | F1 | CI Docker build on Ubuntu | `.github/workflows/ci.yml`, `Dockerfile` | workflow prepared — no git remote | BLOCKED |
+| F1-05 | F1 | CI audit fail on high/critical | `.github/workflows/ci.yml`, `scripts/security-audit.mjs` | workflow prepared — no git remote | BLOCKED |
+| F1-06 | F1 | Private GitHub push guide | `docs/pro-readiness/GITHUB-PRIVATE-PUSH.md` | workflow prepared — push blocked (no git remote) | BLOCKED |
 | F2-01 | F2 | Storefront LH ≥0.85 on Linux CI | — | depends on F1 CI | BLOCKED |
 | F2-02 | F2 | Lazy catalog hover on pointerenter | `components/storefront/catalog/product-card.tsx` | F2 code — not implemented | UNPROVEN |
 | F2-03 | F2 | LCP hero preload / fetchPriority | `components/brand/hero-oud-field.tsx` | F2 code — not implemented | UNPROVEN |

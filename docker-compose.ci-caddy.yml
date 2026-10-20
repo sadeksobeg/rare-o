@@ -1,0 +1,10 @@
+# Ephemeral Caddy edge for CI — HTTPS on host :8443 → app on host :3000.
+services:
+  caddy:
+    image: caddy:2.8-alpine
+    ports:
+      - "8443:443"
+    volumes:
+      - ./deploy/Caddyfile.ci:/etc/caddy/Caddyfile:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

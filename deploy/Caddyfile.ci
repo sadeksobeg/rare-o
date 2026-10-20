@@ -1,0 +1,8 @@
+# CI / local smoke: Caddy with `tls internal` in front of Next on the host (:3000).
+# Used by docker-compose.ci-caddy.yml and scripts/ci-caddy-smoke.sh.
+
+:443 {
+	tls internal
+	encode zstd gzip
+	reverse_proxy host.docker.internal:3000
+}
