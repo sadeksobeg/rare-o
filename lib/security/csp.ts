@@ -1,7 +1,9 @@
-import { randomBytes } from "node:crypto";
-
+/** Edge-safe nonce (middleware) — no node:crypto. */
 export function createCspNonce(): string {
-  return randomBytes(16).toString("base64");
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  let bin = "";
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return btoa(bin);
 }
 
 /**

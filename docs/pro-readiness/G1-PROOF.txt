@@ -1,0 +1,5 @@
+﻿G1 local proof 2026-10-20T17:41:29.3690339+03:00
+tsc: exit 0
+lint: exit 0
+build: exit 0 Next 15.5.28
+fix: lib/security/csp.ts Web Crypto for Edge middleware
