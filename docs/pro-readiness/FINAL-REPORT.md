@@ -1,6 +1,6 @@
-# FINAL REPORT — Closure Round D + E (in progress / agent batches complete)
+# FINAL REPORT — Closure Round D + E + F0 (verification matrix)
 
-**Date:** 2026-10-19  
+**Date:** 2026-10-20 (F0 counts); D/E batches 2026-10-19  
 **Scope:** Appendix S items 1.1–4.3, 6.x–9.3 (+ 8.x, 7.x). One row per item.  
 **Batches:** D1–D4 · E1 perf · E2 tests · E3 security · E4 CI/delivery · E5 content · E6 handover.  
 **Not closed:** UAT, live WA, VPS deploy, owner assets (see OWNER ACTIONS / handover).
@@ -55,6 +55,32 @@
 | 9.2 | Unified Inbox | PASS | `/admin/inbox` (live traffic needs 9.1) |
 | 9.3 | Order-to-Conversation Linking | PASS | Link/unlink + audit |
 
+<!-- COUNTS:BEGIN -->
+
+### Generated counts (do not edit by hand)
+
+_Updated: 2026-10-20T05:16:18.581Z_ · Source: `npm run report:counts`
+
+**ROUND-F-VERIFICATION.md** (STATUS column)
+
+| STATUS | Count |
+|--------|------:|
+| PROVEN | 4 |
+| UNPROVEN | 84 |
+| BLOCKED | 12 |
+| **Total rows** | **100** |
+
+**FINAL-REPORT.md** contract matrix (Verdict column)
+
+| Verdict | Count |
+|---------|------:|
+| PASS | 26 |
+| PARTIAL | 5 |
+| OWNER-ACTION | 2 |
+| **Total rows** | **33** |
+
+<!-- COUNTS:END -->
+
 ## D4 clean-install proof
 
 | Gate | Result |
@@ -83,7 +109,7 @@
 ## 12-line summary
 
 1. Round D batches D1–D4 executed; Postgres merged; Docker package committed (no live deploy).  
-2. Contract rows: **PASS 27 · PARTIAL 4 · OWNER-ACTION 2** (1.4, 2.6, 7.1, 9.1 PARTIAL; 7.4, 7.5 OWNER-ACTION).  
+2. Contract row verdicts: see generated **COUNTS** block above (`npm run report:counts` from `ROUND-F-VERIFICATION.md` + contract matrix).  
 3. Clean install: `npm ci` + migrate + tsc/lint/i18n/ar-enums green.  
 4. Domain suites: week3 58/58; WA a–e green; wholesale + slice-a green.  
 5. Playwright D4: 18 passed, 3 skipped (`D4-E2E-RESULTS.txt`).  

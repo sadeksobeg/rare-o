@@ -47,7 +47,8 @@
     "catalog:import": "node node_modules/tsx/dist/cli.mjs scripts/catalog-import.ts",
     "purge:demo": "node node_modules/tsx/dist/cli.mjs scripts/purge-demo.ts",
     "check:placeholders": "node scripts/check-placeholder.mjs",
-    "seo:validate": "node scripts/seo-validate.mjs"
+    "seo:validate": "node scripts/seo-validate.mjs",
+    "report:counts": "node scripts/regen-final-report-counts.mjs"
   },
   "dependencies": {
     "@prisma/client": "6.19.3",

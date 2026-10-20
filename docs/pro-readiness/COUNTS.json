@@ -1,0 +1,17 @@
+{
+  "generatedAt": "2026-10-20T05:16:18.581Z",
+  "verification": {
+    "PROVEN": 4,
+    "UNPROVEN": 84,
+    "BLOCKED": 12
+  },
+  "contract": {
+    "PASS": 26,
+    "PARTIAL": 5,
+    "OWNER-ACTION": 2
+  },
+  "sources": {
+    "verification": "docs/pro-readiness/ROUND-F-VERIFICATION.md",
+    "contract": "docs/pro-readiness/FINAL-REPORT.md"
+  }
+}
