@@ -1,0 +1,211 @@
+{
+  "generatedAt": "2026-10-20T05:22:04.533Z",
+  "scannedDir": "docs/handover",
+  "filesScanned": 16,
+  "summary": {
+    "links": {
+      "ok": 0,
+      "fail": 0
+    },
+    "npmScripts": {
+      "ok": 26,
+      "fail": 0
+    },
+    "pass": true
+  },
+  "files": [
+    {
+      "file": "docs/handover/ADMIN-GUIDE-AR.md",
+      "links": [],
+      "npmScripts": [
+        {
+          "script": "catalog:import",
+          "ok": true
+        },
+        {
+          "script": "purge:demo",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "file": "docs/handover/ARCHITECTURE.md",
+      "links": [],
+      "npmScripts": []
+    },
+    {
+      "file": "docs/handover/CHANGELOG.md",
+      "links": [],
+      "npmScripts": [
+        {
+          "script": "catalog:import",
+          "ok": true
+        },
+        {
+          "script": "purge:demo",
+          "ok": true
+        },
+        {
+          "script": "check:placeholders",
+          "ok": true
+        },
+        {
+          "script": "seo:validate",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "file": "docs/handover/DELIVERY-VS-CONTRACT.md",
+      "links": [],
+      "npmScripts": []
+    },
+    {
+      "file": "docs/handover/ENV-REFERENCE.md",
+      "links": [],
+      "npmScripts": []
+    },
+    {
+      "file": "docs/handover/GO-LIVE-CHECKLIST.md",
+      "links": [],
+      "npmScripts": [
+        {
+          "script": "smoke:prod",
+          "ok": true
+        },
+        {
+          "script": "seo:validate",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "file": "docs/handover/HYPERCARE-PLAN.md",
+      "links": [],
+      "npmScripts": []
+    },
+    {
+      "file": "docs/handover/RUNBOOKS/backup-restore.md",
+      "links": [],
+      "npmScripts": [
+        {
+          "script": "backup:daily",
+          "ok": true
+        },
+        {
+          "script": "backup:prune",
+          "ok": true
+        },
+        {
+          "script": "backup:offsite",
+          "ok": true
+        },
+        {
+          "script": "test:d2-restore",
+          "ok": true
+        },
+        {
+          "script": "smoke:prod",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "file": "docs/handover/RUNBOOKS/deploy.md",
+      "links": [],
+      "npmScripts": [
+        {
+          "script": "smoke:prod",
+          "ok": true
+        },
+        {
+          "script": "seo:validate",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "file": "docs/handover/RUNBOOKS/incident.md",
+      "links": [],
+      "npmScripts": [
+        {
+          "script": "smoke:prod",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "file": "docs/handover/RUNBOOKS/rollback.md",
+      "links": [],
+      "npmScripts": [
+        {
+          "script": "smoke:prod",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "file": "docs/handover/RUNBOOKS/secret-rotation.md",
+      "links": [],
+      "npmScripts": []
+    },
+    {
+      "file": "docs/handover/RUNBOOKS/whatsapp-relink.md",
+      "links": [],
+      "npmScripts": [
+        {
+          "script": "test:whatsapp-phase-a",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "file": "docs/handover/TEST-REPORT.md",
+      "links": [],
+      "npmScripts": [
+        {
+          "script": "test:lh-budget",
+          "ok": true
+        },
+        {
+          "script": "catalog:import",
+          "ok": true
+        },
+        {
+          "script": "check:placeholders",
+          "ok": true
+        },
+        {
+          "script": "seo:validate",
+          "ok": true
+        },
+        {
+          "script": "test:week3",
+          "ok": true
+        },
+        {
+          "script": "test:e2e",
+          "ok": true
+        },
+        {
+          "script": "test:c6-axe-lh",
+          "ok": true
+        },
+        {
+          "script": "smoke:prod",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "file": "docs/handover/TRADER-GUIDE-AR.md",
+      "links": [],
+      "npmScripts": []
+    },
+    {
+      "file": "docs/handover/UAT-PLAN.md",
+      "links": [],
+      "npmScripts": []
+    }
+  ]
+}

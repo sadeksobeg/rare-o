@@ -1,0 +1,18 @@
+﻿=== F6 seo-validate ===
+Date: 2026-10-20T08:22:04.4843873+03:00
+BASE=http://127.0.0.1:3001
+
+seo-validate base=http://127.0.0.1:3001
+PASS: robots.txt 200
+PASS: robots lists sitemap
+PASS: robots blocks /admin
+PASS: sitemap.xml 200
+PASS: sitemap url count ΓÇö 19
+PASS: sitemap includes /catalog
+PASS: sitemap includes /privacy
+PASS: sitemap includes /contact
+PASS: sitemap hreflang/alternate signals present
+
+seo-validate OK
+
+exit code: 0

@@ -59,15 +59,15 @@
 
 ### Generated counts (do not edit by hand)
 
-_Updated: 2026-10-20T05:16:18.581Z_ · Source: `npm run report:counts`
+_Updated: 2026-10-20T05:24:22.657Z_ · Source: `npm run report:counts`
 
 **ROUND-F-VERIFICATION.md** (STATUS column)
 
 | STATUS | Count |
 |--------|------:|
-| PROVEN | 4 |
-| UNPROVEN | 84 |
-| BLOCKED | 12 |
+| PROVEN | 12 |
+| UNPROVEN | 75 |
+| BLOCKED | 13 |
 | **Total rows** | **100** |
 
 **FINAL-REPORT.md** contract matrix (Verdict column)
@@ -120,3 +120,20 @@ _Updated: 2026-10-20T05:16:18.581Z_ · Source: `npm run report:counts`
 10. CONFORMANCE regenerated from code (Parts 02–05); no stale MISSING for shipped D/F/C components.  
 11. Owner still must: live WA phone, VPS/DNS deploy, SVG/photos/privacy copy.  
 12. Do not tell the client “closed” until OWNER ACTIONS 1–3 are done and item 2.6 is re-measured ≥0.85 if required contractually.
+
+## 14-line summary — Round F6 (content & handover proofs)
+
+1. F6 wired `check-placeholder.mjs` (tsx-backed) into `npm run build` before `next build`.  
+2. `check-site-env.mjs` runs before placeholder gate (prod / REQUIRE_SITE_ENV only); see `F6-PLACEHOLDER-PROOF.txt`.  
+3. Placeholder proof: baseline OK, planted `en.home.headline` FAIL, revert OK — see proof file.  
+4. Privacy dictionary stubs excluded from gate (owner legal copy still OWNER-ACTION).  
+5. Added `docs/templates/catalog-import-10.csv` (10 rows; row 5 null price/currency).  
+6. Import proof: dry-run 10/10 valid; apply 0→10 `f6-import-*` products — `F6-IMPORT-PROOF.txt`.  
+7. Purge demo dry-run only (no `--apply`); JSON plan counts — `F6-PURGE-PROOF.txt`.  
+8. SEO validate PASS against `http://127.0.0.1:3001` — `F6-SEO-PROOF.txt`.  
+9. New `scripts/docs-as-tests.mjs` scans `docs/handover` links + `npm run` scripts — `F6-DOCS-AS-TESTS.json`.  
+10. F6 admin screenshot capture skipped (optional); existing `docs/pro-readiness/screens/` from D4 retained.  
+11. `DELIVERY-VS-CONTRACT.md` links all F6 proof artifacts.  
+12. `ROUND-F-VERIFICATION.md` F6-01–04 and E5-02/03/05/06 marked PROVEN (2026-10-20).  
+13. F6-05 (Playwright admin screens) remains UNPROVEN until a dedicated capture run.  
+14. Regenerate counts via `npm run report:counts` after matrix edits (see COUNTS block below).

@@ -1,0 +1,11 @@
+slug,nameAr,nameEn,category,price,currency,descriptionAr,descriptionEn,specsAr,specsEn,availability,imageFiles,status
+f6-import-01,عود F6-01,F6 Oud 01,string-instruments,1200,USD,"وصف F6-01","F6 import row 01","وجه شوح","Spruce top",available,,draft
+f6-import-02,عود F6-02,F6 Oud 02,string-instruments,1400,USD,"وصف F6-02","F6 import row 02","قصعة جوز","Walnut bowl",available,,draft
+f6-import-03,عود F6-03,F6 Oud 03,string-instruments,1600,USD,"وصف F6-03","F6 import row 03","11 خيط","11 strings",available,,draft
+f6-import-04,عود F6-04,F6 Oud 04,string-instruments,1800,USD,"وصف F6-04","F6 import row 04","تشطيب طبيعي","Natural finish",available,,draft
+f6-import-05,عود F6-05,F6 Oud 05,string-instruments,,,"وصف F6-05 بدون سعر","F6 row 05 price on request","سعر عند الطلب","Price on request",available,,draft
+f6-import-06,كمان F6-06,F6 Violin 06,string-instruments,900,USD,"وصف F6-06","F6 import row 06","4/4","Full size",available,,draft
+f6-import-07,تشيلو F6-07,F6 Cello 07,string-instruments,2200,USD,"وصف F6-07","F6 import row 07","أرش","Arched",available,,draft
+f6-import-08,حافظة F6-08,F6 Case 08,accessories,150,USD,"وصف F6-08","F6 import row 08","صلب","Hard shell",available,,draft
+f6-import-09,حزام F6-09,F6 Strap 09,accessories,45,USD,"وصف F6-09","F6 import row 09","جلد","Leather",available,,draft
+f6-import-10,موالف F6-10,F6 Tuner 10,accessories,35,USD,"وصف F6-10","F6 import row 10","رقمي","Digital",available,,published

@@ -39,3 +39,13 @@ One row per contract item. Authoritative verdicts: `docs/pro-readiness/FINAL-REP
 | 9.3 | Order-to-Conversation Linking | PASS | Row 9.3 |
 
 **Summary (D4):** PASS 27 · PARTIAL 4 · OWNER-ACTION 2 — see FINAL-REPORT owner actions and E5 content OWNER-ACTION for assets/legal.
+
+## Round F6 proof artifacts (2026-10-20)
+
+| Proof | Path |
+|-------|------|
+| Placeholder build gate | [`docs/pro-readiness/F6-PLACEHOLDER-PROOF.txt`](../pro-readiness/F6-PLACEHOLDER-PROOF.txt) |
+| Catalog import (10 rows) | [`docs/pro-readiness/F6-IMPORT-PROOF.txt`](../pro-readiness/F6-IMPORT-PROOF.txt) · template [`docs/templates/catalog-import-10.csv`](../templates/catalog-import-10.csv) |
+| Purge demo dry-run counts | [`docs/pro-readiness/F6-PURGE-PROOF.txt`](../pro-readiness/F6-PURGE-PROOF.txt) |
+| SEO validate (localhost) | [`docs/pro-readiness/F6-SEO-PROOF.txt`](../pro-readiness/F6-SEO-PROOF.txt) |
+| Handover docs-as-tests | [`docs/pro-readiness/F6-DOCS-AS-TESTS.json`](../pro-readiness/F6-DOCS-AS-TESTS.json) |

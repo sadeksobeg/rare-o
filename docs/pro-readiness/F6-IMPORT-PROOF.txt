@@ -1,0 +1,46 @@
+﻿=== F6 catalog import (10 rows) ===
+Date: 2026-10-20T08:22:52.6484452+03:00
+File: docs/templates/catalog-import-10.csv
+
+products matching slug f6-import-* BEFORE: 0
+
+--- dry-run ---
+node node_modules/tsx/dist/cli.mjs scripts/catalog-import.ts --file docs/templates/catalog-import-10.csv --dry-run
+catalog-import: file=D:\N I G H T\rare-oud-platform\docs\templates\catalog-import-10.csv
+mode=dry-run rows=10
+OK row 2: f6-import-01 ΓåÆ category=string-instruments status=draft
+OK row 3: f6-import-02 ΓåÆ category=string-instruments status=draft
+OK row 4: f6-import-03 ΓåÆ category=string-instruments status=draft
+OK row 5: f6-import-04 ΓåÆ category=string-instruments status=draft
+OK row 6: f6-import-05 ΓåÆ category=string-instruments status=draft
+OK row 7: f6-import-06 ΓåÆ category=string-instruments status=draft
+OK row 8: f6-import-07 ΓåÆ category=string-instruments status=draft
+OK row 9: f6-import-08 ΓåÆ category=accessories status=draft
+OK row 10: f6-import-09 ΓåÆ category=accessories status=draft
+OK row 11: f6-import-10 ΓåÆ category=accessories status=published
+
+--- validate report ---
+valid: 10 / 10
+dry-run complete ΓÇö re-run with --apply to write products
+
+--- apply ---
+node node_modules/tsx/dist/cli.mjs scripts/catalog-import.ts --file docs/templates/catalog-import-10.csv --apply
+catalog-import: file=D:\N I G H T\rare-oud-platform\docs\templates\catalog-import-10.csv
+mode=apply rows=10
+OK row 2: f6-import-01 ΓåÆ category=string-instruments status=draft
+OK row 3: f6-import-02 ΓåÆ category=string-instruments status=draft
+OK row 4: f6-import-03 ΓåÆ category=string-instruments status=draft
+OK row 5: f6-import-04 ΓåÆ category=string-instruments status=draft
+OK row 6: f6-import-05 ΓåÆ category=string-instruments status=draft
+OK row 7: f6-import-06 ΓåÆ category=string-instruments status=draft
+OK row 8: f6-import-07 ΓåÆ category=string-instruments status=draft
+OK row 9: f6-import-08 ΓåÆ category=accessories status=draft
+OK row 10: f6-import-09 ΓåÆ category=accessories status=draft
+OK row 11: f6-import-10 ΓåÆ category=accessories status=published
+
+--- validate report ---
+valid: 10 / 10
+apply complete
+
+products matching slug f6-import-* AFTER: 10
+apply exit code: 0

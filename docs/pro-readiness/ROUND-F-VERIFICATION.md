@@ -53,11 +53,11 @@
 | E4-12 | E4 | VPS runbook RPO/RTO | `docs/pro-readiness/VPS-RUNBOOK.md` | documentation only | UNPROVEN |
 | E4-13 | E4 | Local smoke prod | `scripts/smoke-prod.mjs` | `D4-SMOKE.txt` PASS (2026-10-19) | UNPROVEN |
 | E5-01 | E5 | Catalog CSV template | `docs/templates/catalog-import.csv` | file present | UNPROVEN |
-| E5-02 | E5 | Catalog import dry-run | `scripts/catalog-import.ts` | `npm run catalog:import -- --dry-run` (no 2026-10-20 log) | UNPROVEN |
-| E5-03 | E5 | Demo purge tooling | `scripts/purge-demo.ts` | `npm run purge:demo` (no 2026-10-20 log) | UNPROVEN |
+| E5-02 | E5 | Catalog import dry-run | `scripts/catalog-import.ts` | `docs/pro-readiness/F6-IMPORT-PROOF.txt` — 10/10 dry-run + apply (2026-10-20) | PROVEN |
+| E5-03 | E5 | Demo purge tooling | `scripts/purge-demo.ts` | `docs/pro-readiness/F6-PURGE-PROOF.txt` dry-run counts (2026-10-20) | PROVEN |
 | E5-04 | E5 | Legal markdown stubs AR/EN | `content/legal/*.md` | files present; placeholders | UNPROVEN |
-| E5-05 | E5 | Placeholder build gate script | `scripts/check-placeholder.mjs` | `npm run check:placeholders` (not run today) | UNPROVEN |
-| E5-06 | E5 | SEO validate script | `scripts/seo-validate.mjs` | `npm run seo:validate` (needs BASE; not run today) | UNPROVEN |
+| E5-05 | E5 | Placeholder build gate script | `scripts/check-placeholder.mjs` | `F6-PLACEHOLDER-PROOF.txt` + wired in `npm run build` (2026-10-20) | PROVEN |
+| E5-06 | E5 | SEO validate script | `scripts/seo-validate.mjs` | `docs/pro-readiness/F6-SEO-PROOF.txt` BASE `:3001` (2026-10-20) | PROVEN |
 | E5-07 | E5 | E5 content report | `docs/pro-readiness/E5-CONTENT-REPORT.md` | report only | UNPROVEN |
 | E5-08 | E5 | Owner assets checklist | `docs/pro-readiness/OWNER-ASSETS.md` | documentation | UNPROVEN |
 | E6-01 | E6 | Handover architecture | `docs/handover/ARCHITECTURE.md` | documentation | UNPROVEN |
@@ -100,8 +100,8 @@
 | F5-03 | F5 | Visual regression AR/EN breakpoints | — | F5 — not in CI (no remote) | BLOCKED |
 | F5-04 | F5 | Load k6/autocannon p95 gate | `scripts/e2-load.mjs` | baseline only; F5 thresholds not proven | UNPROVEN |
 | F5-05 | F5 | TEST-INVENTORY.md | `docs/pro-readiness/TEST-INVENTORY.md` | F5 — not written | UNPROVEN |
-| F6-01 | F6 | Placeholder gate in `npm run build` | — | F6 — not wired | UNPROVEN |
-| F6-02 | F6 | CSV import 10 products proof | — | F6 — not executed | UNPROVEN |
-| F6-03 | F6 | Purge demo counts on copy DB | — | F6 — not executed | UNPROVEN |
-| F6-04 | F6 | docs-as-tests for handover links | `docs/handover/` | F6 — not automated | UNPROVEN |
-| F6-05 | F6 | Admin UI screenshot evidence | `docs/pro-readiness/screens/` | captures exist (2026-10-19); not F6 Playwright proof | UNPROVEN |
+| F6-01 | F6 | Placeholder gate in `npm run build` | `package.json` | `F6-PLACEHOLDER-PROOF.txt` (2026-10-20) | PROVEN |
+| F6-02 | F6 | CSV import 10 products proof | `docs/templates/catalog-import-10.csv` | `F6-IMPORT-PROOF.txt` 0→10 products (2026-10-20) | PROVEN |
+| F6-03 | F6 | Purge demo counts on copy DB | `scripts/purge-demo.ts` | `F6-PURGE-PROOF.txt` dry-run JSON counts (2026-10-20) | PROVEN |
+| F6-04 | F6 | docs-as-tests for handover links | `scripts/docs-as-tests.mjs` | `F6-DOCS-AS-TESTS.json` pass (2026-10-20) | PROVEN |
+| F6-05 | F6 | Admin UI screenshot evidence | `docs/pro-readiness/screens/` | skipped — no F6 Playwright capture; prior D4 screens only (2026-10-20) | UNPROVEN |

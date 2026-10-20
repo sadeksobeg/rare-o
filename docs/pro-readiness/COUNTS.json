@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-20T05:16:18.581Z",
+  "generatedAt": "2026-10-20T05:24:22.657Z",
   "verification": {
-    "PROVEN": 4,
-    "UNPROVEN": 84,
-    "BLOCKED": 12
+    "PROVEN": 12,
+    "UNPROVEN": 75,
+    "BLOCKED": 13
   },
   "contract": {
     "PASS": 26,

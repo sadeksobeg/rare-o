@@ -1,0 +1,21 @@
+﻿=== F6 purge-demo dry-run ===
+Date: 2026-10-20T08:22:04.3483618+03:00
+Command: npm run purge:demo (default dry-run; no --apply)
+Note: counts only — no rows deleted.
+
+
+> rare-oud-platform@0.1.0 purge:demo
+> node node_modules/tsx/dist/cli.mjs scripts/purge-demo.ts
+
+purge-demo plan (matching ui-hidden / seed-demo markers):
+{
+  "traders": 5,
+  "deals": 19,
+  "wholesale": 0,
+  "customers": 9,
+  "retailRequests": 9
+}
+
+dry-run ΓÇö no rows deleted. Re-run with --apply to purge.
+
+exit code: 0
