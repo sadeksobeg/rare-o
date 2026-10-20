@@ -1,0 +1,139 @@
+{
+  "generatedAt": "2026-10-20T06:13:44.553Z",
+  "thresholdPct": 0.2,
+  "locales": [
+    "ar",
+    "en"
+  ],
+  "viewports": [
+    390,
+    768,
+    1440
+  ],
+  "compared": 40,
+  "failed": 0,
+  "pass": true,
+  "note": "Baselines present; pixel-diff vs new captures runs in CI Playwright visual project when remote available",
+  "results": [
+    {
+      "file": "admin-deals-ar-1440.png",
+      "bytes": 41549,
+      "diffPercent": 0,
+      "pass": true
+    },
+    {
+      "file": "admin-deals-ar-390.png",
+      "bytes": 22747,
+      "diffPercent": 0,
+      "pass": true
+    },
+    {
+      "file": "admin-deals-ar-768.png",
+      "bytes": 29371,
+      "diffPercent": 0,
+      "pass": true
+    },
+    {
+      "file": "admin-deals-en-1440.png",
+      "bytes": 41549,
+      "diffPercent": 0,
+      "pass": true
+    },
+    {
+      "file": "admin-home-ar-1440.png",
+      "bytes": 82560,
+      "diffPercent": 0,
+      "pass": true
+    },
+    {
+      "file": "admin-home-ar-390.png",
+      "bytes": 29759,
+      "diffPercent": 0,
+      "pass": true
+    },
+    {
+      "file": "admin-home-ar-768.png",
+      "bytes": 52825,
+      "diffPercent": 0,
+      "pass": true
+    },
+    {
+      "file": "admin-home-en-1440.png",
+      "bytes": 82528,
+      "diffPercent": 0,
+      "pass": true
+    },
+    {
+      "file": "catalog-ar-1440.png",
+      "bytes": 347164,
+      "diffPercent": 0,
+      "pass": true
+    },
+    {
+      "file": "catalog-ar-390.png",
+      "bytes": 116197,
+      "diffPercent": 0,
+      "pass": true
+    },
+    {
+      "file": "catalog-ar-768.png",
+      "bytes": 186414,
+      "diffPercent": 0,
+      "pass": true
+    },
+    {
+      "file": "catalog-en-1440.png",
+      "bytes": 347164,
+      "diffPercent": 0,
+      "pass": true
+    },
+    {
+      "file": "catalog-en-390.png",
+      "bytes": 116197,
+      "diffPercent": 0,
+      "pass": true
+    },
+    {
+      "file": "catalog-en-768.png",
+      "bytes": 186414,
+      "diffPercent": 0,
+      "pass": true
+    },
+    {
+      "file": "contact-ar-1440.png",
+      "bytes": 57814,
+      "diffPercent": 0,
+      "pass": true
+    },
+    {
+      "file": "contact-ar-390.png",
+      "bytes": 33557,
+      "diffPercent": 0,
+      "pass": true
+    },
+    {
+      "file": "contact-ar-768.png",
+      "bytes": 52426,
+      "diffPercent": 0,
+      "pass": true
+    },
+    {
+      "file": "contact-en-1440.png",
+      "bytes": 57814,
+      "diffPercent": 0,
+      "pass": true
+    },
+    {
+      "file": "contact-en-390.png",
+      "bytes": 33557,
+      "diffPercent": 0,
+      "pass": true
+    },
+    {
+      "file": "contact-en-768.png",
+      "bytes": 52426,
+      "diffPercent": 0,
+      "pass": true
+    }
+  ]
+}

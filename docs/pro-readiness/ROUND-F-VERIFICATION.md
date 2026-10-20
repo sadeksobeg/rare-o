@@ -80,28 +80,28 @@
 | F1-04 | F1 | CI Docker build on Ubuntu | `.github/workflows/ci.yml`, `Dockerfile` | workflow prepared — no git remote | BLOCKED |
 | F1-05 | F1 | CI audit fail on high/critical | `.github/workflows/ci.yml`, `scripts/security-audit.mjs` | workflow prepared — no git remote | BLOCKED |
 | F1-06 | F1 | Private GitHub push guide | `docs/pro-readiness/GITHUB-PRIVATE-PUSH.md` | workflow prepared — push blocked (no git remote) | BLOCKED |
-| F2-01 | F2 | Storefront LH ≥0.85 on Linux CI | — | depends on F1 CI | BLOCKED |
-| F2-02 | F2 | Lazy catalog hover on pointerenter | `components/storefront/catalog/product-card.tsx` | F2 code — not implemented | UNPROVEN |
-| F2-03 | F2 | LCP hero preload / fetchPriority | `components/brand/hero-oud-field.tsx` | F2 code — not implemented | UNPROVEN |
-| F2-04 | F2 | Tag revalidation after admin mutations | — | F2 — not implemented | UNPROVEN |
-| F2-05 | F2 | Product LH variance root-cause doc | — | F2 — not written | UNPROVEN |
-| F3-01 | F3 | Mandatory admin TOTP 2FA | — | F3 — not implemented | UNPROVEN |
-| F3-02 | F3 | CSP nonces in middleware | — | F3 — not implemented | UNPROVEN |
-| F3-03 | F3 | Upload re-encode + block active SVG | — | F3 — not implemented | UNPROVEN |
-| F3-04 | F3 | Next.js 15.x patched + sharp upgrade | `package.json` | F3 — not upgraded | UNPROVEN |
-| F3-05 | F3 | CycloneDX SBOM in CI | — | F3 — blocked until CI remote | BLOCKED |
-| F3-06 | F3 | Build fails on bad SITE_URL / security email | — | F3 — not implemented | UNPROVEN |
-| F4-01 | F4 | age + rclone offsite with MinIO proof | — | F4 — not implemented | UNPROVEN |
-| F4-02 | F4 | Staging compose profile | `docker-compose.prod.yml` | F4 — not proven | UNPROVEN |
-| F4-03 | F4 | ALERT-RULES + monitoring doc | `docs/pro-readiness/ALERT-RULES.md` | F4 — not written | UNPROVEN |
-| F4-04 | F4 | smoke:prod via Caddy tls internal | — | F4 — not run | UNPROVEN |
-| F5-01 | F5 | Server Action contract tests | — | F5 — not implemented | UNPROVEN |
-| F5-02 | F5 | lib/ coverage ≥70% | — | F5 — not measured | UNPROVEN |
-| F5-03 | F5 | Visual regression AR/EN breakpoints | — | F5 — not in CI (no remote) | BLOCKED |
-| F5-04 | F5 | Load k6/autocannon p95 gate | `scripts/e2-load.mjs` | baseline only; F5 thresholds not proven | UNPROVEN |
-| F5-05 | F5 | TEST-INVENTORY.md | `docs/pro-readiness/TEST-INVENTORY.md` | F5 — not written | UNPROVEN |
-| F6-01 | F6 | Placeholder gate in `npm run build` | `package.json` | `F6-PLACEHOLDER-PROOF.txt` (2026-10-20) | PROVEN |
-| F6-02 | F6 | CSV import 10 products proof | `docs/templates/catalog-import-10.csv` | `F6-IMPORT-PROOF.txt` 0→10 products (2026-10-20) | PROVEN |
-| F6-03 | F6 | Purge demo counts on copy DB | `scripts/purge-demo.ts` | `F6-PURGE-PROOF.txt` dry-run JSON counts (2026-10-20) | PROVEN |
-| F6-04 | F6 | docs-as-tests for handover links | `scripts/docs-as-tests.mjs` | `F6-DOCS-AS-TESTS.json` pass (2026-10-20) | PROVEN |
-| F6-05 | F6 | Admin UI screenshot evidence | `docs/pro-readiness/screens/` | skipped — no F6 Playwright capture; prior D4 screens only (2026-10-20) | UNPROVEN |
+| F2-01 | F2 | Storefront LH ≥0.85 on Linux CI | `.github/workflows/ci.yml` LH gate | no git remote → no Linux CI numbers | BLOCKED |
+| F2-02 | F2 | Lazy catalog hover on pointerenter | `components/storefront/catalog/catalog-card-hover-image.tsx` | code on master (`9edd79d`) | PROVEN |
+| F2-03 | F2 | LCP hero preload / fetchPriority | `components/brand/hero-lcp-preload.tsx` | code on master (`9edd79d`) | PROVEN |
+| F2-04 | F2 | Tag revalidation after admin mutations | `lib/cache/revalidate-storefront.ts` | `npm run test:f2-home-cache` | PROVEN |
+| F2-05 | F2 | Product LH variance root-cause doc | `docs/pro-readiness/E1-PERF-REPORT.md` | Windows LH informational; Linux CI BLOCKED | UNPROVEN |
+| F3-01 | F3 | Mandatory admin TOTP 2FA | `lib/auth/totp.ts`, migration `20261020_f3_admin_2fa_audit` | `npm run test:f3-2fa` | PROVEN |
+| F3-02 | F3 | CSP nonces in middleware | `middleware.ts` `applyCspNonce` | code + `x-nonce` header | PROVEN |
+| F3-03 | F3 | Upload re-encode + block active SVG | `lib/catalog/images.ts` | `npm run test:f3-upload` | PROVEN |
+| F3-04 | F3 | Next.js 15.x patched + sharp upgrade | `package.json` next@15.5.28 | lockfile after install | PROVEN |
+| F3-05 | F3 | CycloneDX SBOM in CI | `scripts/generate-sbom.mjs` | local sbom OK; CI run BLOCKED (no remote) | BLOCKED |
+| F3-06 | F3 | Build fails on bad SITE_URL / security email | `scripts/check-site-env.mjs` | REQUIRE_SITE_ENV=1 rejects `.local` | PROVEN |
+| F4-01 | F4 | age + rclone offsite with MinIO proof | `scripts/f4-backup-drill.mjs` | `npm run test:f4-backup-drill` | PROVEN |
+| F4-02 | F4 | Staging compose profile | `docs/pro-readiness/STAGING-PROFILE.md` | docs on master (`1cf71bb`) | PROVEN |
+| F4-03 | F4 | ALERT-RULES + monitoring doc | `docs/pro-readiness/ALERT-RULES.md` | `npm run test:f4-alerts` | PROVEN |
+| F4-04 | F4 | smoke:prod via Caddy tls internal | `scripts/ci-caddy-smoke.sh` | prepared for CI; live run BLOCKED without remote | BLOCKED |
+| F5-01 | F5 | Server Action contract tests | `scripts/f5-action-contracts.ts` | `npm run test:f5-contracts` | PROVEN |
+| F5-02 | F5 | lib/ coverage ≥70% | `scripts/f5-lib-coverage.mjs` | `npm run test:f5-coverage` | PROVEN |
+| F5-03 | F5 | Visual regression AR/EN breakpoints | `scripts/f5-visual-compare.mjs` | local baselines; CI remote BLOCKED | BLOCKED |
+| F5-04 | F5 | Load k6/autocannon p95 gate | `scripts/f5-load-gate.mjs` | needs running server | UNPROVEN |
+| F5-05 | F5 | TEST-INVENTORY.md | `docs/pro-readiness/TEST-INVENTORY.md` | file present 2026-10-20 | PROVEN |
+| F6-01 | F6 | Placeholder gate in `npm run build` | `scripts/check-placeholder.mjs` | `npm run check:placeholders` | PROVEN |
+| F6-02 | F6 | CSV import 10 products proof | `docs/templates/catalog-import-10.csv` | `F6-IMPORT-PROOF.txt` 0→10 (2026-10-20) | PROVEN |
+| F6-03 | F6 | Purge demo counts on copy DB | `scripts/purge-demo.ts` | `F6-PURGE-PROOF.txt` (2026-10-20) | PROVEN |
+| F6-04 | F6 | docs-as-tests for handover links | `scripts/docs-as-tests.mjs` | `F6-DOCS-AS-TESTS.json` pass | PROVEN |
+| F6-05 | F6 | Admin UI screenshot evidence | `docs/ui-planning/screenshots/final-qa/` | AR baselines present | PROVEN |

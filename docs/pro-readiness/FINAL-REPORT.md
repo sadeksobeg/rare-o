@@ -59,15 +59,15 @@
 
 ### Generated counts (do not edit by hand)
 
-_Updated: 2026-10-20T05:24:22.657Z_ · Source: `npm run report:counts`
+_Updated: 2026-10-20T06:15:24.007Z_ · Source: `npm run report:counts`
 
 **ROUND-F-VERIFICATION.md** (STATUS column)
 
 | STATUS | Count |
 |--------|------:|
-| PROVEN | 12 |
-| UNPROVEN | 75 |
-| BLOCKED | 13 |
+| PROVEN | 27 |
+| UNPROVEN | 59 |
+| BLOCKED | 14 |
 | **Total rows** | **100** |
 
 **FINAL-REPORT.md** contract matrix (Verdict column)
@@ -121,19 +121,19 @@ _Updated: 2026-10-20T05:24:22.657Z_ · Source: `npm run report:counts`
 11. Owner still must: live WA phone, VPS/DNS deploy, SVG/photos/privacy copy.  
 12. Do not tell the client “closed” until OWNER ACTIONS 1–3 are done and item 2.6 is re-measured ≥0.85 if required contractually.
 
-## 14-line summary — Round F6 (content & handover proofs)
+## 14-line summary — Closure Round F (F0–F6)
 
-1. F6 wired `check-placeholder.mjs` (tsx-backed) into `npm run build` before `next build`.  
-2. `check-site-env.mjs` runs before placeholder gate (prod / REQUIRE_SITE_ENV only); see `F6-PLACEHOLDER-PROOF.txt`.  
-3. Placeholder proof: baseline OK, planted `en.home.headline` FAIL, revert OK — see proof file.  
-4. Privacy dictionary stubs excluded from gate (owner legal copy still OWNER-ACTION).  
-5. Added `docs/templates/catalog-import-10.csv` (10 rows; row 5 null price/currency).  
-6. Import proof: dry-run 10/10 valid; apply 0→10 `f6-import-*` products — `F6-IMPORT-PROOF.txt`.  
-7. Purge demo dry-run only (no `--apply`); JSON plan counts — `F6-PURGE-PROOF.txt`.  
-8. SEO validate PASS against `http://127.0.0.1:3001` — `F6-SEO-PROOF.txt`.  
-9. New `scripts/docs-as-tests.mjs` scans `docs/handover` links + `npm run` scripts — `F6-DOCS-AS-TESTS.json`.  
-10. F6 admin screenshot capture skipped (optional); existing `docs/pro-readiness/screens/` from D4 retained.  
-11. `DELIVERY-VS-CONTRACT.md` links all F6 proof artifacts.  
-12. `ROUND-F-VERIFICATION.md` F6-01–04 and E5-02/03/05/06 marked PROVEN (2026-10-20).  
-13. F6-05 (Playwright admin screens) remains UNPROVEN until a dedicated capture run.  
-14. Regenerate counts via `npm run report:counts` after matrix edits (see COUNTS block below).
+1. **F0** matrix + `npm run report:counts` — no hand totals; see COUNTS block (`ROUND-F-VERIFICATION.md`).  
+2. **F1** CI expanded (e2e×3, LH, Docker, Caddy, audit fail) — **BLOCKED** for PROVEN CI links (no git remote); see `GITHUB-PRIVATE-PUSH.md`.  
+3. **F2** LCP preload + lazy catalog hover + tag revalidate shipped (`9edd79d`); Linux LH≥0.85 still **BLOCKED** on CI.  
+4. **F3** Admin TOTP 2FA + CSP nonce + sharp SVG harden + Next **15.5.28** + SBOM + env-gated `security.txt` / `check-site-env`.  
+5. **F4** age+rclone MinIO drill + ALERT-RULES + staging profile (`1cf71bb`); Caddy smoke **BLOCKED** without remote.  
+6. **F5** action contracts (53 actions) + lib coverage proxy ≥70% + visual baselines + security IDOR/SVG/lockout — `TEST-INVENTORY.md`.  
+7. **F6** placeholder-in-build + 10-row import + purge proof + SEO + docs-as-tests + final-qa screens — proof files under `docs/pro-readiness/F6-*`.  
+8. Contract matrix: PASS **26** / PARTIAL **5** / OWNER-ACTION **2** (regen via `report:counts`).  
+9. Windows LH informational only; Ubuntu CI is source of truth once remote exists.  
+10. `npm audit` / security:audit fails high/critical in CI workflow (no `continue-on-error`).  
+11. OWNER: create private GitHub remote + push to unlock F1/F2/F3-05/F4-04/F5-03 CI PROVEN rows.  
+12. OWNER O1–O8 unchanged: logo, photos, legal, VPS, WhatsApp phone, UAT signatures.  
+13. Do not tell the client “closed” until 18 signature items + live CI green + OWNER ACTIONS.  
+14. Review pack: `ROUND-F-VERIFICATION.md` + this summary; CI link = **BLOCKED** until push.

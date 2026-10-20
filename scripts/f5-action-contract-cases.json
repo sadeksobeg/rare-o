@@ -1,0 +1,903 @@
+[
+  {
+    "action": "setLocaleAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminLoginAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "enrollAdminTotpAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "confirmAdminTotpAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminLogoutAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "upsertProductAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "attachProductImageAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "removeProductImageAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "reorderProductImageAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "updateProductImageAltsAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "updateCategoryFormAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "updateCategoryAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "createCategoryAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "deleteCategoryAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "createRetailRequestAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "markRetailHandoffOpenedAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminTransitionRetailRequestAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminRetriggerRetailHandoffAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminMarkRetailHandoffOpenedAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "upsertPromoBandAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "deletePromoBandAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "traderLoginAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "traderLogoutAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminCreateTraderAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminSetTraderStatusAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "traderCreateDealAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "traderNegotiateAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminNegotiateAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminUpsertPublicOfferAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminSetPublicOfferStatusAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminCreateOfferDraftFromDealAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "traderUpdatePreferencesAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "traderMarkNotificationReadAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "traderMarkAllNotificationsReadAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminListInboxConversationsAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminGetInboxConversationAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminGetInboxHealthAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminMarkInboxConversationReadAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminSendWhatsAppTextAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminLinkWhatsAppConversationAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminUnlinkWhatsAppConversationAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminGetBusinessContextAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminRetryWhatsAppMessageAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminSearchLinkableRecordsAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminRequestWhatsAppPairingAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminWhatsAppReconnectAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminWhatsAppLogoutAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "traderCreateWholesaleRequestAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "traderRespondWholesaleQuoteAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "traderCancelWholesaleRequestAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminTransitionWholesaleAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminProvideWholesaleQuoteAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  },
+  {
+    "action": "adminUpdateWholesaleShippingAction",
+    "cases": [
+      {
+        "name": "unauthorized",
+        "expect": "reject"
+      },
+      {
+        "name": "invalid_input",
+        "expect": "reject"
+      },
+      {
+        "name": "valid_happy",
+        "expect": "ok_or_redirect"
+      }
+    ]
+  }
+]

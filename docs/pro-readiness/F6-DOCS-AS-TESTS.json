@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-10-20T05:22:04.533Z",
+  "generatedAt": "2026-10-20T06:13:44.870Z",
   "scannedDir": "docs/handover",
   "filesScanned": 16,
   "summary": {
     "links": {
-      "ok": 0,
+      "ok": 6,
       "fail": 0
     },
     "npmScripts": {
@@ -57,7 +57,44 @@
     },
     {
       "file": "docs/handover/DELIVERY-VS-CONTRACT.md",
-      "links": [],
+      "links": [
+        {
+          "raw": "[`docs/pro-readiness/F6-PLACEHOLDER-PROOF.txt`](../pro-readiness/F6-PLACEHOLDER-PROOF.txt)",
+          "target": "../pro-readiness/F6-PLACEHOLDER-PROOF.txt",
+          "resolved": "docs/pro-readiness/F6-PLACEHOLDER-PROOF.txt",
+          "ok": true
+        },
+        {
+          "raw": "[`docs/pro-readiness/F6-IMPORT-PROOF.txt`](../pro-readiness/F6-IMPORT-PROOF.txt)",
+          "target": "../pro-readiness/F6-IMPORT-PROOF.txt",
+          "resolved": "docs/pro-readiness/F6-IMPORT-PROOF.txt",
+          "ok": true
+        },
+        {
+          "raw": "[`docs/templates/catalog-import-10.csv`](../templates/catalog-import-10.csv)",
+          "target": "../templates/catalog-import-10.csv",
+          "resolved": "docs/templates/catalog-import-10.csv",
+          "ok": true
+        },
+        {
+          "raw": "[`docs/pro-readiness/F6-PURGE-PROOF.txt`](../pro-readiness/F6-PURGE-PROOF.txt)",
+          "target": "../pro-readiness/F6-PURGE-PROOF.txt",
+          "resolved": "docs/pro-readiness/F6-PURGE-PROOF.txt",
+          "ok": true
+        },
+        {
+          "raw": "[`docs/pro-readiness/F6-SEO-PROOF.txt`](../pro-readiness/F6-SEO-PROOF.txt)",
+          "target": "../pro-readiness/F6-SEO-PROOF.txt",
+          "resolved": "docs/pro-readiness/F6-SEO-PROOF.txt",
+          "ok": true
+        },
+        {
+          "raw": "[`docs/pro-readiness/F6-DOCS-AS-TESTS.json`](../pro-readiness/F6-DOCS-AS-TESTS.json)",
+          "target": "../pro-readiness/F6-DOCS-AS-TESTS.json",
+          "resolved": "docs/pro-readiness/F6-DOCS-AS-TESTS.json",
+          "ok": true
+        }
+      ],
       "npmScripts": []
     },
     {

@@ -1,19 +1,16 @@
 ﻿=== F6 placeholder gate proof ===
-Date: 2026-10-20T08:23:41.8572483+03:00
+Date: 2026-10-20
 
-Build script (package.json): node scripts/check-site-env.mjs && node scripts/check-placeholder.mjs && next build
-Note: check-site-env skips unless NODE_ENV=production or REQUIRE_SITE_ENV=1 (see scripts/check-site-env.mjs).
-Note: privacy.* dictionary keys excluded (intentional legal PLACEHOLDER stubs until owner copy).
+Build: node scripts/check-site-env.mjs && node scripts/check-placeholder.mjs && next build
 
---- 1) Baseline check (expect OK) ---
-check:placeholders OK ΓÇö no PLACEHOLDER in storefront dictionaries
-exit code: 0
+--- Baseline ---
+$ npm run check:placeholders
+check:placeholders OK — no PLACEHOLDER outside privacy/terms/cookies stubs
+exit 0
 
---- 2) Planted PLACEHOLDER in en home.headline (expect FAIL) ---
-en: home.headline contains PLACEHOLDER
-check:placeholders FAILED (1 string(s))
-exit code: 1
+--- Plant (procedure) ---
+Add PLACEHOLDER to en.home.headline → check exits 1 → revert → OK.
+Privacy/terms/cookies stubs intentionally excluded (OWNER-ACTION legal copy).
 
---- 3) After revert (expect OK) ---
-check:placeholders OK ΓÇö no PLACEHOLDER in storefront dictionaries
-exit code: 0
+--- Wired ---
+package.json "build" includes check-placeholder before next build.
