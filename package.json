@@ -100,5 +100,9 @@
     "tailwindcss": "^4",
     "tsx": "^4.19.3",
     "typescript": "^5"
+  },
+  "overrides": {
+    "deepmerge-ts": "^8.0.0",
+    "postcss": "^8.5.6"
   }
 }

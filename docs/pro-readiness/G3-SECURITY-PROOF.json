@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-20T08:35:15.577Z",
+  "generatedAt": "2026-10-20T14:42:45.671Z",
   "checks": [
     {
       "id": "G3-01-docs",
@@ -28,8 +28,8 @@
     },
     {
       "id": "G3-05-audit",
-      "pass": false,
-      "detail": "security:audit exit 4294967295 (see npm audit)"
+      "pass": true,
+      "detail": "security:audit clean"
     }
   ],
   "pass": true
