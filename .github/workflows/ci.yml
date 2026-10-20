@@ -78,6 +78,34 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
+          REQUIRE_SITE_ENV: "1"
+          SITE_URL: https://ci.example.com
+          SECURITY_EMAIL: security@ci.example.com
+
+      - name: SBOM (CycloneDX)
+        run: npm run sbom
+
+      - name: Upload SBOM
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-cdx
+          path: docs/pro-readiness/SBOM.cdx.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: F5 contracts + coverage + security
+        run: |
+          npm run test:f5-contracts
+          npm run test:f5-coverage
+          npm run test:f5-security
+          npm run test:f5-visual
+          npm run test:f3-2fa
+          npm run test:f3-upload
+        env:
+          AUTH_SECRET: ci-auth-secret-min-16-chars
+          SITE_URL: https://ci.example.com
+          SECURITY_EMAIL: security@ci.example.com
 
       - name: Seed database for runtime tests
         run: |
@@ -120,13 +148,12 @@ jobs:
           path: playwright-report/
           retention-days: 14
 
-      - name: Lighthouse budget (5-run median)
-        # F2: fail CI when storefront medians stay below 0.85 — keep soft until perf fixes land.
-        continue-on-error: true
+      - name: Lighthouse budget (5-run median ≥0.85)
         run: npm run test:lh-budget
         env:
           LH_RUNS: "5"
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
+          LH_FAIL_BELOW: "0.85"
 
       - name: Upload Lighthouse JSON
         if: always()

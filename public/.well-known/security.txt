@@ -1,6 +1,2 @@
-Contact: mailto:security@rareoud.local
-Preferred-Languages: en, ar
-Expires: 2027-10-19T00:00:00.000Z
-Policy: https://rareoud.local/privacy
-
-# Production: update Contact, Policy, and add Canonical with your live domain.
+# Managed at runtime by app/.well-known/security.txt/route.ts
+# Set SITE_URL and SECURITY_EMAIL (non-.local) for a live security.txt.

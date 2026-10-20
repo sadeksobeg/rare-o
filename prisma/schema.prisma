@@ -173,11 +173,30 @@ model RetailRequestLine {
 }
 
 model AdminUser {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  name         String
-  createdAt    DateTime @default(now())
+  id              String    @id @default(cuid())
+  email           String    @unique
+  passwordHash    String
+  name            String
+  /// Encrypted TOTP secret (AES via AUTH_SECRET); null until 2FA enrolled
+  totpSecretEnc   String?
+  /// JSON array of bcrypt-hashed one-time recovery codes
+  totpRecoveryHashes String  @default("[]")
+  totpEnabledAt   DateTime?
+  createdAt       DateTime  @default(now())
+}
+
+/// Append-only admin audit trail (F3)
+model AdminAuditLog {
+  id        String   @id @default(cuid())
+  adminId   String?
+  action    String
+  target    String   @default("")
+  metaJson  String   @default("{}")
+  ip        String   @default("")
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([adminId])
 }
 
 /// Minimal admin-provisioned trader identity — not a marketplace seller account

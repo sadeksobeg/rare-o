@@ -99,8 +99,9 @@ export async function adminCreateTraderAction(
   _prev: ActionResult | null,
   formData: FormData
 ): Promise<ActionResult> {
+  let session;
   try {
-    await requireAdminSession();
+    session = await requireAdminSession();
   } catch {
     return { ok: false, error: "Unauthorized" };
   }
@@ -122,7 +123,15 @@ export async function adminCreateTraderAction(
   }
 
   try {
-    await createTraderAccount(parsed.data);
+    const trader = await createTraderAccount(parsed.data);
+    const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
+    await writeAdminAudit({
+      adminId: session.sub,
+      action: "trader.create",
+      targetType: "trader",
+      targetId: trader.id,
+      meta: { email: parsed.data.email.trim().toLowerCase() },
+    });
     revalidatePath("/admin/traders");
     return {
       ok: true,

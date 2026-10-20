@@ -1,21 +1,43 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
+import {
+  buildContentSecurityPolicy,
+  createCspNonce,
+  CSP_NONCE_HEADER,
+} from "@/lib/security/csp";
 
 const ADMIN_COOKIE = "ro_admin_session";
 const TRADER_COOKIE = "ro_trader_session";
 const LOCALE_COOKIE = "ro_locale";
 
+function applySecurityHeaders(response: NextResponse, nonce: string): NextResponse {
+  const isProd = process.env.NODE_ENV === "production";
+  response.headers.set(
+    "Content-Security-Policy",
+    buildContentSecurityPolicy(nonce, isProd)
+  );
+  response.headers.set(CSP_NONCE_HEADER, nonce);
+  response.cookies.set("ro_csp_nonce", nonce, {
+    path: "/",
+    httpOnly: false,
+    sameSite: "lax",
+    secure: isProd,
+    maxAge: 60,
+  });
+  return response;
+}
+
 function withLocale(
   request: NextRequest,
   locale: "ar" | "en",
-  rewritePath?: string
+  rewritePath?: string,
+  nonce?: string
 ) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-ro-locale", locale);
+  if (nonce) requestHeaders.set(CSP_NONCE_HEADER, nonce);
 
-  // Clone the request URL so search params (filters, q, sort) survive EN rewrites.
-  // `new URL("/catalog", request.url)` drops the query string.
   const response = rewritePath
     ? (() => {
         const target = request.nextUrl.clone();
@@ -32,7 +54,7 @@ function withLocale(
     path: "/",
     sameSite: "lax",
   });
-  return response;
+  return nonce ? applySecurityHeaders(response, nonce) : response;
 }
 
 async function readRole(
@@ -54,11 +76,6 @@ async function readRole(
   }
 }
 
-/**
- * Guard portal routes without changing JWT crypto.
- * Missing/invalid session → login.
- * Valid session for the *other* role → /forbidden (not login).
- */
 async function guardRole(
   request: NextRequest,
   expected: "admin" | "trader",
@@ -94,10 +111,6 @@ async function guardRole(
   return NextResponse.redirect(loginUrl);
 }
 
-/**
- * Logged-in traders must not land on public /offers — that swaps the portal
- * shell for the storefront and looks like lost permissions.
- */
 async function redirectTraderFromPublicOffers(
   request: NextRequest,
   barePath: string
@@ -125,12 +138,17 @@ async function redirectTraderFromPublicOffers(
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const nonce = createCspNonce();
 
   if (pathname === "/forbidden") {
-    return NextResponse.next();
+    const headers = new Headers(request.headers);
+    headers.set(CSP_NONCE_HEADER, nonce);
+    return applySecurityHeaders(
+      NextResponse.next({ request: { headers } }),
+      nonce
+    );
   }
 
-  // Storefront English prefix → rewrite + locale en
   if (pathname === "/en" || pathname.startsWith("/en/")) {
     const stripped = pathname === "/en" ? "/" : pathname.slice(3) || "/";
     if (
@@ -146,19 +164,29 @@ export async function middleware(request: NextRequest) {
       stripped
     );
     if (traderOffers) return traderOffers;
-    return withLocale(request, "en", stripped);
+    return withLocale(request, "en", stripped, nonce);
   }
 
   if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
     const denied = await guardRole(request, "admin", "/admin/login");
     if (denied) return denied;
-    return NextResponse.next();
+    const headers = new Headers(request.headers);
+    headers.set(CSP_NONCE_HEADER, nonce);
+    return applySecurityHeaders(
+      NextResponse.next({ request: { headers } }),
+      nonce
+    );
   }
 
   if (pathname.startsWith("/trader") && !pathname.startsWith("/trader/login")) {
     const denied = await guardRole(request, "trader", "/trader/login");
     if (denied) return denied;
-    return NextResponse.next();
+    const headers = new Headers(request.headers);
+    headers.set(CSP_NONCE_HEADER, nonce);
+    return applySecurityHeaders(
+      NextResponse.next({ request: { headers } }),
+      nonce
+    );
   }
 
   if (
@@ -173,10 +201,15 @@ export async function middleware(request: NextRequest) {
       pathname
     );
     if (traderOffers) return traderOffers;
-    return withLocale(request, "ar");
+    return withLocale(request, "ar", undefined, nonce);
   }
 
-  return NextResponse.next();
+  const headers = new Headers(request.headers);
+  headers.set(CSP_NONCE_HEADER, nonce);
+  return applySecurityHeaders(
+    NextResponse.next({ request: { headers } }),
+    nonce
+  );
 }
 
 export const config = {

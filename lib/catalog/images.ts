@@ -1,10 +1,10 @@
 import { mkdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomBytes } from "node:crypto";
+import sharp from "sharp";
 
 import { prisma } from "@/lib/db/prisma";
 import { probeImageDimensions } from "@/lib/catalog/image-dimensions";
-
 const MAX_MEDIA = 8;
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 48 * 1024 * 1024;
@@ -15,6 +15,13 @@ const ALLOWED_IMAGE = new Set([
   "image/png",
   "image/webp",
 ]);
+
+/** Explicit reject — never store active SVG even if MIME is spoofed. */
+function isSvgPayload(buf: Buffer, declaredType: string): boolean {
+  if (declaredType === "image/svg+xml") return true;
+  const head = buf.subarray(0, Math.min(buf.length, 256)).toString("utf8");
+  return /^\s*<\?xml/i.test(head) || /^\s*<svg[\s>]/i.test(head);
+}
 
 const ALLOWED_VIDEO = new Set(["video/mp4", "video/webm"]);
 
@@ -105,23 +112,37 @@ export async function attachProductImage(input: {
 
   const buf = Buffer.from(await input.file.arrayBuffer());
 
+  if (isSvgPayload(buf, type)) return { ok: false, error: "TYPE" };
+
   const magicKind = detectMediaMagic(buf);
   if (!magicKind) return { ok: false, error: "TYPE" };
   if (isImage && magicKind !== "image") return { ok: false, error: "TYPE" };
   if (isVideo && magicKind !== "video") return { ok: false, error: "TYPE" };
+
+  let outBuf = buf;
+  let outExt = EXT[type] ?? "bin";
 
   if (isImage) {
     const dims = probeImageDimensions(buf);
     if (!dims || Math.max(dims.width, dims.height) < MIN_LONG_SIDE) {
       return { ok: false, error: "DIM" };
     }
+    // Re-encode via sharp — strips metadata / scripts; forces raster webp.
+    try {
+      outBuf = await sharp(buf)
+        .rotate()
+        .webp({ quality: 85 })
+        .toBuffer();
+      outExt = "webp";
+    } catch {
+      return { ok: false, error: "TYPE" };
+    }
   }
 
-  const ext = EXT[type] ?? "bin";
-  const name = `${Date.now()}-${randomBytes(6).toString("hex")}.${ext}`;
+  const name = `${Date.now()}-${randomBytes(6).toString("hex")}.${outExt}`;
   const dir = path.join(uploadsRoot(), input.productId);
   await mkdir(dir, { recursive: true });
-  await writeFile(path.join(dir, name), buf);
+  await writeFile(path.join(dir, name), outBuf);
 
   const publicPath = `/uploads/${input.productId}/${name}`;
   const maxSort = await prisma.productImage.aggregate({

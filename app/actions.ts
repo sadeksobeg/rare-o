@@ -100,7 +100,60 @@ export async function adminLoginAction(
     return { ok: false, error: "LOGIN_INVALID" };
   }
 
+  const require2fa = process.env.REQUIRE_ADMIN_2FA === "1";
+  const totpEnabled = Boolean(admin.totpEnabledAt && admin.totpSecretEnc);
+
+  if (require2fa && !totpEnabled) {
+    return { ok: false, error: "TOTP_ENROLL_REQUIRED" };
+  }
+
+  if (totpEnabled) {
+    const code = (parsed.data.totpCode || "").trim();
+    if (!code) {
+      return { ok: false, error: "TOTP_REQUIRED" };
+    }
+    const {
+      decryptTotpSecret,
+      verifyTotp,
+      consumeRecoveryCode,
+    } = await import("@/lib/auth/totp");
+    const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
+    let ok = false;
+    try {
+      const secret = decryptTotpSecret(admin.totpSecretEnc!);
+      ok = verifyTotp(secret, code);
+    } catch {
+      ok = false;
+    }
+    if (!ok) {
+      const recovered = await consumeRecoveryCode(
+        admin.totpRecoveryHashes,
+        code
+      );
+      if (recovered.ok) {
+        await prisma.adminUser.update({
+          where: { id: admin.id },
+          data: { totpRecoveryHashes: recovered.remainingJson },
+        });
+        ok = true;
+        await writeAdminAudit({
+          adminId: admin.id,
+          action: "admin.login.recovery_code",
+        });
+      }
+    }
+    if (!ok) {
+      recordLoginFailure("admin", email);
+      return { ok: false, error: "TOTP_INVALID" };
+    }
+  }
+
   clearLoginFailures("admin", email);
+  const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
+  await writeAdminAudit({
+    adminId: admin.id,
+    action: "admin.login",
+  });
   const token = await createAdminSessionToken({
     sub: admin.id,
     email: admin.email,
@@ -108,6 +161,76 @@ export async function adminLoginAction(
   });
   await setAdminSessionCookie(token);
   redirect("/admin");
+}
+
+/** Start TOTP enrollment — returns otpauth URL + plaintext recovery codes once. */
+export async function enrollAdminTotpAction(): Promise<
+  | { ok: true; otpauthUrl: string; secret: string; recoveryCodes: string[] }
+  | { ok: false; error: string }
+> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch {
+    return { ok: false, error: "Unauthorized" };
+  }
+  const {
+    generateTotpSecret,
+    encryptTotpSecret,
+    generateRecoveryCodes,
+    hashRecoveryCodes,
+  } = await import("@/lib/auth/totp");
+  const { secret, otpauthUrl } = generateTotpSecret();
+  const recoveryCodes = generateRecoveryCodes(8);
+  await prisma.adminUser.update({
+    where: { id: session.sub },
+    data: {
+      totpSecretEnc: encryptTotpSecret(secret),
+      totpRecoveryHashes: await hashRecoveryCodes(recoveryCodes),
+      totpEnabledAt: null,
+    },
+  });
+  return { ok: true, otpauthUrl, secret, recoveryCodes };
+}
+
+/** Confirm TOTP enrollment with a live code. */
+export async function confirmAdminTotpAction(
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch {
+    return { ok: false, error: "Unauthorized" };
+  }
+  const code = String(formData.get("totpCode") || "").trim();
+  const admin = await prisma.adminUser.findUnique({
+    where: { id: session.sub },
+  });
+  if (!admin?.totpSecretEnc) {
+    return { ok: false, error: "TOTP_NOT_STARTED" };
+  }
+  const { decryptTotpSecret, verifyTotp } = await import("@/lib/auth/totp");
+  const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
+  let secret: string;
+  try {
+    secret = decryptTotpSecret(admin.totpSecretEnc);
+  } catch {
+    return { ok: false, error: "TOTP_INVALID" };
+  }
+  if (!verifyTotp(secret, code)) {
+    return { ok: false, error: "TOTP_INVALID" };
+  }
+  await prisma.adminUser.update({
+    where: { id: admin.id },
+    data: { totpEnabledAt: new Date() },
+  });
+  await writeAdminAudit({
+    adminId: admin.id,
+    action: "admin.totp.enabled",
+  });
+  return { ok: true };
 }
 
 export async function adminLogoutAction(): Promise<void> {
@@ -119,8 +242,9 @@ export async function upsertProductAction(
   _prev: ActionResult | null,
   formData: FormData
 ): Promise<ActionResult> {
+  let adminSession;
   try {
-    await requireAdminSession();
+    adminSession = await requireAdminSession();
   } catch {
     return { ok: false, error: "Unauthorized" };
   }
@@ -169,7 +293,23 @@ export async function upsertProductAction(
   try {
     // Always land on the edit page so image/video upload is visible next.
     if (id) {
+      const prev = await prisma.product.findUnique({
+        where: { id },
+        select: { status: true },
+      });
       await updateProduct(id, parsed.data);
+      if (
+        parsed.data.status === "published" &&
+        prev?.status !== "published"
+      ) {
+        const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
+        await writeAdminAudit({
+          adminId: adminSession.sub,
+          action: "product.publish",
+          targetType: "product",
+          targetId: id,
+        });
+      }
       revalidatePath(`/admin/products/${id}`);
       revalidatePath("/admin/products");
       revalidateProductStorefront();

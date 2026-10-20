@@ -23,6 +23,7 @@ export function LoginForm({
   loginErrorLabel,
   inverse = false,
   localeSlot,
+  totpLabel,
 }: {
   action: (
     prev: ActionResult | null,
@@ -40,6 +41,8 @@ export function LoginForm({
   loginErrorLabel?: string;
   inverse?: boolean;
   localeSlot?: React.ReactNode;
+  /** When set, show optional TOTP / recovery code field (admin 2FA). */
+  totpLabel?: string;
 }) {
   const [state, formAction, pending] = useActionState(action, initial);
   const [reveal, setReveal] = useState(false);
@@ -50,7 +53,11 @@ export function LoginForm({
         state.error === "LOGIN_LOCKED" ||
         state.error === "Invalid email or password"
         ? (loginErrorLabel ?? state.error)
-        : state.error
+        : state.error === "TOTP_REQUIRED" || state.error === "TOTP_INVALID"
+          ? totpLabel
+            ? `${totpLabel}: ${state.error}`
+            : state.error
+          : state.error
       : null;
 
   return (
@@ -120,6 +127,16 @@ export function LoginForm({
               {reveal ? hidePasswordLabel : showPasswordLabel}
             </button>
           </div>
+          {totpLabel ? (
+            <TextField
+              name="totpCode"
+              type="text"
+              label={totpLabel}
+              dir="ltr"
+              autoComplete="one-time-code"
+              inputMode="numeric"
+            />
+          ) : null}
           {errorText ? (
             <Banner tone="danger" alert>
               {errorText}

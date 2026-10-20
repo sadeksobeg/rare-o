@@ -181,6 +181,7 @@ export const retailRequestIdSchema = z.object({
 export const adminLoginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8).max(200),
+  totpCode: z.string().trim().max(32).optional(),
 });
 
 export const traderLoginSchema = z.object({

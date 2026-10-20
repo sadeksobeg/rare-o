@@ -22,6 +22,7 @@ export default async function AdminLoginPage() {
       showPasswordLabel={dict.auth.showPassword}
       hidePasswordLabel={dict.auth.hidePassword}
       loginErrorLabel={dict.auth.loginError}
+      totpLabel="2FA / recovery"
       inverse
       localeSlot={
         <AdminLocaleToggle

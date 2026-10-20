@@ -1,31 +1,42 @@
-# Admin 2FA (TOTP) — design stubs
+# Admin 2FA (TOTP)
 
-**Status:** Not implemented in schema (no migration in Closure E3). Documented API for a follow-up slice.
+**Status:** Implemented (Closure F3).
 
-## Rationale
+## Model
 
-bcrypt + jose already secure password login; TOTP adds defense when passwords leak. `otplib` is **not** a dependency — a future implementation can use Node `crypto` HMAC-SHA1 (RFC 6238) or add `otplib`.
+`AdminUser` fields:
 
-## Proposed data model (future migration)
+| Field | Purpose |
+|-------|---------|
+| `totpSecretEnc` | AES-256-GCM blob (base64) of base32 TOTP secret |
+| `totpRecoveryHashes` | JSON array of bcrypt hashes for one-time recovery codes |
+| `totpEnabledAt` | Set when enrollment is confirmed; login requires TOTP when set |
 
-```prisma
-model AdminUser {
-  // existing fields…
-  totpSecretEnc String?   // AES-GCM blob or sealed box
-  totpEnabled   Boolean   @default(false)
-}
+Encryption key: HMAC-SHA256 of `AUTH_SECRET` with domain `"rare-oud-totp"` (`lib/auth/totp.ts`).
+
+## Login flow
+
+1. Email + password validated (`adminLoginAction`).
+2. If `totpEnabledAt` and `totpSecretEnc` are set, `totpCode` is required (6-digit TOTP or recovery code).
+3. Recovery codes are consumed on use and removed from `totpRecoveryHashes`.
+4. Successful login writes `AdminAuditLog` action `admin.login`.
+
+Optional env `REQUIRE_ADMIN_2FA=1` blocks login until 2FA is enrolled.
+
+## Enrollment (admin UI)
+
+`/admin/settings/security` — stub UI:
+
+- `enrollAdminTotpAction` — generates secret + recovery codes (stored encrypted, `totpEnabledAt` cleared until confirm).
+- `confirmAdminTotpAction` — verifies live TOTP, sets `totpEnabledAt`.
+
+## Tests
+
+```bash
+npm run test:f3-2fa
 ```
 
-Store **hashed** backup codes separately if needed.
+## Operator notes
 
-## Proposed routes / actions
-
-| Endpoint / action | Purpose |
-|-------------------|---------|
-| `POST /api/admin/totp/enroll` | Generate secret, return `otpauth://` URI (admin session required) |
-| `POST /api/admin/totp/verify` | Confirm code, set `totpEnabled` |
-| `adminLoginAction` step 2 | If `totpEnabled`, require `totpCode` field before issuing JWT |
-
-## Current behavior
-
-Single-factor admin login only (`adminLoginSchema` — email + password).
+- Store recovery codes offline after enrollment.
+- Rotate `AUTH_SECRET` only with a planned TOTP re-enrollment (secrets are keyed to `AUTH_SECRET`).

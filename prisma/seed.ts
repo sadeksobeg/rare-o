@@ -388,7 +388,17 @@ async function main() {
     accessories: accessoriesCat.id,
   };
 
-  const email = process.env.ADMIN_EMAIL ?? "admin@rareoud.local";
+  const defaultAdminEmail = "admin@rareoud.local";
+  const email = process.env.ADMIN_EMAIL ?? defaultAdminEmail;
+  if (
+    process.env.NODE_ENV === "production" &&
+    email === defaultAdminEmail &&
+    process.env.ALLOW_DEFAULT_SEED !== "1"
+  ) {
+    throw new Error(
+      "Refusing production seed with admin@rareoud.local. Set ADMIN_EMAIL or ALLOW_DEFAULT_SEED=1 explicitly."
+    );
+  }
   const password = process.env.ADMIN_PASSWORD ?? "ChangeMeNow!";
   const name = process.env.ADMIN_NAME ?? "RARE OUD Admin";
   const passwordHash = await bcrypt.hash(password, 12);
