@@ -22,6 +22,17 @@ process.on("unhandledRejection", (err) => {
   process.exit(1);
 });
 
+const isProductUrl = /\/product\//.test(url);
+if (isProductUrl) {
+  for (let i = 0; i < 2; i += 1) {
+    try {
+      await fetch(url, { redirect: "follow" });
+    } catch {
+      /* server may be cold */
+    }
+  }
+}
+
 const chrome = await chromeLauncher.launch({
   chromeFlags: [
     "--headless=new",

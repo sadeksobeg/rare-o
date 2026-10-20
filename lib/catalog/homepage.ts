@@ -87,13 +87,13 @@ async function fetchPublishedProducts() {
     where: { status: "published" },
     include: {
       category: true,
-      images: { orderBy: { sortOrder: "asc" }, take: 1 },
+      images: { orderBy: { sortOrder: "asc" }, take: 2 },
     },
     orderBy: { updatedAt: "desc" },
   });
 }
 
-async function loadHomepageDiscoveryData() {
+export async function loadHomepageDiscoveryData() {
   const [rawProducts, categories, rawOffers] = await Promise.all([
     fetchPublishedProducts(),
     listLaunchCategories(),
@@ -177,8 +177,8 @@ async function loadHomepageDiscoveryData() {
 
 export const getHomepageDiscoveryData = unstable_cache(
   loadHomepageDiscoveryData,
-  ["homepage-discovery-v1"],
-  { revalidate: 60 }
+  ["homepage-discovery-v2"],
+  { revalidate: 60, tags: ["homepage", "catalog"] }
 );
 
 export type HomepageDiscoveryData = Awaited<

@@ -49,6 +49,7 @@ import { LOCALE_COOKIE } from "@/lib/i18n/server";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { revalidateHomepageAndCatalogTags } from "@/lib/cache/revalidate-storefront";
 
 export type ActionResult =
   | { ok: true; message?: string; data?: unknown }
@@ -171,11 +172,12 @@ export async function upsertProductAction(
       await updateProduct(id, parsed.data);
       revalidatePath(`/admin/products/${id}`);
       revalidatePath("/admin/products");
-      revalidatePath("/catalog");
+      revalidateProductStorefront();
       redirect(`/admin/products/${id}`);
     }
     const created = await createProduct(parsed.data);
     revalidatePath("/admin/products");
+    revalidateProductStorefront();
     redirect(`/admin/products/${created.id}`);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Save failed";
@@ -237,7 +239,7 @@ export async function attachProductImageAction(
 
   revalidatePath(`/admin/products/${productId}`);
   revalidatePath("/admin/products");
-  revalidatePath("/catalog");
+  revalidateProductStorefront();
   return { ok: true };
 }
 
@@ -250,7 +252,7 @@ export async function removeProductImageAction(
   await removeProductImage(imageId);
   revalidatePath(`/admin/products/${productId}`);
   revalidatePath("/admin/products");
-  revalidatePath("/catalog");
+  revalidateProductStorefront();
 }
 
 export async function reorderProductImageAction(
@@ -264,7 +266,7 @@ export async function reorderProductImageAction(
   await reorderProductImage(imageId, direction);
   revalidatePath(`/admin/products/${productId}`);
   revalidatePath("/admin/products");
-  revalidatePath("/catalog");
+  revalidateProductStorefront();
 }
 
 export async function updateProductImageAltsAction(
@@ -304,6 +306,14 @@ function revalidateCategoryPaths() {
   revalidatePath("/admin/categories");
   revalidatePath("/admin/products");
   revalidatePath("/catalog");
+  revalidatePath("/");
+  revalidateHomepageAndCatalogTags();
+}
+
+function revalidateProductStorefront() {
+  revalidatePath("/catalog");
+  revalidatePath("/");
+  revalidateHomepageAndCatalogTags();
 }
 
 /** AD-08 — edit labels + sortOrder (dialog form; returns a result, no redirect). */

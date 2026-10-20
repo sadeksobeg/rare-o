@@ -3,6 +3,7 @@
 import { randomBytes } from "node:crypto";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { revalidateHomepageAndCatalogTags } from "@/lib/cache/revalidate-storefront";
 import {
   dealProposalCreateSchema,
   negotiationEntrySchema,
@@ -371,10 +372,15 @@ export async function adminUpsertPublicOfferAction(
       revalidatePath("/admin/offers");
       revalidatePath(`/admin/offers/${id}`);
       revalidatePath("/offers");
+      revalidatePath("/");
+      revalidateHomepageAndCatalogTags();
       return { ok: true };
     }
     const offer = await createPublicCuratedOffer(parsed.data);
     revalidatePath("/admin/offers");
+    revalidatePath("/offers");
+    revalidatePath("/");
+    revalidateHomepageAndCatalogTags();
     redirect(`/admin/offers/${offer.id}`);
   } catch (e) {
     if (typeof e === "object" && e && "digest" in e) throw e;
@@ -414,6 +420,8 @@ export async function adminSetPublicOfferStatusAction(
     revalidatePath(`/admin/offers/${parsed.data.id}`);
     revalidatePath("/offers");
     revalidatePath("/trader/offers");
+    revalidatePath("/");
+    revalidateHomepageAndCatalogTags();
     return { ok: true };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Status update failed";

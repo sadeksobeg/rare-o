@@ -119,8 +119,8 @@ export async function listPublishedProducts(filters?: PublishedProductFilters) {
     where: publishedWhere(filters),
     include: {
       category: true,
-      // Primary only — hover dual-image was loading a second full srcset per card.
-      images: { orderBy: { sortOrder: "asc" }, take: 1 },
+      // Primary + optional hover (second image lazy-loaded in CatalogCardHoverImage).
+      images: { orderBy: { sortOrder: "asc" }, take: 2 },
     },
     orderBy: publishedOrderBy(filters?.sort),
     ...(filters?.limit ? { take: filters.limit } : {}),

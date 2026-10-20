@@ -47,3 +47,7 @@ Still under 0.85 on Windows localhost without CDN/HTTP2 edge. Primary LH opportu
 - **2.6 Responsive / Performance:** **PARTIAL** (improved, not ≥0.85 hard gate).
 - Admin/Trader soft gate ≥0.85: **met**.
 - Do **not** mark storefront pages PASS below target.
+
+## F2 follow-up (2026-10-20)
+
+See [`F2-PERF-NOTES.md`](./F2-PERF-NOTES.md): hero preload/`fetchPriority`, lazy catalog hover, `revalidateTag` for homepage/catalog, double product LH warmups, and `npm run test:f2-home-cache`. **CI Linux** Lighthouse remains the source of truth; Windows localhost is informational only.

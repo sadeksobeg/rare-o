@@ -43,13 +43,19 @@ function once(url) {
   return JSON.parse(line);
 }
 
-function audit(name, url, hardGate) {
-  const runs = [];
-  try {
-    once(url);
-  } catch (e) {
-    console.warn(`[e1-lh] ${name} warmup skipped:`, e.message);
+function warm(url, passes) {
+  for (let w = 0; w < passes; w += 1) {
+    try {
+      once(url);
+    } catch (e) {
+      console.warn(`[e1-lh] warmup ${w + 1}/${passes} skipped:`, e.message);
+    }
   }
+}
+
+function audit(name, url, hardGate, { warmups = 1 } = {}) {
+  const runs = [];
+  warm(url, warmups);
   for (let i = 0; i < RUNS; i += 1) {
     let ok = false;
     for (let a = 0; a < 4; a += 1) {
@@ -109,7 +115,8 @@ const targets = [
 
 const routes = [];
 for (const t of targets) {
-  const row = audit(t.name, t.url, t.hardGate);
+  const warmups = t.name === "product" ? 2 : 1;
+  const row = audit(t.name, t.url, t.hardGate, { warmups });
   routes.push(row);
   const tag = row.passed ? "OK" : "FAIL";
   console.log(

@@ -8,7 +8,8 @@ import { cn } from "@/lib/utils";
  * Single hero oud — atelier-f (warm gold-rim cutout).
  * Mouse parallax + idle breathe.
  */
-const SRC = "/brand/hero-oud-atelier-f-e1.webp";
+export const HERO_OUD_LCP_SRC = "/brand/hero-oud-atelier-f-e1.webp";
+const SRC = HERO_OUD_LCP_SRC;
 /* Slight plum rim to sit in brand light — keep wood natural */
 /* Soft rim without drop-shadow (drop-shadow tanks Lighthouse paint). */
 
@@ -126,6 +127,7 @@ export function HeroOudField({
               width={360}
               height={765}
               priority
+              fetchPriority="high"
               sizes="(max-width: 390px) 55vw, (max-width: 768px) 45vw, 360px"
               quality={70}
               draggable={false}

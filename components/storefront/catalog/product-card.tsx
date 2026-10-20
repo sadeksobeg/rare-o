@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ProductThumb } from "@/components/storefront/product-media";
+import { CatalogCardMedia } from "@/components/storefront/catalog/catalog-card-media";
 import { AvailabilityChip } from "@/components/storefront/catalog/availability-chip";
 import { PriceBlock } from "@/components/storefront/catalog/price-block";
 import { ProductBadges } from "@/components/storefront/catalog/product-badges";
@@ -42,6 +42,7 @@ export function CatalogProductCard({
 }) {
   const name = localizedName(locale, product.nameAr, product.nameEn, product.slug);
   const primary = product.images[0];
+  const secondary = product.images[1];
   const altFor = (img: { altAr: string; altEn: string }) =>
     localizedName(locale, img.altAr, img.altEn, name);
   const available = product.availability !== "unavailable";
@@ -53,12 +54,14 @@ export function CatalogProductCard({
   return (
     <article className={cn("group relative", className)}>
       <div className="ro-card-lift relative overflow-hidden rounded-[var(--ro-r-xs)]">
-        <ProductThumb
-          path={primary?.path}
-          alt={primary ? altFor(primary) : name}
-          kind={primary?.kind}
+        <CatalogCardMedia
+          primaryPath={primary?.path}
+          primaryKind={primary?.kind}
+          primaryAlt={primary ? altFor(primary) : name}
+          secondaryPath={secondary?.path}
+          secondaryAlt={secondary ? altFor(secondary) : undefined}
           plateCaption={dict.catalog.photoCaption}
-          className={cn(!available && "opacity-80")}
+          dimmed={!available}
         />
         <ProductBadges product={product} locale={locale} />
         {available ? (

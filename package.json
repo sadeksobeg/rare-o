@@ -29,6 +29,7 @@
     "test:d2-restore": "node scripts/d2-restore-drill.mjs",
     "test:d1-lh": "node scripts/d1-lighthouse.mjs",
     "test:lh-budget": "node scripts/e1-lh-budget.mjs",
+    "test:f2-home-cache": "node node_modules/tsx/dist/cli.mjs scripts/f2-home-revalidate-test.ts",
     "test:e2e": "node node_modules/@playwright/test/cli.js test",
     "test:e2-unit": "node node_modules/tsx/dist/cli.mjs scripts/e2-unit-checks.ts",
     "test:e2-load": "node scripts/e2-load.mjs",
