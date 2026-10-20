@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-10-20T05:32:08.261Z",
+  "base": "http://127.0.0.1:3000",
+  "concurrency": 50,
+  "worstP95Ms": 11.7,
+  "paths": [
+    {
+      "path": "/",
+      "url": "http://127.0.0.1:3000/",
+      "concurrency": 50,
+      "ok": 0,
+      "errors": 50,
+      "errorRate": 1,
+      "p50Ms": 10.4,
+      "p95Ms": 11.7,
+      "maxMs": 29.2
+    },
+    {
+      "path": "/catalog",
+      "url": "http://127.0.0.1:3000/catalog",
+      "concurrency": 50,
+      "ok": 0,
+      "errors": 50,
+      "errorRate": 1,
+      "p50Ms": 7,
+      "p95Ms": 7.7,
+      "maxMs": 7.7
+    },
+    {
+      "path": "/en/product/demo-string-instrument",
+      "url": "http://127.0.0.1:3000/en/product/demo-string-instrument",
+      "concurrency": 50,
+      "ok": 0,
+      "errors": 50,
+      "errorRate": 1,
+      "p50Ms": 6.8,
+      "p95Ms": 7.3,
+      "maxMs": 7.4
+    }
+  ]
+}

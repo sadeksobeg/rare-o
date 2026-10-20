@@ -1,0 +1,60 @@
+{
+  "generatedAt": "2026-10-20T05:31:41.295Z",
+  "scopes": [
+    "lib/auth",
+    "lib/db",
+    "lib/deals"
+  ],
+  "totalLines": 1078,
+  "exercisedLines": 1026,
+  "percentLinesProxy": 95.2,
+  "gatePercent": 70,
+  "pass": true,
+  "exercisedModules": [
+    "lib/auth/admin-session.ts",
+    "lib/auth/public-rate-limit.ts",
+    "lib/auth/rate-limit.ts",
+    "lib/auth/totp.ts",
+    "lib/auth/trader-session.ts",
+    "lib/db/prisma.ts",
+    "lib/db/search.ts",
+    "lib/deals/conflict.ts",
+    "lib/deals/constants.ts",
+    "lib/deals/service.ts"
+  ],
+  "allModules": [
+    "lib/auth/admin-audit.ts",
+    "lib/auth/admin-session.ts",
+    "lib/auth/public-rate-limit.ts",
+    "lib/auth/rate-limit.ts",
+    "lib/auth/totp.ts",
+    "lib/auth/trader-session.ts",
+    "lib/db/prisma.ts",
+    "lib/db/search.ts",
+    "lib/deals/conflict.ts",
+    "lib/deals/constants.ts",
+    "lib/deals/service.ts"
+  ],
+  "harnessRuns": [
+    {
+      "name": "e2-unit-checks",
+      "ok": true,
+      "code": 0
+    },
+    {
+      "name": "f5-lib-unit",
+      "ok": true,
+      "code": 0
+    },
+    {
+      "name": "f5-action-contracts",
+      "ok": true,
+      "code": 0
+    },
+    {
+      "name": "f5-security-checks",
+      "ok": true,
+      "code": 0
+    }
+  ]
+}

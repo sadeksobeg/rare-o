@@ -1,0 +1,84 @@
+{
+  "generatedAt": "2026-10-20T05:31:38.840Z",
+  "totalActions": 53,
+  "files": [
+    {
+      "file": "app/actions.ts",
+      "actions": [
+        "setLocaleAction",
+        "adminLoginAction",
+        "enrollAdminTotpAction",
+        "confirmAdminTotpAction",
+        "adminLogoutAction",
+        "upsertProductAction",
+        "attachProductImageAction",
+        "removeProductImageAction",
+        "reorderProductImageAction",
+        "updateProductImageAltsAction",
+        "updateCategoryFormAction",
+        "updateCategoryAction",
+        "createCategoryAction",
+        "deleteCategoryAction",
+        "createRetailRequestAction",
+        "markRetailHandoffOpenedAction",
+        "adminTransitionRetailRequestAction",
+        "adminRetriggerRetailHandoffAction",
+        "adminMarkRetailHandoffOpenedAction",
+        "upsertPromoBandAction",
+        "deletePromoBandAction"
+      ]
+    },
+    {
+      "file": "app/deal-actions.ts",
+      "actions": [
+        "traderLoginAction",
+        "traderLogoutAction",
+        "adminCreateTraderAction",
+        "adminSetTraderStatusAction",
+        "traderCreateDealAction",
+        "traderNegotiateAction",
+        "adminNegotiateAction",
+        "adminUpsertPublicOfferAction",
+        "adminSetPublicOfferStatusAction",
+        "adminCreateOfferDraftFromDealAction"
+      ]
+    },
+    {
+      "file": "app/whatsapp-actions.ts",
+      "actions": [
+        "adminListInboxConversationsAction",
+        "adminGetInboxConversationAction",
+        "adminGetInboxHealthAction",
+        "adminMarkInboxConversationReadAction",
+        "adminSendWhatsAppTextAction",
+        "adminLinkWhatsAppConversationAction",
+        "adminUnlinkWhatsAppConversationAction",
+        "adminGetBusinessContextAction",
+        "adminRetryWhatsAppMessageAction",
+        "adminSearchLinkableRecordsAction",
+        "adminRequestWhatsAppPairingAction",
+        "adminWhatsAppReconnectAction",
+        "adminWhatsAppLogoutAction"
+      ]
+    },
+    {
+      "file": "app/wholesale-actions.ts",
+      "actions": [
+        "traderCreateWholesaleRequestAction",
+        "traderRespondWholesaleQuoteAction",
+        "traderCancelWholesaleRequestAction",
+        "adminTransitionWholesaleAction",
+        "adminProvideWholesaleQuoteAction",
+        "adminUpdateWholesaleShippingAction"
+      ]
+    },
+    {
+      "file": "app/trader-portal-actions.ts",
+      "actions": [
+        "traderUpdatePreferencesAction",
+        "traderMarkNotificationReadAction",
+        "traderMarkAllNotificationsReadAction"
+      ]
+    }
+  ]
+}
