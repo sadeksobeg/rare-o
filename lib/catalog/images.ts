@@ -129,10 +129,9 @@ export async function attachProductImage(input: {
     }
     // Re-encode via sharp — strips metadata / scripts; forces raster webp.
     try {
-      outBuf = await sharp(buf)
-        .rotate()
-        .webp({ quality: 85 })
-        .toBuffer();
+      outBuf = Buffer.from(
+        await sharp(buf).rotate().webp({ quality: 85 }).toBuffer()
+      );
       outExt = "webp";
     } catch {
       return { ok: false, error: "TYPE" };
