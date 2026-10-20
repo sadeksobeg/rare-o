@@ -203,7 +203,7 @@ async function main() {
       assert(!!request.reference, "retail request valid (service layer contract)");
     }
 
-    const adminRetail = await adminTransitionRetailRequestAction(null, new FormData());
+    const adminRetail = await adminTransitionRetailRequestAction(new FormData());
     assert(
       !adminRetail.ok && adminRetail.error === "Unauthorized",
       "adminTransitionRetailRequestAction unauthorized"

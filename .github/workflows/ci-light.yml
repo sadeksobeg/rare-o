@@ -1,0 +1,58 @@
+# Light CI — every PR (lint / tsc / unit). Saves private-plan minutes.
+name: CI Light
+
+on:
+  pull_request:
+    branches: [master, main]
+
+concurrency:
+  group: ci-light-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DATABASE_URL: postgresql://rareoud:rareoud@localhost:5432/rareoud?schema=public
+  AUTH_SECRET: ci-auth-secret-min-16-chars
+  CI: true
+
+jobs:
+  light:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: rareoud
+          POSTGRES_PASSWORD: rareoud
+          POSTGRES_DB: rareoud
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U rareoud"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Prisma generate & migrate
+        run: |
+          npm run db:generate
+          npm run db:migrate
+
+      - name: Unit checks
+        run: npm run test:e2-unit

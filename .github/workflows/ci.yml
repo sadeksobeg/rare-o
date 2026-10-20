@@ -1,14 +1,13 @@
+# Full CI — push to master/main + manual dispatch only (heavy; private minutes).
 name: CI
 
 on:
   push:
     branches: [master, main]
-  pull_request:
-  # Re-run Caddy TLS smoke only (app must already listen on host :3000):
   workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-full-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -21,6 +20,9 @@ env:
   TRADER_PASSWORD: ChangeMeNow!
   PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
   CI: true
+  SITE_URL: https://ci.example.com
+  SECURITY_EMAIL: security@ci.example.com
+  REQUIRE_SITE_ENV: "1"
 
 jobs:
   build-test:
@@ -52,10 +54,22 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Install Playwright browsers (chromium, firefox, webkit + deps)
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: pw-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright browsers
+        if: steps.pw-cache.outputs.cache-hit != 'true'
         run: |
           npx playwright install --with-deps chromium firefox webkit
           npx playwright install --with-deps chrome
+
+      - name: Install Playwright OS deps (cache hit)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium firefox webkit
 
       - name: Lint
         run: npm run lint
@@ -78,9 +92,6 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
-          REQUIRE_SITE_ENV: "1"
-          SITE_URL: https://ci.example.com
-          SECURITY_EMAIL: security@ci.example.com
 
       - name: SBOM (CycloneDX)
         run: npm run sbom
@@ -102,10 +113,6 @@ jobs:
           npm run test:f5-visual
           npm run test:f3-2fa
           npm run test:f3-upload
-        env:
-          AUTH_SECRET: ci-auth-secret-min-16-chars
-          SITE_URL: https://ci.example.com
-          SECURITY_EMAIL: security@ci.example.com
 
       - name: Seed database for runtime tests
         run: |
@@ -148,12 +155,16 @@ jobs:
           path: playwright-report/
           retention-days: 14
 
-      - name: Lighthouse budget (5-run median ≥0.85)
+      - name: Visual regression
+        run: npm run test:e2e -- e2e/visual-regression.spec.ts --reporter=list
+        continue-on-error: false
+
+      - name: Lighthouse budget (5-run median ≥0.85 HARD GATE)
         run: npm run test:lh-budget
         env:
           LH_RUNS: "5"
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
-          LH_FAIL_BELOW: "0.85"
+          LH_THRESHOLD: "0.85"
 
       - name: Upload Lighthouse JSON
         if: always()
@@ -180,6 +191,3 @@ jobs:
 
       - name: Security audit (fail on high/critical)
         run: npm run security:audit
-
-# workflow_dispatch re-runs the full pipeline above (including Caddy via scripts/ci-caddy-smoke.sh).
-# Local-only Caddy check: start `npm run start` on :3000, then `bash scripts/ci-caddy-smoke.sh`.

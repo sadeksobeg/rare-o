@@ -1,0 +1,36 @@
+{
+  "generatedAt": "2026-10-20T08:35:15.577Z",
+  "checks": [
+    {
+      "id": "G3-01-docs",
+      "pass": true,
+      "detail": "POSTGRES-APP-ROLE.md + postgres-app-role.sql"
+    },
+    {
+      "id": "G3-01-sslmode",
+      "pass": true,
+      "detail": "sslmode=require documented"
+    },
+    {
+      "id": "G3-02-actions",
+      "pass": true,
+      "detail": "admin-audit records login + totp.enabled"
+    },
+    {
+      "id": "G3-03-retention",
+      "pass": true,
+      "detail": "RETENTION.md present"
+    },
+    {
+      "id": "G3-04-seed-guard",
+      "pass": true,
+      "detail": "production seed refuses default admin@.local"
+    },
+    {
+      "id": "G3-05-audit",
+      "pass": false,
+      "detail": "security:audit exit 4294967295 (see npm audit)"
+    }
+  ],
+  "pass": true
+}
