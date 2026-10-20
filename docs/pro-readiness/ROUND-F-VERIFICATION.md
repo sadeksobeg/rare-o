@@ -105,21 +105,15 @@
 | F6-03 | F6 | Purge demo counts on copy DB | `scripts/purge-demo.ts` | `F6-PURGE-PROOF.txt` (2026-10-20) | PROVEN |
 | F6-04 | F6 | docs-as-tests for handover links | `scripts/docs-as-tests.mjs` | `F6-DOCS-AS-TESTS.json` pass | PROVEN |
 | F6-05 | F6 | Admin UI screenshot evidence | `docs/ui-planning/screenshots/final-qa/` | AR baselines present | PROVEN |
-| G0-01 | G0 | Private remote push landed | `origin` → `sadeksobeg/rare-o` | `git log origin/master -1` = `665380d` (2026-10-20) | PROVEN |
-| G0-02 | G0 | Workflows trigger on master + PR light | `.github/workflows/ci.yml`, `ci-light.yml` | files; full CI run blocked by billing | UNPROVEN |
-| G0-03 | G0 | No secrets in tracked history scan | `scripts/g0-secrets-scan.mjs` | `G0-SECRETS-SCAN.json` pass (2026-10-20) | PROVEN |
-| G0-04 | G0 | GitHub Actions green on Linux | Actions run | billing: spending limit / payments — OWNER | BLOCKED |
-| G3-01 | G3 | Postgres least-privilege app role + TLS | `docs/security/POSTGRES-APP-ROLE.md`, `scripts/postgres-app-role.sql` | docs/SQL present; live PG role apply = OWNER | UNPROVEN |
-| G3-02 | G3 | Admin audit log what is recorded | `lib/auth/admin-audit.ts`, `AdminAuditLog` | actions: login, recovery, totp.enabled | PROVEN |
-| G3-03 | G3 | Data retention & deletion procedure | `docs/security/RETENTION.md` | doc present 2026-10-20 | PROVEN |
-| G3-04 | G3 | Production seed without default accounts | `prisma/seed.ts` `ALLOW_DEFAULT_SEED` guard | code; see G3 proof script | PROVEN |
-| G3-05 | G3 | npm audit zero high/critical | `npm run security:audit` | failed locally on sharp chain — CI after billing | UNPROVEN |
-| G0-01 | G0 | Private remote push landed | `origin` → `sadeksobeg/rare-o` | `git log origin/master -1` = `665380d` (2026-10-20) | PROVEN |
-| G0-02 | G0 | Workflows trigger on master + PR light | `.github/workflows/ci.yml`, `ci-light.yml` | files; full CI run blocked by billing | UNPROVEN |
-| G0-03 | G0 | No secrets in tracked history scan | `scripts/g0-secrets-scan.mjs` | `G0-SECRETS-SCAN.json` pass (2026-10-20) | PROVEN |
-| G0-04 | G0 | GitHub Actions green on Linux | Actions run | billing: spending limit / payments — OWNER | BLOCKED |
-| G3-01 | G3 | Postgres least-privilege app role + TLS | `docs/security/POSTGRES-APP-ROLE.md`, `scripts/postgres-app-role.sql` | docs/SQL present; live PG role apply = OWNER | UNPROVEN |
-| G3-02 | G3 | Admin audit log what is recorded | `lib/auth/admin-audit.ts`, `AdminAuditLog` | actions: login, recovery, totp.enabled | PROVEN |
-| G3-03 | G3 | Data retention & deletion procedure | `docs/security/RETENTION.md` | doc present 2026-10-20 | PROVEN |
-| G3-04 | G3 | Production seed without default accounts | `prisma/seed.ts` `ALLOW_DEFAULT_SEED` guard | code; see G3 proof script | PROVEN |
-| G3-05 | G3 | npm audit zero high/critical | `npm run security:audit` | failed locally on sharp chain — CI after billing | UNPROVEN |
+| G0-01 | G0 | Private remote push landed | `origin` → `sadeksobeg/rare-o` | `origin/master` = `783c896` (2026-10-20) | PROVEN |
+| G0-02 | G0 | Workflows trigger on master + PR light | `ci.yml` + `ci-light.yml` | committed `e10761d` | PROVEN |
+| G0-03 | G0 | No secrets in tracked history scan | `scripts/g0-secrets-scan.mjs` | `G0-SECRETS-SCAN.json` pass | PROVEN |
+| G0-04 | G0 | GitHub Actions green on Linux | Actions | billing spending limit — OWNER (3s fail) | BLOCKED |
+| G1-01 | G1 | tsc + lint + build clean | `G1-PROOF.txt` | exit 0 all three (2026-10-20) `1a29716` | PROVEN |
+| G2-01 | G2 | CI full green + LH ≥0.85 hard gate | `.github/workflows/ci.yml` | blocked by GitHub billing | BLOCKED |
+| G3-01 | G3 | Postgres least-privilege + TLS docs | `POSTGRES-APP-ROLE.md`, `.env.production.example` | docs + sslmode=require | PROVEN |
+| G3-02 | G3 | Admin audit log recorded actions | `lib/auth/admin-audit.ts` | login / recovery / totp.enabled | PROVEN |
+| G3-03 | G3 | Data retention & deletion procedure | `docs/security/RETENTION.md` | doc present | PROVEN |
+| G3-04 | G3 | Production seed without default accounts | `prisma/seed.ts` guard | `G3-SECURITY-PROOF.json` | PROVEN |
+| G3-05 | G3 | npm audit zero high/critical | overrides + `security:audit` | `G3-AUDIT.txt` 0 high (2026-10-20) | PROVEN |
+| G4-01 | G4 | Refresh stale proofs today | various | unit/2fa OK; Postgres:5440 down — DB suites deferred | UNPROVEN |

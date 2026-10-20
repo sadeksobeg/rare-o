@@ -59,16 +59,16 @@
 
 ### Generated counts (do not edit by hand)
 
-_Updated: 2026-10-20T06:15:24.007Z_ · Source: `npm run report:counts`
+_Updated: 2026-10-20T14:44:02.963Z_ · Source: `npm run report:counts`
 
 **ROUND-F-VERIFICATION.md** (STATUS column)
 
 | STATUS | Count |
 |--------|------:|
-| PROVEN | 27 |
-| UNPROVEN | 59 |
-| BLOCKED | 14 |
-| **Total rows** | **100** |
+| PROVEN | 36 |
+| UNPROVEN | 60 |
+| BLOCKED | 16 |
+| **Total rows** | **112** |
 
 **FINAL-REPORT.md** contract matrix (Verdict column)
 
@@ -121,19 +121,17 @@ _Updated: 2026-10-20T06:15:24.007Z_ · Source: `npm run report:counts`
 11. Owner still must: live WA phone, VPS/DNS deploy, SVG/photos/privacy copy.  
 12. Do not tell the client “closed” until OWNER ACTIONS 1–3 are done and item 2.6 is re-measured ≥0.85 if required contractually.
 
-## 14-line summary — Closure Round F (F0–F6)
+## 12-line summary — Round G (2026-10-20)
 
-1. **F0** matrix + `npm run report:counts` — no hand totals; see COUNTS block (`ROUND-F-VERIFICATION.md`).  
-2. **F1** CI expanded (e2e×3, LH, Docker, Caddy, audit fail) — **BLOCKED** for PROVEN CI links (no git remote); see `GITHUB-PRIVATE-PUSH.md`.  
-3. **F2** LCP preload + lazy catalog hover + tag revalidate shipped (`9edd79d`); Linux LH≥0.85 still **BLOCKED** on CI.  
-4. **F3** Admin TOTP 2FA + CSP nonce + sharp SVG harden + Next **15.5.28** + SBOM + env-gated `security.txt` / `check-site-env`.  
-5. **F4** age+rclone MinIO drill + ALERT-RULES + staging profile (`1cf71bb`); Caddy smoke **BLOCKED** without remote.  
-6. **F5** action contracts (53 actions) + lib coverage proxy ≥70% + visual baselines + security IDOR/SVG/lockout — `TEST-INVENTORY.md`.  
-7. **F6** placeholder-in-build + 10-row import + purge proof + SEO + docs-as-tests + final-qa screens — proof files under `docs/pro-readiness/F6-*`.  
-8. Contract matrix: PASS **26** / PARTIAL **5** / OWNER-ACTION **2** (regen via `report:counts`).  
-9. Windows LH informational only; Ubuntu CI is source of truth once remote exists.  
-10. `npm audit` / security:audit fails high/critical in CI workflow (no `continue-on-error`).  
-11. OWNER: create private GitHub remote + push to unlock F1/F2/F3-05/F4-04/F5-03 CI PROVEN rows.  
-12. OWNER O1–O8 unchanged: logo, photos, legal, VPS, WhatsApp phone, UAT signatures.  
-13. Do not tell the client “closed” until 18 signature items + live CI green + OWNER ACTIONS.  
-14. Review pack: `ROUND-F-VERIFICATION.md` + this summary; CI link = **BLOCKED** until push.
+1. Remote private: `sadeksobeg/rare-o` `origin/master` = `783c896`.  
+2. **G0** secrets scan clean; CI split light(PR)/full(push+dispatch); concurrency + Playwright cache.  
+3. **G1** local `tsc` + `lint` + `next build` all exit 0 (Next 15.5.28); CSP nonce Edge-safe.  
+4. **G2 BLOCKED (OWNER):** Actions jobs fail in ~3s — GitHub billing / spending limit (e.g. https://github.com/sadeksobeg/rare-o/actions/runs/39441741959). No Linux LH medians yet.  
+5. **G3** Postgres role+TLS docs, audit-log actions, retention, seed guard, **`npm audit` 0 high** (overrides) — `G3-AUDIT.txt`.  
+6. **G4** partial: `test:e2-unit` + `test:f3-2fa` PASS today; Postgres `:5440` down / Docker daemon off → week3/e2e/load/axe deferred.  
+7. Verification counts: see COUNTS block (`npm run report:counts`).  
+8. Contract matrix unchanged: PASS 26 / PARTIAL 5 / OWNER-ACTION 2.  
+9. Lighthouse ≥0.85 hard gate is in `ci.yml` but never executed on Linux until billing fixed.  
+10. Browser project ×3 totals: **not available** (CI not started).  
+11. Remaining OWNER: fix GitHub Billing; start Docker/Postgres for G4; logo/photos/legal/VPS/WA/UAT.  
+12. Review: `ROUND-F-VERIFICATION.md` + this summary + latest failed Actions URL above.
