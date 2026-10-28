@@ -242,7 +242,7 @@ trustworthy from this environment.
 | `npm run build` | PASS (after both fixes) |
 | `npm run test:week3` | PASS 58/58 |
 | `npm run test:wholesale-security` | PASS 9/9 |
-| `npm run test:d1-axe` (92 scans) | PASS 0/92 failed (re-confirmed after hero changes) |
+| `npm run test:d1-axe` (92 scans) | PASS 0/92 failed (re-confirmed after hero changes). One intermediate background run reported "67 failed" with `ERR_CONNECTION_REFUSED` errors — invalid, caused by stopping the preview dev server mid-run while that background job was still hitting it; not a regression. Re-ran clean with the server left untouched. |
 | `npm run test:lh-budget` (5 runs × 6 routes) | Ran twice (before/after); see noise caveat above — not a clean signal this session |
 | `npm audit --audit-level=high` | 12 vulnerabilities (2 low, 10 high) — see zod finding above |
 | Live browser crawl: admin login + dashboard (prod build) | PASS, 0 console errors |
