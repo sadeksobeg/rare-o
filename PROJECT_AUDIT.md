@@ -360,3 +360,56 @@ further UI changes were identified as *necessary* — see Track C finding above)
 state verification (loading/empty/error/success) beyond what's already spot-checked; WP12
 (deployment — owner-gated); WP13 (WhatsApp — explicitly deferred). These remain open; see the
 roadmap for sequencing.
+
+---
+
+## Session 5 — 2026-10-28 — Real UI/UX implementation pass (skills-driven)
+
+Per owner instruction: implementation, not another audit. Consulted the `frontend-design` skill
+(general calibration — confirmed not the operative source here) and, more usefully, the project's
+**own** binding design rules (`.cursor/rules/rareoud-ui.mdc`, `docs/ui/01_DESIGN_SYSTEM.md`), which
+contain a 10-item diagnosis checklist from an earlier audit round. Tested each against the live
+app rather than trusting the old report.
+
+**Finding:** 9 of 10 diagnosed issues already fixed (Session 1's admin work — command palette,
+sparkline, dashboard-aside, full-ink sidebar). **One genuine, still-live defect found and fixed:**
+admin dashboard's main grid (`ActionQueue` col-span-7 + `DashboardAside` col-span-5) had no
+`align-items` override; CSS Grid's default `stretch` forced the much-shorter `DashboardAside` to
+match `ActionQueue`'s height, leaving one card rendered as a mostly-empty box up to 573px tall.
+Fixed with `items-start` (`app/admin/(protected)/page.tsx`). Verified via direct DOM measurement
+(not screenshot alone) at 900px and 1440px: aside height 573px (broken) → 360px (natural) at both
+widths, both panels top-aligned in the shared row. Commit `767db91`.
+
+Checked two visually-similar patterns for the same bug class and confirmed **both are correctly,
+deliberately built** — not touched: trader home's 6/6 grid (`items-stretch` + explicit `flex-1` on
+both sides' inner content — intentional balanced panels, labeled "TR-02 desktop: waiting + tasks
+balanced 6/6" in a comment) and product detail's info column (`self-start` + `sticky` — standard
+PDP pattern). Recording this is as important as the fix itself: it proves the check was real, not
+a search-and-replace of every `grid` in the codebase.
+
+**Tooling note:** found and worked around a real limitation — the browser pane's screenshot tool
+does not reliably capture content at a scroll position reached via `window.scrollTo()`; a position
+with verified real DOM content rendered as a completely blank screenshot. Cross-checked everything
+visually ambiguous against exact DOM `getBoundingClientRect()` measurements instead of trusting
+screenshots alone, and explicitly avoided shipping a second "fix" based on that artifact.
+
+### Tests executed and results
+| Check | Result |
+|---|---|
+| `tsc --noEmit` | PASS |
+| `npm run lint` | PASS (3 pre-existing warnings, unrelated) |
+| `test:week3` | PASS 58/58 |
+| `test:d1-axe` (92 scans) | PASS 0/92 failed — re-confirmed after the grid fix |
+| Live browser: admin dashboard, 900px + 1440px | PASS, fix confirmed via DOM measurement |
+| Live browser: homepage, 390px / 768px / 1440px, Arabic RTL | PASS, no overflow, hero/nav/principles render correctly |
+
+### Remaining this track
+Full route-by-route visual pass not yet done this session (catalog, product, cart, trader
+deals/wholesale, every admin table) — this session prioritized depth (find, correctly fix, and
+verify one real bug, plus rule out two near-misses) over breadth, consistent with "small, verified
+implementation cycles." Continuing to the next route.
+
+### Files changed this session
+- `app/admin/(protected)/page.tsx` (real layout fix)
+- `docs/pro-readiness/AXE-RESULTS.json` (regenerated)
+- `PROJECT_AUDIT.md` (this entry)
