@@ -1,0 +1,120 @@
+/* RARE OUD — v3 design system (VISION.md). Loaded after shared.css;
+   extends the real --ro-* tokens from shared.css with depth, glow,
+   texture and chart-theme tokens. Does not redefine color values that
+   already exist — only adds what v2 didn't need. */
+
+:root {
+  /* ---- glow + depth (section 2.1) ---- */
+  --ro-glow-plum: radial-gradient(60% 60% at 50% 40%, rgba(82,39,124,.35), transparent 70%);
+  --ro-glow-amber: radial-gradient(50% 50% at 50% 50%, rgba(184,134,63,.25), transparent 70%);
+  --ro-inner-hairline: inset 0 1px 0 rgba(244,231,216,.08);
+  --ro-e-deep: 0 1px 2px rgba(11,8,13,.3), 0 2px 8px rgba(11,8,13,.25), 0 24px 64px -20px rgba(11,8,13,.6);
+  --ro-e-raised-light: 0 1px 2px rgba(11,8,13,.06), 0 1px 1px rgba(11,8,13,.04);
+  --ro-sheen: linear-gradient(115deg, transparent 20%, rgba(244,231,216,.14) 42%, transparent 60%);
+
+  /* ---- chart theme (Chart.js reads these via getComputedStyle) ---- */
+  --ro-chart-grid: rgba(244,231,216,.08);
+  --ro-chart-grid-light: rgba(11,8,13,.08);
+  --ro-chart-line: #C9B2E3;
+  --ro-chart-fill-from: rgba(201,178,227,.35);
+  --ro-chart-fill-to: rgba(201,178,227,0);
+  --ro-chart-amber: #CFA25E;
+  --ro-chart-label: #B9AFC4;
+  --ro-chart-label-light: #5A4F66;
+
+  /* ---- motion v3 (section 4) ---- */
+  --ro3-dur-ui: 240ms;      /* admin UI state, <=300ms */
+  --ro3-dur-data: 900ms;    /* data draw-in */
+  --ro3-dur-cinematic: 2200ms;
+  --ro3-ease-damped: cubic-bezier(.2,.8,.2,1);
+  --ro3-ease-spring: cubic-bezier(.34,1.56,.64,1);
+}
+
+/* ---- grain overlay (SVG turbulence, section 2.1 "wood grain") ---- */
+.ro-grain {
+  position: absolute; inset: 0; pointer-events: none; opacity: .05; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* ---- layered dark surface (depth, section 2.1) ---- */
+.ro-surface-deep {
+  position: relative; background: var(--ro-ink-950);
+  background-image: var(--ro-glow-plum);
+  background-repeat: no-repeat;
+}
+
+/* ---- raised panel with inner hairline + deep shadow ---- */
+.ro-panel-raised {
+  position: relative; border-radius: var(--ro-r-md);
+  box-shadow: var(--ro-inner-hairline), var(--ro-e-deep);
+}
+
+/* ---- hover sheen sweep (section 2.1 "Light") ---- */
+.ro-sheen-surface { position: relative; overflow: hidden; }
+.ro-sheen-surface::after {
+  content: ""; position: absolute; inset: 0; background: var(--ro-sheen);
+  transform: translateX(-120%); transition: transform .6s var(--ro3-ease-damped); pointer-events: none;
+}
+.ro-sheen-surface:hover::after { transform: translateX(120%); }
+@media (prefers-reduced-motion: reduce) { .ro-sheen-surface::after { display: none; } }
+
+/* ---- living resonance rings (breathe, ripple on click handled by JS) ---- */
+.ro-rings-live { display: block; color: currentColor; }
+.ro-rings-live circle { transform-origin: center; }
+@keyframes ro3-breathe { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+.ro-rings-live.is-breathing circle { animation: ro3-breathe 4.5s ease-in-out infinite; }
+.ro-rings-live.is-breathing circle:nth-child(2) { animation-delay: .3s; }
+.ro-rings-live.is-breathing circle:nth-child(3) { animation-delay: .6s; }
+.ro-rings-live.is-breathing circle:nth-child(4) { animation-delay: .9s; }
+@media (prefers-reduced-motion: reduce) { .ro-rings-live.is-breathing circle { animation: none; opacity: .8; } }
+
+/* ---- waveform motif (section 2.1 "Sound") ---- */
+.ro-waveform { display: block; }
+.ro-waveform path { stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; }
+
+/* ---- count-up value ---- */
+.ro-count { font-variant-numeric: tabular-nums; }
+
+/* ---- chart container ---- */
+.ro-chart-box { position: relative; height: 180px; }
+.ro-chart-box canvas { width: 100% !important; height: 100% !important; }
+
+/* ---- trend delta ---- */
+.ro-trend { display: inline-flex; align-items: center; gap: 3px; font-size: .78rem; font-weight: 600; }
+.ro-trend-up { color: var(--ro-success-700); }
+.ro-trend-down { color: var(--ro-danger-700); }
+.ro-inverse .ro-trend-up { color: #7FCB9A; }
+.ro-inverse .ro-trend-down { color: #E79AA4; }
+
+/* ---- command palette (Ctrl/Cmd K) ---- */
+.ro-palette-input { width: 100%; border: none; outline: none; background: transparent; font-family: inherit; font-size: 1.05rem; padding: var(--ro-s-4); color: inherit; }
+.ro-palette-list { max-height: 360px; overflow-y: auto; padding: var(--ro-s-2); }
+.ro-palette-item { width: 100%; display: flex; align-items: center; gap: var(--ro-s-3); padding: var(--ro-s-3); border: none; background: none; border-radius: var(--ro-r-sm); cursor: pointer; font-family: inherit; font-size: .92rem; color: inherit; text-align: start; }
+.ro-palette-item[aria-selected="true"] { background: rgba(244,231,216,.1); }
+.ro-palette-kbd { margin-inline-start: auto; font-size: .72rem; border: 1px solid var(--ro-border); border-radius: 4px; padding: 1px 6px; opacity: .7; }
+
+/* ---- quick-create floating menu ---- */
+.ro-fab { position: fixed; inset-inline-end: var(--ro-s-6); bottom: var(--ro-s-6); z-index: 40; }
+.ro-fab-trigger {
+  width: 56px; height: 56px; border-radius: var(--ro-r-full); background: var(--ro-plum-900); color: var(--ro-sand-100);
+  border: none; box-shadow: var(--ro-e-deep); cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: transform var(--ro3-dur-ui) var(--ro3-ease-spring);
+}
+.ro-fab-trigger:hover { transform: scale(1.06); }
+.ro-fab-menu { position: absolute; bottom: 68px; inset-inline-end: 0; display: grid; gap: var(--ro-s-2); min-width: 220px; }
+.ro-fab-menu button {
+  display: flex; align-items: center; gap: var(--ro-s-3); background: var(--ro-ink-900); color: var(--ro-sand-100);
+  border: 1px solid rgba(244,231,216,.14); border-radius: var(--ro-r-sm); padding: var(--ro-s-3); cursor: pointer;
+  font-family: inherit; font-size: .88rem; box-shadow: var(--ro-e-deep);
+}
+.ro-fab-menu button:hover { background: var(--ro-plum-900); }
+
+/* ---- priority / age badge ---- */
+.ro-age-badge { font-size: .72rem; padding: 1px 7px; border-radius: var(--ro-r-full); background: var(--ro-sand-300); color: var(--ro-ink-600); }
+.ro-age-badge.is-overdue { background: var(--ro-danger-100); color: var(--ro-danger-700); }
+
+/* ---- live pulse dot (new data arrival) ---- */
+.ro-pulse-dot { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--ro-success-700); display: inline-block; }
+.ro-pulse-dot::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 1.5px solid var(--ro-success-700); animation: ro3-pulse 2.2s ease-out infinite; }
+@keyframes ro3-pulse { 0% { transform: scale(.6); opacity: .9; } 100% { transform: scale(1.8); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .ro-pulse-dot::after { display: none; } }
