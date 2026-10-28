@@ -1,3 +1,4 @@
+@import "../styles/tokens.css";
 @import "tailwindcss";
 
 :root {
@@ -88,10 +89,14 @@
   --ro-dur-enter: 700ms;
   --ro-dur-hero: 1100ms;
   --ro-dur-shift: 600ms;
+  --ro-dur-stagger: 70ms;
+  --ro-dur-ripple: 600ms;
   --ro-ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ro-ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
   --ro-ease-exit: cubic-bezier(0.4, 0, 1, 1);
   --ro-ease-resonance: cubic-bezier(0.37, 0, 0.63, 1);
+  --ro-ease-settle: linear(0, 0.55, 0.9, 1.02, 1);
+  --ro-ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ro-ease-out: var(--ro-ease-enter);
   --ro-ease-soft: var(--ro-ease-resonance);
 
@@ -880,6 +885,206 @@ html[lang="ar"] .ro-type-overline {
   }
 }
 
+.ro-oud-spec-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  border: 1px solid color-mix(in srgb, var(--ro-plum-900) 12%, var(--ro-border-subtle));
+  background: color-mix(in srgb, var(--ro-sand-50) 88%, white);
+  border-radius: var(--ro-r-sm);
+  padding: 0.9rem 0.85rem;
+  transition:
+    transform var(--ro-dur-base) var(--ro-ease-enter),
+    border-color var(--ro-dur-base) var(--ro-ease-enter),
+    box-shadow var(--ro-dur-base) var(--ro-ease-enter),
+    background-color var(--ro-dur-base) var(--ro-ease-enter);
+}
+
+.ro-oud-spec-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.85rem;
+  height: 2.85rem;
+  margin-bottom: 0.2rem;
+  padding: 0;
+  overflow: visible;
+  border: 1px solid color-mix(in srgb, var(--ro-plum-700) 22%, transparent);
+  border-radius: 999px;
+  color: var(--ro-plum-900);
+  background:
+    radial-gradient(
+      circle at 32% 28%,
+      color-mix(in srgb, var(--ro-sand-50) 78%, transparent),
+      transparent 52%
+    ),
+    linear-gradient(
+      148deg,
+      color-mix(in srgb, var(--ro-plum-50) 90%, white),
+      color-mix(in srgb, var(--ro-plum-200) 62%, var(--ro-sand-100))
+    );
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, white 60%, transparent),
+    0 8px 18px -14px rgba(50, 16, 79, 0.45);
+  cursor: default;
+  transition:
+    transform var(--ro-dur-fast) var(--ro-ease-enter),
+    border-color var(--ro-dur-fast) var(--ro-ease-enter),
+    box-shadow var(--ro-dur-fast) var(--ro-ease-enter),
+    color var(--ro-dur-fast) var(--ro-ease-enter);
+}
+
+.ro-oud-spec-icon__ring {
+  pointer-events: none;
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  border: 1px solid color-mix(in srgb, var(--ro-plum-500) 0%, transparent);
+  opacity: 0;
+  transform: scale(0.86);
+  transition:
+    opacity var(--ro-dur-base) var(--ro-ease-enter),
+    transform var(--ro-dur-base) var(--ro-ease-enter),
+    border-color var(--ro-dur-base) var(--ro-ease-enter);
+}
+
+.ro-oud-spec-icon--sm {
+  width: 1.85rem;
+  height: 1.85rem;
+  margin-bottom: 0;
+}
+
+.ro-oud-spec-icon--lg {
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 0;
+}
+
+.ro-oud-spec-icon--ink {
+  color: var(--ro-ink-900);
+  border-color: color-mix(in srgb, var(--ro-ink-900) 16%, transparent);
+  background: color-mix(in srgb, var(--ro-sand-100) 70%, white);
+}
+
+.ro-oud-spec-icon--on-dark {
+  color: var(--ro-sand-100);
+  border-color: color-mix(in srgb, var(--ro-sand-100) 28%, transparent);
+  background: color-mix(in srgb, var(--ro-plum-700) 45%, transparent);
+}
+
+.ro-oud-admin-section {
+  border: 1px solid color-mix(in srgb, var(--ro-plum-900) 12%, transparent);
+  border-radius: var(--ro-r-sm);
+  background: color-mix(in srgb, white 72%, var(--ro-sand-50));
+  padding: 1rem;
+}
+
+.ro-oud-admin-section__head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--ro-plum-900) 10%, transparent);
+}
+
+.ro-oud-admin-section__title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ro-plum-900);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ro-oud-spec-tile,
+  .ro-oud-admin-section {
+    animation: ro-oud-spec-enter 0.55s var(--ro-ease-enter) both;
+    animation-delay: calc(var(--ro-oud-spec-i, 0) * 55ms);
+  }
+
+  .ro-oud-spec-icon {
+    animation: ro-oud-spec-float 4.8s var(--ro-ease-resonance) infinite;
+    animation-delay: calc(var(--ro-oud-spec-i, 0) * 120ms);
+  }
+
+  .ro-oud-spec-tile:hover,
+  .ro-oud-spec-tile:focus-within {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--ro-plum-700) 45%, var(--ro-border));
+    background: color-mix(in srgb, var(--ro-plum-50) 35%, white);
+    box-shadow: var(--ro-e2);
+  }
+
+  .ro-oud-spec-tile:hover .ro-oud-spec-icon,
+  .ro-oud-spec-tile:focus-within .ro-oud-spec-icon,
+  .ro-oud-spec-icon:hover,
+  .ro-oud-spec-icon:focus-visible {
+    transform: scale(1.12);
+    color: var(--ro-plum-900);
+    border-color: color-mix(in srgb, var(--ro-plum-700) 48%, transparent);
+    box-shadow:
+      0 14px 28px -16px rgba(50, 16, 79, 0.58),
+      inset 0 1px 0 color-mix(in srgb, white 70%, transparent);
+  }
+
+  .ro-oud-spec-tile:hover .ro-oud-spec-icon__ring,
+  .ro-oud-spec-tile:focus-within .ro-oud-spec-icon__ring,
+  .ro-oud-spec-icon:hover .ro-oud-spec-icon__ring,
+  .ro-oud-spec-icon:focus-visible .ro-oud-spec-icon__ring {
+    opacity: 1;
+    transform: scale(1.08);
+    border-color: color-mix(in srgb, var(--ro-plum-500) 55%, transparent);
+    animation: ro-oud-spec-ring 1.1s var(--ro-ease-resonance) infinite;
+  }
+
+  .ro-oud-admin-section:hover .ro-oud-admin-section__head .ro-oud-spec-icon {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes ro-oud-spec-ring {
+  0%,
+  100% {
+    transform: scale(1.05);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.16);
+    opacity: 0.35;
+  }
+}
+
+@keyframes ro-oud-spec-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ro-oud-spec-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ro-oud-spec-tile,
+  .ro-oud-spec-icon,
+  .ro-oud-admin-section {
+    animation: none;
+  }
+}
+
 @keyframes ro-panel-slide {
   from {
     transform: translateX(100%);
@@ -1055,6 +1260,80 @@ html[lang="ar"] .ro-type-overline {
 @media (prefers-reduced-motion: reduce) {
   .ro-btn-ripple {
     display: none;
+  }
+  :root {
+    --ro-dur-fast: 1ms;
+    --ro-dur-base: 1ms;
+    --ro-dur-slow: 1ms;
+    --ro-dur-enter: 1ms;
+    --ro-dur-hero: 1ms;
+    --ro-dur-stagger: 1ms;
+    --ro-dur-ripple: 1ms;
+    --ro-dur-shift: 1ms;
+  }
+}
+
+[data-ro-motion-tier="Lite"] {
+  --ro-dur-fast: 1ms;
+  --ro-dur-base: 1ms;
+  --ro-dur-slow: 1ms;
+  --ro-dur-enter: 1ms;
+  --ro-dur-hero: 1ms;
+  --ro-dur-stagger: 1ms;
+  --ro-dur-ripple: 1ms;
+  --ro-dur-shift: 1ms;
+}
+
+.ro-press-ripple {
+  position: relative;
+  overflow: hidden;
+}
+.ro-press-ripple-ring {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 9999px;
+  border: 1.5px solid color-mix(in srgb, var(--ro-amber-500) 80%, white);
+  pointer-events: none;
+  animation: ro-press-ripple var(--ro-dur-ripple) var(--ro-ease-out-expo) forwards;
+}
+@keyframes ro-press-ripple {
+  from {
+    transform: scale(0.15);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(28);
+    opacity: 0;
+  }
+}
+
+.ro-fly-disc {
+  position: fixed;
+  z-index: 80;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  pointer-events: none;
+}
+
+.ro-tilt-surface {
+  transform-origin: center;
+  transition: transform var(--ro-dur-fast) var(--ro-ease-standard);
+}
+
+.ro-draw-in-paused svg {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ro-press-ripple-ring {
+    display: none;
+  }
+  .ro-tilt-surface {
+    transform: none !important;
+    transition: none;
   }
 }
 
@@ -1240,11 +1519,28 @@ html[dir="rtl"] .ro-menu-popover--end {
 
 /* ── Portal Atelier (admin + trader) — bold brand presence + motion ─── */
 .ro-portal {
-  --ro-portal-header-bg: color-mix(in srgb, var(--ro-sand-50) 82%, transparent);
+  --ro-portal-header-bg: color-mix(in srgb, var(--ro-sand-50) 88%, transparent);
   --ro-portal-surface: var(--ro-sand-50);
   --ro-portal-ink-soft: var(--ro-ink-950);
   --ro-portal-accent: var(--ro-plum-800);
+  --ro-portal-ui-weight: 500;
+  --ro-portal-title-weight: 700;
+  --ro-portal-body-size: calc(0.9375rem * var(--ro-ui-scale));
+  --ro-text-muted: color-mix(in srgb, var(--ro-ink-700) 88%, var(--ro-ink-950));
   color: var(--ro-ink-950);
+  font-weight: var(--ro-portal-ui-weight);
+}
+
+html[lang="ar"] .ro-portal {
+  --ro-display-weight: 700;
+  --ro-portal-title-weight: 700;
+  --ro-portal-ui-weight: 600;
+  --ro-ui-scale: 1.1;
+}
+
+html[lang="en"] .ro-portal {
+  --ro-display-weight: 600;
+  --ro-portal-title-weight: 650;
 }
 
 /* Cream atelier canvas — brand wallpaper + warm depth (preferred over ink page fill) */
@@ -1343,6 +1639,15 @@ html[dir="rtl"] .ro-menu-popover--end {
   inset: 0;
   overflow: hidden;
   z-index: 0;
+  /* Soft grain — no dense BrandWallpaper motif on ops surfaces */
+  background-image:
+    radial-gradient(
+      circle at 1px 1px,
+      color-mix(in srgb, var(--ro-ink-950) 4%, transparent) 1px,
+      transparent 0
+    );
+  background-size: 18px 18px;
+  opacity: 0.55;
 }
 
 .ro-portal-atmosphere::before {
@@ -1352,10 +1657,10 @@ html[dir="rtl"] .ro-menu-popover--end {
   width: min(52vw, 420px);
   aspect-ratio: 1;
   border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--ro-plum-800) 22%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ro-plum-800) 14%, transparent);
   box-shadow:
-    0 0 0 28px color-mix(in srgb, var(--ro-plum-800) 6%, transparent),
-    0 0 0 64px color-mix(in srgb, var(--ro-plum-800) 3.5%, transparent);
+    0 0 0 28px color-mix(in srgb, var(--ro-plum-800) 4%, transparent),
+    0 0 0 64px color-mix(in srgb, var(--ro-plum-800) 2%, transparent);
   animation: ro-portal-rings 14s var(--ro-ease-resonance) infinite;
 }
 
@@ -1366,9 +1671,105 @@ html[dir="rtl"] .ro-menu-popover--end {
   width: min(48vw, 380px);
   aspect-ratio: 1;
   border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--ro-amber-600) 18%, transparent);
-  opacity: 0.7;
+  border: 1px solid color-mix(in srgb, var(--ro-amber-600) 12%, transparent);
+  opacity: 0.45;
   animation: ro-portal-rings 18s var(--ro-ease-resonance) 1.2s infinite reverse;
+}
+
+/* Ops lists/details: quiet chrome. Home keeps the rings. */
+.ro-portal-admin:not(:has([data-admin-home])) .ro-portal-atmosphere::before,
+.ro-portal-admin:not(:has([data-admin-home])) .ro-portal-atmosphere::after,
+.ro-portal-trader:not(:has([data-trader-home])) .ro-portal-atmosphere::before,
+.ro-portal-trader:not(:has([data-trader-home])) .ro-portal-atmosphere::after {
+  opacity: 0.14;
+  animation: none;
+}
+
+/* Icon button — portal chrome / timeline CTAs */
+.ro-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2.25rem;
+  padding-inline: 0.65rem;
+  border-radius: var(--ro-r-sm);
+  border: 1px solid color-mix(in srgb, var(--ro-plum-900) 22%, transparent);
+  background: color-mix(in srgb, var(--ro-sand-50) 92%, var(--ro-plum-50));
+  color: var(--ro-plum-900);
+  font-size: 0.8125rem;
+  font-weight: 650;
+  line-height: 1.2;
+  transition:
+    background-color var(--ro-dur-fast) var(--ro-ease-standard),
+    border-color var(--ro-dur-fast) var(--ro-ease-standard),
+    color var(--ro-dur-fast) var(--ro-ease-standard),
+    transform var(--ro-dur-fast) var(--ro-ease-standard),
+    box-shadow var(--ro-dur-fast) var(--ro-ease-standard);
+}
+.ro-icon-btn:hover {
+  border-color: var(--ro-plum-800);
+  background: var(--ro-sand-50);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px -16px color-mix(in srgb, var(--ro-plum-900) 55%, transparent);
+}
+.ro-icon-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+.ro-icon-btn:focus-visible {
+  outline: 2px solid var(--ro-focus);
+  outline-offset: 2px;
+}
+.ro-icon-btn[data-tone="ghost"] {
+  border-color: transparent;
+  background: transparent;
+}
+.ro-icon-btn[data-tone="ghost"]:hover {
+  background: color-mix(in srgb, var(--ro-plum-50) 70%, transparent);
+  box-shadow: none;
+}
+.ro-icon-btn[data-tone="on-dark"] {
+  border-color: color-mix(in srgb, var(--ro-sand-100) 22%, transparent);
+  background: color-mix(in srgb, var(--ro-sand-100) 10%, transparent);
+  color: var(--ro-sand-50);
+}
+.ro-icon-btn[data-tone="on-dark"]:hover {
+  background: color-mix(in srgb, var(--ro-sand-100) 18%, transparent);
+  border-color: color-mix(in srgb, var(--ro-sand-100) 34%, transparent);
+}
+
+.ro-portal-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: var(--ro-r-sm);
+  transition:
+    background-color var(--ro-dur-fast) var(--ro-ease-standard),
+    box-shadow var(--ro-dur-fast) var(--ro-ease-standard);
+}
+.ro-portal-row:hover,
+.ro-portal-row:focus-within {
+  background: color-mix(in srgb, var(--ro-plum-50) 55%, var(--ro-sand-50));
+  box-shadow: inset 3px 0 0 0 var(--ro-plum-800);
+}
+[dir="rtl"] .ro-portal-row:hover,
+[dir="rtl"] .ro-portal-row:focus-within {
+  box-shadow: inset -3px 0 0 0 var(--ro-plum-800);
+}
+
+.ro-portal-icon-well {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  size: 2.25rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: var(--ro-r-sm);
+  background: color-mix(in srgb, var(--ro-plum-100) 80%, var(--ro-sand-50));
+  color: var(--ro-plum-900);
+  border: 1px solid color-mix(in srgb, var(--ro-plum-900) 14%, transparent);
 }
 
 .ro-portal-header {
@@ -1613,7 +2014,10 @@ html[dir="rtl"] .ro-menu-popover--end {
   .ro-portal-nav-link[aria-busy="true"]::after {
     animation: none !important;
   }
-  .ro-portal-nav-link:hover {
+  .ro-portal-nav-link:hover,
+  .ro-icon-btn:hover,
+  .ro-icon-btn:active,
+  .ro-portal-row:hover {
     transform: none;
   }
   .ro-portal-route-progress {
@@ -1623,10 +2027,46 @@ html[dir="rtl"] .ro-menu-popover--end {
 
 .ro-portal .ro-portal-page-title {
   font-family: var(--ro-font-display);
-  font-weight: var(--ro-display-weight);
+  font-weight: var(--ro-portal-title-weight, var(--ro-display-weight));
   letter-spacing: -0.02em;
   color: var(--ro-ink-950);
   text-wrap: balance;
+}
+
+.ro-portal .ro-portal-section-title {
+  font-family: var(--ro-font-display);
+  font-weight: var(--ro-portal-title-weight, 700);
+  font-size: 1.25rem;
+  color: var(--ro-ink-950);
+  letter-spacing: -0.01em;
+}
+
+.ro-portal .ro-portal-body {
+  font-size: var(--ro-portal-body-size);
+  font-weight: var(--ro-portal-ui-weight);
+  line-height: var(--ro-lh-body);
+  color: var(--ro-ink-950);
+}
+
+.ro-portal .ro-portal-muted {
+  font-size: calc(0.8125rem * var(--ro-ui-scale));
+  font-weight: 550;
+  color: var(--ro-text-muted);
+}
+
+.ro-portal-message-panel {
+  margin-top: 0.5rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: var(--ro-r-sm);
+  border: 1px solid color-mix(in srgb, var(--ro-plum-900) 12%, transparent);
+  background: color-mix(in srgb, var(--ro-sand-100) 70%, var(--ro-sand-50));
+  font-size: calc(0.875rem * var(--ro-ui-scale));
+  font-weight: 550;
+  line-height: 1.65;
+  color: var(--ro-ink-900);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 /* Portal buttons — plum primary, tactile secondary */
@@ -1702,6 +2142,16 @@ html[dir="rtl"] .ro-menu-popover--end {
     transform var(--ro-dur-fast) var(--ro-ease-standard),
     border-color var(--ro-dur-fast) var(--ro-ease-standard),
     box-shadow var(--ro-dur-fast) var(--ro-ease-standard);
+}
+
+.ro-portal .ro-portal-kpi[data-kpi] {
+  border-radius: 12px;
+  background: var(--ro-sand-50);
+  box-shadow: none;
+}
+
+.ro-portal .ro-portal-kpi[data-kpi]::after {
+  display: none;
 }
 
 .ro-portal .ro-portal-kpi::after {
@@ -1810,6 +2260,18 @@ html[dir="rtl"] .ro-menu-popover--end {
   width: 3px;
 }
 
+.ro-portal .ro-row-hit::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.ro-portal .ro-portal-interactive-row a:not(.ro-row-hit),
+.ro-portal .ro-portal-interactive-row button {
+  position: relative;
+  z-index: 2;
+}
+
 .ro-portal-tablist {
   position: relative;
   gap: 0.25rem;
@@ -1850,7 +2312,8 @@ html[dir="rtl"] .ro-menu-popover--end {
   .ro-portal-hero-title,
   .ro-portal-hero-lead,
   .ro-portal-hero-action,
-  .ro-portal-reveal {
+  .ro-portal-reveal,
+  .ro-portal-reveal.ro-portal-stagger > * {
     animation: none !important;
     transition: none !important;
     opacity: 1 !important;
@@ -1860,4 +2323,126 @@ html[dir="rtl"] .ro-menu-popover--end {
   .ro-portal .ro-portal-card:hover {
     transform: none;
   }
+  .ro-banner-shake,
+  .ro-badge-pulse,
+  .ro-s10-flash,
+  .ro-login-rings,
+  .ro-home-ambient,
+  .ro-wa-live {
+    animation: none !important;
+  }
+}
+
+@keyframes ro-banner-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+  75% {
+    transform: translateX(-2px);
+  }
+}
+.ro-banner-shake {
+  animation: ro-banner-shake 360ms var(--ro-ease-standard);
+}
+
+@keyframes ro-badge-pulse {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.14);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.ro-badge-pulse {
+  display: inline-flex;
+  animation: ro-badge-pulse 400ms var(--ro-ease-settle, var(--ro-ease-standard));
+}
+
+@keyframes ro-s10-flash {
+  0% {
+    background-color: color-mix(in srgb, var(--ro-plum-100) 80%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+.ro-s10-flash {
+  animation: ro-s10-flash 400ms var(--ro-ease-standard);
+}
+
+.ro-login-stage {
+  isolation: isolate;
+}
+.ro-login-glow {
+  pointer-events: none;
+  position: absolute;
+  inset: 18% 12% auto;
+  height: 42%;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--ro-plum-300) 32%, transparent),
+    transparent 70%
+  );
+}
+.ro-login-rings {
+  animation: ro-portal-rings 14s var(--ro-ease-resonance) infinite;
+  transform-origin: center;
+}
+.ro-login-rings[data-ambient="off"] {
+  animation: none;
+  opacity: 0.1;
+}
+
+.ro-nav-rail {
+  pointer-events: none;
+  position: absolute;
+  inset-inline-start: 0;
+  width: 3px;
+  border-radius: 999px;
+  background: var(--ro-plum-300);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--ro-plum-300) 55%, transparent);
+  transition:
+    top var(--ro-dur-fast) var(--ro-ease-standard),
+    height var(--ro-dur-fast) var(--ro-ease-standard);
+}
+
+.ro-tab-pill {
+  pointer-events: none;
+  position: absolute;
+  top: 0.2rem;
+  bottom: 0.2rem;
+  border-radius: var(--ro-r-sm);
+  background: color-mix(in srgb, var(--ro-plum-100) 78%, var(--ro-sand-50));
+  transition: inset-inline-start var(--ro-dur-fast) var(--ro-ease-standard);
+}
+
+.ro-home-ambient[data-ambient="on"] {
+  animation: ro-portal-rings 14s var(--ro-ease-resonance) infinite;
+  transform-origin: center;
+}
+.ro-home-ambient[data-ambient="off"] {
+  animation: none;
+}
+
+@keyframes ro-wa-live {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--ro-success-700) 50%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+.ro-wa-live {
+  animation: ro-wa-live 1.6s var(--ro-ease-standard) 3;
 }

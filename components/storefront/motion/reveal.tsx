@@ -1,8 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { cn } from "@/lib/utils";
-import { useReducedMotion } from "./use-reduced-motion";
 
 type RevealVariant = "up" | "mask" | "scale";
 
@@ -12,6 +16,10 @@ const variantClass: Record<RevealVariant, string> = {
   scale: "ro-anim-scale-reveal",
 };
 
+/**
+ * Storefront-local Reveal — does not import the shared motion barrel,
+ * so a poisoned webpack chunk there cannot take down the homepage.
+ */
 export function Reveal({
   children,
   variant = "up",
@@ -19,18 +27,30 @@ export function Reveal({
   className,
   once = true,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   variant?: RevealVariant;
   delayMs?: number;
   className?: string;
   once?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const reduced = useReducedMotion();
+  const [lite, setLite] = useState(false);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (reduced) {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => {
+      const next = mq.matches;
+      setLite(next);
+      if (next) setVisible(true);
+    };
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    if (lite) {
       setVisible(true);
       return;
     }
@@ -51,7 +71,7 @@ export function Reveal({
 
     io.observe(node);
     return () => io.disconnect();
-  }, [once, reduced]);
+  }, [once, lite]);
 
   return (
     <div
@@ -60,10 +80,10 @@ export function Reveal({
         "ro-reveal-base",
         variantClass[variant],
         visible && "is-visible",
-        reduced && "is-reduced",
+        lite && "is-reduced",
         className
       )}
-      style={{ transitionDelay: reduced ? "0ms" : `${delayMs}ms` }}
+      style={{ transitionDelay: lite ? "0ms" : `${delayMs}ms` }}
     >
       {children}
     </div>
@@ -75,7 +95,7 @@ export function MaskReveal({
   delayMs = 0,
   className,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   delayMs?: number;
   className?: string;
 }) {

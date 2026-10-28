@@ -1,0 +1,105 @@
+{
+  "at": "2026-10-21T13:08:06.797Z",
+  "note": "Next.js DEV webpack first-load (main-app.js ~7.6MB raw). NOT production gzip and NOT comparable to the 25KB storefront budget. Production sizes are a V3/V6 gate.",
+  "routes": {
+    "home": {
+      "files": [
+        {
+          "file": "static/chunks/webpack.js",
+          "bytes": 140816,
+          "gzip": 27883
+        },
+        {
+          "file": "static/chunks/main-app.js",
+          "bytes": 7609967,
+          "gzip": 1750886
+        },
+        {
+          "file": "static/css/app/layout.css",
+          "bytes": 229571,
+          "gzip": 29260
+        },
+        {
+          "file": "static/chunks/app/layout.js",
+          "bytes": 53369,
+          "gzip": 10771
+        }
+      ],
+      "bytes": 8033723,
+      "gzip": 1818800
+    },
+    "catalog": {
+      "files": [
+        {
+          "file": "static/chunks/webpack.js",
+          "bytes": 140816,
+          "gzip": 27882
+        },
+        {
+          "file": "static/chunks/main-app.js",
+          "bytes": 7609967,
+          "gzip": 1750886
+        },
+        {
+          "file": "static/chunks/app/(storefront)/catalog/loading.js",
+          "bytes": 1680,
+          "gzip": 629
+        }
+      ],
+      "bytes": 7752463,
+      "gzip": 1779397
+    },
+    "product": {
+      "files": [
+        {
+          "file": "static/chunks/webpack.js",
+          "bytes": 140816,
+          "gzip": 27882
+        },
+        {
+          "file": "static/chunks/main-app.js",
+          "bytes": 7609967,
+          "gzip": 1750886
+        },
+        {
+          "file": "static/chunks/app/(storefront)/product/[slug]/page.js",
+          "bytes": 1508363,
+          "gzip": 367228
+        }
+      ],
+      "bytes": 9259146,
+      "gzip": 2145996
+    },
+    "request": {
+      "files": [],
+      "bytes": 0,
+      "gzip": 0
+    },
+    "admin": {
+      "files": [
+        {
+          "file": "static/chunks/webpack.js",
+          "bytes": 140816,
+          "gzip": 27882
+        },
+        {
+          "file": "static/chunks/main-app.js",
+          "bytes": 7609967,
+          "gzip": 1750886
+        },
+        {
+          "file": "static/chunks/app/admin/login/page.js",
+          "bytes": 1122141,
+          "gzip": 268650
+        }
+      ],
+      "bytes": 8872924,
+      "gzip": 2047418
+    },
+    "trader": {
+      "files": [],
+      "bytes": 0,
+      "gzip": 0
+    }
+  }
+}

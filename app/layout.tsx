@@ -8,6 +8,7 @@ import {
 import "./globals.css";
 import { getRequestLocale } from "@/lib/i18n/server";
 import { dirForLocale } from "@/lib/i18n/config";
+import { MotionProvider } from "@/components/motion/provider";
 
 const amiri = Amiri({
   subsets: ["arabic", "latin"],
@@ -66,7 +67,11 @@ export default async function RootLayout({
         <a href="#main-content" className="ro-skip-link">
           {locale === "ar" ? "تخطَّ إلى المحتوى" : "Skip to content"}
         </a>
-        {children}
+        {process.env.RO_SKIP_MOTION_PROVIDER === "1" ? (
+          children
+        ) : (
+          <MotionProvider>{children}</MotionProvider>
+        )}
       </body>
     </html>
   );

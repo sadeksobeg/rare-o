@@ -9,6 +9,8 @@ import { Loader } from "@/components/ui/loader";
 import { MaterialPlate } from "@/components/storefront/material-plate";
 import { PrimitivesB1Gallery } from "@/components/dev/primitives-b1-gallery";
 import { PrimitivesB2Gallery } from "@/components/dev/primitives-b2-gallery";
+import { MotionGallery } from "@/components/dev/motion-gallery";
+import { IconGallery } from "@/components/dev/icon-gallery";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getRequestLocale } from "@/lib/i18n/server";
 
@@ -382,6 +384,72 @@ export default async function DevUiPage() {
                     crumbRequests: "Requests",
                     crumbDetail: "RO-1042",
                     pageOf: dict.common.paginationPageOf,
+                  }
+            }
+          />
+        </section>
+
+        <section className="space-y-4" id="icons">
+          <h2 className="ro-type-h2">
+            {locale === "ar" ? "الأيقونات — V2" : "Icons — V2"}
+          </h2>
+          <IconGallery locale={locale === "ar" ? "ar" : "en"} />
+        </section>
+
+        <section className="space-y-4" id="motion">
+          <h2 className="ro-type-h2">
+            {locale === "ar" ? "الحركة — V1" : "Motion — V1"}
+          </h2>
+          <p className="max-w-2xl text-sm text-ro-text-2">
+            {locale === "ar"
+              ? "بدائيات المستوى A/B/C/Lite. العيّنة تعرض صدى الضغط، الأوتار، الطيران إلى القائمة، والعدّ التصاعدي. لا تُوصَّل إلى صفحات المتجر في هذه الجولة."
+              : "A/B/C/Lite primitives. The sampler shows press ripple, plucked strings, fly-to-list, and count-up. Not wired to live storefront routes in this round."}
+          </p>
+          <MotionGallery
+            copy={
+              locale === "ar"
+                ? {
+                    locale: "ar",
+                    title: "الحركة",
+                    lead: "مختبر V1",
+                    tier: "المستوى",
+                    reduce: "تقليل الحركة",
+                    auto: "تلقائي",
+                    sampler: "مرّر على الأوتار، اضغط الحلقات، ثم أضف إلى القائمة",
+                    add: "أضف إلى الطلب",
+                    list: "قائمة الطلب",
+                    pieces: "قطع في المجموعة",
+                    replay: "إعادة",
+                    ripple: "صدى الضغط",
+                    strings: "أوتار العود",
+                    tilt: "سطح يميل مع المؤشر (حاسوب فقط، ≤ 4°)",
+                    reveal: "ظهور",
+                    spy: "نص تجريبي لتمييز القسم أثناء التمرير.",
+                    spyA: "القسم أ",
+                    spyB: "القسم ب",
+                    spyC: "القسم ج",
+                  }
+                : {
+                    locale: "en",
+                    title: "Motion",
+                    lead: "V1 lab",
+                    tier: "Tier",
+                    reduce: "Reduce motion",
+                    auto: "Auto",
+                    sampler:
+                      "Hover the strings, click the rings, then add to the list",
+                    add: "Add to request",
+                    list: "Request list",
+                    pieces: "Pieces in the collection",
+                    replay: "Replay",
+                    ripple: "Press ripple",
+                    strings: "Oud strings",
+                    tilt: "Pointer tilt (desktop only, ≤ 4°)",
+                    reveal: "Reveal",
+                    spy: "Sample copy so the spy can highlight the section.",
+                    spyA: "Section A",
+                    spyB: "Section B",
+                    spyC: "Section C",
                   }
             }
           />

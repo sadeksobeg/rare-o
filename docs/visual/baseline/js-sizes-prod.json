@@ -1,0 +1,120 @@
+{
+  "at": "2026-10-22T05:53:38.765Z",
+  "unit": "kB First Load JS from next build",
+  "note": "before = RO_SKIP_MOTION_PROVIDER=1; after = MotionProvider wrap in root layout. The skip flag is a Server Component branch; MotionProvider remains a static client import on the root layout, so webpack emitted identical client chunks (same hashes) and First Load JS is unchanged at 1 kB resolution. iconsAfter = V2 named icon imports on live routes. iconDeltaKb is 0 at 1 kB resolution; /dev/ui (production 404) First Load 140→144 kB.",
+  "sharedByAllKb": 103,
+  "middlewareKb": 40.4,
+  "before": {
+    "home": {
+      "path": "/",
+      "pageKb": 5.88,
+      "firstLoadKb": 160
+    },
+    "catalog": {
+      "path": "/catalog",
+      "pageKb": 3.88,
+      "firstLoadKb": 158
+    },
+    "product": {
+      "path": "/product/[slug]",
+      "pageKb": 4.64,
+      "firstLoadKb": 155
+    },
+    "request": {
+      "path": "/request",
+      "pageKb": 7.39,
+      "firstLoadKb": 129
+    },
+    "admin": {
+      "path": "/admin",
+      "pageKb": 2.45,
+      "firstLoadKb": 124
+    },
+    "trader": {
+      "path": "/trader",
+      "pageKb": 2.24,
+      "firstLoadKb": 123
+    }
+  },
+  "after": {
+    "home": {
+      "path": "/",
+      "pageKb": 5.88,
+      "firstLoadKb": 160
+    },
+    "catalog": {
+      "path": "/catalog",
+      "pageKb": 3.88,
+      "firstLoadKb": 158
+    },
+    "product": {
+      "path": "/product/[slug]",
+      "pageKb": 4.64,
+      "firstLoadKb": 155
+    },
+    "request": {
+      "path": "/request",
+      "pageKb": 7.39,
+      "firstLoadKb": 129
+    },
+    "admin": {
+      "path": "/admin",
+      "pageKb": 2.45,
+      "firstLoadKb": 124
+    },
+    "trader": {
+      "path": "/trader",
+      "pageKb": 2.24,
+      "firstLoadKb": 123
+    }
+  },
+  "deltaKb": {
+    "home": 0,
+    "catalog": 0,
+    "product": 0,
+    "request": 0,
+    "admin": 0,
+    "trader": 0
+  },
+  "iconsAfter": {
+    "home": {
+      "path": "/",
+      "pageKb": 5.88,
+      "firstLoadKb": 160
+    },
+    "catalog": {
+      "path": "/catalog",
+      "pageKb": 3.88,
+      "firstLoadKb": 158
+    },
+    "product": {
+      "path": "/product/[slug]",
+      "pageKb": 4.64,
+      "firstLoadKb": 155
+    },
+    "request": {
+      "path": "/request",
+      "pageKb": 7.32,
+      "firstLoadKb": 129
+    },
+    "admin": {
+      "path": "/admin",
+      "pageKb": 2.45,
+      "firstLoadKb": 124
+    },
+    "trader": {
+      "path": "/trader",
+      "pageKb": 2.24,
+      "firstLoadKb": 123
+    }
+  },
+  "iconDeltaKb": {
+    "home": 0,
+    "catalog": 0,
+    "product": 0,
+    "request": 0,
+    "admin": 0,
+    "trader": 0
+  },
+  "iconsAt": "2026-10-22T06:21:42.957Z"
+}
