@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RARE OUD — متجر آلات العود النادرة</title>
+<link rel="stylesheet" href="shared.css" />
+<link rel="stylesheet" href="tokens-v3.css" />
+<style>
+  body { margin: 0; }
+  .sf-nav { position: fixed; top: 0; inset-inline: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; padding: var(--ro-s-4) var(--ro-s-6); transition: background var(--ro3-dur-ui), box-shadow var(--ro3-dur-ui); }
+  .sf-nav.is-solid { background: var(--ro-sand-50); box-shadow: var(--ro-e-raised-light); }
+  .sf-nav .ro-brand { display: flex; align-items: center; gap: 8px; font-family: var(--ro-font-display); font-weight: 700; color: var(--ro-sand-100); transition: color var(--ro3-dur-ui); }
+  .sf-nav.is-solid .ro-brand { color: var(--ro-ink-950); }
+  .sf-nav a.sf-link { color: var(--ro-sand-100); text-decoration: none; font-size: .88rem; transition: color var(--ro3-dur-ui); }
+  .sf-nav.is-solid a.sf-link { color: var(--ro-ink-950); }
+  .sf-nav .lang-toggle { color: var(--ro-sand-100); border-color: rgba(244,231,216,.35); }
+  .sf-nav.is-solid .lang-toggle { color: var(--ro-ink-950); border-color: var(--ro-border); }
+  .sf-nav-links { display: flex; gap: var(--ro-s-5); align-items: center; }
+  @media (max-width: 640px) { .sf-nav-links { display: none; } }
+
+  /* ---- hero ---- */
+  .sf-hero { position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; text-align: center; padding: var(--ro-s-8) var(--ro-s-6); }
+  .sf-hero-rings { position: absolute; inset: 0; margin: auto; width: min(80vw, 760px); height: min(80vw, 760px); color: rgba(244,231,216,.4); }
+  .sf-hero-content { position: relative; z-index: 2; max-width: 800px; }
+  .sf-hero h1 { font-size: clamp(2.6rem, 2rem + 3.5vw, 5rem); line-height: 1.22; color: var(--ro-sand-100); margin: 0 0 var(--ro-s-5); }
+  .sf-hero .sf-eyebrow { color: var(--ro-plum-300); font-size: .85rem; margin-bottom: var(--ro-s-4); display: block; }
+  .sf-hero p { color: var(--ro-ink-200); font-size: 1.1rem; max-width: 50ch; margin: 0 auto var(--ro-s-6); }
+  .sf-hero-ctas { display: flex; gap: var(--ro-s-3); justify-content: center; flex-wrap: wrap; }
+  .sf-scroll-cue { position: absolute; bottom: var(--ro-s-6); inset-inline: 0; margin: auto; width: fit-content; color: var(--ro-ink-300); display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: .75rem; z-index: 2; }
+  .sf-scroll-cue .line { width: 1px; height: 32px; background: linear-gradient(to bottom, currentColor, transparent); }
+
+  /* ---- craft story ---- */
+  .sf-section { padding: var(--ro-s-16) var(--ro-s-6); max-width: 920px; margin: 0 auto; }
+  .sf-story blockquote { font-family: var(--ro-font-display); font-size: clamp(1.4rem, 1.1rem + 1.4vw, 2.1rem); line-height: 1.5; color: var(--ro-ink-950); margin: 0 0 var(--ro-s-6); text-align: center; }
+  .sf-story blockquote cite { display: block; font-family: var(--ro-font-ui); font-size: .85rem; color: var(--ro-text-muted); font-style: normal; margin-top: var(--ro-s-4); }
+  .sf-story-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--ro-s-4); margin-top: var(--ro-s-8); }
+  @media (max-width: 760px) { .sf-story-grid { grid-template-columns: 1fr; } }
+  .sf-story-item { text-align: center; }
+  .sf-story-item .th-icon { width: 48px; height: 48px; border-radius: 50%; background: var(--ro-plum-100); color: var(--ro-plum-900); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--ro-s-3); }
+  .sf-story-item h3 { font-size: 1rem; }
+  .sf-story-item p { font-size: .88rem; color: var(--ro-text-muted); max-width: 32ch; margin: 0 auto; }
+
+  /* ---- collections ---- */
+  .sf-collections { background: var(--ro-sand-200); padding: var(--ro-s-16) var(--ro-s-6); }
+  .sf-collections-head { max-width: 920px; margin: 0 auto var(--ro-s-8); text-align: center; }
+  .sf-collections-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--ro-s-4); max-width: 1100px; margin: 0 auto; }
+  @media (max-width: 760px) { .sf-collections-grid { grid-template-columns: 1fr; } }
+  .sf-coll-card { position: relative; border-radius: var(--ro-r-md); overflow: hidden; aspect-ratio: 4/5; display: flex; align-items: flex-end; text-decoration: none; background: var(--ro-ink-900); }
+  .sf-coll-card .ro-grain { opacity: .1; }
+  .sf-coll-card .sf-coll-glyph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: rgba(244,231,216,.14); }
+  .sf-coll-body { position: relative; z-index: 2; padding: var(--ro-s-4); color: var(--ro-sand-100); width: 100%; background: linear-gradient(to top, rgba(11,8,13,.75), transparent); }
+  .sf-coll-body h3 { margin: 0 0 2px; font-size: 1.05rem; }
+  .sf-coll-body span { font-size: .78rem; color: var(--ro-ink-200); }
+
+  /* ---- trader band ---- */
+  .sf-trader-band { background: var(--ro-ink-950); color: var(--ro-sand-100); padding: var(--ro-s-12) var(--ro-s-6); text-align: center; position: relative; overflow: hidden; }
+  .sf-trader-band .ro-grain { opacity: .04; }
+  .sf-trader-band h2 { font-size: clamp(1.6rem, 1.3rem + 1.4vw, 2.3rem); position: relative; }
+  .sf-trader-band p { color: var(--ro-ink-200); max-width: 50ch; margin: 0 auto var(--ro-s-6); position: relative; }
+
+  footer.sf-footer { padding: var(--ro-s-8) var(--ro-s-6); text-align: center; color: var(--ro-text-muted); font-size: .82rem; }
+</style>
+</head>
+<body>
+<a href="#sf-story" class="skip-link"><span data-lang="ar">تخطَّ إلى المحتوى</span><span data-lang="en" hidden>Skip to content</span></a>
+
+<nav class="sf-nav" id="sf-nav">
+  <div class="ro-brand"><svg width="22" height="22" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="30" fill="var(--ro-plum-900)"/><circle cx="32" cy="32" r="22" stroke="#F4E7D8" stroke-width="1.5"/><circle cx="32" cy="32" r="5" fill="#0B080D"/></svg> RARE OUD</div>
+  <div style="display:flex;gap:var(--ro-s-5);align-items:center">
+    <div class="sf-nav-links">
+      <a class="sf-link" href="#sf-story"><span data-lang="ar">الحرفة</span><span data-lang="en" hidden>Craft</span></a>
+      <a class="sf-link" href="#sf-collections"><span data-lang="ar">المجموعات</span><span data-lang="en" hidden>Collections</span></a>
+      <a class="sf-link" href="login.html"><span data-lang="ar">دخول الإدارة</span><span data-lang="en" hidden>Admin</span></a>
+    </div>
+    <button class="lang-toggle" onclick="roToggleLang()">EN</button>
+  </div>
+</nav>
+
+<main><section class="sf-hero ro-inverse ro-surface-deep">
+  <div class="ro-grain"></div>
+  <svg class="sf-hero-rings ro-rings-live is-breathing" viewBox="0 0 400 400">
+    <circle cx="200" cy="200" r="190" fill="none" stroke="currentColor" stroke-width="1"/>
+    <circle cx="200" cy="200" r="150" fill="none" stroke="currentColor" stroke-width="1" opacity=".75"/>
+    <circle cx="200" cy="200" r="112" fill="none" stroke="currentColor" stroke-width="1" opacity=".55"/>
+    <circle cx="200" cy="200" r="78" fill="none" stroke="currentColor" stroke-width="1" opacity=".4"/>
+    <circle cx="200" cy="200" r="48" fill="none" stroke="currentColor" stroke-width="1" opacity=".3"/>
+  </svg>
+  <div class="sf-hero-content" data-choreo="hero">
+    <span class="sf-eyebrow" data-step="0" data-choreo="hero"><span data-lang="ar">آلات عود نادرة — مصنوعة يدوياً</span><span data-lang="en" hidden>Rare oud instruments — handcrafted</span></span>
+    <h1 data-step="1" data-choreo="hero"><span data-lang="ar">صدى الصنعة،<br/>محفوظ بدقّة</span><span data-lang="en" hidden>The echo of craft,<br/>kept precisely</span></h1>
+    <p data-step="2" data-choreo="hero"><span data-lang="ar">نختار، نعاين، ونوثّق كل قطعة — من الورشة إلى يديك، عبر محادثة واتساب واحدة</span><span data-lang="en" hidden>We select, inspect, and document every piece — from the workshop to your hands, in a single WhatsApp conversation</span></p>
+    <div class="sf-hero-ctas" data-step="3" data-choreo="hero">
+      <a href="#sf-collections" class="ro-btn ro-btn-lg" style="background:var(--ro-sand-100);color:var(--ro-ink-950)"><span data-lang="ar">استكشف المجموعات</span><span data-lang="en" hidden>Explore collections</span></a>
+      <a href="login.html" class="ro-btn ro-btn-lg ro-btn-secondary" style="color:var(--ro-sand-100);border-color:rgba(244,231,216,.4)"><span data-lang="ar">بوابة التجّار</span><span data-lang="en" hidden>Trader portal</span></a>
+    </div>
+  </div>
+  <div class="sf-scroll-cue"><span data-lang="ar">مرّر للأسفل</span><span data-lang="en" hidden>Scroll</span><span class="line"></span></div>
+</section>
+
+<section class="sf-section sf-story" id="sf-story">
+  <h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)"><span data-lang="ar">الحرفة</span><span data-lang="en" hidden>Craft</span></h2>
+  <blockquote data-reveal>
+    <span data-lang="ar">"العود ليس آلة فحسب — إنه ذاكرة خشب، وحرفة يد، وصدى لا يتكرر"</span>
+    <span data-lang="en" hidden>"An oud is never just an instrument — it's the memory of wood, the work of a hand, an echo that never repeats"</span>
+    <cite><span data-lang="ar">— ورشة RARE OUD</span><span data-lang="en" hidden>— The RARE OUD workshop</span></cite>
+  </blockquote>
+  <div class="sf-story-grid" data-scroll-stagger>
+    <div class="sf-story-item">
+      <div class="th-icon"><span data-icon="wood" data-icon-size="22"></span></div>
+      <h3><span data-lang="ar">خشب مُنتقى</span><span data-lang="en" hidden>Selected wood</span></h3>
+      <p><span data-lang="ar">كل قطعة تُختار يدوياً من مصادر موثوقة قبل أن تبدأ رحلتها</span><span data-lang="en" hidden>Every piece is hand-selected from trusted sources before its journey begins</span></p>
+    </div>
+    <div class="sf-story-item">
+      <div class="th-icon"><span data-icon="handcrafted" data-icon-size="22"></span></div>
+      <h3><span data-lang="ar">صناعة يدوية</span><span data-lang="en" hidden>Handcrafted</span></h3>
+      <p><span data-lang="ar">حرفيون يعملون بأدوات تقليدية، قطعة تلو الأخرى</span><span data-lang="en" hidden>Artisans working with traditional tools, one piece at a time</span></p>
+    </div>
+    <div class="sf-story-item">
+      <div class="th-icon"><span data-icon="loupe" data-icon-size="22"></span></div>
+      <h3><span data-lang="ar">فحص وتوثيق</span><span data-lang="en" hidden>Inspected and documented</span></h3>
+      <p><span data-lang="ar">كل قطعة تُفحص وتُوثَّق قبل عرضها عليك</span><span data-lang="en" hidden>Every piece is inspected and documented before it reaches you</span></p>
+    </div>
+  </div>
+</section>
+
+<section class="sf-collections" id="sf-collections">
+  <div class="sf-collections-head">
+    <h2><span data-lang="ar">المجموعات</span><span data-lang="en" hidden>Collections</span></h2>
+    <p class="muted"><span data-lang="ar">تصفّح حسب النوع، أو اطلب قطعة بعينها عبر واتساب</span><span data-lang="en" hidden>Browse by type, or request a specific piece over WhatsApp</span></p>
+  </div>
+  <div class="sf-collections-grid" data-scroll-stagger>
+    <a class="sf-coll-card ro-sheen-surface" href="#">
+      <div class="ro-grain"></div>
+      <div class="sf-coll-glyph"><span data-icon="rosette" data-icon-size="90"></span></div>
+      <div class="sf-coll-body"><h3><span data-lang="ar">عود كلاسيكي</span><span data-lang="en" hidden>Classic Oud</span></h3><span><span data-lang="ar">12 قطعة</span><span data-lang="en" hidden>12 pieces</span></span></div>
+    </a>
+    <a class="sf-coll-card ro-sheen-surface" href="#">
+      <div class="ro-grain"></div>
+      <div class="sf-coll-glyph"><span data-icon="string" data-icon-size="90"></span></div>
+      <div class="sf-coll-body"><h3><span data-lang="ar">قانون وآلات وترية</span><span data-lang="en" hidden>Qanun & Strings</span></h3><span><span data-lang="ar">8 قطع</span><span data-lang="en" hidden>8 pieces</span></span></div>
+    </a>
+    <a class="sf-coll-card ro-sheen-surface" href="#">
+      <div class="ro-grain"></div>
+      <div class="sf-coll-glyph"><span data-icon="sparkles" data-icon-size="90"></span></div>
+      <div class="sf-coll-body"><h3><span data-lang="ar">قطع نادرة معتّقة</span><span data-lang="en" hidden>Aged Rarities</span></h3><span><span data-lang="ar">5 قطع</span><span data-lang="en" hidden>5 pieces</span></span></div>
+    </a>
+  </div>
+</section>
+
+<section class="sf-trader-band">
+  <div class="ro-grain"></div>
+  <h2><span data-lang="ar">هل أنت تاجر؟</span><span data-lang="en" hidden>Are you a trader?</span></h2>
+  <p><span data-lang="ar">اقترح صفقات، اطلب بالجملة، أو اطلب منا الوساطة على قطعة رأيتها في أي مكان</span><span data-lang="en" hidden>Propose deals, request wholesale, or ask us to broker a piece you've found anywhere</span></p>
+  <a href="login.html" class="ro-btn ro-btn-lg" style="background:var(--ro-sand-100);color:var(--ro-ink-950);position:relative"><span data-lang="ar">افتح بوابة التجّار</span><span data-lang="en" hidden>Open the trader portal</span></a>
+</section>
+</main>
+
+<footer class="sf-footer">
+  <p>RARE OUD · <span data-lang="ar">سوريا</span><span data-lang="en" hidden>Syria</span> · <bdi dir="ltr">info@rareoud.example</bdi></p>
+</footer>
+
+<script src="icons.js"></script>
+<script src="shared.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="motion-v3.js"></script>
+<script>
+  // ---- nav solid-on-scroll ----
+  var nav = document.getElementById("sf-nav");
+  window.addEventListener("scroll", function () {
+    nav.classList.toggle("is-solid", window.scrollY > 80);
+  }, { passive: true });
+
+  // ---- hero choreography ----
+  window.addEventListener("load", function () { roMotion.runChoreography("hero"); });
+
+  // ---- scroll reveals (story quote, collections already handled by data-stagger) ----
+  window.addEventListener("load", function () {
+    if (!window.gsap || !window.ScrollTrigger || roMotion.reduced()) {
+      document.querySelectorAll("[data-reveal]").forEach(function (el) { el.style.opacity = 1; });
+      return;
+    }
+    gsap.registerPlugin(ScrollTrigger);
+    document.querySelectorAll("[data-reveal]").forEach(function (el) {
+      gsap.fromTo(el, { opacity: 0, y: 16 }, {
+        opacity: 1, y: 0, duration: .8, ease: "power2.out",
+        scrollTrigger: { trigger: el, start: "top 80%", once: true }
+      });
+    });
+    gsap.utils.toArray("[data-scroll-stagger]").forEach(function (group) {
+      var items = Array.from(group.children);
+      gsap.set(items, { opacity: 0, y: 14 });
+      ScrollTrigger.create({
+        trigger: group, start: "top 85%", once: true,
+        onEnter: function () { gsap.to(items, { opacity: 1, y: 0, duration: .6, stagger: .08, ease: "power2.out" }); }
+      });
+    });
+  });
+</script>
+</body>
+</html>
