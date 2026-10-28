@@ -7,12 +7,35 @@ export type ProductBadgeFlags = {
   badgeSale?: boolean;
   compareAtPrice?: { toString(): string } | number | string | null;
   retailPrice?: { toString(): string } | number | string | null;
+  categorySlug?: string;
 };
 
 const copy = {
   ar: { neu: "جديد", featured: "مميّز", sale: "خصم" },
   en: { neu: "New", featured: "Featured", sale: "Sale" },
 } as const;
+
+const tierCopy = {
+  ar: {
+    "oud-economy": "اقتصادي",
+    "oud-mid": "متوسط",
+    "oud-professional": "احترافي",
+    "oud-vip": "VIP",
+  },
+  en: {
+    "oud-economy": "Economy",
+    "oud-mid": "Mid",
+    "oud-professional": "Pro",
+    "oud-vip": "VIP",
+  },
+} as const;
+
+const tierTone: Record<string, string> = {
+  "oud-economy": "bg-[var(--ro-sand-200)] text-ro-ink",
+  "oud-mid": "bg-[var(--ro-plum-100)] text-[var(--ro-plum-900)]",
+  "oud-professional": "bg-[var(--ro-plum-800)] text-ro-canvas",
+  "oud-vip": "bg-[var(--ro-amber-500)] text-ro-ink",
+};
 
 export function ProductBadges({
   product,
@@ -24,6 +47,7 @@ export function ProductBadges({
   className?: string;
 }) {
   const t = copy[locale] ?? copy.en;
+  const tiers = tierCopy[locale] ?? tierCopy.en;
   const compare =
     product.compareAtPrice != null ? Number(product.compareAtPrice) : null;
   const price =
@@ -31,8 +55,18 @@ export function ProductBadges({
   const saleFromPrice =
     compare != null && price != null && compare > price;
   const showSale = product.badgeSale || saleFromPrice;
+  const slug = product.categorySlug;
+  const tierLabel =
+    slug && slug in tiers ? tiers[slug as keyof typeof tiers] : null;
 
   const badges: { key: string; label: string; tone: string }[] = [];
+  if (tierLabel) {
+    badges.push({
+      key: "tier",
+      label: tierLabel,
+      tone: tierTone[slug!] ?? "bg-ro-ink text-ro-canvas",
+    });
+  }
   if (product.badgeNew) {
     badges.push({
       key: "new",

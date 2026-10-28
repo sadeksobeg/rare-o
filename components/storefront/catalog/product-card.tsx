@@ -21,7 +21,7 @@ export type CatalogCardProduct = {
   badgeNew?: boolean;
   badgeFeatured?: boolean;
   badgeSale?: boolean;
-  category?: { nameAr: string; nameEn: string } | null;
+  category?: { nameAr: string; nameEn: string; slug?: string } | null;
   images: { path: string; altAr: string; altEn: string; kind?: string }[];
 };
 
@@ -63,7 +63,10 @@ export function CatalogProductCard({
           plateCaption={dict.catalog.photoCaption}
           dimmed={!available}
         />
-        <ProductBadges product={product} locale={locale} />
+        <ProductBadges
+          product={{ ...product, categorySlug: product.category?.slug }}
+          locale={locale}
+        />
         {available ? (
           <QuickAddButton
             productId={product.id}

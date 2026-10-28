@@ -2,7 +2,7 @@ import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db/prisma";
 import { listLaunchCategories } from "@/lib/catalog/service";
 import { listPublishedPublicOffers } from "@/lib/offers/service";
-import { LAUNCH_CATEGORY_SLUGS } from "@/lib/catalog/constants";
+import { isOudTierSlug, LAUNCH_CATEGORY_SLUGS } from "@/lib/catalog/constants";
 
 export type HomepageProductImage = {
   path: string;
@@ -130,10 +130,11 @@ export async function loadHomepageDiscoveryData() {
 
   const mosaic = products.filter((p) => p.id !== featuredInstrument?.id);
 
+  const oudProducts = products.filter((p) => isOudTierSlug(p.category.slug));
   const secondaryRail =
     byCategory["accessories"].length > 0
       ? byCategory["accessories"]
-      : byCategory["string-instruments"].filter(
+      : oudProducts.filter(
           (p) => p.id !== featuredInstrument?.id && p.id !== heroProduct?.id
         );
 
@@ -177,7 +178,7 @@ export async function loadHomepageDiscoveryData() {
 
 export const getHomepageDiscoveryData = unstable_cache(
   loadHomepageDiscoveryData,
-  ["homepage-discovery-v2"],
+  ["homepage-discovery-v3"],
   { revalidate: 60, tags: ["homepage", "catalog"] }
 );
 

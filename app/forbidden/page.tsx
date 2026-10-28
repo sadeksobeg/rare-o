@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Rings } from "@/components/brand";
-import { adminLogoutAction } from "@/app/actions";
+import { adminLogoutAction } from "@/app/admin-logout-action";
 import { traderLogoutAction } from "@/app/deal-actions";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { getRequestDictionary } from "@/lib/i18n/server";

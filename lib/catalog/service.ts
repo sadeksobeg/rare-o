@@ -3,10 +3,10 @@ import { containsCI } from "@/lib/db/search";
 import type { ProductUpsertInput } from "@/lib/validation/schemas";
 import {
   type CatalogSort,
-  isLaunchCategorySlug,
+  isProtectedCategorySlug,
   LAUNCH_CATEGORY_SLUGS,
 } from "@/lib/catalog/constants";
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 export type ProductWithRelations = Prisma.ProductGetPayload<{
   include: {
@@ -167,6 +167,10 @@ export async function createProduct(input: ProductUpsertInput) {
       descriptionEn: input.descriptionEn,
       specsTextAr: input.specsTextAr,
       specsTextEn: input.specsTextEn,
+      oudSpecs:
+        input.oudSpecs == null
+          ? Prisma.DbNull
+          : (input.oudSpecs as Prisma.InputJsonValue),
       categoryId: input.categoryId,
       retailPrice: input.retailPrice,
       compareAtPrice: input.compareAtPrice,
@@ -199,6 +203,10 @@ export async function updateProduct(id: string, input: ProductUpsertInput) {
       descriptionEn: input.descriptionEn,
       specsTextAr: input.specsTextAr,
       specsTextEn: input.specsTextEn,
+      oudSpecs:
+        input.oudSpecs == null
+          ? Prisma.DbNull
+          : (input.oudSpecs as Prisma.InputJsonValue),
       categoryId: input.categoryId,
       retailPrice: input.retailPrice,
       compareAtPrice: input.compareAtPrice,
@@ -262,7 +270,7 @@ export async function deleteCategory(id: string) {
     include: { _count: { select: { products: true } } },
   });
   if (!existing) throw new Error("INVALID_CATEGORY");
-  if (isLaunchCategorySlug(existing.slug)) throw new Error("CATEGORY_LAUNCH");
+  if (isProtectedCategorySlug(existing.slug)) throw new Error("CATEGORY_LAUNCH");
   if (existing._count.products > 0) throw new Error("CATEGORY_HAS_PRODUCTS");
   return prisma.category.delete({ where: { id } });
 }

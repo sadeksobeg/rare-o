@@ -1,7 +1,7 @@
 "use client";
 
 import { BrandMark } from "@/components/storefront/brand-mark";
-import { MaskReveal, Reveal } from "@/components/storefront/motion";
+import { MaskReveal, Reveal } from "@/components/storefront/motion/reveal";
 import { SectionLabel } from "@/components/storefront/section-label";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { EDITORIAL } from "@/lib/brand/editorial";

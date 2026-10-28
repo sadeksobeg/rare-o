@@ -19,7 +19,7 @@ import { HandoffExplainer } from "@/components/storefront/handoff-explainer";
 import { FilterBar } from "@/components/storefront/catalog/filter-bar";
 import { LoadMore } from "@/components/storefront/catalog/load-more";
 import { ProductGrid } from "@/components/storefront/catalog/product-grid";
-import { Reveal } from "@/components/storefront/motion";
+import { Reveal } from "@/components/storefront/motion/reveal";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { locale, dict } = await getRequestDictionary();

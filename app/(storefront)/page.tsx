@@ -1,18 +1,10 @@
 import type { Metadata } from "next";
-import dynamic from "next/dynamic";
 import { HeroLcpPreload } from "@/components/brand/hero-lcp-preload";
 import { storefrontMetadata } from "@/lib/seo";
 import { HomepageShell } from "@/components/storefront/discovery/homepage-shell";
 import { CategoryExplorer } from "@/components/storefront/discovery/category-explorer";
+import { FeaturedInstrument } from "@/components/storefront/discovery/featured-instrument";
 import { HeroResonance } from "@/components/storefront/home/hero-resonance";
-
-const FeaturedInstrument = dynamic(
-  () =>
-    import("@/components/storefront/discovery/featured-instrument").then(
-      (m) => m.FeaturedInstrument
-    ),
-  { loading: () => null }
-);
 import { TrustStrip } from "@/components/storefront/home/trust-strip";
 import { SectionHeading } from "@/components/storefront/section-heading";
 import { OfferCard } from "@/components/storefront/offer-card";
@@ -20,7 +12,7 @@ import { EditorialSplit } from "@/components/storefront/editorial-split";
 import { HandoffExplainer } from "@/components/storefront/handoff-explainer";
 import { TraderBand } from "@/components/storefront/trader-band";
 import { ProductGrid } from "@/components/storefront/catalog/product-grid";
-import { Reveal } from "@/components/storefront/motion";
+import { Reveal } from "@/components/storefront/motion/reveal";
 import { ButtonLink } from "@/components/ui/button";
 import { getHomepageDiscoveryData } from "@/lib/catalog/homepage";
 import { getRequestDictionary } from "@/lib/i18n/server";

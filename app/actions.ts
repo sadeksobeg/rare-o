@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { safePortalReturnTo } from "@/lib/auth/return-to";
 import {
   adminLoginSchema,
   categoryCreateSchema,
@@ -11,8 +12,8 @@ import {
   retailRequestIdSchema,
   retailRequestTransitionSchema,
 } from "@/lib/validation/schemas";
+import { oudSpecsFromFormData } from "@/lib/catalog/oud-specs";
 import {
-  clearAdminSessionCookie,
   createAdminSessionToken,
   requireAdminSession,
   setAdminSessionCookie,
@@ -45,25 +46,12 @@ import {
   transitionRetailRequestStatus,
 } from "@/lib/retail-request/service";
 import { isRetailRequestStatus } from "@/lib/retail-request/constants";
-import { LOCALE_COOKIE } from "@/lib/i18n/server";
-import { isLocale, type Locale } from "@/lib/i18n/config";
-import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { revalidateHomepageAndCatalogTags } from "@/lib/cache/revalidate-storefront";
 
 export type ActionResult =
   | { ok: true; message?: string; data?: unknown }
   | { ok: false; error: string };
-
-export async function setLocaleAction(locale: string): Promise<void> {
-  if (!isLocale(locale)) return;
-  const jar = await cookies();
-  jar.set(LOCALE_COOKIE, locale as Locale, {
-    path: "/",
-    sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 365,
-  });
-}
 
 export async function adminLoginAction(
   _prev: ActionResult | null,
@@ -160,7 +148,7 @@ export async function adminLoginAction(
     name: admin.name,
   });
   await setAdminSessionCookie(token);
-  redirect("/admin");
+  redirect(safePortalReturnTo(formData.get("returnTo"), "/admin"));
 }
 
 /** Start TOTP enrollment — returns otpauth URL + plaintext recovery codes once. */
@@ -233,11 +221,6 @@ export async function confirmAdminTotpAction(
   return { ok: true };
 }
 
-export async function adminLogoutAction(): Promise<void> {
-  await clearAdminSessionCookie();
-  redirect("/admin/login");
-}
-
 export async function upsertProductAction(
   _prev: ActionResult | null,
   formData: FormData
@@ -258,6 +241,7 @@ export async function upsertProductAction(
     descriptionEn: formData.get("descriptionEn") || "",
     specsTextAr: formData.get("specsTextAr") || "",
     specsTextEn: formData.get("specsTextEn") || "",
+    oudSpecs: oudSpecsFromFormData(formData),
     categoryId: formData.get("categoryId"),
     retailPrice: formData.get("retailPrice"),
     compareAtPrice: formData.get("compareAtPrice") ?? "",

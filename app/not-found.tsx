@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Rings } from "@/components/brand";
+import { ErrorGrainIllustration } from "@/components/brand/icons/error-grain";
 import { getRequestDictionary } from "@/lib/i18n/server";
 
 export default async function NotFound() {
@@ -9,7 +9,7 @@ export default async function NotFound() {
     <main className="mx-auto flex min-h-[70vh] max-w-lg flex-col items-center justify-center px-6 text-center">
       {/* SF-10: 404 must stay out of search indexes */}
       <meta name="robots" content="noindex, nofollow" />
-      <Rings className="mb-6 h-24 w-24 text-ro-ink opacity-30" />
+      <ErrorGrainIllustration className="mb-6 h-40 w-40 text-ro-ink opacity-80" />
       <h1 className="ro-type-h1">{dict.common.errorNotFound}</h1>
       <p className="mt-3 text-ro-text-2">{dict.common.errorBody}</p>
 

@@ -6,7 +6,6 @@ import {
   getPublishedProductBySlug,
   listRelatedPublishedProducts,
 } from "@/lib/catalog/service";
-import { parseSpecs } from "@/lib/catalog/specs";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { AddToCartButton } from "@/components/storefront/add-to-cart-button";
 import { HandoffExplainer } from "@/components/storefront/handoff-explainer";
@@ -16,6 +15,7 @@ import { AvailabilityChip } from "@/components/storefront/catalog/availability-c
 import { PriceBlock } from "@/components/storefront/catalog/price-block";
 import { ProductBadges } from "@/components/storefront/catalog/product-badges";
 import { ProductGrid } from "@/components/storefront/catalog/product-grid";
+import { OudSpecGallery } from "@/components/storefront/catalog/oud-spec-gallery";
 import { SpecTable } from "@/components/storefront/catalog/spec-table";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { href } from "@/lib/href";
@@ -130,7 +130,6 @@ export default async function ProductPage({
     : "";
   const descriptionText = description?.trim() ?? "";
   const longDescription = descriptionText.length > SHORT_DESCRIPTOR_MAX;
-  const keySpecs = parseSpecs(specs).rows.slice(0, 4);
   const related = await listRelatedPublishedProducts(
     product.categoryId,
     product.id
@@ -168,7 +167,10 @@ export default async function ProductPage({
       <section className="grid gap-8 lg:grid-cols-12 lg:gap-12">
         <div className="relative min-w-0 lg:col-span-7">
           <ProductBadges
-            product={product}
+            product={{
+              ...product,
+              categorySlug: product.category?.slug,
+            }}
             locale={locale}
             className="z-20"
           />
@@ -221,21 +223,6 @@ export default async function ProductPage({
                 : descriptionText}
             </p>
           ) : null}
-          {keySpecs.length > 0 ? (
-            <dl className="border-t border-ro-border">
-              {keySpecs.map((row, i) => (
-                <div
-                  key={`${row.label}-${i}`}
-                  className="flex items-baseline justify-between gap-6 border-b border-ro-border py-2.5"
-                >
-                  <dt className="text-sm text-ro-muted">{row.label}</dt>
-                  <dd className="text-sm font-medium text-ro-ink text-end">
-                    {row.value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          ) : null}
           {available ? (
             <div id="pdp-cta">
               <AddToCartButton
@@ -281,7 +268,9 @@ export default async function ProductPage({
         </section>
       ) : null}
 
-      <SpecTable text={specs} heading={dict.product.specs} />
+      <OudSpecGallery specs={product.oudSpecs} locale={locale} dict={dict} />
+
+      <SpecTable text={specs} heading={dict.product.extras} />
 
       {related.length > 0 ? (
         <section className="space-y-6">
