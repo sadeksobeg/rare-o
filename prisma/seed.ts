@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { TEST_CURRENCY_CODE } from "../lib/catalog/currency";
+import type { OudSpecs } from "../lib/catalog/oud-specs";
 
 const prisma = new PrismaClient();
 
@@ -17,6 +18,14 @@ const IMAGES = {
   oudAlt: "/brand/hero-oud-atelier-e.png",
 } as const;
 
+type SeedCategory =
+  | "oud-economy"
+  | "oud-mid"
+  | "oud-professional"
+  | "oud-vip"
+  | "accessories"
+  | "string-instruments";
+
 type SeedProduct = {
   slug: string;
   nameAr: string;
@@ -25,7 +34,8 @@ type SeedProduct = {
   descriptionEn: string;
   specsTextAr: string;
   specsTextEn: string;
-  category: "string-instruments" | "accessories";
+  category: SeedCategory;
+  oudSpecs?: OudSpecs | null;
   retailPrice: number;
   compareAtPrice?: number | null;
   availability?: "available" | "unavailable";
@@ -33,21 +43,101 @@ type SeedProduct = {
   images: Array<{ path: string; altAr: string; altEn: string }>;
 };
 
-const OUD_SPECS_AR = [
-  "الوجه: خشب شوح متين",
-  "القصعة: جوز مطبق",
-  "الأوتار: 11 وتراً",
-  "بيت المفاتيح: 11 وتداً",
-  "التشطيب: ورنيش يدوي",
-].join("\n");
+const OUD_SPECS_AR = ["الأوتار: 11 وتراً"].join("\n");
 
-const OUD_SPECS_EN = [
-  "Soundboard: spruce",
-  "Bowl: laminated walnut",
-  "Strings: 11 courses",
-  "Pegbox: 11 pegs",
-  "Finish: hand-rubbed varnish",
-].join("\n");
+const OUD_SPECS_EN = ["Strings: 11 courses"].join("\n");
+
+function wood(
+  face: [string, string],
+  back: [string, string],
+  pegs: [string, string],
+  fingerboard: [string, string],
+  bridge: [string, string]
+): OudSpecs["wood"] {
+  return {
+    face: { ar: face[0], en: face[1] },
+    back: { ar: back[0], en: back[1] },
+    pegs: { ar: pegs[0], en: pegs[1] },
+    fingerboard: { ar: fingerboard[0], en: fingerboard[1] },
+    bridge: { ar: bridge[0], en: bridge[1] },
+  };
+}
+
+const WORKSHOP_OUD_SPECS: OudSpecs = {
+  wood: wood(
+    ["شوح متين", "spruce"],
+    ["جوز مطبق", "laminated walnut"],
+    ["خشب الورد", "rosewood"],
+    ["أبنوس", "ebony"],
+    ["خشب الورد", "rosewood"]
+  ),
+  measures: {
+    faceWidthMm: 355,
+    faceDepthMm: 175,
+    faceLengthMm: 490,
+    neckLengthMm: 195,
+    stringLengthMm: 585,
+  },
+  standardNeck: true,
+  finish: { ar: "ورنيش يدوي", en: "hand-rubbed varnish" },
+};
+
+const CLASSIC_OUD_SPECS: OudSpecs = {
+  wood: wood(
+    ["شوح مختار", "select spruce"],
+    ["جوز هندي", "Indian walnut"],
+    ["خشب الورد", "rosewood"],
+    ["أبنوس", "ebony"],
+    ["خشب الورد", "rosewood"]
+  ),
+  measures: {
+    faceWidthMm: 360,
+    faceDepthMm: 180,
+    faceLengthMm: 500,
+    neckLengthMm: 200,
+    stringLengthMm: 600,
+  },
+  standardNeck: true,
+  finish: { ar: "ورنيش زيتي", en: "oil varnish" },
+};
+
+const CONCERT_OUD_SPECS: OudSpecs = {
+  wood: wood(
+    ["شوح ألماني", "German spruce"],
+    ["خشب الورد", "rosewood"],
+    ["أبنوس", "ebony"],
+    ["أبنوس", "ebony"],
+    ["خشب الورد", "rosewood"]
+  ),
+  measures: {
+    faceWidthMm: 365,
+    faceDepthMm: 185,
+    faceLengthMm: 510,
+    neckLengthMm: 205,
+    stringLengthMm: 610,
+  },
+  standardNeck: true,
+  finish: { ar: "ورنيش صدف يدوي", en: "hand French polish" },
+};
+
+const VIP_OUD_SPECS: OudSpecs = {
+  wood: wood(
+    ["أرز معمّر", "aged cedar"],
+    ["جوز مختار", "selected walnut"],
+    ["أبنوس", "ebony"],
+    ["أبنوس أفريقي", "African ebony"],
+    ["خشب الورد", "rosewood"]
+  ),
+  measures: {
+    faceWidthMm: 370,
+    faceDepthMm: 190,
+    faceLengthMm: 515,
+    neckLengthMm: 210,
+    stringLengthMm: 615,
+  },
+  standardNeck: false,
+  finish: { ar: "تشطيب أتيليه متعدد الطبقات", en: "atelier multi-coat finish" },
+};
 
 const DEMO_PRODUCTS: SeedProduct[] = [
   {
@@ -58,7 +148,8 @@ const DEMO_PRODUCTS: SeedProduct[] = [
     descriptionEn: "A workshop oud with a warm tone for practice and display.",
     specsTextAr: OUD_SPECS_AR,
     specsTextEn: OUD_SPECS_EN,
-    category: "string-instruments",
+    category: "oud-economy",
+    oudSpecs: WORKSHOP_OUD_SPECS,
     retailPrice: 2098,
     compareAtPrice: 2490,
     wholesaleEligible: true,
@@ -73,21 +164,10 @@ const DEMO_PRODUCTS: SeedProduct[] = [
     nameEn: "Classic oud 21",
     descriptionAr: "عود بتركيبة متوازنة للعزف اليومي والاستوديو.",
     descriptionEn: "A balanced oud for daily practice and studio sessions.",
-    specsTextAr: [
-      "الوجه: شوح مختار",
-      "القصعة: جوز هندي",
-      "المقياس: قياسي كلاسيك",
-      "الأوتار: 11 وتراً",
-      "الوزن التقريبي: 850 غ",
-    ].join("\n"),
-    specsTextEn: [
-      "Soundboard: select spruce",
-      "Bowl: Indian walnut",
-      "Scale: classic standard",
-      "Strings: 11 courses",
-      "Approx. weight: 850 g",
-    ].join("\n"),
-    category: "string-instruments",
+    specsTextAr: ["الأوتار: 11 وتراً", "الوزن التقريبي: 850 غ"].join("\n"),
+    specsTextEn: ["Strings: 11 courses", "Approx. weight: 850 g"].join("\n"),
+    category: "oud-mid",
+    oudSpecs: CLASSIC_OUD_SPECS,
     retailPrice: 3180,
     compareAtPrice: 3550,
     images: [
@@ -101,25 +181,39 @@ const DEMO_PRODUCTS: SeedProduct[] = [
     nameEn: "Concert premium oud",
     descriptionAr: "اختيار للحفلات بنبرة أوضح واستجابة سريعة.",
     descriptionEn: "A concert choice with clearer tone and quick response.",
-    specsTextAr: [
-      "الوجه: شوح ألماني",
-      "القصعة: خشب الورد",
-      "الوردة: نقش يدوي",
-      "الأوتار: 11 وتراً",
-      "الاستخدام: مسرح واستوديو",
-    ].join("\n"),
-    specsTextEn: [
-      "Soundboard: German spruce",
-      "Bowl: rosewood",
-      "Rosette: hand-carved",
-      "Strings: 11 courses",
-      "Use: stage and studio",
-    ].join("\n"),
-    category: "string-instruments",
+    specsTextAr: ["الوردة: نقش يدوي", "الأوتار: 11 وتراً"].join("\n"),
+    specsTextEn: ["Rosette: hand-carved", "Strings: 11 courses"].join("\n"),
+    category: "oud-professional",
+    oudSpecs: CONCERT_OUD_SPECS,
     retailPrice: 4920,
     images: [
       { path: IMAGES.oudAlt, altAr: "عود حفلات", altEn: "Concert oud" },
       { path: IMAGES.oudPrimary, altAr: "منظر جانبي", altEn: "Side view" },
+    ],
+  },
+  {
+    slug: "oud-vip-signature",
+    nameAr: "عود توقيع VIP",
+    nameEn: "VIP signature oud",
+    descriptionAr: "قطعة أتيليه بأخشاب معمّرة وتشطيب متعدد الطبقات.",
+    descriptionEn: "An atelier piece with aged woods and a multi-coat finish.",
+    specsTextAr: [
+      "الوردة: نقش يدوي",
+      "الأوتار: 11 وتراً",
+      "الاستخدام: حفلات ومقتنيات",
+    ].join("\n"),
+    specsTextEn: [
+      "Rosette: hand-carved",
+      "Strings: 11 courses",
+      "Use: concert and collection",
+    ].join("\n"),
+    category: "oud-vip",
+    oudSpecs: VIP_OUD_SPECS,
+    retailPrice: 8900,
+    wholesaleEligible: true,
+    images: [
+      { path: IMAGES.oudPrimary, altAr: "عود توقيع", altEn: "Signature oud" },
+      { path: IMAGES.oudAlt, altAr: "تفاصيل الأتيليه", altEn: "Atelier detail" },
     ],
   },
   {
@@ -205,18 +299,8 @@ const DEMO_PRODUCTS: SeedProduct[] = [
     nameEn: "Hard-shell case",
     descriptionAr: "حماية للسفر والتخزين اليومي.",
     descriptionEn: "Protection for travel and everyday storage.",
-    specsTextAr: [
-      "المادة: ABS مقوّى",
-      "البطانة: إسفنج كثيف",
-      "الأقفال: معدنية",
-      "التوافق: عود قياسي",
-    ].join("\n"),
-    specsTextEn: [
-      "Shell: reinforced ABS",
-      "Lining: dense foam",
-      "Latches: metal",
-      "Fits: standard oud",
-    ].join("\n"),
+    specsTextAr: "",
+    specsTextEn: "",
     category: "accessories",
     retailPrice: 420,
     compareAtPrice: 490,
@@ -230,18 +314,8 @@ const DEMO_PRODUCTS: SeedProduct[] = [
     nameEn: "Leather strap",
     descriptionAr: "حمّالة جلدية بتشطيب هادئ.",
     descriptionEn: "A leather strap with a quiet finish.",
-    specsTextAr: [
-      "المادة: جلد طبيعي",
-      "العرض: 5 سم",
-      "الطول: قابل للتعديل",
-      "اللون: بني داكن",
-    ].join("\n"),
-    specsTextEn: [
-      "Material: natural leather",
-      "Width: 5 cm",
-      "Length: adjustable",
-      "Color: dark brown",
-    ].join("\n"),
+    specsTextAr: "",
+    specsTextEn: "",
     category: "accessories",
     retailPrice: 180,
     images: [
@@ -254,16 +328,8 @@ const DEMO_PRODUCTS: SeedProduct[] = [
     nameEn: "Rosewood pick set",
     descriptionAr: "ثلاث ريش بدرجات سماكة مختلفة.",
     descriptionEn: "Three picks in varying thicknesses.",
-    specsTextAr: [
-      "المادة: خشب الورد",
-      "العدد: 3 قطع",
-      "السماكة: خفيفة / متوسطة / ثقيلة",
-    ].join("\n"),
-    specsTextEn: [
-      "Material: rosewood",
-      "Count: 3 pieces",
-      "Gauge: light / medium / heavy",
-    ].join("\n"),
+    specsTextAr: "",
+    specsTextEn: "",
     category: "accessories",
     retailPrice: 65,
     images: [
@@ -276,18 +342,8 @@ const DEMO_PRODUCTS: SeedProduct[] = [
     nameEn: "Digital tuner",
     descriptionAr: "موالف سريع للتمرين والاستوديو.",
     descriptionEn: "A quick tuner for practice and studio work.",
-    specsTextAr: [
-      "الشاشة: LED",
-      "المدى: كروماتي",
-      "الطاقة: بطارية زر",
-      "التثبيت: مشبك",
-    ].join("\n"),
-    specsTextEn: [
-      "Display: LED",
-      "Range: chromatic",
-      "Power: button cell",
-      "Mount: clip-on",
-    ].join("\n"),
+    specsTextAr: "",
+    specsTextEn: "",
     category: "accessories",
     retailPrice: 95,
     compareAtPrice: 120,
@@ -310,6 +366,7 @@ async function upsertProduct(
       descriptionEn: product.descriptionEn,
       specsTextAr: product.specsTextAr,
       specsTextEn: product.specsTextEn,
+      oudSpecs: product.oudSpecs ?? undefined,
       categoryId: categoryIds[product.category]!,
       retailPrice: product.retailPrice,
       compareAtPrice: product.compareAtPrice ?? null,
@@ -326,6 +383,7 @@ async function upsertProduct(
       descriptionEn: product.descriptionEn,
       specsTextAr: product.specsTextAr,
       specsTextEn: product.specsTextEn,
+      oudSpecs: product.oudSpecs ?? undefined,
       categoryId: categoryIds[product.category]!,
       retailPrice: product.retailPrice,
       compareAtPrice: product.compareAtPrice ?? null,
@@ -352,40 +410,59 @@ async function upsertProduct(
   return row;
 }
 
+async function upsertCategory(
+  slug: string,
+  nameAr: string,
+  nameEn: string,
+  sortOrder: number
+) {
+  return prisma.category.upsert({
+    where: { slug },
+    update: { nameAr, nameEn, sortOrder },
+    create: { slug, nameAr, nameEn, sortOrder },
+  });
+}
+
 async function main() {
-  const stringCat = await prisma.category.upsert({
-    where: { slug: "string-instruments" },
-    update: {
-      nameAr: "آلات موسيقية وترية",
-      nameEn: "String Musical Instruments",
-      sortOrder: 1,
-    },
-    create: {
-      slug: "string-instruments",
-      nameAr: "آلات موسيقية وترية",
-      nameEn: "String Musical Instruments",
-      sortOrder: 1,
-    },
-  });
+  const economyCat = await upsertCategory(
+    "oud-economy",
+    "عود اقتصادي",
+    "Economy oud",
+    1
+  );
+  const midCat = await upsertCategory(
+    "oud-mid",
+    "عود متوسط",
+    "Mid-range oud",
+    2
+  );
+  const professionalCat = await upsertCategory(
+    "oud-professional",
+    "عود احترافي",
+    "Professional oud",
+    3
+  );
+  const vipCat = await upsertCategory("oud-vip", "عود VIP", "VIP oud", 4);
+  const accessoriesCat = await upsertCategory(
+    "accessories",
+    "إكسسوارات",
+    "Accessories",
+    5
+  );
+  const stringCat = await upsertCategory(
+    "string-instruments",
+    "آلات موسيقية وترية",
+    "String Musical Instruments",
+    90
+  );
 
-  const accessoriesCat = await prisma.category.upsert({
-    where: { slug: "accessories" },
-    update: {
-      nameAr: "إكسسوارات",
-      nameEn: "Accessories",
-      sortOrder: 2,
-    },
-    create: {
-      slug: "accessories",
-      nameAr: "إكسسوارات",
-      nameEn: "Accessories",
-      sortOrder: 2,
-    },
-  });
-
-  const categoryIds = {
-    "string-instruments": stringCat.id,
+  const categoryIds: Record<SeedCategory, string> = {
+    "oud-economy": economyCat.id,
+    "oud-mid": midCat.id,
+    "oud-professional": professionalCat.id,
+    "oud-vip": vipCat.id,
     accessories: accessoriesCat.id,
+    "string-instruments": stringCat.id,
   };
 
   const defaultAdminEmail = "admin@rareoud.local";
@@ -634,7 +711,9 @@ async function main() {
   }
 
   console.log("Seed complete:");
-  console.log("- categories: string-instruments, accessories");
+  console.log(
+    "- categories: oud-economy, oud-mid, oud-professional, oud-vip, accessories"
+  );
   console.log(`- products: ${DEMO_PRODUCTS.length} published fixtures`);
   console.log(`- admin: ${email}`);
   console.log(`- trader: ${traderEmail}`);

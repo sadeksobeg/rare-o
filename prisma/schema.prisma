@@ -7,7 +7,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// Launch categories only: string-instruments, accessories
+/// Launch browse: oud-economy, oud-mid, oud-professional, oud-vip, accessories.
+/// string-instruments is retained as a protected legacy bucket.
 model Category {
   id        String    @id @default(cuid())
   slug      String    @unique
@@ -28,6 +29,8 @@ model Product {
   descriptionEn     String                 @default("")
   specsTextAr       String                 @default("")
   specsTextEn       String                 @default("")
+  /// Optional structured oud wood / measure / finish details (admin-filled)
+  oudSpecs          Json?
   categoryId        String
   category          Category               @relation(fields: [categoryId], references: [id])
   /// Nullable with currency as a pair (D28b): both set or both null = price on request

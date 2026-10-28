@@ -23,7 +23,7 @@ async function main() {
       phone: "+963900000001",
       status: "active",
       adminNotes: "[DEMO] Seeded Arabic demo trader — hide via ui-hidden",
-      interestCategorySlugs: "string-instruments",
+      interestCategorySlugs: "oud-mid",
       interestNotes: "اهتمام بقطع العود المختارة",
     },
     update: {
