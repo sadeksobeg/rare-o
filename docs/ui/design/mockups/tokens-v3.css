@@ -102,6 +102,7 @@
 }
 .ro-fab-trigger:hover { transform: scale(1.06); }
 .ro-fab-menu { position: absolute; bottom: 68px; inset-inline-end: 0; display: grid; gap: var(--ro-s-2); min-width: 220px; }
+.ro-fab-menu[hidden] { display: none; }
 .ro-fab-menu button {
   display: flex; align-items: center; gap: var(--ro-s-3); background: var(--ro-ink-900); color: var(--ro-sand-100);
   border: 1px solid rgba(244,231,216,.14); border-radius: var(--ro-r-sm); padding: var(--ro-s-3); cursor: pointer;

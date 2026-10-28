@@ -3,18 +3,49 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة التحكم — RARE OUD (نموذج مرحلة 2)</title>
+<title>لوحة التحكم — RARE OUD</title>
 <link rel="stylesheet" href="shared.css" />
+<link rel="stylesheet" href="tokens-v3.css" />
+<style>
+  .ad-search { display: flex; align-items: center; gap: var(--ro-s-2); background: var(--ro-sand-50); border: 1px solid var(--ro-border-control); border-radius: var(--ro-r-sm); padding-inline: var(--ro-s-3); height: 44px; color: var(--ro-text-muted); cursor: pointer; font-size: .85rem; min-width: 240px; }
+  .ad-search kbd { margin-inline-start: auto; font-family: var(--ro-font-ui); font-size: .72rem; border: 1px solid var(--ro-border); border-radius: 4px; padding: 1px 6px; background: var(--ro-sand-200); }
+
+  .ad-kpi { position: relative; overflow: hidden; }
+  .ad-kpi .ro-kpi-value { font-size: 1.9rem; }
+  .ad-kpi-foot { display: flex; align-items: center; justify-content: space-between; margin-top: var(--ro-s-2); }
+
+  .ad-grid-2 { display: grid; grid-template-columns: minmax(0,1.3fr) minmax(0,1fr); gap: var(--ro-s-4); align-items: start; margin-bottom: var(--ro-s-4); }
+  @media (max-width: 1100px) { .ad-grid-2 { grid-template-columns: 1fr; } }
+
+  .ad-queue-row { display: grid; grid-template-columns: auto 1fr auto auto auto; gap: var(--ro-s-3); align-items: center; padding: var(--ro-s-3) var(--ro-s-2); border-radius: var(--ro-r-sm); }
+  .ad-queue-row:hover { background: var(--ro-sand-200); }
+  .ad-queue-row .ad-ref { font-variant-numeric: tabular-nums; font-size: .82rem; color: var(--ro-text-muted); }
+  .ad-queue-actions { display: flex; gap: 4px; }
+  .ad-queue-actions button { width: 32px; height: 32px; border-radius: var(--ro-r-sm); border: 1px solid var(--ro-border); background: var(--ro-sand-50); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ro-text); }
+  .ad-queue-actions button:hover { background: var(--ro-plum-100); color: var(--ro-plum-900); }
+
+  .ad-feed-item { display: flex; gap: var(--ro-s-3); padding: var(--ro-s-2) 0; }
+  .ad-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--ro-plum-100); color: var(--ro-plum-900); display: flex; align-items: center; justify-content: center; font-size: .78rem; font-weight: 700; flex-shrink: 0; }
+
+  .ad-wa-card { position: relative; background: var(--ro-ink-950); color: var(--ro-sand-100); border-radius: var(--ro-r-md); padding: var(--ro-s-5); overflow: hidden; }
+  .ad-wa-card .ro-grain { opacity: .04; }
+
+  .ad-broker-stat { display: flex; justify-content: space-between; align-items: baseline; padding: var(--ro-s-2) 0; border-bottom: 1px solid var(--ro-border-subtle); }
+  .ad-broker-stat:last-child { border-bottom: none; }
+
+  .ad-donut-legend { display: flex; flex-direction: column; gap: var(--ro-s-2); margin-top: var(--ro-s-3); }
+  .ad-donut-legend li { display: flex; align-items: center; gap: 8px; font-size: .82rem; list-style: none; }
+  .ad-donut-legend .sw { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+</style>
 </head>
 <body>
 <a href="#main" class="skip-link"><span data-lang="ar">تخطَّ إلى المحتوى</span><span data-lang="en" hidden>Skip to content</span></a>
+
 <div class="ro-shell">
   <aside class="ro-sidebar ro-inverse">
     <div style="display:flex;align-items:center;justify-content:space-between">
       <div class="ro-brand"><svg width="22" height="22" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="30" fill="var(--ro-plum-900)"/><circle cx="32" cy="32" r="22" stroke="#F4E7D8" stroke-width="1.5"/><circle cx="32" cy="32" r="5" fill="#0B080D"/></svg> RARE OUD</div>
-      <button class="ro-icon-btn ro-sidebar-hamburger" data-open-dialog="admin-nav-drawer" aria-label="القائمة">
-        <span data-icon="menu" data-icon-size="20"></span>
-      </button>
+      <button class="ro-icon-btn ro-sidebar-hamburger" data-open-dialog="admin-nav-drawer" aria-label="القائمة"><span data-icon="menu" data-icon-size="20"></span></button>
     </div>
     <nav aria-label="الإدارة">
       <a class="active" href="admin-dashboard.html" aria-current="page" data-icon="home"><span data-lang="ar">لوحة التحكم</span><span data-lang="en" hidden>Dashboard</span></a>
@@ -22,6 +53,7 @@
       <a href="requests-list.html" data-icon="bag"><span data-lang="ar">طلبات التجزئة</span><span data-lang="en" hidden>Retail requests</span></a>
       <a href="#" data-icon="handshake"><span data-lang="ar">الصفقات</span><span data-lang="en" hidden>Deals</span></a>
       <a href="#" data-icon="package"><span data-lang="ar">الجملة</span><span data-lang="en" hidden>Wholesale</span></a>
+      <a href="brokerage-pending-decision.html" data-icon="compass"><span data-lang="ar">الوساطة</span><span data-lang="en" hidden>Brokerage</span></a>
       <a href="product-form.html" data-icon="guitar"><span data-lang="ar">المنتجات</span><span data-lang="en" hidden>Products</span></a>
       <a href="#" data-icon="users"><span data-lang="ar">التجّار</span><span data-lang="en" hidden>Traders</span></a>
       <a href="#" data-icon="user"><span data-lang="ar">العملاء</span><span data-lang="en" hidden>Customers</span></a>
@@ -40,6 +72,7 @@
         <a href="requests-list.html" data-icon="bag"><span data-lang="ar">طلبات التجزئة</span><span data-lang="en" hidden>Retail requests</span></a>
         <a href="#" data-icon="handshake"><span data-lang="ar">الصفقات</span><span data-lang="en" hidden>Deals</span></a>
         <a href="#" data-icon="package"><span data-lang="ar">الجملة</span><span data-lang="en" hidden>Wholesale</span></a>
+        <a href="brokerage-pending-decision.html" data-icon="compass"><span data-lang="ar">الوساطة</span><span data-lang="en" hidden>Brokerage</span></a>
         <a href="product-form.html" data-icon="guitar"><span data-lang="ar">المنتجات</span><span data-lang="en" hidden>Products</span></a>
         <a href="#" data-icon="users"><span data-lang="ar">التجّار</span><span data-lang="en" hidden>Traders</span></a>
         <a href="#" data-icon="user"><span data-lang="ar">العملاء</span><span data-lang="en" hidden>Customers</span></a>
@@ -48,86 +81,240 @@
   </dialog>
 
   <main class="ro-main" id="main">
-    <div class="ro-topbar">
+    <div class="ro-topbar" style="flex-wrap:wrap;gap:var(--ro-s-3)">
       <div>
-        <h1><span data-lang="ar">صباح الخير</span><span data-lang="en" hidden>Good morning</span></h1>
-        <p class="muted ro-body-sm"><span data-lang="ar">24 أمراً بانتظارك اليوم · الأربعاء، 28 أكتوبر</span><span data-lang="en" hidden>24 things awaiting you today · Wednesday, Oct 28</span></p>
+        <h1 style="font-size:1.7rem"><span data-lang="ar">صباح الخير، سامر</span><span data-lang="en" hidden>Good morning, Samer</span></h1>
+        <p class="muted ro-body-sm" style="display:flex;align-items:center;gap:6px">
+          <span class="ro-pulse-dot"></span>
+          <span data-lang="ar">واتساب متصل · آخر مزامنة قبل دقيقة · 24 أمراً بانتظارك</span>
+          <span data-lang="en" hidden>WhatsApp connected · synced a minute ago · 24 things awaiting you</span>
+        </p>
       </div>
-      <div style="display:flex;gap:var(--ro-s-2);align-items:center">
+      <div style="display:flex;gap:var(--ro-s-2);align-items:center;margin-inline-start:auto">
+        <button class="ad-search" data-open-dialog="ro-command-palette">
+          <span data-icon="search" data-icon-size="16"></span>
+          <span data-lang="ar">ابحث أو نفّذ أمراً</span><span data-lang="en" hidden>Search or run a command</span>
+          <kbd>Ctrl K</kbd>
+        </button>
         <button class="lang-toggle" onclick="roToggleLang()">EN</button>
-        <button class="ro-btn ro-btn-primary"><span data-icon="plus" data-icon-size="16"></span><span data-lang="ar">إضافة منتج</span><span data-lang="en" hidden>Add product</span></button>
       </div>
     </div>
 
-    <div class="ro-kpi-grid">
-      <div class="ro-card ro-kpi-card">
+    <div class="ro-kpi-grid" data-stagger>
+      <a class="ro-card ro-kpi-card ad-kpi ro-sheen-surface ro-card-link" href="requests-list.html">
         <div class="ro-kpi-label"><span data-lang="ar">طلبات تجزئة جديدة</span><span data-lang="en" hidden>New retail requests</span></div>
-        <div class="ro-kpi-value ro-tabular">17</div>
-      </div>
-      <div class="ro-card ro-kpi-card">
+        <div class="ro-kpi-value ro-count" data-count-to="17">0</div>
+        <div class="ad-kpi-foot"><span class="ro-trend ro-trend-up"><span data-icon="trending-up" data-icon-size="13"></span>+12%</span><span class="ro-caption"><span data-lang="ar">أسبوعياً</span><span data-lang="en" hidden>weekly</span></span></div>
+      </a>
+      <a class="ro-card ro-kpi-card ad-kpi ro-sheen-surface ro-card-link" href="#">
         <div class="ro-kpi-label"><span data-lang="ar">صفقات بانتظار الرد</span><span data-lang="en" hidden>Deals awaiting reply</span></div>
-        <div class="ro-kpi-value ro-tabular">7</div>
-      </div>
-      <div class="ro-card ro-kpi-card">
+        <div class="ro-kpi-value ro-count" data-count-to="7">0</div>
+        <div class="ad-kpi-foot"><span class="ro-trend ro-trend-down"><span data-icon="trending-down" data-icon-size="13"></span>-3%</span><span class="ro-caption"><span data-lang="ar">أسبوعياً</span><span data-lang="en" hidden>weekly</span></span></div>
+      </a>
+      <a class="ro-card ro-kpi-card ad-kpi ro-sheen-surface ro-card-link" href="#">
         <div class="ro-kpi-label"><span data-lang="ar">طلبات جملة</span><span data-lang="en" hidden>Wholesale requests</span></div>
-        <div class="ro-kpi-value ro-tabular">0</div>
-        <p class="muted" style="font-size:.78rem;margin:0"><span data-lang="ar">لا شيء بانتظارك</span><span data-lang="en" hidden>Nothing waiting</span></p>
+        <div class="ro-kpi-value ro-count" data-count-to="5">0</div>
+        <div class="ad-kpi-foot"><span class="ro-trend ro-trend-up"><span data-icon="trending-up" data-icon-size="13"></span>+2</span><span class="ro-caption"><span data-lang="ar">هذا الأسبوع</span><span data-lang="en" hidden>this week</span></span></div>
+      </a>
+      <a class="ro-card ro-kpi-card ad-kpi ro-sheen-surface ro-card-link" href="brokerage-pending-decision.html">
+        <div class="ro-kpi-label"><span data-lang="ar">طلبات وساطة نشطة</span><span data-lang="en" hidden>Active brokerage requests</span></div>
+        <div class="ro-kpi-value ro-count" data-count-to="4">0</div>
+        <div class="ad-kpi-foot"><span class="ro-trend ro-trend-up"><span data-icon="trending-up" data-icon-size="13"></span>+1</span><span class="ro-caption"><span data-lang="ar">هذا الأسبوع</span><span data-lang="en" hidden>this week</span></span></div>
+      </a>
+    </div>
+
+    <div class="ad-grid-2">
+      <div class="ro-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--ro-s-3)">
+          <h2 style="font-size:1.05rem;margin:0"><span data-lang="ar">الطلبات خلال 14 يوماً</span><span data-lang="en" hidden>Requests over 14 days</span></h2>
+          <span class="ro-caption"><span data-lang="ar">المجموع 86</span><span data-lang="en" hidden>Total 86</span></span>
+        </div>
+        <div class="ro-chart-box"><canvas id="chart-area" role="img" aria-label="مخطط الطلبات خلال 14 يوماً، اتجاه تصاعدي عام من 3 إلى 9 طلبات يومياً"></canvas></div>
       </div>
-      <div class="ro-card ro-kpi-card">
-        <div class="ro-kpi-label"><span data-lang="ar">محادثات غير مقروءة</span><span data-lang="en" hidden>Unread conversations</span></div>
-        <div class="ro-kpi-value ro-tabular">0</div>
+      <div class="ro-card">
+        <h2 style="font-size:1.05rem;margin:0 0 var(--ro-s-3)"><span data-lang="ar">التوزيع حسب المجال</span><span data-lang="en" hidden>Split by domain</span></h2>
+        <div class="ro-chart-box" style="height:140px"><canvas id="chart-donut" role="img" aria-label="التوزيع: تجزئة 46 بالمئة، صفقات 24 بالمئة، جملة 18 بالمئة، وساطة 12 بالمئة"></canvas></div>
+        <ul class="ad-donut-legend">
+          <li><span class="sw" style="background:#52277C"></span><span data-lang="ar">تجزئة</span><span data-lang="en" hidden>Retail</span> <span class="ro-caption" style="margin-inline-start:auto">46%</span></li>
+          <li><span class="sw" style="background:#C9B2E3"></span><span data-lang="ar">صفقات</span><span data-lang="en" hidden>Deals</span> <span class="ro-caption" style="margin-inline-start:auto">24%</span></li>
+          <li><span class="sw" style="background:#B8863F"></span><span data-lang="ar">جملة</span><span data-lang="en" hidden>Wholesale</span> <span class="ro-caption" style="margin-inline-start:auto">18%</span></li>
+          <li><span class="sw" style="background:#1F3F57"></span><span data-lang="ar">وساطة</span><span data-lang="en" hidden>Brokerage</span> <span class="ro-caption" style="margin-inline-start:auto">12%</span></li>
+        </ul>
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:var(--ro-s-4);align-items:start">
+    <div class="ad-grid-2">
       <div class="ro-card">
-        <h2 style="font-size:1.1rem"><span data-lang="ar">بانتظار إجراءك</span><span data-lang="en" hidden>Awaiting your action</span></h2>
-        <div class="ro-table-scroll" tabindex="0" role="region" aria-label="جدول بانتظار إجراءك">
-        <table class="ro-table">
-          <thead><tr>
-            <th><span data-lang="ar">المرجع</span><span data-lang="en" hidden>Reference</span></th>
-            <th><span data-lang="ar">القطع</span><span data-lang="en" hidden>Items</span></th>
-            <th><span data-lang="ar">التاريخ</span><span data-lang="en" hidden>Date</span></th>
-            <th><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)"><span data-lang="ar">الحالة</span><span data-lang="en" hidden>Status</span></span></th>
-          </tr></thead>
-          <tbody>
-            <tr class="row-link" onclick="location.href='request-detail.html'">
-              <td class="ro-tabular" dir="ltr" style="text-align:end">RO-2026-7595</td>
-              <td><span data-lang="ar">قطعة واحدة</span><span data-lang="en" hidden>1 item</span></td>
-              <td class="ro-tabular">2026/10/18</td>
-              <td><span class="ro-chip ro-chip-info"><span data-icon="circle-dot" data-icon-size="12"></span><span data-lang="ar">جديد</span><span data-lang="en" hidden>New</span></span></td>
-            </tr>
-            <tr class="row-link" onclick="location.href='request-detail.html'">
-              <td class="ro-tabular" dir="ltr" style="text-align:end">RO-2026-2948</td>
-              <td><span data-lang="ar">قطعة واحدة</span><span data-lang="en" hidden>1 item</span></td>
-              <td class="ro-tabular">2026/10/18</td>
-              <td><span class="ro-chip ro-chip-info"><span data-icon="circle-dot" data-icon-size="12"></span><span data-lang="ar">جديد</span><span data-lang="en" hidden>New</span></span></td>
-            </tr>
-            <tr class="row-link" onclick="location.href='request-detail.html'">
-              <td class="ro-tabular" dir="ltr" style="text-align:end">RO-2026-4153</td>
-              <td><span data-lang="ar">قطعتان</span><span data-lang="en" hidden>2 items</span></td>
-              <td class="ro-tabular">2026/10/19</td>
-              <td><span class="ro-chip ro-chip-attention"><span data-icon="circle-alert" data-icon-size="12"></span><span data-lang="ar">متابعة</span><span data-lang="en" hidden>Follow-up</span></span></td>
-            </tr>
-          </tbody>
-        </table>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--ro-s-2)">
+          <h2 style="font-size:1.05rem;margin:0"><span data-lang="ar">بانتظار إجراءك</span><span data-lang="en" hidden>Awaiting your action</span></h2>
+          <a href="requests-list.html" class="ro-caption"><span data-lang="ar">عرض الكل</span><span data-lang="en" hidden>View all</span></a>
+        </div>
+        <div data-stagger>
+          <div class="ad-queue-row row-link" onclick="location.href='request-detail.html'" tabindex="0">
+            <span class="ro-chip ro-chip-info"><span data-icon="circle-dot" data-icon-size="12"></span><span data-lang="ar">جديد</span><span data-lang="en" hidden>New</span></span>
+            <span><bdi><span data-lang="ar">سارة أحمد</span><span data-lang="en" hidden>Sara Ahmed</span></bdi> — <span data-lang="ar">قانون مختار</span><span data-lang="en" hidden>Qanun Select</span></span>
+            <span class="ad-ref" dir="ltr">RO-2026-7595</span>
+            <span class="ro-age-badge"><span data-lang="ar">قبل 22د</span><span data-lang="en" hidden>22m ago</span></span>
+            <span class="ad-queue-actions">
+              <button title="فتح محادثة واتساب" aria-label="فتح محادثة واتساب"><span data-icon="inbox" data-icon-size="14"></span></button>
+              <button title="فتح الطلب" aria-label="فتح الطلب"><span data-icon="arrow-end" data-icon-size="14" style="transform:scaleX(-1)"></span></button>
+            </span>
+          </div>
+          <div class="ad-queue-row row-link" onclick="location.href='request-detail.html'" tabindex="0">
+            <span class="ro-chip ro-chip-info"><span data-icon="circle-dot" data-icon-size="12"></span><span data-lang="ar">جديد</span><span data-lang="en" hidden>New</span></span>
+            <span dir="ltr"><bdi>Karim N.</bdi> — <span data-lang="ar">عود الأتيليه الأول</span><span data-lang="en" hidden>Atelier Oud No. 1</span></span>
+            <span class="ad-ref" dir="ltr">RO-2026-2948</span>
+            <span class="ro-age-badge"><span data-lang="ar">قبل 40د</span><span data-lang="en" hidden>40m ago</span></span>
+            <span class="ad-queue-actions">
+              <button title="فتح محادثة واتساب" aria-label="فتح محادثة واتساب"><span data-icon="inbox" data-icon-size="14"></span></button>
+              <button title="فتح الطلب" aria-label="فتح الطلب"><span data-icon="arrow-end" data-icon-size="14" style="transform:scaleX(-1)"></span></button>
+            </span>
+          </div>
+          <div class="ad-queue-row row-link" onclick="location.href='request-detail.html'" tabindex="0">
+            <span class="ro-chip ro-chip-attention"><span data-icon="circle-alert" data-icon-size="12"></span><span data-lang="ar">متابعة</span><span data-lang="en" hidden>Follow-up</span></span>
+            <span><bdi><span data-lang="ar">ليلى حسن</span><span data-lang="en" hidden>Layla Hassan</span></bdi> — <span data-lang="ar">قطعتان</span><span data-lang="en" hidden>2 items</span></span>
+            <span class="ad-ref" dir="ltr">RO-2026-4153</span>
+            <span class="ro-age-badge is-overdue"><span data-lang="ar">قبل يومين</span><span data-lang="en" hidden>2 days ago</span></span>
+            <span class="ad-queue-actions">
+              <button title="فتح محادثة واتساب" aria-label="فتح محادثة واتساب"><span data-icon="inbox" data-icon-size="14"></span></button>
+              <button title="فتح الطلب" aria-label="فتح الطلب"><span data-icon="arrow-end" data-icon-size="14" style="transform:scaleX(-1)"></span></button>
+            </span>
+          </div>
         </div>
       </div>
+
       <div style="display:grid;gap:var(--ro-s-3)">
-        <a class="ro-card ro-card-link" href="whatsapp-inbox.html">
-          <h3 style="display:flex;align-items:center;gap:8px"><span class="ro-chip ro-chip-success" style="padding:4px"><span data-icon="circle-check" data-icon-size="14"></span></span><span data-lang="ar">واتساب متصل</span><span data-lang="en" hidden>WhatsApp connected</span></h3>
-          <p class="muted" style="font-size:.85rem;margin:0"><span data-lang="ar">آخر رسالة قبل 3 أيام</span><span data-lang="en" hidden>Last message 3 days ago</span></p>
-        </a>
+        <div class="ro-card ad-wa-card ro-inverse ro-panel-raised">
+          <div class="ro-grain"></div>
+          <h3 style="display:flex;align-items:center;gap:8px;position:relative"><span class="ro-pulse-dot"></span><span data-lang="ar">واتساب متصل</span><span data-lang="en" hidden>WhatsApp connected</span></h3>
+          <p class="ro-body-sm" style="color:var(--ro-ink-200);margin:0 0 var(--ro-s-3);position:relative"><span data-lang="ar">آخر رسالة قبل 3 أيام · +963 93 xxx xxxx</span><span data-lang="en" hidden>Last message 3 days ago · +963 93 xxx xxxx</span></p>
+          <div style="display:flex;gap:var(--ro-s-2);position:relative">
+            <a href="whatsapp-inbox.html" class="ro-btn ro-btn-sm ro-btn-secondary" style="border-color:rgba(244,231,216,.3);color:var(--ro-sand-100)"><span data-lang="ar">فتح الصندوق</span><span data-lang="en" hidden>Open inbox</span></a>
+            <button class="ro-btn ro-btn-sm ro-btn-quiet" style="color:var(--ro-ink-200)"><span data-lang="ar">إعادة ربط QR</span><span data-lang="en" hidden>Re-link QR</span></button>
+          </div>
+        </div>
+
         <div class="ro-card">
-          <h3 style="font-size:1rem"><span data-lang="ar">صحة المحتوى</span><span data-lang="en" hidden>Content health</span></h3>
-          <p class="muted" style="font-size:.85rem;margin:0"><span data-lang="ar">11 من 12 منتجاً منشوراً بصور كاملة</span><span data-lang="en" hidden>11 of 12 published products have full photos</span></p>
+          <h3 style="font-size:1rem;display:flex;align-items:center;gap:8px"><span data-icon="compass" data-icon-size="16" style="color:var(--ro-plum-900)"></span><span data-lang="ar">الوساطة</span><span data-lang="en" hidden>Brokerage</span></h3>
+          <div class="ad-broker-stat"><span class="ro-body-sm muted"><span data-lang="ar">بانتظار معاينة</span><span data-lang="en" hidden>Awaiting inspection</span></span><strong>2</strong></div>
+          <div class="ad-broker-stat"><span class="ro-body-sm muted"><span data-lang="ar">عروض بانتظار التاجر</span><span data-lang="en" hidden>Quotes awaiting trader</span></span><strong>1</strong></div>
+          <div class="ad-broker-stat"><span class="ro-body-sm muted"><span data-lang="ar">عمولة هذا الشهر (تقديري)</span><span data-lang="en" hidden>Commission this month (est.)</span></span><strong dir="ltr" class="ro-tabular">420 US$</strong></div>
+        </div>
+
+        <div class="ro-card">
+          <h3 style="font-size:1rem"><span data-lang="ar">نشاط حديث</span><span data-lang="en" hidden>Recent activity</span></h3>
+          <div data-stagger>
+            <div class="ad-feed-item"><span class="ad-avatar">س</span><div><p style="margin:0;font-size:.85rem"><bdi><span data-lang="ar">سارة أحمد</span><span data-lang="en" hidden>Sara Ahmed</span></bdi> <span class="muted"><span data-lang="ar">أرسلت رسالة جديدة</span><span data-lang="en" hidden>sent a new message</span></span></p><p class="ro-caption" style="margin:0"><span data-lang="ar">قبل 22 دقيقة</span><span data-lang="en" hidden>22 min ago</span></p></div></div>
+            <div class="ad-feed-item"><span class="ad-avatar" dir="ltr">K</span><div><p style="margin:0;font-size:.85rem"><bdi dir="ltr">Karim N.</bdi> <span class="muted"><span data-lang="ar">قدّم طلب تجزئة</span><span data-lang="en" hidden>submitted a retail request</span></span></p><p class="ro-caption" style="margin:0"><span data-lang="ar">قبل 40 دقيقة</span><span data-lang="en" hidden>40 min ago</span></p></div></div>
+            <div class="ad-feed-item"><span class="ad-avatar">ع</span><div><p style="margin:0;font-size:.85rem"><bdi><span data-lang="ar">عدنان درويش</span><span data-lang="en" hidden>Adnan Darwish</span></bdi> <span class="muted"><span data-lang="ar">وافق على عرض الوساطة</span><span data-lang="en" hidden>approved the brokerage quote</span></span></p><p class="ro-caption" style="margin:0"><span data-lang="ar">أمس</span><span data-lang="en" hidden>Yesterday</span></p></div></div>
+          </div>
         </div>
       </div>
     </div>
   </main>
 </div>
+
+<!-- quick-create floating menu -->
+<div class="ro-fab">
+  <div class="ro-fab-menu" id="fab-menu" hidden>
+    <button onclick="location.href='product-form.html'"><span data-icon="guitar" data-icon-size="16"></span><span data-lang="ar">منتج جديد</span><span data-lang="en" hidden>New product</span></button>
+    <button><span data-icon="package" data-icon-size="16"></span><span data-lang="ar">عرض جديد</span><span data-lang="en" hidden>New offer</span></button>
+    <button><span data-icon="users" data-icon-size="16"></span><span data-lang="ar">تاجر جديد</span><span data-lang="en" hidden>New trader</span></button>
+    <button onclick="location.href='brokerage-pending-decision.html'"><span data-icon="compass" data-icon-size="16"></span><span data-lang="ar">طلب وساطة</span><span data-lang="en" hidden>Brokerage request</span></button>
+  </div>
+  <button class="ro-fab-trigger" id="fab-trigger" aria-haspopup="true" aria-expanded="false" aria-label="إنشاء جديد"><span data-icon="plus" data-icon-size="24"></span></button>
+</div>
+
+<!-- command palette -->
+<dialog id="ro-command-palette" class="ro-dialog" style="padding:0;width:min(560px,92vw);align-self:flex-start;margin-top:12vh" aria-label="لوحة الأوامر">
+  <input type="text" class="ro-palette-input" placeholder="ابحث عن طلب، صفقة، منتج، تاجر، أو أمر..." autofocus />
+  <div class="ro-palette-list" role="listbox">
+    <button class="ro-palette-item" role="option" aria-selected="true" data-close-dialog onclick="location.href='requests-list.html'"><span data-icon="bag" data-icon-size="16"></span><span data-lang="ar">الذهاب إلى طلبات التجزئة</span><span data-lang="en" hidden>Go to retail requests</span></button>
+    <button class="ro-palette-item" role="option" aria-selected="false" data-close-dialog onclick="location.href='whatsapp-inbox.html'"><span data-icon="inbox" data-icon-size="16"></span><span data-lang="ar">فتح صندوق واتساب</span><span data-lang="en" hidden>Open WhatsApp inbox</span></button>
+    <button class="ro-palette-item" role="option" aria-selected="false" data-close-dialog onclick="location.href='brokerage-pending-decision.html'"><span data-icon="compass" data-icon-size="16"></span><span data-lang="ar">فتح الوساطة</span><span data-lang="en" hidden>Open brokerage</span></button>
+    <button class="ro-palette-item" role="option" aria-selected="false" data-close-dialog onclick="location.href='product-form.html'"><span data-icon="plus" data-icon-size="16"></span><span data-lang="ar">إضافة منتج جديد</span><span data-lang="en" hidden>Add a new product</span></button>
+  </div>
+</dialog>
+
 <script src="icons.js"></script>
 <script src="shared.js"></script>
 <script src="nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="motion-v3.js"></script>
+<script>
+  // ---- command palette keyboard shortcut + arrow nav ----
+  (function () {
+    var dlg = document.getElementById("ro-command-palette");
+    var input = dlg.querySelector("input");
+    var items = Array.from(dlg.querySelectorAll(".ro-palette-item"));
+    var active = 0;
+    function render() { items.forEach(function (it, i) { it.setAttribute("aria-selected", i === active ? "true" : "false"); }); }
+    document.addEventListener("keydown", function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); dlg.showModal(); input.focus(); active = 0; render(); }
+    });
+    dlg.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowDown") { e.preventDefault(); active = Math.min(items.length - 1, active + 1); render(); }
+      if (e.key === "ArrowUp") { e.preventDefault(); active = Math.max(0, active - 1); render(); }
+      if (e.key === "Enter") { e.preventDefault(); items[active] && items[active].click(); }
+    });
+  })();
+
+  // ---- quick-create FAB ----
+  (function () {
+    var trigger = document.getElementById("fab-trigger");
+    var menu = document.getElementById("fab-menu");
+    trigger.addEventListener("click", function () {
+      var open = menu.hidden;
+      menu.hidden = !open;
+      trigger.setAttribute("aria-expanded", String(open));
+      if (open && window.gsap && !roMotion.reduced()) {
+        gsap.fromTo(menu.children, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: .25, stagger: .04 });
+      }
+    });
+    document.addEventListener("click", function (e) {
+      if (!menu.hidden && !menu.contains(e.target) && e.target !== trigger && !trigger.contains(e.target)) {
+        menu.hidden = true; trigger.setAttribute("aria-expanded", "false");
+      }
+    });
+  })();
+
+  // ---- charts, themed from tokens-v3.css custom properties ----
+  window.addEventListener("load", function () {
+    if (!window.Chart) return;
+    var theme = roChartTheme(false);
+    var reduceAnim = roMotion.reduced();
+
+    var areaCtx = document.getElementById("chart-area").getContext("2d");
+    var grad = areaCtx.createLinearGradient(0, 0, 0, 160);
+    grad.addColorStop(0, theme.fillFrom); grad.addColorStop(1, theme.fillTo);
+    new Chart(areaCtx, {
+      type: "line",
+      data: {
+        labels: ["18/10","19/10","20/10","21/10","22/10","23/10","24/10","25/10","26/10","27/10","28/10","29/10","30/10","31/10"],
+        datasets: [{ data: [3,4,3,5,6,5,7,6,8,7,9,8,9,9], borderColor: theme.line, backgroundColor: grad, fill: true, tension: .4, pointRadius: 0, borderWidth: 2 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, animation: reduceAnim ? false : { duration: 900, easing: "easeOutCubic" },
+        plugins: { legend: { display: false }, tooltip: { rtl: true, titleFont: { family: theme.font }, bodyFont: { family: theme.font } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { display: false } },
+          y: { grid: { color: theme.grid }, ticks: { color: theme.label, font: { family: theme.font, size: 10 } }, beginAtZero: true }
+        }
+      }
+    });
+
+    var donutCtx = document.getElementById("chart-donut").getContext("2d");
+    new Chart(donutCtx, {
+      type: "doughnut",
+      data: { labels: ["تجزئة","صفقات","جملة","وساطة"], datasets: [{ data: [46,24,18,12], backgroundColor: ["#52277C","#C9B2E3","#B8863F","#1F3F57"], borderWidth: 0 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: "68%",
+        animation: reduceAnim ? false : { duration: 900, easing: "easeOutCubic" },
+        plugins: { legend: { display: false }, tooltip: { rtl: true, titleFont: { family: theme.font }, bodyFont: { family: theme.font } } }
+      }
+    });
+  });
+</script>
 </body>
 </html>
