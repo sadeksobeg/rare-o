@@ -76,7 +76,7 @@
 .ro-count { font-variant-numeric: tabular-nums; }
 
 /* ---- chart container ---- */
-.ro-chart-box { position: relative; height: 180px; }
+.ro-chart-box { position: relative; height: 180px; min-width: 0; }
 .ro-chart-box canvas { width: 100% !important; height: 100% !important; }
 
 /* ---- trend delta ---- */
