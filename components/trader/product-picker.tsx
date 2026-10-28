@@ -26,6 +26,7 @@ export function ProductPicker({
   labels: t,
   locale,
   className,
+  variant = "qty",
 }: {
   products: PickerProduct[];
   qtyById: Record<string, number>;
@@ -33,6 +34,8 @@ export function ProductPicker({
   labels: TraderDict;
   locale: Locale;
   className?: string;
+  /** `single` picks one catalog piece (deal wizard); `qty` is wholesale. */
+  variant?: "qty" | "single";
 }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string>("all");
@@ -99,6 +102,9 @@ export function ProductPicker({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t.wsPickerSearch}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") e.preventDefault();
+          }}
           className="min-h-11 w-full rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-paper px-3 py-2 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
         />
       </label>
@@ -154,6 +160,14 @@ export function ProductPicker({
                   className="min-h-11 w-full border border-ro-line text-sm hover:bg-ro-sunken"
                 >
                   {t.wsAddPiece}
+                </button>
+              ) : variant === "single" ? (
+                <button
+                  type="button"
+                  onClick={() => setQty(p.id, 0)}
+                  className="min-h-11 w-full border border-[var(--ro-plum-900)] bg-[var(--ro-plum-100)] text-sm font-semibold text-[var(--ro-plum-900)]"
+                >
+                  {t.wsRemovePiece}
                 </button>
               ) : (
                 <div className="space-y-1">

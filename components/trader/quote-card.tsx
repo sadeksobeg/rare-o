@@ -1,3 +1,4 @@
+import { FileText } from "lucide-react";
 import { formatMoney } from "@/lib/ui/trader-labels";
 
 export type QuoteCardLine = {
@@ -37,8 +38,13 @@ export function QuoteCard({
 }) {
   const priced = lines.filter((l) => l.quotedUnitPrice != null);
   return (
-    <div className="space-y-4 border border-[var(--ro-amber-100)] bg-ro-surface p-5 text-sm">
-      <h2 className="font-display text-lg font-semibold">{title}</h2>
+    <div className="ro-portal-card space-y-4 border border-[color-mix(in_srgb,var(--ro-amber-600)_28%,transparent)] p-5 text-sm">
+      <h2 className="ro-portal-section-title flex items-center gap-2">
+        <span className="ro-portal-icon-well size-8 [&>svg]:size-4" aria-hidden>
+          <FileText className="size-4" strokeWidth={1.5} />
+        </span>
+        {title}
+      </h2>
       <dl className="grid gap-3 sm:grid-cols-2">
         {quotedAt ? (
           <div>

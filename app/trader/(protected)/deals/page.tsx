@@ -1,12 +1,23 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { Plus } from "lucide-react";
+import { Handshake, Plus } from "lucide-react";
+import {
+  DataTable,
+  DataTableHead,
+  RowHit,
+  Td,
+  Th,
+  Tr,
+} from "@/components/admin/data-table";
+import { PressRipple } from "@/components/motion/press-ripple";
+import { PressLink } from "@/components/portal/press-link";
 import { DealCard } from "@/components/trader/deal-card";
 import { TraderPageHeader } from "@/components/trader/page-header";
 import { ButtonLink } from "@/components/ui/button";
 import { ListFilterTabs } from "@/components/ui/list-filter-tabs";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusChip } from "@/components/ui/status-chip";
+import { isFresh } from "@/lib/ui/fresh";
 import { requireTraderSession } from "@/lib/auth/trader-session";
 import { isOpenDealStatus, isDealStatus } from "@/lib/deals/constants";
 import { listDealsForTrader } from "@/lib/deals/service";
@@ -64,9 +75,10 @@ export default async function TraderDealsPage({
   });
 
   return (
-    <section className="ro-portal-stagger relative space-y-6 p-5 pb-20 sm:p-8 md:p-10 md:pb-10">
+    <section className="ro-portal-stagger relative space-y-6 pb-20 md:pb-0">
       <TraderPageHeader
         title={t.dealsTitle}
+        icon={<Handshake className="size-5" strokeWidth={2} />}
         action={
           <ButtonLink
             href="/trader/deals/new"
@@ -117,34 +129,35 @@ export default async function TraderDealsPage({
                     statusLabel={statusLabel}
                     waitingLabel={waiting ? t.waitingOnYou : null}
                     meta={`${kindLabel} · ${fmt(t.entriesCount, { n: d._count.entries })}`}
+                    className={isFresh(d.updatedAt) ? "ro-s10-flash" : undefined}
                   />
                 </li>
               )
             )}
           </ul>
 
-          <div className="hidden overflow-x-auto border border-ro-line md:block">
-            <table className="min-w-full text-start text-sm">
-              <thead className="border-b border-ro-line bg-ro-surface">
-                <tr>
-                  <th className="p-3 text-start font-medium">
-                    {t.colReference}
-                  </th>
-                  <th className="p-3 text-start font-medium">{t.colTitle}</th>
-                  <th className="p-3 text-start font-medium">{t.colKind}</th>
-                  <th className="p-3 text-start font-medium">{t.colStatus}</th>
-                  <th className="p-3 text-start font-medium">{t.colEntries}</th>
-                  <th className="p-3" />
-                </tr>
-              </thead>
+          <div className="hidden md:block">
+            <DataTable>
+              <DataTableHead>
+                <Th>{t.colReference}</Th>
+                <Th>{t.colTitle}</Th>
+                <Th>{t.colKind}</Th>
+                <Th>{t.colStatus}</Th>
+                <Th>{t.colEntries}</Th>
+                <Th />
+              </DataTableHead>
               <tbody>
                 {filtered.map(
                   ({ deal: d, tone, statusLabel, kindLabel, waiting }) => (
-                    <tr key={d.id} className="border-b border-ro-line">
-                      <td className="p-3">{d.reference}</td>
-                      <td className="p-3">{d.title}</td>
-                      <td className="p-3">{kindLabel}</td>
-                      <td className="p-3">
+                    <Tr key={d.id} flash={isFresh(d.updatedAt)}>
+                      <Td>
+                        <RowHit href={`/trader/deals/${d.id}`}>
+                          {d.reference}
+                        </RowHit>
+                      </Td>
+                      <Td>{d.title}</Td>
+                      <Td>{kindLabel}</Td>
+                      <Td>
                         <span className="flex flex-wrap items-center gap-2">
                           <StatusChip
                             tone={tone}
@@ -159,32 +172,34 @@ export default async function TraderDealsPage({
                             />
                           ) : null}
                         </span>
-                      </td>
-                      <td className="p-3">{d._count.entries}</td>
-                      <td className="p-3">
-                        <Link
+                      </Td>
+                      <Td className="tabular-nums">{d._count.entries}</Td>
+                      <Td>
+                        <PressLink
                           href={`/trader/deals/${d.id}`}
-                          className="text-ro-plum hover:underline"
+                          className="text-sm font-semibold text-ro-plum hover:underline"
                         >
                           {t.openRecord}
-                        </Link>
-                      </td>
-                    </tr>
+                        </PressLink>
+                      </Td>
+                    </Tr>
                   )
                 )}
               </tbody>
-            </table>
+            </DataTable>
           </div>
         </>
       )}
 
-      <Link
-        href="/trader/deals/new"
-        aria-label={t.newDeal}
-        className="fixed bottom-20 end-4 z-30 inline-flex size-14 items-center justify-center rounded-full bg-[linear-gradient(165deg,var(--ro-plum-700),var(--ro-plum-900))] text-[var(--ro-sand-100)] shadow-[0_12px_32px_-8px_color-mix(in_srgb,var(--ro-plum-900)_70%,transparent)] transition-transform duration-[var(--ro-dur-fast)] hover:scale-105 active:scale-95 md:hidden"
-      >
-        <Plus className="size-6" aria-hidden />
-      </Link>
+      <PressRipple className="fixed bottom-20 end-4 z-30 rounded-full md:hidden">
+        <Link
+          href="/trader/deals/new"
+          aria-label={t.newDeal}
+          className="inline-flex size-14 items-center justify-center rounded-full bg-[linear-gradient(165deg,var(--ro-plum-700),var(--ro-plum-900))] text-[var(--ro-sand-100)] shadow-[0_12px_32px_-8px_color-mix(in_srgb,var(--ro-plum-900)_70%,transparent)] transition-transform duration-[var(--ro-dur-fast)] hover:scale-105 active:scale-95"
+        >
+          <Plus className="size-6" aria-hidden />
+        </Link>
+      </PressRipple>
     </section>
   );
 }

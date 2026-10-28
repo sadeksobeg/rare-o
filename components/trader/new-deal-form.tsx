@@ -2,10 +2,15 @@
 
 import { traderCreateDealAction } from "@/app/deal-actions";
 import type { ActionResult } from "@/app/actions";
+import {
+  ProductPicker,
+  type PickerProduct,
+} from "@/components/trader/product-picker";
 import { Banner } from "@/components/ui/banner";
+import { Button } from "@/components/ui/button";
 import { Wizard } from "@/components/ui/wizard";
 import type { Locale } from "@/lib/i18n/config";
-import { fmt, type TraderDict } from "@/lib/ui/trader-labels";
+import { fmt, traderActionMessage, type TraderDict } from "@/lib/ui/trader-labels";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 
@@ -56,10 +61,12 @@ export function NewDealForm({
   products,
   labels: t,
   locale,
+  initialTitle = "",
 }: {
-  products: Array<{ id: string; nameEn: string; nameAr: string; slug: string }>;
+  products: Array<PickerProduct & { currency?: string | null }>;
   labels: TraderDict;
   locale: Locale;
+  initialTitle?: string;
 }) {
   const router = useRouter();
   const [state, action, pending] = useActionState(
@@ -100,12 +107,14 @@ export function NewDealForm({
       if (raw) {
         const parsed = JSON.parse(raw) as Partial<Draft>;
         setDraft({ ...emptyDraft(), ...parsed, step: parsed.step ?? 0 });
+      } else if (initialTitle.trim()) {
+        setDraft({ ...emptyDraft(), title: initialTitle.trim().slice(0, 200) });
       }
     } catch {
       /* ignore */
     }
     setHydrated(true);
-  }, []);
+  }, [initialTitle]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -221,13 +230,14 @@ export function NewDealForm({
         hideNext={draft.step === steps.length - 1}
         footer={
           draft.step === steps.length - 1 ? (
-            <button
+            <Button
               type="submit"
+              variant="primary"
+              size="md"
               disabled={pending || navigating}
-              className="min-h-11 bg-ro-purple px-5 text-sm text-ro-ivory disabled:opacity-60"
             >
               {pending || navigating ? t.submitting : t.submitProposal}
-            </button>
+            </Button>
           ) : null
         }
       >
@@ -261,27 +271,27 @@ export function NewDealForm({
               />
             </label>
             {draft.dealKind === "catalog" ? (
-              <label className="block space-y-1.5 text-sm">
-                <span className="font-medium">{t.productLabel}</span>
-                <select
-                  value={draft.productId}
-                  onChange={(e) => patch({ productId: e.target.value })}
-                  className={control}
-                >
-                  <option value="">{t.productPlaceholder}</option>
-                  {products.map((p) => {
-                    const name =
-                      locale === "ar"
-                        ? p.nameAr || p.nameEn
-                        : p.nameEn || p.nameAr;
-                    return (
-                      <option key={p.id} value={p.id}>
-                        {name} ({p.slug})
-                      </option>
-                    );
-                  })}
-                </select>
-              </label>
+              <div className="space-y-1.5">
+                <p className="text-sm font-medium">{t.productLabel}</p>
+                <ProductPicker
+                  variant="single"
+                  products={products}
+                  qtyById={draft.productId ? { [draft.productId]: 1 } : {}}
+                  onQtyChange={(id, qty) => {
+                    if (qty < 1) {
+                      patch({ productId: "" });
+                      return;
+                    }
+                    const p = products.find((x) => x.id === id);
+                    patch({
+                      productId: id,
+                      currency: p?.currency || draft.currency,
+                    });
+                  }}
+                  labels={t}
+                  locale={locale}
+                />
+              </div>
             ) : (
               <p className="text-sm text-ro-muted">{t.nonCatalogNote}</p>
             )}
@@ -316,7 +326,11 @@ export function NewDealForm({
               <label className="block space-y-1.5 text-sm">
                 <span className="font-medium">{t.currencyLabel}</span>
                 <input
-                  placeholder="USD"
+                  placeholder={
+                    products.find((p) => p.id === draft.productId)?.currency ||
+                    products.find((p) => p.currency)?.currency ||
+                    undefined
+                  }
                   dir="ltr"
                   value={draft.currency}
                   onChange={(e) => patch({ currency: e.target.value })}
@@ -401,7 +415,7 @@ export function NewDealForm({
       ) : null}
       {state && !state.ok ? (
         <Banner tone="danger" alert>
-          {state.error}
+          {traderActionMessage(t, state.error)}
         </Banner>
       ) : null}
     </form>

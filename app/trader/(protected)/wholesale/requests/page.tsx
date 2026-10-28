@@ -1,12 +1,23 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { Plus } from "lucide-react";
+import { Package, Plus } from "lucide-react";
+import {
+  DataTable,
+  DataTableHead,
+  RowHit,
+  Td,
+  Th,
+  Tr,
+} from "@/components/admin/data-table";
+import { PressRipple } from "@/components/motion/press-ripple";
+import { PressLink } from "@/components/portal/press-link";
 import { DealCard } from "@/components/trader/deal-card";
 import { TraderPageHeader } from "@/components/trader/page-header";
 import { ButtonLink } from "@/components/ui/button";
 import { ListFilterTabs } from "@/components/ui/list-filter-tabs";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusChip } from "@/components/ui/status-chip";
+import { isFresh } from "@/lib/ui/fresh";
 import { requireTraderSession } from "@/lib/auth/trader-session";
 import { isOpenWholesaleStatus, isWholesaleStatus } from "@/lib/wholesale/constants";
 import { getRequestDictionary } from "@/lib/i18n/server";
@@ -63,9 +74,10 @@ export default async function TraderWholesaleRequestsPage({
   });
 
   return (
-    <section className="ro-portal-stagger relative space-y-6 p-5 pb-20 sm:p-8 md:p-10 md:pb-10">
+    <section className="ro-portal-stagger relative space-y-6 pb-20 md:pb-0">
       <TraderPageHeader
         title={t.wsMyRequests}
+        icon={<Package className="size-5" strokeWidth={2} />}
         action={
           <ButtonLink
             href="/trader/wholesale"
@@ -110,31 +122,32 @@ export default async function TraderWholesaleRequestsPage({
                   statusLabel={statusLabel}
                   waitingLabel={waiting ? t.waitingOnYou : null}
                   meta={`${modeLabel} · ${fmt(t.wsLinesCount, { n: r._count.lines })}`}
+                  className={isFresh(r.updatedAt) ? "ro-s10-flash" : undefined}
                 />
               </li>
             ))}
           </ul>
 
-          <div className="hidden overflow-x-auto border border-ro-line md:block">
-            <table className="min-w-full text-start text-sm">
-              <thead className="border-b border-ro-line bg-ro-surface">
-                <tr>
-                  <th className="p-3 text-start font-medium">
-                    {t.wsColReference}
-                  </th>
-                  <th className="p-3 text-start font-medium">{t.wsColMode}</th>
-                  <th className="p-3 text-start font-medium">{t.wsColStatus}</th>
-                  <th className="p-3 text-start font-medium">{t.wsColLines}</th>
-                  <th className="p-3" />
-                </tr>
-              </thead>
+          <div className="hidden md:block">
+            <DataTable>
+              <DataTableHead>
+                <Th>{t.wsColReference}</Th>
+                <Th>{t.wsColMode}</Th>
+                <Th>{t.wsColStatus}</Th>
+                <Th>{t.wsColLines}</Th>
+                <Th />
+              </DataTableHead>
               <tbody>
                 {filtered.map(
                   ({ r, tone, statusLabel, modeLabel, waiting }) => (
-                    <tr key={r.id} className="border-b border-ro-line">
-                      <td className="p-3">{r.reference}</td>
-                      <td className="p-3">{modeLabel}</td>
-                      <td className="p-3">
+                    <Tr key={r.id} flash={isFresh(r.updatedAt)}>
+                      <Td>
+                        <RowHit href={`/trader/wholesale/${r.id}`}>
+                          {r.reference}
+                        </RowHit>
+                      </Td>
+                      <Td>{modeLabel}</Td>
+                      <Td>
                         <span className="flex flex-wrap items-center gap-2">
                           <StatusChip
                             tone={tone}
@@ -149,32 +162,34 @@ export default async function TraderWholesaleRequestsPage({
                             />
                           ) : null}
                         </span>
-                      </td>
-                      <td className="p-3">{r._count.lines}</td>
-                      <td className="p-3">
-                        <Link
+                      </Td>
+                      <Td className="tabular-nums">{r._count.lines}</Td>
+                      <Td>
+                        <PressLink
                           href={`/trader/wholesale/${r.id}`}
-                          className="text-ro-plum hover:underline"
+                          className="text-sm font-semibold text-ro-plum hover:underline"
                         >
                           {t.openRecord}
-                        </Link>
-                      </td>
-                    </tr>
+                        </PressLink>
+                      </Td>
+                    </Tr>
                   )
                 )}
               </tbody>
-            </table>
+            </DataTable>
           </div>
         </>
       )}
 
-      <Link
-        href="/trader/wholesale"
-        aria-label={t.wsNewRequest}
-        className="fixed bottom-20 end-4 z-30 inline-flex size-14 items-center justify-center rounded-full bg-[linear-gradient(165deg,var(--ro-plum-700),var(--ro-plum-900))] text-[var(--ro-sand-100)] shadow-[0_12px_32px_-8px_color-mix(in_srgb,var(--ro-plum-900)_70%,transparent)] transition-transform duration-[var(--ro-dur-fast)] hover:scale-105 active:scale-95 md:hidden"
-      >
-        <Plus className="size-6" aria-hidden />
-      </Link>
+      <PressRipple className="fixed bottom-20 end-4 z-30 rounded-full md:hidden">
+        <Link
+          href="/trader/wholesale"
+          aria-label={t.wsNewRequest}
+          className="inline-flex size-14 items-center justify-center rounded-full bg-[linear-gradient(165deg,var(--ro-plum-700),var(--ro-plum-900))] text-[var(--ro-sand-100)] shadow-[0_12px_32px_-8px_color-mix(in_srgb,var(--ro-plum-900)_70%,transparent)] transition-transform duration-[var(--ro-dur-fast)] hover:scale-105 active:scale-95"
+        >
+          <Plus className="size-6" aria-hidden />
+        </Link>
+      </PressRipple>
     </section>
   );
 }

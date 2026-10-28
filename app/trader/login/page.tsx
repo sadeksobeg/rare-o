@@ -9,8 +9,13 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function TraderLoginPage() {
+export default async function TraderLoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ returnTo?: string }>;
+}) {
   const { locale, dict } = await getRequestDictionary();
+  const { returnTo } = await searchParams;
   const accountRequestHref =
     whatsAppGreetingLink(
       locale === "ar"
@@ -23,34 +28,32 @@ export default async function TraderLoginPage() {
       action={traderLoginAction}
       title={dict.auth.traderTitle}
       brand={dict.brand}
-      hint={
-        <>
-          <p>{dict.auth.traderHint}</p>
-          <p className="mt-2">
-            <a
-              href={accountRequestHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-[var(--ro-plum-900)] underline-offset-2 hover:underline"
-            >
-              {dict.trader.accountRequestHelp}
-            </a>
-          </p>
-        </>
+      hint={dict.auth.traderHint}
+      footer={
+        <a
+          href={accountRequestHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-medium text-[var(--ro-sand-100)] underline-offset-4 hover:underline"
+        >
+          {dict.trader.accountRequestHelp}
+        </a>
       }
       emailLabel={dict.common.email}
       passwordLabel={dict.common.password}
       submitLabel={dict.common.signIn}
       showPasswordLabel={dict.auth.showPassword}
       hidePasswordLabel={dict.auth.hidePassword}
+      loginErrorLabel={dict.auth.loginError}
+      loginLockedLabel={dict.auth.loginLocked}
+      returnTo={returnTo}
       inverse
-      localeSlot={
-        <AdminLocaleToggle
-          locale={locale}
-          label={dict.common.language}
-          tone="on-dark"
-        />
-      }
-    />
+    >
+      <AdminLocaleToggle
+        locale={locale}
+        label={dict.common.language}
+        tone="on-dark"
+      />
+    </LoginForm>
   );
 }

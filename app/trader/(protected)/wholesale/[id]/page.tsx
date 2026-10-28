@@ -1,7 +1,9 @@
 import { QuoteCard } from "@/components/trader/quote-card";
+import { TraderPageHeader } from "@/components/trader/page-header";
 import { TraderWholesaleActions } from "@/components/trader/wholesale-actions";
 import { Banner } from "@/components/ui/banner";
 import { StatusChip } from "@/components/ui/status-chip";
+import { StatusStepper } from "@/components/ui/status-stepper";
 import { requireTraderSession } from "@/lib/auth/trader-session";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { getStatusMeta } from "@/lib/ui/status";
@@ -11,6 +13,7 @@ import {
   wholesaleStatusLabel,
 } from "@/lib/ui/trader-labels";
 import { getWholesaleRequestForTrader } from "@/lib/wholesale/service";
+import { Package } from "lucide-react";
 import { notFound } from "next/navigation";
 
 export default async function TraderWholesaleDetailPage({
@@ -38,22 +41,24 @@ export default async function TraderWholesaleDetailPage({
   const hasQuote = Boolean(request.quoteMessage || request.quotedAt);
 
   return (
-    <section className="space-y-8">
-      <div className="space-y-2">
-        <p className="text-sm text-ro-muted">{request.reference}</p>
-        <h1 className="font-display text-3xl font-semibold tracking-tight">
-          {t.wsDetailTitle}
-        </h1>
-        <p className="flex flex-wrap items-center gap-2 text-sm">
+    <section className="ro-portal-stagger space-y-8">
+      <TraderPageHeader
+        title={t.wsDetailTitle}
+        description={request.reference}
+        icon={<Package className="size-5" strokeWidth={2} />}
+        backHref="/trader/wholesale/requests"
+        backLabel={t.wsMyRequests}
+        action={
           <StatusChip
             tone={meta.tone}
             label={wholesaleStatusLabel(t, request.status)}
           />
-          <span className="text-ro-muted">
-            {t.requestMode[request.requestMode] ?? request.requestMode}
-          </span>
-        </p>
-      </div>
+        }
+      />
+      <p className="text-sm font-semibold text-ro-muted">
+        {t.requestMode[request.requestMode] ?? request.requestMode}
+      </p>
+      <StatusStepper domain="wholesale" current={request.status} dict={dict} />
 
       {meta.nextActor === "trader" ? (
         <Banner tone="attention">{t.wsQuoteBanner}</Banner>
@@ -103,7 +108,7 @@ export default async function TraderWholesaleDetailPage({
           {request.carrier ? (
             <p>
               <span className="text-ro-muted">{dict.adminUi.form.carrier}: </span>
-              {request.carrier}
+              <span dir="ltr">{request.carrier}</span>
             </p>
           ) : null}
           {request.trackingReference ? (

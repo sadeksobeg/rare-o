@@ -1,13 +1,13 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { Bell } from "lucide-react";
+import { Bell, LogOut, UserRound } from "lucide-react";
 import { traderLogoutAction } from "@/app/deal-actions";
 import { AdminLocaleToggle } from "@/components/admin/locale-toggle";
-import { BrandWallpaper, Emblem } from "@/components/brand";
-import { PortalRouteProgress } from "@/components/portal/route-progress";
+import { Emblem } from "@/components/brand";
+import { ChromeBadge } from "@/components/portal/chrome-badge";
+import { PortalRouteProgressMount } from "@/components/portal/route-progress-mount";
 import { OfflineBanner } from "@/components/system/offline-banner";
 import { AppToast } from "@/components/system/app-toast";
-import { Button } from "@/components/ui/button";
 import {
   TraderBottomTabs,
   TraderDesktopNav,
@@ -16,6 +16,7 @@ import {
 import { getTraderSession } from "@/lib/auth/trader-session";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { countUnreadTraderNotifications } from "@/lib/trader/notifications";
+import { getTraderWaitingCounts } from "@/lib/trader/waiting-counts";
 import { redirect } from "next/navigation";
 
 export async function TraderShell({ children }: { children: React.ReactNode }) {
@@ -23,7 +24,10 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
   if (!session) redirect("/trader/login");
 
   const { locale, dict } = await getRequestDictionary();
-  const unreadNotifications = await countUnreadTraderNotifications(session.sub);
+  const [unreadNotifications, waiting] = await Promise.all([
+    countUnreadTraderNotifications(session.sub),
+    getTraderWaitingCounts(session.sub),
+  ]);
 
   const tabs: TraderTab[] = [
     {
@@ -37,12 +41,14 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
       label: dict.trader.deals,
       match: "prefix",
       icon: "deals",
+      waiting: waiting.deals,
     },
     {
       href: "/trader/wholesale",
       label: dict.trader.wholesale,
       match: "prefix",
       icon: "wholesale",
+      waiting: waiting.wholesale,
     },
     {
       href: "/trader/offers",
@@ -61,14 +67,9 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
   return (
     <AppToast dismissLabel={dict.common.toastDismiss}>
       <div className="ro-portal ro-portal-trader relative min-h-screen overflow-x-clip text-ro-ink">
-        <BrandWallpaper
-          tone="cream"
-          patternId="ro-trader-wallpaper"
-          className="z-0 opacity-[0.72]"
-        />
         <div className="ro-portal-atmosphere" aria-hidden />
         <Suspense fallback={null}>
-          <PortalRouteProgress />
+          <PortalRouteProgressMount />
         </Suspense>
         <div className="relative z-10">
           <OfflineBanner />
@@ -82,46 +83,53 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
                   variant="small"
                   className="size-8 brightness-110 transition-transform duration-[var(--ro-dur-fast)] group-hover:scale-105"
                 />
-                <span className="font-display text-sm font-semibold tracking-[0.24em] text-[var(--ro-sand-50)]">
+                <span className="font-display text-sm font-bold tracking-[0.24em] text-[var(--ro-sand-50)]">
                   RARE OUD
-                  <span className="mt-0.5 block text-[0.65rem] tracking-[0.18em] text-[var(--ro-plum-300)]">
+                  <span className="mt-0.5 block text-[0.65rem] font-semibold tracking-[0.18em] text-[var(--ro-plum-300)]">
                     {dict.trader.brand}
                   </span>
                 </span>
               </Link>
               <TraderDesktopNav tabs={tabs} tone="on-dark" />
-              <div className="flex items-center gap-2.5 text-sm">
+              <div className="flex items-center gap-1.5 text-sm sm:gap-2.5">
                 <Link
                   href="/trader/notifications"
-                  className="relative inline-flex size-10 items-center justify-center rounded-[var(--ro-r-sm)] text-[var(--ro-sand-100)] transition-colors hover:bg-[color-mix(in_srgb,var(--ro-sand-100)_12%,transparent)]"
+                  className="ro-icon-btn relative size-10 min-h-0 px-0"
+                  data-tone="on-dark"
                   aria-label={dict.trader.notifications}
                 >
-                  <Bell className="size-5" strokeWidth={1.75} aria-hidden />
-                  {unreadNotifications > 0 ? (
-                    <span className="absolute end-1.5 top-1.5 flex min-w-[1.1rem] items-center justify-center rounded-full bg-[var(--ro-plum-300)] px-1 text-[0.65rem] font-bold text-[var(--ro-ink-950)]">
-                      {unreadNotifications > 9 ? "9+" : unreadNotifications}
-                    </span>
-                  ) : null}
+                  <Bell className="size-5" strokeWidth={1.5} aria-hidden />
+                  <ChromeBadge
+                    value={unreadNotifications}
+                    className="absolute end-1 top-1 flex min-w-[1.1rem] items-center justify-center rounded-full bg-[var(--ro-plum-300)] px-1 text-[0.65rem] font-bold text-[var(--ro-ink-950)]"
+                  />
                 </Link>
                 <AdminLocaleToggle
                   locale={locale}
                   label={dict.common.language}
                   tone="on-dark"
                 />
-                <span className="hidden max-w-[9rem] truncate text-[color-mix(in_srgb,var(--ro-sand-100)_70%,transparent)] lg:inline">
+                <span className="hidden max-w-[9rem] items-center gap-1.5 truncate font-semibold text-[color-mix(in_srgb,var(--ro-sand-100)_78%,transparent)] lg:inline-flex">
+                  <UserRound className="size-3.5 shrink-0 opacity-80" aria-hidden />
                   {session.displayName}
                 </span>
                 <form action={traderLogoutAction}>
-                  <Button type="submit" variant="inverse-secondary" size="sm">
-                    {dict.trader.logout}
-                  </Button>
+                  <button
+                    type="submit"
+                    className="ro-icon-btn"
+                    data-tone="on-dark"
+                    aria-label={dict.trader.logout}
+                  >
+                    <LogOut className="size-4" strokeWidth={1.5} aria-hidden />
+                    <span className="hidden sm:inline">{dict.trader.logout}</span>
+                  </button>
                 </form>
               </div>
             </div>
           </header>
           <main
             id="main-content"
-            className="ro-portal-main-enter mx-auto max-w-[1180px] px-4 py-6 pb-28 sm:px-6 md:pb-12"
+            className="ro-portal-main-enter mx-auto max-w-[1180px] px-4 py-6 pb-28 sm:px-6 md:pb-10"
           >
             {children}
           </main>
@@ -131,3 +139,5 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
     </AppToast>
   );
 }
+
+export default TraderShell;

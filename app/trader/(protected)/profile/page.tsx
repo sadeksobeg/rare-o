@@ -60,22 +60,25 @@ export default async function TraderProfilePage() {
 
   const statusLabel = t.accountStatus[trader.status] ?? trader.status;
   const statusTone = trader.status === "active" ? "success" : "closed";
-  const initial = (trader.displayName || "?").trim().charAt(0).toUpperCase();
   const selectedSlugs = trader.interestCategorySlugs
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
 
   return (
-    <section className="ro-portal-stagger space-y-8 p-5 sm:p-8 md:p-10">
-      <TraderPageHeader title={t.profileTitle} description={t.profileNote} />
+    <section className="ro-portal-stagger space-y-8">
+      <TraderPageHeader
+        title={t.profileTitle}
+        description={t.profileNote}
+        icon={<UserRound className="size-5" strokeWidth={2} />}
+      />
       <div className="ro-portal-card overflow-hidden border">
         <div className="flex flex-wrap items-center gap-5 border-b border-[color-mix(in_srgb,var(--ro-plum-900)_14%,transparent)] bg-[linear-gradient(135deg,var(--ro-plum-900)_0%,var(--ro-ink-950)_100%)] px-5 py-7 text-[var(--ro-sand-100)] sm:px-6">
           <span
             aria-hidden
-            className="flex size-[4.5rem] items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--ro-sand-100)_16%,transparent)] font-display text-3xl font-semibold text-[var(--ro-sand-50)] shadow-[0_0_0_1px_color-mix(in_srgb,var(--ro-sand-100)_28%,transparent),0_12px_40px_-16px_rgba(0,0,0,0.55)]"
+            className="flex size-[4.5rem] items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--ro-sand-100)_16%,transparent)] text-[var(--ro-sand-50)] shadow-[0_0_0_1px_color-mix(in_srgb,var(--ro-sand-100)_28%,transparent),0_12px_40px_-16px_rgba(0,0,0,0.55)]"
           >
-            {initial}
+            <UserRound className="size-8" strokeWidth={1.5} />
           </span>
           <div className="min-w-0 flex-1 space-y-2">
             <p className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">

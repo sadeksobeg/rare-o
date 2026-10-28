@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Bell } from "lucide-react";
 import {
   traderMarkAllNotificationsReadAction,
   traderMarkNotificationReadAction,
@@ -24,10 +25,11 @@ export default async function TraderNotificationsPage() {
   const unread = items.filter((n) => !n.readAt).length;
 
   return (
-    <section className="space-y-8 p-5 sm:p-8 md:p-10">
+    <section className="space-y-8">
       <TraderPageHeader
         title={t.notificationsTitle}
         description={t.notificationsLead}
+        icon={<Bell className="size-5" strokeWidth={2} />}
         action={
           unread > 0 ? (
             <form action={traderMarkAllNotificationsReadAction}>
@@ -58,11 +60,19 @@ export default async function TraderNotificationsPage() {
                   className={cn(
                     "flex flex-wrap items-start gap-3 px-4 py-3.5",
                     unreadRow &&
-                      "bg-[color-mix(in_srgb,var(--ro-plum-50)_55%,transparent)]"
+                      "ro-s10-flash bg-[color-mix(in_srgb,var(--ro-plum-50)_70%,transparent)]"
                   )}
                 >
                   <div className="min-w-0 flex-1 space-y-1">
-                    <p className="font-semibold text-ro-ink">{title}</p>
+                    <p
+                      className={
+                        unreadRow
+                          ? "font-bold text-ro-ink"
+                          : "font-semibold text-ro-ink"
+                      }
+                    >
+                      {title}
+                    </p>
                     {body ? (
                       <p className="text-sm text-ro-muted">{body}</p>
                     ) : null}

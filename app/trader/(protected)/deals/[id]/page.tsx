@@ -1,6 +1,8 @@
 import { NegotiationThread } from "@/components/deals/negotiation-thread";
+import { TraderPageHeader } from "@/components/trader/page-header";
 import { Banner } from "@/components/ui/banner";
 import { StatusChip } from "@/components/ui/status-chip";
+import { StatusStepper } from "@/components/ui/status-stepper";
 import { requireTraderSession } from "@/lib/auth/trader-session";
 import { getDealForTrader } from "@/lib/deals/service";
 import { isOpenDealStatus, isDealStatus } from "@/lib/deals/constants";
@@ -11,6 +13,7 @@ import {
   fmt,
   formatMoney,
 } from "@/lib/ui/trader-labels";
+import { Handshake, Package, Tags } from "lucide-react";
 import { notFound } from "next/navigation";
 
 export default async function TraderDealDetailPage({
@@ -43,22 +46,24 @@ export default async function TraderDealDetailPage({
     : null;
 
   return (
-    <section className="space-y-8">
-      <div className="space-y-2">
-        <p className="text-sm text-ro-muted">{deal.reference}</p>
-        <h1 className="font-display text-3xl font-semibold tracking-tight">
-          {deal.title}
-        </h1>
-        <p className="flex flex-wrap items-center gap-2 text-sm">
+    <section className="ro-portal-stagger space-y-8">
+      <TraderPageHeader
+        title={deal.title}
+        description={deal.reference}
+        icon={<Handshake className="size-5" strokeWidth={2} />}
+        backHref="/trader/deals"
+        backLabel={t.deals}
+        action={
           <StatusChip
             tone={getStatusMeta("deal", deal.status).tone}
             label={statusText}
           />
-          <span className="text-ro-muted">
-            {t.dealKind[deal.dealKind] ?? deal.dealKind}
-          </span>
-        </p>
-      </div>
+        }
+      />
+      <p className="text-sm font-semibold text-ro-muted">
+        {t.dealKind[deal.dealKind] ?? deal.dealKind}
+      </p>
+      <StatusStepper domain="deal" current={deal.status} dict={dict} />
 
       {open && nextActor === "trader" ? (
         <Banner tone="attention">{t.dealWaitingBanner}</Banner>
@@ -84,23 +89,37 @@ export default async function TraderDealDetailPage({
           })()
         : null}
 
-      <dl className="grid gap-3 text-sm md:grid-cols-2">
-        <div>
-          <dt className="text-ro-muted">{t.dealProduct}</dt>
-          <dd>{deal.product ? productName : t.dealNonCatalog}</dd>
+      <dl className="ro-portal-card grid gap-4 border p-4 text-sm md:grid-cols-2 md:p-5">
+        <div className="flex items-start gap-2.5">
+          <span className="ro-portal-icon-well size-8 [&>svg]:size-3.5" aria-hidden>
+            <Package className="size-3.5" strokeWidth={2} />
+          </span>
+          <div>
+            <dt className="text-xs font-bold text-ro-muted">{t.dealProduct}</dt>
+            <dd className="mt-0.5 font-semibold">
+              {deal.product ? productName : t.dealNonCatalog}
+            </dd>
+          </div>
         </div>
-        <div>
-          <dt className="text-ro-muted">{t.dealSnapshot}</dt>
-          <dd>
-            {deal.proposedPrice != null
-              ? formatMoney(deal.proposedPrice, deal.currency)
-              : "—"}
-            {deal.quantity != null ? ` · ${t.dealQtyShort} ${deal.quantity}` : ""}
-          </dd>
+        <div className="flex items-start gap-2.5">
+          <span className="ro-portal-icon-well size-8 [&>svg]:size-3.5" aria-hidden>
+            <Tags className="size-3.5" strokeWidth={2} />
+          </span>
+          <div>
+            <dt className="text-xs font-bold text-ro-muted">{t.dealSnapshot}</dt>
+            <dd className="mt-0.5 font-semibold">
+              {deal.proposedPrice != null
+                ? formatMoney(deal.proposedPrice, deal.currency)
+                : "—"}
+              {deal.quantity != null
+                ? ` · ${t.dealQtyShort} ${deal.quantity}`
+                : ""}
+            </dd>
+          </div>
         </div>
         <div className="md:col-span-2">
-          <dt className="text-ro-muted">{t.dealConditions}</dt>
-          <dd className="whitespace-pre-wrap">
+          <dt className="text-xs font-bold text-ro-muted">{t.dealConditions}</dt>
+          <dd className="ro-portal-message-panel mt-1">
             {deal.conditionsNotes || "—"}
           </dd>
         </div>
@@ -117,10 +136,11 @@ export default async function TraderDealDetailPage({
         money={(v, c) => formatMoney(v as number, c)}
         termsLabel={t.dealTerms}
         qtyLabel={t.dealQtyShort}
+        currency={deal.currency}
       />
 
       {!open ? (
-        <p className="text-sm text-ro-muted">
+        <p className="ro-portal-muted">
           {fmt(t.dealClosed, { status: statusText })}
         </p>
       ) : null}

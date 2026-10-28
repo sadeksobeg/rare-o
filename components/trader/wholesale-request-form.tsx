@@ -8,9 +8,11 @@ import {
   type PickerProduct,
 } from "@/components/trader/product-picker";
 import { Banner } from "@/components/ui/banner";
+import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import type { Locale } from "@/lib/i18n/config";
-import { fmt, type TraderDict } from "@/lib/ui/trader-labels";
+import { WHOLESALE_QTY_TECHNICAL_MAX } from "@/lib/wholesale/constants";
+import { fmt, traderActionMessage, type TraderDict } from "@/lib/ui/trader-labels";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useState } from "react";
 
@@ -98,6 +100,9 @@ export function WholesaleRequestForm({
           <option value="propose_price">{t.requestMode.propose_price}</option>
         </select>
       </label>
+      <p className="max-w-[45rem] text-sm leading-relaxed text-ro-muted">
+        {fmt(t.wsFormHint, { max: WHOLESALE_QTY_TECHNICAL_MAX })}
+      </p>
 
       <ProductPicker
         products={products}
@@ -198,17 +203,19 @@ export function WholesaleRequestForm({
 
           {state && !state.ok ? (
             <Banner tone="danger" alert>
-              {state.error}
+              {traderActionMessage(t, state.error)}
             </Banner>
           ) : null}
 
-          <button
+          <Button
             type="submit"
+            variant="primary"
+            size="md"
             disabled={pending || navigating || selected.length === 0}
-            className="min-h-12 w-full bg-ro-purple px-5 text-sm text-ro-ivory disabled:opacity-60"
+            className="w-full"
           >
             {pending || navigating ? t.submitting : t.wsSubmit}
-          </button>
+          </Button>
         </form>
       </Dialog>
     </div>

@@ -1,3 +1,5 @@
+import { Package } from "lucide-react";
+import { Reveal } from "@/components/motion/reveal";
 import { TraderPageHeader } from "@/components/trader/page-header";
 import { WholesaleRequestForm } from "@/components/trader/wholesale-request-form";
 import { ButtonLink } from "@/components/ui/button";
@@ -12,10 +14,11 @@ export default async function TraderWholesaleCatalogPage() {
   const products = await listWholesaleEligibleProducts();
 
   return (
-    <section className="space-y-6 p-5 sm:p-8 md:p-10">
+    <section className="space-y-6">
       <TraderPageHeader
         title={t.wsTitle}
         description={t.wsLead}
+        icon={<Package className="size-5" strokeWidth={2} />}
         action={
           <ButtonLink
             href="/trader/wholesale/requests"
@@ -26,6 +29,7 @@ export default async function TraderWholesaleCatalogPage() {
           </ButtonLink>
         }
       />
+      <Reveal>
       <div className="ro-portal-card border p-4 sm:p-6">
         <WholesaleRequestForm
           labels={t}
@@ -44,6 +48,7 @@ export default async function TraderWholesaleCatalogPage() {
           }))}
         />
       </div>
+      </Reveal>
     </section>
   );
 }

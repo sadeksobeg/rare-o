@@ -1,5 +1,6 @@
 import { uiVisibleWholesaleWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { notifyTrader } from "@/lib/trader/notifications";
 import {
   WHOLESALE_QTY_TECHNICAL_MAX,
@@ -285,13 +286,17 @@ export async function adminTransitionWholesaleStatus(input: {
     include: { lines: true, events: { orderBy: { createdAt: "asc" } } },
   });
 
+  const statusAr =
+    getDictionary("ar").trader.wholesaleStatus[input.toStatus] ?? input.toStatus;
+  const statusEn =
+    getDictionary("en").trader.wholesaleStatus[input.toStatus] ?? input.toStatus;
   await notifyTrader({
     traderId: updated.traderId,
     domain: "wholesale",
     titleAr: `تحديث طلب جملة · ${updated.reference}`,
     titleEn: `Wholesale update · ${updated.reference}`,
-    bodyAr: `الحالة: ${input.toStatus}`,
-    bodyEn: `Status: ${input.toStatus}`,
+    bodyAr: `طلب الجملة أصبح: ${statusAr}`,
+    bodyEn: `Wholesale request is now ${statusEn}.`,
     href: `/trader/wholesale/${updated.id}`,
   });
 
@@ -495,7 +500,7 @@ export async function adminUpdateWholesaleShipping(input: {
     throw new Error("SHIPPING_FIELDS_REQUIRED");
   }
 
-  return prisma.wholesaleRequest.update({
+  const updated = await prisma.wholesaleRequest.update({
     where: { id: request.id },
     data: {
       carrier,
@@ -518,4 +523,16 @@ export async function adminUpdateWholesaleShipping(input: {
       trader: true,
     },
   });
+
+  await notifyTrader({
+    traderId: updated.traderId,
+    domain: "wholesale",
+    titleAr: `تحديث شحن الجملة · ${updated.reference}`,
+    titleEn: `Wholesale shipping update · ${updated.reference}`,
+    bodyAr: `الناقل ${carrier} — رقم التتبع ${trackingReference}`,
+    bodyEn: `Carrier ${carrier} — tracking ${trackingReference}`,
+    href: `/trader/wholesale/${updated.id}`,
+  });
+
+  return updated;
 }

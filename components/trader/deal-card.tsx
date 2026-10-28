@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Handshake } from "lucide-react";
+import { PressRipple } from "@/components/motion/press-ripple";
 import { StatusChip } from "@/components/ui/status-chip";
 import { cn } from "@/lib/utils";
 import type { StatusTone } from "@/lib/ui/status";
@@ -25,6 +28,7 @@ export function DealCard({
   className?: string;
 }) {
   return (
+    <PressRipple>
     <Link
       href={href}
       className={cn(
@@ -32,12 +36,15 @@ export function DealCard({
         className
       )}
     >
+      <span className="ro-portal-icon-well size-10 transition-transform duration-[var(--ro-dur-fast)] group-hover:scale-105 [&>svg]:size-4">
+        <Handshake className="size-4" strokeWidth={1.5} aria-hidden />
+      </span>
       <span className="min-w-0 flex-1 space-y-1.5">
-        <span className="block text-xs tracking-wide text-ro-muted">
+        <span className="block text-xs font-bold tracking-wide text-ro-muted">
           {reference}
         </span>
         {title ? (
-          <span className="font-display block text-base font-semibold leading-snug transition-colors group-hover:text-[var(--ro-plum-900)]">
+          <span className="font-display block text-base font-bold leading-snug transition-colors group-hover:text-[var(--ro-plum-900)]">
             {title}
           </span>
         ) : null}
@@ -46,7 +53,9 @@ export function DealCard({
           {waitingLabel ? (
             <StatusChip tone="attention" label={waitingLabel} size="sm" />
           ) : null}
-          {meta ? <span className="text-xs text-ro-muted">{meta}</span> : null}
+          {meta ? (
+            <span className="text-xs font-semibold text-ro-muted">{meta}</span>
+          ) : null}
         </span>
       </span>
       <ChevronRight
@@ -54,5 +63,6 @@ export function DealCard({
         aria-hidden
       />
     </Link>
+    </PressRipple>
   );
 }

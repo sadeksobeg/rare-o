@@ -1,6 +1,6 @@
-import { TraderShell } from "@/components/trader/shell";
+import TraderShell from "@/components/trader/shell";
 
-export default function TraderProtectedLayout({
+export default async function TraderProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
