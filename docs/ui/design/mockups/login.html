@@ -3,79 +3,315 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>دخول الإدارة — RARE OUD (نموذج مرحلة 2)</title>
+<title>الدخول — RARE OUD</title>
 <link rel="stylesheet" href="shared.css" />
+<link rel="stylesheet" href="tokens-v3.css" />
 <style>
-  body.ro-inverse { background: var(--ro-ink-950); }
-  .stage { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: var(--ro-s-6); position: relative; overflow: hidden; }
-  .stage .rings { position: absolute; inset: 0; margin: auto; width: min(58vw, 440px); height: min(58vw, 440px); color: var(--ro-sand-100); opacity: .12; pointer-events: none; }
-  /* .panel is a light card nested inside the dark .ro-inverse stage — reset the
-     role tokens back to their light-mode values so text/borders/focus don't
-     inherit the dark-mode roles meant for the ink-950 backdrop around it. */
-  .panel {
-    --ro-text: var(--ro-ink-950); --ro-text-2: var(--ro-ink-600); --ro-text-muted: var(--ro-ink-500);
-    --ro-link: var(--ro-plum-900); --ro-link-hover: var(--ro-plum-700);
-    --ro-border-subtle: rgba(11,8,13,.14); --ro-border: rgba(11,8,13,.28); --ro-border-control: #8F8473;
-    --ro-focus: var(--ro-plum-900);
-    position: relative; width: min(400px, 100%); background: var(--ro-sand-50);
-    border-radius: var(--ro-r-md); padding: var(--ro-s-8) var(--ro-s-6); box-shadow: var(--ro-e3); color: var(--ro-text);
+  html, body { height: 100%; }
+  body { margin: 0; overflow-x: hidden; }
+  .lg-shell { min-height: 100vh; display: grid; grid-template-columns: 1.1fr 1fr; }
+  @media (max-width: 960px) { .lg-shell { grid-template-columns: 1fr; } .lg-scene { min-height: 46vh; } }
+
+  /* ---- left: living brand scene ---- */
+  .lg-scene {
+    position: relative; overflow: hidden; background: var(--ro-ink-950); color: var(--ro-sand-100);
+    display: flex; flex-direction: column; justify-content: space-between; padding: var(--ro-s-8);
   }
-  .panel h1 { text-align: center; font-size: 1.5rem; }
-  .mark { color: var(--ro-plum-900); width: 48px; height: 48px; margin: 0 auto var(--ro-s-3); display: block; }
-  .brandline { text-align: center; font-family: var(--ro-font-display); letter-spacing: .12em; color: var(--ro-text-muted); font-size: .78rem; margin-bottom: var(--ro-s-6); }
-  .toprow { position: absolute; top: var(--ro-s-5); inset-inline-end: var(--ro-s-5); }
-  .submit { width: 100%; justify-content: center; margin-top: var(--ro-s-2); }
-  .hint { text-align: center; margin-top: var(--ro-s-5); font-size: .85rem; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .lg-scene-glow { position: absolute; inset: -20%; background: var(--ro-glow-plum); pointer-events: none; transition: transform .4s var(--ro3-ease-damped); }
+  .lg-scene-rings { position: absolute; inset: 0; margin: auto; width: min(64vw, 520px); height: min(64vw, 520px); color: rgba(244,231,216,.5); }
+  .lg-scene-rings circle { fill: none; stroke: currentColor; stroke-width: 1; }
+  .lg-wave-wrap { position: absolute; inset-inline: 0; bottom: 18%; color: rgba(201,178,227,.55); }
+  .lg-brandmark { position: relative; z-index: 2; display: flex; align-items: center; gap: var(--ro-s-3); font-family: var(--ro-font-display); font-size: 1.1rem; letter-spacing: .02em; }
+  .lg-tagline { position: relative; z-index: 2; max-width: 30ch; }
+  .lg-tagline h2 { font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.4rem); line-height: 1.3; margin: 0; color: var(--ro-sand-100); }
+  .lg-tagline p { color: var(--ro-ink-200); margin-top: var(--ro-s-3); }
+
+  /* ---- right: form panel ---- */
+  .lg-panel-wrap { display: flex; align-items: center; justify-content: center; padding: var(--ro-s-8) var(--ro-s-6); background: var(--ro-sand-100); }
+  .lg-panel {
+    --ro-text: var(--ro-ink-950); --ro-text-muted: var(--ro-ink-500); --ro-link: var(--ro-plum-900);
+    --ro-border-control: #8F8473; --ro-focus: var(--ro-plum-900);
+    width: min(400px, 100%); color: var(--ro-text);
+  }
+  .lg-toprow { display: flex; justify-content: flex-end; margin-bottom: var(--ro-s-6); }
+
+  /* role switch */
+  .lg-roles { position: relative; display: inline-flex; background: var(--ro-sand-200); border-radius: var(--ro-r-sm); padding: 3px; margin-bottom: var(--ro-s-6); }
+  .lg-roles button { position: relative; z-index: 1; border: none; background: transparent; padding: .5rem 1.1rem; font-family: inherit; font-weight: 600; font-size: .85rem; cursor: pointer; color: var(--ro-ink-600); border-radius: var(--ro-r-sm); min-height: 36px; }
+  .lg-roles button[aria-selected="true"] { color: var(--ro-sand-100); }
+  .lg-roles-indicator { position: absolute; left: 0; top: 3px; bottom: 3px; border-radius: var(--ro-r-sm); background: var(--ro-ink-950); transition: left var(--ro3-dur-ui) var(--ro3-ease-damped), width var(--ro3-dur-ui) var(--ro3-ease-damped); }
+
+  .lg-panel h1 { font-size: 1.6rem; margin-bottom: var(--ro-s-1); }
+  .lg-panel .lg-sub { color: var(--ro-text-muted); margin-bottom: var(--ro-s-6); }
+
   .pw-field { position: relative; }
   .pw-toggle { position: absolute; inset-inline-end: 4px; top: 27px; background: none; border: none; cursor: pointer; color: var(--ro-text-muted); padding: 8px; display: flex; }
+  .lg-capslock { display: none; align-items: center; gap: 6px; color: var(--ro-amber-800); font-size: .8rem; margin-top: -8px; margin-bottom: var(--ro-s-3); }
+  .lg-capslock.is-visible { display: flex; }
+  .lg-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--ro-s-5); font-size: .85rem; }
+  .lg-remember { display: flex; align-items: center; gap: 6px; color: var(--ro-text-muted); }
+  .lg-forgot { background: none; border: none; color: var(--ro-link); cursor: pointer; font-family: inherit; font-size: .85rem; padding: 0; text-decoration: underline; text-underline-offset: 3px; }
+
+  .lg-submit { width: 100%; justify-content: center; position: relative; }
+  .lg-submit .lg-wave-loader { display: none; }
+  .lg-submit.is-loading .lg-label { visibility: hidden; }
+  .lg-submit.is-loading .lg-wave-loader { display: flex; position: absolute; inset: 0; align-items: center; justify-content: center; gap: 3px; }
+  .lg-wave-loader span { width: 3px; height: 6px; background: currentColor; border-radius: 2px; animation: lg-wave 0.9s ease-in-out infinite; }
+  .lg-wave-loader span:nth-child(2) { animation-delay: .1s; } .lg-wave-loader span:nth-child(3) { animation-delay: .2s; }
+  .lg-wave-loader span:nth-child(4) { animation-delay: .3s; } .lg-wave-loader span:nth-child(5) { animation-delay: .4s; }
+  @keyframes lg-wave { 0%, 100% { height: 6px; } 50% { height: 16px; } }
+
+  @keyframes lg-shake { 10%, 90% { transform: translateX(-1px); } 20%, 80% { transform: translateX(2px); } 30%, 50%, 70% { transform: translateX(-4px); } 40%, 60% { transform: translateX(4px); } }
+  .lg-panel.is-error form { animation: lg-shake .5s var(--ro3-ease-damped); }
+  @media (prefers-reduced-motion: reduce) { .lg-panel.is-error form { animation: none; } }
+
+  .lg-ratelimit { display: none; align-items: flex-start; gap: 8px; background: var(--ro-danger-100); color: var(--ro-danger-700); border-radius: var(--ro-r-sm); padding: var(--ro-s-3); font-size: .85rem; margin-bottom: var(--ro-s-4); }
+  .lg-ratelimit.is-visible { display: flex; }
+
+  .lg-hint { text-align: center; margin-top: var(--ro-s-5); font-size: .85rem; display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--ro-text-muted); }
+
+  /* forgot-password view */
+  .lg-view { display: none; }
+  .lg-view.is-active { display: block; }
+  .lg-back { display: inline-flex; align-items: center; gap: 6px; background: none; border: none; color: var(--ro-text-muted); font-family: inherit; font-size: .85rem; cursor: pointer; padding: 0; margin-bottom: var(--ro-s-5); }
+
+  /* success */
+  .lg-success { display: none; text-align: center; padding: var(--ro-s-8) 0; }
+  .lg-success.is-active { display: block; }
+  .lg-success-ring { width: 72px; height: 72px; margin: 0 auto var(--ro-s-4); color: var(--ro-success-700); }
 </style>
 </head>
-<body class="ro-inverse">
-  <a href="#login-form" class="skip-link"><span data-lang="ar">تخطَّ إلى النموذج</span><span data-lang="en" hidden>Skip to form</span></a>
-  <div class="toprow"><button class="lang-toggle" onclick="roToggleLang()">EN</button></div>
-  <main class="stage">
-    <svg class="rings" viewBox="0 0 400 400" fill="none"><circle cx="200" cy="200" r="190" stroke="currentColor"/><circle cx="200" cy="200" r="150" stroke="currentColor" opacity=".7"/><circle cx="200" cy="200" r="112" stroke="currentColor" opacity=".55"/><circle cx="200" cy="200" r="78" stroke="currentColor" opacity=".42"/><circle cx="200" cy="200" r="48" stroke="currentColor" opacity=".32"/></svg>
-    <div class="panel">
-      <svg class="mark" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="30" fill="currentColor"/><circle cx="32" cy="32" r="22" stroke="#F4E7D8" stroke-width="1.5"/><circle cx="32" cy="32" r="13" stroke="#F4E7D8" stroke-width="1.5" opacity=".7"/><circle cx="32" cy="32" r="5" fill="#0B080D"/></svg>
-      <div class="brandline">RARE OUD</div>
-      <h1><span data-lang="ar">دخول الإدارة</span><span data-lang="en" hidden>Admin sign in</span></h1>
-      <p class="muted ro-body-sm" style="text-align:center;margin-bottom:var(--ro-s-6)">
-        <span data-lang="ar">صلاحية كاملة على التجزئة والصفقات والجملة وصندوق واتساب</span>
-        <span data-lang="en" hidden>Full access to retail, deals, wholesale and the WhatsApp inbox</span>
-      </p>
-      <form id="login-form">
-        <div class="ro-field">
-          <label for="f-email"><span data-lang="ar">البريد الإلكتروني</span><span data-lang="en" hidden>Email</span> *</label>
-          <input id="f-email" type="email" dir="ltr" autocomplete="username" required />
+<body>
+<a href="#lg-panel-main" class="skip-link"><span data-lang="ar">تخطَّ إلى النموذج</span><span data-lang="en" hidden>Skip to form</span></a>
+
+<div class="lg-shell">
+  <section class="lg-scene ro-inverse" aria-hidden="true">
+    <div class="lg-scene-glow" id="scene-glow"></div>
+    <div class="ro-grain"></div>
+    <svg class="lg-scene-rings ro-rings-live is-breathing" id="scene-rings" viewBox="0 0 400 400">
+      <circle cx="200" cy="200" r="190"/><circle cx="200" cy="200" r="150" opacity=".75"/>
+      <circle cx="200" cy="200" r="112" opacity=".55"/><circle cx="200" cy="200" r="78" opacity=".4"/>
+      <circle cx="200" cy="200" r="48" opacity=".3"/>
+    </svg>
+    <svg class="lg-wave-wrap ro-waveform" viewBox="0 0 400 60" preserveAspectRatio="none">
+      <path d="M0 30 Q 20 5, 40 30 T 80 30 T 120 30 T 160 30 T 200 30 T 240 30 T 280 30 T 320 30 T 360 30 T 400 30" />
+    </svg>
+    <div class="lg-brandmark">
+      <svg width="26" height="26" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="30" fill="var(--ro-plum-900)"/><circle cx="32" cy="32" r="22" stroke="#F4E7D8" stroke-width="1.5"/><circle cx="32" cy="32" r="5" fill="#0B080D"/></svg>
+      RARE OUD
+    </div>
+    <div class="lg-tagline">
+      <h2><span data-lang="ar">صدى الصنعة، محفوظ بدقّة</span><span data-lang="en" hidden>The echo of craft, kept precisely</span></h2>
+      <p class="ro-body-sm"><span data-lang="ar">منصة واحدة لإدارة التجزئة والصفقات والجملة والوساطة — متصلة بواتساب</span><span data-lang="en" hidden>One platform for retail, deals, wholesale and brokerage — connected to WhatsApp</span></p>
+    </div>
+  </section>
+
+  <main class="lg-panel-wrap">
+    <div class="lg-panel" id="lg-panel-main">
+      <div class="lg-toprow"><button class="lang-toggle" onclick="roToggleLang()" style="color:var(--ro-ink-950);border-color:var(--ro-border)">EN</button></div>
+
+      <div class="lg-view is-active" id="view-login">
+        <div class="lg-roles" role="tablist" aria-label="نوع الحساب">
+          <span class="lg-roles-indicator" id="roles-indicator"></span>
+          <button type="button" role="tab" aria-selected="true" data-role="admin"><span data-lang="ar">إدارة</span><span data-lang="en" hidden>Admin</span></button>
+          <button type="button" role="tab" aria-selected="false" data-role="trader"><span data-lang="ar">تاجر</span><span data-lang="en" hidden>Trader</span></button>
         </div>
-        <div class="ro-field pw-field">
-          <label for="f-pass"><span data-lang="ar">كلمة المرور</span><span data-lang="en" hidden>Password</span> *</label>
-          <input id="f-pass" type="password" dir="ltr" autocomplete="current-password" required />
-          <button type="button" class="pw-toggle" data-icon="eye" aria-label="إظهار كلمة المرور" onclick="var i=document.getElementById('f-pass');i.type=i.type==='password'?'text':'password';"></button>
+
+        <h1 id="role-title"><span data-lang="ar">دخول الإدارة</span><span data-lang="en" hidden>Admin sign in</span></h1>
+        <p class="lg-sub" id="role-sub"><span data-lang="ar">صلاحية كاملة على التجزئة والصفقات والجملة والوساطة وصندوق واتساب</span><span data-lang="en" hidden>Full access to retail, deals, wholesale, brokerage and the WhatsApp inbox</span></p>
+
+        <div class="lg-ratelimit" id="ratelimit-box" role="alert">
+          <span data-icon="shield" data-icon-size="16"></span>
+          <span><span data-lang="ar">محاولات كثيرة من هذا الجهاز. أُوقف الدخول مؤقتاً 15 دقيقة.</span><span data-lang="en" hidden>Too many attempts from this device. Sign-in paused for 15 minutes.</span></span>
         </div>
-        <div class="ro-field">
-          <label for="f-totp"><span data-lang="ar">رمز التحقق أو الاسترداد</span><span data-lang="en" hidden>2FA or recovery code</span></label>
-          <input id="f-totp" type="text" dir="ltr" inputmode="numeric" />
-        </div>
-        <button class="ro-btn ro-btn-primary ro-btn-lg submit" type="submit">
-          <span data-lang="ar">دخول</span><span data-lang="en" hidden>Sign in</span>
-        </button>
-        <p class="ro-caption" id="login-note" style="text-align:center;margin:var(--ro-s-3) 0 0;min-height:1.2em"></p>
-      </form>
-      <p class="hint muted">
-        <span data-icon="shield" data-icon-size="14"></span>
-        <span data-lang="ar">محاولات كثيرة تؤدي لإيقاف مؤقت 15 دقيقة — حماية فعلية موجودة في الكود</span>
-        <span data-lang="en" hidden>Too many attempts trigger a 15-minute lockout — real, already implemented</span>
-      </p>
+
+        <form id="login-form" novalidate>
+          <div class="ro-field">
+            <label for="f-email"><span data-lang="ar">البريد الإلكتروني</span><span data-lang="en" hidden>Email</span> *</label>
+            <input id="f-email" type="email" dir="ltr" autocomplete="username" required value="admin@rareoud.example" />
+          </div>
+          <div class="ro-field pw-field">
+            <label for="f-pass"><span data-lang="ar">كلمة المرور</span><span data-lang="en" hidden>Password</span> *</label>
+            <input id="f-pass" type="password" dir="ltr" autocomplete="current-password" required value="correct-horse-battery" />
+            <button type="button" class="pw-toggle" id="pw-toggle" aria-label="إظهار كلمة المرور" aria-pressed="false">
+              <span data-icon="eye" data-icon-size="18"></span>
+            </button>
+          </div>
+          <p class="lg-capslock" id="capslock-hint"><span data-icon="circle-alert" data-icon-size="14"></span><span data-lang="ar">مفتاح Caps Lock مُفعَّل</span><span data-lang="en" hidden>Caps Lock is on</span></p>
+
+          <div class="lg-row">
+            <label class="lg-remember"><input type="checkbox" id="f-remember" /> <span data-lang="ar">تذكّر هذا الجهاز</span><span data-lang="en" hidden>Remember this device</span></label>
+            <button type="button" class="lg-forgot" id="forgot-trigger"><span data-lang="ar">نسيت كلمة المرور؟</span><span data-lang="en" hidden>Forgot password?</span></button>
+          </div>
+
+          <button class="ro-btn ro-btn-primary ro-btn-lg lg-submit" type="submit" id="submit-btn">
+            <span class="lg-label"><span data-lang="ar">دخول</span><span data-lang="en" hidden>Sign in</span></span>
+            <span class="lg-wave-loader" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></span>
+          </button>
+          <p class="ro-caption" id="login-note" style="text-align:center;margin:var(--ro-s-3) 0 0;min-height:1.2em" aria-live="polite"></p>
+        </form>
+
+        <p class="lg-hint">
+          <span data-icon="shield" data-icon-size="14"></span>
+          <span data-lang="ar">محاولات كثيرة تؤدي لإيقاف مؤقت 15 دقيقة — حماية فعلية موجودة في الكود</span>
+          <span data-lang="en" hidden>Too many attempts trigger a 15-minute lockout — real, already implemented</span>
+        </p>
+      </div>
+
+      <div class="lg-view" id="view-forgot">
+        <button type="button" class="lg-back" id="back-to-login"><span data-icon="arrow-end" data-icon-size="16" style="transform:scaleX(-1)"></span><span data-lang="ar">رجوع لتسجيل الدخول</span><span data-lang="en" hidden>Back to sign in</span></button>
+        <h1><span data-lang="ar">استرداد كلمة المرور</span><span data-lang="en" hidden>Recover your password</span></h1>
+        <p class="lg-sub"><span data-lang="ar">أدخل بريدك الإلكتروني وسنرسل رابط استرداد — هذا نموذج، لا إرسال حقيقي</span><span data-lang="en" hidden>Enter your email and we'll send a recovery link — this is a mockup, nothing is actually sent</span></p>
+        <form id="forgot-form">
+          <div class="ro-field">
+            <label for="f-forgot-email"><span data-lang="ar">البريد الإلكتروني</span><span data-lang="en" hidden>Email</span></label>
+            <input id="f-forgot-email" type="email" dir="ltr" required />
+          </div>
+          <button class="ro-btn ro-btn-primary ro-btn-lg" type="submit" style="width:100%;justify-content:center">
+            <span data-lang="ar">إرسال رابط الاسترداد</span><span data-lang="en" hidden>Send recovery link</span>
+          </button>
+        </form>
+      </div>
+
+      <div class="lg-success" id="view-success">
+        <svg class="lg-success-ring" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+        <h1><span data-lang="ar">تم التحقق</span><span data-lang="en" hidden>Verified</span></h1>
+        <p class="lg-sub"><span data-lang="ar">يفتح لوحة التحكم…</span><span data-lang="en" hidden>Opening the dashboard…</span></p>
+      </div>
     </div>
   </main>
-  <script src="icons.js"></script>
-  <script src="shared.js"></script>
-  <script>
-    document.getElementById("login-form").addEventListener("submit", function (e) {
-      e.preventDefault();
-      document.getElementById("login-note").textContent = document.documentElement.lang === "ar" ? "هذا نموذج مرحلة 2 — لا اتصال حقيقي بالخادم" : "Phase 2 mockup — no real server call";
+</div>
+
+<script src="icons.js"></script>
+<script src="shared.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="motion-v3.js"></script>
+<script>
+  // ---- role switch ----
+  var roles = document.querySelectorAll('.lg-roles button');
+  var indicator = document.getElementById('roles-indicator');
+  var roleTitle = document.getElementById('role-title');
+  var roleSub = document.getElementById('role-sub');
+  var copy = {
+    admin: {
+      title: { ar: "دخول الإدارة", en: "Admin sign in" },
+      sub: { ar: "صلاحية كاملة على التجزئة والصفقات والجملة والوساطة وصندوق واتساب", en: "Full access to retail, deals, wholesale, brokerage and the WhatsApp inbox" }
+    },
+    trader: {
+      title: { ar: "دخول التاجر", en: "Trader sign in" },
+      sub: { ar: "اقترح صفقات، اطلب بالجملة، واطلب وساطة على قطعة رأيتها", en: "Propose deals, request wholesale, and ask us to broker a piece you've found" }
+    }
+  };
+  function placeIndicator(btn, animate) {
+    var cr = btn.parentElement.getBoundingClientRect();
+    var br = btn.getBoundingClientRect();
+    indicator.style.transition = animate === false ? "none" : "";
+    indicator.style.width = br.width + "px";
+    indicator.style.left = (br.left - cr.left) + "px";
+  }
+  function setRole(role) {
+    roles.forEach(function (b) { b.setAttribute("aria-selected", b.dataset.role === role ? "true" : "false"); });
+    var btn = document.querySelector('.lg-roles button[data-role="' + role + '"]');
+    placeIndicator(btn);
+    var lang = document.documentElement.lang;
+    roleTitle.querySelector('[data-lang="ar"]').textContent = copy[role].title.ar;
+    roleTitle.querySelector('[data-lang="en"]').textContent = copy[role].title.en;
+    roleSub.querySelector('[data-lang="ar"]').textContent = copy[role].sub.ar;
+    roleSub.querySelector('[data-lang="en"]').textContent = copy[role].sub.en;
+  }
+  roles.forEach(function (b) { b.addEventListener("click", function () { setRole(b.dataset.role); }); });
+  window.addEventListener("load", function () { placeIndicator(roles[0], false); });
+  window.addEventListener("resize", function () {
+    var sel = document.querySelector('.lg-roles button[aria-selected="true"]');
+    placeIndicator(sel, false);
+  });
+
+  // ---- password visibility ----
+  var pwInput = document.getElementById("f-pass");
+  var pwToggle = document.getElementById("pw-toggle");
+  pwToggle.addEventListener("click", function () {
+    var show = pwInput.type === "password";
+    pwInput.type = show ? "text" : "password";
+    pwToggle.setAttribute("aria-pressed", String(show));
+    pwToggle.innerHTML = "";
+    pwToggle.insertAdjacentHTML("afterbegin", roIcon(show ? "eye-off" : "eye", 18));
+  });
+
+  // ---- caps lock ----
+  var capsHint = document.getElementById("capslock-hint");
+  pwInput.addEventListener("keyup", function (e) {
+    if (e.getModifierState) capsHint.classList.toggle("is-visible", e.getModifierState("CapsLock"));
+  });
+
+  // ---- forgot password view swap ----
+  document.getElementById("forgot-trigger").addEventListener("click", function () {
+    document.getElementById("view-login").classList.remove("is-active");
+    document.getElementById("view-forgot").classList.add("is-active");
+    document.getElementById("f-forgot-email").focus();
+  });
+  document.getElementById("back-to-login").addEventListener("click", function () {
+    document.getElementById("view-forgot").classList.remove("is-active");
+    document.getElementById("view-login").classList.add("is-active");
+  });
+  document.getElementById("forgot-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    document.getElementById("view-forgot").classList.remove("is-active");
+    document.getElementById("view-login").classList.add("is-active");
+    document.getElementById("login-note").textContent = document.documentElement.lang === "ar" ? "إن وُجد الحساب، سيصلك رابط الاسترداد" : "If the account exists, a recovery link is on its way";
+  });
+
+  // ---- submit: rate-limit simulation + loading + shake + success ----
+  var attempts = 0;
+  var panel = document.getElementById("lg-panel-main");
+  var submitBtn = document.getElementById("submit-btn");
+  var ratelimitBox = document.getElementById("ratelimit-box");
+  document.getElementById("login-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    attempts++;
+    if (attempts >= 3) {
+      ratelimitBox.classList.add("is-visible");
+      submitBtn.setAttribute("aria-disabled", "true");
+      submitBtn.disabled = true;
+      return;
+    }
+    submitBtn.classList.add("is-loading");
+    submitBtn.disabled = true;
+    setTimeout(function () {
+      submitBtn.classList.remove("is-loading");
+      submitBtn.disabled = false;
+      if (attempts < 2) {
+        panel.classList.add("is-error");
+        document.getElementById("login-note").textContent = document.documentElement.lang === "ar" ? "بيانات الدخول غير صحيحة — جرّب مرة أخرى (هذا عرض توضيحي)" : "Incorrect credentials — try again (this is a demo)";
+        setTimeout(function () { panel.classList.remove("is-error"); }, 600);
+      } else {
+        goToSuccess();
+      }
+    }, 900);
+  });
+
+  function goToSuccess() {
+    function swap() {
+      document.getElementById("view-login").classList.remove("is-active");
+      document.getElementById("view-success").classList.add("is-active");
+    }
+    if (document.startViewTransition && !roMotion.reduced()) { document.startViewTransition(swap); } else { swap(); }
+    setTimeout(function () {
+      var role = document.querySelector('.lg-roles button[aria-selected="true"]').dataset.role;
+      window.location.href = role === "admin" ? "admin-dashboard.html" : "trader-home.html";
+    }, 1100);
+  }
+
+  // ---- cursor-reactive glow (section 2.1, skipped under reduced motion) ----
+  var scene = document.querySelector(".lg-scene");
+  var glow = document.getElementById("scene-glow");
+  if (!roMotion.reduced()) {
+    scene.addEventListener("pointermove", function (e) {
+      var r = scene.getBoundingClientRect();
+      var x = ((e.clientX - r.left) / r.width - 0.5) * 24;
+      var y = ((e.clientY - r.top) / r.height - 0.5) * 24;
+      glow.style.transform = "translate(" + x + "px," + y + "px)";
     });
-  </script>
+  }
+</script>
 </body>
 </html>
