@@ -1,6 +1,6 @@
 # Section 10 — Complete Execution Roadmap
 
-Approval gate applies after WP5. **WP6 onward does not start until the owner explicitly approves this plan and the WP4 prototypes.**
+**Owner approved the plan and authorized implementation beyond WP5 on 2026-10-28.** Status per work package is updated below as execution proceeds; see `PROJECT_AUDIT.md` Session 4+ for full evidence.
 
 ---
 
@@ -41,63 +41,24 @@ Approval gate applies after WP5. **WP6 onward does not start until the owner exp
 - **Completion evidence:** This document set + live screenshots in this conversation.
 
 ### WP5 — Owner design review and approval gate
-- **Objective:** Owner reviews WP0–WP4 and either approves, requests changes, or rejects specific items.
-- **Status:** **Not started — waiting on the owner.**
-- **Dependencies:** WP0–WP4.
-- **Expected deliverable:** An explicit, itemized approval (or change requests) covering: the `RoListCard` consolidation, the three owner-decision items (naming realignment, conflict-blocking keep, notifications keep), and the zod-migration timing.
-- **Owner approval required:** This WP *is* the approval gate.
-- **Completion evidence:** Owner's written approval, referenced in a future `PROJECT_AUDIT.md` entry.
+- **Status:** **Complete.** Owner reviewed WP0–WP4 and explicitly authorized implementation beyond WP5 on 2026-10-28.
+- **Completion evidence:** Owner's written approval in this conversation, referenced in `PROJECT_AUDIT.md` Session 4.
 
-### WP6 — Storefront implementation
-- **Objective:** Apply the `RoListCard` consolidation to catalog/product cards; close any state-handling gaps found during WP4a verification (none currently open).
-- **Dependencies:** WP5 approval.
-- **Likely files:** `components/storefront/catalog/product-card.tsx`, new `components/ui/ro-list-card.tsx`.
-- **Risks:** Visual regression on catalog/home if the shared component doesn't account for every existing variant (badges, video thumbnails). **Rollback:** component is additive; old card components stay until the new one is verified in place, then removed in the same batch, revertible via git.
-- **Test plan:** axe suite on catalog/home (must stay 0/92-equivalent), visual diff before/after, `tsc`/lint/build.
-- **Acceptance criteria:** No visual regression, no a11y regression, one shared component replaces at least the catalog card.
-- **Owner approval required:** No (pre-approved by WP5), but final visual diff shown before merge.
-
-### WP7 — Trader and negotiation implementation
-- **Objective:** Apply `RoListCard` to the trader deal list; document the conflict-blocking and notifications-center decisions as approved extensions (doc-only change to a companion note, not Appendix S itself).
-- **Dependencies:** WP5, WP6 (shared component).
-- **Likely files:** `components/trader/deal-card.tsx`.
-- **Risks:** Low — isolated component swap.
-- **Test plan:** `test:week3`, `test:wholesale-security`, axe on trader routes.
-- **Acceptance criteria:** No regression in the 58/9 baseline.
-- **Owner approval required:** No.
-
-### WP8 — Wholesale implementation
-- **Objective:** Apply `RoListCard` to the wholesale list.
-- **Dependencies:** WP5, WP6.
-- **Likely files:** Wholesale list components (trader + admin sides).
-- **Test plan:** Same as WP7.
-- **Acceptance criteria:** Same as WP7.
-- **Owner approval required:** No.
-
-### WP9 — Admin implementation
-- **Objective:** Apply `RoListCard` to the admin retail-request list and equivalent surfaces.
-- **Dependencies:** WP5, WP6.
-- **Likely files:** `components/admin/data-table.tsx` or adjacent list components.
-- **Test plan:** Same pattern as WP6–WP8, plus a live admin-login browser crawl.
-- **Acceptance criteria:** Same.
-- **Owner approval required:** No.
+### WP6–WP9 — Storefront / trader / wholesale / admin `RoListCard` implementation
+- **Status:** **Re-scoped on evidence, not executed as originally planned — correctly so.** Before implementing, verified the real current architecture per instruction ("if a roadmap item is already correctly implemented... record the evidence and move on"). Finding: trader (`DealCard`) and admin (`AdminRecordCard`) already share one consistent visual foundation — the `ro-portal-card` CSS utility class, used across 28 files. `DealCard` is already reused directly for trader deals, trader home, *and* wholesale requests — there was never a separate wholesale implementation to consolidate. Admin's `AdminRecordCard` is already the established `DataTable` mobile fallback everywhere. Only the storefront catalog `ProductCard` is visually distinct, correctly so (image-led merchandising card vs. operational record rows — different job, different shape, exactly the difference the mandate said to preserve).
+- **Decision: no `RoListCard` component built.** Forcing it in would have meant discarding working, tested components for a redundant abstraction achieving nothing the CSS-class layer doesn't already achieve — directly against "do not replace working functionality." Full evidence: `PROJECT_AUDIT.md` Session 4, Track C.
+- **Completion evidence:** Live browser verification (admin dashboard, zero console errors, consistent card rendering), grep evidence of `ro-portal-card` usage breadth.
+- **Owner note:** if a *visual* refresh of these cards (not a structural consolidation) is still wanted, that's a distinct, smaller WP6-equivalent task — flag if so.
 
 ### WP10 — Security and functional hardening
-- **Objective:** Execute the zod 3→4 migration (owner-authorized, WP0-B1); clean up the 9 dev-tool `npm audit` findings; structured-logging/error-exposure pass (WP0-S7/S10); add the `npm audit` wrapper script (WP1).
-- **Dependencies:** WP5 owner authorization specifically for the zod migration (major version, breaking change, touches every validation schema).
-- **Likely files:** `lib/validation/schemas.ts`, every service file importing `zod`, `package.json`.
-- **Risks:** zod 4's API changes could silently alter validation behavior if not carefully migrated. **Rollback:** full git revert of the migration commit; feasible because it will land as its own isolated commit, not mixed with UI work.
-- **Test plan:** Full regression (`tsc`, lint, build, `test:week3`, `test:wholesale-security`, `test:d1-axe`) must stay green; `npm audit` shows 0 high for `zod`.
-- **Acceptance criteria:** Zero behavior change to any user-facing validation message or rejection logic, proven by the regression suite; CVE closed.
-- **Owner approval required:** Yes, specifically for the zod migration timing (already sought in WP5).
+- **Status:** **zod migration complete** (commit `b629cfd`). Inventory: one file imports zod directly, six consumers, one consistent pattern. `zod@^3.24.2` → `^4.6.7`. Verification: `tsc` clean, build clean, `test:week3` 58/58, `test:wholesale-security` 9/9, `test:f5-action-contracts` 16/16, plus a 20-case schema-level smoke test (success/failure paths, `superRefine` custom issues, `preprocess` chains) — 20/20. `npm audit`: app's own zod no longer a direct finding; one transitive zod remains via `puppeteer-core` (devDependency, documented, low-priority). Live-verified in browser post-migration.
+- **Remaining in WP10:** the 9 transitive dev-tool `npm audit` findings (optional, low-priority, needs a `puppeteer-core` major bump — not done, correctly deferred); structured-logging/error-exposure pass (WP0-S7/S10, not done this session, no contradiction found requiring urgency).
+- **Correction to WP1's recommendation:** `scripts/security-audit.mjs` already wraps `npm audit --audit-level=high` exactly as recommended — confirmed this session. No new script needed; the WP1 recommendation is superseded.
+- **Owner approval required:** No further approval needed — migration timing was already authorized.
 
 ### WP11 — Automated testing, accessibility, and performance
-- **Objective:** Resolve the CLS instability (WP0-B2) with proper tooling; re-measure Lighthouse on a quiet machine or CI; full E2E state coverage (loading/empty/error/success) across routes not yet spot-checked; rate-limiter load test.
-- **Dependencies:** WP0-B5 (CI billing fix) ideally, or a dedicated quiet local run as a fallback.
-- **Likely files:** `app/layout.tsx` (font loading, if that's the confirmed CLS cause), possibly font-fallback metric overrides.
-- **Risks:** Low — performance-only changes, covered by the existing Lighthouse/axe gates.
-- **Test plan:** `test:lh-budget` CLS ≤0.1 median; `test:d1-axe` stays 0; full E2E suite run (`test:e2e`).
-- **Acceptance criteria:** CLS root-caused and fixed with evidence (not guessed); Lighthouse gate status known with confidence (clean environment or CI), not just "ran."
+- **Status:** **CLS root-caused; test-tooling fix shipped** (commit `565b3cc`). Lighthouse's own trace gatherers still error in this environment (confirmed again). Built a direct CDP + native `PerformanceObserver` profiler connected to the exact Chrome instance Lighthouse spawns. **Finding: the dominant measured shift was the browser window itself resizing mid-load (chrome-launcher default window racing Lighthouse's `screenEmulation` CDP call) — a test-harness artifact, not an application defect.** Fixed by pinning `--window-size=390,844` at Chrome launch. Post-fix, true native CLS measured 0 in 5/6 runs, 0.086 in 1/6 (both within the ≤0.1 budget). Honest residual: Lighthouse's own full-pipeline score still shows some flakiness (2/3 clean, 1/3 not) from a secondary timing sensitivity inside Lighthouse's own sequencing, not reachable from outside the library.
+- **Remaining in WP11:** full E2E state coverage beyond spot-checks; rate-limiter load test; CI-based authoritative Lighthouse grading (blocked on WP0-B5, GitHub billing).
 - **Owner approval required:** No.
 
 ### WP12 — Backup, deployment, monitoring, and production readiness

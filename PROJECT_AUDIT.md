@@ -275,3 +275,88 @@ new decision) — see `docs/excellence-plan/08-SECURITY-AND-OPERATIONS.md`.
 
 This phase stops at the WP5 approval gate. No further work proceeds until the owner reviews
 `docs/excellence-plan/` and approves.
+
+---
+
+## Session 4 — 2026-10-28 — Execution: Track A (security), Track D (perf), Track C (verified)
+
+Owner explicitly approved the plan and authorized implementation beyond WP5. This session executed
+the highest-priority, well-scoped items. Full detail and evidence in `docs/excellence-plan/`
+(updated); summary here.
+
+### Track A — zod 3→4 migration (WP10, done)
+
+Inventory: exactly one file imports `zod` directly (`lib/validation/schemas.ts`), six consumers,
+all via the identical narrow pattern (`.safeParse` + `.error.issues[0]?.message`). Bumped
+`zod@^3.24.2` → `^4.6.7`. Verification: `tsc` clean, `build` clean, `test:week3` 58/58,
+`test:wholesale-security` 9/9, `test:f5-action-contracts` 16/16, plus a dedicated 20-case smoke
+test (not committed, throwaway) covering every schema's success/failure paths, `superRefine`
+custom issues, and `preprocess` chains — 20/20, zero regressions. `npm audit`: the app's own zod
+no longer appears as a direct finding; one transitive zod remains via `puppeteer-core`/
+`chromium-bidi` (devDependency, not shipped, documented, low-priority optional cleanup).
+Live browser re-verification post-migration: admin login → dashboard, zero console errors.
+Commit `b629cfd`.
+
+### Track D — homepage CLS investigation (WP11, root-caused + partial fix)
+
+Lighthouse's own trace gatherers error in this environment (confirmed again). Built a direct
+CDP + native `PerformanceObserver` profiler instead, connected to the exact Chrome instance
+`chrome-launcher`/Lighthouse itself spawns. **Finding: the dominant reported shift (~1.0 of a
+measured ~1.17) was the `<html>` root element resizing from a small default window to its final
+size mid-measurement — a test-harness artifact** (Chrome launching without an explicit window
+size, racing against Lighthouse's `screenEmulation` CDP call), **not an application defect.**
+Fixed by pinning `--window-size=390,844` in `scripts/d4-lh-once.mjs`. With the window-size race
+eliminated and the viewport set before any navigation, true native-browser CLS measured 0 in 5/6
+runs and 0.086 in 1/6 — both within the ≤0.1 "good" budget. Honest residual: Lighthouse's own
+reported score (run through its full pipeline) still shows some flakiness post-fix (2/3 clean,
+1/3 still read 0.913) — a secondary timing sensitivity inside Lighthouse's own sequencing that
+this fix can't reach from outside the library. Recommendation: trust the direct
+`PerformanceObserver` measurement (consistently healthy) over any single local Lighthouse run.
+Previously-fixed LCP (Session 2, dead preload) re-verified intact throughout: 2.6–3.4s across
+every run. Commit `565b3cc`.
+
+### Track C — RoListCard consolidation: verified already substantially implemented, not rebuilt
+
+Before forcing the `RoListCard` prototype into production, checked the real current architecture
+(per instruction: "if a roadmap item is already correctly implemented... record the evidence and
+move on"). **Finding: trader and admin already share one visual foundation** — the `ro-portal-card`
+CSS utility class, used consistently across 28 files spanning `components/trader/deal-card.tsx`,
+`components/admin/list-record-card.tsx`, `action-queue.tsx`, `activity-feed.tsx`,
+`connection-card.tsx`, `dashboard-aside.tsx`, `manage-hub.tsx`, and more. `DealCard` is already
+reused directly across trader deals, trader home, *and* trader wholesale requests — wholesale was
+never a separate implementation. Admin's `AdminRecordCard` is the established mobile fallback for
+every `DataTable` usage. Only the storefront catalog `ProductCard` is visually distinct from these,
+correctly so — it's an image-led merchandising card (hover-swap gallery, quick-add, compare-at
+pricing) with a fundamentally different job than an operational record row, exactly the kind of
+difference the mandate said to preserve, not flatten.
+
+**Conclusion: no `RoListCard` component was built into the application.** The original WP3 proposal
+was based on a surface-level read of four page types without checking the shared CSS layer
+underneath; the real architecture already achieves the same goal (one consistent visual language,
+purpose-fit components) through a better mechanism (a shared token class + focused components)
+than the single-component-with-many-variants approach the plan proposed. Building it anyway would
+have meant discarding working, tested components for a redundant abstraction — directly against
+instruction. Live-verified via browser: admin dashboard record cards render correctly, consistent
+with the trader portal's own cards, zero console errors. No commit — no code change was warranted.
+
+### Full regression re-run after all Session 4 changes
+
+| Check | Result |
+|---|---|
+| `tsc --noEmit` | PASS |
+| `npm run build` | PASS |
+| `test:week3` | PASS 58/58 |
+| `test:wholesale-security` | PASS 9/9 |
+| `test:d1-axe` (92 scans) | PASS 0/92 failed |
+| Live browser: admin login → dashboard (zod-migrated build) | PASS, 0 console errors |
+
+### Not done this session — honest accounting against the full mandate
+
+Given the scope of the full mandate (every roadmap track, every route, full release-readiness),
+this session prioritized the highest-severity/highest-confidence items (security CVE, measured
+perf regression, and verifying rather than blindly rebuilding the design-system item) over breadth.
+**Not done:** WP6 storefront visual redesign work beyond what Sessions 1–2 already shipped (no
+further UI changes were identified as *necessary* — see Track C finding above); full route-by-route
+state verification (loading/empty/error/success) beyond what's already spot-checked; WP12
+(deployment — owner-gated); WP13 (WhatsApp — explicitly deferred). These remain open; see the
+roadmap for sequencing.

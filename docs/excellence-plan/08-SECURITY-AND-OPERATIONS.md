@@ -10,7 +10,7 @@ This mission's brief instructs: *"Keep SQLite as the current database unless an 
 |---|---|---|---|---|---|
 | S1 | Authentication/authorization | bcrypt + JWT (`jose`), role-scoped middleware guards, cross-role redirect to `/forbidden` (verified live, Session 2) | None | — | No |
 | S2 | Trader ownership / IDOR | `test:week3` + `test:wholesale-security` assert cross-trader access is blocked (58/58, 9/9 passing) | None | — | No |
-| S3 | Server-side validation | Zod schemas on every mutation path | **See S-CVE below** | High | Yes — migration timing |
+| S3 | Server-side validation | Zod schemas on every mutation path, now on zod 4.6.7 (see S-CVE) | None | — | No |
 | S4 | File content validation | Magic-byte checks now present (`detectMediaMagic`) | None | — | No |
 | S5 | Login throttling | 5 failures / 15 min lockout, role+identity scoped | None | — | No |
 | S6 | Security headers | CSP (nonce-based, Edge-safe), HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy all present and verified via live response headers this session | None | — | No |
@@ -18,15 +18,15 @@ This mission's brief instructs: *"Keep SQLite as the current database unless an 
 | S8 | Database integrity / migration safety | Postgres with a tested restore drill; the one pending migration (oud-specs-tiers, Session 1) is additive/idempotent, reviewed before commit (`WHERE NOT EXISTS` guards, no `DROP`) | None | — | No |
 | S9 | Automated backups + verified restore | `backup:daily` + `test:d2-restore` (22/22 tables + upload checksums) — PASS per `FINAL-REPORT.md` | None | — | No |
 | S10 | Structured logging / health checks | `/api/health`, `/api/ready` exist (confirmed in production route list); structured-logger adoption beyond ad-hoc `console.*` not verified | Scope for **WP10** | Low-Medium | No |
-| S11 | Dependency security | **`zod` high-severity DoS advisory** (GHSA-mrhx-c7xc-m3w5, CVSS 7.5), direct production dependency, fix is a 3→4 major bump touching every schema file. 9 further high-severity findings, all transitive through `lighthouse`/`puppeteer-core` (devDependencies, not shipped) | Owner authorization needed before the zod migration (blast radius = every validation schema); dev-tool bumps can proceed independently, low risk | **High** (zod) / Low (rest) | **Yes — zod only** |
+| S11 | Dependency security | **zod CVE resolved 2026-10-28** (commit `b629cfd`) — migrated to zod 4.6.7, app's own zod no longer a direct `npm audit` finding. 9 remaining high-severity findings, all transitive through `lighthouse`/`puppeteer-core` (devDependencies, not shipped, low real-world risk) | Dev-tool bumps optional, low priority, can proceed independently when convenient | Low (remaining) | No |
 | S12 | Environment/secret management | `.env.example` documents required vars; `.wa-auth/` and `backups/` correctly gitignored | None | — | No |
 | S13 | Deployment, domain, SSL | Docker/Caddy package exists and proven buildable; VPS/DNS execution is owner-controlled infrastructure | **Owner action** — WP12 | — | Yes (infra access) |
 | S14 | Production monitoring/recovery | `docs/pro-readiness/ALERT-RULES.md` exists (not re-read in depth this session — no contradiction found requiring it) | Review as part of WP12 | Medium | No |
 | S15 | GitHub Actions CI | Blocked ~3s on every run — billing/spending limit, not a code defect | **Owner action** — fix billing | High (process) | Yes |
 
-### S-CVE detail — the one genuinely new, high-severity finding
+### S-CVE detail — RESOLVED 2026-10-28
 
-`zod <4.6.6` — CWE-770 (uncontrolled resource consumption), CVSS 7.5. Zod validates every mutation path including unauthenticated storefront submission (retail requests). A malicious, deliberately oversized payload against an array/record schema could exhaust server memory — a real, if not yet exploited, denial-of-service risk. The fix is `zod@4.6.7`, which `npm` flags as a semver-major (breaking) change. This is **not** a drop-in bump: zod 4 changes error-handling APIs and some schema method signatures. Scoped as its own item in the roadmap (**WP10**) with: an inventory of every file importing `zod` (grep shows `lib/validation/schemas.ts` plus service-layer call sites across retail/wholesale/deal domains), a migration pass, and a full regression re-run (`test:week3`, `test:wholesale-security`, `tsc`, `build`) before merge.
+`zod <4.6.6` — CWE-770 (uncontrolled resource consumption), CVSS 7.5. **Fixed in commit `b629cfd`.** Inventory found a much narrower blast radius than estimated when this plan was written: exactly one file imports `zod` directly (`lib/validation/schemas.ts`), six consumers, all via one consistent pattern (`.safeParse` + `.error.issues[0]?.message`). Migrated to `zod@4.6.7`. Verification: `tsc` clean, `npm run build` clean, `test:week3` 58/58, `test:wholesale-security` 9/9, `test:f5-action-contracts` 16/16, plus a dedicated 20-case smoke test covering every schema's success/failure paths, the `superRefine` custom-issue patterns (D28b price/currency pairing, catalog/non_catalog deal guard), and the `optionalMoney`/`optionalQty`/`optionalCurrency` preprocess chains — 20/20 passed, zero behavior regressions. `npm audit` confirms the app's own zod dependency no longer appears as a finding. Full detail: `PROJECT_AUDIT.md` Session 4.
 
 ## Schema changes requiring backup/migration/rollback discipline
 
