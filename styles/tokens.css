@@ -1,0 +1,93 @@
+/**
+ * RARE OUD design tokens — the only file that may contain hex colors.
+ * Existing `--ro-*` names in `app/globals.css` stay as a bridge until
+ * screens are migrated; new UI must prefer the names in this file.
+ */
+:root {
+  /* identity */
+  --ink-950: #0b080d;
+  --sand-200: #f4e7d8;
+  --plum-700: #32104f;
+
+  /* ink scale */
+  --ink-900: #120d16;
+  --ink-800: #1b1421;
+  --ink-700: #2a2032;
+  --ink-600: #3d3248;
+  --ink-500: #5a4e66;
+  --ink-400: #6b5e73;
+
+  /* plum scale */
+  --plum-900: #220a37;
+  --plum-800: #2a0d44;
+  --plum-600: #46206a;
+  --plum-500: #5e3a86;
+  --plum-400: #8566a8;
+  --plum-300: #a78bc4;
+  --plum-200: #cdbbe0;
+  --plum-100: #e9e0f1;
+
+  /* sand scale */
+  --sand-50: #fcf8f2;
+  --sand-100: #f8f0e4;
+  --sand-300: #e9d8c2;
+  --sand-400: #d6bea0;
+  --sand-500: #b89c7a;
+
+  /* status only */
+  --ok: #2f6b4f;
+  --ok-bg: #e3efe8;
+  --warn: #a8691e;
+  --warn-bg: #f6e9d2;
+  --danger: #a32d3a;
+  --danger-bg: #f5dde0;
+
+  /* semantic */
+  --bg-page: var(--sand-100);
+  --bg-surface: rgba(255, 255, 255, 0.62);
+  --bg-surface-solid: var(--sand-50);
+  --bg-inverse: var(--ink-950);
+  --text: var(--ink-950);
+  --text-muted: var(--ink-400);
+  --text-inverse: var(--sand-200);
+  --border: rgba(50, 16, 79, 0.14);
+  --border-strong: rgba(50, 16, 79, 0.32);
+  --accent: var(--plum-700);
+  --focus: var(--plum-500);
+
+  /* radius — sharp atelier, capsules for badges only */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+
+  /* elevation — plum-tinted, never gray */
+  --shadow-1: 0 1px 2px rgba(34, 10, 55, 0.06), 0 1px 1px rgba(34, 10, 55, 0.04);
+  --shadow-2: 0 8px 20px -8px rgba(34, 10, 55, 0.16),
+    0 2px 4px rgba(34, 10, 55, 0.05);
+  --shadow-3: 0 24px 56px -16px rgba(34, 10, 55, 0.28),
+    0 4px 12px rgba(34, 10, 55, 0.08);
+  --ring-focus: 0 0 0 2px var(--sand-50), 0 0 0 4px var(--focus);
+
+  /* space 4px grid */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+
+  /* motion */
+  --dur-instant: 80ms;
+  --dur-fast: 140ms;
+  --dur-base: 220ms;
+  --dur-slow: 360ms;
+  --dur-enter: 480ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+}

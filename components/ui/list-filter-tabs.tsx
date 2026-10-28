@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
+import { CountUp } from "@/components/motion/count-up";
 import { cn } from "@/lib/utils";
 
 export type ListFilterTab = {
@@ -73,7 +74,7 @@ export function ListFilterTabs({
                     : "bg-ro-sunken text-ro-muted"
                 )}
               >
-                {tab.count}
+                <CountUp value={tab.count} durationMs={200} />
               </span>
             ) : null}
           </button>

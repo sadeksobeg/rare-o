@@ -1,6 +1,12 @@
 "use client";
 
-import { useId, useState } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { cn } from "@/lib/utils";
 
 type FieldShared = {
@@ -15,6 +21,10 @@ type FieldShared = {
   dense?: boolean;
   /** When set, shows a character counter (P02). */
   maxLength?: number;
+  /** Icon / node inside the control on the inline-start edge. */
+  startAdornment?: ReactNode;
+  /** Button / node inside the control on the inline-end edge (not wrapped by label). */
+  endAdornment?: ReactNode;
 };
 
 type TextFieldProps = FieldShared &
@@ -71,6 +81,8 @@ export function TextField({
   id,
   value,
   onChange,
+  startAdornment,
+  endAdornment,
   ...rest
 }: TextFieldProps) {
   const autoId = useId();
@@ -87,57 +99,81 @@ export function TextField({
   const autoDir =
     dir ??
     (type === "email" || type === "tel" || type === "url" ? "ltr" : undefined);
+  const showMeta = Boolean(error || helper || maxLength != null);
 
   return (
-    <label className={cn("block space-y-1.5 text-sm", className)}>
-      <span className="font-medium text-ro-ink">
+    <div className={cn("block space-y-1.5 text-sm", className)}>
+      <label htmlFor={fieldId} className="font-medium text-ro-ink">
         {label}
         {required ? " *" : ""}
-      </span>
-      <input
-        id={fieldId}
-        name={name}
-        type={type}
-        defaultValue={value === undefined ? defaultValue : undefined}
-        value={value}
-        required={required}
-        dir={autoDir}
-        maxLength={maxLength}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy}
-        className={controlClass(dense, error)}
-        onChange={(e) => {
-          if (maxLength != null) setCount(e.target.value.length);
-          onChange?.(e);
-        }}
-        {...rest}
-      />
-      <span className="flex items-start justify-between gap-3">
-        {error ? (
+      </label>
+      <div className="relative">
+        {startAdornment ? (
           <span
-            id={`${fieldId}-error`}
-            className="block text-xs text-[var(--ro-danger-700)]"
-            role="alert"
+            className="pointer-events-none absolute inset-y-0 start-0 z-10 flex w-10 items-center justify-center text-[var(--ro-plum-800)]"
+            aria-hidden="true"
           >
-            {error}
-          </span>
-        ) : helper ? (
-          <span id={`${fieldId}-help`} className="block text-xs text-ro-muted">
-            {helper}
-          </span>
-        ) : (
-          <span />
-        )}
-        {maxLength != null ? (
-          <span
-            id={counterId}
-            className="shrink-0 text-xs tabular-nums text-ro-muted"
-          >
-            {count}/{maxLength}
+            {startAdornment}
           </span>
         ) : null}
-      </span>
-    </label>
+        <input
+          id={fieldId}
+          name={name}
+          type={type}
+          defaultValue={value === undefined ? defaultValue : undefined}
+          value={value}
+          required={required}
+          dir={autoDir}
+          maxLength={maxLength}
+          className={cn(
+            controlClass(dense, error),
+            startAdornment && "ps-10",
+            endAdornment && "pe-14"
+          )}
+          {...rest}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy}
+          // Autofill extensions mutate attributes after SSR.
+          suppressHydrationWarning
+          onChange={(e) => {
+            if (maxLength != null) setCount(e.target.value.length);
+            onChange?.(e);
+          }}
+        />
+        {endAdornment ? (
+          <div className="absolute inset-y-0 end-1 z-10 flex items-center">
+            {endAdornment}
+          </div>
+        ) : null}
+      </div>
+      {showMeta ? (
+        <span className="flex items-start justify-between gap-3">
+          {error ? (
+            <span
+              id={`${fieldId}-error`}
+              className="block text-xs text-[var(--ro-danger-700)]"
+              role="alert"
+            >
+              {error}
+            </span>
+          ) : helper ? (
+            <span id={`${fieldId}-help`} className="block text-xs text-ro-muted">
+              {helper}
+            </span>
+          ) : (
+            <span />
+          )}
+          {maxLength != null ? (
+            <span
+              id={counterId}
+              className="shrink-0 text-xs tabular-nums text-ro-muted"
+            >
+              {count}/{maxLength}
+            </span>
+          ) : null}
+        </span>
+      ) : null}
+    </div>
   );
 }
 
@@ -171,6 +207,8 @@ export function Textarea({
         : 0;
   const [count, setCount] = useState(initial);
   const describedBy = describedByIds(fieldId, error, helper, counterId);
+  const areaRef = useRef<HTMLTextAreaElement | null>(null);
+  const showMeta = Boolean(error || helper || maxLength != null);
 
   function autoGrow(el: HTMLTextAreaElement) {
     el.style.height = "auto";
@@ -179,12 +217,17 @@ export function Textarea({
     el.style.height = `${Math.min(el.scrollHeight, maxH)}px`;
   }
 
+  // Grow after mount — never during SSR/ref-attach (avoids hydration mismatch).
+  useEffect(() => {
+    if (areaRef.current) autoGrow(areaRef.current);
+  }, [value, defaultValue, rows, maxRows]);
+
   return (
-    <label className={cn("block space-y-1.5 text-sm", className)}>
-      <span className="font-medium text-ro-ink">
+    <div className={cn("block space-y-1.5 text-sm", className)}>
+      <label htmlFor={fieldId} className="font-medium text-ro-ink">
         {label}
         {required ? " *" : ""}
-      </span>
+      </label>
       <textarea
         id={fieldId}
         name={name}
@@ -194,8 +237,6 @@ export function Textarea({
         dir={dir}
         maxLength={maxLength}
         rows={rows}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy}
         className={cn(
           "w-full resize-none rounded-[var(--ro-r-sm)] border bg-ro-paper px-3 py-2.5 text-ro-ink outline-none transition-colors duration-[var(--ro-dur-fast)] ease-[var(--ro-ease-standard)] focus:border-[var(--ro-plum-900)] focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-[var(--ro-focus)] disabled:pointer-events-none disabled:opacity-45",
           "min-h-24",
@@ -204,41 +245,43 @@ export function Textarea({
             : "border-[var(--ro-border-control)]",
           dense && "text-sm"
         )}
+        {...rest}
+        ref={areaRef}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={describedBy}
         onChange={(e) => {
           if (maxLength != null) setCount(e.target.value.length);
           autoGrow(e.currentTarget);
           onChange?.(e);
         }}
-        ref={(el) => {
-          if (el) autoGrow(el);
-        }}
-        {...rest}
       />
-      <span className="flex items-start justify-between gap-3">
-        {error ? (
-          <span
-            id={`${fieldId}-error`}
-            className="block text-xs text-[var(--ro-danger-700)]"
-            role="alert"
-          >
-            {error}
-          </span>
-        ) : helper ? (
-          <span id={`${fieldId}-help`} className="block text-xs text-ro-muted">
-            {helper}
-          </span>
-        ) : (
-          <span />
-        )}
-        {maxLength != null ? (
-          <span
-            id={counterId}
-            className="shrink-0 text-xs tabular-nums text-ro-muted"
-          >
-            {count}/{maxLength}
-          </span>
-        ) : null}
-      </span>
-    </label>
+      {showMeta ? (
+        <span className="flex items-start justify-between gap-3">
+          {error ? (
+            <span
+              id={`${fieldId}-error`}
+              className="block text-xs text-[var(--ro-danger-700)]"
+              role="alert"
+            >
+              {error}
+            </span>
+          ) : helper ? (
+            <span id={`${fieldId}-help`} className="block text-xs text-ro-muted">
+              {helper}
+            </span>
+          ) : (
+            <span />
+          )}
+          {maxLength != null ? (
+            <span
+              id={counterId}
+              className="shrink-0 text-xs tabular-nums text-ro-muted"
+            >
+              {count}/{maxLength}
+            </span>
+          ) : null}
+        </span>
+      ) : null}
+    </div>
   );
 }

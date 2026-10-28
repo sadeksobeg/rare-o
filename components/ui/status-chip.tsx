@@ -1,3 +1,12 @@
+import {
+  Circle,
+  CircleCheck,
+  CircleX,
+  Clock,
+  Info,
+  Minus,
+  TriangleAlert,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import {
@@ -5,6 +14,16 @@ import {
   type StatusDomain,
 } from "@/lib/ui/status-labels";
 import type { StatusTone } from "@/lib/ui/status";
+
+const toneIcon: Record<StatusTone, typeof Info> = {
+  neutral: Circle,
+  info: Info,
+  progress: Clock,
+  attention: TriangleAlert,
+  success: CircleCheck,
+  danger: CircleX,
+  closed: Minus,
+};
 
 const toneClass: Record<StatusTone, string> = {
   neutral:
@@ -60,10 +79,12 @@ export function StatusChip(props: (BoundProps | FreeProps) & Common) {
       ? getStatusChipProps(props.dict, props.domain, props.value)
       : { tone: props.tone, label: props.label };
 
+  const ToneIcon = toneIcon[resolved.tone];
+
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-[var(--ro-r-sm)] font-medium",
+        "inline-flex items-center gap-1.5 rounded-[var(--ro-r-sm)] font-bold tracking-wide",
         size === "sm" ? "h-[22px] px-2 text-xs" : "h-7 px-2.5 text-xs",
         toneClass[resolved.tone],
         className
@@ -74,11 +95,13 @@ export function StatusChip(props: (BoundProps | FreeProps) & Common) {
           aria-hidden
           className="size-1.5 shrink-0 rounded-full bg-current opacity-80"
         />
-      ) : icon ? (
+      ) : (
         <span className="inline-flex size-3.5 shrink-0 items-center justify-center [&>svg]:size-3.5">
-          {icon}
+          {icon ?? (
+            <ToneIcon className="size-3.5" strokeWidth={1.5} aria-hidden />
+          )}
         </span>
-      ) : null}
+      )}
       <span>{resolved.label}</span>
     </span>
   );

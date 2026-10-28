@@ -3,6 +3,7 @@ import {
   PRODUCT_AVAILABILITIES,
   PRODUCT_STATUSES,
 } from "@/lib/catalog/constants";
+import { parseOudSpecs } from "@/lib/catalog/oud-specs";
 import { isCurrencyCode } from "@/lib/catalog/currency";
 import {
   RETAIL_REQUEST_CREATE_STATUSES,
@@ -32,6 +33,10 @@ export const productUpsertSchema = z.object({
   descriptionEn: z.string().max(10000).default(""),
   specsTextAr: z.string().max(10000).default(""),
   specsTextEn: z.string().max(10000).default(""),
+  oudSpecs: z
+    .unknown()
+    .optional()
+    .transform((value) => parseOudSpecs(value)),
   categoryId: z.string().min(1),
   /** Empty = price on request (D28b); must pair with currency */
   retailPrice: z

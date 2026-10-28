@@ -49,6 +49,10 @@ type Dict = {
     categoriesCta: string;
     categoryDescInstruments: string;
     categoryDescAccessories: string;
+    categoryDescEconomy: string;
+    categoryDescMid: string;
+    categoryDescProfessional: string;
+    categoryDescVip: string;
     oudEyebrow: string;
     oudTitle: string;
     oudBody: string;
@@ -196,6 +200,28 @@ type Dict = {
     priceWas: string;
     priceNow: string;
     onSale: string;
+    extras: string;
+    oudSpecs: {
+      title: string;
+      wood: string;
+      measures: string;
+      details: string;
+      back: string;
+      face: string;
+      pegs: string;
+      fingerboard: string;
+      bridge: string;
+      faceWidth: string;
+      faceDepth: string;
+      faceLength: string;
+      neckLength: string;
+      stringLength: string;
+      standardNeck: string;
+      standardNeckYes: string;
+      standardNeckNo: string;
+      finish: string;
+      mm: string;
+    };
   };
   cart: {
     title: string;
@@ -317,6 +343,32 @@ type Dict = {
     quickProduct: string;
     quickOffer: string;
     quickTrader: string;
+    waitingToday: string;
+    waitingTodayZero: string;
+    filterAll: string;
+    filterRetail: string;
+    filterDeals: string;
+    filterWholesale: string;
+    trendUp: string;
+    trendDown: string;
+    trendFlat: string;
+    contentHealth: string;
+    contentHealthRatio: string;
+    contentHealthMissing: string;
+    contentHealthComplete: string;
+    pipeline: string;
+    pipelineLegend: string;
+    whatsappNoun: string;
+    whatsappLastMessage: string;
+    whatsappNoMessage: string;
+    piecesCount: string;
+    commandSearch: string;
+    commandPlaceholder: string;
+    commandEmpty: string;
+    commandSearching: string;
+    manageHub: string;
+    settings: string;
+    savedToast: string;
   };
   adminUi: {
     colReference: string;
@@ -363,6 +415,10 @@ type Dict = {
     promoStatus: Record<string, string>;
     promoTone: Record<string, string>;
     searchPlaceholder: string;
+    searchRequests: string;
+    searchDeals: string;
+    searchWholesale: string;
+    searchProducts: string;
     search: string;
     filterTabs: string;
     filterAll: string;
@@ -389,6 +445,8 @@ type Dict = {
     traderTempPasswordClose: string;
     traderActivate: string;
     traderDisable: string;
+    traderDisableTitle: string;
+    traderDisableBody: string;
     categorySave: string;
     categoryNameAr: string;
     categoryNameEn: string;
@@ -409,6 +467,11 @@ type Dict = {
     customerWaTitle: string;
     customerWaEmpty: string;
     customerWaOpen: string;
+    customerNotesSave: string;
+    customerNotesSaved: string;
+    customerNotesFailed: string;
+    customerNotesInvalid: string;
+    customerNotesHelper: string;
     kindCatalog: string;
     kindNonCatalog: string;
     modeRequestQuote: string;
@@ -542,6 +605,30 @@ type Dict = {
       descriptionEn: string;
       specsAr: string;
       specsEn: string;
+      specsHelp: string;
+      oudSpecsTitle: string;
+      oudSpecsHint: string;
+      oudWoodTitle: string;
+      oudMeasuresTitle: string;
+      oudDetailsTitle: string;
+      oudWoodBack: string;
+      oudWoodFace: string;
+      oudWoodPegs: string;
+      oudWoodFingerboard: string;
+      oudWoodBridge: string;
+      oudFaceWidth: string;
+      oudFaceDepth: string;
+      oudFaceLength: string;
+      oudNeckLength: string;
+      oudStringLength: string;
+      oudStandardNeck: string;
+      oudStandardNeckUnset: string;
+      oudStandardNeckYes: string;
+      oudStandardNeckNo: string;
+      oudFinish: string;
+      oudMm: string;
+      oudAr: string;
+      oudEn: string;
       category: string;
       retailPrice: string;
       compareAtPrice: string;
@@ -554,6 +641,12 @@ type Dict = {
       availabilityHelp: string;
       wholesaleEligible: string;
       wholesaleEligibleHelp: string;
+      storeBadges: string;
+      storeBadgesHelp: string;
+      badgeNew: string;
+      badgeFeatured: string;
+      badgeSale: string;
+      previewStorefront: string;
       saveProduct: string;
       saving: string;
     };
@@ -569,6 +662,8 @@ type Dict = {
     profile: string;
     logout: string;
     welcome: string;
+    waitingToday: string;
+    waitingTodayZero: string;
     lead: string;
     homeTasksTitle: string;
     taskDealTitle: string;
@@ -752,6 +847,24 @@ type Dict = {
     offersBack: string;
     offersRelatedProduct: string;
     offersStartDeal: string;
+    confirmCancel: string;
+    negConfirmAcceptTitle: string;
+    negConfirmAcceptBody: string;
+    negConfirmCloseTitle: string;
+    negConfirmCloseBody: string;
+    negConfirmRejectTitle: string;
+    negConfirmRejectBody: string;
+    wsConfirmAcceptTitle: string;
+    wsConfirmAcceptBody: string;
+    wsConfirmDeclineTitle: string;
+    wsConfirmDeclineBody: string;
+    wsConfirmCancelTitle: string;
+    wsConfirmCancelBody: string;
+    actionErrorUnauthorized: string;
+    actionErrorNotAllowed: string;
+    actionErrorInvalid: string;
+    actionErrorGeneric: string;
+    actionError: Record<string, string>;
   };
   inbox: {
     title: string;
@@ -895,6 +1008,10 @@ type Dict = {
     /** Supports `{page}` and `{pages}` placeholders. */
     paginationPageOf: string;
     timelineLabel: string;
+    greetingMorning: string;
+    greetingAfternoon: string;
+    greetingEvening: string;
+    greetingNamed: string;
   };
   contact: {
     title: string;
@@ -922,6 +1039,11 @@ type Dict = {
     traderTitle: string;
     traderHint: string;
     loginError: string;
+    loginLocked: string;
+    totpLabel: string;
+    totpRequired: string;
+    totpInvalid: string;
+    totpEnrollRequired: string;
     showPassword: string;
     hidePassword: string;
   };
@@ -981,7 +1103,11 @@ const ar: Dict = {
     categoriesIntro: "فئتان قائمتان في المنصة عالمان بصريان ضمن هوية RARE OUD.",
     categoriesCta: "استكشف",
     categoryDescInstruments: "اكتشف المجموعة الأولى من الكتالوج.",
-    categoryDescAccessories: "اكتشف المجموعة الثانية من الكتالوج.",
+    categoryDescAccessories: "إكسسوارات مختارة للسفر والعزف اليومي.",
+    categoryDescEconomy: "عود ورشة للممارسة والعزف اليومي.",
+    categoryDescMid: "عود متوازن للاستخدام المنتظم والاستوديو.",
+    categoryDescProfessional: "عود حفلات بنبرة أوضح واستجابة سريعة.",
+    categoryDescVip: "قطع نادرة بأخشاب مختارة وتشطيب أتيليه.",
     oudEyebrow: "الندرة",
     oudTitle: "مادة نادرة واختيار واعٍ",
     oudBody:
@@ -1057,7 +1183,7 @@ const ar: Dict = {
     search: "بحث",
     filters: "تصفية",
     allCategories: "كل الفئات",
-    lead: "قطع مختارة بعناية من العود والآلات الوترية والملحقات. اختر القطعة التي تلفت نظرك وأضفها إلى قائمة الطلب.",
+    lead: "أربع درجات من العود — اقتصادي، متوسط، احترافي، VIP — مع إكسسوارات مختارة. اختر القطعة التي تلفت نظرك وأضفها إلى قائمة الطلب.",
     photoCaption: "الصورة قيد التصوير",
     filtersTitle: "تصفية وترتيب",
     typeLabel: "النوع",
@@ -1128,6 +1254,28 @@ const ar: Dict = {
     priceWas: "كان",
     priceNow: "الآن",
     onSale: "سعر مخفّض",
+    extras: "ميزات إضافية",
+    oudSpecs: {
+      title: "مواصفات العود",
+      wood: "نوع الخشب",
+      measures: "مقاسات العود",
+      details: "المواصفات",
+      back: "الظهر",
+      face: "الوجه",
+      pegs: "المفاتيح",
+      fingerboard: "لوحة الأصابع",
+      bridge: "مربط الأوتار",
+      faceWidth: "عرض الوجه",
+      faceDepth: "عمق الظهر",
+      faceLength: "طول الوجه",
+      neckLength: "طول الزند",
+      stringLength: "طول الوتر",
+      standardNeck: "الزند عياري",
+      standardNeckYes: "عياري",
+      standardNeckNo: "غير عياري",
+      finish: "نوع الطلاء",
+      mm: "مم",
+    },
   },
   cart: {
     title: "قائمة الطلب",
@@ -1198,9 +1346,9 @@ const ar: Dict = {
     wholesale: "الجملة",
     offers: "العروض",
     promos: "الترويج",
-    kpiRetail: "طلبات بانتظار الإدارة",
+    kpiRetail: "طلبات تجزئة جديدة",
     kpiDeals: "صفقات بانتظار الرد",
-    kpiWholesale: "جملة بانتظار الرد",
+    kpiWholesale: "طلبات جملة",
     kpiUnread: "محادثات غير مقروءة",
     kpiIdle: "لا شيء بانتظارك",
     recentRequests: "أحدث طلبات التجزئة",
@@ -1252,6 +1400,32 @@ const ar: Dict = {
     quickProduct: "منتج",
     quickOffer: "عرض",
     quickTrader: "حساب تاجر",
+    waitingToday: "{n} أمور بانتظارك اليوم · {date}",
+    waitingTodayZero: "لا شيء بانتظارك اليوم · {date}",
+    filterAll: "الكل {n}",
+    filterRetail: "تجزئة",
+    filterDeals: "صفقات",
+    filterWholesale: "جملة",
+    trendUp: "+{n} عن أمس",
+    trendDown: "−{n} عن أمس",
+    trendFlat: "بلا تغيير",
+    contentHealth: "صحة المحتوى",
+    contentHealthRatio: "{have} من {total}",
+    contentHealthMissing: "{n} قطع تنتظر صوراً خاصة بها",
+    contentHealthComplete: "كل القطع المنشورة لها صور",
+    pipeline: "مسار الطلبات",
+    pipelineLegend: "جديد · متابعة · فُتح · مكتمل",
+    whatsappNoun: "واتساب",
+    whatsappLastMessage: "آخر رسالة {relative}",
+    whatsappNoMessage: "لا رسائل بعد",
+    piecesCount: "{n} قطع",
+    commandSearch: "بحث أو أمر",
+    commandPlaceholder: "ابحث عن طلب أو منتج أو تاجر…",
+    commandEmpty: "لا نتائج",
+    commandSearching: "جاري البحث…",
+    manageHub: "إدارة",
+    settings: "الأمان",
+    savedToast: "تم الحفظ.",
   },
   adminUi: {
     colReference: "المرجع",
@@ -1310,6 +1484,10 @@ const ar: Dict = {
       sand: "رملي",
     },
     searchPlaceholder: "ابحث بالاسم أو الهاتف",
+    searchRequests: "ابحث بالمرجع أو العميل",
+    searchDeals: "ابحث بالمرجع أو التاجر",
+    searchWholesale: "ابحث بالمرجع أو التاجر",
+    searchProducts: "ابحث بالاسم أو التصنيف",
     search: "بحث",
     filterTabs: "تصفية القائمة",
     filterAll: "الكل",
@@ -1338,6 +1516,8 @@ const ar: Dict = {
     traderTempPasswordClose: "تم — إغلاق",
     traderActivate: "تفعيل",
     traderDisable: "تعطيل",
+    traderDisableTitle: "تعطيل حساب التاجر؟",
+    traderDisableBody: "لن يستطيع التاجر الدخول حتى يُعاد تفعيله. سجلاته تبقى ظاهرة.",
     categorySave: "حفظ التسميات",
     categoryNameAr: "الاسم (عربي)",
     categoryNameEn: "الاسم (إنجليزي)",
@@ -1358,6 +1538,12 @@ const ar: Dict = {
     customerWaTitle: "محادثات واتساب",
     customerWaEmpty: "لا توجد محادثات واتساب مرتبطة برقم هذا العميل.",
     customerWaOpen: "فتح المحادثة",
+    customerNotesSave: "حفظ الملاحظات",
+    customerNotesSaved: "تم حفظ الملاحظات.",
+    customerNotesFailed: "تعذّر حفظ الملاحظات.",
+    customerNotesInvalid: "الملاحظة أطول من المسموح.",
+    customerNotesHelper:
+      "ملاحظات داخلية للإدارة فقط. لا تغيّر حالة الطلب ولا محادثة واتساب.",
     kindCatalog: "من الكتالوج",
     kindNonCatalog: "خارج الكتالوج",
     modeRequestQuote: "طلب عرض سعر",
@@ -1530,9 +1716,33 @@ const ar: Dict = {
       productNameEn: "الاسم (إنجليزي)",
       descriptionAr: "الوصف (عربي)",
       descriptionEn: "الوصف (إنجليزي)",
-      specsAr: "المواصفات (عربي)",
-      specsEn: "المواصفات (إنجليزي)",
-      category: "الفئة (مجموعة الإطلاق فقط)",
+      specsAr: "ميزات إضافية (عربي)",
+      specsEn: "ميزات إضافية (إنجليزي)",
+      specsHelp: "نص حر يظهر تحت مواصفات العود فقط — ليس بنوداً مستقلة.",
+      oudSpecsTitle: "مواصفات العود (اختياري)",
+      oudSpecsHint: "املأ ما ينطبق على هذه القطعة. الحقول الفارغة لا تظهر في المتجر.",
+      oudWoodTitle: "نوع الخشب",
+      oudMeasuresTitle: "مقاسات العود",
+      oudDetailsTitle: "المواصفات",
+      oudWoodBack: "الظهر",
+      oudWoodFace: "الوجه",
+      oudWoodPegs: "المفاتيح",
+      oudWoodFingerboard: "لوحة الأصابع",
+      oudWoodBridge: "مربط الأوتار",
+      oudFaceWidth: "عرض الوجه",
+      oudFaceDepth: "عمق الظهر",
+      oudFaceLength: "طول الوجه",
+      oudNeckLength: "طول الزند",
+      oudStringLength: "طول الوتر",
+      oudStandardNeck: "الزند عياري",
+      oudStandardNeckUnset: "غير محدد",
+      oudStandardNeckYes: "عياري",
+      oudStandardNeckNo: "غير عياري",
+      oudFinish: "نوع الطلاء",
+      oudMm: "بالملليمتر",
+      oudAr: "عربي",
+      oudEn: "إنجليزي",
+      category: "الفئة",
       retailPrice: "سعر التجزئة",
       compareAtPrice: "السعر السابق (اختياري)",
       compareAtHelp: "اتركه فارغاً إن لم يكن هناك سعر سابق. يظهر الخصم فقط إذا كان أعلى من سعر التجزئة.",
@@ -1544,6 +1754,12 @@ const ar: Dict = {
       availabilityHelp: "علامة توفر للتجزئة، وليست مخزوناً.",
       wholesaleEligible: "مؤهَّل للجملة",
       wholesaleEligibleHelp: "علامة فقط — لا واجهة جملة مرتبطة بها حالياً.",
+      storeBadges: "شارات المتجر",
+      storeBadgesHelp: "تظهر على بطاقة المنتج وصورة القطعة. يتحكم الأدمن بكل شارة بشكل مستقل.",
+      badgeNew: "جديد",
+      badgeFeatured: "مميّز",
+      badgeSale: "خصم",
+      previewStorefront: "معاينة في المتجر",
       saveProduct: "حفظ المنتج",
       saving: "جارٍ الحفظ…",
     },
@@ -1559,6 +1775,8 @@ const ar: Dict = {
     profile: "حسابي",
     logout: "خروج",
     welcome: "أهلاً، {name}",
+    waitingToday: "{n} أمور بانتظارك اليوم · {date}",
+    waitingTodayZero: "لا شيء بانتظارك اليوم · {date}",
     lead: "فاوض على الصفقات وقدّم طلبات الجملة من مخزون RARE OUD — هذه البوابة ليست متجراً.",
     homeTasksTitle: "ابدأ من هنا",
     taskDealTitle: "اقترح صفقة",
@@ -1779,6 +1997,24 @@ const ar: Dict = {
     offersBack: "العودة إلى العروض",
     offersRelatedProduct: "المنتج المرتبط",
     offersStartDeal: "بدء صفقة من هذا العرض",
+    confirmCancel: "إلغاء",
+    negConfirmAcceptTitle: "قبول هذه الصفقة؟",
+    negConfirmAcceptBody: "القبول يُقفل التفاوض ويسجّل موافقتك على الشروط الحالية.",
+    negConfirmCloseTitle: "إغلاق هذه الصفقة؟",
+    negConfirmCloseBody: "الإغلاق يُنهي التفاوض دون قبول. لا يمكن التراجع من هنا.",
+    negConfirmRejectTitle: "رفض هذه الصفقة؟",
+    negConfirmRejectBody: "الرفض يُنهي الصفقة. يمكنك إضافة سبب يظهر للتاجر.",
+    wsConfirmAcceptTitle: "قبول عرض السعر؟",
+    wsConfirmAcceptBody: "القبول يعني نيّة التنفيذ على الأسعار المعروضة.",
+    wsConfirmDeclineTitle: "رفض عرض السعر؟",
+    wsConfirmDeclineBody: "رفض العرض يُلغي طلب الجملة. يمكنك إرسال طلب جديد لاحقاً.",
+    wsConfirmCancelTitle: "إلغاء طلب الجملة؟",
+    wsConfirmCancelBody: "سيُلغى الطلب ولن تتمكن من تعديله بعد الإلغاء.",
+    actionErrorUnauthorized: "انتهت جلستك. سجّل الدخول من جديد.",
+    actionErrorNotAllowed: "هذا الإجراء غير متاح لهذه الحالة.",
+    actionErrorInvalid: "تعذّر إرسال البيانات. راجع الحقول وحاول مرة أخرى.",
+    actionErrorGeneric: "تعذّر إكمال العملية. حاول مرة أخرى.",
+    actionError: {},
   },
   inbox: {
     title: "صندوق واتساب",
@@ -1920,6 +2156,10 @@ const ar: Dict = {
     paginationNext: "التالي",
     paginationPageOf: "صفحة {page} من {pages}",
     timelineLabel: "سجل النشاط",
+    greetingMorning: "صباح الخير",
+    greetingAfternoon: "طاب يومك",
+    greetingEvening: "مساء الخير",
+    greetingNamed: "{greeting}، {name}",
   },
   contact: {
     title: "تواصل معنا",
@@ -1952,6 +2192,11 @@ const ar: Dict = {
     traderTitle: "دخول التجّار",
     traderHint: "الحسابات تُنشأ من الإدارة فقط — لا تسجيل ذاتي عام.",
     loginError: "البريد أو كلمة المرور غير صحيحة.",
+    loginLocked: "محاولات كثيرة. انتظر قليلاً ثم أعد المحاولة.",
+    totpLabel: "رمز التحقق أو الاسترداد",
+    totpRequired: "أدخل رمز التحقق أو رمز الاسترداد.",
+    totpInvalid: "رمز التحقق غير صحيح.",
+    totpEnrollRequired: "فعّل التحقق بخطوتين من إعدادات الأمان قبل الدخول.",
     showPassword: "إظهار",
     hidePassword: "إخفاء",
   },
@@ -2013,7 +2258,11 @@ const en: Dict = {
     categoriesIntro: "The two launch categories on the platform — distinct visual worlds within the RARE OUD identity.",
     categoriesCta: "Explore",
     categoryDescInstruments: "Discover the first collection in the catalog.",
-    categoryDescAccessories: "Discover the second collection in the catalog.",
+    categoryDescAccessories: "Selected accessories for travel and daily play.",
+    categoryDescEconomy: "Workshop ouds for practice and everyday playing.",
+    categoryDescMid: "Balanced ouds for regular use and studio work.",
+    categoryDescProfessional: "Concert ouds with clearer tone and quick response.",
+    categoryDescVip: "Rare pieces with selected woods and atelier finishing.",
     oudEyebrow: "Rarity",
     oudTitle: "Rare material, considered selection",
     oudBody:
@@ -2089,7 +2338,7 @@ const en: Dict = {
     search: "Search",
     filters: "Filters",
     allCategories: "All categories",
-    lead: "Pieces chosen with care: oud, string instruments and accessories. Pick what catches your eye and add it to your request list.",
+    lead: "Four oud tiers — economy, mid, professional, VIP — plus selected accessories. Pick what catches your eye and add it to your request list.",
     photoCaption: "Photography in progress",
     filtersTitle: "Filter & sort",
     typeLabel: "Type",
@@ -2160,6 +2409,28 @@ const en: Dict = {
     priceWas: "Was",
     priceNow: "Now",
     onSale: "On offer",
+    extras: "Extra features",
+    oudSpecs: {
+      title: "Oud specifications",
+      wood: "Wood type",
+      measures: "Oud measurements",
+      details: "Specifications",
+      back: "Back",
+      face: "Face",
+      pegs: "Keys",
+      fingerboard: "Fingerboard",
+      bridge: "String holder",
+      faceWidth: "Face width",
+      faceDepth: "Back depth",
+      faceLength: "Face length",
+      neckLength: "Neck length",
+      stringLength: "String length",
+      standardNeck: "Standard neck",
+      standardNeckYes: "Standard",
+      standardNeckNo: "Non-standard",
+      finish: "Finish type",
+      mm: "mm",
+    },
   },
   cart: {
     title: "Request list",
@@ -2230,9 +2501,9 @@ const en: Dict = {
     wholesale: "Wholesale",
     offers: "Offers",
     promos: "Promos",
-    kpiRetail: "Requests needing admin",
+    kpiRetail: "New retail requests",
     kpiDeals: "Deals awaiting reply",
-    kpiWholesale: "Wholesale awaiting reply",
+    kpiWholesale: "Wholesale requests",
     kpiUnread: "Unread conversations",
     kpiIdle: "Nothing waiting for you",
     recentRequests: "Recent retail requests",
@@ -2285,6 +2556,32 @@ const en: Dict = {
     quickProduct: "Product",
     quickOffer: "Offer",
     quickTrader: "Trader account",
+    waitingToday: "{n} items waiting today · {date}",
+    waitingTodayZero: "Nothing waiting today · {date}",
+    filterAll: "All {n}",
+    filterRetail: "Retail",
+    filterDeals: "Deals",
+    filterWholesale: "Wholesale",
+    trendUp: "+{n} vs yesterday",
+    trendDown: "−{n} vs yesterday",
+    trendFlat: "Unchanged",
+    contentHealth: "Catalog health",
+    contentHealthRatio: "{have} of {total}",
+    contentHealthMissing: "{n} pieces still need their own photos",
+    contentHealthComplete: "Every published piece has photos",
+    pipeline: "Request path",
+    pipelineLegend: "New · Follow-up · Opened · Done",
+    whatsappNoun: "WhatsApp",
+    whatsappLastMessage: "Last message {relative}",
+    whatsappNoMessage: "No messages yet",
+    piecesCount: "{n} pieces",
+    commandSearch: "Search or command",
+    commandPlaceholder: "Search a request, product, or trader…",
+    commandEmpty: "No results",
+    commandSearching: "Searching…",
+    manageHub: "Manage",
+    settings: "Security",
+    savedToast: "Saved.",
   },
   adminUi: {
     colReference: "Reference",
@@ -2343,6 +2640,10 @@ const en: Dict = {
       sand: "Sand",
     },
     searchPlaceholder: "Search name or phone",
+    searchRequests: "Search reference or customer",
+    searchDeals: "Search reference or trader",
+    searchWholesale: "Search reference or trader",
+    searchProducts: "Search name or category",
     search: "Search",
     filterTabs: "Filter list",
     filterAll: "All",
@@ -2372,6 +2673,8 @@ const en: Dict = {
     traderTempPasswordClose: "Done — close",
     traderActivate: "Activate",
     traderDisable: "Disable",
+    traderDisableTitle: "Disable this trader?",
+    traderDisableBody: "They will not be able to sign in until reactivated. Their records stay visible.",
     categorySave: "Save labels",
     categoryNameAr: "Name (Arabic)",
     categoryNameEn: "Name (English)",
@@ -2393,6 +2696,12 @@ const en: Dict = {
     customerWaTitle: "WhatsApp conversations",
     customerWaEmpty: "No WhatsApp conversations match this customer's phone.",
     customerWaOpen: "Open conversation",
+    customerNotesSave: "Save notes",
+    customerNotesSaved: "Notes saved.",
+    customerNotesFailed: "Could not save notes.",
+    customerNotesInvalid: "The note is longer than allowed.",
+    customerNotesHelper:
+      "Internal admin notes only. Saving does not change a request status or a WhatsApp conversation.",
     kindCatalog: "Catalog",
     kindNonCatalog: "Non-catalog",
     modeRequestQuote: "Request quote",
@@ -2568,9 +2877,33 @@ const en: Dict = {
       productNameEn: "Name (English)",
       descriptionAr: "Description (Arabic)",
       descriptionEn: "Description (English)",
-      specsAr: "Specs (Arabic)",
-      specsEn: "Specs (English)",
-      category: "Category (launch set only)",
+      specsAr: "Extra features (Arabic)",
+      specsEn: "Extra features (English)",
+      specsHelp: "Free text shown only as extra features — not a separate spec list.",
+      oudSpecsTitle: "Oud specifications (optional)",
+      oudSpecsHint: "Fill only what applies. Empty fields stay hidden on the storefront.",
+      oudWoodTitle: "Wood type",
+      oudMeasuresTitle: "Oud measurements",
+      oudDetailsTitle: "Specifications",
+      oudWoodBack: "Back",
+      oudWoodFace: "Face",
+      oudWoodPegs: "Keys",
+      oudWoodFingerboard: "Fingerboard",
+      oudWoodBridge: "String holder",
+      oudFaceWidth: "Face width",
+      oudFaceDepth: "Back depth",
+      oudFaceLength: "Face length",
+      oudNeckLength: "Neck length",
+      oudStringLength: "String length",
+      oudStandardNeck: "Standard neck",
+      oudStandardNeckUnset: "Not set",
+      oudStandardNeckYes: "Standard",
+      oudStandardNeckNo: "Non-standard",
+      oudFinish: "Finish type",
+      oudMm: "Millimetres",
+      oudAr: "Arabic",
+      oudEn: "English",
+      category: "Category",
       retailPrice: "Retail price",
       compareAtPrice: "Compare-at price (optional)",
       compareAtHelp: "Leave empty if there is no prior price. A discount shows only when this is higher than retail.",
@@ -2582,6 +2915,12 @@ const en: Dict = {
       availabilityHelp: "Retail flag, not inventory.",
       wholesaleEligible: "Wholesale eligible",
       wholesaleEligibleHelp: "Flag only — no wholesale UI is attached to it yet.",
+      storeBadges: "Store badges",
+      storeBadgesHelp: "Shown on the product card and plate. Each badge is independent.",
+      badgeNew: "New",
+      badgeFeatured: "Featured",
+      badgeSale: "Sale",
+      previewStorefront: "Preview on storefront",
       saveProduct: "Save product",
       saving: "Saving…",
     },
@@ -2597,6 +2936,8 @@ const en: Dict = {
     profile: "Profile",
     logout: "Sign out",
     welcome: "Welcome, {name}",
+    waitingToday: "{n} items waiting today · {date}",
+    waitingTodayZero: "Nothing waiting today · {date}",
     lead: "Negotiate deals and submit wholesale requests against RARE OUD stock — this is not a storefront.",
     homeTasksTitle: "Start here",
     taskDealTitle: "Propose a deal",
@@ -2819,6 +3160,30 @@ const en: Dict = {
     offersBack: "Back to offers",
     offersRelatedProduct: "Related product",
     offersStartDeal: "Start a deal from this offer",
+    confirmCancel: "Cancel",
+    negConfirmAcceptTitle: "Accept this deal?",
+    negConfirmAcceptBody:
+      "Accepting locks negotiation and records your agreement to the current terms.",
+    negConfirmCloseTitle: "Close this deal?",
+    negConfirmCloseBody:
+      "Closing ends negotiation without accepting. This cannot be undone here.",
+    negConfirmRejectTitle: "Reject this deal?",
+    negConfirmRejectBody:
+      "Rejecting ends the deal. You can add a reason shown to the trader.",
+    wsConfirmAcceptTitle: "Accept this quotation?",
+    wsConfirmAcceptBody:
+      "Accepting records fulfillment intent on the quoted prices.",
+    wsConfirmDeclineTitle: "Decline this quotation?",
+    wsConfirmDeclineBody:
+      "Declining cancels the wholesale request. You can submit a new one later.",
+    wsConfirmCancelTitle: "Cancel this wholesale request?",
+    wsConfirmCancelBody:
+      "The request will be cancelled and cannot be edited afterwards.",
+    actionErrorUnauthorized: "Your session has expired. Please sign in again.",
+    actionErrorNotAllowed: "This action is not available for the current status.",
+    actionErrorInvalid: "The form could not be sent. Check the fields and try again.",
+    actionErrorGeneric: "Could not complete that action. Please try again.",
+    actionError: {},
   },
   inbox: {
     title: "WhatsApp inbox",
@@ -2961,6 +3326,10 @@ const en: Dict = {
     paginationNext: "Next",
     paginationPageOf: "Page {page} of {pages}",
     timelineLabel: "Activity timeline",
+    greetingMorning: "Good morning",
+    greetingAfternoon: "Good afternoon",
+    greetingEvening: "Good evening",
+    greetingNamed: "{greeting}, {name}",
   },
   contact: {
     title: "Contact us",
@@ -2993,6 +3362,11 @@ const en: Dict = {
     traderTitle: "Trader sign in",
     traderHint: "Accounts are provisioned by RARE OUD admin. No public registration.",
     loginError: "Email or password is incorrect.",
+    loginLocked: "Too many attempts. Wait a moment and try again.",
+    totpLabel: "2FA or recovery code",
+    totpRequired: "Enter your authenticator or recovery code.",
+    totpInvalid: "That verification code is not valid.",
+    totpEnrollRequired: "Turn on two-factor authentication in security settings before signing in.",
     showPassword: "Show",
     hidePassword: "Hide",
   },

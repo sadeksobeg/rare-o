@@ -20,6 +20,7 @@ import {
   verifyPassword,
 } from "@/lib/auth/trader-session";
 import { requireAdminSession } from "@/lib/auth/admin-session";
+import { safePortalReturnTo } from "@/lib/auth/return-to";
 import { prisma } from "@/lib/db/prisma";
 import {
   addNegotiationEntry,
@@ -46,7 +47,7 @@ export async function traderLoginAction(
     password: formData.get("password"),
   });
   if (!parsed.success) {
-    return { ok: false, error: "Invalid credentials payload" };
+    return { ok: false, error: "LOGIN_INVALID" };
   }
 
   const email = parsed.data.email.toLowerCase();
@@ -60,13 +61,13 @@ export async function traderLoginAction(
   });
   if (!trader || trader.status !== "active") {
     recordLoginFailure("trader", email);
-    return { ok: false, error: "Invalid email or password" };
+    return { ok: false, error: "LOGIN_INVALID" };
   }
 
   const valid = await verifyPassword(parsed.data.password, trader.passwordHash);
   if (!valid) {
     recordLoginFailure("trader", email);
-    return { ok: false, error: "Invalid email or password" };
+    return { ok: false, error: "LOGIN_INVALID" };
   }
 
   clearLoginFailures("trader", email);
@@ -76,7 +77,7 @@ export async function traderLoginAction(
     displayName: trader.displayName,
   });
   await setTraderSessionCookie(token);
-  redirect("/trader");
+  redirect(safePortalReturnTo(formData.get("returnTo"), "/trader"));
 }
 
 export async function traderLogoutAction(): Promise<void> {

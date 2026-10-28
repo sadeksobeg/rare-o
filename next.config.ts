@@ -25,9 +25,6 @@ const nextConfig: NextConfig = {
     imageSizes: [64, 96, 128, 256, 384],
     minimumCacheTTL: 60 * 60 * 24 * 30,
   },
-  experimental: {
-    optimizePackageImports: ["lucide-react"],
-  },
   // Expose the promo UI gate to client components (PriceBlock in client trees).
   env: {
     RO_PROMO_FEATURES: process.env.RO_PROMO_FEATURES ?? "",

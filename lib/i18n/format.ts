@@ -3,6 +3,39 @@ import type { Locale } from "@/lib/i18n/config";
 
 const tz = process.env.APP_TIMEZONE || "Asia/Damascus";
 
+export const APP_TIMEZONE = tz;
+
+/** Calendar day `YYYY-MM-DD` in `APP_TIMEZONE`. */
+export function formatDayKey(date: Date): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
+/** Oldest-first calendar keys ending today (`APP_TIMEZONE`), length `n`. */
+export function lastCalendarDayKeys(n: number, from = new Date()): string[] {
+  const today = formatDayKey(from);
+  const [year, month, day] = today.split("-").map(Number);
+  const keys: string[] = [];
+  for (let i = n - 1; i >= 0; i -= 1) {
+    const utc = new Date(Date.UTC(year, month - 1, day - i));
+    keys.push(utc.toISOString().slice(0, 10));
+  }
+  return keys;
+}
+
+export function hourInAppTimezone(date = new Date()): number {
+  const hour = new Intl.DateTimeFormat("en-GB", {
+    timeZone: tz,
+    hour: "numeric",
+    hourCycle: "h23",
+  }).format(date);
+  return Number.parseInt(hour, 10);
+}
+
 function localeTag(locale: Locale) {
   return `${locale}-u-nu-latn`;
 }

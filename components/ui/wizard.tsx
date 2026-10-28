@@ -1,5 +1,7 @@
 "use client";
 
+import { Reveal } from "@/components/motion/reveal";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export type WizardStep = {
@@ -67,31 +69,30 @@ export function Wizard({
         </div>
       </header>
 
-      <div className="min-h-[12rem]">{children}</div>
+      <Reveal key={idx} variant="up" className="min-h-[12rem]">
+        {children}
+      </Reveal>
 
       <div className="flex flex-wrap items-center gap-3 border-t border-ro-line pt-4">
         {idx > 0 && onBack ? (
-          <button
-            type="button"
-            onClick={onBack}
-            className="min-h-11 border border-ro-line px-4 text-sm hover:bg-ro-sunken"
-          >
+          <Button type="button" variant="secondary" size="md" onClick={onBack}>
             {backLabel}
-          </button>
+          </Button>
         ) : (
           <span className="flex-1" />
         )}
         <div className="ms-auto flex flex-wrap items-center gap-3">
           {footer}
           {!hideNext && onNext ? (
-            <button
+            <Button
               type="button"
+              variant="primary"
+              size="md"
               onClick={onNext}
               disabled={nextDisabled}
-              className="min-h-11 bg-ro-purple px-5 text-sm text-ro-ivory disabled:opacity-60"
             >
               {nextLabel}
-            </button>
+            </Button>
           ) : null}
         </div>
       </div>

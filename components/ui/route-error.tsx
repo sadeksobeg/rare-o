@@ -8,15 +8,23 @@ import { Button } from "@/components/ui/button";
 
 export function RouteError({
   reset,
+  homeHref,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
+  homeHref?: string;
 }) {
   const dict = useMemo(() => {
     const lang =
       typeof document !== "undefined" ? document.documentElement.lang : "ar";
     return getDictionary(isLocale(lang) ? lang : defaultLocale);
   }, []);
+
+  const href = homeHref ?? "/contact";
+  const homeLabel =
+    href === "/admin" || href === "/trader"
+      ? dict.common.goToPortal
+      : dict.nav.contact;
 
   return (
     <div className="mx-auto flex min-h-[50vh] max-w-lg flex-col items-center justify-center px-6 py-16 text-center">
@@ -27,10 +35,10 @@ export function RouteError({
           {dict.common.errorRetry}
         </Button>
         <Link
-          href="/contact"
+          href={href}
           className="inline-flex min-h-11 items-center border border-ro-line px-4 text-sm font-medium text-ro-plum hover:bg-ro-sunken"
         >
-          {dict.nav.contact}
+          {homeLabel}
         </Link>
       </div>
     </div>
