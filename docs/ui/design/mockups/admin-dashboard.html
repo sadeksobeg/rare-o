@@ -7,64 +7,127 @@
 <link rel="stylesheet" href="shared.css" />
 </head>
 <body>
-<div class="shell">
-  <aside class="sidebar">
-    <div class="brand">RARE OUD</div>
-    <nav>
-      <a class="active" href="admin-dashboard.html">🏠 <span data-lang="ar">لوحة التحكم</span><span data-lang="en" hidden>Dashboard</span></a>
-      <a href="whatsapp-inbox.html">💬 <span data-lang="ar">صندوق واتساب</span><span data-lang="en" hidden>WhatsApp Inbox</span></a>
-      <a href="requests-list.html">🛍️ <span data-lang="ar">طلبات التجزئة</span><span data-lang="en" hidden>Retail requests</span></a>
-      <a href="#">🤝 <span data-lang="ar">الصفقات</span><span data-lang="en" hidden>Deals</span></a>
-      <a href="#">📦 <span data-lang="ar">الجملة</span><span data-lang="en" hidden>Wholesale</span></a>
-      <a href="product-form.html">🎻 <span data-lang="ar">المنتجات</span><span data-lang="en" hidden>Products</span></a>
-      <a href="#">👥 <span data-lang="ar">التجّار</span><span data-lang="en" hidden>Traders</span></a>
-      <a href="#">🧑‍💼 <span data-lang="ar">العملاء</span><span data-lang="en" hidden>Customers</span></a>
+<a href="#main" class="skip-link"><span data-lang="ar">تخطَّ إلى المحتوى</span><span data-lang="en" hidden>Skip to content</span></a>
+<div class="ro-shell">
+  <aside class="ro-sidebar ro-inverse">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div class="ro-brand"><svg width="22" height="22" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="30" fill="var(--ro-plum-900)"/><circle cx="32" cy="32" r="22" stroke="#F4E7D8" stroke-width="1.5"/><circle cx="32" cy="32" r="5" fill="#0B080D"/></svg> RARE OUD</div>
+      <button class="ro-icon-btn ro-sidebar-hamburger" data-open-dialog="admin-nav-drawer" aria-label="القائمة">
+        <span data-icon="menu" data-icon-size="20"></span>
+      </button>
+    </div>
+    <nav aria-label="الإدارة">
+      <a class="active" href="admin-dashboard.html" aria-current="page" data-icon="home"><span data-lang="ar">لوحة التحكم</span><span data-lang="en" hidden>Dashboard</span></a>
+      <a href="whatsapp-inbox.html" data-icon="inbox"><span data-lang="ar">صندوق واتساب</span><span data-lang="en" hidden>WhatsApp Inbox</span></a>
+      <a href="requests-list.html" data-icon="bag"><span data-lang="ar">طلبات التجزئة</span><span data-lang="en" hidden>Retail requests</span></a>
+      <a href="#" data-icon="handshake"><span data-lang="ar">الصفقات</span><span data-lang="en" hidden>Deals</span></a>
+      <a href="#" data-icon="package"><span data-lang="ar">الجملة</span><span data-lang="en" hidden>Wholesale</span></a>
+      <a href="product-form.html" data-icon="guitar"><span data-lang="ar">المنتجات</span><span data-lang="en" hidden>Products</span></a>
+      <a href="#" data-icon="users"><span data-lang="ar">التجّار</span><span data-lang="en" hidden>Traders</span></a>
+      <a href="#" data-icon="user"><span data-lang="ar">العملاء</span><span data-lang="en" hidden>Customers</span></a>
     </nav>
   </aside>
-  <main class="main">
-    <div class="topbar">
+
+  <dialog id="admin-nav-drawer" class="ro-drawer" aria-label="قائمة التنقل">
+    <div style="padding:var(--ro-s-5)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--ro-s-5)">
+        <strong style="font-family:var(--ro-font-display)">RARE OUD</strong>
+        <button class="ro-icon-btn" data-close-dialog aria-label="إغلاق"><span data-icon="x" data-icon-size="18"></span></button>
+      </div>
+      <nav class="ro-drawer-nav" aria-label="القائمة">
+        <a class="active" href="admin-dashboard.html" data-icon="home"><span data-lang="ar">لوحة التحكم</span><span data-lang="en" hidden>Dashboard</span></a>
+        <a href="whatsapp-inbox.html" data-icon="inbox"><span data-lang="ar">صندوق واتساب</span><span data-lang="en" hidden>WhatsApp Inbox</span></a>
+        <a href="requests-list.html" data-icon="bag"><span data-lang="ar">طلبات التجزئة</span><span data-lang="en" hidden>Retail requests</span></a>
+        <a href="#" data-icon="handshake"><span data-lang="ar">الصفقات</span><span data-lang="en" hidden>Deals</span></a>
+        <a href="#" data-icon="package"><span data-lang="ar">الجملة</span><span data-lang="en" hidden>Wholesale</span></a>
+        <a href="product-form.html" data-icon="guitar"><span data-lang="ar">المنتجات</span><span data-lang="en" hidden>Products</span></a>
+        <a href="#" data-icon="users"><span data-lang="ar">التجّار</span><span data-lang="en" hidden>Traders</span></a>
+        <a href="#" data-icon="user"><span data-lang="ar">العملاء</span><span data-lang="en" hidden>Customers</span></a>
+      </nav>
+    </div>
+  </dialog>
+
+  <main class="ro-main" id="main">
+    <div class="ro-topbar">
       <div>
         <h1><span data-lang="ar">صباح الخير</span><span data-lang="en" hidden>Good morning</span></h1>
-        <p class="muted"><span data-lang="ar">24 أمراً بانتظارك اليوم · الأربعاء، 28 أكتوبر</span><span data-lang="en" hidden>24 things awaiting you today · Wednesday, Oct 28</span></p>
+        <p class="muted ro-body-sm"><span data-lang="ar">24 أمراً بانتظارك اليوم · الأربعاء، 28 أكتوبر</span><span data-lang="en" hidden>24 things awaiting you today · Wednesday, Oct 28</span></p>
       </div>
-      <div style="display:flex;gap:var(--s-2);align-items:center">
+      <div style="display:flex;gap:var(--ro-s-2);align-items:center">
         <button class="lang-toggle" onclick="roToggleLang()">EN</button>
-        <button class="btn btn-primary">+ <span data-lang="ar">إضافة منتج</span><span data-lang="en" hidden>Add product</span></button>
+        <button class="ro-btn ro-btn-primary"><span data-icon="plus" data-icon-size="16"></span><span data-lang="ar">إضافة منتج</span><span data-lang="en" hidden>Add product</span></button>
       </div>
     </div>
 
-    <div class="kpi-grid">
-      <div class="card kpi-card"><div class="label"><span data-lang="ar">طلبات تجزئة جديدة</span><span data-lang="en" hidden>New retail requests</span></div><div class="value">17</div></div>
-      <div class="card kpi-card"><div class="label"><span data-lang="ar">صفقات بانتظار الرد</span><span data-lang="en" hidden>Deals awaiting reply</span></div><div class="value">7</div></div>
-      <div class="card kpi-card"><div class="label"><span data-lang="ar">طلبات جملة</span><span data-lang="en" hidden>Wholesale requests</span></div><div class="value">0</div><div class="muted" style="font-size:.78rem"><span data-lang="ar">لا شيء بانتظارك</span><span data-lang="en" hidden>Nothing waiting</span></div></div>
-      <div class="card kpi-card"><div class="label"><span data-lang="ar">محادثات غير مقروءة</span><span data-lang="en" hidden>Unread conversations</span></div><div class="value">0</div></div>
+    <div class="ro-kpi-grid">
+      <div class="ro-card ro-kpi-card">
+        <div class="ro-kpi-label"><span data-lang="ar">طلبات تجزئة جديدة</span><span data-lang="en" hidden>New retail requests</span></div>
+        <div class="ro-kpi-value ro-tabular">17</div>
+      </div>
+      <div class="ro-card ro-kpi-card">
+        <div class="ro-kpi-label"><span data-lang="ar">صفقات بانتظار الرد</span><span data-lang="en" hidden>Deals awaiting reply</span></div>
+        <div class="ro-kpi-value ro-tabular">7</div>
+      </div>
+      <div class="ro-card ro-kpi-card">
+        <div class="ro-kpi-label"><span data-lang="ar">طلبات جملة</span><span data-lang="en" hidden>Wholesale requests</span></div>
+        <div class="ro-kpi-value ro-tabular">0</div>
+        <p class="muted" style="font-size:.78rem;margin:0"><span data-lang="ar">لا شيء بانتظارك</span><span data-lang="en" hidden>Nothing waiting</span></p>
+      </div>
+      <div class="ro-card ro-kpi-card">
+        <div class="ro-kpi-label"><span data-lang="ar">محادثات غير مقروءة</span><span data-lang="en" hidden>Unread conversations</span></div>
+        <div class="ro-kpi-value ro-tabular">0</div>
+      </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:7fr 5fr;gap:var(--s-4);align-items:start">
-      <div class="card">
-        <h2><span data-lang="ar">بانتظار إجراءك</span><span data-lang="en" hidden>Awaiting your action</span></h2>
-        <table>
-          <thead><tr><th><span data-lang="ar">المرجع</span><span data-lang="en" hidden>Reference</span></th><th><span data-lang="ar">القطع</span><span data-lang="en" hidden>Items</span></th><th><span data-lang="ar">التاريخ</span><span data-lang="en" hidden>Date</span></th><th></th></tr></thead>
+    <div style="display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:var(--ro-s-4);align-items:start">
+      <div class="ro-card">
+        <h2 style="font-size:1.1rem"><span data-lang="ar">بانتظار إجراءك</span><span data-lang="en" hidden>Awaiting your action</span></h2>
+        <div class="ro-table-scroll" tabindex="0" role="region" aria-label="جدول بانتظار إجراءك">
+        <table class="ro-table">
+          <thead><tr>
+            <th><span data-lang="ar">المرجع</span><span data-lang="en" hidden>Reference</span></th>
+            <th><span data-lang="ar">القطع</span><span data-lang="en" hidden>Items</span></th>
+            <th><span data-lang="ar">التاريخ</span><span data-lang="en" hidden>Date</span></th>
+            <th><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)"><span data-lang="ar">الحالة</span><span data-lang="en" hidden>Status</span></span></th>
+          </tr></thead>
           <tbody>
-            <tr class="row-link" onclick="location.href='request-detail.html'"><td>RO-2026-7595</td><td><span data-lang="ar">قطعة واحدة</span><span data-lang="en" hidden>1 item</span></td><td>2026/10/18</td><td><span class="chip chip-warn"><span data-lang="ar">جديد</span><span data-lang="en" hidden>New</span></span></td></tr>
-            <tr class="row-link" onclick="location.href='request-detail.html'"><td>RO-2026-2948</td><td><span data-lang="ar">قطعة واحدة</span><span data-lang="en" hidden>1 item</span></td><td>2026/10/18</td><td><span class="chip chip-warn"><span data-lang="ar">جديد</span><span data-lang="en" hidden>New</span></span></td></tr>
-            <tr class="row-link" onclick="location.href='request-detail.html'"><td>RO-2026-4153</td><td><span data-lang="ar">قطعتان</span><span data-lang="en" hidden>2 items</span></td><td>2026/10/19</td><td><span class="chip chip-neutral"><span data-lang="ar">متابعة</span><span data-lang="en" hidden>Follow-up</span></span></td></tr>
+            <tr class="row-link" onclick="location.href='request-detail.html'">
+              <td class="ro-tabular" dir="ltr" style="text-align:end">RO-2026-7595</td>
+              <td><span data-lang="ar">قطعة واحدة</span><span data-lang="en" hidden>1 item</span></td>
+              <td class="ro-tabular">2026/10/18</td>
+              <td><span class="ro-chip ro-chip-info"><span data-icon="circle-dot" data-icon-size="12"></span><span data-lang="ar">جديد</span><span data-lang="en" hidden>New</span></span></td>
+            </tr>
+            <tr class="row-link" onclick="location.href='request-detail.html'">
+              <td class="ro-tabular" dir="ltr" style="text-align:end">RO-2026-2948</td>
+              <td><span data-lang="ar">قطعة واحدة</span><span data-lang="en" hidden>1 item</span></td>
+              <td class="ro-tabular">2026/10/18</td>
+              <td><span class="ro-chip ro-chip-info"><span data-icon="circle-dot" data-icon-size="12"></span><span data-lang="ar">جديد</span><span data-lang="en" hidden>New</span></span></td>
+            </tr>
+            <tr class="row-link" onclick="location.href='request-detail.html'">
+              <td class="ro-tabular" dir="ltr" style="text-align:end">RO-2026-4153</td>
+              <td><span data-lang="ar">قطعتان</span><span data-lang="en" hidden>2 items</span></td>
+              <td class="ro-tabular">2026/10/19</td>
+              <td><span class="ro-chip ro-chip-attention"><span data-icon="circle-alert" data-icon-size="12"></span><span data-lang="ar">متابعة</span><span data-lang="en" hidden>Follow-up</span></span></td>
+            </tr>
           </tbody>
         </table>
+        </div>
       </div>
-      <div style="display:grid;gap:var(--s-3)">
-        <a class="card card-link" href="whatsapp-inbox.html">
-          <h3><span data-lang="ar">واتساب متصل</span><span data-lang="en" hidden>WhatsApp connected</span></h3>
+      <div style="display:grid;gap:var(--ro-s-3)">
+        <a class="ro-card ro-card-link" href="whatsapp-inbox.html">
+          <h3 style="display:flex;align-items:center;gap:8px"><span class="ro-chip ro-chip-success" style="padding:4px"><span data-icon="circle-check" data-icon-size="14"></span></span><span data-lang="ar">واتساب متصل</span><span data-lang="en" hidden>WhatsApp connected</span></h3>
           <p class="muted" style="font-size:.85rem;margin:0"><span data-lang="ar">آخر رسالة قبل 3 أيام</span><span data-lang="en" hidden>Last message 3 days ago</span></p>
         </a>
-        <div class="card">
-          <h3><span data-lang="ar">صحة المحتوى</span><span data-lang="en" hidden>Content health</span></h3>
+        <div class="ro-card">
+          <h3 style="font-size:1rem"><span data-lang="ar">صحة المحتوى</span><span data-lang="en" hidden>Content health</span></h3>
           <p class="muted" style="font-size:.85rem;margin:0"><span data-lang="ar">11 من 12 منتجاً منشوراً بصور كاملة</span><span data-lang="en" hidden>11 of 12 published products have full photos</span></p>
         </div>
       </div>
     </div>
   </main>
 </div>
+<script src="icons.js"></script>
 <script src="shared.js"></script>
+<script src="nav.js"></script>
 </body>
 </html>
