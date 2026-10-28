@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>تفاصيل طلب — RARE OUD (نموذج مرحلة 2)</title>
+<link rel="stylesheet" href="shared.css" />
+<style>.stepper{display:flex;gap:0;margin-bottom:var(--s-5)}.step{flex:1;text-align:center;padding:var(--s-2);font-size:.82rem;border-bottom:3px solid var(--sand-300);color:var(--text-muted)}.step.done{border-color:var(--ok);color:var(--ok);font-weight:600}.step.now{border-color:var(--plum-700);color:var(--plum-700);font-weight:700}</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">RARE OUD</div>
+    <nav>
+      <a href="admin-dashboard.html">🏠 <span data-lang="ar">لوحة التحكم</span><span data-lang="en" hidden>Dashboard</span></a>
+      <a class="active" href="requests-list.html">🛍️ <span data-lang="ar">طلبات التجزئة</span><span data-lang="en" hidden>Retail requests</span></a>
+    </nav>
+  </aside>
+  <main class="main" style="max-width:920px">
+    <div class="topbar">
+      <div><a href="requests-list.html" class="muted" style="font-size:.85rem;text-decoration:none">← <span data-lang="ar">الطلبات</span><span data-lang="en" hidden>Requests</span></a>
+        <h1>RO-2026-7595</h1></div>
+      <button class="lang-toggle" onclick="roToggleLang()">EN</button>
+    </div>
+
+    <div class="stepper">
+      <div class="step done"><span data-lang="ar">جديد</span><span data-lang="en" hidden>New</span></div>
+      <div class="step now"><span data-lang="ar">متابعة</span><span data-lang="en" hidden>Follow-up</span></div>
+      <div class="step"><span data-lang="ar">فُتح</span><span data-lang="en" hidden>Opened</span></div>
+      <div class="step"><span data-lang="ar">مكتمل</span><span data-lang="en" hidden>Completed</span></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:var(--s-4)">
+      <div class="card">
+        <h2><span data-lang="ar">القطع المطلوبة</span><span data-lang="en" hidden>Requested items</span></h2>
+        <table>
+          <thead><tr><th><span data-lang="ar">القطعة</span><span data-lang="en" hidden>Item</span></th><th><span data-lang="ar">الكمية</span><span data-lang="en" hidden>Qty</span></th><th><span data-lang="ar">السعر</span><span data-lang="en" hidden>Price</span></th></tr></thead>
+          <tbody><tr><td><bdi>قانون مختار</bdi></td><td>1</td><td><bdi>8,845.00 US$</bdi></td></tr></tbody>
+        </table>
+        <h2 style="margin-top:var(--s-6)"><span data-lang="ar">ملاحظة إدارية</span><span data-lang="en" hidden>Admin note</span></h2>
+        <div class="field"><textarea rows="3" placeholder="…"></textarea></div>
+        <button class="btn btn-primary"><span data-lang="ar">تحويل إلى «فُتح»</span><span data-lang="en" hidden>Move to "Opened"</span></button>
+      </div>
+      <div style="display:grid;gap:var(--s-3)">
+        <div class="card">
+          <h3><span data-lang="ar">العميل</span><span data-lang="en" hidden>Customer</span></h3>
+          <p class="muted" style="margin:0;font-size:.88rem"><bdi>سارة أحمد</bdi><br/><bdi dir="ltr">+963 93 xxx xxxx</bdi></p>
+          <a href="#" style="display:inline-block;margin-top:var(--s-2);font-size:.85rem"><span data-lang="ar">فتح محادثة واتساب</span><span data-lang="en" hidden>Open WhatsApp thread</span></a>
+        </div>
+        <div class="card">
+          <h3><span data-lang="ar">سجل الأحداث</span><span data-lang="en" hidden>Event log</span></h3>
+          <p class="muted" style="font-size:.82rem;margin:0 0 var(--s-2)"><span data-lang="ar">تحضير التحويل</span><span data-lang="en" hidden>Handoff prepared</span> · <span data-lang="ar">قبل 22 دقيقة</span><span data-lang="en" hidden>22 min ago</span></p>
+          <p class="muted" style="font-size:.82rem;margin:0"><span data-lang="ar">استُلم الطلب</span><span data-lang="en" hidden>Request received</span> · <span data-lang="ar">قبل 40 دقيقة</span><span data-lang="en" hidden>40 min ago</span></p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="shared.js"></script>
+</body>
+</html>

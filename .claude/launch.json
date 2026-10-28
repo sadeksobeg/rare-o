@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 3000
+    },
+    {
+      "name": "ui-mockups",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "4600", "docs/ui/design/mockups"],
+      "port": 4600
     }
   ]
 }

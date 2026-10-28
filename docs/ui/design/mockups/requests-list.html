@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>طلبات التجزئة — RARE OUD (نموذج مرحلة 2)</title>
+<link rel="stylesheet" href="shared.css" />
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">RARE OUD</div>
+    <nav>
+      <a href="admin-dashboard.html">🏠 <span data-lang="ar">لوحة التحكم</span><span data-lang="en" hidden>Dashboard</span></a>
+      <a href="whatsapp-inbox.html">💬 <span data-lang="ar">صندوق واتساب</span><span data-lang="en" hidden>WhatsApp Inbox</span></a>
+      <a class="active" href="requests-list.html">🛍️ <span data-lang="ar">طلبات التجزئة</span><span data-lang="en" hidden>Retail requests</span></a>
+      <a href="#">🤝 <span data-lang="ar">الصفقات</span><span data-lang="en" hidden>Deals</span></a>
+      <a href="#">📦 <span data-lang="ar">الجملة</span><span data-lang="en" hidden>Wholesale</span></a>
+      <a href="product-form.html">🎻 <span data-lang="ar">المنتجات</span><span data-lang="en" hidden>Products</span></a>
+    </nav>
+  </aside>
+  <main class="main">
+    <div class="topbar">
+      <h1><span data-lang="ar">طلبات التجزئة</span><span data-lang="en" hidden>Retail requests</span></h1>
+      <button class="lang-toggle" onclick="roToggleLang()">EN</button>
+    </div>
+
+    <div style="display:flex;gap:var(--s-2);margin-bottom:var(--s-4);flex-wrap:wrap;align-items:center">
+      <button class="btn btn-secondary" style="background:var(--ink-950);color:var(--sand-50)"><span data-lang="ar">الكل 24</span><span data-lang="en" hidden>All 24</span></button>
+      <button class="btn btn-ghost"><span data-lang="ar">جديد 17</span><span data-lang="en" hidden>New 17</span></button>
+      <button class="btn btn-ghost"><span data-lang="ar">متابعة 4</span><span data-lang="en" hidden>Follow-up 4</span></button>
+      <button class="btn btn-ghost"><span data-lang="ar">فُتح 2</span><span data-lang="en" hidden>Opened 2</span></button>
+      <button class="btn btn-ghost"><span data-lang="ar">مكتمل 1</span><span data-lang="en" hidden>Completed 1</span></button>
+      <input type="search" placeholder="بحث" style="margin-inline-start:auto;min-height:40px;border:1px solid var(--border-strong);border-radius:var(--r-sm);padding:.4rem .8rem;background:var(--sand-50)" />
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden">
+      <table>
+        <thead><tr>
+          <th><span data-lang="ar">المرجع</span><span data-lang="en" hidden>Reference</span></th>
+          <th><span data-lang="ar">العميل</span><span data-lang="en" hidden>Customer</span></th>
+          <th><span data-lang="ar">القطع</span><span data-lang="en" hidden>Items</span></th>
+          <th><span data-lang="ar">الحالة</span><span data-lang="en" hidden>Status</span></th>
+          <th><span data-lang="ar">التاريخ</span><span data-lang="en" hidden>Date</span></th>
+          <th></th>
+        </tr></thead>
+        <tbody>
+          <tr class="row-link" onclick="location.href='request-detail.html'"><td>RO-2026-7595</td><td><bdi>سارة أحمد</bdi></td><td>1</td><td><span class="chip chip-warn"><span data-lang="ar">جديد</span><span data-lang="en" hidden>New</span></span></td><td>2026/10/18</td><td><a href="request-detail.html"><span data-lang="ar">فتح</span><span data-lang="en" hidden>Open</span></a></td></tr>
+          <tr class="row-link" onclick="location.href='request-detail.html'"><td>RO-2026-2948</td><td><bdi>Karim N.</bdi></td><td>1</td><td><span class="chip chip-warn"><span data-lang="ar">جديد</span><span data-lang="en" hidden>New</span></span></td><td>2026/10/18</td><td><a href="request-detail.html"><span data-lang="ar">فتح</span><span data-lang="en" hidden>Open</span></a></td></tr>
+          <tr class="row-link" onclick="location.href='request-detail.html'"><td>RO-2026-4153</td><td><bdi>ليلى حسن</bdi></td><td>2</td><td><span class="chip chip-neutral"><span data-lang="ar">متابعة</span><span data-lang="en" hidden>Follow-up</span></span></td><td>2026/10/19</td><td><a href="request-detail.html"><span data-lang="ar">فتح</span><span data-lang="en" hidden>Open</span></a></td></tr>
+          <tr class="row-link" onclick="location.href='request-detail.html'"><td>RO-2026-3411</td><td><bdi>Omar S.</bdi></td><td>1</td><td><span class="chip chip-ok"><span data-lang="ar">مكتمل</span><span data-lang="en" hidden>Completed</span></span></td><td>2026/10/12</td><td><a href="request-detail.html"><span data-lang="ar">فتح</span><span data-lang="en" hidden>Open</span></a></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted" style="margin-top:var(--s-3);font-size:.85rem"><span data-lang="ar">عرض 4 من 24</span><span data-lang="en" hidden>Showing 4 of 24</span></p>
+  </main>
+</div>
+<script src="shared.js"></script>
+</body>
+</html>

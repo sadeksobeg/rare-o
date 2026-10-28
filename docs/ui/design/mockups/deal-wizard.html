@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>اقتراح صفقة — RARE OUD (نموذج مرحلة 2)</title>
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .tr-header { background: linear-gradient(105deg, var(--plum-900) 0%, var(--ink-950) 58%, var(--ink-900) 100%); color: var(--text-inverse); padding: var(--s-3) var(--s-6); display: flex; justify-content: space-between; align-items: center; }
+  .tr-main { padding: var(--s-6) var(--s-8); max-width: 640px; margin: 0 auto; }
+  .wiz-steps { display: flex; gap: var(--s-2); margin-bottom: var(--s-6); }
+  .wiz-steps span { flex: 1; height: 4px; border-radius: 2px; background: var(--sand-300); }
+  .wiz-steps span.done { background: var(--plum-700); }
+  .kind-toggle { display: flex; gap: var(--s-2); margin-bottom: var(--s-4); }
+  .kind-toggle button { flex: 1; padding: var(--s-3); border-radius: var(--r-md); border: 1px solid var(--border-strong); background: var(--sand-50); font-family: inherit; font-weight: 600; cursor: pointer; }
+  .kind-toggle button.selected { background: var(--plum-700); color: var(--sand-50); border-color: var(--plum-700); }
+</style>
+</head>
+<body>
+  <header class="tr-header">
+    <div style="font-family:var(--font-ar-display);font-weight:700">RARE OUD</div>
+    <button class="lang-toggle" onclick="roToggleLang()">EN</button>
+  </header>
+  <main class="tr-main">
+    <a href="trader-home.html" class="muted" style="font-size:.85rem;text-decoration:none">← <span data-lang="ar">الرئيسية</span><span data-lang="en" hidden>Home</span></a>
+    <h1><span data-lang="ar">اقتراح صفقة</span><span data-lang="en" hidden>Propose a deal</span></h1>
+    <div class="wiz-steps"><span class="done"></span><span class="done"></span><span></span></div>
+
+    <form onsubmit="return false">
+      <div class="field">
+        <label><span data-lang="ar">نوع الصفقة</span><span data-lang="en" hidden>Deal type</span></label>
+        <div class="kind-toggle">
+          <button type="button" class="selected"><span data-lang="ar">من الكتالوج</span><span data-lang="en" hidden>From catalog</span></button>
+          <button type="button"><span data-lang="ar">خارج الكتالوج</span><span data-lang="en" hidden>Outside catalog</span></button>
+        </div>
+      </div>
+      <div class="field"><label><span data-lang="ar">القطعة</span><span data-lang="en" hidden>Item</span> *</label>
+        <select><option><bdi>قانون مختار</bdi></option></select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 var(--s-4)">
+        <div class="field"><label><span data-lang="ar">السعر المقترح</span><span data-lang="en" hidden>Proposed price</span></label><input type="number" /></div>
+        <div class="field"><label><span data-lang="ar">الكمية</span><span data-lang="en" hidden>Quantity</span></label><input type="number" value="1" /></div>
+      </div>
+      <div class="field"><label><span data-lang="ar">رسالة للإدارة</span><span data-lang="en" hidden>Message to admin</span></label><textarea rows="3"></textarea></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center"><span data-lang="ar">إرسال الاقتراح</span><span data-lang="en" hidden>Send proposal</span></button>
+      <p class="muted" style="text-align:center;font-size:.82rem;margin-top:var(--s-3)">
+        <span data-lang="ar">قاعدة حقيقية: صفقة «من الكتالوج» تتطلب قطعة؛ «خارج الكتالوج» تمنعها</span>
+        <span data-lang="en" hidden>Real rule: a "from catalog" deal requires an item; "outside catalog" forbids one</span>
+      </p>
+    </form>
+  </main>
+<script src="shared.js"></script>
+</body>
+</html>

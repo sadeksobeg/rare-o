@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>بوابة التاجر — RARE OUD (نموذج مرحلة 2)</title>
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .tr-header { background: linear-gradient(105deg, var(--plum-900) 0%, var(--ink-950) 58%, var(--ink-900) 100%); color: var(--text-inverse); padding: var(--s-3) var(--s-6); display: flex; justify-content: space-between; align-items: center; }
+  .tr-header nav { display: flex; gap: var(--s-1); }
+  .tr-header nav a { color: rgba(244,231,216,.72); text-decoration: none; padding: var(--s-2) var(--s-3); border-radius: var(--r-sm); font-size: .88rem; }
+  .tr-header nav a.active { background: rgba(244,231,216,.14); color: var(--sand-50); font-weight: 600; }
+  .tr-main { padding: var(--s-6) var(--s-8); max-width: 1100px; margin: 0 auto; }
+  .task-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); margin-bottom: var(--s-5); }
+</style>
+</head>
+<body>
+  <header class="tr-header">
+    <div style="font-family:var(--font-ar-display);font-weight:700">RARE OUD <span style="font-size:.7rem;opacity:.8"><span data-lang="ar">بوابة التجّار</span><span data-lang="en" hidden>Trader portal</span></span></div>
+    <nav>
+      <a class="active" href="trader-home.html"><span data-lang="ar">الرئيسية</span><span data-lang="en" hidden>Home</span></a>
+      <a href="deal-wizard.html"><span data-lang="ar">صفقاتي</span><span data-lang="en" hidden>My deals</span></a>
+      <a href="wholesale.html"><span data-lang="ar">الجملة</span><span data-lang="en" hidden>Wholesale</span></a>
+      <a href="notifications.html"><span data-lang="ar">الإشعارات</span><span data-lang="en" hidden>Notifications</span></a>
+      <a href="account.html"><span data-lang="ar">حسابي</span><span data-lang="en" hidden>Account</span></a>
+    </nav>
+    <button class="lang-toggle" onclick="roToggleLang()">EN</button>
+  </header>
+  <main class="tr-main">
+    <h1><span data-lang="ar">طاب يومك، Demo</span><span data-lang="en" hidden>Good day, Demo</span></h1>
+    <p class="muted"><span data-lang="ar">لا شيء بانتظارك اليوم — فاوض على الصفقات وقدّم طلبات الجملة من مخزون RARE OUD</span><span data-lang="en" hidden>Nothing awaiting you today — negotiate deals and submit wholesale requests from RARE OUD's stock</span></p>
+
+    <h2 style="margin-top:var(--s-6)"><span data-lang="ar">ابدأ من هنا</span><span data-lang="en" hidden>Start here</span></h2>
+    <div class="task-row">
+      <a class="card card-link" href="deal-wizard.html"><h3><span data-lang="ar">اقترح صفقة</span><span data-lang="en" hidden>Propose a deal</span></h3><p class="muted" style="margin:0;font-size:.85rem"><span data-lang="ar">قدّم عرضاً تجارياً على قطعة من الكتالوج أو خارجه</span><span data-lang="en" hidden>Offer a commercial proposal on a catalog piece or outside it</span></p></a>
+      <a class="card card-link" href="wholesale.html"><h3><span data-lang="ar">اطلب بالجملة</span><span data-lang="en" hidden>Request wholesale</span></h3><p class="muted" style="margin:0;font-size:.85rem"><span data-lang="ar">اختر القطع والكميات؛ الإدارة ترد بعرض السعر</span><span data-lang="en" hidden>Pick items and quantities; admin replies with a quote</span></p></a>
+    </div>
+
+    <h2><span data-lang="ar">العروض المتاحة الآن</span><span data-lang="en" hidden>Available offers now</span></h2>
+    <div class="task-row">
+      <div class="card"><h3><bdi>مختارات وترية</bdi></h3><p class="muted" style="margin:0;font-size:.85rem"><span data-lang="ar">قطع يختارها فريق RARE OUD من المخزون الحالي</span><span data-lang="en" hidden>Pieces hand-picked by the RARE OUD team</span></p></div>
+      <div class="card"><h3><bdi>تحرير الأتيليه</bdi></h3><p class="muted" style="margin:0;font-size:.85rem"><span data-lang="ar">اختيار قصير من الورشة — للطلب عبر واتساب</span><span data-lang="en" hidden>A short workshop selection — order via WhatsApp</span></p></div>
+    </div>
+  </main>
+<script src="shared.js"></script>
+</body>
+</html>

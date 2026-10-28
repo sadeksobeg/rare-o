@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>الوساطة والتوريد المباشر — بانتظار قرار المالك (نموذج مرحلة 2)</title>
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .pending-banner { background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn); border-radius: var(--r-md); padding: var(--s-3) var(--s-4); margin-bottom: var(--s-5); font-weight: 600; font-size: .9rem; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">RARE OUD</div>
+    <nav>
+      <a href="admin-dashboard.html">🏠 <span data-lang="ar">لوحة التحكم</span><span data-lang="en" hidden>Dashboard</span></a>
+      <a class="active" href="brokerage-pending-decision.html">🧭 <span data-lang="ar">الوساطة</span><span data-lang="en" hidden>Brokerage</span></a>
+    </nav>
+  </aside>
+  <main class="main" style="max-width:860px">
+    <div class="topbar">
+      <h1><span data-lang="ar">طلب وساطة من تاجر</span><span data-lang="en" hidden>Brokerage request from a trader</span></h1>
+      <button class="lang-toggle" onclick="roToggleLang()">EN</button>
+    </div>
+
+    <div class="pending-banner">
+      ⚠ <span data-lang="ar">هذه الشاشة توضيحية فقط — الميزة خارج الملحق S (نطاق العقد الموقَّع) وبانتظار قرار مالك وتعديل عقد منفصل. لا تنفيذ ولا باك-إند حقيقي خلف هذا النموذج.</span>
+      <span data-lang="en" hidden>Illustrative only — this feature is outside Appendix S (the signed contract scope) and awaits an owner decision plus a separate contract amendment. No implementation, no real backend behind this mockup.</span>
+    </div>
+
+    <div class="card">
+      <h2><span data-lang="ar">تفاصيل ما رآه التاجر</span><span data-lang="en" hidden>What the trader saw</span></h2>
+      <div class="field"><label><span data-lang="ar">الوصف</span><span data-lang="en" hidden>Description</span></label>
+        <textarea rows="3" readonly><bdi>عود نادر من صناعة حرفي محلي، لم يُعرض سابقاً عبر RARE OUD</bdi></textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 var(--s-4)">
+        <div class="field"><label><span data-lang="ar">السعر التقديري من التاجر</span><span data-lang="en" hidden>Trader's estimated price</span></label><input type="text" readonly value="≈ 3,200 USD" /></div>
+        <div class="field"><label><span data-lang="ar">نسبة العمولة المقترحة</span><span data-lang="en" hidden>Proposed commission rate</span></label><input type="text" readonly value="1–2%" /></div>
+      </div>
+      <h2 style="margin-top:var(--s-4)"><span data-lang="ar">قرار الإدارة</span><span data-lang="en" hidden>Admin decision</span></h2>
+      <div style="display:flex;gap:var(--s-2)">
+        <button class="btn btn-primary" disabled title="معطَّل عمداً — لا باك-إند"><span data-lang="ar">قبول ومعاينة</span><span data-lang="en" hidden>Accept and review</span></button>
+        <button class="btn btn-secondary" disabled title="معطَّل عمداً — لا باك-إند"><span data-lang="ar">رفض</span><span data-lang="en" hidden>Decline</span></button>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="shared.js"></script>
+</body>
+</html>

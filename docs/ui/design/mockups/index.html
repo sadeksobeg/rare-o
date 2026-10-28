@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>فهرس النماذج المرئية — المرحلة 2</title>
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .wrap { max-width: 760px; margin: 0 auto; padding: var(--s-8) var(--s-5); }
+  .list { display: grid; gap: var(--s-3); margin-top: var(--s-5); }
+  .list a { display: flex; justify-content: space-between; align-items: center; }
+  .list .n { font-variant-numeric: tabular-nums; color: var(--text-muted); margin-inline-end: var(--s-3); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <h1><span data-lang="ar">النماذج المرئية — المرحلة 2</span><span data-lang="en" hidden>Visual mockups — Phase 2</span></h1>
+    <button class="lang-toggle" onclick="roToggleLang()">EN</button>
+  </div>
+  <p class="muted">
+    <span data-lang="ar">صفحات HTML ثابتة مستقلة، بلا تبعيات خارجية سوى خط Google Fonts (الخطوط الأربعة المعتمَدة بقرار D4). كل صفحة بها مبدّل عربي/إنجليزي حقيقي أعلى اليمين. افتح أي ملف مباشرة في متصفح — لا خادم مطلوب.</span>
+    <span data-lang="en" hidden>Standalone static HTML, no external dependencies besides Google Fonts (the four D4-approved fonts). Every page has a real Arabic/English toggle, top end. Open any file directly in a browser — no server needed.</span>
+  </p>
+  <div class="list">
+    <a class="card card-link" href="login.html"><span><span data-lang="ar">الدخول (إدارة)</span><span data-lang="en" hidden>Login (admin)</span></span><span class="n">01</span></a>
+    <a class="card card-link" href="admin-dashboard.html"><span><span data-lang="ar">لوحة الإدارة</span><span data-lang="en" hidden>Admin dashboard</span></span><span class="n">02</span></a>
+    <a class="card card-link" href="requests-list.html"><span><span data-lang="ar">قائمة طلبات التجزئة</span><span data-lang="en" hidden>Retail requests list</span></span><span class="n">03</span></a>
+    <a class="card card-link" href="request-detail.html"><span><span data-lang="ar">تفاصيل طلب</span><span data-lang="en" hidden>Request detail</span></span><span class="n">04</span></a>
+    <a class="card card-link" href="whatsapp-inbox.html"><span><span data-lang="ar">صندوق واتساب</span><span data-lang="en" hidden>WhatsApp inbox</span></span><span class="n">05</span></a>
+    <a class="card card-link" href="product-form.html"><span><span data-lang="ar">نموذج منتج</span><span data-lang="en" hidden>Product form</span></span><span class="n">06</span></a>
+    <a class="card card-link" href="trader-home.html"><span><span data-lang="ar">رئيسية التاجر</span><span data-lang="en" hidden>Trader home</span></span><span class="n">07</span></a>
+    <a class="card card-link" href="deal-wizard.html"><span><span data-lang="ar">معالج صفقة</span><span data-lang="en" hidden>Deal wizard</span></span><span class="n">08</span></a>
+    <a class="card card-link" href="wholesale.html"><span><span data-lang="ar">طلب جملة</span><span data-lang="en" hidden>Wholesale request</span></span><span class="n">09</span></a>
+    <a class="card card-link" href="notifications.html"><span><span data-lang="ar">الإشعارات</span><span data-lang="en" hidden>Notifications</span></span><span class="n">10</span></a>
+    <a class="card card-link" href="account.html"><span><span data-lang="ar">الحساب</span><span data-lang="en" hidden>Account</span></span><span class="n">11</span></a>
+    <a class="card card-link" href="brokerage-pending-decision.html" style="border-color:var(--warn)"><span><span data-lang="ar">الوساطة — بانتظار قرار المالك</span><span data-lang="en" hidden>Brokerage — pending owner decision</span></span><span class="n">+1</span></a>
+  </div>
+</div>
+<script src="shared.js"></script>
+</body>
+</html>

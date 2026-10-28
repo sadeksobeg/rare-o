@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>دخول الإدارة — RARE OUD (نموذج مرحلة 2)</title>
+<link rel="stylesheet" href="shared.css" />
+<style>
+  body { background: var(--ink-950); }
+  .stage { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: var(--s-6); position: relative; overflow: hidden; }
+  .rings { position: absolute; inset: 0; margin: auto; width: min(60vw, 420px); height: min(60vw, 420px); opacity: 0.12; pointer-events: none; }
+  .panel { position: relative; width: min(420px, 100%); background: var(--sand-50); border-radius: var(--r-lg); padding: var(--s-8) var(--s-6); box-shadow: var(--shadow-3); }
+  .mark { width: 48px; height: 48px; margin: 0 auto var(--s-3); display: block; }
+  .panel h1 { text-align: center; font-size: 1.4rem; }
+  .brandline { text-align: center; font-family: var(--font-ar-display); letter-spacing: 0.12em; color: var(--text-muted); font-size: 0.78rem; margin-bottom: var(--s-6); }
+  .toprow { position: absolute; top: var(--s-5); inset-inline-end: var(--s-5); }
+  .submit { width: 100%; justify-content: center; margin-top: var(--s-2); }
+  .hint { text-align: center; margin-top: var(--s-5); font-size: 0.85rem; }
+</style>
+</head>
+<body>
+  <div class="toprow"><button class="lang-toggle" onclick="roToggleLang()" style="background:transparent;border-color:rgba(244,231,216,.3);color:#f4e7d8">EN</button></div>
+  <div class="stage">
+    <svg class="rings" viewBox="0 0 400 400" fill="none"><circle cx="200" cy="200" r="190" stroke="#f4e7d8"/><circle cx="200" cy="200" r="150" stroke="#f4e7d8" opacity=".7"/><circle cx="200" cy="200" r="112" stroke="#f4e7d8" opacity=".55"/><circle cx="200" cy="200" r="78" stroke="#f4e7d8" opacity=".42"/><circle cx="200" cy="200" r="48" stroke="#f4e7d8" opacity=".32"/></svg>
+    <div class="panel">
+      <svg class="mark" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="30" fill="#32104F"/><circle cx="32" cy="32" r="22" stroke="#F4E7D8" stroke-width="1.5"/><circle cx="32" cy="32" r="13" stroke="#F4E7D8" stroke-width="1.5" opacity=".7"/><circle cx="32" cy="32" r="5" fill="#0B080D"/></svg>
+      <div class="brandline">RARE OUD</div>
+      <h1><span data-lang="ar">دخول الإدارة</span><span data-lang="en" hidden>Admin sign in</span></h1>
+      <p class="muted" style="text-align:center;font-size:.85rem;margin-bottom:var(--s-6)">
+        <span data-lang="ar">صلاحية كاملة على التجزئة والصفقات والجملة وصندوق واتساب</span>
+        <span data-lang="en" hidden>Full access to retail, deals, wholesale and the WhatsApp inbox</span>
+      </p>
+      <form onsubmit="return false">
+        <div class="field">
+          <label><span data-lang="ar">البريد الإلكتروني</span><span data-lang="en" hidden>Email</span> *</label>
+          <input type="email" dir="ltr" autocomplete="username" />
+        </div>
+        <div class="field">
+          <label><span data-lang="ar">كلمة المرور</span><span data-lang="en" hidden>Password</span> *</label>
+          <input type="password" dir="ltr" autocomplete="current-password" />
+        </div>
+        <div class="field">
+          <label><span data-lang="ar">رمز التحقق أو الاسترداد</span><span data-lang="en" hidden>2FA or recovery code</span></label>
+          <input type="text" dir="ltr" inputmode="numeric" />
+        </div>
+        <button class="btn btn-primary submit" type="submit">
+          <span data-lang="ar">دخول</span><span data-lang="en" hidden>Sign in</span>
+        </button>
+      </form>
+      <p class="hint muted">
+        <span data-lang="ar">محاولات كثيرة تؤدي لإيقاف مؤقت 15 دقيقة — حماية فعلية موجودة في الكود</span>
+        <span data-lang="en" hidden>Too many attempts trigger a 15-minute lockout — real, already implemented</span>
+      </p>
+    </div>
+  </div>
+  <script src="shared.js"></script>
+</body>
+</html>
