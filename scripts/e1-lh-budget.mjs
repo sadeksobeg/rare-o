@@ -11,7 +11,9 @@ import path from "node:path";
 const require = createRequire(import.meta.url);
 const ROOT = process.cwd();
 const BASE = process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:3001";
-const OUT = path.join(ROOT, "docs/pro-readiness/LIGHTHOUSE.json");
+const OUT =
+  process.env.LH_OUT ||
+  path.join(ROOT, "docs/pro-readiness/LIGHTHOUSE.json");
 const THRESHOLD = Number(process.env.LH_THRESHOLD || 0.85);
 const RUNS = Number(process.env.LH_RUNS || 5);
 

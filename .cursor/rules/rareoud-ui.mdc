@@ -1,0 +1,43 @@
+---
+description: RARE OUD visual system — binding UI rules for every change
+alwaysApply: true
+---
+
+# RARE OUD UI
+
+Source of truth: `docs/ui/01_DESIGN_SYSTEM.md`. Hex colors live only in `styles/tokens.css`. This rule wins if it conflicts with that doc on **stack adaptations**.
+
+## Stack (do not replace)
+
+- Next.js App Router + Tailwind 4 + existing `components/motion` (CSS). Do not add Framer Motion/`motion`, `cmdk`, or `sonner` until a dedicated phase. Do not migrate `lib/i18n/dictionaries.ts` to `ar.json`/`en.json` in visual phases.
+- No Prisma schema, API contracts, or business logic changes for UI work.
+- Storefront is in scope of the tokens/fonts later; do not restyle the public catalog until a storefront phase is explicit.
+
+## Identity
+
+- Three colors only for chrome: ink, sand, plum. `--ok/--warn/--danger` are status, never decoration.
+- No plum text on ink (contrast). Status color always with text or icon.
+- Arabic first: logical properties (`ms/me/ps/pe/start/end`). No physical `left/right/ml/mr` except numeric `dir="ltr"`. Wrap Latin in `<bdi dir="ltr">`. No letter-spacing on Arabic.
+- lucide-react stroke 1.5. No emoji as icons. Mirror directional icons in RTL only.
+
+## Motion
+
+- Animate `transform` and `opacity` only. No `transition: all`. No animating width/height/top/left/box-shadow.
+- Enter has a faster exit (~60%). Stagger at most 8 items.
+- `prefers-reduced-motion`: stop rings/spin; opacity 80ms; layout and data unchanged.
+- Count-up on first appearance only. Sparkline only if ≥ 7 real points; otherwise number + change copy. No invented charts.
+- Press: scale ~0.97 plus concentric echo. New/updated rows flash plum ~400ms then settle.
+
+## Components / screens
+
+- Admin sidebar is full `--ink-950` including the brand block — never a white cap on a dark rail.
+- The row/card is the hit target; do not add a heavy black «فتح» as the only affordance.
+- Empty = drawn rose + one action. Loading skeleton matches final geometry. Errors are human + retry.
+- Filters/tabs/sort/page belong in the URL. Keyboard: Ctrl/⌘K, `/`, Esc, j/k on lists when those exist.
+- Unsaved-changes guard on forms. Toasts already use the isolated portal mount — do not statically import `useSearchParams` into shells.
+
+## Quality
+
+- Touch targets ≥ 44px. `focus-visible` always. WCAG 2.2 AA contrast.
+- After a phase: `npx tsc --noEmit` and `npx next lint` on touched files. Playwright only when the phase names it.
+- Do not merge a phase that fails its acceptance criteria.
