@@ -39,6 +39,15 @@ const chrome = await chromeLauncher.launch({
     "--no-sandbox",
     "--disable-gpu",
     "--disable-dev-shm-usage",
+    // Without an explicit window size, Chrome launches at its own default
+    // window size and Lighthouse's `screenEmulation` CDP call races against
+    // that during startup. The resulting mid-measurement window resize was
+    // showing up as a spurious, large CLS "shift" of the entire page (the
+    // <html> root element itself growing to its final size) - a test-harness
+    // artifact, not a real layout shift. Pinning the window size at launch
+    // removes the race. See docs/excellence-plan/08-SECURITY-AND-OPERATIONS.md
+    // and PROJECT_AUDIT.md for the investigation.
+    "--window-size=390,844",
   ],
 });
 try {
