@@ -1,15 +1,13 @@
 {
-  "generatedAt": "2026-10-20T06:15:25.162Z",
-  "totalActions": 53,
+  "generatedAt": "2026-10-28T08:31:04.321Z",
+  "totalActions": 51,
   "files": [
     {
       "file": "app/actions.ts",
       "actions": [
-        "setLocaleAction",
         "adminLoginAction",
         "enrollAdminTotpAction",
         "confirmAdminTotpAction",
-        "adminLogoutAction",
         "upsertProductAction",
         "attachProductImageAction",
         "removeProductImageAction",
