@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RARE OUD — RoListCard unification prototype (isolated, non-production)</title>
+<style>
+  :root {
+    --ro-ink-950: #0B080D;   /* approved near-black */
+    --ro-plum-900: #32104F;  /* approved deep purple */
+    --ro-sand-100: #F4E7D8;  /* approved warm cream */
+    --ro-sand-50: #FBF6EE;
+    --ro-sand-200: #EFE3D4;
+    --ro-sand-300: #E3D6C5;
+    --ro-ink-600: #4B4056;
+    --ro-ink-500: #5A4F66;
+    --ro-r-sm: 4px;
+    --ro-r-xs: 2px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ro-sand-100);
+    color: var(--ro-ink-950);
+    font-family: "Source Sans 3", "IBM Plex Sans Arabic", system-ui, sans-serif;
+    padding: 40px 24px 80px;
+  }
+  .notice {
+    max-width: 900px;
+    margin: 0 auto 40px;
+    padding: 14px 18px;
+    border: 1px solid var(--ro-ink-950);
+    border-radius: var(--ro-r-sm);
+    background: var(--ro-sand-50);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  h1 { font-size: 22px; max-width: 900px; margin: 0 auto 6px; }
+  h2 { font-size: 15px; font-weight: 600; letter-spacing: 0.02em; margin: 48px auto 16px; max-width: 900px; color: var(--ro-ink-600); }
+  .lede { max-width: 900px; margin: 0 auto 32px; color: var(--ro-ink-600); font-size: 14px; line-height: 1.7; }
+  .grid {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  /* --- RoListCard: one shared anatomy — media / title / meta / tag / action --- */
+  .ro-card {
+    background: var(--ro-sand-50);
+    border: 1px solid var(--ro-sand-300);
+    border-radius: var(--ro-r-sm);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .ro-card__media {
+    aspect-ratio: 4 / 5;
+    background: linear-gradient(160deg, var(--ro-ink-950), var(--ro-plum-900));
+    position: relative;
+  }
+  .ro-card__tag {
+    position: absolute;
+    top: 10px;
+    inset-inline-start: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--ro-sand-100);
+    color: var(--ro-ink-950);
+  }
+  .ro-card__tag[data-tone="plum"] { background: var(--ro-plum-900); color: var(--ro-sand-100); }
+  .ro-card__body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .ro-card__title { font-size: 14px; font-weight: 600; line-height: 1.4; }
+  .ro-card__meta { font-size: 12px; color: var(--ro-ink-500); }
+  .ro-card__action {
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ro-plum-900);
+    text-decoration: none;
+  }
+  .en { direction: ltr; text-align: left; font-family: "Cormorant Garamond", "Source Sans 3", system-ui, serif; }
+</style>
+</head>
+<body>
+  <div class="notice">
+    <strong>Isolated design prototype — not connected to the production application.</strong>
+    No routes, no data fetching, no app code modified. Static HTML/CSS only, using the three
+    approved brand colors and real dictionary strings pulled from <code>lib/i18n/dictionaries.ts</code>.
+    Demonstrates the single <code>RoListCard</code> anatomy proposed in
+    <code>docs/excellence-plan/04-DESIGN-SYSTEM-AND-IA.md</code> to replace four currently-separate
+    card implementations (catalog, trader deal, wholesale, admin request).
+  </div>
+
+  <h1>عود نادر — توحيد بطاقة القائمة (معاينة معزولة)</h1>
+  <p class="lede">
+    نفس التشريح (صورة / عنوان / سطر وصفي / وسم حالة / إجراء) يُطبَّق على أربع سياقات مختلفة بدل أربعة تنفيذات منفصلة.
+    لا بيانات تجارية مُختلقة — الأسماء والفئات والحالات منقولة حرفياً من القاموس الحالي.
+  </p>
+
+  <h2>الكتالوج العام — بطاقة منتج</h2>
+  <div class="grid">
+    <div class="ro-card">
+      <div class="ro-card__media"><span class="ro-card__tag">جديد</span></div>
+      <div class="ro-card__body">
+        <div class="ro-card__title">عود احترافي</div>
+        <div class="ro-card__meta">السعر عند الطلب</div>
+        <a class="ro-card__action" href="#">عرض القطعة ←</a>
+      </div>
+    </div>
+    <div class="ro-card">
+      <div class="ro-card__media"><span class="ro-card__tag" data-tone="plum">خصم</span></div>
+      <div class="ro-card__body">
+        <div class="ro-card__title">عود VIP</div>
+        <div class="ro-card__meta">$ 950.00</div>
+        <a class="ro-card__action" href="#">عرض القطعة ←</a>
+      </div>
+    </div>
+  </div>
+
+  <h2>بوابة التاجر — بطاقة صفقة</h2>
+  <div class="grid">
+    <div class="ro-card">
+      <div class="ro-card__media"><span class="ro-card__tag">قيد التفاوض</span></div>
+      <div class="ro-card__body">
+        <div class="ro-card__title">عود متوسط — DL-0142</div>
+        <div class="ro-card__meta">آخر رد: الإدارة</div>
+        <a class="ro-card__action" href="#">متابعة التفاوض ←</a>
+      </div>
+    </div>
+  </div>
+
+  <h2>الجملة — بطاقة طلب</h2>
+  <div class="grid">
+    <div class="ro-card">
+      <div class="ro-card__media"><span class="ro-card__tag" data-tone="plum">تم الشحن</span></div>
+      <div class="ro-card__body">
+        <div class="ro-card__title">طلب جملة — WS-0088</div>
+        <div class="ro-card__meta">12 قطعة · عود اقتصادي</div>
+        <a class="ro-card__action" href="#">عرض التفاصيل ←</a>
+      </div>
+    </div>
+  </div>
+
+  <h2>الإدارة — بطاقة طلب تجزئة</h2>
+  <div class="grid">
+    <div class="ro-card">
+      <div class="ro-card__media"><span class="ro-card__tag">جديدة</span></div>
+      <div class="ro-card__body">
+        <div class="ro-card__title">طلب RT-2291</div>
+        <div class="ro-card__meta">عميل: ضيف · 2 قطعة</div>
+        <a class="ro-card__action" href="#">فتح السجل ←</a>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="en" style="text-align: right;">English / LTR mirror — same anatomy</h2>
+  <div class="grid en">
+    <div class="ro-card">
+      <div class="ro-card__media"><span class="ro-card__tag">New</span></div>
+      <div class="ro-card__body">
+        <div class="ro-card__title">Professional Oud</div>
+        <div class="ro-card__meta">Price on request</div>
+        <a class="ro-card__action" href="#">View piece →</a>
+      </div>
+    </div>
+    <div class="ro-card">
+      <div class="ro-card__media"><span class="ro-card__tag" data-tone="plum">Sale</span></div>
+      <div class="ro-card__body">
+        <div class="ro-card__title">VIP Oud</div>
+        <div class="ro-card__meta">$ 950.00</div>
+        <a class="ro-card__action" href="#">View piece →</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
