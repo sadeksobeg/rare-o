@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { useParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useParams, useSearchParams } from "next/navigation";
+import { UserRound } from "lucide-react";
+import { CountUp } from "@/components/motion/count-up";
+import { DrawIn, RosetteMark } from "@/components/motion/draw-in";
+import { spawnPressRipple } from "@/components/motion/press-ripple";
 import { cn } from "@/lib/utils";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
@@ -33,10 +37,34 @@ export function InboxConversationList({
   dict: Dictionary;
 }) {
   const params = useParams<{ id?: string }>();
+  const searchParams = useSearchParams();
   const activeId = params?.id;
-  const [tab, setTab] = useState<TabId>("all");
+  const initialTab = searchParams.get("tab");
+  const [tab, setTab] = useState<TabId>(
+    initialTab === "unread" ||
+      initialTab === "linked" ||
+      initialTab === "unlinked"
+      ? initialTab
+      : "all"
+  );
   const [q, setQ] = useState("");
+  const [flashIds, setFlashIds] = useState<Set<string>>(new Set());
+  const seenRef = useRef<Set<string> | null>(null);
   const i = dict.inbox;
+
+  useEffect(() => {
+    const ids = rows.map((r) => r.id);
+    if (!seenRef.current) {
+      seenRef.current = new Set(ids);
+      return;
+    }
+    const fresh = ids.filter((id) => !seenRef.current!.has(id));
+    for (const id of ids) seenRef.current.add(id);
+    if (fresh.length === 0) return;
+    setFlashIds(new Set(fresh));
+    const t = window.setTimeout(() => setFlashIds(new Set()), 450);
+    return () => window.clearTimeout(t);
+  }, [rows]);
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -49,6 +77,12 @@ export function InboxConversationList({
     });
   }, [rows, tab, q, activeId]);
 
+  const tabCounts: Record<TabId, number> = {
+    all: rows.length,
+    unread: rows.filter((r) => r.hasUnread).length,
+    linked: rows.filter((r) => r.linked).length,
+    unlinked: rows.filter((r) => !r.linked).length,
+  };
   const tabs: { id: TabId; label: string }[] = [
     { id: "all", label: i.tabAll },
     { id: "unread", label: i.tabUnread },
@@ -88,6 +122,9 @@ export function InboxConversationList({
               )}
             >
               {t.label}
+              <span className="ms-1 tabular-nums opacity-80">
+                <CountUp value={tabCounts[t.id]} durationMs={200} />
+              </span>
             </button>
           ))}
         </div>
@@ -108,37 +145,46 @@ export function InboxConversationList({
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {filtered.length === 0 ? (
-          <p className="p-6 text-sm text-ro-muted">{i.empty}</p>
+          <div className="flex flex-col items-center gap-3 p-8 text-center">
+            <DrawIn durationMs={800} className="size-16">
+              <RosetteMark width={64} height={64} />
+            </DrawIn>
+            <p className="text-sm text-ro-muted">{i.empty}</p>
+          </div>
         ) : (
           <ul className="divide-y divide-ro-border">
             {filtered.map((c) => {
               const active = c.id === activeId;
               const unread = c.hasUnread && !active;
-              const initial = (c.displayLabel.trim().charAt(0) || "?").toUpperCase();
               return (
                 <li key={c.id}>
                   <Link
                     href={`/admin/inbox/${c.id}`}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "relative flex gap-3 border-s-2 p-3 transition-colors hover:bg-ro-sunken",
+                      "ro-press-ripple relative flex gap-3 border-s-2 p-3 transition-colors hover:bg-ro-sunken",
                       active
                         ? "border-s-[var(--ro-plum-900)] bg-[var(--ro-plum-50)]"
-                        : "border-s-transparent"
+                        : "border-s-transparent",
+                      unread && "bg-[color-mix(in_srgb,var(--ro-plum-50)_35%,transparent)]",
+                      flashIds.has(c.id) && "ro-s10-flash"
                     )}
+                    onPointerDown={(e) => {
+                      spawnPressRipple(e.currentTarget, e.clientX, e.clientY);
+                    }}
                   >
                     <span
                       aria-hidden
-                      className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--ro-plum-100)] text-sm font-semibold text-[var(--ro-plum-900)]"
+                      className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--ro-plum-100)] text-[var(--ro-plum-900)]"
                     >
-                      {initial}
+                      <UserRound className="size-4" strokeWidth={1.5} />
                     </span>
                     <span className="min-w-0 flex-1 space-y-0.5">
                       <span className="flex items-center justify-between gap-2">
                         <span
                           className={cn(
                             "min-w-0 truncate text-sm",
-                            unread ? "font-semibold" : "font-medium"
+                            unread ? "font-bold text-ro-ink" : "font-medium"
                           )}
                         >
                           <bdi>{c.displayLabel}</bdi>

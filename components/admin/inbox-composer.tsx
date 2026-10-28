@@ -6,6 +6,7 @@ import { MAX_OUTBOUND_TEXT_LENGTH } from "@/lib/whatsapp/messaging/constants";
 import { ArrowUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
+  useEffect,
   useRef,
   useState,
   useTransition,
@@ -37,6 +38,26 @@ export function InboxComposer({
   const router = useRouter();
   const i = dict.inbox;
   const nearLimit = text.length >= MAX_OUTBOUND_TEXT_LENGTH - 200;
+  const [keyboardInset, setKeyboardInset] = useState(0);
+
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    const sync = () => {
+      const inset = Math.max(
+        0,
+        window.innerHeight - viewport.height - viewport.offsetTop
+      );
+      setKeyboardInset(inset);
+    };
+    viewport.addEventListener("resize", sync);
+    viewport.addEventListener("scroll", sync);
+    sync();
+    return () => {
+      viewport.removeEventListener("resize", sync);
+      viewport.removeEventListener("scroll", sync);
+    };
+  }, []);
 
   function disabledReason(): string | null {
     if (
@@ -119,6 +140,7 @@ export function InboxComposer({
     <form
       data-inbox-composer="ready"
       className="space-y-2 border border-ro-border bg-ro-paper p-3"
+      style={keyboardInset ? { marginBottom: keyboardInset } : undefined}
       onSubmit={onSubmit}
     >
       <label className="block">

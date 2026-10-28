@@ -1,7 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useState, type ComponentType } from "react";
+import { useLayoutEffect, useRef, useState, type ComponentType } from "react";
+import { LiveBadge } from "@/components/motion/live-badge";
 import {
   LayoutDashboard,
   MessageSquare,
@@ -15,13 +16,15 @@ import {
   Store,
   Menu,
   X,
+  Megaphone,
+  ShieldCheck,
   type LucideProps,
 } from "lucide-react";
 import { Emblem } from "@/components/brand";
 import { PendingNavLink } from "@/components/ui/pending-nav-link";
 import { cn } from "@/lib/utils";
 
-export type AdminNavItem = { href: string; label: string };
+export type AdminNavItem = { href: string; label: string; badge?: number };
 export type AdminNavGroup = { title: string; items: AdminNavItem[] };
 
 type IconComp = ComponentType<LucideProps>;
@@ -35,9 +38,10 @@ const NAV_ICONS: Record<string, IconComp> = {
   "/admin/products": Boxes,
   "/admin/categories": Tags,
   "/admin/offers": Percent,
-  "/admin/promos": Percent,
+  "/admin/promos": Megaphone,
   "/admin/customers": Users,
   "/admin/traders": Store,
+  "/admin/settings/security": ShieldCheck,
 };
 
 function iconFor(href: string): IconComp {
@@ -59,12 +63,38 @@ function NavList({
   collapsed?: boolean;
 }) {
   const pathname = usePathname();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [rail, setRail] = useState({ top: 0, height: 0 });
+
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root || collapsed) return;
+    const activeEl = root.querySelector("[data-active='true']");
+    if (!(activeEl instanceof HTMLElement)) return;
+    const rootBox = root.getBoundingClientRect();
+    const elBox = activeEl.getBoundingClientRect();
+    setRail({
+      top: elBox.top - rootBox.top,
+      height: elBox.height,
+    });
+  }, [pathname, collapsed, groups]);
+
   return (
-    <div className={cn(collapsed ? "space-y-1" : "space-y-6")}>
+    <div
+      ref={rootRef}
+      className={cn("relative", collapsed ? "space-y-1" : "space-y-6")}
+    >
+      {!collapsed && rail.height > 0 ? (
+        <span
+          aria-hidden
+          className="ro-nav-rail"
+          style={{ top: rail.top + 6, height: Math.max(rail.height - 12, 8) }}
+        />
+      ) : null}
       {groups.map((group) => (
         <div key={group.title}>
           {!collapsed ? (
-            <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ro-ink-300)]">
+            <p className="px-3 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--ro-ink-200)]">
               {group.title}
             </p>
           ) : null}
@@ -88,11 +118,12 @@ function NavList({
                     data-active={active ? "true" : undefined}
                     className={cn(
                       "relative flex items-center transition-[color,background-color,transform,box-shadow] duration-[var(--ro-dur-fast)]",
+                      "ro-portal-nav-link",
                       collapsed
                         ? "mx-auto size-10 justify-center rounded-[var(--ro-r-sm)]"
-                        : "gap-2.5 rounded-[var(--ro-r-sm)] px-3 py-2 text-sm",
+                        : "gap-2.5 rounded-[var(--ro-r-sm)] px-3 py-2.5 text-sm font-semibold",
                       active
-                        ? "font-semibold"
+                        ? "font-bold"
                         : "text-[var(--ro-ink-300)] hover:bg-white/8 hover:text-[var(--ro-sand-100)]",
                       collapsed &&
                         active &&
@@ -102,7 +133,7 @@ function NavList({
                     {active && !collapsed ? (
                       <span
                         aria-hidden
-                        className="absolute inset-y-1.5 start-0 w-1 rounded-full bg-[var(--ro-plum-300)] shadow-[0_0_12px_color-mix(in_srgb,var(--ro-plum-300)_55%,transparent)]"
+                        className="absolute inset-y-1.5 start-0 w-1 rounded-full bg-transparent"
                       />
                     ) : null}
                     <Icon
@@ -110,10 +141,22 @@ function NavList({
                         "size-4 shrink-0 transition-transform duration-[var(--ro-dur-fast)]",
                         active && "scale-110"
                       )}
-                      strokeWidth={active ? 2 : 1.5}
+                      strokeWidth={1.5}
                       aria-hidden
                     />
-                    {!collapsed ? <span>{item.label}</span> : null}
+                    {!collapsed ? (
+                      <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
+                        <span className="truncate">{item.label}</span>
+                        {item.badge && item.badge > 0 ? (
+                          <LiveBadge
+                            value={item.badge}
+                            className="inline-flex min-w-[1.15rem] shrink-0 items-center justify-center rounded-full bg-[var(--ro-plum-300)] px-1.5 text-[0.65rem] font-bold text-[var(--ro-ink-950)]"
+                          />
+                        ) : null}
+                      </span>
+                    ) : item.badge && item.badge > 0 ? (
+                      <span className="absolute end-1 top-1 size-1.5 rounded-full bg-[var(--ro-plum-300)]" />
+                    ) : null}
                   </PendingNavLink>
                 </li>
               );
@@ -186,12 +229,12 @@ export function AdminMobileNav({
     <div className="lg:hidden">
       <button
         type="button"
-        className="inline-flex size-10 items-center justify-center border border-ro-line bg-ro-paper/80"
+        className="ro-icon-btn size-10 min-h-0 px-0"
         aria-label={menuLabel}
         aria-expanded={open}
         onClick={() => setOpen(true)}
       >
-        <Menu className="size-5" />
+        <Menu className="size-5" strokeWidth={1.5} aria-hidden />
       </button>
       {open ? (
         <div className="fixed inset-0 z-50 flex">

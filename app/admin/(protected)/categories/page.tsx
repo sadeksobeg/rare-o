@@ -1,6 +1,7 @@
+import { Tags } from "lucide-react";
 import { CategoriesManager } from "@/components/admin/categories-manager";
 import { PageHeader } from "@/components/admin/page-header";
-import { isLaunchCategorySlug } from "@/lib/catalog/constants";
+import { isProtectedCategorySlug } from "@/lib/catalog/constants";
 import { listAdminCategories } from "@/lib/catalog/service";
 import { getRequestDictionary } from "@/lib/i18n/server";
 
@@ -15,6 +16,7 @@ export default async function AdminCategoriesPage() {
       <PageHeader
         title={dict.admin.categories}
         description={dict.adminUi.categoriesLead}
+        icon={<Tags className="size-5" strokeWidth={2} />}
       />
       <CategoriesManager
         locale={locale}
@@ -26,7 +28,7 @@ export default async function AdminCategoriesPage() {
           nameEn: c.nameEn,
           sortOrder: c.sortOrder,
           productCount: c._count.products,
-          isLaunch: isLaunchCategorySlug(c.slug),
+          isLaunch: isProtectedCategorySlug(c.slug),
         }))}
       />
     </section>

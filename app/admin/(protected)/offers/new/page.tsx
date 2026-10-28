@@ -1,3 +1,4 @@
+import { Percent } from "lucide-react";
 import { PageHeader } from "@/components/admin/page-header";
 import { PublicOfferForm } from "@/components/admin/public-offer-form";
 import { uiVisibleDealWhere } from "@/lib/admin/ui-hidden";
@@ -25,6 +26,7 @@ export default async function AdminNewOfferPage() {
       <PageHeader
         title={dict.adminUi.detail.newOfferTitle}
         description={dict.adminUi.detail.newOfferLead}
+        icon={<Percent className="size-5" strokeWidth={2} />}
       />
       <PublicOfferForm
         deals={deals}

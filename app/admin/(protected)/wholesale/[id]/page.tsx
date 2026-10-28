@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { AdminWholesaleControls } from "@/components/admin/wholesale-controls";
 import {
   DetailItem,
@@ -186,7 +187,11 @@ export default async function AdminWholesaleDetailPage({
                     {e.fromStatus
                       ? (u.status.wholesale[e.fromStatus] ?? e.fromStatus)
                       : "—"}{" "}
-                    {locale === "ar" ? "←" : "→"}{" "}
+                    <ArrowRight
+                      className="mx-1 inline size-3.5 rtl:-scale-x-100"
+                      strokeWidth={1.5}
+                      aria-hidden
+                    />{" "}
                     {e.toStatus
                       ? (u.status.wholesale[e.toStatus] ?? e.toStatus)
                       : "—"}

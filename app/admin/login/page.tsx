@@ -8,8 +8,13 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function AdminLoginPage() {
+export default async function AdminLoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ returnTo?: string }>;
+}) {
   const { locale, dict } = await getRequestDictionary();
+  const { returnTo } = await searchParams;
 
   return (
     <LoginForm
@@ -22,15 +27,19 @@ export default async function AdminLoginPage() {
       showPasswordLabel={dict.auth.showPassword}
       hidePasswordLabel={dict.auth.hidePassword}
       loginErrorLabel={dict.auth.loginError}
-      totpLabel="2FA / recovery"
+      loginLockedLabel={dict.auth.loginLocked}
+      totpLabel={dict.auth.totpLabel}
+      totpRequiredLabel={dict.auth.totpRequired}
+      totpInvalidLabel={dict.auth.totpInvalid}
+      totpEnrollLabel={dict.auth.totpEnrollRequired}
+      returnTo={returnTo}
       inverse
-      localeSlot={
-        <AdminLocaleToggle
-          locale={locale}
-          label={dict.common.language}
-          tone="on-dark"
-        />
-      }
-    />
+    >
+      <AdminLocaleToggle
+        locale={locale}
+        label={dict.common.language}
+        tone="on-dark"
+      />
+    </LoginForm>
   );
 }

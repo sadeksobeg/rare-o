@@ -1,19 +1,23 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { adminLogoutAction } from "@/app/actions";
+import { LogOut, MessageSquare, UserRound } from "lucide-react";
+import { adminLogoutAction } from "@/app/admin-logout-action";
+import { AdminCommandSearchMount } from "@/components/admin/command-search-mount";
 import { AdminLocaleToggle } from "@/components/admin/locale-toggle";
 import {
   AdminMobileNav,
   AdminSidebar,
   type AdminNavGroup,
 } from "@/components/admin/nav";
-import { BrandWallpaper, Emblem } from "@/components/brand";
-import { PortalRouteProgress } from "@/components/portal/route-progress";
+import { Emblem } from "@/components/brand";
+import { ChromeBadge } from "@/components/portal/chrome-badge";
+import { PortalRouteProgressMount } from "@/components/portal/route-progress-mount";
+import { SavedToastMount } from "@/components/portal/saved-toast-mount";
 import { OfflineBanner } from "@/components/system/offline-banner";
 import { AppToast } from "@/components/system/app-toast";
-import { Button } from "@/components/ui/button";
 import { getAdminSessionChrome } from "@/lib/auth/admin-session";
 import { isPromoFeaturesEnabled } from "@/lib/config/feature-flags";
+import { prisma } from "@/lib/db/prisma";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { redirect } from "next/navigation";
 
@@ -24,13 +28,16 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
   const { locale, dict } = await getRequestDictionary();
   const a = dict.admin;
   const promoFeatures = isPromoFeaturesEnabled();
+  const unreadInbox = await prisma.whatsAppConversation.count({
+    where: { unreadCount: { gt: 0 } },
+  });
 
   const groups: AdminNavGroup[] = [
     {
       title: dict.common.navOps,
       items: [
         { href: "/admin", label: a.dashboard },
-        { href: "/admin/inbox", label: a.inbox },
+        { href: "/admin/inbox", label: a.inbox, badge: unreadInbox },
         { href: "/admin/requests", label: a.requests },
         { href: "/admin/deals", label: a.deals },
         { href: "/admin/wholesale", label: a.wholesale },
@@ -52,30 +59,44 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
       items: [
         { href: "/admin/customers", label: a.customers },
         { href: "/admin/traders", label: a.traders },
+        { href: "/admin/settings/security", label: a.settings },
       ],
     },
   ];
+
+  const commandPages: Record<string, string> = {
+    "/admin": a.dashboard,
+    "/admin/inbox": a.inbox,
+    "/admin/requests": a.requests,
+    "/admin/deals": a.deals,
+    "/admin/wholesale": a.wholesale,
+    "/admin/products": a.products,
+    "/admin/categories": a.categories,
+    "/admin/offers": a.offers,
+    "/admin/customers": a.customers,
+    "/admin/traders": a.traders,
+    "/admin/settings/security": a.settings,
+  };
+  if (promoFeatures) commandPages["/admin/promos"] = a.promos;
 
   const brand = `RARE OUD · ${a.dashboard}`;
 
   return (
     <AppToast dismissLabel={dict.common.toastDismiss}>
       <div className="ro-portal ro-portal-admin relative flex min-h-screen text-ro-ink">
-        <BrandWallpaper
-          tone="cream"
-          patternId="ro-admin-wallpaper"
-          className="z-0 opacity-[0.55]"
-        />
         <div className="ro-portal-atmosphere" aria-hidden />
         <Suspense fallback={null}>
-          <PortalRouteProgress />
+          <PortalRouteProgressMount />
+        </Suspense>
+        <Suspense fallback={null}>
+          <SavedToastMount message={a.savedToast} param="notesSaved" />
         </Suspense>
         <div className="relative z-10 flex min-h-screen w-full">
           <AdminSidebar groups={groups} brand={brand} />
           <div className="flex min-w-0 flex-1 flex-col">
             <OfflineBanner />
             <header className="ro-portal-header sticky top-0 z-30 flex h-14 items-center justify-between gap-3 px-4">
-              <div className="flex items-center gap-3">
+              <div className="flex min-w-0 items-center gap-3">
                 <AdminMobileNav
                   groups={groups}
                   menuLabel={dict.common.menu}
@@ -86,24 +107,53 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
                   className="flex items-center gap-2 lg:hidden"
                 >
                   <Emblem variant="small" className="size-7" />
-                  <span className="font-display text-sm font-semibold tracking-[0.14em] text-ro-ink">
+                  <span className="font-display text-sm font-bold tracking-[0.14em] text-ro-ink">
                     {brand}
                   </span>
                 </Link>
               </div>
-              <div className="flex items-center gap-3 text-sm">
+              <div className="flex items-center gap-2 text-sm sm:gap-3">
+                <AdminCommandSearchMount
+                  labels={{
+                    search: a.commandSearch,
+                    placeholder: a.commandPlaceholder,
+                    empty: a.commandEmpty,
+                    searching: a.commandSearching,
+                    close: dict.common.close,
+                    pages: commandPages,
+                  }}
+                />
+                <Link
+                  href="/admin/inbox"
+                  className="ro-icon-btn relative"
+                  aria-label={a.inbox}
+                >
+                  <MessageSquare className="size-4" strokeWidth={1.5} aria-hidden />
+                  <ChromeBadge
+                    value={unreadInbox}
+                    className="absolute end-1 top-1 flex min-w-[1.05rem] items-center justify-center rounded-full bg-[var(--ro-plum-900)] px-1 text-[0.6rem] font-bold text-[var(--ro-sand-50)]"
+                  />
+                </Link>
                 <AdminLocaleToggle
                   locale={locale}
                   label={dict.common.language}
                   tone="on-light"
                 />
-                <span className="hidden truncate text-ro-muted sm:inline">
-                  {session.email}
+                <span className="hidden items-center gap-1.5 rounded-[var(--ro-r-sm)] border border-[color-mix(in_srgb,var(--ro-plum-900)_14%,transparent)] bg-[color-mix(in_srgb,var(--ro-sand-50)_90%,var(--ro-plum-50))] px-2.5 py-1.5 font-semibold text-ro-ink sm:inline-flex">
+                  <UserRound className="size-3.5 text-[var(--ro-plum-800)]" aria-hidden />
+                  <span className="max-w-[12rem] truncate text-xs sm:text-sm">
+                    {session.email}
+                  </span>
                 </span>
                 <form action={adminLogoutAction}>
-                  <Button type="submit" variant="secondary" size="sm">
-                    {a.logout}
-                  </Button>
+                  <button
+                    type="submit"
+                    className="ro-icon-btn"
+                    aria-label={a.logout}
+                  >
+                    <LogOut className="size-4" strokeWidth={1.5} aria-hidden />
+                    <span className="hidden sm:inline">{a.logout}</span>
+                  </button>
                 </form>
               </div>
             </header>

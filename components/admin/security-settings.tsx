@@ -12,9 +12,17 @@ import { Banner } from "@/components/ui/banner";
 export function AdminSecuritySettings({
   email,
   totpEnabled,
+  accountLabel = "Account",
+  enabledLabel = "On",
+  disabledLabel = "Off",
+  enrollLabel = "Enable 2FA",
 }: {
   email: string;
   totpEnabled: boolean;
+  accountLabel?: string;
+  enabledLabel?: string;
+  disabledLabel?: string;
+  enrollLabel?: string;
 }) {
   const [pending, start] = useTransition();
   const [enroll, setEnroll] = useState<{
@@ -28,10 +36,10 @@ export function AdminSecuritySettings({
   return (
     <div className="space-y-4 rounded-[var(--ro-r-sm)] border border-ro-line bg-ro-surface p-6">
       <p className="text-sm">
-        Account: <span dir="ltr">{email}</span>
+        {accountLabel}: <span dir="ltr">{email}</span>
       </p>
       <p className="text-sm text-ro-muted">
-        Status: {totpEnabled ? "2FA enabled" : "2FA not enabled"}
+        {totpEnabled ? enabledLabel : disabledLabel}
       </p>
 
       {!totpEnabled && !enroll ? (

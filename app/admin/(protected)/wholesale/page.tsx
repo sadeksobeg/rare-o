@@ -1,18 +1,25 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { Package } from "lucide-react";
 import {
   DataTable,
   DataTableHead,
+  RowHit,
   Td,
   Th,
   Tr,
 } from "@/components/admin/data-table";
+import {
+  AdminRecordCard,
+  AdminRecordCardList,
+} from "@/components/admin/list-record-card";
 import { PageHeader } from "@/components/admin/page-header";
 import { AdminTableFilters } from "@/components/admin/table-filters";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusChip } from "@/components/ui/status-chip";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { wholesaleNextActor } from "@/lib/ui/status";
+import { isFresh } from "@/lib/ui/fresh";
 import { getStatusChipProps } from "@/lib/ui/status-labels";
 import { WHOLESALE_STATUSES } from "@/lib/wholesale/constants";
 import { listWholesaleRequestsForAdmin } from "@/lib/wholesale/service";
@@ -63,12 +70,16 @@ export default async function AdminWholesalePage({
 
   return (
     <section className="space-y-6">
-      <PageHeader title={a.wholesale} description={u.wholesaleLead} />
+      <PageHeader
+        title={a.wholesale}
+        description={u.wholesaleLead}
+        icon={<Package className="size-5" strokeWidth={2} />}
+      />
       <Suspense fallback={null}>
         <AdminTableFilters
           tabsLabel={u.filterTabs}
           searchLabel={u.search}
-          searchPlaceholder={u.searchPlaceholder}
+          searchPlaceholder={u.searchWholesale}
           resultCount={filtered.length}
           resultLabel={u.resultsLabel}
           tabs={[
@@ -91,6 +102,31 @@ export default async function AdminWholesalePage({
           <EmptyState title={u.emptyTitle} body={u.emptyBody} />
         </div>
       ) : (
+        <>
+          <AdminRecordCardList>
+            {filtered.map(({ r, waiting }) => (
+              <AdminRecordCard
+                key={r.id}
+                href={`/admin/wholesale/${r.id}`}
+                flash={isFresh(r.updatedAt)}
+                title={r.reference}
+                trailing={
+                  <StatusChip
+                    size="sm"
+                    {...getStatusChipProps(dict, "wholesale", r.status)}
+                  />
+                }
+                meta={
+                  <>
+                    {r.trader.displayName}
+                    {waiting ? ` · ${u.waitingOnYou}` : null}
+                  </>
+                }
+                actionLabel={u.actionReview}
+              />
+            ))}
+          </AdminRecordCardList>
+          <div className="hidden md:block">
         <DataTable>
           <DataTableHead>
             <Th>{u.colReference}</Th>
@@ -102,9 +138,17 @@ export default async function AdminWholesalePage({
             <Th />
           </DataTableHead>
           <tbody>
-            {filtered.map(({ r, waiting }) => (
-              <Tr key={r.id}>
-                <Td className="font-medium">{r.reference}</Td>
+            {filtered.map(({ r, waiting }) => {
+              const shipping = [r.carrier, r.trackingReference]
+                .filter(Boolean)
+                .join(" · ");
+              return (
+              <Tr key={r.id} flash={isFresh(r.updatedAt)}>
+                <Td>
+                  <RowHit href={`/admin/wholesale/${r.id}`}>
+                    {r.reference}
+                  </RowHit>
+                </Td>
                 <Td>
                   {r.trader.displayName}
                   <div className="text-ro-muted" dir="ltr">
@@ -133,7 +177,9 @@ export default async function AdminWholesalePage({
                     ) : null}
                   </span>
                 </Td>
-                <Td className="text-ro-muted">{u.shippingPlaceholder}</Td>
+                <Td className="text-ro-muted" dir="ltr">
+                  {shipping || u.shippingPlaceholder}
+                </Td>
                 <Td className="tabular-nums">{r._count.lines}</Td>
                 <Td>
                   <Link
@@ -144,9 +190,12 @@ export default async function AdminWholesalePage({
                   </Link>
                 </Td>
               </Tr>
-            ))}
+              );
+            })}
           </tbody>
         </DataTable>
+          </div>
+        </>
       )}
     </section>
   );

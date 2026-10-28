@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { InboxConversationList } from "@/components/admin/inbox-conversation-list";
 import type { InboxListRow } from "@/components/admin/inbox-conversation-list";
 import { InboxConnectionBanner } from "@/components/admin/inbox-connection-banner";
+import { MessageSquare } from "lucide-react";
 import { PageHeader } from "@/components/admin/page-header";
 import { WhatsAppLinkAccount } from "@/components/admin/whatsapp-link-account";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -88,7 +89,11 @@ export default async function AdminInboxLayout({
       data-admin-inbox
       className="flex min-h-[calc(100vh-5.5rem)] flex-col gap-3"
     >
-      <PageHeader title={dict.inbox.title} description={dict.inbox.subtitle} />
+      <PageHeader
+        title={dict.inbox.title}
+        description={dict.inbox.subtitle}
+        icon={<MessageSquare className="size-5" strokeWidth={2} />}
+      />
       <Suspense
         fallback={
           <div className="space-y-3" aria-busy="true">

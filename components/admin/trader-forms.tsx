@@ -6,7 +6,7 @@ import {
 } from "@/app/deal-actions";
 import type { ActionResult } from "@/app/actions";
 import { Button } from "@/components/ui/button";
-import { Dialog } from "@/components/ui/dialog";
+import { ConfirmDialog, Dialog } from "@/components/ui/dialog";
 import { TextField } from "@/components/ui/text-field";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { useRouter } from "next/navigation";
@@ -145,34 +145,82 @@ export function TraderStatusButton({
   traderId,
   nextStatus,
   label,
+  confirmTitle,
+  confirmBody,
+  confirmLabel,
+  cancelLabel,
 }: {
   traderId: string;
   nextStatus: "active" | "disabled";
   label: string;
+  confirmTitle?: string;
+  confirmBody?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const needsConfirm = nextStatus === "disabled";
+
+  function run() {
+    const fd = new FormData();
+    fd.set("traderId", traderId);
+    fd.set("status", nextStatus);
+    startTransition(async () => {
+      await adminSetTraderStatusAction(fd);
+      setConfirmOpen(false);
+      router.refresh();
+    });
+  }
 
   return (
-    <form
-      action={(fd) => {
-        startTransition(async () => {
-          await adminSetTraderStatusAction(fd);
-          router.refresh();
-        });
-      }}
-    >
-      <input type="hidden" name="traderId" value={traderId} />
-      <input type="hidden" name="status" value={nextStatus} />
-      <Button
-        type="submit"
-        variant="secondary"
-        size="sm"
-        loading={pending}
-        className="h-8 px-3"
-      >
-        {label}
-      </Button>
-    </form>
+    <>
+      {needsConfirm ? (
+        <>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            loading={pending}
+            className="h-8 px-3"
+            onClick={() => setConfirmOpen(true)}
+          >
+            {label}
+          </Button>
+          <ConfirmDialog
+            open={confirmOpen}
+            onClose={() => setConfirmOpen(false)}
+            onConfirm={run}
+            title={confirmTitle ?? label}
+            body={confirmBody ?? label}
+            confirmLabel={confirmLabel ?? label}
+            cancelLabel={cancelLabel ?? "Cancel"}
+            pending={pending}
+          />
+        </>
+      ) : (
+        <form
+          action={(fd) => {
+            startTransition(async () => {
+              await adminSetTraderStatusAction(fd);
+              router.refresh();
+            });
+          }}
+        >
+          <input type="hidden" name="traderId" value={traderId} />
+          <input type="hidden" name="status" value={nextStatus} />
+          <Button
+            type="submit"
+            variant="secondary"
+            size="sm"
+            loading={pending}
+            className="h-8 px-3"
+          >
+            {label}
+          </Button>
+        </form>
+      )}
+    </>
   );
 }

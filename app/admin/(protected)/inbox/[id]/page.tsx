@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { InboxContextShell } from "@/components/admin/inbox-context-shell";
 import { LinkedRecordPanel } from "@/components/admin/linked-record-panel";
 import { MessageThread } from "@/components/admin/message-thread";
@@ -48,9 +49,14 @@ export default async function AdminWhatsAppConversationPage({
         <div className="mb-2 lg:hidden">
           <Link
             href="/admin/inbox"
-            className="text-sm font-semibold text-ro-plum hover:underline"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-ro-plum hover:underline"
           >
-            ← {dict.inbox.backToList}
+            <ArrowLeft
+              className="size-4 rtl:-scale-x-100"
+              strokeWidth={1.5}
+              aria-hidden
+            />
+            {dict.inbox.backToList}
           </Link>
         </div>
         <MessageThread

@@ -1,3 +1,4 @@
+import { Wifi } from "lucide-react";
 import { ButtonLink } from "@/components/ui/button";
 import { StatusChip } from "@/components/ui/status-chip";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -66,7 +67,10 @@ export function ConnectionCard({
 
   return (
     <section className={cn("space-y-3", className)}>
-      <h2 className="font-display text-xl font-semibold text-ro-ink">
+      <h2 className="ro-portal-section-title flex items-center gap-2">
+        <span className="ro-portal-icon-well size-8 [&>svg]:size-4" aria-hidden>
+          <Wifi className="size-4" strokeWidth={1.5} />
+        </span>
         {a.connection}
       </h2>
       <div className="ro-portal-card space-y-4 border p-4">

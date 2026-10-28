@@ -1,6 +1,9 @@
+import { Boxes } from "lucide-react";
 import { notFound } from "next/navigation";
+import { PageHeader } from "@/components/admin/page-header";
 import { ImageUploader } from "@/components/admin/image-uploader";
 import { ProductForm } from "@/components/admin/product-form";
+import { oudSpecsFormDefaults, parseOudSpecs } from "@/lib/catalog/oud-specs";
 import { getProductById, listAllCategories } from "@/lib/catalog/service";
 import { isPromoFeaturesEnabled } from "@/lib/config/feature-flags";
 import { getRequestDictionary } from "@/lib/i18n/server";
@@ -20,10 +23,10 @@ export default async function EditProductPage({
 
   return (
     <section className="space-y-8">
-      <h1 className="text-2xl font-semibold tracking-tight sm:text-[28px]">
-        {dict.admin.edit}:{" "}
-        {product.nameAr || product.nameEn || product.slug}
-      </h1>
+      <PageHeader
+        title={`${dict.admin.edit}: ${product.nameAr || product.nameEn || product.slug}`}
+        icon={<Boxes className="size-5" strokeWidth={2} />}
+      />
 
       <ImageUploader
         productId={product.id}
@@ -67,6 +70,7 @@ export default async function EditProductPage({
           badgeNew: product.badgeNew,
           badgeFeatured: product.badgeFeatured,
           badgeSale: product.badgeSale,
+          oudSpecs: oudSpecsFormDefaults(parseOudSpecs(product.oudSpecs)),
         }}
       />
     </section>

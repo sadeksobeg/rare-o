@@ -2,15 +2,22 @@ import Link from "next/link";
 import {
   DataTable,
   DataTableHead,
+  RowHit,
   Td,
   Th,
   Tr,
 } from "@/components/admin/data-table";
+import {
+  AdminRecordCard,
+  AdminRecordCardList,
+} from "@/components/admin/list-record-card";
+import { Percent } from "lucide-react";
 import { PageHeader } from "@/components/admin/page-header";
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusChip } from "@/components/ui/status-chip";
 import { getRequestDictionary } from "@/lib/i18n/server";
+import { isFresh } from "@/lib/ui/fresh";
 import { listPublicOffersForAdmin } from "@/lib/offers/service";
 import { getStatusChipProps } from "@/lib/ui/status-labels";
 
@@ -25,6 +32,7 @@ export default async function AdminOffersPage() {
       <PageHeader
         title={a.offers}
         description={u.offersLead}
+        icon={<Percent className="size-5" strokeWidth={2} />}
         action={
           <ButtonLink href="/admin/offers/new" variant="primary" size="sm">
             {u.newOffer}
@@ -41,6 +49,26 @@ export default async function AdminOffersPage() {
           />
         </div>
       ) : (
+        <>
+          <AdminRecordCardList>
+            {offers.map((o) => {
+              const title =
+                locale === "ar"
+                  ? o.titleAr || o.titleEn
+                  : o.titleEn || o.titleAr;
+              return (
+                <AdminRecordCard
+                  key={o.id}
+                  href={`/admin/offers/${o.id}`}
+                  flash={isFresh(o.updatedAt)}
+                  title={title}
+                  meta={o.slug}
+                  actionLabel={a.edit}
+                />
+              );
+            })}
+          </AdminRecordCardList>
+          <div className="hidden md:block">
         <DataTable>
           <DataTableHead>
             <Th>{a.colSlug}</Th>
@@ -56,11 +84,13 @@ export default async function AdminOffersPage() {
                   ? o.titleAr || o.titleEn
                   : o.titleEn || o.titleAr;
               return (
-                <Tr key={o.id}>
+                <Tr key={o.id} flash={isFresh(o.updatedAt)}>
                   <Td className="text-ro-muted" dir="ltr">
                     {o.slug}
                   </Td>
-                  <Td className="font-medium">{title}</Td>
+                  <Td>
+                    <RowHit href={`/admin/offers/${o.id}`}>{title}</RowHit>
+                  </Td>
                   <Td>
                     <StatusChip
                       size="sm"
@@ -81,6 +111,8 @@ export default async function AdminOffersPage() {
             })}
           </tbody>
         </DataTable>
+          </div>
+        </>
       )}
     </section>
   );

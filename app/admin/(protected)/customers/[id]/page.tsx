@@ -1,9 +1,12 @@
 import Link from "next/link";
+import { Users } from "lucide-react";
+import { CustomerNotesForm } from "@/components/admin/customer-notes-form";
 import {
   DetailItem,
   DetailList,
   DetailSection,
 } from "@/components/admin/detail-list";
+import { PageHeader } from "@/components/admin/page-header";
 import { StatusChip } from "@/components/ui/status-chip";
 import { prisma } from "@/lib/db/prisma";
 import { formatDate, formatRelative } from "@/lib/i18n/format";
@@ -45,10 +48,13 @@ async function findWhatsAppConversationsForPhone(phone: string) {
 
 export default async function AdminCustomerDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ notesSaved?: string; notesError?: string }>;
 }) {
   const { id } = await params;
+  const q = await searchParams;
   const { locale, dict } = await getRequestDictionary();
   const a = dict.admin;
   const u = dict.adminUi;
@@ -56,6 +62,7 @@ export default async function AdminCustomerDetailPage({
   const customer = await prisma.customer.findUnique({
     where: { id },
     include: {
+      _count: { select: { requests: true } },
       requests: {
         orderBy: { createdAt: "desc" },
         take: 40,
@@ -78,30 +85,36 @@ export default async function AdminCustomerDetailPage({
 
   return (
     <section className="space-y-8">
-      <div className="space-y-2">
-        <p className="text-sm text-ro-muted">{a.customers}</p>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-[28px]">
-          {customer.name}
-        </h1>
-        <p className="text-ro-muted" dir="ltr">
-          {customer.phone}
-        </p>
-      </div>
+      <PageHeader
+        overline={a.customers}
+        title={customer.name}
+        icon={<Users className="size-5" strokeWidth={2} />}
+      />
 
       <DetailList>
+        <DetailItem label={u.colPhone}>
+          <span dir="ltr">{customer.phone}</span>
+        </DetailItem>
         <DetailItem label={u.colCreated}>
           {formatDate(customer.createdAt, locale, {
             dateStyle: "medium",
             timeStyle: "short",
           })}
         </DetailItem>
-        <DetailItem label={u.detail.customerNotes}>
-          {customer.notes?.trim() || "—"}
-        </DetailItem>
         <DetailItem label={u.colRequests}>
-          {customer.requests.length}
+          {customer._count.requests}
         </DetailItem>
       </DetailList>
+
+      <div className="ro-portal-card space-y-3 border p-4 md:p-5">
+        <CustomerNotesForm
+          customerId={customer.id}
+          notes={customer.notes ?? ""}
+          dict={dict}
+          saved={q.notesSaved === "1"}
+          error={Boolean(q.notesError)}
+        />
+      </div>
 
       <DetailSection title={u.customerWaTitle}>
         {waConversations.length === 0 ? (

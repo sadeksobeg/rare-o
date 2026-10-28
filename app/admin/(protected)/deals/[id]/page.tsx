@@ -9,6 +9,13 @@ import { isDealStatus, isOpenDealStatus } from "@/lib/deals/constants";
 import { formatCurrency, formatNumber } from "@/lib/i18n/format";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { getStatusChipProps } from "@/lib/ui/status-labels";
+import {
+  FilePlus2,
+  Handshake,
+  Package,
+  Store,
+  Tags,
+} from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -49,17 +56,21 @@ export default async function AdminDealDetailPage({
 
   return (
     <section className="space-y-8">
-      <div className="space-y-3">
-        <p className="text-sm text-ro-muted">
+      <div className="space-y-4">
+        <p className="ro-portal-muted flex items-center gap-2">
+          <Handshake className="size-3.5 text-[var(--ro-plum-800)]" aria-hidden />
           {a.deals} · <span dir="ltr">{deal.reference}</span>
         </p>
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-[28px]">
+          <span className="ro-portal-icon-well size-11 [&>svg]:size-5" aria-hidden>
+            <Handshake className="size-5" strokeWidth={2} />
+          </span>
+          <h1 className="ro-portal-page-title text-2xl tracking-tight sm:text-[28px]">
             {deal.title}
           </h1>
           <StatusChip {...getStatusChipProps(dict, "deal", deal.status)} />
         </div>
-        <p className="text-sm">
+        <p className="text-sm font-semibold">
           <span className="text-ro-muted">{u.colKind}: </span>
           {t.dealKind[deal.dealKind] ?? deal.dealKind}
         </p>
@@ -67,7 +78,10 @@ export default async function AdminDealDetailPage({
       </div>
 
       <DetailList>
-        <DetailItem label={u.colTrader}>
+        <DetailItem
+          label={u.colTrader}
+          icon={<Store className="size-3.5" strokeWidth={2} />}
+        >
           {deal.trader.displayName}
           <span className="text-ro-muted"> · </span>
           <span dir="ltr">{deal.trader.email}</span>
@@ -75,7 +89,10 @@ export default async function AdminDealDetailPage({
             <div className="text-ro-muted">{deal.trader.companyName}</div>
           ) : null}
         </DetailItem>
-        <DetailItem label={d.productReference}>
+        <DetailItem
+          label={d.productReference}
+          icon={<Package className="size-3.5" strokeWidth={2} />}
+        >
           {deal.product && productName ? (
             <>
               {productName}{" "}
@@ -87,20 +104,24 @@ export default async function AdminDealDetailPage({
             d.nonCatalogNoProduct
           )}
         </DetailItem>
-        <DetailItem label={d.commercialSnapshot}>
+        <DetailItem
+          label={d.commercialSnapshot}
+          icon={<Tags className="size-3.5" strokeWidth={2} />}
+        >
           {deal.proposedPrice != null
             ? money(deal.proposedPrice, deal.currency)
             : "—"}
           {deal.quantity != null ? ` · ${d.qty} ${deal.quantity}` : ""}
         </DetailItem>
         <DetailItem label={d.conditions}>
-          <span className="whitespace-pre-wrap">
+          <span className="ro-portal-message-panel mt-1 block">
             {deal.conditionsNotes || "—"}
           </span>
         </DetailItem>
       </DetailList>
 
       <NegotiationThread
+        currency={deal.currency}
         entries={deal.entries}
         dealId={deal.id}
         mode="admin"
@@ -113,16 +134,21 @@ export default async function AdminDealDetailPage({
         qtyLabel={d.qty}
       />
 
-      <div className="space-y-3 border border-ro-line p-4">
-        <h2 className="text-lg font-semibold">{d.publicOfferTitle}</h2>
-        <p className="text-sm text-ro-muted">{d.publicOfferBody}</p>
+      <div className="ro-portal-card space-y-3 border p-4 md:p-5">
+        <h2 className="ro-portal-section-title flex items-center gap-2 text-lg">
+          <span className="ro-portal-icon-well size-8 [&>svg]:size-4" aria-hidden>
+            <FilePlus2 className="size-4" strokeWidth={2} />
+          </span>
+          {d.publicOfferTitle}
+        </h2>
+        <p className="ro-portal-muted">{d.publicOfferBody}</p>
         {deal.curatedOffers.length > 0 ? (
-          <ul className="space-y-2 text-sm">
+          <ul className="space-y-2 text-sm font-semibold">
             {deal.curatedOffers.map((o) => (
               <li key={o.id} className="flex flex-wrap items-center gap-2">
                 <Link
                   href={`/admin/offers/${o.id}`}
-                  className="text-ro-plum hover:underline"
+                  className="font-bold text-ro-plum hover:underline"
                   dir="ltr"
                 >
                   {o.slug}
@@ -138,6 +164,7 @@ export default async function AdminDealDetailPage({
         <form action={adminCreateOfferDraftFromDealAction}>
           <input type="hidden" name="dealId" value={deal.id} />
           <Button type="submit" variant="secondary" size="sm">
+            <FilePlus2 className="size-3.5" strokeWidth={2} aria-hidden />
             {d.createDraftOffer}
           </Button>
         </form>

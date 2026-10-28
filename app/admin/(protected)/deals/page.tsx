@@ -1,12 +1,18 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { Handshake } from "lucide-react";
 import {
   DataTable,
   DataTableHead,
+  RowHit,
   Td,
   Th,
   Tr,
 } from "@/components/admin/data-table";
+import {
+  AdminRecordCard,
+  AdminRecordCardList,
+} from "@/components/admin/list-record-card";
 import { PageHeader } from "@/components/admin/page-header";
 import { AdminTableFilters } from "@/components/admin/table-filters";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -15,6 +21,7 @@ import { DEAL_STATUSES } from "@/lib/deals/constants";
 import { listDealsForAdmin } from "@/lib/deals/service";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { dealNextActor } from "@/lib/ui/status";
+import { isFresh } from "@/lib/ui/fresh";
 import { getStatusChipProps } from "@/lib/ui/status-labels";
 
 export default async function AdminDealsPage({
@@ -69,12 +76,16 @@ export default async function AdminDealsPage({
 
   return (
     <section className="space-y-6">
-      <PageHeader title={a.deals} description={u.dealsLead} />
+      <PageHeader
+        title={a.deals}
+        description={u.dealsLead}
+        icon={<Handshake className="size-5" strokeWidth={2} />}
+      />
       <Suspense fallback={null}>
         <AdminTableFilters
           tabsLabel={u.filterTabs}
           searchLabel={u.search}
-          searchPlaceholder={u.searchPlaceholder}
+          searchPlaceholder={u.searchDeals}
           resultCount={filtered.length}
           resultLabel={u.resultsLabel}
           tabs={[
@@ -97,6 +108,31 @@ export default async function AdminDealsPage({
           <EmptyState title={u.emptyTitle} body={u.emptyBody} />
         </div>
       ) : (
+        <>
+          <AdminRecordCardList>
+            {filtered.map(({ d, waiting }) => (
+              <AdminRecordCard
+                key={d.id}
+                href={`/admin/deals/${d.id}`}
+                flash={isFresh(d.updatedAt)}
+                title={d.reference}
+                trailing={
+                  <StatusChip
+                    size="sm"
+                    {...getStatusChipProps(dict, "deal", d.status)}
+                  />
+                }
+                meta={
+                  <>
+                    {d.trader.displayName}
+                    {waiting ? ` · ${u.waitingOnYou}` : null}
+                  </>
+                }
+                actionLabel={u.actionNegotiate}
+              />
+            ))}
+          </AdminRecordCardList>
+          <div className="hidden md:block">
         <DataTable>
           <DataTableHead>
             <Th>{u.colReference}</Th>
@@ -109,8 +145,10 @@ export default async function AdminDealsPage({
           </DataTableHead>
           <tbody>
             {filtered.map(({ d, waiting }) => (
-              <Tr key={d.id}>
-                <Td className="font-medium">{d.reference}</Td>
+              <Tr key={d.id} flash={isFresh(d.updatedAt)}>
+                <Td>
+                  <RowHit href={`/admin/deals/${d.id}`}>{d.reference}</RowHit>
+                </Td>
                 <Td>
                   {d.trader.displayName}
                   <div className="text-ro-muted" dir="ltr">
@@ -153,6 +191,8 @@ export default async function AdminDealsPage({
             ))}
           </tbody>
         </DataTable>
+          </div>
+        </>
       )}
     </section>
   );

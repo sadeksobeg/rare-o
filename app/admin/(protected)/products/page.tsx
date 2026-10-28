@@ -1,5 +1,19 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { Boxes, Plus } from "lucide-react";
+import {
+  DataTable,
+  DataTableHead,
+  RowHit,
+  Td,
+  Th,
+  Tr,
+} from "@/components/admin/data-table";
+import {
+  AdminRecordCard,
+  AdminRecordCardList,
+} from "@/components/admin/list-record-card";
+import { PageHeader } from "@/components/admin/page-header";
 import { AdminTableFilters } from "@/components/admin/table-filters";
 import { ProductThumb } from "@/components/storefront/product-media";
 import { StatusChip } from "@/components/ui/status-chip";
@@ -9,6 +23,7 @@ import { PRODUCT_STATUSES } from "@/lib/catalog/constants";
 import { listAdminProducts } from "@/lib/catalog/service";
 import { formatCurrency } from "@/lib/i18n/format";
 import { getRequestDictionary } from "@/lib/i18n/server";
+import { isFresh } from "@/lib/ui/fresh";
 
 function productStatusTone(
   status: string
@@ -52,20 +67,22 @@ export default async function AdminProductsPage({
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-[28px]">
-          {a.products}
-        </h1>
-        <ButtonLink href="/admin/products/new" variant="primary" size="sm">
-          {a.newProduct}
-        </ButtonLink>
-      </div>
+      <PageHeader
+        title={a.products}
+        icon={<Boxes className="size-5" strokeWidth={2} />}
+        action={
+          <ButtonLink href="/admin/products/new" variant="primary" size="sm">
+            <Plus className="size-3.5" strokeWidth={2.5} aria-hidden />
+            {a.newProduct}
+          </ButtonLink>
+        }
+      />
 
       <Suspense fallback={null}>
         <AdminTableFilters
           tabsLabel={u.filterTabs}
           searchLabel={u.search}
-          searchPlaceholder={u.searchPlaceholder}
+          searchPlaceholder={u.searchProducts}
           resultCount={filtered.length}
           resultLabel={u.resultsLabel}
           tabs={[
@@ -84,90 +101,115 @@ export default async function AdminProductsPage({
           <EmptyState title={u.emptyTitle} body={u.emptyBody} />
         </div>
       ) : (
-        <div className="overflow-x-auto border border-ro-line">
-          <table className="min-w-full text-start text-sm">
-            <thead className="border-b border-ro-line bg-ro-surface">
-              <tr>
-                <th className="p-3 font-medium">{a.colThumb}</th>
-                <th className="p-3 font-medium">{a.colName}</th>
-                <th className="p-3 font-medium">{a.colCategory}</th>
-                <th className="p-3 font-medium">{a.colStatus}</th>
-                <th className="p-3 font-medium">{a.colAvailability}</th>
-                <th className="p-3 font-medium">{a.colPrice}</th>
-                <th className="p-3 font-medium">{a.colSlug}</th>
-                <th className="p-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((p) => {
-                const thumb = p.images[0];
-                const name =
-                  locale === "ar"
-                    ? p.nameAr || p.nameEn || "—"
-                    : p.nameEn || p.nameAr || "—";
-                const categoryName =
-                  locale === "ar"
-                    ? p.category.nameAr || p.category.nameEn
-                    : p.category.nameEn || p.category.nameAr;
-                return (
-                  <tr key={p.id} className="border-b border-ro-line">
-                    <td className="p-3">
-                      <div className="w-14">
-                        <ProductThumb
-                          path={thumb?.path}
-                          alt={
-                            locale === "ar"
-                              ? thumb?.altAr || name
-                              : thumb?.altEn || name
-                          }
-                          plateCaption={plateCaption}
-                          className="aspect-square"
-                        />
-                      </div>
-                    </td>
-                    <td className="p-3 font-medium">{name}</td>
-                    <td className="p-3 text-ro-muted">{categoryName}</td>
-                    <td className="p-3">
-                      <StatusChip
-                        tone={productStatusTone(p.status)}
-                        label={u.productStatus[p.status] ?? p.status}
-                        size="sm"
-                      />
-                    </td>
-                    <td className="p-3">
-                      <StatusChip
-                        tone={
-                          p.availability === "available" ? "success" : "closed"
+        <>
+          <AdminRecordCardList>
+            {filtered.map((p) => {
+              const name =
+                locale === "ar"
+                  ? p.nameAr || p.nameEn || "—"
+                  : p.nameEn || p.nameAr || "—";
+              return (
+                <AdminRecordCard
+                  key={p.id}
+                  href={`/admin/products/${p.id}`}
+                  flash={isFresh(p.updatedAt)}
+                  title={name}
+                  trailing={
+                    <StatusChip
+                      tone={productStatusTone(p.status)}
+                      label={u.productStatus[p.status] ?? p.status}
+                      size="sm"
+                    />
+                  }
+                  meta={p.slug}
+                  actionLabel={a.edit}
+                />
+              );
+            })}
+          </AdminRecordCardList>
+          <div className="hidden md:block">
+        <DataTable>
+          <DataTableHead>
+            <Th>{a.colThumb}</Th>
+            <Th>{a.colName}</Th>
+            <Th>{a.colCategory}</Th>
+            <Th>{a.colStatus}</Th>
+            <Th>{a.colAvailability}</Th>
+            <Th>{a.colPrice}</Th>
+            <Th>{a.colSlug}</Th>
+            <Th />
+          </DataTableHead>
+          <tbody>
+            {filtered.map((p) => {
+              const thumb = p.images[0];
+              const name =
+                locale === "ar"
+                  ? p.nameAr || p.nameEn || "—"
+                  : p.nameEn || p.nameAr || "—";
+              const categoryName =
+                locale === "ar"
+                  ? p.category.nameAr || p.category.nameEn
+                  : p.category.nameEn || p.category.nameAr;
+              return (
+                <Tr key={p.id} flash={isFresh(p.updatedAt)}>
+                  <Td>
+                    <div className="w-14">
+                      <ProductThumb
+                        path={thumb?.path}
+                        alt={
+                          locale === "ar"
+                            ? thumb?.altAr || name
+                            : thumb?.altEn || name
                         }
-                        label={
-                          u.availability[p.availability] ?? p.availability
-                        }
-                        size="sm"
+                        plateCaption={plateCaption}
+                        className="aspect-square"
                       />
-                    </td>
-                    <td className="p-3 tabular-nums">
-                      {formatCurrency(
-                        Number(p.retailPrice),
-                        p.currency,
-                        locale,
-                        dict.product.priceOnRequest
-                      )}
-                    </td>
-                    <td className="p-3 text-ro-muted">{p.slug}</td>
-                    <td className="p-3">
-                      <Link
-                        href={`/admin/products/${p.id}`}
-                        className="text-ro-plum hover:underline"
-                      >
-                        {a.edit}
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                    </div>
+                  </Td>
+                  <Td>
+                    <RowHit href={`/admin/products/${p.id}`}>{name}</RowHit>
+                  </Td>
+                  <Td className="text-ro-muted">{categoryName}</Td>
+                  <Td>
+                    <StatusChip
+                      tone={productStatusTone(p.status)}
+                      label={u.productStatus[p.status] ?? p.status}
+                      size="sm"
+                    />
+                  </Td>
+                  <Td>
+                    <StatusChip
+                      tone={
+                        p.availability === "available" ? "success" : "closed"
+                      }
+                      label={u.availability[p.availability] ?? p.availability}
+                      size="sm"
+                    />
+                  </Td>
+                  <Td className="tabular-nums">
+                    {formatCurrency(
+                      Number(p.retailPrice),
+                      p.currency,
+                      locale,
+                      dict.product.priceOnRequest
+                    )}
+                  </Td>
+                  <Td className="text-ro-muted">{p.slug}</Td>
+                  <Td>
+                    <Link
+                      href={`/admin/products/${p.id}`}
+                      className="text-ro-plum hover:underline"
+                    >
+                      {a.edit}
+                    </Link>
+                  </Td>
+                </Tr>
+              );
+            })}
+          </tbody>
+        </DataTable>
+          </div>
+        </>
       )}
     </section>
   );

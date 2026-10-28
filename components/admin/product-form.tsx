@@ -1,11 +1,17 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import Link from "next/link";
 import { upsertProductAction, type ActionResult } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/text-field";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import { OudSpecsFields } from "@/components/admin/oud-specs-fields";
+import {
+  EMPTY_OUD_SPECS_FORM,
+  type OudSpecsFormValues,
+} from "@/lib/catalog/oud-specs";
 import {
   controlClass,
   controlLabelClass,
@@ -36,6 +42,7 @@ type ProductValues = {
   badgeNew?: boolean;
   badgeFeatured?: boolean;
   badgeSale?: boolean;
+  oudSpecs?: OudSpecsFormValues;
 };
 
 export function ProductForm({
@@ -59,6 +66,17 @@ export function ProductForm({
   const [state, action, pending] = useActionState(upsertProductAction, initial);
   const [nameAr, setNameAr] = useState(product?.nameAr ?? "");
   const [status, setStatus] = useState(product?.status ?? "draft");
+  const [dirty, setDirty] = useState(false);
+
+  useEffect(() => {
+    if (!dirty) return;
+    function onLeave(event: BeforeUnloadEvent) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+    window.addEventListener("beforeunload", onLeave);
+    return () => window.removeEventListener("beforeunload", onLeave);
+  }, [dirty]);
 
   const hasNameAr = nameAr.trim().length > 0;
   const hasImage = imageCount > 0;
@@ -83,7 +101,11 @@ export function ProductForm({
       : null;
 
   return (
-    <form action={action} className="max-w-2xl space-y-4">
+    <form
+      action={action}
+      className="max-w-2xl space-y-4"
+      onChange={() => setDirty(true)}
+    >
       {product?.id ? <input type="hidden" name="id" value={product.id} /> : null}
       <TextField
         name="slug"
@@ -122,18 +144,6 @@ export function ProductForm({
         dir="ltr"
         defaultValue={product?.descriptionEn}
       />
-      <TextArea
-        name="specsTextAr"
-        label={f.specsAr}
-        dir="rtl"
-        defaultValue={product?.specsTextAr}
-      />
-      <TextArea
-        name="specsTextEn"
-        label={f.specsEn}
-        dir="ltr"
-        defaultValue={product?.specsTextEn}
-      />
       <label className={controlLabelClass}>
         <span className={controlLabelTextClass}>{f.category}</span>
         <select
@@ -149,6 +159,25 @@ export function ProductForm({
           ))}
         </select>
       </label>
+      <OudSpecsFields
+        labels={f}
+        values={product?.oudSpecs ?? EMPTY_OUD_SPECS_FORM}
+      />
+      <TextArea
+        name="specsTextAr"
+        label={f.specsAr}
+        dir="rtl"
+        defaultValue={product?.specsTextAr}
+      />
+      {f.specsHelp ? (
+        <p className="-mt-2 text-xs text-ro-muted">{f.specsHelp}</p>
+      ) : null}
+      <TextArea
+        name="specsTextEn"
+        label={f.specsEn}
+        dir="ltr"
+        defaultValue={product?.specsTextEn}
+      />
       <div
         className={
           showCompareAtPrice ? "grid gap-3 sm:grid-cols-2" : "grid gap-3"
@@ -241,15 +270,13 @@ export function ProductForm({
         </label>
       </div>
       <fieldset className="space-y-3 rounded-[var(--ro-r-sm)] border border-ro-line p-4">
-        <legend className={controlLabelTextClass}>شارات المتجر</legend>
-        <p className="text-xs text-ro-muted">
-          تظهر على بطاقة المنتج وصورة القطعة. يتحكم الأدمن بكل شارة بشكل مستقل.
-        </p>
+        <legend className={controlLabelTextClass}>{f.storeBadges}</legend>
+        <p className="text-xs text-ro-muted">{f.storeBadgesHelp}</p>
         {(
           [
-            ["badgeNew", "جديد", product?.badgeNew],
-            ["badgeFeatured", "مميّز", product?.badgeFeatured],
-            ["badgeSale", "خصم", product?.badgeSale],
+            ["badgeNew", f.badgeNew, product?.badgeNew],
+            ["badgeFeatured", f.badgeFeatured, product?.badgeFeatured],
+            ["badgeSale", f.badgeSale, product?.badgeSale],
           ] as const
         ).map(([name, label, checked]) => (
           <label key={name} className="flex items-center gap-2 text-sm">
@@ -287,10 +314,20 @@ export function ProductForm({
           {publishBlockedText}
         </p>
       ) : null}
-      <div className="z-20 border-t border-ro-line bg-ro-surface/95 py-3 backdrop-blur md:sticky md:bottom-0">
+      <div className="z-20 flex flex-wrap items-center gap-3 border-t border-ro-line bg-ro-surface/95 py-3 backdrop-blur md:sticky md:bottom-0">
         <Button type="submit" loading={pending} disabled={publishBlocked}>
           {pending ? f.saving : f.saveProduct}
         </Button>
+        {product?.slug && product.status === "published" ? (
+          <Link
+            href={`/product/${product.slug}`}
+            className="text-sm font-medium text-ro-plum hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {f.previewStorefront}
+          </Link>
+        ) : null}
       </div>
     </form>
   );

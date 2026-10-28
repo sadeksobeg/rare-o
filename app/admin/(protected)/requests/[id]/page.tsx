@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { AdminRequestControls } from "@/components/admin/request-controls";
 import {
   DetailItem,
@@ -94,7 +95,16 @@ export default async function AdminRequestDetailPage({
 
       <DetailList>
         <DetailItem label={u.colCustomer}>
-          {request.customerName}
+          {request.customerId ? (
+            <Link
+              href={`/admin/customers/${request.customerId}`}
+              className="font-medium text-ro-plum hover:underline"
+            >
+              {request.customerName}
+            </Link>
+          ) : (
+            request.customerName
+          )}
           <span className="text-ro-muted"> · </span>
           <span dir="ltr">{request.customerPhone}</span>
         </DetailItem>
@@ -191,12 +201,17 @@ export default async function AdminRequestDetailPage({
       ) : null}
 
       <DetailSection title={d.handoffPayload}>
-        <pre
-          dir="ltr"
-          className="overflow-x-auto border border-ro-line bg-ro-surface p-4 text-start text-xs"
-        >
-          {JSON.stringify(payload, null, 2)}
-        </pre>
+        <details className="border border-ro-line bg-ro-surface">
+          <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-ro-plum">
+            {d.handoffPayload}
+          </summary>
+          <pre
+            dir="ltr"
+            className="overflow-x-auto border-t border-ro-line p-4 text-start text-xs"
+          >
+            {JSON.stringify(payload, null, 2)}
+          </pre>
+        </details>
       </DetailSection>
 
       <DetailSection title={d.auditEvents}>
@@ -214,7 +229,11 @@ export default async function AdminRequestDetailPage({
                     {e.fromStatus
                       ? (u.status.retail[e.fromStatus] ?? e.fromStatus)
                       : "—"}{" "}
-                    {locale === "ar" ? "←" : "→"}{" "}
+                    <ArrowRight
+                      className="mx-1 inline size-3.5 rtl:-scale-x-100"
+                      strokeWidth={1.5}
+                      aria-hidden
+                    />{" "}
                     {e.toStatus
                       ? (u.status.retail[e.toStatus] ?? e.toStatus)
                       : "—"}

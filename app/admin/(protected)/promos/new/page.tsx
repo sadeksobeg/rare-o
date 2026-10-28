@@ -1,3 +1,4 @@
+import { Megaphone } from "lucide-react";
 import { PageHeader } from "@/components/admin/page-header";
 import { PromoBandForm } from "@/components/admin/promo-band-form";
 import { isPromoFeaturesEnabled } from "@/lib/config/feature-flags";
@@ -13,6 +14,7 @@ export default async function AdminNewPromoPage() {
       <PageHeader
         title={dict.adminUi.newPromo}
         description={dict.adminUi.promosLead}
+        icon={<Megaphone className="size-5" strokeWidth={2} />}
       />
       <PromoBandForm labels={dict.adminUi} />
     </section>

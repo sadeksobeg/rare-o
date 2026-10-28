@@ -1,12 +1,18 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import {
   DataTable,
   DataTableHead,
+  RowHit,
   Td,
   Th,
   Tr,
 } from "@/components/admin/data-table";
+import {
+  AdminRecordCard,
+  AdminRecordCardList,
+} from "@/components/admin/list-record-card";
 import { PageHeader } from "@/components/admin/page-header";
 import { AdminTableFilters } from "@/components/admin/table-filters";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -20,6 +26,8 @@ import {
   RETAIL_REQUEST_STATUSES,
   isRetailRequestStatus,
 } from "@/lib/retail-request/constants";
+import { statusesAwaitingAdmin } from "@/lib/ui/status";
+import { isFresh } from "@/lib/ui/fresh";
 import { getStatusChipProps } from "@/lib/ui/status-labels";
 import type { Prisma } from "@prisma/client";
 
@@ -58,12 +66,16 @@ export default async function AdminRequestsPage({
     Number.parseInt(pageRaw || "1", 10) || 1
   );
 
+  const waitingStatuses = statusesAwaitingAdmin("retail");
   const statusFilter =
-    tab !== "all" && isRetailRequestStatus(tab) ? tab : undefined;
+    tab !== "all" && tab !== "waiting" && isRetailRequestStatus(tab)
+      ? tab
+      : undefined;
 
   const where: Prisma.RetailRequestWhereInput = {
     AND: [
       uiVisibleRetailRequestWhere(),
+      ...(tab === "waiting" ? [{ status: { in: waitingStatuses } }] : []),
       ...(statusFilter ? [{ status: statusFilter }] : []),
       ...(q
         ? [
@@ -120,16 +132,25 @@ export default async function AdminRequestsPage({
 
   return (
     <section className="space-y-6">
-      <PageHeader title={a.requests} description={u.requestsLead} />
+      <PageHeader
+        title={a.requests}
+        description={u.requestsLead}
+        icon={<ShoppingBag className="size-5" strokeWidth={1.5} />}
+      />
       <Suspense fallback={null}>
         <AdminTableFilters
           tabsLabel={u.filterTabs}
           searchLabel={u.search}
-          searchPlaceholder={u.searchPlaceholder}
+          searchPlaceholder={u.searchRequests}
           resultCount={totalFiltered}
           resultLabel={u.resultsLabel}
           tabs={[
             { id: "all", label: u.filterAll, count: counts.all },
+            {
+              id: "waiting",
+              label: u.filterWaiting,
+              count: waitingStatuses.reduce((n, s) => n + (counts[s] ?? 0), 0),
+            },
             ...RETAIL_REQUEST_STATUSES.map((s) => ({
               id: s,
               label: statusLabel(s),
@@ -144,6 +165,32 @@ export default async function AdminRequestsPage({
         </div>
       ) : (
         <>
+          <AdminRecordCardList>
+            {requests.map((r) => (
+              <AdminRecordCard
+                key={r.id}
+                href={`/admin/requests/${r.id}`}
+                flash={isFresh(r.updatedAt)}
+                title={r.reference}
+                trailing={
+                  <StatusChip
+                    size="sm"
+                    {...getStatusChipProps(dict, "retail", r.status)}
+                  />
+                }
+                meta={
+                  <>
+                    {r.customerName}
+                    <span className="ms-2" dir="ltr">
+                      {r.customerPhone}
+                    </span>
+                  </>
+                }
+                actionLabel={u.actionView}
+              />
+            ))}
+          </AdminRecordCardList>
+          <div className="hidden md:block">
           <DataTable>
             <DataTableHead>
               <Th>{u.colReference}</Th>
@@ -159,8 +206,12 @@ export default async function AdminRequestsPage({
               {requests.map((r) => {
                 const last = r.handoffEvents[0];
                 return (
-                  <Tr key={r.id}>
-                    <Td className="font-medium">{r.reference}</Td>
+                  <Tr key={r.id} flash={isFresh(r.updatedAt)}>
+                    <Td>
+                      <RowHit href={`/admin/requests/${r.id}`}>
+                        {r.reference}
+                      </RowHit>
+                    </Td>
                     <Td>
                       {r.customerName}
                       <div className="text-ro-muted" dir="ltr">
@@ -198,6 +249,7 @@ export default async function AdminRequestsPage({
               })}
             </tbody>
           </DataTable>
+          </div>
           {pageCount > 1 ? (
             <nav
               aria-label="Pagination"
@@ -210,17 +262,27 @@ export default async function AdminRequestsPage({
                 {page > 1 ? (
                   <Link
                     href={buildPageHref(tab, q, page - 1)}
-                    className="rounded-[var(--ro-r-sm)] border border-ro-line px-3 py-2 hover:bg-ro-sunken"
+                    aria-label={dict.common.paginationPrevious}
+                    className="inline-flex size-11 items-center justify-center rounded-[var(--ro-r-sm)] border border-ro-line hover:bg-ro-sunken"
                   >
-                    ←
+                    <ChevronLeft
+                      className="size-4 rtl:-scale-x-100"
+                      strokeWidth={1.5}
+                      aria-hidden
+                    />
                   </Link>
                 ) : null}
                 {page < pageCount ? (
                   <Link
                     href={buildPageHref(tab, q, page + 1)}
-                    className="rounded-[var(--ro-r-sm)] border border-ro-line px-3 py-2 hover:bg-ro-sunken"
+                    aria-label={dict.common.paginationNext}
+                    className="inline-flex size-11 items-center justify-center rounded-[var(--ro-r-sm)] border border-ro-line hover:bg-ro-sunken"
                   >
-                    →
+                    <ChevronRight
+                      className="size-4 rtl:-scale-x-100"
+                      strokeWidth={1.5}
+                      aria-hidden
+                    />
                   </Link>
                 ) : null}
               </div>

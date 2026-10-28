@@ -1,4 +1,11 @@
 import Link from "next/link";
+import {
+  ArrowUpLeft,
+  Handshake,
+  Package,
+  ShoppingBag,
+  Activity,
+} from "lucide-react";
 import { Timeline, type TimelineEvent } from "@/components/ui/timeline";
 import type { ActivityFeedItem } from "@/lib/admin/dashboard";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -38,11 +45,27 @@ function eventLabel(
   return dict.trader.wholesaleEvent[eventKey] ?? eventKey;
 }
 
+/** Safe text-only detail — never interpret as HTML. */
 function humanizeDetail(detail: string | null | undefined): string | null {
   if (!detail) return null;
-  // Strip technical "Mode: propose_price" style notes from feed detail
   if (/^Mode:\s*/i.test(detail.trim())) return null;
   return detail;
+}
+
+function domainIcon(domain: ActivityFeedItem["domain"]) {
+  if (domain === "retail") {
+    return <ShoppingBag className="size-4" strokeWidth={1.5} aria-hidden />;
+  }
+  if (domain === "deal") {
+    return <Handshake className="size-4" strokeWidth={1.5} aria-hidden />;
+  }
+  return <Package className="size-4" strokeWidth={1.5} aria-hidden />;
+}
+
+function domainTone(
+  domain: ActivityFeedItem["domain"]
+): TimelineEvent["tone"] {
+  return domain;
 }
 
 /** A07 / D31 — Timeline of last 10 domain events, each linking to its record. */
@@ -71,13 +94,23 @@ export function ActivityFeed({
         dateStyle: "medium",
         timeStyle: "short",
       }),
+      icon: domainIcon(item.domain),
+      tone: domainTone(item.domain),
       detail: (
-        <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1">
-          {detail ? <span>{detail}</span> : null}
+        <span className="inline-flex flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+          {detail ? (
+            <span className="ro-portal-message-panel mt-0 flex-1">{detail}</span>
+          ) : null}
           <Link
             href={item.href}
-            className="font-semibold text-ro-plum hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
+            className="ro-icon-btn shrink-0 self-start"
+            aria-label={`${a.actionOpen} ${item.reference}`}
           >
+            <ArrowUpLeft
+              className="size-3.5 rtl:-scale-x-100"
+              strokeWidth={1.5}
+              aria-hidden
+            />
             {a.actionOpen}
           </Link>
         </span>
@@ -87,15 +120,18 @@ export function ActivityFeed({
 
   return (
     <section className={cn("space-y-3", className)}>
-      <h2 className="font-display text-xl font-semibold text-ro-ink">
+      <h2 className="ro-portal-section-title flex items-center gap-2">
+        <span className="ro-portal-icon-well size-8 [&>svg]:size-4" aria-hidden>
+          <Activity className="size-4" strokeWidth={1.5} />
+        </span>
         {a.activityFeed}
       </h2>
       {events.length === 0 ? (
-        <p className="ro-portal-card border p-4 text-sm text-ro-muted">
+        <p className="ro-portal-card border p-4 text-sm font-semibold text-ro-muted">
           {a.activityEmpty}
         </p>
       ) : (
-        <div className="ro-portal-card border p-4 md:p-5">
+        <div className="ro-portal-card border p-3 md:p-4">
           <Timeline label={a.activityFeed} events={events} />
         </div>
       )}

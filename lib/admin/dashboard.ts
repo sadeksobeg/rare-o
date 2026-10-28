@@ -1,10 +1,13 @@
 import { prisma } from "@/lib/db/prisma";
 import {
   isUiHiddenReference,
+  uiVisibleCustomerWhere,
   uiVisibleDealWhere,
   uiVisibleRetailRequestWhere,
+  uiVisibleTraderWhere,
   uiVisibleWholesaleWhere,
 } from "@/lib/admin/ui-hidden";
+import { formatDayKey, lastCalendarDayKeys } from "@/lib/i18n/format";
 import {
   dealNextActor,
   retailNextActor,
@@ -22,6 +25,43 @@ export type ActionQueueRow = {
   href: string;
   ageAt: Date;
   status: string;
+  reference: string;
+  subtitle: string;
+  lineCount?: number;
+};
+
+export type KpiSeries = {
+  points: number[];
+  today: number;
+  yesterday: number;
+};
+
+export type AdminKpiSeriesMap = {
+  retail: KpiSeries;
+  deals: KpiSeries;
+  wholesale: KpiSeries;
+  inbox: KpiSeries;
+};
+
+export type CatalogHealth = {
+  published: number;
+  withPhoto: number;
+  missingPhoto: number;
+};
+
+/** Real counts for the dashboard manage strip (products / traders / customers / inbox). */
+export type ManageHubCounts = {
+  publishedProducts: number;
+  traders: number;
+  customers: number;
+  unreadConversations: number;
+};
+
+export type RetailPipeline = {
+  ready_for_handoff: number;
+  in_follow_up: number;
+  handoff_opened: number;
+  completed: number;
 };
 
 export type ActivityFeedDomain = "retail" | "deal" | "wholesale";
@@ -52,6 +92,8 @@ export async function getAdminHomeData() {
     dealCandidates,
     wholesaleAwaitingAdmin,
     unreadConversations,
+    visibleTraders,
+    visibleCustomers,
     health,
     actionQueue,
     activityFeed,
@@ -91,9 +133,22 @@ export async function getAdminHomeData() {
     prisma.whatsAppConversation.count({
       where: { unreadCount: { gt: 0 } },
     }),
+    prisma.traderAccount.count({
+      where: uiVisibleTraderWhere(),
+    }),
+    prisma.customer.count({
+      where: uiVisibleCustomerWhere(),
+    }),
     getInboxHealthView(),
-    getActionQueueRows(),
+    getActionQueueRows(24),
     getActivityFeedItems(),
+  ]);
+
+  const [series, catalogHealth, pipeline, lastWhatsAppAt] = await Promise.all([
+    getKpiSeries(sevenDaysAgo()),
+    getCatalogHealth(),
+    getRetailPipeline(),
+    latestWhatsAppAt(),
   ]);
 
   const dealsAwaitingAdmin = dealCandidates.filter((d) => {
@@ -110,6 +165,16 @@ export async function getAdminHomeData() {
       wholesaleAwaitingAdmin,
       unreadConversations,
     },
+    series,
+    catalogHealth,
+    manageHub: {
+      publishedProducts: catalogHealth.published,
+      traders: visibleTraders,
+      customers: visibleCustomers,
+      unreadConversations,
+    } satisfies ManageHubCounts,
+    pipeline,
+    lastWhatsAppAt,
     health,
     actionQueue,
     activityFeed,
@@ -144,6 +209,7 @@ export async function getActionQueueRows(
         status: true,
         updatedAt: true,
         createdAt: true,
+        _count: { select: { lines: true } },
       },
       take: 40,
     }),
@@ -161,6 +227,7 @@ export async function getActionQueueRows(
         status: true,
         updatedAt: true,
         createdAt: true,
+        trader: { select: { displayName: true } },
         entries: {
           orderBy: { createdAt: "desc" },
           take: 1,
@@ -199,6 +266,9 @@ export async function getActionQueueRows(
       href: `/admin/requests/${r.id}`,
       ageAt: r.updatedAt ?? r.createdAt,
       status: r.status,
+      reference: r.reference,
+      subtitle: r.customerName,
+      lineCount: r._count.lines,
     });
   }
 
@@ -214,6 +284,8 @@ export async function getActionQueueRows(
       href: `/admin/deals/${d.id}`,
       ageAt: d.updatedAt ?? d.createdAt,
       status: d.status,
+      reference: d.reference,
+      subtitle: d.trader.displayName,
     });
   }
 
@@ -226,6 +298,8 @@ export async function getActionQueueRows(
       href: `/admin/wholesale/${w.id}`,
       ageAt: w.updatedAt ?? w.createdAt,
       status: w.status,
+      reference: w.reference,
+      subtitle: w.trader.displayName,
     });
   }
 
@@ -330,4 +404,110 @@ export async function countRetailAwaitingAdmin(): Promise<number> {
       ],
     },
   });
+}
+
+function sevenDaysAgo(): Date {
+  return new Date(Date.now() - 8 * 24 * 60 * 60 * 1000);
+}
+
+function toSeries(dates: readonly Date[], keys: readonly string[]): KpiSeries {
+  const counts: Record<string, number> = Object.fromEntries(
+    keys.map((key) => [key, 0])
+  );
+  for (const date of dates) {
+    const key = formatDayKey(date);
+    if (key in counts) counts[key] += 1;
+  }
+  const points = keys.map((key) => counts[key] ?? 0);
+  return {
+    points,
+    today: points[points.length - 1] ?? 0,
+    yesterday: points[points.length - 2] ?? 0,
+  };
+}
+
+async function getKpiSeries(since: Date): Promise<AdminKpiSeriesMap> {
+  const keys = lastCalendarDayKeys(7);
+  const retail = await prisma.retailRequest.findMany({
+    where: {
+      AND: [uiVisibleRetailRequestWhere(), { createdAt: { gte: since } }],
+    },
+    select: { createdAt: true },
+  });
+  const deals = await prisma.dealProposal.findMany({
+    where: {
+      AND: [uiVisibleDealWhere(), { createdAt: { gte: since } }],
+    },
+    select: { createdAt: true },
+  });
+  const wholesale = await prisma.wholesaleRequest.findMany({
+    where: {
+      AND: [uiVisibleWholesaleWhere(), { createdAt: { gte: since } }],
+    },
+    select: { createdAt: true },
+  });
+  const inbound = await prisma.whatsAppMessage.findMany({
+    where: { direction: "inbound", createdAt: { gte: since } },
+    select: { createdAt: true },
+  });
+  return {
+    retail: toSeries(
+      retail.map((row) => row.createdAt),
+      keys
+    ),
+    deals: toSeries(
+      deals.map((row) => row.createdAt),
+      keys
+    ),
+    wholesale: toSeries(
+      wholesale.map((row) => row.createdAt),
+      keys
+    ),
+    inbox: toSeries(
+      inbound.map((row) => row.createdAt),
+      keys
+    ),
+  };
+}
+
+async function getCatalogHealth(): Promise<CatalogHealth> {
+  const published = await prisma.product.count({
+    where: { status: "published" },
+  });
+  const withPhoto = await prisma.product.count({
+    where: {
+      status: "published",
+      images: { some: { kind: "image" } },
+    },
+  });
+  return {
+    published,
+    withPhoto,
+    missingPhoto: Math.max(0, published - withPhoto),
+  };
+}
+
+async function getRetailPipeline(): Promise<RetailPipeline> {
+  const groups = await prisma.retailRequest.groupBy({
+    by: ["status"],
+    where: uiVisibleRetailRequestWhere(),
+    _count: { _all: true },
+  });
+  const countOf = (status: string) =>
+    groups.find((row) => row.status === status)?._count._all ?? 0;
+  return {
+    ready_for_handoff: countOf("ready_for_handoff"),
+    in_follow_up: countOf("in_follow_up"),
+    handoff_opened: countOf("handoff_opened"),
+    completed: countOf("completed"),
+  };
+}
+
+async function latestWhatsAppAt(): Promise<Date | null> {
+  const row = await prisma.whatsAppConversation.findFirst({
+    where: { lastMessageAt: { not: null } },
+    orderBy: { lastMessageAt: "desc" },
+    select: { lastMessageAt: true },
+  });
+  return row?.lastMessageAt ?? null;
 }
