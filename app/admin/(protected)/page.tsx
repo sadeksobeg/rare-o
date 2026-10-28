@@ -174,7 +174,7 @@ async function AdminDashboardBody({
         />
       </PortalReveal>
 
-      <PortalReveal className="grid gap-2.5 lg:grid-cols-12">
+      <PortalReveal className="grid items-start gap-2.5 lg:grid-cols-12">
         <ActionQueue
           rows={data.actionQueue}
           counts={{
