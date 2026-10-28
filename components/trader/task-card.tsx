@@ -1,23 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { ChevronRight, Handshake, Package } from "lucide-react";
 import { PressRipple } from "@/components/motion/press-ripple";
 import { cn } from "@/lib/utils";
+
+const TASK_ICONS = { handshake: Handshake, package: Package } as const;
 
 export function TaskCard({
   href,
   title,
   body,
-  icon: Icon,
+  icon,
   className,
 }: {
   href: string;
   title: string;
   body: string;
-  icon: LucideIcon;
+  /** A lucide-react component can't cross the server-to-client boundary as a
+   * prop (it isn't a registered RSC client reference) - pass a plain string
+   * key instead and let this client module import/render the icon itself,
+   * same pattern DealCard already uses for its own icon. */
+  icon: keyof typeof TASK_ICONS;
   className?: string;
 }) {
+  const Icon = TASK_ICONS[icon];
   return (
     <PressRipple>
     <Link

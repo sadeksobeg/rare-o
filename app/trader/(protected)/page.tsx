@@ -192,13 +192,13 @@ async function TraderHomeBody({
               href="/trader/deals/new"
               title={t.taskDealTitle}
               body={t.taskDealBody}
-              icon={Handshake}
+              icon="handshake"
             />
             <TaskCard
               href="/trader/wholesale"
               title={t.taskWholesaleTitle}
               body={t.taskWholesaleBody}
-              icon={Package}
+              icon="package"
             />
           </div>
         </div>
