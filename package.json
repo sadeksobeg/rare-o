@@ -98,7 +98,7 @@
     "prisma": "6.19.3",
     "puppeteer-core": "^23.11.1",
     "tailwindcss": "^4",
-    "tsx": "^4.19.3",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   },
   "overrides": {

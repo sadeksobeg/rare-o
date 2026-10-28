@@ -47,6 +47,7 @@ export function CartView({
     return (
       <div
         className="mx-auto max-w-[1440px] px-5 py-24 md:px-8"
+        role="status"
         aria-busy="true"
         aria-label={labels.title}
       />

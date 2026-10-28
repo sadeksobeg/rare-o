@@ -50,3 +50,10 @@ public/uploads/*
 
 # Local backup / restore-drill copies (never commit DB dumps)
 backups/
+
+# Local scratch / tool output (not part of the shipped app)
+debug.log
+npm-out.txt
+tmp-npm-install.txt
+tmp/
+test-results/
