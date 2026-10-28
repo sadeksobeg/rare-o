@@ -473,11 +473,11 @@ html[lang="ar"] .ro-type-overline {
 @keyframes ro-oud-enter {
   from {
     transform: translate3d(0, 2.75rem, 0) scale(0.9);
-    filter: brightness(0.7);
+    opacity: 0.7;
   }
   to {
     transform: translate3d(0, 0, 0) scale(1);
-    filter: brightness(1);
+    opacity: 1;
   }
 }
 
