@@ -58,10 +58,12 @@ export default async function RootLayout({
       className={
         // Only the active locale's font variables are applied; unused vars
         // fall back via globals.css so the other locale's files never load.
+        // -u-nu-latn: Western digits app-wide (PLAN D5 / design-lab port).
         locale === "ar"
           ? `${amiri.variable} ${plexAr.variable}`
           : `${cormorant.variable} ${source.variable}`
       }
+      style={{ fontVariantNumeric: "lining-nums" }}
     >
       <body className="min-h-screen antialiased">
         <a href="#main-content" className="ro-skip-link">

@@ -1,21 +1,30 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { Eye, EyeOff, KeyRound, Lock, Mail, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { useActionState, useEffect, useState } from "react";
+import { AlertTriangle, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import type { ActionResult } from "@/app/actions";
+import { LogoSceneMount } from "@/components/brand/logo-scene-mount";
 import { TextField } from "@/components/ui/text-field";
 import { Button } from "@/components/ui/button";
 import { Banner } from "@/components/ui/banner";
-import { Grain, Rings } from "@/components/brand";
-import { DrawIn, RosetteMark } from "@/components/motion/draw-in";
-import { Reveal } from "@/components/motion/reveal";
-import { useAmbientMotion } from "@/components/motion/use-ambient";
+import { cn } from "@/lib/utils";
 
 const initial: ActionResult | null = null;
 
+function formatMmSs(totalSec: number) {
+  const s = Math.max(0, Math.ceil(totalSec));
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return `${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
+}
+
+/** Design-lab login ceremony wired to real admin/trader auth actions. */
 export function LoginForm({
   action,
   title,
+  subtitle,
+  headline,
   hint,
   footer,
   emailLabel,
@@ -29,16 +38,25 @@ export function LoginForm({
   totpRequiredLabel,
   totpInvalidLabel,
   totpEnrollLabel,
-  inverse = false,
   children,
   totpLabel,
   returnTo,
+  tagline,
+  role = "admin",
+  roleAdminLabel = "Admin",
+  roleTraderLabel = "Trader",
+  rateLimitFooter,
+  capsLockLabel = "Caps Lock is on",
 }: {
   action: (
     prev: ActionResult | null,
     formData: FormData
   ) => Promise<ActionResult>;
   title: string;
+  /** Short line under the form title (design-lab subtitle). */
+  subtitle?: string;
+  /** Large words on the brand panel (design-lab headline). */
+  headline?: string;
   hint?: React.ReactNode;
   footer?: React.ReactNode;
   emailLabel: string;
@@ -47,21 +65,50 @@ export function LoginForm({
   brand?: string;
   showPasswordLabel?: string;
   hidePasswordLabel?: string;
-  /** Localized generic credentials error (maps LOGIN_INVALID). */
   loginErrorLabel?: string;
   loginLockedLabel?: string;
   totpRequiredLabel?: string;
   totpInvalidLabel?: string;
   totpEnrollLabel?: string;
-  inverse?: boolean;
   children?: React.ReactNode;
-  /** When set, show optional TOTP / recovery code field (admin 2FA). */
   totpLabel?: string;
   returnTo?: string;
+  tagline?: string;
+  role?: "admin" | "trader";
+  roleAdminLabel?: string;
+  roleTraderLabel?: string;
+  rateLimitFooter?: string;
+  capsLockLabel?: string;
 }) {
   const [state, formAction, pending] = useActionState(action, initial);
   const [reveal, setReveal] = useState(false);
-  const { active, resume } = useAmbientMotion();
+  const [capsLock, setCapsLock] = useState(false);
+  const [lockLeft, setLockLeft] = useState(0);
+
+  useEffect(() => {
+    if (!state || state.ok || state.error !== "LOGIN_LOCKED") {
+      setLockLeft(0);
+      return;
+    }
+    const sec =
+      typeof state.data === "object" &&
+      state.data &&
+      "retryAfterSec" in state.data
+        ? Number((state.data as { retryAfterSec?: number }).retryAfterSec)
+        : 60;
+    setLockLeft(Number.isFinite(sec) ? sec : 60);
+  }, [state]);
+
+  useEffect(() => {
+    if (lockLeft <= 0) return;
+    const id = window.setInterval(() => {
+      setLockLeft((n) => Math.max(0, n - 1));
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [lockLeft > 0]);
+
+  const locked = lockLeft > 0;
+  const headlineWords = (headline ?? title).split(/\s+/).filter(Boolean);
 
   const errorText =
     state && !state.ok
@@ -69,7 +116,9 @@ export function LoginForm({
         state.error === "Invalid email or password"
         ? (loginErrorLabel ?? state.error)
         : state.error === "LOGIN_LOCKED"
-          ? (loginLockedLabel ?? loginErrorLabel ?? state.error)
+          ? `${loginLockedLabel ?? loginErrorLabel ?? state.error}${
+              locked ? ` (${formatMmSs(lockLeft)})` : ""
+            }`
           : state.error === "TOTP_REQUIRED"
             ? (totpRequiredLabel ?? totpLabel ?? state.error)
             : state.error === "TOTP_INVALID"
@@ -80,138 +129,205 @@ export function LoginForm({
       : null;
 
   return (
-    <div
-      className={
-        inverse
-          ? "ro-inverse ro-login-stage fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-[var(--ro-ink-950)] px-4 py-12"
-          : "relative flex min-h-screen items-center justify-center bg-ro-canvas px-4 py-12"
-      }
-      onPointerDown={resume}
-    >
-      {inverse ? (
-        <>
-          <div className="ro-login-glow" aria-hidden="true" />
-          <div
-            className="pointer-events-none absolute inset-0 opacity-50"
-            style={{
-              background:
-                "radial-gradient(ellipse 50% 40% at 50% 40%, rgba(50,16,79,0.45), transparent 70%)",
-            }}
-            aria-hidden="true"
-          />
-          <Grain
-            patternId="ro-login-grain"
-            className="absolute inset-0 z-0 text-ro-canvas opacity-[0.06]"
-          />
-          <div
-            className="ro-login-rings pointer-events-none absolute inset-0 z-0 m-auto h-[min(70vw,28rem)] w-[min(70vw,28rem)]"
-            data-ambient={active ? "on" : "off"}
-          >
-            <Rings className="h-full w-full text-ro-canvas opacity-[0.14]" />
+    <main className="grid min-h-[100dvh] grid-cols-1 md:grid-cols-[1.15fr_1fr]">
+      {/* Living brand scene — design-lab (stacked on small screens so the ceremony always shows) */}
+      <section className="relative flex min-h-[44vh] flex-col justify-between overflow-hidden bg-[var(--ro-ink-950)] p-6 text-[var(--ro-sand-100)] sm:p-8 md:min-h-[100dvh]">
+        <div
+          className="pointer-events-none absolute inset-[-10%]"
+          aria-hidden
+          style={{
+            background: [
+              "radial-gradient(38% 46% at 24% 28%, rgba(82,39,124,0.55), transparent 60%)",
+              "radial-gradient(44% 50% at 78% 70%, rgba(184,134,63,0.22), transparent 62%)",
+              "radial-gradient(60% 60% at 50% 100%, rgba(50,16,79,0.65), transparent 65%)",
+            ].join(","),
+          }}
+        />
+        <div className="absolute inset-x-0 top-[8%] bottom-[34%]">
+          <LogoSceneMount className="h-full w-full" />
+        </div>
+        <div className="relative z-10 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 font-display text-xl font-semibold tracking-[0.12em]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/logo-mark-small.svg"
+              alt=""
+              className="h-6 w-6 invert"
+            />
+            {brand}
           </div>
-        </>
-      ) : null}
-
-      {children ? (
-        <div className="absolute end-4 top-4 z-10">{children}</div>
-      ) : null}
-
-      <Reveal variant="up" className="relative w-full max-w-[420px]">
-        <form
-          action={formAction}
-          className="relative space-y-5 rounded-[var(--ro-r-sm)] border border-[var(--ro-sand-200)] bg-[var(--ro-sand-50)] p-8 text-ro-ink shadow-[0_24px_60px_-36px_rgba(11,8,13,0.55)]"
-        >
-          <div className="flex flex-col items-center gap-3 text-center">
-            <DrawIn durationMs={900} className="size-16">
-              <RosetteMark width={64} height={64} />
-            </DrawIn>
-            <p className="font-display text-sm font-bold tracking-[0.28em]">
-              {brand}
+          {children}
+        </div>
+        <div className="relative z-10 rounded-t-2xl bg-gradient-to-t from-[var(--ro-ink-950)] via-[color-mix(in_srgb,var(--ro-ink-950)_70%,transparent)] to-transparent px-2 pb-2 pt-16 text-center">
+          {tagline ? (
+            <p className="ro-login-fade-up mb-2 text-sm text-[var(--ro-plum-300)]">
+              {tagline}
             </p>
-            <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight">
-              <KeyRound
-                className="size-5 shrink-0 text-[var(--ro-plum-800)]"
-                strokeWidth={2}
-                aria-hidden="true"
-              />
-              {title}
-            </h1>
-            {hint ? (
-              <div className="text-sm font-medium text-[var(--ro-ink-700)]">
-                {hint}
-              </div>
-            ) : null}
+          ) : null}
+          <h2 className="mx-auto max-w-[16ch] font-display text-3xl font-semibold text-[var(--ro-sand-100)] sm:text-4xl">
+            {headlineWords.map((word, i) => (
+              <span
+                key={`${word}-${i}`}
+                className="ro-login-word-in inline-block"
+                style={{ animationDelay: `${300 + i * 80}ms` }}
+              >
+                {word}
+                {i < headlineWords.length - 1 ? "\u00a0" : null}
+              </span>
+            ))}
+          </h2>
+        </div>
+      </section>
+
+      {/* Form panel — design-lab */}
+      <section className="relative flex items-center justify-center bg-[var(--ro-sand-100)] p-6 md:p-10">
+        <div className="w-full max-w-sm rounded-[14px] border border-white/50 bg-[var(--ro-sand-50)] p-8 shadow-[inset_0_1px_0_rgba(244,231,216,.08),0_1px_2px_rgba(11,8,13,.06),0_8px_24px_-12px_rgba(11,8,13,.18)]">
+          <div
+            role="tablist"
+            aria-label={brand}
+            className="mb-6 grid grid-cols-2 gap-1 rounded-[10px] bg-[color-mix(in_srgb,var(--ro-ink-950)_6%,transparent)] p-1"
+          >
+            <Link
+              href="/admin/login"
+              role="tab"
+              aria-selected={role === "admin"}
+              className={cn(
+                "rounded-[8px] px-3 py-2 text-center text-sm font-semibold transition-colors duration-[var(--ro-dur-fast)]",
+                role === "admin"
+                  ? "bg-[var(--ro-sand-50)] text-ro-ink shadow-[0_1px_2px_rgba(11,8,13,.08)]"
+                  : "text-[var(--ro-ink-600)] hover:text-ro-ink"
+              )}
+            >
+              {roleAdminLabel}
+            </Link>
+            <Link
+              href="/trader/login"
+              role="tab"
+              aria-selected={role === "trader"}
+              className={cn(
+                "rounded-[8px] px-3 py-2 text-center text-sm font-semibold transition-colors duration-[var(--ro-dur-fast)]",
+                role === "trader"
+                  ? "bg-[var(--ro-sand-50)] text-ro-ink shadow-[0_1px_2px_rgba(11,8,13,.08)]"
+                  : "text-[var(--ro-ink-600)] hover:text-ro-ink"
+              )}
+            >
+              {roleTraderLabel}
+            </Link>
           </div>
 
-          {returnTo ? (
-            <input type="hidden" name="returnTo" value={returnTo} />
+          <h1 className="mb-1 font-display text-2xl font-semibold text-ro-ink">
+            {title}
+          </h1>
+          {subtitle ? (
+            <p className="mb-6 text-sm text-[var(--ro-ink-600)]">{subtitle}</p>
+          ) : hint ? (
+            <div className="mb-6 text-sm text-[var(--ro-ink-600)]">{hint}</div>
+          ) : (
+            <div className="mb-6" />
+          )}
+
+          {locked ? (
+            <div className="mb-4 flex items-start gap-2 rounded-[8px] bg-[var(--ro-danger-100)] p-3 text-sm text-[var(--ro-danger-700)]">
+              <ShieldCheck
+                className="mt-0.5 size-4 shrink-0"
+                strokeWidth={1.5}
+              />
+              <span>{errorText}</span>
+            </div>
           ) : null}
-          <TextField
-            name="email"
-            type="email"
-            label={emailLabel}
-            required
-            dir="ltr"
-            autoComplete="username"
-            autoFocus
-            startAdornment={<Mail className="size-4" strokeWidth={2} />}
-          />
-          <TextField
-            name="password"
-            type={reveal ? "text" : "password"}
-            label={passwordLabel}
-            required
-            minLength={8}
-            dir="ltr"
-            autoComplete="current-password"
-            startAdornment={<Lock className="size-4" strokeWidth={2} />}
-            endAdornment={
-              <button
-                type="button"
-                className="ro-icon-btn h-8 min-h-0 gap-1 px-2 text-xs"
-                data-tone="ghost"
-                onClick={() => setReveal((v) => !v)}
-                aria-label={reveal ? hidePasswordLabel : showPasswordLabel}
-              >
-                {reveal ? (
-                  <EyeOff className="size-3.5" aria-hidden="true" />
-                ) : (
-                  <Eye className="size-3.5" aria-hidden="true" />
-                )}
-                <span className="hidden sm:inline">
-                  {reveal ? hidePasswordLabel : showPasswordLabel}
-                </span>
-              </button>
-            }
-          />
-          {totpLabel ? (
+
+          <form
+            action={formAction}
+            className={cn("space-y-4", locked && "pointer-events-none opacity-50")}
+          >
+            {returnTo ? (
+              <input type="hidden" name="returnTo" value={returnTo} />
+            ) : null}
             <TextField
-              name="totpCode"
-              type="text"
-              label={totpLabel}
+              name="email"
+              type="email"
+              label={emailLabel}
+              required
               dir="ltr"
-              autoComplete="one-time-code"
-              inputMode="numeric"
-              startAdornment={
-                <ShieldCheck className="size-4" strokeWidth={2} />
+              autoComplete="username"
+              inputMode="email"
+              autoFocus
+            />
+            <TextField
+              name="password"
+              type={reveal ? "text" : "password"}
+              label={passwordLabel}
+              required
+              minLength={8}
+              dir="ltr"
+              autoComplete="current-password"
+              onKeyUp={(e) => setCapsLock(e.getModifierState("CapsLock"))}
+              onKeyDown={(e) => setCapsLock(e.getModifierState("CapsLock"))}
+              endAdornment={
+                <button
+                  type="button"
+                  className="text-[var(--ro-ink-600)]"
+                  onClick={() => setReveal((v) => !v)}
+                  aria-pressed={reveal}
+                  aria-label={reveal ? hidePasswordLabel : showPasswordLabel}
+                >
+                  {reveal ? (
+                    <EyeOff className="size-5" strokeWidth={1.5} aria-hidden />
+                  ) : (
+                    <Eye className="size-5" strokeWidth={1.5} aria-hidden />
+                  )}
+                </button>
               }
             />
+            {capsLock ? (
+              <p
+                className="flex items-center gap-1.5 text-xs text-[var(--ro-amber-800)]"
+                role="status"
+              >
+                <AlertTriangle className="size-4" strokeWidth={1.5} aria-hidden />
+                {capsLockLabel}
+              </p>
+            ) : null}
+            {totpLabel ? (
+              <TextField
+                name="totpCode"
+                type="text"
+                label={totpLabel}
+                dir="ltr"
+                autoComplete="one-time-code"
+                inputMode="numeric"
+              />
+            ) : null}
+            {!locked && errorText ? (
+              <Banner tone="danger" alert aria-live="assertive">
+                {errorText}
+              </Banner>
+            ) : null}
+            <Button
+              type="submit"
+              className="w-full"
+              size="lg"
+              loading={pending}
+              disabled={locked || pending}
+            >
+              {submitLabel}
+            </Button>
+          </form>
+
+          {rateLimitFooter ? (
+            <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-xs text-[var(--ro-ink-600)]">
+              <ShieldCheck className="size-4" strokeWidth={1.5} aria-hidden />
+              {rateLimitFooter}
+            </p>
           ) : null}
-          {errorText ? (
-            <Banner tone="danger" alert className="ro-banner-shake">
-              {errorText}
-            </Banner>
+
+          {footer ? (
+            <div className="mt-4 text-center text-sm text-[var(--ro-ink-600)]">
+              {footer}
+            </div>
           ) : null}
-          <Button type="submit" className="w-full" loading={pending}>
-            {submitLabel}
-          </Button>
-        </form>
-        {footer ? (
-          <div className="relative mt-5 text-center text-sm font-medium text-[color-mix(in_srgb,var(--ro-sand-100)_82%,transparent)]">
-            {footer}
-          </div>
-        ) : null}
-      </Reveal>
-    </div>
+        </div>
+      </section>
+    </main>
   );
 }

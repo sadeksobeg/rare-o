@@ -16,9 +16,10 @@ export default async function TraderLoginPage({
 }) {
   const { locale, dict } = await getRequestDictionary();
   const { returnTo } = await searchParams;
+  const ar = locale === "ar";
   const accountRequestHref =
     whatsAppGreetingLink(
-      locale === "ar"
+      ar
         ? "مرحباً، أود طلب حساب تاجر في منصة RARE OUD."
         : "Hello — I would like to request a trader account on RARE OUD."
     ) || "/contact";
@@ -26,15 +27,30 @@ export default async function TraderLoginPage({
   return (
     <LoginForm
       action={traderLoginAction}
-      title={dict.auth.traderTitle}
       brand={dict.brand}
-      hint={dict.auth.traderHint}
+      role="trader"
+      roleAdminLabel={ar ? "إدارة" : "Admin"}
+      roleTraderLabel={ar ? "تاجر" : "Trader"}
+      tagline={
+        ar
+          ? "آلات عود نادرة — مصنوعة يدوياً"
+          : "Rare oud instruments — handcrafted"
+      }
+      headline={
+        ar ? "صدى الصنعة، محفوظ بدقّة" : "The echo of craft, kept precisely"
+      }
+      title={ar ? "دخول التاجر" : "Trader Sign In"}
+      subtitle={
+        ar
+          ? "اقترح صفقات، اطلب بالجملة، واطلب وساطة على قطعة رأيتها"
+          : "Propose deals, request wholesale, and ask us to broker a piece you've found"
+      }
       footer={
         <a
           href={accountRequestHref}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-medium text-[var(--ro-sand-100)] underline-offset-4 hover:underline"
+          className="font-medium text-[var(--ro-plum-900)] underline-offset-4 hover:underline"
         >
           {dict.trader.accountRequestHelp}
         </a>
@@ -46,8 +62,13 @@ export default async function TraderLoginPage({
       hidePasswordLabel={dict.auth.hidePassword}
       loginErrorLabel={dict.auth.loginError}
       loginLockedLabel={dict.auth.loginLocked}
+      capsLockLabel={ar ? "مفتاح Caps Lock مُفعَّل" : "Caps Lock is on"}
+      rateLimitFooter={
+        ar
+          ? "محاولات الدخول المتكررة تُوقَف مؤقتاً لحماية حسابك"
+          : "Repeated sign-in attempts are paused temporarily to protect your account"
+      }
       returnTo={returnTo}
-      inverse
     >
       <AdminLocaleToggle
         locale={locale}

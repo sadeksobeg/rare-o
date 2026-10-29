@@ -51,7 +51,7 @@ import { revalidateHomepageAndCatalogTags } from "@/lib/cache/revalidate-storefr
 
 export type ActionResult =
   | { ok: true; message?: string; data?: unknown }
-  | { ok: false; error: string };
+  | { ok: false; error: string; data?: unknown };
 
 export async function adminLoginAction(
   _prev: ActionResult | null,
@@ -71,7 +71,11 @@ export async function adminLoginAction(
   const email = parsed.data.email.toLowerCase();
   const lock = isLoginLocked("admin", email);
   if (lock.locked) {
-    return { ok: false, error: "LOGIN_LOCKED" };
+    return {
+      ok: false,
+      error: "LOGIN_LOCKED",
+      data: { retryAfterSec: lock.retryAfterSec ?? 60 },
+    };
   }
 
   const admin = await prisma.adminUser.findUnique({

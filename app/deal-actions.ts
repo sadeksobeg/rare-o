@@ -53,7 +53,11 @@ export async function traderLoginAction(
   const email = parsed.data.email.toLowerCase();
   const lock = isLoginLocked("trader", email);
   if (lock.locked) {
-    return { ok: false, error: "LOGIN_LOCKED" };
+    return {
+      ok: false,
+      error: "LOGIN_LOCKED",
+      data: { retryAfterSec: lock.retryAfterSec ?? 60 },
+    };
   }
 
   const trader = await prisma.traderAccount.findUnique({

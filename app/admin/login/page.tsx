@@ -15,12 +15,29 @@ export default async function AdminLoginPage({
 }) {
   const { locale, dict } = await getRequestDictionary();
   const { returnTo } = await searchParams;
+  const ar = locale === "ar";
 
   return (
     <LoginForm
       action={adminLoginAction}
-      title={dict.auth.adminTitle}
       brand={dict.brand}
+      role="admin"
+      roleAdminLabel={ar ? "إدارة" : "Admin"}
+      roleTraderLabel={ar ? "تاجر" : "Trader"}
+      tagline={
+        ar
+          ? "آلات عود نادرة — مصنوعة يدوياً"
+          : "Rare oud instruments — handcrafted"
+      }
+      headline={
+        ar ? "صدى الصنعة، محفوظ بدقّة" : "The echo of craft, kept precisely"
+      }
+      title={ar ? "دخول الإدارة" : "Admin Sign In"}
+      subtitle={
+        ar
+          ? "صلاحية كاملة على التجزئة والصفقات والجملة والوساطة وصندوق واتساب"
+          : "Full access to retail, deals, wholesale, brokerage, and the WhatsApp inbox"
+      }
       emailLabel={dict.common.email}
       passwordLabel={dict.common.password}
       submitLabel={dict.common.signIn}
@@ -32,8 +49,13 @@ export default async function AdminLoginPage({
       totpRequiredLabel={dict.auth.totpRequired}
       totpInvalidLabel={dict.auth.totpInvalid}
       totpEnrollLabel={dict.auth.totpEnrollRequired}
+      capsLockLabel={ar ? "مفتاح Caps Lock مُفعَّل" : "Caps Lock is on"}
+      rateLimitFooter={
+        ar
+          ? "محاولات الدخول المتكررة تُوقَف مؤقتاً لحماية حسابك"
+          : "Repeated sign-in attempts are paused temporarily to protect your account"
+      }
       returnTo={returnTo}
-      inverse
     >
       <AdminLocaleToggle
         locale={locale}

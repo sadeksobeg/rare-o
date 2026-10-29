@@ -194,6 +194,21 @@ html[lang="en"] {
   --color-ro-line-on-dark: var(--ro-line-on-dark);
   --font-sans: var(--ro-font-ui);
   --font-display: var(--ro-font-display);
+  /* design-lab type scale (port) */
+  --text-display: clamp(3rem, 2rem + 5vw, 6.5rem);
+  --text-display--line-height: 1.25;
+  --text-h1: clamp(2rem, 1.55rem + 2vw, 3.25rem);
+  --text-h1--line-height: 1.35;
+  --text-h2: clamp(1.625rem, 1.35rem + 1.2vw, 2.25rem);
+  --text-h2--line-height: 1.4;
+  --text-h3: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+  --text-h3--line-height: 1.5;
+  --text-body: 1rem;
+  --text-body--line-height: 1.8;
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.7;
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.65;
 }
 
 * {
@@ -1796,15 +1811,10 @@ html[lang="en"] .ro-portal {
 
 .ro-portal-sidebar-brand {
   letter-spacing: 0.22em;
-  color: var(--ro-ink-950);
-  background:
-    linear-gradient(
-      180deg,
-      var(--ro-sand-50) 0%,
-      color-mix(in srgb, var(--ro-plum-50) 55%, var(--ro-sand-50)) 100%
-    );
-  border-bottom: 1px solid color-mix(in srgb, var(--ro-plum-900) 16%, transparent);
-  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--ro-sand-50) 70%, transparent);
+  color: var(--ro-sand-100);
+  background: transparent;
+  border-bottom: 1px solid color-mix(in srgb, var(--ro-sand-100) 14%, transparent);
+  box-shadow: none;
 }
 
 .ro-portal-nav-link {
@@ -2445,4 +2455,83 @@ html[lang="en"] .ro-portal {
 }
 .ro-wa-live {
   animation: ro-wa-live 1.6s var(--ro-ease-standard) 3;
+}
+
+/* Design-lab login ceremony (CSS instead of Framer Motion) */
+@keyframes ro-login-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes ro-login-word-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ro-login-fade-up {
+  animation: ro-login-fade-up 0.6s var(--ro-ease-standard) both;
+}
+.ro-login-word-in {
+  animation: ro-login-word-in 0.6s var(--ro-ease-standard) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ro-login-fade-up,
+  .ro-login-word-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ro-login-orbit {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 0.95; transform: scale(1.015); }
+}
+.ro-login-orbit {
+  animation: ro-login-orbit 5.5s var(--ro-ease-resonance) infinite;
+  transform-origin: center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ro-login-orbit { animation: none; opacity: 0.7; }
+}
+
+/* Brokerage ceremony */
+.ro-brokerage-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--ro-r-lg);
+  border: 1px solid var(--ro-border-subtle);
+  background:
+    radial-gradient(80% 120% at 100% 0%, color-mix(in srgb, var(--ro-plum-300) 28%, transparent), transparent 55%),
+    radial-gradient(70% 100% at 0% 100%, color-mix(in srgb, var(--ro-amber-500) 12%, transparent), transparent 50%),
+    var(--ro-sand-50);
+}
+.ro-brokerage-col {
+  background: color-mix(in srgb, var(--ro-sand-50) 92%, var(--ro-plum-50));
+}
+.ro-brokerage-card {
+  transition:
+    transform var(--ro-dur-fast) var(--ro-ease-standard),
+    border-color var(--ro-dur-fast) var(--ro-ease-standard),
+    background-color var(--ro-dur-fast) var(--ro-ease-standard);
+}
+.ro-brokerage-card:hover {
+  transform: translateY(-1px);
+}
+.ro-brokerage-pulse {
+  position: relative;
+}
+.ro-brokerage-pulse::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: -0.15rem;
+  top: -0.15rem;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: var(--ro-amber-500);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--ro-amber-500) 55%, transparent);
+  animation: ro-wa-live 1.6s var(--ro-ease-standard) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ro-brokerage-pulse::after { animation: none; }
+  .ro-brokerage-card:hover { transform: none; }
 }
