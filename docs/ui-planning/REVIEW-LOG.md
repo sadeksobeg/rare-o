@@ -33,3 +33,35 @@ Brief, factual notes per screen: what changed between the two critique passes an
 **Pass 2:** Verified live: nav solidifies on scroll, hero choreography plays once on load, craft-story quote and collection cards reveal on scroll via ScrollTrigger (kept on a separate `data-scroll-stagger` attribute from `motion-v3.js`'s own immediate `data-stagger`, specifically to avoid the two systems fighting over the same elements' opacity). axe: zero violations at 375 and 1440 (x3 runs each) after adding the missing `<main>` landmark and an `<h2>` for the craft-story section (visually hidden — the section's content speaks for itself without a visible duplicate title, but the heading level needs to exist for the outline). Zero horizontal overflow at both breakpoints.
 
 **Known limitation:** collection cards link to `#` — the catalog screen itself is Wave 3 (VISION.md section 10). Product imagery is the Material Plate placeholder throughout, consistent with PLAN.md 10.3, since no product photography exists yet.
+
+---
+
+## Checkpoint 2 (owner rejection: "still primitive", new direction)
+
+The owner rejected checkpoint 1 as a wireframe aesthetic with motion added - line strokes, hairlines, flat panels, no real logo. Before rebuilding, searched `public/brand/` and found the project's actual logo and studio photography already in the repo (recorded in `ASSETS.md`), rather than assuming none existed and reaching for stock downloads.
+
+### login.html (round 2)
+
+**Pass 1:** Real logo (vectorized from `public/brand/mark-master.png`) extruded into a lit, rotating 3D object via Three.js + SVGLoader - genuinely required solving two non-obvious problems first: three.js r160 removed the non-module `examples/js` build the first attempt used, so this needed ES modules + an importmap (verified working with a throwaway test page before touching the real file); and the 3D object, while rotating, grew large enough on some frames to visually cover the headline text sitting below it in the same flex-positioned scene - not catchable from a single static screenshot, only from watching it rotate and from direct rect measurement.
+
+**Pass 2:** Fixed both structurally (canvas constrained to the upper 62% of the scene; headline moved into its own scrim-backed zone that can't be covered regardless of 3D object size) rather than by luck of camera angle. Found a second, unrelated bug while re-verifying: `backdrop-filter` on the glass form panel corrupted the paint of the headline text elsewhere on the page - a real Chromium compositor interaction between backdrop-filter and a live WebGL canvas, reproduced consistently, `isolation`/`will-change` confirmed as not a fix. Removed backdrop-filter; panel depth now comes from opacity + layered shadow. Re-verified axe zero violations and zero overflow after both fixes, from a fresh browser tab (see below).
+
+### admin-dashboard.html (round 2)
+
+**Pass 1:** Real logo in the sidebar (CSS `invert()` to read as cream against the dark background - confirmed this renders correctly rather than assuming a filter trick works), a new animated gradient-mesh header band with a large faint logo watermark, charts given a soft purple drop-shadow glow, KPI cards given real depth (inner hairline + hover lift) instead of flat cards.
+
+**Pass 2:** Verified live at 375 and 1440: axe zero violations, zero real overflow (3px `<html>`-level sub-pixel rounding only, the same previously-confirmed-benign pattern from Wave 1). No new bugs found on this screen this round.
+
+### trader-home.html (round 2)
+
+**Pass 1:** The three task cards (including brokerage) became image-led with real product photography and a hover zoom instead of flat color panels with a small icon, per VISION.md 5.8's explicit ask; the offers carousel also swapped its icon placeholders for real photography. Real logo in the header.
+
+**Pass 2:** Verified live: axe zero violations, zero overflow at 375/1440.
+
+### storefront-home.html (round 2)
+
+**Pass 1:** The 3D logo object now ties into scroll: `logo-scene.js` gained `setScrollOffset`/`setCameraZ` controls, driven by a `ScrollTrigger` with `scrub` across the hero section, so the object keeps rotating and the camera dollies in as the user scrolls past it - VISION.md 5.9's "camera moves through its details as the user scrolls." SplitText word-reveal headline, real macro photography for the craft-story section, real product photography on all three collection cards (not icon watermarks).
+
+**Pass 2:** Hit the strangest issue of this round: after building, the subtitle and both CTA buttons in the hero looked completely absent in screenshots, while every DOM check (computed opacity 1, correct color, correct position, `elementFromPoint` hitting the actual button) said they were there and correctly painted. Ruled out the WebGL/backdrop-filter theory from login.html by hiding the canvas entirely - still absent. Loaded the identical URL in a brand-new browser tab: rendered perfectly, immediately. This matches a stale-tab rendering artifact already documented earlier in this engagement for a different symptom (the dashboard count-up that looked "stuck" in a long-reused tab) - the browser tab used continuously since Wave 1 had accumulated some compositor corruption specific to this automated test harness, unrelated to the page's own code. Closed that tab and re-verified every remaining check from a fresh one. Separately found and fixed a real, if minor, accessibility bug common to both this page and login.html: SplitText's generated span gets an `aria-label` with no ARIA role, which axe correctly flags (`aria-prohibited-attr`); fixed by setting `role="text"` on the target element before splitting.
+
+**Known limitation:** the stale-tab artifact above cannot be fully ruled out as *never* affecting a judgment earlier in this session without re-testing every prior screenshot in a fresh tab, which wasn't done retroactively - stated here rather than silently assuming all earlier checks were unaffected. Every axe run, overflow check, and screenshot in this checkpoint-2 round, however, was taken from a fresh tab after this was discovered.

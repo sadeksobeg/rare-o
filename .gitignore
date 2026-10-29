@@ -57,3 +57,6 @@ npm-out.txt
 tmp-npm-install.txt
 tmp/
 test-results/
+
+# Wave 1 checkpoint video captures (large binaries, delivered directly, not committed)
+docs/ui-planning/wave1-capture/videos/

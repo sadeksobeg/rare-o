@@ -1,0 +1,42 @@
+{
+  "login": {
+    "reducedMotionMatches": true,
+    "axe": [
+      [],
+      [],
+      []
+    ],
+    "overflowDesktop": 0,
+    "overflowMobile": 0
+  },
+  "admin-dashboard": {
+    "reducedMotionMatches": true,
+    "axe": [
+      [],
+      [],
+      []
+    ],
+    "overflowDesktop": 0,
+    "overflowMobile": 3
+  },
+  "trader-home": {
+    "reducedMotionMatches": true,
+    "axe": [
+      [],
+      [],
+      []
+    ],
+    "overflowDesktop": 0,
+    "overflowMobile": 0
+  },
+  "storefront-home": {
+    "reducedMotionMatches": true,
+    "axe": [
+      [],
+      [],
+      []
+    ],
+    "overflowDesktop": 0,
+    "overflowMobile": 0
+  }
+}
