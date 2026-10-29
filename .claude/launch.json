@@ -12,6 +12,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "-l", "4600", "docs/ui/design/mockups"],
       "port": 4600
+    },
+    {
+      "name": "design-lab",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "design-lab", "run", "dev", "--", "-p", "3100"],
+      "port": 3100
     }
   ]
 }
