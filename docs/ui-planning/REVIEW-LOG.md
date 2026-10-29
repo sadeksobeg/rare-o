@@ -320,3 +320,55 @@ built yet); and benchmarking this copy against reference products'
 microcopy specifically (the benchmark boards themselves are also not
 built yet — see the open-items note in the prior checkpoint-3 section
 above).
+
+### English locale (item 1, remainder)
+
+Built real i18n infrastructure (`lib/i18n.tsx` — `LocaleProvider`/
+`useLocale`/`useDict`, `lib/dictionaries.ts` — one `{ar, en}` dictionary
+per screen) rather than the static-mockup era's dual-render `data-lang`
+hack, since this stack is meant to be ported into the real app. Converted
+all 10 screens; added a `LocaleToggle` control to every topbar/nav and
+both standalone gate screens (login, force-password-change).
+
+Two real bugs surfaced and fixed while verifying live, not assumed away
+from reading the code:
+
+1. **Persistence race.** The first implementation read `localStorage`
+   into `useState`'s lazy initializer, then had a separate `[locale]`-
+   dependency effect that wrote the current locale back to storage. Both
+   effects fire in the same commit on mount; the write-effect's closure
+   still held the pre-correction default and silently overwrote a saved
+   "en" preference back to "ar" before the read could take effect. The
+   toggle worked in memory for the rest of that page view but never
+   survived a reload — caught by explicitly testing a hard navigation
+   after toggling, not just the in-session click.
+2. **Hydration mismatch.** The same lazy-read-into-initial-state pattern
+   caused a second, more visible bug: a real `Hydration failed` error,
+   caught live via the browser's error overlay and confirmed (not
+   assumed) by checking a **fresh tab's** console — the server always
+   renders `<html lang="ar">`, but the client's first paint read "en"
+   from storage and rendered English strings immediately, so React
+   discarded and regenerated the mismatched subtree.
+
+Both fixed the same way: initial state always matches the server's
+"ar" default deterministically; the saved locale is applied only in an
+effect that runs once, after hydration commits (gated behind a
+`hydrated` flag so the persisting effect can't fire with a stale value
+before that correction lands). Re-verified from a brand-new tab (not the
+tab that had the bug) with zero console errors, and confirmed the
+toggle's choice now survives both client-side navigation and a hard
+reload.
+
+Verification also caught two smaller real gaps, not just the
+infrastructure bugs: the avatar initial stayed Arabic ("س") in English
+mode on three screens, because it came from a static `avatarInitials`
+field instead of being derived from the already-locale-resolved display
+name — fixed by deriving it from the name everywhere (and removing the
+now-redundant field); and team members' "last active" column had no
+English text at all — fixed by adding `lastActiveEn` to the fixture
+(trader `city`/`cityEn` already needed the same treatment and got it too).
+
+**Verified per screen:** every one of the 10 screens read correctly in
+both languages via `get_page_text`, not just a visual screenshot check —
+catching exactly the kind of fixture-field gap (city, last-active) that
+a screenshot alone would likely miss at a glance.
