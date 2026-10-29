@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Handshake, Package, Compass, Bell, User } from "lucide-react";
+import { Home, Compass, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -18,10 +18,9 @@ import { currentTrader } from "@/lib/fixtures";
 import { useLocale, useDict } from "@/lib/i18n";
 import { navDict, topbarDict } from "@/lib/dictionaries";
 
+/** Only screens that exist in design-lab (Claude builds). No stub routes. */
 const nav = [
   { href: "/trader", labelKey: "traderHome", icon: Home },
-  { href: "/trader/deals", labelKey: "myDeals", icon: Handshake },
-  { href: "/trader/wholesale", labelKey: "wholesale", icon: Package },
   { href: "/trader/brokerage", labelKey: "brokerage", icon: Compass },
 ] as const;
 
@@ -41,7 +40,10 @@ export function TraderTopbar() {
         </Link>
         <nav className="hidden items-center gap-1 md:flex">
           {nav.map((item) => {
-            const active = pathname === item.href;
+            const active =
+              item.href === "/trader"
+                ? pathname === "/trader"
+                : pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
               <Link
                 key={item.href}
@@ -86,13 +88,9 @@ export function TraderTopbar() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/trader/account">
-                <User className="size-4" strokeWidth={1.5} /> {tTop("myAccount")}
-              </Link>
+            <DropdownMenuItem variant="destructive" asChild>
+              <Link href="/login">{tTop("signOut")}</Link>
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">{tTop("signOut")}</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

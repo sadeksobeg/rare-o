@@ -75,7 +75,9 @@ export function AdminTopbar() {
               <Link href="/admin/team">{t("manageTeam")}</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">{t("signOut")}</DropdownMenuItem>
+            <DropdownMenuItem variant="destructive" asChild>
+              <Link href="/login">{t("signOut")}</Link>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

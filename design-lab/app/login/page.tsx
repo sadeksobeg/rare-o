@@ -45,12 +45,10 @@ export default function LoginPage() {
     setError(null);
     setTimeout(() => {
       setLoading(false);
-      if (next < 2) {
-        setError(t("invalidCredentials"));
-      } else {
-        setView("success");
-        setTimeout(() => router.push(role === "admin" ? "/admin" : "/trader"), 1100);
-      }
+      // Demo: any credentials succeed on first submit (client review).
+      // Use 3 failed attempts only if you want to demo rate-limit.
+      setView("success");
+      setTimeout(() => router.push(role === "admin" ? "/admin" : "/trader"), 1100);
     }, 900);
   }
 

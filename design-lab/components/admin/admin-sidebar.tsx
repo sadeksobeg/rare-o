@@ -4,12 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Home,
-  Inbox,
-  ShoppingBag,
-  Handshake,
-  Package,
   Compass,
-  Guitar,
   Users,
   User,
   Settings,
@@ -29,14 +24,10 @@ import {
 import { useLocale, useDict } from "@/lib/i18n";
 import { navDict } from "@/lib/dictionaries";
 
+/** Only screens that exist in design-lab (Claude builds). No stub routes. */
 const mainNav = [
   { href: "/admin", labelKey: "home", icon: Home },
-  { href: "/admin/inbox", labelKey: "inbox", icon: Inbox },
-  { href: "/admin/requests", labelKey: "retailRequests", icon: ShoppingBag },
-  { href: "/admin/deals", labelKey: "deals", icon: Handshake },
-  { href: "/admin/wholesale", labelKey: "wholesale", icon: Package },
   { href: "/admin/brokerage", labelKey: "brokerage", icon: Compass },
-  { href: "/admin/products", labelKey: "products", icon: Guitar },
 ] as const;
 
 const peopleNav = [
@@ -47,7 +38,7 @@ const peopleNav = [
 
 const systemNav = [
   { href: "/admin/audit-log", labelKey: "auditLog", icon: ShieldCheck },
-  { href: "/admin/settings", labelKey: "settings", icon: Settings },
+  { href: "/admin/profile", labelKey: "settings", icon: Settings },
 ] as const;
 
 function NavGroup({
@@ -66,16 +57,22 @@ function NavGroup({
       <SidebarGroupLabel>{label}</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
-          {items.map((item) => (
+          {items.map((item) => {
+            const active =
+              item.href === "/admin"
+                ? pathname === "/admin"
+                : pathname === item.href || pathname.startsWith(`${item.href}/`);
+            return (
             <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton asChild isActive={pathname === item.href}>
+              <SidebarMenuButton asChild isActive={active}>
                 <Link href={item.href}>
                   <item.icon className="size-5" strokeWidth={1.5} />
                   <span>{t(item.labelKey)}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-          ))}
+            );
+          })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

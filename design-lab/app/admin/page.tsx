@@ -39,14 +39,14 @@ function KpiCard({
   deltaLabel,
   trend,
 }: {
-  href: string;
+  href?: string;
   label: string;
   value: number;
   deltaLabel: string;
   trend: "up" | "down";
 }) {
-  return (
-    <Link href={href} className="group block border-s-2 border-transparent ps-4 transition-colors hover:border-ro-plum-300">
+  const body = (
+    <>
       <p className="mb-1 text-small text-muted-foreground">{label}</p>
       <p className="text-h2 font-bold tabular-nums">
         <NumberTicker value={value} />
@@ -57,6 +57,14 @@ function KpiCard({
           {deltaLabel}
         </span>
       </div>
+    </>
+  );
+  if (!href) {
+    return <div className="border-s-2 border-transparent ps-4">{body}</div>;
+  }
+  return (
+    <Link href={href} className="group block border-s-2 border-transparent ps-4 transition-colors hover:border-ro-plum-300">
+      {body}
     </Link>
   );
 }
@@ -91,11 +99,11 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* KPI row */}
+      {/* KPI row — only brokerage list exists in this lab build */}
       <div className="grid grid-cols-2 gap-4 border-b border-border pb-6 lg:grid-cols-4">
-        <KpiCard href="/admin/requests" label={t("kpiNewRetail")} value={kpis.newRetailRequests} deltaLabel={locale === "ar" ? "+12% أسبوعياً" : "+12% weekly"} trend="up" />
-        <KpiCard href="/admin/deals" label={t("kpiDealsAwaiting")} value={kpis.dealsAwaitingReply} deltaLabel={locale === "ar" ? "-3% أسبوعياً" : "-3% weekly"} trend="down" />
-        <KpiCard href="/admin/wholesale" label={t("kpiWholesale")} value={kpis.wholesaleRequests} deltaLabel={locale === "ar" ? "+2 هذا الأسبوع" : "+2 this week"} trend="up" />
+        <KpiCard label={t("kpiNewRetail")} value={kpis.newRetailRequests} deltaLabel={locale === "ar" ? "+12% أسبوعياً" : "+12% weekly"} trend="up" />
+        <KpiCard label={t("kpiDealsAwaiting")} value={kpis.dealsAwaitingReply} deltaLabel={locale === "ar" ? "-3% أسبوعياً" : "-3% weekly"} trend="down" />
+        <KpiCard label={t("kpiWholesale")} value={kpis.wholesaleRequests} deltaLabel={locale === "ar" ? "+2 هذا الأسبوع" : "+2 this week"} trend="up" />
         <KpiCard href="/admin/brokerage" label={t("kpiBrokerage")} value={kpis.activeBrokerageRequests} deltaLabel={locale === "ar" ? "+1 هذا الأسبوع" : "+1 this week"} trend="up" />
       </div>
 
@@ -154,7 +162,7 @@ export default function AdminDashboardPage() {
       <Card>
         <CardHeader className="flex-row items-center justify-between">
           <CardTitle className="text-h3">{t("awaitingAction")}</CardTitle>
-          <Link href="/admin/requests" className="text-caption text-ro-plum-900 underline underline-offset-2">
+          <Link href="/admin/brokerage" className="text-caption text-ro-plum-900 underline underline-offset-2">
             {t("viewAll")}
           </Link>
         </CardHeader>

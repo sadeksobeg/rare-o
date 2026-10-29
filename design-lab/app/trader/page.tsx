@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Handshake, Package, Compass } from "lucide-react";
+import { Compass } from "lucide-react";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { currentTrader, traders } from "@/lib/fixtures";
 import { useLocale, useDict } from "@/lib/i18n";
@@ -9,25 +9,10 @@ import { traderHomeDict } from "@/lib/dictionaries";
 
 const me = traders.find((t) => t.id === "t1")!;
 
+/** Brokerage is the only trader workflow Claude built end-to-end. */
 const taskCards = [
   {
-    href: "/trader/deals",
-    icon: Handshake,
-    titleKey: "proposeDealTitle",
-    descKey: "proposeDealDesc",
-    photo: "/brand/hero-oud-atelier-a.jpg",
-    scrim: "from-ro-ink-950/95 via-ro-ink-950/40",
-  },
-  {
-    href: "/trader/wholesale",
-    icon: Package,
-    titleKey: "wholesaleTitle",
-    descKey: "wholesaleDesc",
-    photo: "/brand/hero-oud-atelier-b.jpg",
-    scrim: "from-ro-ink-950/95 via-ro-ink-950/40",
-  },
-  {
-    href: "/trader/brokerage",
+    href: "/trader/brokerage/new",
     icon: Compass,
     titleKey: "brokerageTitle",
     descKey: "brokerageDesc",
@@ -63,7 +48,7 @@ export default function TraderHomePage() {
 
       <section>
         <h2 className="mb-3 text-h2 font-semibold">{t("startHere")}</h2>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid max-w-xl gap-4">
           {taskCards.map((card) => (
             <Link
               key={card.href}
