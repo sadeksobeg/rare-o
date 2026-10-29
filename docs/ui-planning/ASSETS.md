@@ -1,4 +1,38 @@
-# Assets used in Wave 1 rework (VISION.md checkpoint 2)
+# Assets used in the design-lab rebuild (checkpoint-2/3 pivot)
+
+All real brand photography/emblem files listed below were copied from this
+repo's `public/brand/` into `design-lab/public/brand/` (same files, same
+licensing — this is still the project's own asset library, not a new
+sourcing pass). They now cover: the login/storefront 3D logo hero, the
+storefront craft-story section, the storefront collections grid, and the
+trader-home task cards and offers carousel — every photographic spot built
+this round.
+
+The owner's checkpoint-3 feedback named Unsplash/Pexels as permitted
+sources for additional imagery if the existing library runs short. It
+did not run short this round: every section built had a matching real
+asset already in `public/brand/`, so no new external image was fetched.
+This is noted here rather than silently claimed as "more imagery added" —
+if a future round needs imagery beyond what's listed below (e.g. distinct
+photography per catalog category, or trader-specific photography), that's
+the point to actually use the Unsplash/Pexels permission and log the
+source + license per file here.
+
+| Asset | Used in design-lab for |
+|---|---|
+| `mark-master.png` → `logo-mark.svg` (re-traced this round, `optTolerance: 0.05`) | 3D logo hero (`components/brand/logo-scene.tsx`), login + storefront |
+| `mark-small.png` → `logo-mark-small.svg` | Admin sidebar mark, trader topbar mark, storefront nav mark |
+| `hero-oud-atelier-a.jpg` | Trader-home "اقترح صفقة" task card |
+| `hero-oud-atelier-b.jpg` | Trader-home "اطلب بالجملة" task card |
+| `hero-closeup.jpg` | Trader-home "اطلب وساطة" task card; storefront craft-story photo |
+| `hero-oud-majestic.jpg` | Trader-home offers carousel ("مختارات وترية"); storefront collections ("قانون وآلات وترية") |
+| `instrument-dark.jpg` | Trader-home offers carousel ("تحرير الأتيليه") |
+| `oud-heritage.jpg` | Trader-home offers carousel ("إرث العود"); storefront collections ("قطع نادرة معتّقة") |
+| `hero-oud-resonance.jpg` | Storefront collections ("عود كلاسيكي") |
+
+---
+
+# Assets used in Wave 1 rework (VISION.md checkpoint 2) — superseded, kept for history
 
 ## Real brand assets found in-repo (not stock, already the project's own)
 
