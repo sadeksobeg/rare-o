@@ -45,12 +45,12 @@ export default function ForcePasswordChangePage() {
               <ShieldAlert className="size-5" strokeWidth={1.5} />
             </div>
             <div>
-              <h1 className="text-lg font-semibold">عيّن كلمة مرور جديدة</h1>
-              <p className="text-sm text-muted-foreground">مرحباً {currentTrader.name.split(" ")[0]} — هذه خطوة لمرة واحدة</p>
+              <h1 className="text-h1 font-semibold">عيّن كلمة مرور جديدة</h1>
+              <p className="text-small text-muted-foreground">مرحباً {currentTrader.name.split(" ")[0]} — هذه خطوة لمرة واحدة</p>
             </div>
           </div>
 
-          <p className="mb-6 rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">
+          <p className="mb-6 rounded-md border bg-muted/40 p-3 text-small text-muted-foreground">
             أعادت الإدارة تعيين كلمة مرور حسابك. لأسباب أمنية لا تستطيع الإدارة رؤية كلمة
             مرورك الحالية في أي وقت — عليك اختيار كلمة مرور جديدة الآن قبل المتابعة.
           </p>
@@ -76,7 +76,7 @@ export default function ForcePasswordChangePage() {
               {password.length > 0 && (
                 <div className="space-y-1.5 pt-1">
                   <Progress value={(score / 4) * 100} className={`h-1.5 [&>div]:${scoreMeta[score].color}`} />
-                  <p className="text-xs text-muted-foreground">قوة كلمة المرور: {scoreMeta[score].labelAr}</p>
+                  <p className="text-caption text-muted-foreground">قوة كلمة المرور: {scoreMeta[score].labelAr}</p>
                 </div>
               )}
             </div>
@@ -90,7 +90,7 @@ export default function ForcePasswordChangePage() {
                 onChange={(e) => setConfirm(e.target.value)}
                 aria-invalid={mismatch}
               />
-              {mismatch && <p className="text-xs text-[#8A2433]">كلمتا المرور غير متطابقتين</p>}
+              {mismatch && <p className="text-caption text-[#8A2433]">كلمتا المرور غير متطابقتين</p>}
             </div>
             <Button type="submit" className="w-full" disabled={!canSubmit}>
               تعيين كلمة المرور والمتابعة

@@ -67,7 +67,7 @@ export default function LoginPage() {
         <div className="absolute inset-0 top-[8%] bottom-[34%]">
           <LogoScene className="h-full w-full" />
         </div>
-        <div className="relative z-10 flex items-center gap-3 font-[family-name:var(--font-heading)] text-lg">
+        <div className="relative z-10 flex items-center gap-3 font-[family-name:var(--font-heading)] text-h3">
           <img src="/brand/logo-mark-small.svg" alt="" className="h-6 w-6 invert" />
           RARE OUD
         </div>
@@ -76,11 +76,11 @@ export default function LoginPage() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="mb-2 text-sm text-ro-plum-300"
+            className="mb-2 text-small text-ro-plum-300"
           >
             آلات عود نادرة — مصنوعة يدوياً
           </motion.p>
-          <h2 className="mx-auto max-w-[16ch] font-[family-name:var(--font-heading)] text-3xl leading-[1.3] text-ro-sand-100">
+          <h2 className="mx-auto max-w-[16ch] font-[family-name:var(--font-heading)] text-h2 text-ro-sand-100">
             {headlineWords.map((word, i) => (
               <motion.span
                 key={i}
@@ -108,11 +108,11 @@ export default function LoginPage() {
                 </TabsList>
               </Tabs>
 
-              <h1 className="mb-1 text-2xl font-semibold font-[family-name:var(--font-heading)]">{copy[role].title}</h1>
-              <p className="mb-6 text-sm text-muted-foreground">{copy[role].subtitle}</p>
+              <h1 className="mb-1 text-h1 font-semibold font-[family-name:var(--font-heading)]">{copy[role].title}</h1>
+              <p className="mb-6 text-small text-muted-foreground">{copy[role].subtitle}</p>
 
               {rateLimited && (
-                <div className="mb-4 flex items-start gap-2 rounded-md bg-ro-danger-100 p-3 text-sm text-ro-danger-700">
+                <div className="mb-4 flex items-start gap-2 rounded-md bg-ro-danger-100 p-3 text-small text-ro-danger-700">
                   <ShieldCheck className="mt-0.5 size-4 shrink-0" />
                   <span>محاولات كثيرة من هذا الجهاز. أُوقف الدخول مؤقتاً 15 دقيقة.</span>
                 </div>
@@ -144,12 +144,12 @@ export default function LoginPage() {
                   </button>
                 </div>
                 {capsLock && (
-                  <p className="mb-3 flex items-center gap-1.5 text-xs text-ro-amber-800">
+                  <p className="mb-3 flex items-center gap-1.5 text-caption text-ro-amber-800">
                     <AlertTriangle className="size-3.5" /> مفتاح Caps Lock مُفعَّل
                   </p>
                 )}
 
-                <div className="mb-5 flex items-center justify-between text-sm">
+                <div className="mb-5 flex items-center justify-between text-small">
                   <label className="flex items-center gap-1.5 text-muted-foreground">
                     <input type="checkbox" className="size-4 rounded border-input" /> تذكّر هذا الجهاز
                   </label>
@@ -161,10 +161,10 @@ export default function LoginPage() {
                 <Button type="submit" size="lg" className="w-full" disabled={loading}>
                   {loading ? "جارٍ الدخول…" : "دخول"}
                 </Button>
-                {error && <p className="mt-3 text-center text-xs text-ro-danger-700">{error}</p>}
+                {error && <p className="mt-3 text-center text-caption text-ro-danger-700">{error}</p>}
               </form>
 
-              <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
+              <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-caption text-muted-foreground">
                 <ShieldCheck className="size-3.5" />
                 محاولات كثيرة تؤدي لإيقاف مؤقت 15 دقيقة — حماية فعلية موجودة في الكود
               </p>
@@ -176,12 +176,12 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setView("form")}
-                className="mb-5 flex items-center gap-1.5 text-sm text-muted-foreground"
+                className="mb-5 flex items-center gap-1.5 text-small text-muted-foreground"
               >
                 رجوع لتسجيل الدخول
               </button>
-              <h1 className="mb-1 text-2xl font-semibold font-[family-name:var(--font-heading)]">استرداد كلمة المرور</h1>
-              <p className="mb-6 text-sm text-muted-foreground">
+              <h1 className="mb-1 text-h1 font-semibold font-[family-name:var(--font-heading)]">استرداد كلمة المرور</h1>
+              <p className="mb-6 text-small text-muted-foreground">
                 أدخل بريدك الإلكتروني وسنرسل رابط استرداد — هذا نموذج، لا إرسال حقيقي
               </p>
               <form
@@ -204,8 +204,8 @@ export default function LoginPage() {
           {view === "success" && (
             <div className="py-8 text-center">
               <CheckCircle2 className="mx-auto mb-4 size-16 text-ro-plum-900" />
-              <h1 className="mb-1 text-2xl font-semibold font-[family-name:var(--font-heading)]">تم التحقق</h1>
-              <p className="text-sm text-muted-foreground">يفتح لوحة التحكم…</p>
+              <h1 className="mb-1 text-h1 font-semibold font-[family-name:var(--font-heading)]">تم التحقق</h1>
+              <p className="text-small text-muted-foreground">يفتح لوحة التحكم…</p>
             </div>
           )}
         </div>

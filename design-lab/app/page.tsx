@@ -42,7 +42,7 @@ export default function StorefrontHome() {
           <img src="/brand/logo-mark-small.svg" alt="" className={cn("h-5 w-5 transition-all", !solid && "invert")} />
           RARE OUD
         </Link>
-        <div className="hidden items-center gap-6 text-sm sm:flex">
+        <div className="hidden items-center gap-6 text-small sm:flex">
           <a href="#craft" className="hover:opacity-80">
             الحرفة
           </a>
@@ -60,16 +60,16 @@ export default function StorefrontHome() {
         <div className="absolute inset-x-0 top-[8%] bottom-[34%] flex items-center justify-center">
           <LogoScene className="h-[min(46vw,420px)] w-[min(46vw,420px)]" />
         </div>
-        <div className="absolute inset-x-0 top-6 z-10 flex flex-col items-center gap-1.5 text-xs text-ro-ink-300">
+        <div className="absolute inset-x-0 top-6 z-10 flex flex-col items-center gap-1.5 text-caption text-ro-ink-300">
           <span>مرّر للأسفل</span>
           <ChevronDown className="size-4 animate-bounce motion-reduce:animate-none" strokeWidth={1.5} />
         </div>
         <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-ro-ink-950 via-ro-ink-950/60 to-transparent px-6 pb-16 pt-24 text-center">
-          <span className="mb-3 block text-sm text-ro-plum-300">آلات عود نادرة — مصنوعة يدوياً</span>
-          <h1 className="mx-auto max-w-[18ch] font-[family-name:var(--font-heading)] text-4xl leading-[1.25] text-ro-sand-100 sm:text-5xl">
+          <span className="mb-3 block text-small text-ro-plum-300">آلات عود نادرة — مصنوعة يدوياً</span>
+          <h1 className="mx-auto max-w-[18ch] font-[family-name:var(--font-heading)] text-display text-ro-sand-100">
             صدى الصنعة، محفوظ بدقّة
           </h1>
-          <p className="mx-auto mt-4 max-w-[50ch] text-base text-ro-ink-200">
+          <p className="mx-auto mt-4 max-w-[50ch] text-body text-ro-ink-200">
             نختار، نعاين، ونوثّق كل قطعة — من الورشة إلى يديك، عبر محادثة واتساب واحدة
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
@@ -89,15 +89,15 @@ export default function StorefrontHome() {
             <img src="/brand/hero-closeup.jpg" alt="" className="size-full object-cover" />
           </div>
           <div>
-            <blockquote className="font-[family-name:var(--font-heading)] text-2xl leading-[1.5] text-foreground sm:text-3xl">
+            <blockquote className="font-[family-name:var(--font-heading)] text-h2 text-foreground">
               &ldquo;العود ليس آلة فحسب — إنه ذاكرة خشب، وحرفة يد، وصدى لا يتكرر&rdquo;
-              <cite className="mt-4 block font-sans text-sm not-italic text-muted-foreground">— ورشة RARE OUD</cite>
+              <cite className="mt-4 block font-sans text-small not-italic text-muted-foreground">— ورشة RARE OUD</cite>
             </blockquote>
             <div className="mt-8 grid gap-5 sm:grid-cols-3">
               {craftItems.map((item) => (
                 <div key={item.titleAr}>
-                  <h3 className="mb-1 text-sm font-medium">{item.titleAr}</h3>
-                  <p className="text-xs leading-relaxed text-muted-foreground">{item.descAr}</p>
+                  <h3 className="mb-1 text-small font-medium">{item.titleAr}</h3>
+                  <p className="text-caption leading-relaxed text-muted-foreground">{item.descAr}</p>
                 </div>
               ))}
             </div>
@@ -107,7 +107,7 @@ export default function StorefrontHome() {
 
       <section id="collections" className="bg-ro-sand-200 px-6 py-20">
         <div className="mx-auto mb-10 max-w-xl text-center">
-          <h2 className="font-[family-name:var(--font-heading)] text-3xl">المجموعات</h2>
+          <h2 className="font-[family-name:var(--font-heading)] text-h2">المجموعات</h2>
           <p className="mt-2 text-muted-foreground">تصفّح حسب النوع، أو اطلب قطعة بعينها عبر واتساب</p>
         </div>
         <div className="mx-auto grid max-w-5xl gap-4 sm:grid-cols-3">
@@ -123,8 +123,8 @@ export default function StorefrontHome() {
                 className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
               />
               <div className="relative z-10 w-full bg-gradient-to-t from-ro-ink-950/85 to-transparent p-4 text-ro-sand-100">
-                <h3 className="text-base font-semibold">{c.titleAr}</h3>
-                <span className="text-xs text-ro-ink-200">{c.countAr}</span>
+                <h3 className="text-h3 font-semibold">{c.titleAr}</h3>
+                <span className="text-caption text-ro-ink-200">{c.countAr}</span>
               </div>
             </a>
           ))}
@@ -133,7 +133,7 @@ export default function StorefrontHome() {
 
       <section className="relative overflow-hidden bg-ro-ink-950 px-6 py-16 text-center text-ro-sand-100">
         <div className="pointer-events-none absolute inset-[-20%] bg-[radial-gradient(45%_60%_at_50%_50%,rgba(82,39,124,.5),transparent_65%)]" />
-        <h2 className="relative font-[family-name:var(--font-heading)] text-3xl sm:text-4xl">هل أنت تاجر؟</h2>
+        <h2 className="relative font-[family-name:var(--font-heading)] text-h2">هل أنت تاجر؟</h2>
         <p className="relative mx-auto mt-3 max-w-[50ch] text-ro-ink-200">
           اقترح صفقات، اطلب بالجملة، أو اطلب منا الوساطة على قطعة رأيتها في أي مكان
         </p>
@@ -142,7 +142,7 @@ export default function StorefrontHome() {
         </Button>
       </section>
 
-      <footer className="px-6 py-8 text-center text-sm text-muted-foreground">
+      <footer className="px-6 py-8 text-center text-small text-muted-foreground">
         <p>
           RARE OUD · سوريا · <bdi dir="ltr">info@rareoud.example</bdi>
         </p>

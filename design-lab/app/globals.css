@@ -11,6 +11,25 @@
   --font-mono: var(--font-source);
   --font-heading: var(--font-amiri), var(--font-cormorant), serif;
 
+  /* Type scale, PLAN.md section 5 table (Arabic column) — the only type
+     scale in this app. Every heading/body size must use one of these
+     utilities (text-display / text-h1 / text-h2 / text-h3 / text-body /
+     text-small / text-caption); no ad-hoc text-xs/sm/base/lg/xl/2xl/... */
+  --text-display: clamp(3rem, 2rem + 5vw, 6.5rem);
+  --text-display--line-height: 1.25;
+  --text-h1: clamp(2rem, 1.55rem + 2vw, 3.25rem);
+  --text-h1--line-height: 1.35;
+  --text-h2: clamp(1.625rem, 1.35rem + 1.2vw, 2.25rem);
+  --text-h2--line-height: 1.4;
+  --text-h3: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+  --text-h3--line-height: 1.5;
+  --text-body: 1rem;
+  --text-body--line-height: 1.8;
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.7;
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.65;
+
   /* RARE OUD brand tokens, verbatim from docs/ui-planning/plan/PLAN.md section 4 */
   --color-ro-sand-50: #fbf6ee;
   --color-ro-sand-100: #f4e7d8;

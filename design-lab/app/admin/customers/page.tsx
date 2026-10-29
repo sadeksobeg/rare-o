@@ -31,13 +31,13 @@ export default function CustomersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold font-[family-name:var(--font-heading)]">العملاء</h1>
-        <p className="text-sm text-muted-foreground">عملاء المتجر العام الذين قدّموا طلبات تجزئة</p>
+        <h1 className="text-h1 font-semibold font-[family-name:var(--font-heading)]">العملاء</h1>
+        <p className="text-small text-muted-foreground">عملاء المتجر العام الذين قدّموا طلبات تجزئة</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">كل العملاء ({customers.length})</CardTitle>
+          <CardTitle className="text-h3">كل العملاء ({customers.length})</CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>
@@ -78,15 +78,15 @@ export default function CustomersPage() {
           </SheetHeader>
           <div className="space-y-4 px-4">
             <div>
-              <h3 className="mb-2 text-sm font-medium text-muted-foreground">طلبات التجزئة</h3>
+              <h3 className="mb-2 text-small font-medium text-muted-foreground">طلبات التجزئة</h3>
               <div className="space-y-2">
                 {customerRequests.length === 0 && (
-                  <p className="text-sm text-muted-foreground">لا توجد طلبات مطابقة في بيانات العرض.</p>
+                  <p className="text-small text-muted-foreground">لا توجد طلبات مطابقة في بيانات العرض.</p>
                 )}
                 {customerRequests.map((r) => (
-                  <div key={r.id} className="flex items-center justify-between rounded-md border p-3 text-sm">
+                  <div key={r.id} className="flex items-center justify-between rounded-md border p-3 text-small">
                     <div>
-                      <div className="font-mono text-xs" dir="ltr">
+                      <div className="font-mono text-caption" dir="ltr">
                         {r.id}
                       </div>
                       <div className="text-muted-foreground">{r.date}</div>

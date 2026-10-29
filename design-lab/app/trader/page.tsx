@@ -45,10 +45,10 @@ export default function TraderHomePage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="font-[family-name:var(--font-heading)] text-2xl font-semibold">
+        <h1 className="font-[family-name:var(--font-heading)] text-h1 font-semibold">
           طاب يومك، {currentTrader.name.split(" ")[0]}
         </h1>
-        <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+        <p className="mt-1 flex items-center gap-2 text-small text-muted-foreground">
           <span className="relative inline-flex size-2 rounded-full bg-ro-amber-500">
             <span className="absolute inset-0 animate-ping rounded-full bg-ro-amber-500" />
           </span>
@@ -57,7 +57,7 @@ export default function TraderHomePage() {
       </div>
 
       <section>
-        <h2 className="mb-3 text-base font-semibold">ابدأ من هنا</h2>
+        <h2 className="mb-3 text-h2 font-semibold">ابدأ من هنا</h2>
         <div className="grid gap-4 sm:grid-cols-3">
           {taskCards.map((card) => (
             <Link
@@ -75,8 +75,8 @@ export default function TraderHomePage() {
                 <div className="mb-3 flex size-10 items-center justify-center rounded-md bg-ro-sand-100/15">
                   <card.icon className="size-5" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-base font-semibold">{card.titleAr}</h3>
-                <p className="mt-1 text-sm text-ro-ink-200">{card.descAr}</p>
+                <h3 className="text-h3 font-semibold">{card.titleAr}</h3>
+                <p className="mt-1 text-small text-ro-ink-200">{card.descAr}</p>
               </div>
             </Link>
           ))}
@@ -84,22 +84,22 @@ export default function TraderHomePage() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-base font-semibold">إحصائياتي</h2>
+        <h2 className="mb-3 text-h2 font-semibold">إحصائياتي</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Card>
             <CardContent>
-              <p className="mb-1 text-sm text-muted-foreground">صفقاتي هذا الشهر</p>
-              <p className="text-3xl font-bold tabular-nums">
+              <p className="mb-1 text-small text-muted-foreground">صفقاتي هذا الشهر</p>
+              <p className="text-h2 font-bold tabular-nums">
                 <NumberTicker value={me.dealsCount} />
               </p>
             </CardContent>
           </Card>
           <Card>
             <CardContent>
-              <p className="mb-1 text-sm text-muted-foreground">نسبة القبول</p>
-              <p className="text-3xl font-bold tabular-nums">
+              <p className="mb-1 text-small text-muted-foreground">نسبة القبول</p>
+              <p className="text-h2 font-bold tabular-nums">
                 <NumberTicker value={me.acceptRate} />
-                <span className="text-lg">%</span>
+                <span className="text-h3">%</span>
               </p>
             </CardContent>
           </Card>
@@ -107,7 +107,7 @@ export default function TraderHomePage() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-base font-semibold">العروض المتاحة الآن</h2>
+        <h2 className="mb-3 text-h2 font-semibold">العروض المتاحة الآن</h2>
         <div className="flex gap-4 overflow-x-auto pb-2">
           {offers.map((o) => (
             <div key={o.titleAr} className="w-60 shrink-0 overflow-hidden rounded-lg border bg-card">
@@ -115,8 +115,8 @@ export default function TraderHomePage() {
                 <img src={o.photo} alt="" className="size-full object-cover" />
               </div>
               <div className="p-3">
-                <h3 className="text-sm font-medium">{o.titleAr}</h3>
-                <p className="mt-0.5 text-xs text-muted-foreground">{o.descAr}</p>
+                <h3 className="text-small font-medium">{o.titleAr}</h3>
+                <p className="mt-0.5 text-caption text-muted-foreground">{o.descAr}</p>
               </div>
             </div>
           ))}

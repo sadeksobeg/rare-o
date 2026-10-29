@@ -52,11 +52,11 @@ function KpiCard({
     <Link href={href}>
       <Card className="group relative overflow-hidden transition-shadow hover:shadow-md">
         <CardContent className="pt-0">
-          <p className="mb-1 text-sm text-muted-foreground">{label}</p>
-          <p className="text-3xl font-bold tabular-nums">
+          <p className="mb-1 text-small text-muted-foreground">{label}</p>
+          <p className="text-h2 font-bold tabular-nums">
             <NumberTicker value={value} />
           </p>
-          <div className="mt-2 flex items-center justify-between text-xs">
+          <div className="mt-2 flex items-center justify-between text-caption">
             <span className={`flex items-center gap-1 font-semibold ${trend === "up" ? "text-[#1F5130]" : "text-[#8A2433]"}`}>
               {trend === "up" ? <TrendingUp className="size-3.5" /> : <TrendingDown className="size-3.5" />}
               {deltaLabel}
@@ -77,7 +77,7 @@ export default function AdminDashboardPage() {
         <img src="/brand/logo-mark.svg" alt="" className="pointer-events-none absolute end-[-40px] top-1/2 h-56 w-56 -translate-y-1/2 opacity-10 invert" />
         <div className="relative flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="flex items-center gap-2 text-sm text-ro-ink-200">
+            <p className="flex items-center gap-2 text-small text-ro-ink-200">
               <span className="relative inline-flex size-2 rounded-full bg-[#2f6b4f]">
                 <span className="absolute inset-0 animate-ping rounded-full bg-[#2f6b4f]" />
               </span>
@@ -103,8 +103,8 @@ export default function AdminDashboardPage() {
       <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
         <Card>
           <CardHeader className="flex-row items-center justify-between">
-            <CardTitle className="text-base">الطلبات خلال 14 يوماً</CardTitle>
-            <span className="text-xs text-muted-foreground">المجموع {requestsOverTime.reduce((a, b) => a + b, 0)}</span>
+            <CardTitle className="text-h3">الطلبات خلال 14 يوماً</CardTitle>
+            <span className="text-caption text-muted-foreground">المجموع {requestsOverTime.reduce((a, b) => a + b, 0)}</span>
           </CardHeader>
           <CardContent>
             <ChartContainer config={areaConfig} className="h-[180px] w-full">
@@ -124,7 +124,7 @@ export default function AdminDashboardPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">التوزيع حسب المجال</CardTitle>
+            <CardTitle className="text-h3">التوزيع حسب المجال</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center gap-4">
             <ChartContainer config={donutConfig} className="aspect-square h-[140px]">
@@ -137,7 +137,7 @@ export default function AdminDashboardPage() {
                 </Pie>
               </PieChart>
             </ChartContainer>
-            <ul className="space-y-1.5 text-sm">
+            <ul className="space-y-1.5 text-small">
               {domainSplit.map((d) => (
                 <li key={d.labelAr} className="flex items-center gap-2">
                   <span className="size-2.5 rounded-sm" style={{ background: d.color }} />
@@ -153,8 +153,8 @@ export default function AdminDashboardPage() {
       {/* action queue */}
       <Card>
         <CardHeader className="flex-row items-center justify-between">
-          <CardTitle className="text-base">بانتظار إجراءك</CardTitle>
-          <Link href="/admin/requests" className="text-xs text-ro-plum-900 underline underline-offset-2">
+          <CardTitle className="text-h3">بانتظار إجراءك</CardTitle>
+          <Link href="/admin/requests" className="text-caption text-ro-plum-900 underline underline-offset-2">
             عرض الكل
           </Link>
         </CardHeader>
@@ -175,7 +175,7 @@ export default function AdminDashboardPage() {
                 const Icon = meta.icon;
                 return (
                   <TableRow key={r.id} className="cursor-pointer">
-                    <TableCell className="font-mono text-xs" dir="ltr">
+                    <TableCell className="font-mono text-caption" dir="ltr">
                       {r.id}
                     </TableCell>
                     <TableCell dir={r.customerAr === r.customerEn ? "ltr" : undefined}>{r.customerAr}</TableCell>

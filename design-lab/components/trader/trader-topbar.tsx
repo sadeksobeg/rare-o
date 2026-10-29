@@ -27,7 +27,7 @@ export function TraderTopbar() {
   return (
     <header className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-sidebar-border bg-ro-ink-950 px-6 py-3 text-ro-sand-100">
       <div className="flex items-center gap-8">
-        <Link href="/trader" className="flex items-center gap-2 font-[family-name:var(--font-heading)] text-base font-semibold">
+        <Link href="/trader" className="flex items-center gap-2 font-[family-name:var(--font-heading)] text-h3 font-semibold">
           <img src="/brand/logo-mark-small.svg" alt="" className="h-5 w-5 invert" />
           RARE OUD
         </Link>
@@ -39,7 +39,7 @@ export function TraderTopbar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
+                  "flex items-center gap-2 rounded-md px-3 py-2 text-small transition-colors",
                   active ? "bg-ro-sand-100/10 text-ro-sand-50" : "text-ro-ink-300 hover:text-ro-sand-100"
                 )}
               >
@@ -72,7 +72,7 @@ export function TraderTopbar() {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
               <div className="font-medium">{currentTrader.name}</div>
-              <div className="text-xs font-normal text-muted-foreground" dir="ltr">
+              <div className="text-caption font-normal text-muted-foreground" dir="ltr">
                 {currentTrader.email}
               </div>
             </DropdownMenuLabel>

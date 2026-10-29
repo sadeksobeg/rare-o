@@ -63,8 +63,8 @@ export default function AdminProfilePage() {
   return (
     <div className="max-w-3xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold font-[family-name:var(--font-heading)]">حسابي</h1>
-        <p className="text-sm text-muted-foreground">إدارة بياناتك الشخصية وإعدادات الأمان</p>
+        <h1 className="text-h1 font-semibold font-[family-name:var(--font-heading)]">حسابي</h1>
+        <p className="text-small text-muted-foreground">إدارة بياناتك الشخصية وإعدادات الأمان</p>
       </div>
 
       <Tabs defaultValue="profile">
@@ -77,12 +77,12 @@ export default function AdminProfilePage() {
         <TabsContent value="profile" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">البيانات الشخصية</CardTitle>
+              <CardTitle className="text-h3">البيانات الشخصية</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center gap-4">
                 <Avatar size="lg">
-                  <AvatarFallback className="bg-ro-plum-100 text-base text-ro-plum-900">
+                  <AvatarFallback className="bg-ro-plum-100 text-h3 text-ro-plum-900">
                     {currentAdmin.avatarInitials}
                   </AvatarFallback>
                 </Avatar>
@@ -139,7 +139,7 @@ export default function AdminProfilePage() {
         <TabsContent value="security" className="mt-6 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">تغيير كلمة المرور</CardTitle>
+              <CardTitle className="text-h3">تغيير كلمة المرور</CardTitle>
               <CardDescription>استخدم كلمة مرور لا تستخدمها في أي مكان آخر</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -159,7 +159,7 @@ export default function AdminProfilePage() {
                 {newPassword.length > 0 && (
                   <div className="space-y-1.5 pt-1">
                     <Progress value={(score / 4) * 100} className={`h-1.5 [&>div]:${scoreMeta[score].color}`} />
-                    <p className="text-xs text-muted-foreground">قوة كلمة المرور: {scoreMeta[score].labelAr}</p>
+                    <p className="text-caption text-muted-foreground">قوة كلمة المرور: {scoreMeta[score].labelAr}</p>
                   </div>
                 )}
               </div>
@@ -180,14 +180,14 @@ export default function AdminProfilePage() {
           <Card>
             <CardHeader className="flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-base">التحقق بخطوتين</CardTitle>
+                <CardTitle className="text-h3">التحقق بخطوتين</CardTitle>
                 <CardDescription>طبقة حماية إضافية عند تسجيل الدخول</CardDescription>
               </div>
               <Switch checked={twoFactor} onCheckedChange={setTwoFactor} aria-label="تفعيل التحقق بخطوتين" />
             </CardHeader>
             {twoFactor && (
               <CardContent>
-                <div className="flex items-center gap-3 rounded-md border bg-muted/40 p-4 text-sm">
+                <div className="flex items-center gap-3 rounded-md border bg-muted/40 p-4 text-small">
                   <ShieldCheck className="size-5 shrink-0 text-[#1F5130]" strokeWidth={1.5} />
                   <p>
                     امسح رمز QR من تطبيق المصادقة الخاص بك، ثم أدخل الرمز المكوّن من 6 أرقام لإتمام
@@ -203,7 +203,7 @@ export default function AdminProfilePage() {
           <Card>
             <CardHeader className="flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-base">الجلسات النشطة</CardTitle>
+                <CardTitle className="text-h3">الجلسات النشطة</CardTitle>
                 <CardDescription>الأجهزة المسجَّلة بحسابك حالياً</CardDescription>
               </div>
               <Button variant="outline" size="sm" onClick={() => setSignOutOpen(true)}>
@@ -220,14 +220,14 @@ export default function AdminProfilePage() {
                       <div className="flex items-center gap-3">
                         <Icon className="size-5 text-muted-foreground" strokeWidth={1.5} />
                         <div>
-                          <div className="text-sm font-medium" dir="ltr">
+                          <div className="text-small font-medium" dir="ltr">
                             {s.device}
                           </div>
-                          <div className="text-xs text-muted-foreground">{s.city}</div>
+                          <div className="text-caption text-muted-foreground">{s.city}</div>
                         </div>
                       </div>
                       {s.current && (
-                        <span className="text-xs font-medium text-[#1F5130]">الجلسة الحالية</span>
+                        <span className="text-caption font-medium text-[#1F5130]">الجلسة الحالية</span>
                       )}
                     </div>
                   );

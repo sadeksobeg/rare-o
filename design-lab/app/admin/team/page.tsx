@@ -87,8 +87,8 @@ export default function TeamPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold font-[family-name:var(--font-heading)]">الفريق</h1>
-          <p className="text-sm text-muted-foreground">أعضاء فريق الإدارة وصلاحياتهم</p>
+          <h1 className="text-h1 font-semibold font-[family-name:var(--font-heading)]">الفريق</h1>
+          <p className="text-small text-muted-foreground">أعضاء فريق الإدارة وصلاحياتهم</p>
         </div>
         <Button onClick={() => setInviteOpen(true)}>
           <UserPlus className="size-4" strokeWidth={1.5} />
@@ -98,7 +98,7 @@ export default function TeamPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">الأعضاء ({team.length})</CardTitle>
+          <CardTitle className="text-h3">الأعضاء ({team.length})</CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>
@@ -125,19 +125,19 @@ export default function TeamPage() {
                         </Avatar>
                         <div>
                           <div className="font-medium">{m.name}</div>
-                          <div className="text-xs text-muted-foreground" dir="ltr">
+                          <div className="text-caption text-muted-foreground" dir="ltr">
                             {m.email}
                           </div>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className="inline-flex items-center gap-1.5 text-sm">
+                      <span className="inline-flex items-center gap-1.5 text-small">
                         <RoleIcon className="size-4 text-muted-foreground" strokeWidth={1.5} />
                         {roleLabelAr[m.role]}
                       </span>
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{m.lastActive}</TableCell>
+                    <TableCell className="text-small text-muted-foreground">{m.lastActive}</TableCell>
                     <TableCell>
                       <Badge
                         variant="secondary"
@@ -175,7 +175,7 @@ export default function TeamPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">الصلاحيات حسب الدور</CardTitle>
+          <CardTitle className="text-h3">الصلاحيات حسب الدور</CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>

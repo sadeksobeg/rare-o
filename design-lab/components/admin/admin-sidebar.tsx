@@ -75,7 +75,7 @@ export function AdminSidebar() {
   return (
     <Sidebar className="border-sidebar-border" collapsible="offcanvas" side="right">
       <SidebarHeader className="px-4 py-5">
-        <Link href="/admin" className="flex items-center gap-2 font-[family-name:var(--font-heading)] text-base font-semibold">
+        <Link href="/admin" className="flex items-center gap-2 font-[family-name:var(--font-heading)] text-h3 font-semibold">
           <img src="/brand/logo-mark-small.svg" alt="" className="h-6 w-6 invert" />
           RARE OUD
         </Link>

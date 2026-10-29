@@ -70,13 +70,13 @@ export default function TradersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold font-[family-name:var(--font-heading)]">التجّار</h1>
-        <p className="text-sm text-muted-foreground">إدارة حسابات التجّار — لا يمكن لأحد رؤية كلمة مرور تاجر مخزَّنة، فقط إعادة تعيينها</p>
+        <h1 className="text-h1 font-semibold font-[family-name:var(--font-heading)]">التجّار</h1>
+        <p className="text-small text-muted-foreground">إدارة حسابات التجّار — لا يمكن لأحد رؤية كلمة مرور تاجر مخزَّنة، فقط إعادة تعيينها</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">كل التجّار ({traders.length})</CardTitle>
+          <CardTitle className="text-h3">كل التجّار ({traders.length})</CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>
@@ -95,7 +95,7 @@ export default function TradersPage() {
                 <TableRow key={t.id}>
                   <TableCell>
                     <div className="font-medium">{t.name}</div>
-                    <div className="text-xs text-muted-foreground" dir="ltr">
+                    <div className="text-caption text-muted-foreground" dir="ltr">
                       {t.email}
                     </div>
                   </TableCell>
@@ -158,7 +158,7 @@ export default function TradersPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="flex items-center gap-2 rounded-md border bg-muted p-3">
-            <code dir="ltr" className="flex-1 font-mono text-sm tracking-wide">
+            <code dir="ltr" className="flex-1 font-mono text-small tracking-wide">
               {tempPassword}
             </code>
             <Button type="button" variant="outline" size="icon" onClick={copyPassword} aria-label="نسخ">

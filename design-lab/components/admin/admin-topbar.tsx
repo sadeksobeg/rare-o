@@ -32,15 +32,15 @@ export function AdminTopbar() {
       <div className="flex items-center gap-3">
         <SidebarTrigger />
         <div>
-          <h1 className="font-[family-name:var(--font-heading)] text-xl font-semibold">{greeting}</h1>
-          <p className="text-sm text-muted-foreground">{dateLabel}</p>
+          <h1 className="font-[family-name:var(--font-heading)] text-h3 font-semibold">{greeting}</h1>
+          <p className="text-small text-muted-foreground">{dateLabel}</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
         <Button variant="outline" className="hidden min-w-56 justify-start gap-2 text-muted-foreground sm:flex">
           <Search className="size-4" strokeWidth={1.5} />
           ابحث أو نفّذ أمراً
-          <kbd className="ms-auto rounded border bg-muted px-1.5 text-xs">Ctrl K</kbd>
+          <kbd className="ms-auto rounded border bg-muted px-1.5 text-caption">Ctrl K</kbd>
         </Button>
         <Button variant="outline" size="icon" aria-label="الإشعارات">
           <Bell className="size-5" strokeWidth={1.5} />
@@ -56,7 +56,7 @@ export function AdminTopbar() {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
               <div className="font-medium">{currentAdmin.name}</div>
-              <div className="text-xs font-normal text-muted-foreground" dir="ltr">
+              <div className="text-caption font-normal text-muted-foreground" dir="ltr">
                 {currentAdmin.email}
               </div>
             </DropdownMenuLabel>
