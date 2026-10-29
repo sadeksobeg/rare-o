@@ -1,8 +1,6 @@
-import { Suspense } from "react";
 import Link from "next/link";
 import { LogOut, MessageSquare, UserRound } from "lucide-react";
 import { adminLogoutAction } from "@/app/admin-logout-action";
-import { AdminCommandSearchMount } from "@/components/admin/command-search-mount";
 import { AdminLocaleToggle } from "@/components/admin/locale-toggle";
 import {
   AdminMobileNav,
@@ -11,8 +9,6 @@ import {
 } from "@/components/admin/nav";
 import { Emblem } from "@/components/brand";
 import { ChromeBadge } from "@/components/portal/chrome-badge";
-import { PortalRouteProgressMount } from "@/components/portal/route-progress-mount";
-import { SavedToastMount } from "@/components/portal/saved-toast-mount";
 import { OfflineBanner } from "@/components/system/offline-banner";
 import { AppToast } from "@/components/system/app-toast";
 import { getAdminSessionChrome } from "@/lib/auth/admin-session";
@@ -41,6 +37,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
         { href: "/admin/requests", label: a.requests },
         { href: "/admin/deals", label: a.deals },
         { href: "/admin/wholesale", label: a.wholesale },
+        { href: "/admin/brokerage", label: a.brokerage },
       ],
     },
     {
@@ -59,25 +56,14 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
       items: [
         { href: "/admin/customers", label: a.customers },
         { href: "/admin/traders", label: a.traders },
+        {
+          href: "/admin/team",
+          label: locale === "ar" ? "الفريق" : "Team",
+        },
         { href: "/admin/settings/security", label: a.settings },
       ],
     },
   ];
-
-  const commandPages: Record<string, string> = {
-    "/admin": a.dashboard,
-    "/admin/inbox": a.inbox,
-    "/admin/requests": a.requests,
-    "/admin/deals": a.deals,
-    "/admin/wholesale": a.wholesale,
-    "/admin/products": a.products,
-    "/admin/categories": a.categories,
-    "/admin/offers": a.offers,
-    "/admin/customers": a.customers,
-    "/admin/traders": a.traders,
-    "/admin/settings/security": a.settings,
-  };
-  if (promoFeatures) commandPages["/admin/promos"] = a.promos;
 
   const brand = `RARE OUD · ${a.dashboard}`;
 
@@ -85,12 +71,6 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
     <AppToast dismissLabel={dict.common.toastDismiss}>
       <div className="ro-portal ro-portal-admin relative flex min-h-screen text-ro-ink">
         <div className="ro-portal-atmosphere" aria-hidden />
-        <Suspense fallback={null}>
-          <PortalRouteProgressMount />
-        </Suspense>
-        <Suspense fallback={null}>
-          <SavedToastMount message={a.savedToast} param="notesSaved" />
-        </Suspense>
         <div className="relative z-10 flex min-h-screen w-full">
           <AdminSidebar groups={groups} brand={brand} />
           <div className="flex min-w-0 flex-1 flex-col">
@@ -113,16 +93,6 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
                 </Link>
               </div>
               <div className="flex items-center gap-2 text-sm sm:gap-3">
-                <AdminCommandSearchMount
-                  labels={{
-                    search: a.commandSearch,
-                    placeholder: a.commandPlaceholder,
-                    empty: a.commandEmpty,
-                    searching: a.commandSearching,
-                    close: dict.common.close,
-                    pages: commandPages,
-                  }}
-                />
                 <Link
                   href="/admin/inbox"
                   className="ro-icon-btn relative"

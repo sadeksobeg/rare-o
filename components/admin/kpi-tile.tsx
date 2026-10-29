@@ -110,7 +110,14 @@ export function KpiTile({
       <p className="mt-0.5 font-display text-[1.65rem] font-medium leading-none tabular-nums text-ro-ink sm:text-[1.75rem]">
         <AnimatedValue value={value} />
       </p>
-      {series ? <Sparkline points={series.points} stroke={palette.stroke} /> : null}
+      {series && series.points.length >= 7 ? (
+        <Sparkline points={series.points} stroke={palette.stroke} />
+      ) : series && series.today !== series.yesterday ? (
+        <p className="mt-0.5 text-[11px] text-[var(--ro-ink-600)]">
+          {series.today > series.yesterday ? "+" : ""}
+          {series.today - series.yesterday}
+        </p>
+      ) : null}
       {trend ? (
         <p
           className={cn(

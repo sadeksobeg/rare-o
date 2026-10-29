@@ -3,8 +3,6 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Handshake, Package, ShoppingBag } from "lucide-react";
-import { Reveal } from "@/components/motion/reveal";
-import { spawnPressRipple } from "@/components/motion/press-ripple";
 import type { ActionQueueDomain, ActionQueueRow } from "@/lib/admin/dashboard";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { formatRelative } from "@/lib/i18n/format";
@@ -115,7 +113,7 @@ export function ActionQueue({
           </p>
         ) : (
           <div>
-            {visible.map((row, i) => {
+            {visible.map((row) => {
               const age = asDate(row.ageAt);
               const heading =
                 row.domain === "deal" ? row.title.replace(`${row.reference} · `, "") : row.reference;
@@ -128,13 +126,10 @@ export function ActionQueue({
                 .filter(Boolean)
                 .join(" · ");
               return (
-                <Reveal key={`${row.domain}-${row.id}`} delayMs={i * 25}>
                   <Link
+                    key={`${row.domain}-${row.id}`}
                     href={row.href}
-                    className="ro-press-ripple grid grid-cols-[3px_auto_minmax(0,1fr)_auto] items-center gap-2.5 border-t border-[color-mix(in_srgb,var(--ro-ink-950)_10%,transparent)] py-2.5 transition-colors hover:bg-[color-mix(in_srgb,var(--ro-plum-50)_70%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)] sm:gap-2.5"
-                    onPointerDown={(e) => {
-                      spawnPressRipple(e.currentTarget, e.clientX, e.clientY);
-                    }}
+                    className="group grid grid-cols-[3px_auto_minmax(0,1fr)_auto] items-center gap-2.5 border-t border-[color-mix(in_srgb,var(--ro-ink-950)_10%,transparent)] py-2.5 transition-colors hover:bg-[color-mix(in_srgb,var(--ro-plum-50)_70%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)] sm:gap-2.5"
                   >
                     <span
                       className={cn("h-7 rounded-[2px]", barClass(row.domain))}
@@ -161,11 +156,15 @@ export function ActionQueue({
                         {meta}
                       </p>
                     </div>
-                    <span className="inline-flex h-8 items-center rounded-[6px] bg-[var(--ro-ink-950)] px-3 text-xs font-medium text-[var(--ro-sand-100)]">
-                      {a.actionOpen}
+                    <span
+                      className="inline-flex size-8 items-center justify-center text-[var(--ro-plum-900)] transition-transform group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5"
+                      aria-hidden
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                        <path d="M9 18l6-6-6-6" />
+                      </svg>
                     </span>
                   </Link>
-                </Reveal>
               );
             })}
           </div>

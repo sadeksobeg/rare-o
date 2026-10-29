@@ -1,9 +1,5 @@
-"use client";
-
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { PressRipple } from "@/components/motion/press-ripple";
-import { AnimatedValue } from "@/components/portal/animated-value";
 import { cn } from "@/lib/utils";
 
 export type ManageHubItem = {
@@ -32,7 +28,6 @@ export function ManageHub({
       <ul className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
         {items.map((item) => (
           <li key={item.href}>
-            <PressRipple>
             <Link
               href={item.href}
               className={cn(
@@ -51,11 +46,10 @@ export function ManageHub({
                   {item.label}
                 </p>
                 <p className="mt-0.5 font-display text-[1.45rem] font-medium leading-none tabular-nums text-ro-ink">
-                  <AnimatedValue value={item.value} />
+                  {item.value}
                 </p>
               </div>
             </Link>
-            </PressRipple>
           </li>
         ))}
       </ul>

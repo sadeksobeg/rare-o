@@ -1,13 +1,22 @@
 "use client";
 
 import { useEffect, useState, type ComponentType } from "react";
-import type { CommandPaletteLabels } from "@/components/admin/command-search-slot";
+
+export type CommandPaletteLabels = {
+  search: string;
+  placeholder: string;
+  empty: string;
+  searching: string;
+  close: string;
+  pages: Record<string, string>;
+};
 
 type SlotProps = { labels: CommandPaletteLabels };
 
 /**
  * Isolates command-search from AdminShell so a poisoned webpack chunk
  * cannot make the whole admin shell crash with `undefined.call`.
+ * Types live here — do not import the slot module at top level.
  */
 export function AdminCommandSearchMount({ labels }: SlotProps) {
   const [Slot, setSlot] = useState<ComponentType<SlotProps> | null>(null);

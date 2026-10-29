@@ -1,4 +1,4 @@
-import { PressLink } from "@/components/portal/press-link";
+import Link from "next/link";
 import type { CatalogHealth, RetailPipeline } from "@/lib/admin/dashboard";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { formatRelative } from "@/lib/i18n/format";
@@ -81,7 +81,7 @@ export function DashboardAside({
 
   return (
     <aside className={cn("grid gap-2.5 content-start", className)}>
-      <PressLink
+      <Link
         href="/admin/inbox"
         className="ro-portal-card flex items-center gap-3 border p-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
       >
@@ -124,9 +124,9 @@ export function DashboardAside({
           </p>
           <p className="text-[11px] text-[var(--ro-ink-600)]">{lastMessage}</p>
         </div>
-      </PressLink>
+      </Link>
 
-      <PressLink
+      <Link
         href="/admin/products"
         className="ro-portal-card space-y-1.5 border p-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
       >
@@ -150,9 +150,9 @@ export function DashboardAside({
             ? a.contentHealthComplete
             : fmt(a.contentHealthMissing, { n: catalogHealth.missingPhoto })}
         </p>
-      </PressLink>
+      </Link>
 
-      <PressLink
+      <Link
         href="/admin/requests"
         className="ro-portal-card space-y-1.5 border p-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
       >
@@ -182,7 +182,7 @@ export function DashboardAside({
           )}
         </div>
         <p className="text-[11px] text-[var(--ro-ink-600)]">{a.pipelineLegend}</p>
-      </PressLink>
+      </Link>
     </aside>
   );
 }

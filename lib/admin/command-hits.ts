@@ -18,12 +18,14 @@ const PAGE_HREFS = [
   "/admin/requests",
   "/admin/deals",
   "/admin/wholesale",
+  "/admin/brokerage",
   "/admin/products",
   "/admin/categories",
   "/admin/offers",
   "/admin/promos",
   "/admin/customers",
   "/admin/traders",
+  "/admin/team",
   "/admin/settings/security",
 ] as const;
 

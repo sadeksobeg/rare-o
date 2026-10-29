@@ -2,13 +2,14 @@
 
 import { usePathname } from "next/navigation";
 import { useLayoutEffect, useRef, useState, type ComponentType } from "react";
-import { LiveBadge } from "@/components/motion/live-badge";
+import { ChromeBadge } from "@/components/portal/chrome-badge";
 import {
   LayoutDashboard,
   MessageSquare,
   ShoppingBag,
   Handshake,
   Package,
+  Compass,
   Boxes,
   Tags,
   Percent,
@@ -18,6 +19,7 @@ import {
   X,
   Megaphone,
   ShieldCheck,
+  UsersRound,
   type LucideProps,
 } from "lucide-react";
 import { Emblem } from "@/components/brand";
@@ -35,12 +37,14 @@ const NAV_ICONS: Record<string, IconComp> = {
   "/admin/requests": ShoppingBag,
   "/admin/deals": Handshake,
   "/admin/wholesale": Package,
+  "/admin/brokerage": Compass,
   "/admin/products": Boxes,
   "/admin/categories": Tags,
   "/admin/offers": Percent,
   "/admin/promos": Megaphone,
   "/admin/customers": Users,
   "/admin/traders": Store,
+  "/admin/team": UsersRound,
   "/admin/settings/security": ShieldCheck,
 };
 
@@ -64,13 +68,21 @@ function NavList({
 }) {
   const pathname = usePathname();
   const rootRef = useRef<HTMLDivElement>(null);
-  const [rail, setRail] = useState({ top: 0, height: 0 });
+  const [rail, setRail] = useState<{ top: number; height: number } | null>(
+    null
+  );
 
   useLayoutEffect(() => {
     const root = rootRef.current;
-    if (!root || collapsed) return;
+    if (!root || collapsed) {
+      setRail(null);
+      return;
+    }
     const activeEl = root.querySelector("[data-active='true']");
-    if (!(activeEl instanceof HTMLElement)) return;
+    if (!(activeEl instanceof HTMLElement)) {
+      setRail(null);
+      return;
+    }
     const rootBox = root.getBoundingClientRect();
     const elBox = activeEl.getBoundingClientRect();
     setRail({
@@ -84,7 +96,7 @@ function NavList({
       ref={rootRef}
       className={cn("relative", collapsed ? "space-y-1" : "space-y-6")}
     >
-      {!collapsed && rail.height > 0 ? (
+      {!collapsed && rail ? (
         <span
           aria-hidden
           className="ro-nav-rail"
@@ -148,7 +160,7 @@ function NavList({
                       <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
                         <span className="truncate">{item.label}</span>
                         {item.badge && item.badge > 0 ? (
-                          <LiveBadge
+                          <ChromeBadge
                             value={item.badge}
                             className="inline-flex min-w-[1.15rem] shrink-0 items-center justify-center rounded-full bg-[var(--ro-plum-300)] px-1.5 text-[0.65rem] font-bold text-[var(--ro-ink-950)]"
                           />
@@ -197,7 +209,7 @@ export function AdminSidebar({
       >
         <Emblem variant="small" className="size-8" />
         {!collapsed ? (
-          <span className="text-[0.7rem] font-semibold tracking-[0.2em] text-[var(--ro-ink-950)]">
+          <span className="text-[0.7rem] font-semibold tracking-[0.2em] text-[var(--ro-sand-100)]">
             {brand}
           </span>
         ) : null}

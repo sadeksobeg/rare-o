@@ -14,6 +14,7 @@ import {
   statusesAwaitingAdmin,
   wholesaleNextActor,
 } from "@/lib/ui/status";
+import { countActiveBrokerage } from "@/lib/brokerage/service";
 import { getInboxHealthView } from "@/lib/whatsapp/messaging/inbox";
 
 export type ActionQueueDomain = "retail" | "deal" | "wholesale";
@@ -92,6 +93,7 @@ export async function getAdminHomeData() {
     dealCandidates,
     wholesaleAwaitingAdmin,
     unreadConversations,
+    activeBrokerage,
     visibleTraders,
     visibleCustomers,
     health,
@@ -133,6 +135,7 @@ export async function getAdminHomeData() {
     prisma.whatsAppConversation.count({
       where: { unreadCount: { gt: 0 } },
     }),
+    countActiveBrokerage(),
     prisma.traderAccount.count({
       where: uiVisibleTraderWhere(),
     }),
@@ -164,6 +167,7 @@ export async function getAdminHomeData() {
       dealsAwaitingAdmin,
       wholesaleAwaitingAdmin,
       unreadConversations,
+      activeBrokerage,
     },
     series,
     catalogHealth,
