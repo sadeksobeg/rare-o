@@ -48,31 +48,45 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { teamMembers as initialTeam } from "@/lib/fixtures";
+import { useLocale, useDict } from "@/lib/i18n";
+import { teamDict } from "@/lib/dictionaries";
 import { toast } from "sonner";
 
 type Role = "Owner" | "Manager" | "Staff";
 
-const roleLabelAr: Record<Role, string> = { Owner: "مالك", Manager: "مدير", Staff: "موظف" };
 const roleIcon: Record<Role, typeof ShieldCheck> = { Owner: ShieldCheck, Manager: Shield, Staff: UserCog };
 
-const permissions: { labelAr: string; owner: boolean; manager: boolean; staff: boolean }[] = [
-  { labelAr: "عرض لوحة التحكم والتقارير", owner: true, manager: true, staff: true },
-  { labelAr: "إدارة الطلبات والصفقات", owner: true, manager: true, staff: true },
-  { labelAr: "إدارة المنتجات والكتالوج", owner: true, manager: true, staff: false },
-  { labelAr: "إدارة حسابات التجّار", owner: true, manager: true, staff: false },
-  { labelAr: "دعوة أعضاء الفريق وتغيير الأدوار", owner: true, manager: false, staff: false },
-  { labelAr: "الوصول إلى سجلّ الأمان", owner: true, manager: true, staff: false },
+const permissionKeys = [
+  "permDashboard",
+  "permRequests",
+  "permProducts",
+  "permTraders",
+  "permInvite",
+  "permAuditLog",
+] as const;
+
+const permissions: { key: (typeof permissionKeys)[number]; owner: boolean; manager: boolean; staff: boolean }[] = [
+  { key: "permDashboard", owner: true, manager: true, staff: true },
+  { key: "permRequests", owner: true, manager: true, staff: true },
+  { key: "permProducts", owner: true, manager: true, staff: false },
+  { key: "permTraders", owner: true, manager: true, staff: false },
+  { key: "permInvite", owner: true, manager: false, staff: false },
+  { key: "permAuditLog", owner: true, manager: true, staff: false },
 ];
 
 export default function TeamPage() {
+  const { locale } = useLocale();
+  const t = useDict(teamDict);
+  const roleLabel: Record<Role, string> = { Owner: t("roleOwner"), Manager: t("roleManager"), Staff: t("roleStaff") };
   const [team, setTeam] = useState(initialTeam);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [disableTarget, setDisableTarget] = useState<string | null>(null);
   const disableMember = team.find((m) => m.id === disableTarget);
+  const disableMemberName = disableMember ? (locale === "ar" ? disableMember.name : disableMember.nameEn) : "";
 
   function sendInvite() {
     setInviteOpen(false);
-    toast.success("أُرسلت الدعوة بالبريد الإلكتروني");
+    toast.success(t("inviteSent"));
   }
 
   function confirmDisable() {
@@ -80,51 +94,54 @@ export default function TeamPage() {
       prev.map((m) => (m.id === disableTarget ? { ...m, status: m.status === "active" ? "disabled" : "active" } : m))
     );
     setDisableTarget(null);
-    toast.success("تم تحديث حالة العضو");
+    toast.success(t("statusUpdated"));
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-h1 font-semibold font-[family-name:var(--font-heading)]">الفريق</h1>
-          <p className="text-small text-muted-foreground">أعضاء فريق الإدارة وصلاحياتهم</p>
+          <h1 className="text-h1 font-semibold font-[family-name:var(--font-heading)]">{t("pageTitle")}</h1>
+          <p className="text-small text-muted-foreground">{t("pageSubtitle")}</p>
         </div>
         <Button onClick={() => setInviteOpen(true)}>
           <UserPlus className="size-4" strokeWidth={1.5} />
-          دعوة عضو
+          {t("inviteMember")}
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-h3">الأعضاء ({team.length})</CardTitle>
+          <CardTitle className="text-h3">
+            {t("members")} ({team.length})
+          </CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>العضو</TableHead>
-                <TableHead>الدور</TableHead>
-                <TableHead>آخر نشاط</TableHead>
-                <TableHead>الحالة</TableHead>
-                <TableHead className="sr-only">إجراءات</TableHead>
+                <TableHead>{t("colMember")}</TableHead>
+                <TableHead>{t("colRole")}</TableHead>
+                <TableHead>{t("colLastActive")}</TableHead>
+                <TableHead>{t("colStatus")}</TableHead>
+                <TableHead className="sr-only">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {team.map((m) => {
                 const RoleIcon = roleIcon[m.role];
+                const name = locale === "ar" ? m.name : m.nameEn;
                 return (
                   <TableRow key={m.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar size="sm">
                           <AvatarFallback className="bg-ro-plum-100 text-ro-plum-900">
-                            {m.name.slice(0, 1)}
+                            {name.slice(0, 1)}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="font-medium">{m.name}</div>
+                          <div className="font-medium">{name}</div>
                           <div className="text-caption text-muted-foreground" dir="ltr">
                             {m.email}
                           </div>
@@ -134,23 +151,23 @@ export default function TeamPage() {
                     <TableCell>
                       <span className="inline-flex items-center gap-1.5 text-small">
                         <RoleIcon className="size-4 text-muted-foreground" strokeWidth={1.5} />
-                        {roleLabelAr[m.role]}
+                        {roleLabel[m.role]}
                       </span>
                     </TableCell>
-                    <TableCell className="text-small text-muted-foreground">{m.lastActive}</TableCell>
+                    <TableCell className="text-small text-muted-foreground">{locale === "ar" ? m.lastActive : m.lastActiveEn}</TableCell>
                     <TableCell>
                       <Badge
                         variant="secondary"
                         className={m.status === "active" ? "bg-[#DCEBDD] text-[#1F5130]" : "bg-[#F4DADC] text-[#8A2433]"}
                       >
-                        {m.status === "active" ? "نشِط" : "معطَّل"}
+                        {m.status === "active" ? t("statusActive") : t("statusDisabled")}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       {m.role !== "Owner" && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" aria-label="المزيد">
+                            <Button variant="ghost" size="icon" aria-label="More">
                               <MoreHorizontal className="size-4" strokeWidth={1.5} />
                             </Button>
                           </DropdownMenuTrigger>
@@ -159,7 +176,7 @@ export default function TeamPage() {
                               variant={m.status === "active" ? "destructive" : "default"}
                               onClick={() => setDisableTarget(m.id)}
                             >
-                              {m.status === "active" ? "تعطيل العضوية" : "تفعيل العضوية"}
+                              {m.status === "active" ? t("disableMembership") : t("enableMembership")}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -175,22 +192,22 @@ export default function TeamPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-h3">الصلاحيات حسب الدور</CardTitle>
+          <CardTitle className="text-h3">{t("permissionsByRole")}</CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>الصلاحية</TableHead>
-                <TableHead className="text-center">مالك</TableHead>
-                <TableHead className="text-center">مدير</TableHead>
-                <TableHead className="text-center">موظف</TableHead>
+                <TableHead>{t("colPermission")}</TableHead>
+                <TableHead className="text-center">{t("roleOwner")}</TableHead>
+                <TableHead className="text-center">{t("roleManager")}</TableHead>
+                <TableHead className="text-center">{t("roleStaff")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {permissions.map((p) => (
-                <TableRow key={p.labelAr}>
-                  <TableCell>{p.labelAr}</TableCell>
+                <TableRow key={p.key}>
+                  <TableCell>{t(p.key)}</TableCell>
                   <TableCell className="text-center">{p.owner ? <ShieldCheck className="mx-auto size-4 text-[#1F5130]" strokeWidth={1.5} /> : <span className="text-muted-foreground">—</span>}</TableCell>
                   <TableCell className="text-center">{p.manager ? <ShieldCheck className="mx-auto size-4 text-[#1F5130]" strokeWidth={1.5} /> : <span className="text-muted-foreground">—</span>}</TableCell>
                   <TableCell className="text-center">{p.staff ? <ShieldCheck className="mx-auto size-4 text-[#1F5130]" strokeWidth={1.5} /> : <span className="text-muted-foreground">—</span>}</TableCell>
@@ -204,32 +221,32 @@ export default function TeamPage() {
       <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>دعوة عضو جديد</DialogTitle>
-            <DialogDescription>سيصل بريد إلكتروني يحتوي رابط دعوة صالحاً لمدة 7 أيام.</DialogDescription>
+            <DialogTitle>{t("inviteTitle")}</DialogTitle>
+            <DialogDescription>{t("inviteDesc")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="invite-email">البريد الإلكتروني</Label>
+              <Label htmlFor="invite-email">{t("emailLabel")}</Label>
               <Input id="invite-email" type="email" dir="ltr" placeholder="name@example.com" />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="invite-role">الدور</Label>
+              <Label htmlFor="invite-role">{t("roleLabel")}</Label>
               <Select defaultValue="Staff">
                 <SelectTrigger id="invite-role" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Manager">مدير</SelectItem>
-                  <SelectItem value="Staff">موظف</SelectItem>
+                  <SelectItem value="Manager">{t("roleManager")}</SelectItem>
+                  <SelectItem value="Staff">{t("roleStaff")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setInviteOpen(false)}>
-              إلغاء
+              {t("cancel")}
             </Button>
-            <Button onClick={sendInvite}>إرسال الدعوة</Button>
+            <Button onClick={sendInvite}>{t("sendInvite")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -238,18 +255,16 @@ export default function TeamPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {disableMember?.status === "active" ? `تعطيل عضوية ${disableMember?.name}؟` : `تفعيل عضوية ${disableMember?.name}؟`}
+              {disableMember?.status === "active" ? t("disableConfirmTitleActive") : t("disableConfirmTitleDisabled")} {disableMemberName}?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {disableMember?.status === "active"
-                ? "لن يتمكّن من الدخول إلى لوحة التحكم حتى تُعاد عضويته."
-                : "سيستعيد القدرة على الدخول إلى لوحة التحكم بدوره الحالي."}
+              {disableMember?.status === "active" ? t("disableConsequence") : t("enableConsequence")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDisable}>
-              {disableMember?.status === "active" ? "تعطيل العضوية" : "تفعيل العضوية"}
+              {disableMember?.status === "active" ? t("disableMembership") : t("enableMembership")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

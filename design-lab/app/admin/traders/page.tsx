@@ -32,9 +32,13 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { traders as initialTraders } from "@/lib/fixtures";
 import { generateTempPassword } from "@/lib/temp-password";
+import { useLocale, useDict } from "@/lib/i18n";
+import { tradersDict } from "@/lib/dictionaries";
 import { toast } from "sonner";
 
 export default function TradersPage() {
+  const { locale } = useLocale();
+  const t = useDict(tradersDict);
   const [traders, setTraders] = useState(initialTraders);
   const [resetTarget, setResetTarget] = useState<string | null>(null);
   const [disableTarget, setDisableTarget] = useState<string | null>(null);
@@ -49,10 +53,10 @@ export default function TradersPage() {
 
   function confirmDisable() {
     setTraders((prev) =>
-      prev.map((t) => (t.id === disableTarget ? { ...t, status: t.status === "active" ? "disabled" : "active" } : t))
+      prev.map((tr) => (tr.id === disableTarget ? { ...tr, status: tr.status === "active" ? "disabled" : "active" } : tr))
     );
     setDisableTarget(null);
-    toast.success("تم تحديث حالة الحساب");
+    toast.success(t("statusUpdated"));
   }
 
   function copyPassword() {
@@ -63,64 +67,67 @@ export default function TradersPage() {
     });
   }
 
-  const resetTraderName = traders.find((t) => t.id === resetTarget)?.name;
-  const disableTraderName = traders.find((t) => t.id === disableTarget)?.name;
-  const disableTraderStatus = traders.find((t) => t.id === disableTarget)?.status;
+  const resetTrader = traders.find((tr) => tr.id === resetTarget);
+  const disableTrader = traders.find((tr) => tr.id === disableTarget);
+  const disableTraderName = disableTrader ? (locale === "ar" ? disableTrader.name : disableTrader.nameEn) : "";
+  const disableTraderStatus = disableTrader?.status;
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-h1 font-semibold font-[family-name:var(--font-heading)]">التجّار</h1>
-        <p className="text-small text-muted-foreground">إدارة حسابات التجّار — كلمة مرور أي تاجر لا تُعرض لأحد، يمكن فقط إعادة تعيينها</p>
+        <h1 className="text-h1 font-semibold font-[family-name:var(--font-heading)]">{t("pageTitle")}</h1>
+        <p className="text-small text-muted-foreground">{t("pageSubtitle")}</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-h3">كل التجّار ({traders.length})</CardTitle>
+          <CardTitle className="text-h3">
+            {t("allTraders")} ({traders.length})
+          </CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>التاجر</TableHead>
-                <TableHead>المدينة</TableHead>
-                <TableHead>الصفقات</TableHead>
-                <TableHead>نسبة القبول</TableHead>
-                <TableHead>الحالة</TableHead>
-                <TableHead className="sr-only">إجراءات</TableHead>
+                <TableHead>{t("colTrader")}</TableHead>
+                <TableHead>{t("colCity")}</TableHead>
+                <TableHead>{t("colDeals")}</TableHead>
+                <TableHead>{t("colAcceptRate")}</TableHead>
+                <TableHead>{t("colStatus")}</TableHead>
+                <TableHead className="sr-only">{t("actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {traders.map((t) => (
-                <TableRow key={t.id}>
+              {traders.map((tr) => (
+                <TableRow key={tr.id}>
                   <TableCell>
-                    <div className="font-medium">{t.name}</div>
+                    <div className="font-medium">{locale === "ar" ? tr.name : tr.nameEn}</div>
                     <div className="text-caption text-muted-foreground" dir="ltr">
-                      {t.email}
+                      {tr.email}
                     </div>
                   </TableCell>
-                  <TableCell>{t.city}</TableCell>
-                  <TableCell className="tabular-nums">{t.dealsCount}</TableCell>
-                  <TableCell className="tabular-nums">{t.acceptRate}%</TableCell>
+                  <TableCell>{locale === "ar" ? tr.city : tr.cityEn}</TableCell>
+                  <TableCell className="tabular-nums">{tr.dealsCount}</TableCell>
+                  <TableCell className="tabular-nums">{tr.acceptRate}%</TableCell>
                   <TableCell>
-                    <Badge variant={t.status === "active" ? "secondary" : "outline"} className={t.status === "active" ? "bg-[#DCEBDD] text-[#1F5130]" : "bg-[#F4DADC] text-[#8A2433]"}>
-                      {t.status === "active" ? "نشِط" : "معطَّل"}
+                    <Badge variant={tr.status === "active" ? "secondary" : "outline"} className={tr.status === "active" ? "bg-[#DCEBDD] text-[#1F5130]" : "bg-[#F4DADC] text-[#8A2433]"}>
+                      {tr.status === "active" ? t("statusActive") : t("statusDisabled")}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" aria-label="المزيد">
+                        <Button variant="ghost" size="icon" aria-label={t("more")}>
                           <MoreHorizontal className="size-4" strokeWidth={1.5} />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setResetTarget(t.id)}>
-                          <KeyRound className="size-4" strokeWidth={1.5} /> إعادة تعيين كلمة المرور
+                        <DropdownMenuItem onClick={() => setResetTarget(tr.id)}>
+                          <KeyRound className="size-4" strokeWidth={1.5} /> {t("resetPassword")}
                         </DropdownMenuItem>
-                        <DropdownMenuItem variant="destructive" onClick={() => setDisableTarget(t.id)}>
+                        <DropdownMenuItem variant="destructive" onClick={() => setDisableTarget(tr.id)}>
                           <ShieldAlert className="size-4" strokeWidth={1.5} />
-                          {t.status === "active" ? "تعطيل الحساب" : "تفعيل الحساب"}
+                          {tr.status === "active" ? t("disableAccount") : t("enableAccount")}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -136,14 +143,14 @@ export default function TradersPage() {
       <AlertDialog open={!!resetTarget} onOpenChange={(open) => !open && setResetTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>إعادة تعيين كلمة مرور {resetTraderName}؟</AlertDialogTitle>
-            <AlertDialogDescription>
-              ستُنشأ كلمة مرور مؤقتة جديدة وتظهر لك مرة واحدة فقط. كلمة مرور التاجر الحالية لن تكون مرئية لك في أي وقت؛ سيُطلب منه تغييرها فور الدخول.
-            </AlertDialogDescription>
+            <AlertDialogTitle>
+              {t("resetConfirmTitle")} {resetTrader ? (locale === "ar" ? resetTrader.name : resetTrader.nameEn) : ""}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>{t("resetConfirmDesc")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>إلغاء</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmReset}>إعادة التعيين</AlertDialogAction>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmReset}>{t("confirmReset")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -152,21 +159,19 @@ export default function TradersPage() {
       <Dialog open={!!tempPassword} onOpenChange={(open) => !open && setTempPassword(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>كلمة المرور المؤقتة</DialogTitle>
-            <DialogDescription>
-              انسخها وسلّمها للتاجر الآن — لن تظهر مرة أخرى. سيُطالَب بتغييرها عند أول تسجيل دخول.
-            </DialogDescription>
+            <DialogTitle>{t("tempPasswordTitle")}</DialogTitle>
+            <DialogDescription>{t("tempPasswordDesc")}</DialogDescription>
           </DialogHeader>
           <div className="flex items-center gap-2 rounded-md border bg-muted p-3">
             <code dir="ltr" className="flex-1 font-mono text-small tracking-wide">
               {tempPassword}
             </code>
-            <Button type="button" variant="outline" size="icon" onClick={copyPassword} aria-label="نسخ">
+            <Button type="button" variant="outline" size="icon" onClick={copyPassword} aria-label={t("copy")}>
               {copied ? <Check className="size-4" strokeWidth={1.5} /> : <Copy className="size-4" strokeWidth={1.5} />}
             </Button>
           </div>
           <DialogFooter>
-            <Button onClick={() => setTempPassword(null)}>تم</Button>
+            <Button onClick={() => setTempPassword(null)}>{t("done")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -176,18 +181,16 @@ export default function TradersPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {disableTraderStatus === "active" ? `تعطيل حساب ${disableTraderName}؟` : `تفعيل حساب ${disableTraderName}؟`}
+              {disableTraderStatus === "active" ? t("disableConfirmTitleActive") : t("disableConfirmTitleDisabled")} {disableTraderName}?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {disableTraderStatus === "active"
-                ? "لن يتمكّن التاجر من الدخول أو اقتراح صفقات جديدة حتى يُعاد تفعيل حسابه. الصفقات القائمة تبقى كما هي."
-                : "سيستعيد التاجر القدرة على الدخول واقتراح صفقات جديدة."}
+              {disableTraderStatus === "active" ? t("disableConsequence") : t("enableConsequence")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDisable}>
-              {disableTraderStatus === "active" ? "تعطيل الحساب" : "تفعيل الحساب"}
+              {disableTraderStatus === "active" ? t("disableAccount") : t("enableAccount")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

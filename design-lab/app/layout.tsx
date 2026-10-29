@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Amiri, Cormorant_Garamond, IBM_Plex_Sans_Arabic, Source_Sans_3 } from "next/font/google";
-import { DirectionProvider } from "@/components/ui/direction";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { Toaster } from "@/components/ui/sonner";
+import { Providers } from "@/components/providers";
 import "./globals.css";
 
 // Fonts per RARE OUD decision D4: Amiri + Cormorant Garamond (display),
@@ -44,10 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${fontAmiri.variable} ${fontCormorant.variable} ${fontPlexArabic.variable} ${fontSource.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <DirectionProvider direction="rtl">
-          <TooltipProvider>{children}</TooltipProvider>
-          <Toaster position="top-center" dir="rtl" />
-        </DirectionProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

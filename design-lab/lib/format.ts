@@ -11,6 +11,10 @@ export function formatDateAr(date: Date, options: Intl.DateTimeFormatOptions) {
   return new Intl.DateTimeFormat(AR_LATN, options).format(date);
 }
 
+export function formatDate(date: Date, locale: "ar" | "en", options: Intl.DateTimeFormatOptions) {
+  return new Intl.DateTimeFormat(locale === "ar" ? AR_LATN : "en-US", options).format(date);
+}
+
 export function formatNumberAr(value: number, options?: Intl.NumberFormatOptions) {
   return new Intl.NumberFormat(AR_LATN, options).format(value);
 }

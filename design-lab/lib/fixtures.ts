@@ -9,7 +9,6 @@ export const currentAdmin = {
   nameEn: "Samer Al-Halabi",
   role: "Owner" as const,
   email: "samer@rareoud.example",
-  avatarInitials: "س",
 };
 
 export const currentTrader = {
@@ -17,7 +16,6 @@ export const currentTrader = {
   name: "عدنان درويش",
   nameEn: "Adnan Darwish",
   email: "adnan@rareoud.example",
-  avatarInitials: "ع",
 };
 
 export type StatusTone = "neutral" | "info" | "progress" | "attention" | "success" | "danger" | "closed";
@@ -52,9 +50,9 @@ export const domainSplit = [
 ];
 
 export const traders = [
-  { id: "t1", name: "عدنان درويش", nameEn: "Adnan Darwish", email: "adnan@rareoud.example", phone: "+963 93 111 2233", status: "active" as const, city: "دمشق", dealsCount: 9, acceptRate: 78, joined: "2026-03-14" },
-  { id: "t2", name: "ريم قاسم", nameEn: "Reem Qassem", email: "reem@rareoud.example", phone: "+963 94 222 3344", status: "active" as const, city: "حلب", dealsCount: 4, acceptRate: 62, joined: "2026-05-02" },
-  { id: "t3", name: "بلال شاهين", nameEn: "Bilal Shaheen", email: "bilal@rareoud.example", phone: "+963 95 333 4455", status: "disabled" as const, city: "حمص", dealsCount: 1, acceptRate: 30, joined: "2026-01-20" },
+  { id: "t1", name: "عدنان درويش", nameEn: "Adnan Darwish", email: "adnan@rareoud.example", phone: "+963 93 111 2233", status: "active" as const, city: "دمشق", cityEn: "Damascus", dealsCount: 9, acceptRate: 78, joined: "2026-03-14" },
+  { id: "t2", name: "ريم قاسم", nameEn: "Reem Qassem", email: "reem@rareoud.example", phone: "+963 94 222 3344", status: "active" as const, city: "حلب", cityEn: "Aleppo", dealsCount: 4, acceptRate: 62, joined: "2026-05-02" },
+  { id: "t3", name: "بلال شاهين", nameEn: "Bilal Shaheen", email: "bilal@rareoud.example", phone: "+963 95 333 4455", status: "disabled" as const, city: "حمص", cityEn: "Homs", dealsCount: 1, acceptRate: 30, joined: "2026-01-20" },
 ];
 
 export const customers = [
@@ -63,9 +61,9 @@ export const customers = [
 ];
 
 export const teamMembers = [
-  { id: "m1", name: "سامر الحلبي", nameEn: "Samer Al-Halabi", email: "samer@rareoud.example", role: "Owner" as const, status: "active" as const, lastActive: "قبل 5 دقائق" },
-  { id: "m2", name: "هالة نصر", nameEn: "Hala Nasr", email: "hala@rareoud.example", role: "Manager" as const, status: "active" as const, lastActive: "قبل ساعة" },
-  { id: "m3", name: "وائل زيدان", nameEn: "Wael Zaidan", email: "wael@rareoud.example", role: "Staff" as const, status: "active" as const, lastActive: "أمس" },
+  { id: "m1", name: "سامر الحلبي", nameEn: "Samer Al-Halabi", email: "samer@rareoud.example", role: "Owner" as const, status: "active" as const, lastActive: "قبل 5 دقائق", lastActiveEn: "5 minutes ago" },
+  { id: "m2", name: "هالة نصر", nameEn: "Hala Nasr", email: "hala@rareoud.example", role: "Manager" as const, status: "active" as const, lastActive: "قبل ساعة", lastActiveEn: "an hour ago" },
+  { id: "m3", name: "وائل زيدان", nameEn: "Wael Zaidan", email: "wael@rareoud.example", role: "Staff" as const, status: "active" as const, lastActive: "أمس", lastActiveEn: "yesterday" },
 ];
 
 export const auditLog = [
@@ -74,8 +72,13 @@ export const auditLog = [
   { id: "a3", actorAr: "سامر الحلبي", actorEn: "Samer Al-Halabi", actionAr: "سجّل الدخول", actionEn: "Signed in", time: "2026-10-28 08:01" },
 ];
 
-export function greetingForHour(hour: number, nameAr: string) {
-  if (hour < 12) return `صباح الخير، ${nameAr}`;
-  if (hour < 17) return `نهارك سعيد، ${nameAr}`;
-  return `مساء الخير، ${nameAr}`;
+export function greetingForHour(hour: number, name: string, locale: "ar" | "en" = "ar") {
+  if (locale === "en") {
+    if (hour < 12) return `Good morning, ${name}`;
+    if (hour < 17) return `Good afternoon, ${name}`;
+    return `Good evening, ${name}`;
+  }
+  if (hour < 12) return `صباح الخير، ${name}`;
+  if (hour < 17) return `نهارك سعيد، ${name}`;
+  return `مساء الخير، ${name}`;
 }

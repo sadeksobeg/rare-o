@@ -17,13 +17,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { kpis, requestsOverTime, domainSplit, retailRequests, type StatusTone } from "@/lib/fixtures";
+import { useLocale, useDict } from "@/lib/i18n";
+import { dashboardDict } from "@/lib/dictionaries";
 
-const areaData = requestsOverTime.map((v, i) => ({ day: i + 1, requests: v }));
-const areaConfig = { requests: { label: "الطلبات", color: "var(--color-ro-plum-700)" } } satisfies ChartConfig;
-
-const donutConfig = Object.fromEntries(
-  domainSplit.map((d) => [d.labelAr, { label: d.labelAr, color: d.color }])
-) satisfies ChartConfig;
+const areaConfig = { requests: { label: "Requests", color: "var(--color-ro-plum-700)" } } satisfies ChartConfig;
 
 const statusMeta: Record<StatusTone, { className: string; icon: typeof CircleDot }> = {
   neutral: { className: "bg-ro-sand-300 text-ro-ink-700", icon: CircleDot },
@@ -69,6 +66,13 @@ function KpiCard({
 }
 
 export default function AdminDashboardPage() {
+  const { locale } = useLocale();
+  const t = useDict(dashboardDict);
+  const areaData = requestsOverTime.map((v, i) => ({ day: i + 1, requests: v }));
+  const donutConfig = Object.fromEntries(
+    domainSplit.map((d) => [locale === "ar" ? d.labelAr : d.labelEn, { label: locale === "ar" ? d.labelAr : d.labelEn, color: d.color }])
+  ) satisfies ChartConfig;
+
   return (
     <div className="space-y-6">
       {/* gradient-mesh header band */}
@@ -81,30 +85,30 @@ export default function AdminDashboardPage() {
               <span className="relative inline-flex size-2 rounded-full bg-[#2f6b4f]">
                 <span className="absolute inset-0 animate-ping rounded-full bg-[#2f6b4f]" />
               </span>
-              واتساب متصل · آخر مزامنة قبل دقيقة
+              {t("whatsappConnected")}
             </p>
           </div>
           <Button className="bg-ro-sand-100 text-ro-ink-950 hover:bg-ro-sand-50">
             <Plus className="size-4" strokeWidth={1.5} />
-            إضافة منتج
+            {t("addProduct")}
           </Button>
         </div>
       </div>
 
       {/* KPI row */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <KpiCard href="/admin/requests" label="طلبات تجزئة جديدة" value={kpis.newRetailRequests} deltaLabel="+12% أسبوعياً" trend="up" />
-        <KpiCard href="/admin/deals" label="صفقات بانتظار الرد" value={kpis.dealsAwaitingReply} deltaLabel="-3% أسبوعياً" trend="down" />
-        <KpiCard href="/admin/wholesale" label="طلبات جملة" value={kpis.wholesaleRequests} deltaLabel="+2 هذا الأسبوع" trend="up" />
-        <KpiCard href="/admin/brokerage" label="طلبات وساطة نشطة" value={kpis.activeBrokerageRequests} deltaLabel="+1 هذا الأسبوع" trend="up" />
+        <KpiCard href="/admin/requests" label={t("kpiNewRetail")} value={kpis.newRetailRequests} deltaLabel={locale === "ar" ? "+12% أسبوعياً" : "+12% weekly"} trend="up" />
+        <KpiCard href="/admin/deals" label={t("kpiDealsAwaiting")} value={kpis.dealsAwaitingReply} deltaLabel={locale === "ar" ? "-3% أسبوعياً" : "-3% weekly"} trend="down" />
+        <KpiCard href="/admin/wholesale" label={t("kpiWholesale")} value={kpis.wholesaleRequests} deltaLabel={locale === "ar" ? "+2 هذا الأسبوع" : "+2 this week"} trend="up" />
+        <KpiCard href="/admin/brokerage" label={t("kpiBrokerage")} value={kpis.activeBrokerageRequests} deltaLabel={locale === "ar" ? "+1 هذا الأسبوع" : "+1 this week"} trend="up" />
       </div>
 
       {/* charts row */}
       <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
         <Card>
           <CardHeader className="flex-row items-center justify-between">
-            <CardTitle className="text-h3">الطلبات خلال 14 يوماً</CardTitle>
-            <span className="text-caption text-muted-foreground">المجموع {requestsOverTime.reduce((a, b) => a + b, 0)}</span>
+            <CardTitle className="text-h3">{t("requestsOverDays")}</CardTitle>
+            <span className="text-caption text-muted-foreground">{t("total")} {requestsOverTime.reduce((a, b) => a + b, 0)}</span>
           </CardHeader>
           <CardContent>
             <ChartContainer config={areaConfig} className="h-[180px] w-full">
@@ -124,13 +128,13 @@ export default function AdminDashboardPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-h3">التوزيع حسب المجال</CardTitle>
+            <CardTitle className="text-h3">{t("domainSplit")}</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center gap-4">
             <ChartContainer config={donutConfig} className="aspect-square h-[140px]">
               <PieChart>
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Pie data={domainSplit} dataKey="value" nameKey="labelAr" innerRadius={38} outerRadius={60} strokeWidth={0}>
+                <Pie data={domainSplit} dataKey="value" nameKey={locale === "ar" ? "labelAr" : "labelEn"} innerRadius={38} outerRadius={60} strokeWidth={0}>
                   {domainSplit.map((entry) => (
                     <Cell key={entry.labelAr} fill={entry.color} />
                   ))}
@@ -141,7 +145,7 @@ export default function AdminDashboardPage() {
               {domainSplit.map((d) => (
                 <li key={d.labelAr} className="flex items-center gap-2">
                   <span className="size-2.5 rounded-sm" style={{ background: d.color }} />
-                  {d.labelAr}
+                  {locale === "ar" ? d.labelAr : d.labelEn}
                   <span className="text-muted-foreground">{d.value}%</span>
                 </li>
               ))}
@@ -153,38 +157,39 @@ export default function AdminDashboardPage() {
       {/* action queue */}
       <Card>
         <CardHeader className="flex-row items-center justify-between">
-          <CardTitle className="text-h3">بانتظار إجراءك</CardTitle>
+          <CardTitle className="text-h3">{t("awaitingAction")}</CardTitle>
           <Link href="/admin/requests" className="text-caption text-ro-plum-900 underline underline-offset-2">
-            عرض الكل
+            {t("viewAll")}
           </Link>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>المرجع</TableHead>
-                <TableHead>العميل</TableHead>
-                <TableHead>القطع</TableHead>
-                <TableHead>التاريخ</TableHead>
-                <TableHead>الحالة</TableHead>
+                <TableHead>{t("colReference")}</TableHead>
+                <TableHead>{t("colCustomer")}</TableHead>
+                <TableHead>{t("colItems")}</TableHead>
+                <TableHead>{t("colDate")}</TableHead>
+                <TableHead>{t("colStatus")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {retailRequests.slice(0, 3).map((r) => {
                 const meta = statusMeta[r.status];
                 const Icon = meta.icon;
+                const customerName = locale === "ar" ? r.customerAr : r.customerEn;
                 return (
                   <TableRow key={r.id} className="cursor-pointer">
                     <TableCell className="font-mono text-caption" dir="ltr">
                       {r.id}
                     </TableCell>
-                    <TableCell dir={r.customerAr === r.customerEn ? "ltr" : undefined}>{r.customerAr}</TableCell>
+                    <TableCell dir={r.customerAr === r.customerEn ? "ltr" : undefined}>{customerName}</TableCell>
                     <TableCell>{r.items}</TableCell>
                     <TableCell className="tabular-nums">{r.date}</TableCell>
                     <TableCell>
                       <Badge className={meta.className} variant="secondary">
                         <Icon className="size-4" strokeWidth={1.5} />
-                        {r.statusLabelAr}
+                        {locale === "ar" ? r.statusLabelAr : r.statusLabelEn}
                       </Badge>
                     </TableCell>
                   </TableRow>

@@ -8,7 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
+import { LocaleToggle } from "@/components/brand/locale-toggle";
 import { currentTrader } from "@/lib/fixtures";
+import { useLocale, useDict } from "@/lib/i18n";
+import { forcePasswordChangeDict } from "@/lib/dictionaries";
 
 function passwordScore(pw: string) {
   let score = 0;
@@ -20,24 +23,23 @@ function passwordScore(pw: string) {
   return Math.min(score, 4);
 }
 
-const scoreMeta = [
-  { labelAr: "ضعيفة", color: "bg-[#8A2433]" },
-  { labelAr: "مقبولة", color: "bg-ro-amber-500" },
-  { labelAr: "جيدة", color: "bg-ro-amber-500" },
-  { labelAr: "قوية", color: "bg-[#1F5130]" },
-  { labelAr: "قوية جداً", color: "bg-[#1F5130]" },
-];
+const scoreColor = ["bg-[#8A2433]", "bg-ro-amber-500", "bg-ro-amber-500", "bg-[#1F5130]", "bg-[#1F5130]"];
+const scoreLabelKeys = ["strengthWeak", "strengthFair", "strengthGood", "strengthStrong", "strengthVeryStrong"] as const;
 
 export default function ForcePasswordChangePage() {
   const router = useRouter();
+  const { locale } = useLocale();
+  const t = useDict(forcePasswordChangeDict);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const score = useMemo(() => passwordScore(password), [password]);
   const mismatch = confirm.length > 0 && password !== confirm;
   const canSubmit = score >= 2 && password === confirm && confirm.length > 0;
+  const firstName = (locale === "ar" ? currentTrader.name : currentTrader.nameEn).split(" ")[0];
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-ro-sand-100 px-6 py-12">
+    <div className="relative flex min-h-svh items-center justify-center bg-ro-sand-100 px-6 py-12">
+      <LocaleToggle className="absolute end-6 top-6" />
       <Card className="w-full max-w-md">
         <CardContent className="pt-6">
           <div className="mb-5 flex items-center gap-3">
@@ -45,15 +47,14 @@ export default function ForcePasswordChangePage() {
               <ShieldAlert className="size-5" strokeWidth={1.5} />
             </div>
             <div>
-              <h1 className="text-h1 font-semibold">عيّن كلمة مرور جديدة</h1>
-              <p className="text-small text-muted-foreground">مرحباً {currentTrader.name.split(" ")[0]} — هذه خطوة لمرة واحدة</p>
+              <h1 className="text-h1 font-semibold">{t("title")}</h1>
+              <p className="text-small text-muted-foreground">
+                {locale === "ar" ? `مرحباً ${firstName}` : `Welcome, ${firstName}`} — {t("subtitle")}
+              </p>
             </div>
           </div>
 
-          <p className="mb-6 rounded-md border bg-muted/40 p-3 text-small text-muted-foreground">
-            أعادت الإدارة تعيين كلمة مرور حسابك. لأسباب أمنية لا تستطيع الإدارة رؤية كلمة
-            مرورك الحالية في أي وقت — عليك اختيار كلمة مرور جديدة الآن قبل المتابعة.
-          </p>
+          <p className="mb-6 rounded-md border bg-muted/40 p-3 text-small text-muted-foreground">{t("explanation")}</p>
 
           <form
             className="space-y-4"
@@ -64,7 +65,7 @@ export default function ForcePasswordChangePage() {
             }}
           >
             <div className="space-y-1.5">
-              <Label htmlFor="new-pw">كلمة المرور الجديدة</Label>
+              <Label htmlFor="new-pw">{t("newPassword")}</Label>
               <Input
                 id="new-pw"
                 type="password"
@@ -75,13 +76,15 @@ export default function ForcePasswordChangePage() {
               />
               {password.length > 0 && (
                 <div className="space-y-1.5 pt-1">
-                  <Progress value={(score / 4) * 100} className={`h-1.5 [&>div]:${scoreMeta[score].color}`} />
-                  <p className="text-caption text-muted-foreground">قوة كلمة المرور: {scoreMeta[score].labelAr}</p>
+                  <Progress value={(score / 4) * 100} className={`h-1.5 [&>div]:${scoreColor[score]}`} />
+                  <p className="text-caption text-muted-foreground">
+                    {t("strengthLabel")}: {t(scoreLabelKeys[score])}
+                  </p>
                 </div>
               )}
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="confirm-pw">تأكيد كلمة المرور</Label>
+              <Label htmlFor="confirm-pw">{t("confirmPassword")}</Label>
               <Input
                 id="confirm-pw"
                 type="password"
@@ -90,10 +93,10 @@ export default function ForcePasswordChangePage() {
                 onChange={(e) => setConfirm(e.target.value)}
                 aria-invalid={mismatch}
               />
-              {mismatch && <p className="text-caption text-[#8A2433]">كلمتا المرور غير متطابقتين</p>}
+              {mismatch && <p className="text-caption text-[#8A2433]">{t("mismatch")}</p>}
             </div>
             <Button type="submit" className="w-full" disabled={!canSubmit}>
-              تعيين كلمة المرور والمتابعة
+              {t("submit")}
             </Button>
           </form>
         </CardContent>
