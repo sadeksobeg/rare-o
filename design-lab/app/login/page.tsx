@@ -113,7 +113,7 @@ export default function LoginPage() {
 
               {rateLimited && (
                 <div className="mb-4 flex items-start gap-2 rounded-md bg-ro-danger-100 p-3 text-small text-ro-danger-700">
-                  <ShieldCheck className="mt-0.5 size-4 shrink-0" />
+                  <ShieldCheck className="mt-0.5 size-4 shrink-0" strokeWidth={1.5} />
                   <span>محاولات كثيرة من هذا الجهاز. أُوقف الدخول مؤقتاً 15 دقيقة.</span>
                 </div>
               )}
@@ -140,12 +140,12 @@ export default function LoginPage() {
                     className="absolute inset-inline-end-3 top-9 text-muted-foreground"
                     aria-label={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
                   >
-                    {showPassword ? <EyeOff className="size-[18px]" /> : <Eye className="size-[18px]" />}
+                    {showPassword ? <EyeOff className="size-5" strokeWidth={1.5} /> : <Eye className="size-5" strokeWidth={1.5} />}
                   </button>
                 </div>
                 {capsLock && (
                   <p className="mb-3 flex items-center gap-1.5 text-caption text-ro-amber-800">
-                    <AlertTriangle className="size-3.5" /> مفتاح Caps Lock مُفعَّل
+                    <AlertTriangle className="size-4" strokeWidth={1.5} /> مفتاح Caps Lock مُفعَّل
                   </p>
                 )}
 
@@ -165,7 +165,7 @@ export default function LoginPage() {
               </form>
 
               <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-caption text-muted-foreground">
-                <ShieldCheck className="size-3.5" />
+                <ShieldCheck className="size-4" strokeWidth={1.5} />
                 محاولات كثيرة تؤدي لإيقاف مؤقت 15 دقيقة — حماية فعلية موجودة في الكود
               </p>
             </>

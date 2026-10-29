@@ -162,7 +162,7 @@ export default function TradersPage() {
               {tempPassword}
             </code>
             <Button type="button" variant="outline" size="icon" onClick={copyPassword} aria-label="نسخ">
-              {copied ? <Check className="size-4" /> : <Copy className="size-4" strokeWidth={1.5} />}
+              {copied ? <Check className="size-4" strokeWidth={1.5} /> : <Copy className="size-4" strokeWidth={1.5} />}
             </Button>
           </div>
           <DialogFooter>

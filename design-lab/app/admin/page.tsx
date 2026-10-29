@@ -58,7 +58,7 @@ function KpiCard({
           </p>
           <div className="mt-2 flex items-center justify-between text-caption">
             <span className={`flex items-center gap-1 font-semibold ${trend === "up" ? "text-[#1F5130]" : "text-[#8A2433]"}`}>
-              {trend === "up" ? <TrendingUp className="size-3.5" /> : <TrendingDown className="size-3.5" />}
+              {trend === "up" ? <TrendingUp className="size-4" strokeWidth={1.5} /> : <TrendingDown className="size-4" strokeWidth={1.5} />}
               {deltaLabel}
             </span>
           </div>
@@ -183,7 +183,7 @@ export default function AdminDashboardPage() {
                     <TableCell className="tabular-nums">{r.date}</TableCell>
                     <TableCell>
                       <Badge className={meta.className} variant="secondary">
-                        <Icon className="size-3" />
+                        <Icon className="size-4" strokeWidth={1.5} />
                         {r.statusLabelAr}
                       </Badge>
                     </TableCell>
