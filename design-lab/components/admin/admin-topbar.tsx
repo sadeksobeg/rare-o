@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { currentAdmin, greetingForHour } from "@/lib/fixtures";
+import { formatDateAr } from "@/lib/format";
 import Link from "next/link";
 
 export function AdminTopbar() {
@@ -23,7 +24,7 @@ export function AdminTopbar() {
   useEffect(() => {
     const now = new Date();
     setGreeting(greetingForHour(now.getHours(), currentAdmin.name));
-    setDateLabel(new Intl.DateTimeFormat("ar-SY", { weekday: "long", day: "numeric", month: "long" }).format(now));
+    setDateLabel(formatDateAr(now, { weekday: "long", day: "numeric", month: "long" }));
   }, []);
 
   return (
