@@ -65,3 +65,141 @@ The owner rejected checkpoint 1 as a wireframe aesthetic with motion added - lin
 **Pass 2:** Hit the strangest issue of this round: after building, the subtitle and both CTA buttons in the hero looked completely absent in screenshots, while every DOM check (computed opacity 1, correct color, correct position, `elementFromPoint` hitting the actual button) said they were there and correctly painted. Ruled out the WebGL/backdrop-filter theory from login.html by hiding the canvas entirely - still absent. Loaded the identical URL in a brand-new browser tab: rendered perfectly, immediately. This matches a stale-tab rendering artifact already documented earlier in this engagement for a different symptom (the dashboard count-up that looked "stuck" in a long-reused tab) - the browser tab used continuously since Wave 1 had accumulated some compositor corruption specific to this automated test harness, unrelated to the page's own code. Closed that tab and re-verified every remaining check from a fresh one. Separately found and fixed a real, if minor, accessibility bug common to both this page and login.html: SplitText's generated span gets an `aria-label` with no ARIA role, which axe correctly flags (`aria-prohibited-attr`); fixed by setting `role="text"` on the target element before splitting.
 
 **Known limitation:** the stale-tab artifact above cannot be fully ruled out as *never* affecting a judgment earlier in this session without re-testing every prior screenshot in a fresh tab, which wasn't done retroactively - stated here rather than silently assuming all earlier checks were unaffected. Every axe run, overflow check, and screenshot in this checkpoint-2 round, however, was taken from a fresh tab after this was discovered.
+
+---
+
+## Checkpoint 3 (owner verdict: "IMPROVED, NOT ACCEPTED" — build-method pivot)
+
+The owner identified the build *method* — hand-drawing every control in
+static HTML — as the actual root cause, not any single screen's execution.
+Mandated direction: stop building static HTML mockups; build instead in an
+isolated Next.js workspace (`design-lab/`) on top of ready-made, polished
+component libraries (shadcn/ui, Magic UI, Aceternity UI) rather than
+hand-rolling controls. Also mandated: a security correction on the
+traders-management screen (admin resets → system-generated temp password
+shown once → trader forced to change it — admin never sees the real
+password), and five new account/user-management screens.
+
+### design-lab/ scaffold and the four signature screens
+
+**Pass 1:** Scaffolded the workspace (shadcn `init -b radix --rtl`, Magic UI
+and Aceternity registries, Motion/GSAP/R3F/Recharts), ported real PLAN.md
+tokens into `app/globals.css`, real D4 Google Fonts via `next/font/google`.
+Two real, non-cosmetic bugs found before any screen was usable: (1) the dev
+server's build trace showed it trying to import `@/lib/security/csp` from a
+`middleware.ts` that does not exist in `design-lab/` — Next.js's workspace-
+root inference was reading the parent repo's production `middleware.ts`
+(JWT verification, CSP, session cookies) because `design-lab/` sits nested
+inside a tree that itself looks like a monorepo root. Fixed by pinning
+`turbopack.root`/`outputFileTracingRoot` in `design-lab/next.config.ts`;
+confirmed fixed by the browser tab title changing to "RARE OUD — Design
+Lab" and zero server errors referencing the parent's files afterward. (2)
+The 3D logo (now required explicitly after checkpoint 1) clipped at some
+rotation angles — traced to a fixed camera distance that only cleared the
+model's flattest silhouette. Fixed with a proper fit: camera distance
+derived from the model's bounding **sphere** radius with 22% padding
+(`components/brand/logo-scene.tsx`), which by construction cannot clip at
+any rotation, not just the ones checked by eye.
+
+**Pass 2:** Verified live on `/admin/traders`: a third real bug, found
+while trying to click the row "more actions" button — clicks kept landing
+on the sidebar's own "المنتجات" link instead, causing an accidental
+navigation to an unbuilt route. `getBoundingClientRect()` on the actual
+button showed it rendering at x≈98–130px, inside the sidebar's own 0–256px
+footprint, while `document.documentElement.scrollWidth === clientWidth`
+(no page-level scrollbar — the overflow was hidden under a sibling, not
+visibly scrollable). Root cause was not a `min-width:0` containment issue
+(the first fix attempted, which did nothing): shadcn's `Sidebar` defaults
+to `side="left"` (a **physical** CSS value — `left-0`), while the page's
+`dir="rtl"` flex layout reverses DOM order so the sidebar's own in-flow
+spacer reserved space on the **physical right**. The fixed, visible sidebar
+panel and its own layout-reserving spacer disagreed about which side of the
+screen they were on, so content rendered as if the full viewport width were
+available and the sidebar floated on top of it. Fixed with `side="right"`
+on `<Sidebar>` in `components/admin/admin-sidebar.tsx`, which aligns the
+fixed panel with where RTL flex actually reserved its space. Re-verified:
+dropdown opens in the correct position, full reset-password flow (confirm
+dialog → show-once temp-password dialog → copy button) works end to end.
+Also chased what looked like a KPI-ticker bug (dashboard showed "٠" for all
+four KPIs in one screenshot) — confirmed via direct DOM text-content read
+that the real settled values (17/7/5/4) were correct; the screenshot had
+just caught the Motion spring mid-animation, the same category of
+screenshot-timing false-positive documented repeatedly in earlier rounds,
+not a new defect. Also confirmed, from the live server's own `preview_logs`
+output (not the browser's cumulative, cross-navigation console buffer),
+that a "new Date() in a Client Component" error attached to
+`admin-topbar.tsx` was a **stale log entry** — the file on disk already
+carries the earlier fix (seed state at a fixed hour 8, real time computed
+only inside `useEffect`) — the same stale-log-buffer pattern documented in
+earlier rounds, now confirmed to also apply to the dev server's own log
+tail, not only the browser console.
+
+### Account/user-management screens (owner's section E)
+
+Built `/admin/profile` (personal data; change-password with a live
+strength meter; 2FA toggle revealing setup instructions; active sessions
+list with a sign-out-others confirmation), `/admin/team` (members list,
+role badges, an Owner/Manager/Staff permissions matrix, invite dialog,
+disable/enable confirmation — Owner row has no disable action, by design),
+`/admin/customers` (list + a detail sheet matching a customer's retail
+requests from the shared fixtures), `/admin/audit-log` (filterable
+who-did-what-when reading the existing `auditLog` fixture), and
+`/force-password-change` (the trader-side half of the security correction:
+a one-time gate screen, deliberately kept outside the `/trader` layout so
+it carries no nav — the same pattern as the login screen — with a live
+strength meter and confirm-match validation gating the submit button). All
+five verified live via screenshot + DOM read, not just visual inspection:
+the team page's permission matrix renders fully, the customer sheet shows
+the matched request records (not placeholder text), the audit log's search
+filters correctly, the profile page's 2FA switch correctly reveals/hides
+its setup panel and its password field's strength label updates live
+("مقبولة" at `abc123`), and the forced-password-change page's submit
+button stayed correctly disabled until both fields matched.
+
+### trader-home and storefront-home
+
+**Pass 1:** Rebuilt both using the same content structure as the old
+static mockups (task cards, stats, offers carousel for trader-home;
+3D-logo hero, craft story, collections grid, trader CTA band for
+storefront-home) but on real components and the shared `lib/fixtures.ts`
+so trader stats match the `traders` fixture's `t1` record exactly (9
+deals, 78% acceptance) rather than being re-typed as separate numbers.
+
+**Pass 2:** Verified live by scrolling through both pages at 1280×800:
+the 3D hero renders with zero visible clipping at its resting rotation,
+real photography loads in every card, and the stats settle to the correct
+fixture values (confirmed via DOM text read, same ticker-timing caveat as
+above). Found one real bug on `/`: the storefront nav kept its light
+(sand-colored) text permanently, which the old static mockup had handled
+with a scroll-triggered `.is-solid` class switch that was never ported.
+Past the dark hero, the nav became genuinely illegible against the light
+sand sections below — not a cosmetic nitpick, a contrast/legibility defect.
+Fixed with a scroll listener that switches the nav to a solid light bar
+with dark text (and un-inverts the logo) past ~75% of the viewport height;
+re-verified by screenshot at both scroll positions.
+
+### Deliberately not done this round, stated rather than silently skipped
+
+- **Full copy rewrite pass with a before/after table.** Existing copy was
+  largely carried over from the already-approved static-mockup content
+  (login, dashboard, trader-home, storefront-home) rather than rewritten
+  from scratch; the five new account/user-management screens are new
+  copy, not yet separately audited against the ux-copy skill checklist
+  word by word.
+- **Icon-size and type-scale audits as a separate documented pass.** Built
+  consistently (Lucide, stroke 1.5, `size-4`/`size-5` i.e. 16/20px, 40px
+  feature-icon containers) but not independently re-audited screen by
+  screen with a checklist.
+- **World-class benchmark comparison boards** (Linear/Stripe/Vercel/Apple/
+  Aesop reference captures in `docs/ui-planning/benchmarks/`).
+- **The Playwright capture script** targeting `design-lab`'s dev server
+  (video + live reduced-motion + axe at 375/1440, Arabic and English).
+  Verification this round was done via the browser pane directly
+  (screenshots, DOM reads, `preview_logs`), which caught and fixed four
+  real bugs, but is not the recorded, repeatable video-based evidence the
+  owner asked for.
+- **English-language pass.** Every screen built this round is Arabic-only;
+  no `lang="en"` verification was done.
+
+These are the open items for the next round, not silently dropped
+requirements.
