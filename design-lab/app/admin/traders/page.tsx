@@ -71,7 +71,7 @@ export default function TradersPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-h1 font-semibold font-[family-name:var(--font-heading)]">التجّار</h1>
-        <p className="text-small text-muted-foreground">إدارة حسابات التجّار — لا يمكن لأحد رؤية كلمة مرور تاجر مخزَّنة، فقط إعادة تعيينها</p>
+        <p className="text-small text-muted-foreground">إدارة حسابات التجّار — كلمة مرور أي تاجر لا تُعرض لأحد، يمكن فقط إعادة تعيينها</p>
       </div>
 
       <Card>
@@ -138,7 +138,7 @@ export default function TradersPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>إعادة تعيين كلمة مرور {resetTraderName}؟</AlertDialogTitle>
             <AlertDialogDescription>
-              ستُنشأ كلمة مرور مؤقتة جديدة وتظهر لك مرة واحدة فقط. كلمة المرور الحالية للتاجر — إن وُجدت — لن تكون مرئية لك في أي وقت؛ سيُطلب من التاجر تغييرها فور الدخول.
+              ستُنشأ كلمة مرور مؤقتة جديدة وتظهر لك مرة واحدة فقط. كلمة مرور التاجر الحالية لن تكون مرئية لك في أي وقت؛ سيُطلب منه تغييرها فور الدخول.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -186,7 +186,9 @@ export default function TradersPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>إلغاء</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDisable}>تأكيد</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDisable}>
+              {disableTraderStatus === "active" ? "تعطيل الحساب" : "تفعيل الحساب"}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

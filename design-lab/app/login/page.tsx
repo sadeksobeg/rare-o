@@ -51,7 +51,7 @@ export default function LoginPage() {
     setTimeout(() => {
       setLoading(false);
       if (next < 2) {
-        setError("بيانات الدخول غير صحيحة — جرّب مرة أخرى (هذا نموذج توضيحي)");
+        setError("البريد أو كلمة المرور غير صحيحة");
       } else {
         setView("success");
         setTimeout(() => router.push(role === "admin" ? "/admin" : "/trader"), 1100);
@@ -166,7 +166,7 @@ export default function LoginPage() {
 
               <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-caption text-muted-foreground">
                 <ShieldCheck className="size-4" strokeWidth={1.5} />
-                محاولات كثيرة تؤدي لإيقاف مؤقت 15 دقيقة — حماية فعلية موجودة في الكود
+                محاولات الدخول المتكررة تُوقَف مؤقتاً لحماية حسابك
               </p>
             </>
           )}
@@ -182,7 +182,7 @@ export default function LoginPage() {
               </button>
               <h1 className="mb-1 text-h1 font-semibold font-[family-name:var(--font-heading)]">استرداد كلمة المرور</h1>
               <p className="mb-6 text-small text-muted-foreground">
-                أدخل بريدك الإلكتروني وسنرسل رابط استرداد — هذا نموذج، لا إرسال حقيقي
+                أدخل بريدك الإلكتروني وسنرسل رابط استرداد كلمة المرور
               </p>
               <form
                 onSubmit={(e) => {

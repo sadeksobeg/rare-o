@@ -203,3 +203,120 @@ re-verified by screenshot at both scroll positions.
 
 These are the open items for the next round, not silently dropped
 requirements.
+
+---
+
+## Checkpoint 3 follow-up: quality pass on the 10 existing screens
+
+The owner's follow-up verdict ("NOT ACCEPTED YET") was explicit that the
+items deferred above are exactly the owner's main complaints, and that
+quality on the 10 existing screens comes before any new screen. This
+section covers items 1–4 of that follow-up (copy, type scale, icons,
+numerals); benchmarks, the Playwright capture, and brokerage are tracked
+separately and were not completed in this pass (see note at the end).
+
+### Numerals (D5: Western digits everywhere)
+
+Root cause: `Intl.DateTimeFormat("ar-SY", ...)` in `admin-topbar.tsx` (the
+greeting date) defaults to the Arabic-Indic numbering system unless the
+`-u-nu-latn` Unicode extension is appended — the one place in the app that
+actually produced Arabic-Indic digits. Added `lib/format.ts` with
+locale-aware helpers that always append `-u-nu-latn`, routed the topbar
+date through it, and pinned `chart.tsx`'s bare `toLocaleString()` to
+`"en-US"` explicitly. Verified via DOM text extraction on `/admin`: every
+digit (date, KPIs, deltas, chart total, table dates) is Latin.
+
+### Type scale
+
+Defined one scale in `app/globals.css` under `@theme inline`
+(`--text-display/h1/h2/h3/body/small/caption`), using PLAN.md section 5's
+exact `clamp()` sizes and Arabic line-heights — not invented values.
+Grepped every ad-hoc Tailwind text-size utility (`text-xs/sm/base/lg/xl/
+2xl/3xl/...`) in `app/` and the admin/trader component layer:
+
+**103 occurrences across 13 files → 0** (re-grep confirms zero remaining;
+`components/ui/*`, the imported shadcn/Magic UI/Aceternity library source,
+is intentionally out of scope — it's generic primitives, not this app's
+content hierarchy).
+
+Caught a real regression while verifying live: mapping the admin
+dashboard's topbar greeting to `text-display`-adjacent `text-h1` made it
+wrap to two lines and crowd the topbar's search/bell/avatar row, since
+that role lives in a shared, height-constrained row rather than its own
+full-width page header (unlike `/admin/traders`, `/admin/team`, etc.,
+which correctly use `text-h1` for their page title). Dialed it back to
+`text-h3`, matching the brand-wordmark weight already used elsewhere in a
+topbar. Re-verified single-line, no crowding, on `/admin`, `/trader`,
+`/login`, and `/admin/traders`.
+
+### Icon audit
+
+Grepped every Lucide icon usage in the same scope. Found 7 non-compliant
+sizes and several missing `strokeWidth`:
+
+| File | Before | After |
+|---|---|---|
+| `login.tsx` (password show/hide) | `size-[18px]`, no stroke rule violation but arbitrary | `size-5`, `strokeWidth={1.5}` |
+| `login.tsx` (Caps Lock warning) | `size-3.5` | `size-4`, `strokeWidth={1.5}` |
+| `login.tsx` (footer shield) | `size-3.5` | `size-4`, `strokeWidth={1.5}` |
+| `login.tsx` (rate-limit banner shield) | `size-4`, no strokeWidth | `size-4`, `strokeWidth={1.5}` |
+| `admin/page.tsx` (status-badge icon) | `size-3`, no strokeWidth | `size-4`, `strokeWidth={1.5}` |
+| `admin/page.tsx` (KPI trend arrows ×2) | `size-3.5`, no strokeWidth | `size-4`, `strokeWidth={1.5}` |
+| `admin/traders/page.tsx` (copy-success check) | no strokeWidth | `strokeWidth={1.5}` |
+
+Verified the remaining non-16/20/24 `size-N` usages the sweep found
+(`size-1.5`/`size-2`/`size-2.5`/`size-9`) are decorative status dots, a
+legend swatch, and an icon-button container — not Lucide icons — so out
+of scope for this rule. Feature-icon containers (trader-home task cards,
+the force-password-change screen's icon) were already compliant at a
+fixed 40px (`size-10`). Re-verified live: the badge icon at 16px doesn't
+look oversized inside its small badge; the login eye icons at 20px read
+proportionate.
+
+### Copy pass (design:ux-copy skill)
+
+Read every user-facing string on all 10 screens against the skill's
+checklist (clear, concise, consistent, useful, human; verb-first CTAs;
+error messages state what+why+how; confirmation dialogs name the actual
+action on the button, not "OK"/"Confirm"). Most existing copy already
+held up — it carries over from the already-approved static-mockup content
+for the four signature screens, and the five new account-management
+screens were written with these principles from the start. The real,
+material defect found was **three places where an internal dev note had
+leaked into user-facing copy** — text that breaks the fourth wall and
+reads as obviously unfinished, which is a more serious defect than
+awkward phrasing:
+
+| Screen | Element | Before | After |
+|---|---|---|---|
+| `login.tsx` | Submit error | "بيانات الدخول غير صحيحة — جرّب مرة أخرى (هذا نموذج توضيحي)" ("...this is a demo") | "البريد أو كلمة المرور غير صحيحة" (PLAN.md's own prescribed copy for this exact banner, §1415) |
+| `login.tsx` | Footer note | "محاولات كثيرة تؤدي لإيقاف مؤقت 15 دقيقة — حماية فعلية موجودة في الكود" ("...real protection exists in the code") | "محاولات الدخول المتكررة تُوقَف مؤقتاً لحماية حسابك" |
+| `login.tsx` | Forgot-password subtitle | "أدخل بريدك الإلكتروني وسنرسل رابط استرداد — هذا نموذج، لا إرسال حقيقي" ("...this is a demo, nothing is really sent") | "أدخل بريدك الإلكتروني وسنرسل رابط استرداد كلمة المرور" |
+| `admin/customers/page.tsx` | Sheet empty state | "لا توجد طلبات مطابقة في بيانات العرض" ("...in the demo data") | "لا توجد طلبات لهذا العميل بعد" |
+
+Three further real (non-dev-note) copy fixes, applying the skill's rules
+directly:
+
+| Screen | Element | Before | After | Why |
+|---|---|---|---|---|
+| `admin/traders/page.tsx` | Page subtitle | "إدارة حسابات التجّار — لا يمكن لأحد رؤية كلمة مرور تاجر مخزَّنة، فقط إعادة تعيينها" | "إدارة حسابات التجّار — كلمة مرور أي تاجر لا تُعرض لأحد، يمكن فقط إعادة تعيينها" | States the system's behavior as a confident fact rather than an awkward "no one can" construction; fixes an adjective-placement ambiguity |
+| `admin/traders/page.tsx` | Reset-password confirm description | "...كلمة المرور الحالية للتاجر — إن وُجدت — لن تكون مرئية لك..." | "...كلمة مرور التاجر الحالية لن تكون مرئية لك..." | Dropped "إن وُجدت" ("if it exists") — unnecessary hedging; an active trader account always has a password |
+| `admin/traders/page.tsx`, `admin/team/page.tsx` | Disable/enable confirm button | "تأكيد" (generic "Confirm") | "تعطيل الحساب" / "تفعيل الحساب" (dynamic, matches dialog title) | Skill rule: "Label buttons with the action... not OK/Cancel" — the confirmation dialog already names the action; the button should too |
+
+All seven fixes verified live (screenshot + `get_page_text`/DOM read, not
+just source review): the login error banner, the forgot-password
+subtitle, the footer note, and the traders/team disable-dialog buttons
+all render the corrected copy.
+
+**Not done in this pass, stated rather than silently dropped:** a
+word-by-word audit of every remaining string (CTA verb-form choices like
+"إضافة منتج" vs. an imperative "أضف منتجاً" were deliberately left as-is
+— the masdar/verbal-noun form is itself idiomatic, professional Arabic
+product copy, not a defect, so mechanically converting every button to a
+literal imperative per the skill's English-language example would make
+the copy *less* natural, not more); the English-language version of every
+screen with a working locale toggle (needs real i18n infrastructure, not
+built yet); and benchmarking this copy against reference products'
+microcopy specifically (the benchmark boards themselves are also not
+built yet — see the open-items note in the prior checkpoint-3 section
+above).

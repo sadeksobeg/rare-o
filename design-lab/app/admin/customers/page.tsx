@@ -81,7 +81,7 @@ export default function CustomersPage() {
               <h3 className="mb-2 text-small font-medium text-muted-foreground">طلبات التجزئة</h3>
               <div className="space-y-2">
                 {customerRequests.length === 0 && (
-                  <p className="text-small text-muted-foreground">لا توجد طلبات مطابقة في بيانات العرض.</p>
+                  <p className="text-small text-muted-foreground">لا توجد طلبات لهذا العميل بعد.</p>
                 )}
                 {customerRequests.map((r) => (
                   <div key={r.id} className="flex items-center justify-between rounded-md border p-3 text-small">

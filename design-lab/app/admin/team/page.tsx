@@ -248,7 +248,9 @@ export default function TeamPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>إلغاء</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDisable}>تأكيد</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDisable}>
+              {disableMember?.status === "active" ? "تعطيل العضوية" : "تفعيل العضوية"}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
