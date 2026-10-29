@@ -4,34 +4,72 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>الدخول — RARE OUD</title>
+<link rel="icon" href="assets/logo-mark-small.svg" />
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
 <link rel="stylesheet" href="shared.css" />
 <link rel="stylesheet" href="tokens-v3.css" />
 <style>
   html, body { height: 100%; }
   body { margin: 0; overflow-x: hidden; }
-  .lg-shell { min-height: 100vh; display: grid; grid-template-columns: 1.1fr 1fr; }
-  @media (max-width: 960px) { .lg-shell { grid-template-columns: 1fr; } .lg-scene { min-height: 46vh; } }
+  .lg-shell { min-height: 100vh; display: grid; grid-template-columns: minmax(0,1.15fr) minmax(0,1fr); }
+  @media (max-width: 960px) { .lg-shell { grid-template-columns: minmax(0,1fr); } .lg-scene { min-height: 52vh; } }
 
   /* ---- left: living brand scene ---- */
   .lg-scene {
     position: relative; overflow: hidden; background: var(--ro-ink-950); color: var(--ro-sand-100);
     display: flex; flex-direction: column; justify-content: space-between; padding: var(--ro-s-8);
   }
-  .lg-scene-glow { position: absolute; inset: -20%; background: var(--ro-glow-plum); pointer-events: none; transition: transform .4s var(--ro3-ease-damped); }
-  .lg-scene-rings { position: absolute; inset: 0; margin: auto; width: min(64vw, 520px); height: min(64vw, 520px); color: rgba(244,231,216,.5); }
-  .lg-scene-rings circle { fill: none; stroke: currentColor; stroke-width: 1; }
-  .lg-wave-wrap { position: absolute; inset-inline: 0; bottom: 18%; color: rgba(201,178,227,.55); }
+  .lg-mesh {
+    position: absolute; inset: -10%; pointer-events: none;
+    background:
+      radial-gradient(38% 46% at 24% 28%, rgba(82,39,124,.55), transparent 60%),
+      radial-gradient(44% 50% at 78% 70%, rgba(184,134,63,.22), transparent 62%),
+      radial-gradient(60% 60% at 50% 100%, rgba(50,16,79,.65), transparent 65%),
+      var(--ro-ink-950);
+    background-size: 160% 160%, 160% 160%, 140% 140%, 100% 100%;
+    animation: lg-mesh-drift 18s ease-in-out infinite alternate;
+  }
+  @keyframes lg-mesh-drift {
+    0% { background-position: 10% 20%, 80% 70%, 50% 100%, 0 0; }
+    100% { background-position: 30% 35%, 60% 55%, 55% 90%, 0 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { .lg-mesh { animation: none; } }
+
+  /* 3D object occupies the upper ~62% of the scene only, so it can never
+     grow into the text zone below it however it rotates. */
+  .lg-canvas-wrap { position: absolute; inset: 0 0 38% 0; display: flex; align-items: center; justify-content: center; }
+  .lg-canvas-wrap canvas { width: min(58vw, 460px); height: min(58vw, 460px); display: block; }
+  .lg-static-mark { position: absolute; inset: 0 0 38% 0; margin: auto; width: min(44vw, 340px); height: min(44vw, 340px); color: var(--ro-sand-100); opacity: .9; }
+
   .lg-brandmark { position: relative; z-index: 2; display: flex; align-items: center; gap: var(--ro-s-3); font-family: var(--ro-font-display); font-size: 1.1rem; letter-spacing: .02em; }
-  .lg-tagline { position: relative; z-index: 2; max-width: 30ch; }
-  .lg-tagline h2 { font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.4rem); line-height: 1.3; margin: 0; color: var(--ro-sand-100); }
+  .lg-brandmark svg { width: 26px; height: 26px; color: var(--ro-sand-100); }
+  /* dedicated bottom strip for text, with its own scrim for guaranteed contrast
+     regardless of what renders above it */
+  .lg-tagline-zone {
+    position: absolute; inset-inline: 0; bottom: 0; z-index: 3; padding: var(--ro-s-8) var(--ro-s-8) var(--ro-s-6);
+    background: linear-gradient(to top, rgba(11,8,13,.92) 10%, rgba(11,8,13,.55) 60%, transparent 100%);
+  }
+  .lg-tagline { max-width: 34ch; }
+  .lg-tagline h2 { font-size: clamp(1.7rem, 1.2rem + 1.9vw, 2.6rem); line-height: 1.3; margin: 0; color: var(--ro-sand-100); }
+  .lg-tagline h2 .word { display: inline-block; }
   .lg-tagline p { color: var(--ro-ink-200); margin-top: var(--ro-s-3); }
 
-  /* ---- right: form panel ---- */
-  .lg-panel-wrap { display: flex; align-items: center; justify-content: center; padding: var(--ro-s-8) var(--ro-s-6); background: var(--ro-sand-100); }
+  /* ---- right: form panel, glass depth ---- */
+  .lg-panel-wrap { display: flex; align-items: center; justify-content: center; padding: var(--ro-s-8) var(--ro-s-6); background: var(--ro-sand-100); position: relative; }
   .lg-panel {
-    --ro-text: var(--ro-ink-950); --ro-text-muted: var(--ro-ink-500); --ro-link: var(--ro-plum-900);
-    --ro-border-control: #8F8473; --ro-focus: var(--ro-plum-900);
-    width: min(400px, 100%); color: var(--ro-text);
+    --ro-text: var(--ro-ink-950); --ro-text-2: var(--ro-ink-600); --ro-text-muted: var(--ro-ink-500);
+    --ro-link: var(--ro-plum-900); --ro-link-hover: var(--ro-plum-700);
+    --ro-border-subtle: rgba(11,8,13,.14); --ro-border: rgba(11,8,13,.28); --ro-border-control: #8F8473;
+    --ro-focus: var(--ro-plum-900);
+    width: min(400px, 100%); color: var(--ro-text); position: relative; z-index: 2;
+    /* Note: backdrop-filter was tried here for a true frosted-glass look, but on
+       this page it corrupts the paint of unrelated DOM text elsewhere on the
+       page (a real Chromium compositor bug when backdrop-filter and a WebGL
+       canvas share a page - reproduced, isolation/will-change did not fix it).
+       Depth comes from opacity + layered shadow + inner hairline instead. */
+    background: rgba(251,246,238,.96);
+    border: 1px solid rgba(255,255,255,.5); border-radius: var(--ro-r-md); padding: var(--ro-s-8) var(--ro-s-6);
+    box-shadow: var(--ro-inner-hairline), var(--ro-e-deep);
   }
   .lg-toprow { display: flex; justify-content: flex-end; margin-bottom: var(--ro-s-6); }
 
@@ -53,13 +91,12 @@
   .lg-forgot { background: none; border: none; color: var(--ro-link); cursor: pointer; font-family: inherit; font-size: .85rem; padding: 0; text-decoration: underline; text-underline-offset: 3px; }
 
   .lg-submit { width: 100%; justify-content: center; position: relative; }
-  .lg-submit .lg-wave-loader { display: none; }
+  .lg-submit .lg-logo-loader { display: none; }
   .lg-submit.is-loading .lg-label { visibility: hidden; }
-  .lg-submit.is-loading .lg-wave-loader { display: flex; position: absolute; inset: 0; align-items: center; justify-content: center; gap: 3px; }
-  .lg-wave-loader span { width: 3px; height: 6px; background: currentColor; border-radius: 2px; animation: lg-wave 0.9s ease-in-out infinite; }
-  .lg-wave-loader span:nth-child(2) { animation-delay: .1s; } .lg-wave-loader span:nth-child(3) { animation-delay: .2s; }
-  .lg-wave-loader span:nth-child(4) { animation-delay: .3s; } .lg-wave-loader span:nth-child(5) { animation-delay: .4s; }
-  @keyframes lg-wave { 0%, 100% { height: 6px; } 50% { height: 16px; } }
+  .lg-submit.is-loading .lg-logo-loader { display: flex; position: absolute; inset: 0; align-items: center; justify-content: center; }
+  .lg-submit .lg-logo-loader svg { width: 20px; height: 20px; animation: lg-logo-pulse 1s ease-in-out infinite; }
+  @keyframes lg-logo-pulse { 0%, 100% { transform: scale(1); opacity: .7; } 50% { transform: scale(1.18); opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .lg-submit .lg-logo-loader svg { animation: none; } }
 
   @keyframes lg-shake { 10%, 90% { transform: translateX(-1px); } 20%, 80% { transform: translateX(2px); } 30%, 50%, 70% { transform: translateX(-4px); } 40%, 60% { transform: translateX(4px); } }
   .lg-panel.is-error form { animation: lg-shake .5s var(--ro3-ease-damped); }
@@ -70,15 +107,13 @@
 
   .lg-hint { text-align: center; margin-top: var(--ro-s-5); font-size: .85rem; display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--ro-text-muted); }
 
-  /* forgot-password view */
   .lg-view { display: none; }
   .lg-view.is-active { display: block; }
   .lg-back { display: inline-flex; align-items: center; gap: 6px; background: none; border: none; color: var(--ro-text-muted); font-family: inherit; font-size: .85rem; cursor: pointer; padding: 0; margin-bottom: var(--ro-s-5); }
 
-  /* success */
   .lg-success { display: none; text-align: center; padding: var(--ro-s-8) 0; }
   .lg-success.is-active { display: block; }
-  .lg-success-ring { width: 72px; height: 72px; margin: 0 auto var(--ro-s-4); color: var(--ro-success-700); }
+  .lg-success-mark { width: 64px; height: 64px; margin: 0 auto var(--ro-s-4); color: var(--ro-plum-900); }
 </style>
 </head>
 <body>
@@ -86,27 +121,22 @@
 
 <div class="lg-shell">
   <section class="lg-scene ro-inverse" aria-hidden="true">
-    <div class="lg-scene-glow" id="scene-glow"></div>
-    <div class="ro-grain"></div>
-    <svg class="lg-scene-rings ro-rings-live is-breathing" id="scene-rings" viewBox="0 0 400 400">
-      <circle cx="200" cy="200" r="190"/><circle cx="200" cy="200" r="150" opacity=".75"/>
-      <circle cx="200" cy="200" r="112" opacity=".55"/><circle cx="200" cy="200" r="78" opacity=".4"/>
-      <circle cx="200" cy="200" r="48" opacity=".3"/>
-    </svg>
-    <svg class="lg-wave-wrap ro-waveform" viewBox="0 0 400 60" preserveAspectRatio="none">
-      <path d="M0 30 Q 20 5, 40 30 T 80 30 T 120 30 T 160 30 T 200 30 T 240 30 T 280 30 T 320 30 T 360 30 T 400 30" />
-    </svg>
+    <div class="lg-mesh"></div>
+    <div class="lg-canvas-wrap"><canvas id="lg-logo-canvas"></canvas></div>
+    <svg class="lg-static-mark" id="lg-static-mark" viewBox="0 0 611 611" style="display:none"><use href="assets/logo-mark.svg#x"/></svg>
     <div class="lg-brandmark">
-      <svg width="26" height="26" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="30" fill="var(--ro-plum-900)"/><circle cx="32" cy="32" r="22" stroke="#F4E7D8" stroke-width="1.5"/><circle cx="32" cy="32" r="5" fill="#0B080D"/></svg>
+      <svg viewBox="0 0 611 611" fill="currentColor"><path id="lg-nav-mark-path"/></svg>
       RARE OUD
     </div>
-    <div class="lg-tagline">
-      <h2><span data-lang="ar">صدى الصنعة، محفوظ بدقّة</span><span data-lang="en" hidden>The echo of craft, kept precisely</span></h2>
-      <p class="ro-body-sm"><span data-lang="ar">منصة واحدة لإدارة التجزئة والصفقات والجملة والوساطة — متصلة بواتساب</span><span data-lang="en" hidden>One platform for retail, deals, wholesale and brokerage — connected to WhatsApp</span></p>
+    <div class="lg-tagline-zone">
+      <div class="lg-tagline">
+        <h2 id="lg-heading-ar"><span data-lang="ar">صدى الصنعة، محفوظ بدقّة</span><span data-lang="en" hidden style="display:none"></span></h2>
+        <p class="ro-body-sm"><span data-lang="ar">منصة واحدة لإدارة التجزئة والصفقات والجملة والوساطة — متصلة بواتساب</span><span data-lang="en" hidden>One platform for retail, deals, wholesale and brokerage — connected to WhatsApp</span></p>
+      </div>
     </div>
   </section>
 
-  <main class="lg-panel-wrap">
+  <section class="lg-panel-wrap">
     <div class="lg-panel" id="lg-panel-main">
       <div class="lg-toprow"><button class="lang-toggle" onclick="roToggleLang()" style="color:var(--ro-ink-950);border-color:var(--ro-border)">EN</button></div>
 
@@ -146,7 +176,7 @@
 
           <button class="ro-btn ro-btn-primary ro-btn-lg lg-submit" type="submit" id="submit-btn">
             <span class="lg-label"><span data-lang="ar">دخول</span><span data-lang="en" hidden>Sign in</span></span>
-            <span class="lg-wave-loader" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></span>
+            <span class="lg-logo-loader" aria-hidden="true"><svg viewBox="0 0 611 611" fill="currentColor"><use href="#lg-mark-defs"/></svg></span>
           </button>
           <p class="ro-caption" id="login-note" style="text-align:center;margin:var(--ro-s-3) 0 0;min-height:1.2em" aria-live="polite"></p>
         </form>
@@ -174,19 +204,69 @@
       </div>
 
       <div class="lg-success" id="view-success">
-        <svg class="lg-success-ring" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+        <svg class="lg-success-mark" viewBox="0 0 611 611" fill="currentColor"><use href="#lg-mark-defs"/></svg>
         <h1><span data-lang="ar">تم التحقق</span><span data-lang="en" hidden>Verified</span></h1>
         <p class="lg-sub"><span data-lang="ar">يفتح لوحة التحكم…</span><span data-lang="en" hidden>Opening the dashboard…</span></p>
       </div>
     </div>
-  </main>
+  </section>
 </div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="lg-mark-defs-wrap"></defs></svg>
 
 <script src="icons.js"></script>
 <script src="shared.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script type="module">
+  // Load the real logo mark's path data once, reuse via <use href="#lg-mark-defs">
+  // and feed the Three.js scene (assets/logo-mark.svg directly).
+  fetch("assets/logo-mark.svg").then(function (r) { return r.text(); }).then(function (svgText) {
+    var doc = new DOMParser().parseFromString(svgText, "image/svg+xml");
+    var path = doc.querySelector("path");
+    if (!path) return;
+    var d = path.getAttribute("d");
+    document.getElementById("lg-nav-mark-path").setAttribute("d", d);
+    var defsWrap = document.getElementById("lg-mark-defs-wrap");
+    var g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    g.id = "lg-mark-defs";
+    var p2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    p2.setAttribute("d", d);
+    g.appendChild(p2);
+    defsWrap.appendChild(g);
+  });
+</script>
+<script type="module" src="assets/logo-scene.js"></script>
+<script src="https://unpkg.com/gsap@latest/dist/gsap.min.js"></script>
+<script src="https://unpkg.com/gsap@latest/dist/SplitText.js"></script>
 <script src="motion-v3.js"></script>
 <script>
+  // ---- 3D logo scene, with a static fallback for reduced-motion / WebGL failure ----
+  (function () {
+    var canvas = document.getElementById("lg-logo-canvas");
+    var staticMark = document.getElementById("lg-static-mark");
+    function fallback() {
+      canvas.style.display = "none";
+      staticMark.style.display = "block";
+      staticMark.querySelector("use").setAttribute("href", "#lg-mark-defs");
+    }
+    function start() {
+      var scene = window.roLogoScene ? window.roLogoScene(canvas, { svgUrl: "assets/logo-mark.svg", color: 0x8566a8 }) : null;
+      if (!scene) fallback();
+    }
+    if (window.roLogoScene) start();
+    else window.addEventListener("ro-logo-scene-ready", start, { once: true });
+    // if the module never loads (network/CDN failure), fall back after a timeout
+    setTimeout(function () { if (!window.roLogoScene) fallback(); }, 4000);
+  })();
+
+  // ---- SplitText headline reveal ----
+  window.addEventListener("load", function () {
+    if (window.gsap && window.SplitText && !roMotion.reduced()) {
+      gsap.registerPlugin(SplitText);
+      var split = new SplitText("#lg-heading-ar span[data-lang='ar']", { type: "words" });
+      gsap.fromTo(split.words, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: .8, stagger: .08, ease: "power3.out", delay: .3 });
+    }
+  });
+
   // ---- role switch ----
   var roles = document.querySelectorAll('.lg-roles button');
   var indicator = document.getElementById('roles-indicator');
@@ -213,7 +293,6 @@
     roles.forEach(function (b) { b.setAttribute("aria-selected", b.dataset.role === role ? "true" : "false"); });
     var btn = document.querySelector('.lg-roles button[data-role="' + role + '"]');
     placeIndicator(btn);
-    var lang = document.documentElement.lang;
     roleTitle.querySelector('[data-lang="ar"]').textContent = copy[role].title.ar;
     roleTitle.querySelector('[data-lang="en"]').textContent = copy[role].title.en;
     roleSub.querySelector('[data-lang="ar"]').textContent = copy[role].sub.ar;
@@ -299,18 +378,6 @@
       var role = document.querySelector('.lg-roles button[aria-selected="true"]').dataset.role;
       window.location.href = role === "admin" ? "admin-dashboard.html" : "trader-home.html";
     }, 1100);
-  }
-
-  // ---- cursor-reactive glow (section 2.1, skipped under reduced motion) ----
-  var scene = document.querySelector(".lg-scene");
-  var glow = document.getElementById("scene-glow");
-  if (!roMotion.reduced()) {
-    scene.addEventListener("pointermove", function (e) {
-      var r = scene.getBoundingClientRect();
-      var x = ((e.clientX - r.left) / r.width - 0.5) * 24;
-      var y = ((e.clientY - r.top) / r.height - 0.5) * 24;
-      glow.style.transform = "translate(" + x + "px," + y + "px)";
-    });
   }
 </script>
 </body>

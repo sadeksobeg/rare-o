@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>بوابة التجّار — RARE OUD</title>
+<link rel="icon" href="assets/logo-mark-small.svg" />
 <link rel="stylesheet" href="shared.css" />
 <link rel="stylesheet" href="tokens-v3.css" />
 <style>
@@ -13,19 +14,24 @@
   .th-task-row { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--ro-s-3); margin-bottom: var(--ro-s-6); }
   @media (max-width: 760px) { .th-task-row { grid-template-columns: 1fr; } }
   .th-task-card {
-    position: relative; overflow: hidden; border-radius: var(--ro-r-md); padding: var(--ro-s-5);
-    background: var(--ro-ink-950); color: var(--ro-sand-100); text-decoration: none; display: block;
+    position: relative; overflow: hidden; border-radius: var(--ro-r-md); min-height: 240px;
+    color: var(--ro-sand-100); text-decoration: none; display: flex; flex-direction: column; justify-content: flex-end;
+    background: var(--ro-ink-950);
   }
-  .th-task-card .ro-grain { opacity: .05; }
-  .th-task-card .th-icon { width: 40px; height: 40px; border-radius: var(--ro-r-sm); background: rgba(244,231,216,.1); display: flex; align-items: center; justify-content: center; margin-bottom: var(--ro-s-3); position: relative; }
-  .th-task-card h3 { position: relative; font-size: 1.1rem; margin: 0 0 4px; }
-  .th-task-card p { position: relative; color: var(--ro-ink-200); font-size: .85rem; margin: 0; }
-  .th-task-card.is-broker { background: linear-gradient(135deg, var(--ro-plum-900), var(--ro-ink-950)); }
+  .th-task-card .th-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--ro3-ease-damped); }
+  .th-task-card:hover .th-photo { transform: scale(1.06); }
+  @media (prefers-reduced-motion: reduce) { .th-task-card:hover .th-photo { transform: none; } }
+  .th-task-card .th-scrim { position: absolute; inset: 0; background: linear-gradient(to top, rgba(11,8,13,.92) 25%, rgba(11,8,13,.35) 65%, rgba(11,8,13,.1) 100%); }
+  .th-task-card .th-icon { width: 40px; height: 40px; border-radius: var(--ro-r-sm); background: rgba(244,231,216,.14); display: flex; align-items: center; justify-content: center; margin-bottom: var(--ro-s-3); position: relative; z-index: 1; }
+  .th-task-card .th-body { position: relative; z-index: 1; padding: var(--ro-s-5); }
+  .th-task-card h3 { font-size: 1.1rem; margin: 0 0 4px; }
+  .th-task-card p { color: var(--ro-ink-200); font-size: .85rem; margin: 0; }
+  .th-task-card.is-broker .th-scrim { background: linear-gradient(to top, rgba(50,16,79,.94) 25%, rgba(11,8,13,.4) 65%, rgba(11,8,79,.15) 100%); }
 
   .th-offers { display: flex; gap: var(--ro-s-3); overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: var(--ro-s-2); margin: 0 calc(var(--ro-s-1) * -1); padding-inline: var(--ro-s-1); }
   .th-offer-card { scroll-snap-align: start; flex: 0 0 240px; border-radius: var(--ro-r-md); overflow: hidden; border: 1px solid var(--ro-border-subtle); background: var(--ro-bg-raised); }
-  .th-offer-media { height: 120px; background: var(--ro-ink-900); position: relative; display: flex; align-items: center; justify-content: center; color: var(--ro-ink-300); }
-  .th-offer-media .ro-grain { opacity: .08; }
+  .th-offer-media { height: 120px; background: var(--ro-ink-900); position: relative; overflow: hidden; }
+  .th-offer-media img { width: 100%; height: 100%; object-fit: cover; }
   .th-offer-body { padding: var(--ro-s-3); }
 
   .th-stats-row { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: var(--ro-s-3); margin-bottom: var(--ro-s-5); }
@@ -44,7 +50,7 @@
 <body>
 <a href="#main" class="skip-link"><span data-lang="ar">تخطَّ إلى المحتوى</span><span data-lang="en" hidden>Skip to content</span></a>
 <header class="tr-header">
-  <div class="brand"><svg width="20" height="20" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="30" fill="var(--ro-sand-100)" opacity=".15"/><circle cx="32" cy="32" r="22" stroke="#F4E7D8" stroke-width="1.5"/><circle cx="32" cy="32" r="5" fill="#F4E7D8"/></svg> RARE OUD</div>
+  <div class="brand"><img src="assets/logo-mark-small.svg" alt="" style="width:20px;height:20px;filter:invert(1)" /> RARE OUD</div>
   <nav aria-label="بوابة التجّار">
     <a class="active" href="trader-home.html" aria-current="page" data-icon="home"><span data-lang="ar">الرئيسية</span><span data-lang="en" hidden>Home</span></a>
     <a href="deal-wizard.html" data-icon="handshake"><span data-lang="ar">صفقاتي</span><span data-lang="en" hidden>My deals</span></a>
@@ -88,23 +94,32 @@
 
   <h2 style="margin-top:var(--ro-s-6);font-size:1.15rem"><span data-lang="ar">ابدأ من هنا</span><span data-lang="en" hidden>Start here</span></h2>
   <div class="th-task-row" data-stagger>
-    <a class="th-task-card ro-sheen-surface" href="deal-wizard.html">
-      <div class="ro-grain"></div>
-      <div class="th-icon"><span data-icon="handshake" data-icon-size="20"></span></div>
-      <h3><span data-lang="ar">اقترح صفقة</span><span data-lang="en" hidden>Propose a deal</span></h3>
-      <p><span data-lang="ar">قدّم عرضاً تجارياً على قطعة من الكتالوج أو خارجه</span><span data-lang="en" hidden>Offer a commercial proposal on a catalog piece or outside it</span></p>
+    <a class="th-task-card" href="deal-wizard.html">
+      <img class="th-photo" src="assets/hero-oud-atelier-a.jpg" alt="" />
+      <div class="th-scrim"></div>
+      <div class="th-body">
+        <div class="th-icon"><span data-icon="handshake" data-icon-size="20"></span></div>
+        <h3><span data-lang="ar">اقترح صفقة</span><span data-lang="en" hidden>Propose a deal</span></h3>
+        <p><span data-lang="ar">قدّم عرضاً تجارياً على قطعة من الكتالوج أو خارجه</span><span data-lang="en" hidden>Offer a commercial proposal on a catalog piece or outside it</span></p>
+      </div>
     </a>
-    <a class="th-task-card ro-sheen-surface" href="wholesale.html">
-      <div class="ro-grain"></div>
-      <div class="th-icon"><span data-icon="package" data-icon-size="20"></span></div>
-      <h3><span data-lang="ar">اطلب بالجملة</span><span data-lang="en" hidden>Request wholesale</span></h3>
-      <p><span data-lang="ar">اختر القطع والكميات؛ الإدارة ترد بعرض السعر</span><span data-lang="en" hidden>Pick items and quantities; admin replies with a quote</span></p>
+    <a class="th-task-card" href="wholesale.html">
+      <img class="th-photo" src="assets/hero-oud-atelier-b.jpg" alt="" />
+      <div class="th-scrim"></div>
+      <div class="th-body">
+        <div class="th-icon"><span data-icon="package" data-icon-size="20"></span></div>
+        <h3><span data-lang="ar">اطلب بالجملة</span><span data-lang="en" hidden>Request wholesale</span></h3>
+        <p><span data-lang="ar">اختر القطع والكميات؛ الإدارة ترد بعرض السعر</span><span data-lang="en" hidden>Pick items and quantities; admin replies with a quote</span></p>
+      </div>
     </a>
-    <a class="th-task-card is-broker ro-sheen-surface" href="brokerage-pending-decision.html">
-      <div class="ro-grain"></div>
-      <div class="th-icon"><span data-icon="compass" data-icon-size="20"></span></div>
-      <h3><span data-lang="ar">اطلب وساطة</span><span data-lang="en" hidden>Request brokerage</span></h3>
-      <p><span data-lang="ar">رأيت قطعة نادرة في مكان ما؟ نعاينها ونشتريها لك</span><span data-lang="en" hidden>Spotted a rare piece somewhere? We'll inspect and buy it for you</span></p>
+    <a class="th-task-card is-broker" href="brokerage-pending-decision.html">
+      <img class="th-photo" src="assets/hero-closeup.jpg" alt="" />
+      <div class="th-scrim"></div>
+      <div class="th-body">
+        <div class="th-icon"><span data-icon="compass" data-icon-size="20"></span></div>
+        <h3><span data-lang="ar">اطلب وساطة</span><span data-lang="en" hidden>Request brokerage</span></h3>
+        <p><span data-lang="ar">رأيت قطعة نادرة في مكان ما؟ نعاينها ونشتريها لك</span><span data-lang="en" hidden>Spotted a rare piece somewhere? We'll inspect and buy it for you</span></p>
+      </div>
     </a>
   </div>
 
@@ -125,15 +140,15 @@
   <h2 style="font-size:1.15rem"><span data-lang="ar">العروض المتاحة الآن</span><span data-lang="en" hidden>Available offers now</span></h2>
   <div class="th-offers" tabindex="0" role="region" aria-label="العروض المتاحة الآن">
     <div class="th-offer-card">
-      <div class="th-offer-media"><div class="ro-grain"></div><span data-icon="guitar" data-icon-size="28"></span></div>
+      <div class="th-offer-media"><img src="assets/hero-oud-majestic.jpg" alt="" /></div>
       <div class="th-offer-body"><h3 style="font-size:.95rem;margin:0 0 4px"><bdi><span data-lang="ar">مختارات وترية</span><span data-lang="en" hidden>Strings Selection</span></bdi></h3><p class="ro-caption" style="margin:0"><span data-lang="ar">قطع يختارها فريق RARE OUD</span><span data-lang="en" hidden>Hand-picked by the RARE OUD team</span></p></div>
     </div>
     <div class="th-offer-card">
-      <div class="th-offer-media"><div class="ro-grain"></div><span data-icon="guitar" data-icon-size="28"></span></div>
+      <div class="th-offer-media"><img src="assets/instrument-dark.jpg" alt="" /></div>
       <div class="th-offer-body"><h3 style="font-size:.95rem;margin:0 0 4px"><bdi><span data-lang="ar">تحرير الأتيليه</span><span data-lang="en" hidden>Atelier Edit</span></bdi></h3><p class="ro-caption" style="margin:0"><span data-lang="ar">اختيار قصير من الورشة</span><span data-lang="en" hidden>A short workshop selection</span></p></div>
     </div>
     <div class="th-offer-card">
-      <div class="th-offer-media"><div class="ro-grain"></div><span data-icon="guitar" data-icon-size="28"></span></div>
+      <div class="th-offer-media"><img src="assets/oud-heritage.jpg" alt="" /></div>
       <div class="th-offer-body"><h3 style="font-size:.95rem;margin:0 0 4px"><bdi><span data-lang="ar">قطع نادرة معتّقة</span><span data-lang="en" hidden>Aged Rarities</span></bdi></h3><p class="ro-caption" style="margin:0"><span data-lang="ar">كمية محدودة — تحديث أسبوعي</span><span data-lang="en" hidden>Limited quantity — refreshed weekly</span></p></div>
     </div>
   </div>

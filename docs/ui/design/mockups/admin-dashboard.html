@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>لوحة التحكم — RARE OUD</title>
+<link rel="icon" href="assets/logo-mark-small.svg" />
 <link rel="stylesheet" href="shared.css" />
 <link rel="stylesheet" href="tokens-v3.css" />
 <style>
@@ -36,6 +37,35 @@
   .ad-donut-legend { display: flex; flex-direction: column; gap: var(--ro-s-2); margin-top: var(--ro-s-3); }
   .ad-donut-legend li { display: flex; align-items: center; gap: 8px; font-size: .82rem; list-style: none; }
   .ad-donut-legend .sw { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+  /* ---- gradient-mesh header band (section 5.2: "rich gradient-mesh header with the logo") ---- */
+  .ad-header-band {
+    position: relative; overflow: hidden; border-radius: var(--ro-r-md); margin-bottom: var(--ro-s-5);
+    padding: var(--ro-s-6) var(--ro-s-6); color: var(--ro-sand-100);
+    background:
+      radial-gradient(42% 70% at 12% 20%, rgba(82,39,124,.65), transparent 60%),
+      radial-gradient(38% 60% at 88% 85%, rgba(184,134,63,.28), transparent 62%),
+      var(--ro-ink-950);
+    background-size: 150% 150%, 150% 150%, 100% 100%;
+    animation: ad-mesh-drift 22s ease-in-out infinite alternate;
+  }
+  @keyframes ad-mesh-drift { 0% { background-position: 20% 10%, 80% 90%, 0 0; } 100% { background-position: 35% 30%, 65% 70%, 0 0; } }
+  @media (prefers-reduced-motion: reduce) { .ad-header-band { animation: none; } }
+  .ad-header-band .ro-grain { opacity: .05; }
+  .ad-header-band-mark { position: absolute; inset-inline-end: -40px; top: 50%; transform: translateY(-50%); width: 220px; height: 220px; opacity: .14; }
+  .ad-header-band h1, .ad-header-band p { position: relative; z-index: 1; }
+  .ad-header-band h1 { color: var(--ro-sand-100); }
+  .ad-header-band p { color: var(--ro-ink-200); }
+
+  /* ---- chart glow: gradient-filled lines instead of flat default styling ---- */
+  .ro-chart-box { filter: drop-shadow(0 4px 14px rgba(82,39,124,.18)); }
+
+  /* ---- richer KPI depth ---- */
+  .ad-kpi { box-shadow: var(--ro-inner-hairline), var(--ro-e-raised-light); transition: box-shadow var(--ro3-dur-ui), transform var(--ro3-dur-ui); }
+  .ad-kpi:hover { box-shadow: var(--ro-inner-hairline), var(--ro-e2); transform: translateY(-2px); }
+
+  /* the traced mark is solid ink on transparent; invert so it reads as cream on the dark sidebar */
+  .ad-sidebar-logo { width: 26px; height: 26px; filter: invert(1) drop-shadow(0 0 6px rgba(201,178,227,.5)); }
 </style>
 </head>
 <body>
@@ -44,7 +74,7 @@
 <div class="ro-shell">
   <aside class="ro-sidebar ro-inverse">
     <div style="display:flex;align-items:center;justify-content:space-between">
-      <div class="ro-brand"><svg width="22" height="22" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="30" fill="var(--ro-plum-900)"/><circle cx="32" cy="32" r="22" stroke="#F4E7D8" stroke-width="1.5"/><circle cx="32" cy="32" r="5" fill="#0B080D"/></svg> RARE OUD</div>
+      <div class="ro-brand"><img class="ad-sidebar-logo" src="assets/logo-mark-small.svg" alt="" /> RARE OUD</div>
       <button class="ro-icon-btn ro-sidebar-hamburger" data-open-dialog="admin-nav-drawer" aria-label="القائمة"><span data-icon="menu" data-icon-size="20"></span></button>
     </div>
     <nav aria-label="الإدارة">
@@ -81,22 +111,26 @@
   </dialog>
 
   <main class="ro-main" id="main">
-    <div class="ro-topbar" style="flex-wrap:wrap;gap:var(--ro-s-3)">
-      <div>
-        <h1 style="font-size:1.7rem"><span data-lang="ar">صباح الخير، سامر</span><span data-lang="en" hidden>Good morning, Samer</span></h1>
-        <p class="muted ro-body-sm" style="display:flex;align-items:center;gap:6px">
-          <span class="ro-pulse-dot"></span>
-          <span data-lang="ar">واتساب متصل · آخر مزامنة قبل دقيقة · 24 أمراً بانتظارك</span>
-          <span data-lang="en" hidden>WhatsApp connected · synced a minute ago · 24 things awaiting you</span>
-        </p>
-      </div>
-      <div style="display:flex;gap:var(--ro-s-2);align-items:center;margin-inline-start:auto">
-        <button class="ad-search" data-open-dialog="ro-command-palette">
-          <span data-icon="search" data-icon-size="16"></span>
-          <span data-lang="ar">ابحث أو نفّذ أمراً</span><span data-lang="en" hidden>Search or run a command</span>
-          <kbd>Ctrl K</kbd>
-        </button>
-        <button class="lang-toggle" onclick="roToggleLang()">EN</button>
+    <div class="ad-header-band ro-inverse">
+      <div class="ro-grain"></div>
+      <img class="ad-header-band-mark" src="assets/logo-mark.svg" alt="" style="filter:invert(1)" />
+      <div style="display:flex;flex-wrap:wrap;gap:var(--ro-s-3);align-items:flex-start;justify-content:space-between">
+        <div>
+          <h1 style="font-size:1.7rem"><span data-lang="ar">صباح الخير، سامر</span><span data-lang="en" hidden>Good morning, Samer</span></h1>
+          <p class="ro-body-sm" style="display:flex;align-items:center;gap:6px;margin:0">
+            <span class="ro-pulse-dot"></span>
+            <span data-lang="ar">واتساب متصل · آخر مزامنة قبل دقيقة · 24 أمراً بانتظارك</span>
+            <span data-lang="en" hidden>WhatsApp connected · synced a minute ago · 24 things awaiting you</span>
+          </p>
+        </div>
+        <div style="display:flex;gap:var(--ro-s-2);align-items:center">
+          <button class="ad-search" data-open-dialog="ro-command-palette" style="background:rgba(244,231,216,.08);border-color:rgba(244,231,216,.25);color:var(--ro-sand-100)">
+            <span data-icon="search" data-icon-size="16"></span>
+            <span data-lang="ar">ابحث أو نفّذ أمراً</span><span data-lang="en" hidden>Search or run a command</span>
+            <kbd style="background:rgba(244,231,216,.12);border-color:rgba(244,231,216,.25)">Ctrl K</kbd>
+          </button>
+          <button class="lang-toggle" onclick="roToggleLang()" style="color:var(--ro-sand-100);border-color:rgba(244,231,216,.3)">EN</button>
+        </div>
       </div>
     </div>
 
