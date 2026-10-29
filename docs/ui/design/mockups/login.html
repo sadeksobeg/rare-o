@@ -136,7 +136,7 @@
     </div>
   </section>
 
-  <section class="lg-panel-wrap">
+  <main class="lg-panel-wrap">
     <div class="lg-panel" id="lg-panel-main">
       <div class="lg-toprow"><button class="lang-toggle" onclick="roToggleLang()" style="color:var(--ro-ink-950);border-color:var(--ro-border)">EN</button></div>
 
@@ -209,7 +209,7 @@
         <p class="lg-sub"><span data-lang="ar">يفتح لوحة التحكم…</span><span data-lang="en" hidden>Opening the dashboard…</span></p>
       </div>
     </div>
-  </section>
+  </main>
 </div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="lg-mark-defs-wrap"></defs></svg>
@@ -262,6 +262,7 @@
   window.addEventListener("load", function () {
     if (window.gsap && window.SplitText && !roMotion.reduced()) {
       gsap.registerPlugin(SplitText);
+      document.querySelector("#lg-heading-ar span[data-lang='ar']").setAttribute("role", "text");
       var split = new SplitText("#lg-heading-ar span[data-lang='ar']", { type: "words" });
       gsap.fromTo(split.words, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: .8, stagger: .08, ease: "power3.out", delay: .3 });
     }

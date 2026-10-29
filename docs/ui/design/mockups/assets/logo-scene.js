@@ -100,13 +100,15 @@ window.roLogoScene = function (canvas, opts) {
   });
   io.observe(canvas);
 
+  var scrollOffset = 0; // caller can drive extra rotation from scroll progress
+
   var clock = new THREE.Clock();
   function tick() {
     if (disposed) return;
     raf = requestAnimationFrame(tick);
     if (!visible) return;
     var t = clock.getElapsedTime();
-    group.rotation.y = t * 0.25;
+    group.rotation.y = t * 0.25 + scrollOffset;
     group.rotation.x = Math.sin(t * 0.3) * 0.08;
     particles.rotation.y = t * 0.05;
     renderer.render(scene, camera);
@@ -114,6 +116,8 @@ window.roLogoScene = function (canvas, opts) {
   tick();
 
   return {
+    setScrollOffset: function (v) { scrollOffset = v; },
+    setCameraZ: function (z) { camera.position.z = z; camera.updateProjectionMatrix(); },
     dispose: function () {
       disposed = true;
       if (raf) cancelAnimationFrame(raf);
