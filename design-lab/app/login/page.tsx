@@ -8,7 +8,7 @@ import { LogoScene } from "@/components/brand/logo-scene";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { LocaleToggle } from "@/components/brand/locale-toggle";
 import { cn } from "@/lib/utils";
 import { useDict } from "@/lib/i18n";
@@ -107,6 +107,14 @@ export default function LoginPage() {
                   <TabsTrigger value="admin">{t("roleAdmin")}</TabsTrigger>
                   <TabsTrigger value="trader">{t("roleTrader")}</TabsTrigger>
                 </TabsList>
+                {/* The role switch only changes which form copy/fields show
+                    below (handled separately via `role` state) — these
+                    panels stay empty, but Radix's TabsTrigger always emits
+                    aria-controls pointing at a matching TabsContent id, so
+                    without them that reference was dangling (axe:
+                    aria-valid-attr-value). */}
+                <TabsContent value="admin" />
+                <TabsContent value="trader" />
               </Tabs>
 
               <h1 className="mb-1 text-h1 font-semibold font-[family-name:var(--font-heading)]">{copy[role].title}</h1>

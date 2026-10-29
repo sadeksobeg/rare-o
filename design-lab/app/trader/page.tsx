@@ -109,7 +109,7 @@ export default function TraderHomePage() {
 
       <section>
         <h2 className="mb-3 text-h2 font-semibold">{t("offersNow")}</h2>
-        <div className="flex gap-4 overflow-x-auto pb-2">
+        <div className="flex gap-4 overflow-x-auto pb-2" tabIndex={0} role="region" aria-label={t("offersNow")}>
           {offers.map((o) => (
             <div key={o.titleAr} className="w-60 shrink-0 overflow-hidden rounded-lg border bg-card">
               <div className="h-28 overflow-hidden">

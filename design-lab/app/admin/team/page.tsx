@@ -116,7 +116,7 @@ export default function TeamPage() {
             {t("members")} ({team.length})
           </CardTitle>
         </CardHeader>
-        <CardContent className="overflow-x-auto">
+        <CardContent className="overflow-x-auto" tabIndex={0} role="region" aria-label={t("members")}>
           <Table>
             <TableHeader>
               <TableRow>
@@ -194,7 +194,7 @@ export default function TeamPage() {
         <CardHeader>
           <CardTitle className="text-h3">{t("permissionsByRole")}</CardTitle>
         </CardHeader>
-        <CardContent className="overflow-x-auto">
+        <CardContent className="overflow-x-auto" tabIndex={0} role="region" aria-label={t("permissionsByRole")}>
           <Table>
             <TableHeader>
               <TableRow>

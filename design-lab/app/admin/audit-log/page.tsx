@@ -49,7 +49,7 @@ export default function AuditLogPage() {
             />
           </div>
         </CardHeader>
-        <CardContent className="overflow-x-auto">
+        <CardContent className="overflow-x-auto" tabIndex={0} role="region" aria-label={t("events")}>
           <Table>
             <TableHeader>
               <TableRow>

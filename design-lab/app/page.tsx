@@ -60,6 +60,7 @@ export default function StorefrontHome() {
         </div>
       </nav>
 
+      <main>
       <section className="relative h-svh overflow-hidden bg-ro-ink-950">
         <div className="pointer-events-none absolute inset-[-10%] bg-[radial-gradient(40%_50%_at_22%_25%,rgba(82,39,124,.55),transparent_60%),radial-gradient(45%_55%_at_80%_75%,rgba(184,134,63,.2),transparent_62%)]" />
         <div className="absolute inset-x-0 top-[8%] bottom-[34%] flex items-center justify-center">
@@ -87,6 +88,7 @@ export default function StorefrontHome() {
       </section>
 
       <section id="craft" className="px-6 py-20">
+        <h2 className="sr-only">{t("navCraft")}</h2>
         <div className="mx-auto grid max-w-5xl items-center gap-10 sm:grid-cols-[0.9fr_1.1fr]">
           <div className="aspect-[4/5] overflow-hidden rounded-xl">
             <img src="/brand/hero-closeup.jpg" alt="" className="size-full object-cover" />
@@ -142,6 +144,7 @@ export default function StorefrontHome() {
           <Link href="/login">{t("openTraderPortal")}</Link>
         </Button>
       </section>
+      </main>
 
       <footer className="px-6 py-8 text-center text-small text-muted-foreground">
         <p>

@@ -46,7 +46,7 @@ export default function CustomersPage() {
             {t("allCustomers")} ({customers.length})
           </CardTitle>
         </CardHeader>
-        <CardContent className="overflow-x-auto">
+        <CardContent className="overflow-x-auto" tabIndex={0} role="region" aria-label={t("allCustomers")}>
           <Table>
             <TableHeader>
               <TableRow>

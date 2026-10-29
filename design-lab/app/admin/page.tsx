@@ -158,7 +158,7 @@ export default function AdminDashboardPage() {
             {t("viewAll")}
           </Link>
         </CardHeader>
-        <CardContent className="overflow-x-auto">
+        <CardContent className="overflow-x-auto" tabIndex={0} role="region" aria-label={t("awaitingAction")}>
           <Table>
             <TableHeader>
               <TableRow>

@@ -12,7 +12,9 @@ export const currentAdmin = {
 };
 
 export const currentTrader = {
-  id: "u_trader_1",
+  // Same identity as traders[0] ("t1") — the logged-in trader session is
+  // Adnan, who also appears in the admin's traders list.
+  id: "t1",
   name: "عدنان درويش",
   nameEn: "Adnan Darwish",
   email: "adnan@rareoud.example",
@@ -70,6 +72,150 @@ export const auditLog = [
   { id: "a1", actorAr: "سامر الحلبي", actorEn: "Samer Al-Halabi", actionAr: "أعاد تعيين كلمة مرور التاجر عدنان درويش", actionEn: "Reset trader Adnan Darwish's password", time: "2026-10-28 14:02" },
   { id: "a2", actorAr: "هالة نصر", actorEn: "Hala Nasr", actionAr: "عطّلت حساب التاجر بلال شاهين", actionEn: "Disabled trader Bilal Shaheen's account", time: "2026-10-27 09:40" },
   { id: "a3", actorAr: "سامر الحلبي", actorEn: "Samer Al-Halabi", actionAr: "سجّل الدخول", actionEn: "Signed in", time: "2026-10-28 08:01" },
+];
+
+// Brokerage domain (VISION.md section 7) — a fourth, separate domain from
+// retail/deals/wholesale. Lifecycle per section 7.1.
+export type BrokerageStatus =
+  | "SUBMITTED"
+  | "NEEDS_INFO"
+  | "ACCEPTED"
+  | "INSPECTION_SCHEDULED"
+  | "INSPECTED"
+  | "QUOTE_SENT"
+  | "APPROVED"
+  | "PURCHASED"
+  | "SHIPPED"
+  | "DELIVERED"
+  | "CLOSED"
+  | "DECLINED"
+  | "REJECTED"
+  | "CANCELLED";
+
+export const brokerageStatusMeta: Record<BrokerageStatus, { ar: string; en: string; tone: StatusTone }> = {
+  SUBMITTED: { ar: "جديد", en: "New", tone: "info" },
+  NEEDS_INFO: { ar: "بحاجة لمعلومات", en: "Needs Info", tone: "attention" },
+  ACCEPTED: { ar: "مقبول للمعاينة", en: "Accepted for Inspection", tone: "progress" },
+  INSPECTION_SCHEDULED: { ar: "المعاينة مجدولة", en: "Inspection Scheduled", tone: "progress" },
+  INSPECTED: { ar: "تمت المعاينة", en: "Inspected", tone: "progress" },
+  QUOTE_SENT: { ar: "العرض بانتظارك", en: "Quote Awaiting You", tone: "attention" },
+  APPROVED: { ar: "وافق التاجر", en: "Trader Approved", tone: "success" },
+  PURCHASED: { ar: "تم الشراء", en: "Purchased", tone: "success" },
+  SHIPPED: { ar: "قيد الشحن", en: "Shipped", tone: "progress" },
+  DELIVERED: { ar: "تم التسليم", en: "Delivered", tone: "success" },
+  CLOSED: { ar: "مغلق", en: "Closed", tone: "closed" },
+  DECLINED: { ar: "مرفوض", en: "Declined", tone: "danger" },
+  REJECTED: { ar: "رفض العرض", en: "Quote Rejected", tone: "danger" },
+  CANCELLED: { ar: "ملغى", en: "Cancelled", tone: "closed" },
+};
+
+// The forward order of the lifecycle's normal path (excludes the three
+// terminal rejection states), used to render the trader-side stepper.
+export const brokerageLifecycleOrder: BrokerageStatus[] = [
+  "SUBMITTED",
+  "ACCEPTED",
+  "INSPECTION_SCHEDULED",
+  "INSPECTED",
+  "QUOTE_SENT",
+  "APPROVED",
+  "PURCHASED",
+  "SHIPPED",
+  "DELIVERED",
+];
+
+export const brokerageRequests = [
+  {
+    id: "BR-2026-014",
+    traderId: "t1",
+    descriptionAr: "عود حلبي قديم رأيته في محل أدوات موسيقية — يبدو أصلياً وبحالة جيدة",
+    descriptionEn: "An old Aleppo oud I saw at a music shop — looks original and in good condition",
+    category: "عود كلاسيكي",
+    categoryEn: "Classic Oud",
+    quantity: 1,
+    city: "حلب",
+    cityEn: "Aleppo",
+    placeName: "محل آلات الفرات",
+    placeNameEn: "Al-Furat Instruments Shop",
+    status: "QUOTE_SENT" as BrokerageStatus,
+    submittedDate: "2026-10-20",
+    budgetMin: 2000,
+    budgetMax: 3000,
+    inspection: {
+      grade: "B" as const,
+      notes: "آثار استخدام طبيعية، لا تشققات، الأوتار بحاجة تغيير",
+      notesEn: "Normal wear, no cracks, strings need replacing",
+      verdict: "موصى بالشراء",
+      verdictEn: "Recommended for purchase",
+      photos: 4,
+    },
+    quote: { goodsValue: 2400, commissionRate: 1.5, shipping: 60, validUntil: "2026-11-05" },
+  },
+  {
+    id: "BR-2026-013",
+    traderId: "t1",
+    descriptionAr: "قانون من ورشة محلية في اللاذقية، مطلوب معاينة قبل أي قرار",
+    descriptionEn: "A qanun from a local workshop in Latakia, needs inspection before any decision",
+    category: "قانون وآلات وترية",
+    categoryEn: "Qanun & Strings",
+    quantity: 1,
+    city: "اللاذقية",
+    cityEn: "Latakia",
+    placeName: "ورشة أبو خالد",
+    placeNameEn: "Abu Khaled's Workshop",
+    status: "INSPECTION_SCHEDULED" as BrokerageStatus,
+    submittedDate: "2026-10-24",
+    budgetMin: 1500,
+    budgetMax: 2200,
+    inspection: null,
+    quote: null,
+  },
+  {
+    id: "BR-2026-011",
+    traderId: "t1",
+    descriptionAr: "ناي فارسي معتّق، صورة من بائع عبر فيسبوك ماركت بليس",
+    descriptionEn: "An aged Persian ney, photo from a Facebook Marketplace seller",
+    category: "قطع نادرة معتّقة",
+    categoryEn: "Aged Rarities",
+    quantity: 1,
+    city: "دمشق",
+    cityEn: "Damascus",
+    placeName: "—",
+    placeNameEn: "—",
+    status: "DELIVERED" as BrokerageStatus,
+    submittedDate: "2026-09-30",
+    budgetMin: 800,
+    budgetMax: 1200,
+    inspection: {
+      grade: "A" as const,
+      notes: "حالة ممتازة، موثّقة بشهادة الورشة الأصلية",
+      notesEn: "Excellent condition, documented with the original workshop certificate",
+      verdict: "موصى بالشراء",
+      verdictEn: "Recommended for purchase",
+      photos: 6,
+    },
+    quote: { goodsValue: 950, commissionRate: 2, shipping: 40, validUntil: "2026-10-10" },
+  },
+  {
+    id: "BR-2026-009",
+    traderId: "t2",
+    descriptionAr: "عود مصري قديم، البائع لا يملك وثائق أصل",
+    descriptionEn: "An old Egyptian oud, the seller has no provenance documents",
+    category: "عود كلاسيكي",
+    categoryEn: "Classic Oud",
+    quantity: 1,
+    city: "القاهرة",
+    cityEn: "Cairo",
+    placeName: "سوق خان الخليلي",
+    placeNameEn: "Khan el-Khalili Market",
+    status: "DECLINED" as BrokerageStatus,
+    submittedDate: "2026-10-15",
+    budgetMin: 1000,
+    budgetMax: 1800,
+    inspection: null,
+    quote: null,
+    declineReason: "خارج نطاق التغطية الجغرافية الحالية",
+    declineReasonEn: "Outside the current geographic coverage area",
+  },
 ];
 
 export function greetingForHour(hour: number, name: string, locale: "ar" | "en" = "ar") {

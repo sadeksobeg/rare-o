@@ -38,7 +38,7 @@ export default function ForcePasswordChangePage() {
   const firstName = (locale === "ar" ? currentTrader.name : currentTrader.nameEn).split(" ")[0];
 
   return (
-    <div className="relative flex min-h-svh items-center justify-center bg-ro-sand-100 px-6 py-12">
+    <main className="relative flex min-h-svh items-center justify-center bg-ro-sand-100 px-6 py-12">
       <LocaleToggle className="absolute end-6 top-6" />
       <Card className="w-full max-w-md">
         <CardContent className="pt-6">
@@ -101,6 +101,6 @@ export default function ForcePasswordChangePage() {
           </form>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }

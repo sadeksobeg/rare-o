@@ -1,0 +1,1912 @@
+{
+  "login": {
+    "375-ar": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "aria-valid-attr-value",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "aria-valid-attr-value",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "aria-valid-attr-value",
+            "nodes": 1
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "375-en": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "aria-valid-attr-value",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "aria-valid-attr-value",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "aria-valid-attr-value",
+            "nodes": 1
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "1440-ar": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "aria-valid-attr-value",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "aria-valid-attr-value",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "aria-valid-attr-value",
+            "nodes": 1
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "1440-en": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "aria-valid-attr-value",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "aria-valid-attr-value",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "aria-valid-attr-value",
+            "nodes": 1
+          }
+        ]
+      ],
+      "overflow": 0
+    }
+  },
+  "admin-dashboard": {
+    "375-ar": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "375-en": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "1440-ar": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "1440-en": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ]
+      ],
+      "overflow": 0
+    }
+  },
+  "admin-traders": {
+    "375-ar": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "375-en": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "1440-ar": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "1440-en": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ]
+      ],
+      "overflow": 0
+    }
+  },
+  "admin-team": {
+    "375-ar": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "375-en": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "1440-ar": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "1440-en": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ]
+      ],
+      "overflow": 0
+    }
+  },
+  "admin-customers": {
+    "375-ar": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "375-en": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "1440-ar": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "1440-en": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ]
+      ],
+      "overflow": 0
+    }
+  },
+  "admin-audit-log": {
+    "375-ar": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "375-en": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "1440-ar": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "1440-en": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ]
+      ],
+      "overflow": 0
+    }
+  },
+  "admin-profile": {
+    "375-ar": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "375-en": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "1440-ar": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "1440-en": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ],
+        [
+          {
+            "id": "landmark-main-is-top-level",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-no-duplicate-main",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-unique",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 16
+          }
+        ]
+      ],
+      "overflow": 0
+    }
+  },
+  "force-password-change": {
+    "375-ar": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 4
+          }
+        ],
+        [
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 4
+          }
+        ],
+        [
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 4
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "375-en": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 4
+          }
+        ],
+        [
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 4
+          }
+        ],
+        [
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 4
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "1440-ar": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 4
+          }
+        ],
+        [
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 4
+          }
+        ],
+        [
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 4
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "1440-en": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 4
+          }
+        ],
+        [
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 4
+          }
+        ],
+        [
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 4
+          }
+        ]
+      ],
+      "overflow": 0
+    }
+  },
+  "trader-home": {
+    "375-ar": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "375-en": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ],
+        [
+          {
+            "id": "scrollable-region-focusable",
+            "nodes": 1
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "1440-ar": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [],
+        [],
+        []
+      ],
+      "overflow": 0
+    },
+    "1440-en": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [],
+        [],
+        []
+      ],
+      "overflow": 0
+    }
+  },
+  "storefront-home": {
+    "375-ar": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "heading-order",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 6
+          }
+        ],
+        [
+          {
+            "id": "heading-order",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 6
+          }
+        ],
+        [
+          {
+            "id": "heading-order",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 6
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "375-en": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "heading-order",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 6
+          }
+        ],
+        [
+          {
+            "id": "heading-order",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 6
+          }
+        ],
+        [
+          {
+            "id": "heading-order",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 6
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "1440-ar": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "heading-order",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 6
+          }
+        ],
+        [
+          {
+            "id": "heading-order",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 6
+          }
+        ],
+        [
+          {
+            "id": "heading-order",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 6
+          }
+        ]
+      ],
+      "overflow": 0
+    },
+    "1440-en": {
+      "reducedMotionMatches": true,
+      "axe": [
+        [
+          {
+            "id": "heading-order",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 6
+          }
+        ],
+        [
+          {
+            "id": "heading-order",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 6
+          }
+        ],
+        [
+          {
+            "id": "heading-order",
+            "nodes": 1
+          },
+          {
+            "id": "landmark-one-main",
+            "nodes": 1
+          },
+          {
+            "id": "region",
+            "nodes": 6
+          }
+        ]
+      ],
+      "overflow": 0
+    }
+  }
+}

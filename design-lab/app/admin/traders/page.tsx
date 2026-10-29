@@ -85,7 +85,7 @@ export default function TradersPage() {
             {t("allTraders")} ({traders.length})
           </CardTitle>
         </CardHeader>
-        <CardContent className="overflow-x-auto">
+        <CardContent className="overflow-x-auto" tabIndex={0} role="region" aria-label={t("allTraders")}>
           <Table>
             <TableHeader>
               <TableRow>
