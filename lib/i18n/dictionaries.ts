@@ -289,11 +289,13 @@ type Dict = {
     traders: string;
     deals: string;
     wholesale: string;
+    brokerage: string;
     offers: string;
     promos: string;
     kpiRetail: string;
     kpiDeals: string;
     kpiWholesale: string;
+    kpiBrokerage: string;
     kpiUnread: string;
     kpiIdle: string;
     recentRequests: string;
@@ -658,6 +660,10 @@ type Dict = {
     newDeal: string;
     wholesale: string;
     wholesaleRequests: string;
+    brokerage: string;
+    newBrokerage: string;
+    taskBrokerageTitle: string;
+    taskBrokerageBody: string;
     offers: string;
     profile: string;
     logout: string;
@@ -1344,11 +1350,13 @@ const ar: Dict = {
     traders: "التجّار",
     deals: "الصفقات",
     wholesale: "الجملة",
+    brokerage: "الوساطة",
     offers: "العروض",
     promos: "الترويج",
     kpiRetail: "طلبات تجزئة جديدة",
     kpiDeals: "صفقات بانتظار الرد",
     kpiWholesale: "طلبات جملة",
+    kpiBrokerage: "وساطة نشطة",
     kpiUnread: "محادثات غير مقروءة",
     kpiIdle: "لا شيء بانتظارك",
     recentRequests: "أحدث طلبات التجزئة",
@@ -1771,6 +1779,10 @@ const ar: Dict = {
     newDeal: "اقتراح صفقة",
     wholesale: "الجملة",
     wholesaleRequests: "طلبات الجملة",
+    brokerage: "الوساطة",
+    newBrokerage: "طلب وساطة",
+    taskBrokerageTitle: "اطلب وساطة",
+    taskBrokerageBody: "رأينا قطعة؟ نعاينها ونرسل عرضاً قبل الشراء.",
     offers: "العروض العامة",
     profile: "حسابي",
     logout: "خروج",
@@ -2499,11 +2511,13 @@ const en: Dict = {
     traders: "Traders",
     deals: "Deals",
     wholesale: "Wholesale",
+    brokerage: "Brokerage",
     offers: "Offers",
     promos: "Promos",
     kpiRetail: "New retail requests",
     kpiDeals: "Deals awaiting reply",
     kpiWholesale: "Wholesale requests",
+    kpiBrokerage: "Active brokerage",
     kpiUnread: "Unread conversations",
     kpiIdle: "Nothing waiting for you",
     recentRequests: "Recent retail requests",
@@ -2932,6 +2946,10 @@ const en: Dict = {
     newDeal: "Propose deal",
     wholesale: "Wholesale",
     wholesaleRequests: "Wholesale requests",
+    brokerage: "Brokerage",
+    newBrokerage: "New brokerage",
+    taskBrokerageTitle: "Request brokerage",
+    taskBrokerageBody: "Saw a piece? We inspect and quote before purchase.",
     offers: "Public offers",
     profile: "Profile",
     logout: "Sign out",
