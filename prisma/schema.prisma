@@ -219,17 +219,18 @@ model TraderAccount {
   interestNotes         String               @default("")
   deals                 DealProposal[]
   wholesaleRequests     WholesaleRequest[]
+  brokerageRequests     BrokerageRequest[]
   notifications         TraderNotification[]
   createdAt             DateTime             @default(now())
   updatedAt             DateTime             @updatedAt
 }
 
-/// In-app status center for traders (deals + wholesale) — pull inbox, not push.
+/// In-app status center for traders (deals + wholesale + brokerage) — pull inbox, not push.
 model TraderNotification {
   id        String        @id @default(cuid())
   traderId  String
   trader    TraderAccount @relation(fields: [traderId], references: [id], onDelete: Cascade)
-  /// deal | wholesale | system
+  /// deal | wholesale | brokerage | system
   domain    String
   titleAr   String
   titleEn   String
@@ -486,4 +487,96 @@ model WhatsAppLinkAudit {
 
   @@index([conversationId, createdAt])
   @@index([adminId])
+}
+
+/// Fourth commercial domain — trader asks RARE OUD to inspect/source goods (VISION §7).
+model BrokerageRequest {
+  id               String                @id @default(cuid())
+  reference        String                @unique
+  traderId         String
+  trader           TraderAccount         @relation(fields: [traderId], references: [id], onDelete: Restrict)
+  /// SUBMITTED | NEEDS_INFO | ACCEPTED | INSPECTION_SCHEDULED | INSPECTED | QUOTE_SENT | APPROVED | PURCHASED | SHIPPED | DELIVERED | CLOSED | DECLINED | REJECTED | CANCELLED
+  status           String                @default("SUBMITTED")
+  descriptionAr    String
+  descriptionEn    String                @default("")
+  categoryAr       String                @default("")
+  categoryEn       String                @default("")
+  quantity         Int                   @default(1)
+  cityAr           String                @default("")
+  cityEn           String                @default("")
+  placeNameAr      String                @default("")
+  placeNameEn      String                @default("")
+  sellerContact    String                @default("")
+  sourceUrl        String                @default("")
+  budgetMinUsd     Int?
+  budgetMaxUsd     Int?
+  timelineNotes    String                @default("")
+  traderNotes      String                @default("")
+  /// JSON string array of public image paths (trader request photos)
+  photoPaths       String                @default("[]")
+  adminDeclineReason String              @default("")
+  inspectionAt     DateTime?
+  inspectionAssignee String              @default("")
+  inspectionLocation String              @default("")
+  carrier          String                @default("")
+  trackingRef      String                @default("")
+  shippedAt        DateTime?
+  deliveredAt      DateTime?
+  inspection       BrokerageInspection?
+  quote            BrokerageQuote?
+  events           BrokerageEvent[]
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+
+  @@index([traderId, createdAt])
+  @@index([status, createdAt])
+}
+
+model BrokerageInspection {
+  id          String           @id @default(cuid())
+  requestId   String           @unique
+  request     BrokerageRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  /// A | B | C | D
+  grade       String           @default("B")
+  notesAr     String           @default("")
+  notesEn     String           @default("")
+  verdictAr   String           @default("")
+  verdictEn   String           @default("")
+  /// JSON string array of public image paths
+  photoPaths  String           @default("[]")
+  checklist   String           @default("")
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model BrokerageQuote {
+  id              String           @id @default(cuid())
+  requestId       String           @unique
+  request         BrokerageRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  goodsValueUsd   Int
+  /// 1.0 – 2.0
+  commissionRate  Float
+  shippingUsd     Int              @default(0)
+  notesAr         String           @default("")
+  notesEn         String           @default("")
+  validUntil      DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model BrokerageEvent {
+  id        String           @id @default(cuid())
+  requestId String
+  request   BrokerageRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  /// status_change | note | system
+  kind      String           @default("status_change")
+  /// admin | trader | system
+  actor     String
+  fromStatus String?
+  toStatus   String?
+  messageAr  String          @default("")
+  messageEn  String          @default("")
+  createdAt  DateTime        @default(now())
+
+  @@index([requestId, createdAt])
 }
