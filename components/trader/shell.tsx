@@ -51,6 +51,12 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
       waiting: waiting.wholesale,
     },
     {
+      href: "/trader/brokerage",
+      label: dict.trader.brokerage,
+      match: "prefix",
+      icon: "brokerage",
+    },
+    {
       href: "/trader/offers",
       label: dict.trader.offers,
       match: "prefix",

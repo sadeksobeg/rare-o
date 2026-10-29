@@ -1,11 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, Handshake, Package } from "lucide-react";
+import { ChevronRight, Compass, Handshake, Package } from "lucide-react";
 import { PressRipple } from "@/components/motion/press-ripple";
 import { cn } from "@/lib/utils";
 
-const TASK_ICONS = { handshake: Handshake, package: Package } as const;
+const TASK_ICONS = {
+  handshake: Handshake,
+  package: Package,
+  compass: Compass,
+} as const;
 
 export function TaskCard({
   href,

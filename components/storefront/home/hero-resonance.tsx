@@ -27,14 +27,15 @@ export function HeroResonance({
       className="relative isolate min-h-[100svh] overflow-hidden bg-black text-[var(--ro-sand-100)]"
       data-hero="resonance"
     >
-      {/* Soft plum depth — no photo backdrop */}
+      {/* Soft plum + amber atelier depth (design-lab port accents) */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 z-0"
         style={{
           background: [
-            "radial-gradient(ellipse 55% 70% at 38% 55%, rgba(82,39,124,0.28) 0%, transparent 62%)",
-            "radial-gradient(ellipse 40% 50% at 70% 30%, rgba(50,16,79,0.18) 0%, transparent 55%)",
+            "radial-gradient(ellipse 55% 70% at 38% 55%, rgba(82,39,124,0.34) 0%, transparent 62%)",
+            "radial-gradient(ellipse 40% 50% at 70% 30%, rgba(50,16,79,0.22) 0%, transparent 55%)",
+            "radial-gradient(ellipse 35% 40% at 78% 78%, rgba(184,134,63,0.12) 0%, transparent 60%)",
             "linear-gradient(180deg, rgba(0,0,0,0.35) 0%, transparent 18%, transparent 78%, rgba(0,0,0,0.55) 100%)",
           ].join(", "),
         }}

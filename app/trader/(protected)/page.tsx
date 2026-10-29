@@ -4,7 +4,6 @@ import { Activity, Handshake, Home, Package, Sparkles } from "lucide-react";
 import { CountUp } from "@/components/motion/count-up";
 import { DrawIn, RosetteMark } from "@/components/motion/draw-in";
 import { Stagger } from "@/components/motion/reveal";
-import { HomeAmbient } from "@/components/portal/home-ambient";
 import { PressLink } from "@/components/portal/press-link";
 import { DealCard } from "@/components/trader/deal-card";
 import { TaskCard } from "@/components/trader/task-card";
@@ -122,7 +121,6 @@ async function TraderHomeBody({
 
   return (
     <div className="relative space-y-10">
-      <HomeAmbient />
       <TraderPageHeader
         title={greetingHeadline(traderName, dict.common)}
         description={`${waitingLine} — ${t.lead}`}
@@ -199,6 +197,13 @@ async function TraderHomeBody({
               title={t.taskWholesaleTitle}
               body={t.taskWholesaleBody}
               icon="package"
+            />
+            <TaskCard
+              href="/trader/brokerage/new"
+              title={t.taskBrokerageTitle}
+              body={t.taskBrokerageBody}
+              icon="compass"
+              className="sm:col-span-2 xl:col-span-2"
             />
           </div>
         </div>

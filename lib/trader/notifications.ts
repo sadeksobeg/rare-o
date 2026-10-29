@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db/prisma";
 
 export type NotifyTraderInput = {
   traderId: string;
-  domain: "deal" | "wholesale" | "system";
+  domain: "deal" | "wholesale" | "brokerage" | "system";
   titleAr: string;
   titleEn: string;
   bodyAr?: string;

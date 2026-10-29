@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { LiveBadge } from "@/components/motion/live-badge";
 import {
+  Compass,
   Handshake,
   Home,
   Package,
@@ -16,7 +17,7 @@ export type TraderTab = {
   href: string;
   label: string;
   match: "exact" | "prefix";
-  icon: "home" | "deals" | "wholesale" | "offers" | "profile";
+  icon: "home" | "deals" | "wholesale" | "brokerage" | "offers" | "profile";
   waiting?: number;
 };
 
@@ -24,6 +25,7 @@ const icons = {
   home: Home,
   deals: Handshake,
   wholesale: Package,
+  brokerage: Compass,
   offers: Sparkles,
   profile: UserRound,
 };

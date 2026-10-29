@@ -710,6 +710,64 @@ async function main() {
     });
   }
 
+  const brRef = "BR-SEED-014";
+  const existingBr = await prisma.brokerageRequest.findUnique({
+    where: { reference: brRef },
+  });
+  if (!existingBr) {
+    await prisma.brokerageRequest.create({
+      data: {
+        reference: brRef,
+        traderId: trader.id,
+        status: "QUOTE_SENT",
+        descriptionAr: "عود حلبي قديم — بذرة وساطة للتحقق",
+        descriptionEn: "Old Aleppo oud — brokerage seed fixture",
+        categoryAr: "عود كلاسيكي",
+        categoryEn: "Classic Oud",
+        quantity: 1,
+        cityAr: "حلب",
+        cityEn: "Aleppo",
+        placeNameAr: "محل آلات الفرات",
+        placeNameEn: "Al-Furat Instruments",
+        budgetMinUsd: 2000,
+        budgetMaxUsd: 3000,
+        quote: {
+          create: {
+            goodsValueUsd: 2400,
+            commissionRate: 1.5,
+            shippingUsd: 60,
+          },
+        },
+        inspection: {
+          create: {
+            grade: "B",
+            notesAr: "آثار استخدام طبيعية",
+            notesEn: "Normal wear",
+            verdictAr: "موصى بالشراء",
+            verdictEn: "Recommended",
+          },
+        },
+        events: {
+          create: [
+            {
+              actor: "trader",
+              toStatus: "SUBMITTED",
+              messageAr: "تم التقديم",
+              messageEn: "Submitted",
+            },
+            {
+              actor: "admin",
+              fromStatus: "INSPECTED",
+              toStatus: "QUOTE_SENT",
+              messageAr: "أُرسل العرض",
+              messageEn: "Quote sent",
+            },
+          ],
+        },
+      },
+    });
+  }
+
   console.log("Seed complete:");
   console.log(
     "- categories: oud-economy, oud-mid, oud-professional, oud-vip, accessories"
@@ -718,6 +776,7 @@ async function main() {
   console.log(`- admin: ${email}`);
   console.log(`- trader: ${traderEmail}`);
   console.log(`- waiting deal: ${waitingRef} (nextActor=trader)`);
+  console.log(`- brokerage seed: ${brRef} (QUOTE_SENT)`);
   console.log(`- storefront demo currency: ${DEMO_CURRENCY}`);
   console.log(`- regression fixture currency: ${TEST_CURRENCY_CODE} (hidden in UI)`);
   console.log("- offers + promo bands seeded (admin-editable)");
