@@ -46,21 +46,17 @@ function KpiCard({
   trend: "up" | "down";
 }) {
   return (
-    <Link href={href}>
-      <Card className="group relative overflow-hidden transition-shadow hover:shadow-md">
-        <CardContent className="pt-0">
-          <p className="mb-1 text-small text-muted-foreground">{label}</p>
-          <p className="text-h2 font-bold tabular-nums">
-            <NumberTicker value={value} />
-          </p>
-          <div className="mt-2 flex items-center justify-between text-caption">
-            <span className={`flex items-center gap-1 font-semibold ${trend === "up" ? "text-[#1F5130]" : "text-[#8A2433]"}`}>
-              {trend === "up" ? <TrendingUp className="size-4" strokeWidth={1.5} /> : <TrendingDown className="size-4" strokeWidth={1.5} />}
-              {deltaLabel}
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+    <Link href={href} className="group block border-s-2 border-transparent ps-4 transition-colors hover:border-ro-plum-300">
+      <p className="mb-1 text-small text-muted-foreground">{label}</p>
+      <p className="text-h2 font-bold tabular-nums">
+        <NumberTicker value={value} />
+      </p>
+      <div className="mt-2 flex items-center justify-between text-caption">
+        <span className={`flex items-center gap-1 font-semibold ${trend === "up" ? "text-[#1F5130]" : "text-[#8A2433]"}`}>
+          {trend === "up" ? <TrendingUp className="size-4" strokeWidth={1.5} /> : <TrendingDown className="size-4" strokeWidth={1.5} />}
+          {deltaLabel}
+        </span>
+      </div>
     </Link>
   );
 }
@@ -96,7 +92,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* KPI row */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 border-b border-border pb-6 lg:grid-cols-4">
         <KpiCard href="/admin/requests" label={t("kpiNewRetail")} value={kpis.newRetailRequests} deltaLabel={locale === "ar" ? "+12% أسبوعياً" : "+12% weekly"} trend="up" />
         <KpiCard href="/admin/deals" label={t("kpiDealsAwaiting")} value={kpis.dealsAwaitingReply} deltaLabel={locale === "ar" ? "-3% أسبوعياً" : "-3% weekly"} trend="down" />
         <KpiCard href="/admin/wholesale" label={t("kpiWholesale")} value={kpis.wholesaleRequests} deltaLabel={locale === "ar" ? "+2 هذا الأسبوع" : "+2 this week"} trend="up" />

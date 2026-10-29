@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Handshake, Package, Compass } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { currentTrader, traders } from "@/lib/fixtures";
 import { useLocale, useDict } from "@/lib/i18n";
@@ -91,24 +90,20 @@ export default function TraderHomePage() {
 
       <section>
         <h2 className="mb-3 text-h2 font-semibold">{t("myStats")}</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Card>
-            <CardContent>
-              <p className="mb-1 text-small text-muted-foreground">{t("dealsThisMonth")}</p>
-              <p className="text-h2 font-bold tabular-nums">
-                <NumberTicker value={me.dealsCount} />
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent>
-              <p className="mb-1 text-small text-muted-foreground">{t("acceptRate")}</p>
-              <p className="text-h2 font-bold tabular-nums">
-                <NumberTicker value={me.acceptRate} />
-                <span className="text-h3">%</span>
-              </p>
-            </CardContent>
-          </Card>
+        <div className="grid gap-4 border-b border-border pb-6 sm:grid-cols-2">
+          <div className="border-s-2 border-ro-plum-300/40 ps-4">
+            <p className="mb-1 text-small text-muted-foreground">{t("dealsThisMonth")}</p>
+            <p className="text-h2 font-bold tabular-nums">
+              <NumberTicker value={me.dealsCount} />
+            </p>
+          </div>
+          <div className="border-s-2 border-ro-plum-300/40 ps-4">
+            <p className="mb-1 text-small text-muted-foreground">{t("acceptRate")}</p>
+            <p className="text-h2 font-bold tabular-nums">
+              <NumberTicker value={me.acceptRate} />
+              <span className="text-h3">%</span>
+            </p>
+          </div>
         </div>
       </section>
 
