@@ -11,6 +11,7 @@ import { Emblem } from "@/components/brand";
 import { ChromeBadge } from "@/components/portal/chrome-badge";
 import { OfflineBanner } from "@/components/system/offline-banner";
 import { AppToast } from "@/components/system/app-toast";
+import { SonnerToaster } from "@/components/ui/sonner-toaster";
 import { getAdminSessionChrome } from "@/lib/auth/admin-session";
 import { isPromoFeaturesEnabled } from "@/lib/config/feature-flags";
 import { prisma } from "@/lib/db/prisma";
@@ -69,6 +70,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
 
   return (
     <AppToast dismissLabel={dict.common.toastDismiss}>
+      <SonnerToaster />
       <div className="ro-portal ro-portal-admin relative flex min-h-screen text-ro-ink">
         <div className="ro-portal-atmosphere" aria-hidden />
         <div className="relative z-10 flex min-h-screen w-full">

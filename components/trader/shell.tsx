@@ -8,6 +8,7 @@ import { ChromeBadge } from "@/components/portal/chrome-badge";
 import { PortalRouteProgressMount } from "@/components/portal/route-progress-mount";
 import { OfflineBanner } from "@/components/system/offline-banner";
 import { AppToast } from "@/components/system/app-toast";
+import { SonnerToaster } from "@/components/ui/sonner-toaster";
 import {
   TraderBottomTabs,
   TraderDesktopNav,
@@ -72,6 +73,7 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
 
   return (
     <AppToast dismissLabel={dict.common.toastDismiss}>
+      <SonnerToaster />
       <div className="ro-portal ro-portal-trader relative min-h-screen overflow-x-clip text-ro-ink">
         <div className="ro-portal-atmosphere" aria-hidden />
         <Suspense fallback={null}>
