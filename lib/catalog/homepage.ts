@@ -187,3 +187,38 @@ export type HomepageDiscoveryData = Awaited<
 >;
 
 export type HomepageSearchItem = HomepageDiscoveryData["searchIndex"][number];
+
+export function toSearchIndex(products: HomepageProduct[]): HomepageSearchItem[] {
+  return products.map((p) => ({
+    id: p.id,
+    slug: p.slug,
+    nameAr: p.nameAr,
+    nameEn: p.nameEn,
+    descriptionAr: p.descriptionAr,
+    descriptionEn: p.descriptionEn,
+    categorySlug: p.category.slug,
+    categoryNameAr: p.category.nameAr,
+    categoryNameEn: p.category.nameEn,
+    imagePath: p.images[0]?.path ?? null,
+    availability: p.availability,
+    retailPrice: p.retailPrice,
+    currency: p.currency,
+  }));
+}
+
+/**
+ * All published products, mapped the same way the homepage does — used to
+ * mount the storefront's search/quick-view/compare context from the shared
+ * layout, so search works on every storefront page, not only the homepage.
+ * Cheaper than loadHomepageDiscoveryData (skips hero/collections/offers).
+ */
+async function loadDiscoveryProducts(): Promise<HomepageProduct[]> {
+  const rawProducts = await fetchPublishedProducts();
+  return rawProducts.map(mapProduct);
+}
+
+export const getDiscoveryProducts = unstable_cache(
+  loadDiscoveryProducts,
+  ["storefront-discovery-products-v1"],
+  { revalidate: 60, tags: ["catalog"] }
+);

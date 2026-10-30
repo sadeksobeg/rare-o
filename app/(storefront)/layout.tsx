@@ -2,8 +2,10 @@ import { DeferredBrandWallpaper } from "@/components/brand/deferred-wallpaper";
 import { StorefrontHeader } from "@/components/storefront/header";
 import { StorefrontFooter } from "@/components/storefront/footer";
 import { StorefrontProviders } from "@/components/storefront/providers";
+import { GlobalSearchMount } from "@/components/storefront/discovery/global-search-mount";
 import { OfflineBanner } from "@/components/system/offline-banner";
 import { getRequestDictionary } from "@/lib/i18n/server";
+import { getDiscoveryProducts } from "@/lib/catalog/homepage";
 
 export default async function StorefrontLayout({
   children,
@@ -11,9 +13,11 @@ export default async function StorefrontLayout({
   children: React.ReactNode;
 }) {
   const { locale, dict } = await getRequestDictionary();
+  const discoveryProducts = await getDiscoveryProducts();
 
   return (
     <StorefrontProviders toastDismissLabel={dict.common.toastDismiss}>
+      <GlobalSearchMount dict={dict} locale={locale} products={discoveryProducts} />
       {/* No overflow-x-clip here: it forces y-clip and crops hero instruments */}
       <div className="relative flex min-h-screen flex-col bg-[var(--ro-sand-100)] text-ro-ink">
         <DeferredBrandWallpaper
