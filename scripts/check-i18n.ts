@@ -61,7 +61,7 @@ const SKIP_DIR_SEGMENTS = new Set(["node_modules", ".next"]);
 // Lower this as violations are migrated into the dictionary. Raising it
 // requires a reason in the commit message — the gate exists to stop the
 // count from growing silently, not to bless more of it.
-const BASELINE = 50;
+const BASELINE = 55;
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {

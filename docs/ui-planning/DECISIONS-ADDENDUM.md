@@ -71,26 +71,30 @@ cost added to the login routes' own first-load JS (the scene is a separate lazy 
 
 ### Dictionary consolidation: ratchet, not a one-shot fix to zero
 
-Found 54 inline `locale === "ar" ? "..." : "..."` occurrences across 28 files when this phase
-started (a stricter related pattern of raw JSX string literals wasn't separately counted — no
-reliable low-false-positive regex exists for that without a real AST pass, which was out of
-reach this phase). Fixing all 54 in one batch wasn't realistic without either rushing the rest
-of Phase 2 or risking regressions in files this session didn't have time to verify carefully.
-**Decision: migrate what's safely identifiable this phase (5 genuine fixes — see below), and
-turn `scripts/check-i18n.ts` into a ratchet**: it now scans the whole `app/`, `components/`,
-`lib/` tree, prints every remaining violation's `file:line`, and **fails if the count goes above
-the current baseline** (50, after this phase's fixes) — so the debt is permanently visible and
-cannot silently grow, even though it isn't fully paid off yet. Lower `BASELINE` in that script as
-violations are migrated.
+A first manual `grep` pass found ~54 inline `locale === "ar" ? "..." : "..."` occurrences; once
+`scripts/check-i18n.ts` was extended to scan the tree programmatically (walking `app/`,
+`components/`, `lib/` for every `.ts(x)`/`.js(x)` file, not just the subset a hand-rolled grep
+command happened to cover), the accurate count turned out to be **55 across 32 files** — the
+manual pass had undercounted by missing a few `lib/*` and `components/*` files. A stricter
+related pattern (raw JSX string literals with no dictionary lookup at all) wasn't separately
+counted — no reliable low-false-positive regex exists for that without a real AST pass, which
+was out of reach this phase. Fixing all 55 in one batch wasn't realistic without either rushing
+the rest of Phase 2 or risking regressions in files this session didn't have time to verify
+carefully. **Decision: migrate what's safely identifiable this phase (5 genuine fixes — see
+below), and turn `scripts/check-i18n.ts` into a ratchet**: it prints every violation's
+`file:line` and **fails if the count goes above the current baseline** (55, the accurate
+post-fix count) — so the debt is permanently visible and cannot silently grow, even though it
+isn't fully paid off yet. Lower `BASELINE` in that script as violations are migrated.
 
 Important nuance found while triaging: **not every ternary matching that pattern is a genuine
-violation.** Several are legitimate data-locale selection (e.g.
-`app/(storefront)/product/[slug]/page.tsx:107` picks which of a product's bilingual database
-fields to display; `app/admin/(protected)/inbox/layout.tsx:20` picks an `Intl.DateTimeFormat`
-locale code) — there's no dictionary key that makes sense for "which language variant of this
-database row to show." The ratchet count therefore overstates true UI-string debt; a future pass
-should classify the full list (already printed by the script) before assuming all 50 need a
-dictionary key.
+violation.** Several are legitimate data-locale selection: `app/(storefront)/product/[slug]/
+page.tsx:107` picks which of a product's bilingual database fields to display;
+`app/admin/(protected)/inbox/layout.tsx:20`, `components/storefront/header.tsx:23`, and
+`lib/seo.ts:19,38` pick an `Intl.DateTimeFormat`/locale *code* (`"ar"`/`"en"`), not a UI string;
+`lib/utils.ts:14` is the shared `localizedName`-style helper that picks which bilingual field to
+prefer — there's no dictionary key that makes sense for "which language variant of this value to
+show." The ratchet count therefore overstates true UI-string debt; a future pass should classify
+the full list (already printed by the script) before assuming all 55 need a dictionary key.
 
 Fixed this phase (5 occurrences, all genuine hardcoded UI strings):
 - `app/(storefront)/contact/page.tsx` — `locale === "ar" ? "RARE OUD" : "RARE OUD"` (both
