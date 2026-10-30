@@ -11,6 +11,9 @@ import { PrimitivesB1Gallery } from "@/components/dev/primitives-b1-gallery";
 import { PrimitivesB2Gallery } from "@/components/dev/primitives-b2-gallery";
 import { MotionGallery } from "@/components/dev/motion-gallery";
 import { IconGallery } from "@/components/dev/icon-gallery";
+import { DevToastDemo } from "@/components/dev/toast-demo";
+import { DashboardDomainChartMount } from "@/components/admin/dashboard-domain-chart-mount";
+import { SonnerToaster } from "@/components/ui/sonner-toaster";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getRequestLocale } from "@/lib/i18n/server";
 
@@ -129,6 +132,7 @@ export default async function DevUiPage() {
 
   return (
     <div className="min-h-screen bg-ro-canvas text-ro-ink">
+      <SonnerToaster />
       <header className="border-b border-ro-border px-6 py-6">
         <p className="ro-type-overline text-ro-plum">DEV ONLY · /dev/ui</p>
         <h1 className="ro-type-h1 mt-2">UI Foundations Gallery</h1>
@@ -257,11 +261,7 @@ export default async function DevUiPage() {
             <Skeleton className="aspect-[4/5]" />
           </div>
           <div className="mx-auto max-w-xs">
-            <MaterialPlate
-              caption={
-                locale === "ar" ? "الصورة قيد التصوير" : "Photography in progress"
-              }
-            />
+            <MaterialPlate caption={dict.catalog.photoCaption} />
           </div>
           <EmptyState
             title={locale === "ar" ? "لا نتائج" : "No results"}
@@ -453,6 +453,22 @@ export default async function DevUiPage() {
                   }
             }
           />
+        </section>
+
+        <section className="space-y-4" id="sonner-recharts">
+          <h2 className="ro-type-h2">Sonner + recharts</h2>
+          <DevToastDemo locale={locale} />
+          <div className="rounded-[var(--ro-r-sm)] border border-ro-border bg-ro-paper p-6">
+            <DashboardDomainChartMount
+              title={locale === "ar" ? "مثال: توزيع المسارات" : "Example: domain mix"}
+              slices={[
+                { key: "retail", label: locale === "ar" ? "تجزئة" : "Retail", value: 12, color: "var(--ro-plum-700)" },
+                { key: "deals", label: locale === "ar" ? "صفقات" : "Deals", value: 7, color: "var(--ro-plum-300)" },
+                { key: "wholesale", label: locale === "ar" ? "جملة" : "Wholesale", value: 4, color: "var(--ro-amber-500)" },
+                { key: "brokerage", label: locale === "ar" ? "وساطة" : "Brokerage", value: 3, color: "var(--ro-progress-700)" },
+              ]}
+            />
+          </div>
         </section>
       </main>
     </div>

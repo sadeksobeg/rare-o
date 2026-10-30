@@ -44,8 +44,7 @@ export default async function AdminProductsPage({
   const a = dict.admin;
   const u = dict.adminUi;
   const products = await listAdminProducts();
-  const plateCaption =
-    locale === "ar" ? "الصورة قيد التصوير" : "Photography in progress";
+  const plateCaption = dict.catalog.photoCaption;
   const q = qRaw?.trim().toLowerCase() ?? "";
   const tab = tabRaw?.trim() || "all";
 

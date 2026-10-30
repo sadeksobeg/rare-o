@@ -1045,6 +1045,10 @@ type Dict = {
     s3Title: string;
     s3Body: string;
   };
+  terms: {
+    title: string;
+    fallbackBody: string;
+  };
   auth: {
     adminTitle: string;
     traderTitle: string;
@@ -1055,6 +1059,7 @@ type Dict = {
     totpRequired: string;
     totpInvalid: string;
     totpEnrollRequired: string;
+    totpEnrollButton: string;
     showPassword: string;
     hidePassword: string;
     sessionInvalidatedNotice: string;
@@ -2244,6 +2249,10 @@ const ar: Dict = {
     s3Body:
       "[PLACEHOLDER] قسم تجريبي. يضع العميل هنا نص ملفات الارتباط وقنوات التواصل المعتمد.",
   },
+  terms: {
+    title: "شروط الاستخدام",
+    fallbackBody: "محتوى الشروط قيد الإعداد.",
+  },
   auth: {
     adminTitle: "دخول الإدارة",
     traderTitle: "دخول التجّار",
@@ -2254,6 +2263,7 @@ const ar: Dict = {
     totpRequired: "أدخل رمز التحقق أو رمز الاسترداد.",
     totpInvalid: "رمز التحقق غير صحيح.",
     totpEnrollRequired: "فعّل التحقق بخطوتين من إعدادات الأمان قبل الدخول.",
+    totpEnrollButton: "ابدأ تفعيل التحقق بخطوتين",
     showPassword: "إظهار",
     hidePassword: "إخفاء",
     sessionInvalidatedNotice:
@@ -3462,6 +3472,10 @@ const en: Dict = {
     s3Body:
       "[PLACEHOLDER] Sample section. Client supplies approved cookies and contact wording.",
   },
+  terms: {
+    title: "Terms of use",
+    fallbackBody: "Terms content is being prepared.",
+  },
   auth: {
     adminTitle: "Admin sign in",
     traderTitle: "Trader sign in",
@@ -3472,6 +3486,7 @@ const en: Dict = {
     totpRequired: "Enter your authenticator or recovery code.",
     totpInvalid: "That verification code is not valid.",
     totpEnrollRequired: "Turn on two-factor authentication in security settings before signing in.",
+    totpEnrollButton: "Start 2FA enrollment",
     showPassword: "Show",
     hidePassword: "Hide",
     sessionInvalidatedNotice:
