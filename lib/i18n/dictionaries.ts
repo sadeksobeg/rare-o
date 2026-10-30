@@ -360,6 +360,7 @@ type Dict = {
     contentHealthComplete: string;
     pipeline: string;
     pipelineLegend: string;
+    domainMixTitle: string;
     whatsappNoun: string;
     whatsappLastMessage: string;
     whatsappNoMessage: string;
@@ -1056,6 +1057,7 @@ type Dict = {
     totpEnrollRequired: string;
     showPassword: string;
     hidePassword: string;
+    sessionInvalidatedNotice: string;
   };
   forcePasswordChange: {
     title: string;
@@ -1460,6 +1462,7 @@ const ar: Dict = {
     contentHealthComplete: "كل القطع المنشورة لها صور",
     pipeline: "مسار الطلبات",
     pipelineLegend: "جديد · متابعة · فُتح · مكتمل",
+    domainMixTitle: "توزيع المسارات",
     whatsappNoun: "واتساب",
     whatsappLastMessage: "آخر رسالة {relative}",
     whatsappNoMessage: "لا رسائل بعد",
@@ -2253,6 +2256,8 @@ const ar: Dict = {
     totpEnrollRequired: "فعّل التحقق بخطوتين من إعدادات الأمان قبل الدخول.",
     showPassword: "إظهار",
     hidePassword: "إخفاء",
+    sessionInvalidatedNotice:
+      "تم تغيير كلمة المرور من جهاز آخر. سجّل الدخول من جديد.",
   },
   forcePasswordChange: {
     title: "عيّن كلمة مرور جديدة",
@@ -2661,6 +2666,7 @@ const en: Dict = {
     contentHealthComplete: "Every published piece has photos",
     pipeline: "Request path",
     pipelineLegend: "New · Follow-up · Opened · Done",
+    domainMixTitle: "Domain mix",
     whatsappNoun: "WhatsApp",
     whatsappLastMessage: "Last message {relative}",
     whatsappNoMessage: "No messages yet",
@@ -3468,6 +3474,8 @@ const en: Dict = {
     totpEnrollRequired: "Turn on two-factor authentication in security settings before signing in.",
     showPassword: "Show",
     hidePassword: "Hide",
+    sessionInvalidatedNotice:
+      "Your password was changed on another device. Please sign in again.",
   },
   forcePasswordChange: {
     title: "Set a new password",

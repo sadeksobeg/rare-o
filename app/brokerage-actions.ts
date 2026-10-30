@@ -4,8 +4,14 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import type { ActionResult } from "@/app/actions";
-import { requireAdminSession } from "@/lib/auth/admin-session";
-import { requireTraderSession } from "@/lib/auth/trader-session";
+import {
+  handleAdminSessionError,
+  requireAdminSession,
+} from "@/lib/auth/admin-session";
+import {
+  handleTraderSessionError,
+  requireTraderSession,
+} from "@/lib/auth/trader-session";
 import {
   appendBrokerageRequestPhotos,
   adminTransitionBrokerage,
@@ -59,7 +65,12 @@ export async function traderCreateBrokerageAction(
   _prev: ActionResult | null,
   formData: FormData
 ): Promise<ActionResult> {
-  const session = await requireTraderSession();
+  let session;
+  try {
+    session = await requireTraderSession();
+  } catch (e) {
+    return handleTraderSessionError(e);
+  }
   const parsed = createSchema.safeParse({
     descriptionAr: formData.get("descriptionAr"),
     descriptionEn: formData.get("descriptionEn") || undefined,
@@ -103,7 +114,12 @@ export async function traderRespondQuoteAction(
   _prev: ActionResult | null,
   formData: FormData
 ): Promise<ActionResult> {
-  const session = await requireTraderSession();
+  let session;
+  try {
+    session = await requireTraderSession();
+  } catch (e) {
+    return handleTraderSessionError(e);
+  }
   const id = String(formData.get("id") ?? "");
   const decision = String(formData.get("decision") ?? "");
   if (!id || (decision !== "approve" && decision !== "reject")) {
@@ -130,7 +146,12 @@ export async function traderResubmitBrokerageAction(
   _prev: ActionResult | null,
   formData: FormData
 ): Promise<ActionResult> {
-  const session = await requireTraderSession();
+  let session;
+  try {
+    session = await requireTraderSession();
+  } catch (e) {
+    return handleTraderSessionError(e);
+  }
   const id = String(formData.get("id") ?? "");
   if (!id) return { ok: false, error: "VALIDATION" };
   const files = collectPhotoFiles(formData);
@@ -172,7 +193,11 @@ export async function adminBrokerageTransitionAction(
   _prev: ActionResult | null,
   formData: FormData
 ): Promise<ActionResult> {
-  await requireAdminSession();
+  try {
+    await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
   const id = String(formData.get("id") ?? "");
   const toStatus = String(formData.get("toStatus") ?? "") as BrokerageStatus;
   if (!id || !toStatus) return { ok: false, error: "VALIDATION" };
@@ -204,7 +229,11 @@ export async function adminSaveInspectionAction(
   _prev: ActionResult | null,
   formData: FormData
 ): Promise<ActionResult> {
-  await requireAdminSession();
+  try {
+    await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
   const requestId = String(formData.get("requestId") ?? "");
   if (!requestId) return { ok: false, error: "VALIDATION" };
   const files = collectPhotoFiles(formData);
@@ -243,7 +272,11 @@ export async function adminSendQuoteAction(
   _prev: ActionResult | null,
   formData: FormData
 ): Promise<ActionResult> {
-  await requireAdminSession();
+  try {
+    await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
   const requestId = String(formData.get("requestId") ?? "");
   const goodsValueUsd = Number(formData.get("goodsValueUsd"));
   const commissionRate = Number(formData.get("commissionRate"));

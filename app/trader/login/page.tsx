@@ -12,10 +12,10 @@ export const metadata: Metadata = {
 export default async function TraderLoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ returnTo?: string }>;
+  searchParams: Promise<{ returnTo?: string; notice?: string }>;
 }) {
   const { locale, dict } = await getRequestDictionary();
-  const { returnTo } = await searchParams;
+  const { returnTo, notice } = await searchParams;
   const ar = locale === "ar";
   const accountRequestHref =
     whatsAppGreetingLink(
@@ -69,6 +69,11 @@ export default async function TraderLoginPage({
           : "Repeated sign-in attempts are paused temporarily to protect your account"
       }
       returnTo={returnTo}
+      notice={
+        notice === "session_invalidated"
+          ? dict.auth.sessionInvalidatedNotice
+          : undefined
+      }
     >
       <AdminLocaleToggle
         locale={locale}

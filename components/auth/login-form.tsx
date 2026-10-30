@@ -47,6 +47,7 @@ export function LoginForm({
   roleTraderLabel = "Trader",
   rateLimitFooter,
   capsLockLabel = "Caps Lock is on",
+  notice,
 }: {
   action: (
     prev: ActionResult | null,
@@ -79,6 +80,8 @@ export function LoginForm({
   roleTraderLabel?: string;
   rateLimitFooter?: string;
   capsLockLabel?: string;
+  /** e.g. "Your password was changed on another device. Please sign in again." */
+  notice?: string;
 }) {
   const [state, formAction, pending] = useActionState(action, initial);
   const [reveal, setReveal] = useState(false);
@@ -225,6 +228,12 @@ export function LoginForm({
           ) : (
             <div className="mb-6" />
           )}
+
+          {notice ? (
+            <Banner tone="info" className="mb-4">
+              {notice}
+            </Banner>
+          ) : null}
 
           {locked ? (
             <div className="mb-4 flex items-start gap-2 rounded-[8px] bg-[var(--ro-danger-100)] p-3 text-sm text-[var(--ro-danger-700)]">

@@ -152,6 +152,56 @@ async function main() {
       traversal.status === 404,
       `non-matching filename pattern -> 404 (got ${traversal.status})`
     );
+
+    // L-1 (AUDIT-PHASE-1.md): a session forced to change its password must
+    // not be able to fetch protected media either, same as every other
+    // gated action/page. The admin row here is the real seeded account, so
+    // its flag is reset in a finally — never left stuck on failure.
+    await prisma.traderAccount.update({
+      where: { id: traderA.id },
+      data: { mustChangePassword: true },
+    });
+    try {
+      const ownerForced = await fetch(mediaUrl, {
+        headers: { Cookie: `ro_trader_session=${traderAToken}` },
+      });
+      assert(
+        ownerForced.status === 404,
+        `owning trader with mustChangePassword=true -> 404 (L-1, got ${ownerForced.status})`
+      );
+    } finally {
+      await prisma.traderAccount.update({
+        where: { id: traderA.id },
+        data: { mustChangePassword: false },
+      });
+    }
+
+    await prisma.adminUser.update({
+      where: { id: admin.id },
+      data: { mustChangePassword: true },
+    });
+    try {
+      const adminForced = await fetch(mediaUrl, {
+        headers: { Cookie: `ro_admin_session=${adminToken}` },
+      });
+      assert(
+        adminForced.status === 404,
+        `admin with mustChangePassword=true -> 404 (L-1, got ${adminForced.status})`
+      );
+    } finally {
+      await prisma.adminUser.update({
+        where: { id: admin.id },
+        data: { mustChangePassword: false },
+      });
+    }
+
+    const afterReset = await fetch(mediaUrl, {
+      headers: { Cookie: `ro_trader_session=${traderAToken}` },
+    });
+    assert(
+      afterReset.status === 200,
+      `owning trader after mustChangePassword cleared -> 200 (got ${afterReset.status})`
+    );
   } catch (e) {
     failed++;
     console.error(

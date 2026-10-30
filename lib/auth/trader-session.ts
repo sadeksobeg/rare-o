@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
 import {
   hashPassword,
@@ -108,13 +109,20 @@ export const requireTraderSession = cache(async (): Promise<TraderSession> => {
   return session;
 });
 
-/** Only for the change-password action and sign-out — skips the gate above. */
-export const requireTraderSessionAllowPasswordChange = cache(
-  async (): Promise<TraderSession> => {
+type TraderSessionStatus =
+  | { ok: true; session: TraderSession }
+  | { ok: false; reason: "no-token" | "pwv-mismatch" };
+
+/**
+ * DB-authoritative: the JWT identity is trusted, but account status,
+ * mustChangePassword, and the pwv (password-version) check always come from
+ * the database, never the token alone — a stale JWT from before a reset or a
+ * password change on another device must not pass.
+ */
+const getTraderSessionStatus = cache(
+  async (): Promise<TraderSessionStatus> => {
     const session = await getTraderSession();
-    if (!session) {
-      throw new Error("UNAUTHORIZED");
-    }
+    if (!session) return { ok: false, reason: "no-token" };
     const trader = await prisma.traderAccount.findUnique({
       where: { id: session.sub },
       select: {
@@ -127,24 +135,85 @@ export const requireTraderSessionAllowPasswordChange = cache(
       },
     });
     if (!trader || trader.status !== "active") {
-      throw new Error("UNAUTHORIZED");
+      return { ok: false, reason: "no-token" };
     }
     const currentPwv = trader.passwordChangedAt?.getTime() ?? 0;
     // A token issued before the last password change is a stale session on
-    // another device/browser — treat it as signed out.
+    // another device/browser — treat it as signed out, distinctly from
+    // "never logged in" so callers can show the right message.
     if (session.pwv !== currentPwv) {
-      throw new Error("UNAUTHORIZED");
+      return { ok: false, reason: "pwv-mismatch" };
     }
-    // DB is authoritative — a stale JWT from before a reset must not let a
-    // server action skip the gate.
     return {
-      sub: trader.id,
-      email: trader.email,
-      displayName: trader.displayName,
-      mustChangePassword: trader.mustChangePassword,
-      pwv: currentPwv,
+      ok: true,
+      session: {
+        sub: trader.id,
+        email: trader.email,
+        displayName: trader.displayName,
+        mustChangePassword: trader.mustChangePassword,
+        pwv: currentPwv,
+      },
     };
   }
 );
+
+/**
+ * DB-authoritative, non-throwing (status + pwv checked, mustChangePassword
+ * NOT gated here — same shape as getAdminSession). Use where you need "is
+ * this a real, current trader session" without the forced-change gate, e.g.
+ * the brokerage media route (see L-1 in AUDIT-PHASE-1.md).
+ */
+export async function getTraderSessionDb(): Promise<TraderSession | null> {
+  const status = await getTraderSessionStatus();
+  return status.ok ? status.session : null;
+}
+
+/** Only for the change-password action and sign-out — skips the gate above. */
+export async function requireTraderSessionAllowPasswordChange(): Promise<TraderSession> {
+  const status = await getTraderSessionStatus();
+  if (!status.ok) {
+    throw new Error(
+      status.reason === "pwv-mismatch" ? "SESSION_INVALIDATED" : "UNAUTHORIZED"
+    );
+  }
+  return status.session;
+}
+
+/**
+ * For Server Component pages/layouts: redirects cleanly instead of letting
+ * MUST_CHANGE_PASSWORD / SESSION_INVALIDATED / UNAUTHORIZED bubble to the
+ * generic error.tsx boundary. Call at the top of every protected trader
+ * layout/page that needs the session.
+ */
+export async function requireTraderSessionOrRedirect(): Promise<TraderSession> {
+  try {
+    return await requireTraderSession();
+  } catch (e) {
+    if (e instanceof Error && e.message === "MUST_CHANGE_PASSWORD") {
+      redirect("/trader/force-password-change");
+    }
+    if (e instanceof Error && e.message === "SESSION_INVALIDATED") {
+      redirect("/trader/sign-out-stale");
+    }
+    redirect("/trader/login");
+  }
+}
+
+/**
+ * For Server Actions: on SESSION_INVALIDATED, clears the cookie and redirects
+ * (the framework follows this the same way it follows a successful action's
+ * redirect — no special client code needed). Any other session error falls
+ * back to a plain ActionResult the action's own catch block can return.
+ */
+export async function handleTraderSessionError(
+  e: unknown,
+  fallbackError = "Unauthorized"
+): Promise<{ ok: false; error: string }> {
+  if (e instanceof Error && e.message === "SESSION_INVALIDATED") {
+    await clearTraderSessionCookie();
+    redirect("/trader/login?notice=session_invalidated");
+  }
+  return { ok: false, error: fallbackError };
+}
 
 export const TRADER_SESSION_COOKIE = COOKIE_NAME;

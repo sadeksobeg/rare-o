@@ -4,7 +4,10 @@ import { revalidatePath } from "next/cache";
 import { randomUUID } from "node:crypto";
 
 import type { ActionResult } from "@/app/actions";
-import { requireAdminSession } from "@/lib/auth/admin-session";
+import {
+  handleAdminSessionError,
+  requireAdminSession,
+} from "@/lib/auth/admin-session";
 import {
   getInboxConversation,
   getInboxHealthView,
@@ -39,8 +42,8 @@ export async function adminListInboxConversationsAction(): Promise<
 > {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
   const data = await listInboxConversations();
   return { ok: true, data };
@@ -55,8 +58,8 @@ export async function adminGetInboxConversationAction(
 > {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
   const data = await getInboxConversation(conversationId);
   if (!data) return { ok: false, error: "NOT_FOUND" };
@@ -68,8 +71,8 @@ export async function adminGetInboxHealthAction(): Promise<
 > {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
   const data = await getInboxHealthView();
   return { ok: true, data };
@@ -80,8 +83,8 @@ export async function adminMarkInboxConversationReadAction(
 ): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
   const ok = await markConversationRead(conversationId);
   if (!ok) return { ok: false, error: "NOT_FOUND" };
@@ -110,8 +113,8 @@ export async function adminSendWhatsAppTextAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
 
   const conversationId = String(formData.get("conversationId") || "").trim();
@@ -175,8 +178,8 @@ export async function adminLinkWhatsAppConversationAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
 
   const conversationId = String(formData.get("conversationId") || "").trim();
@@ -208,8 +211,8 @@ export async function adminUnlinkWhatsAppConversationAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
 
   const conversationId = String(formData.get("conversationId") || "").trim();
@@ -236,8 +239,8 @@ export async function adminGetBusinessContextAction(
 > {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
   const data = await getBusinessContextForConversation(conversationId);
   return { ok: true, data };
@@ -253,8 +256,8 @@ export async function adminRetryWhatsAppMessageAction(
 ): Promise<ActionResult & { data?: { messageId: string; status: string } }> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
 
   const messageId = String(formData.get("messageId") || "").trim();
@@ -310,8 +313,8 @@ export async function adminSearchLinkableRecordsAction(
 ): Promise<ActionResult & { data?: LinkableRecordHit[] }> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
 
   const linkType = String(formData.get("linkType") || "").trim();
@@ -406,8 +409,8 @@ export async function adminRequestWhatsAppPairingAction(
 ): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
 
   const digits = normalizePairingPhone(String(phone ?? ""));
@@ -427,8 +430,8 @@ export async function adminRequestWhatsAppPairingAction(
 export async function adminWhatsAppReconnectAction(): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
 
   if (isFakeWhatsAppAdapter()) {
@@ -444,8 +447,8 @@ export async function adminWhatsAppReconnectAction(): Promise<ActionResult> {
 export async function adminWhatsAppLogoutAction(): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
 
   if (isFakeWhatsAppAdapter()) {

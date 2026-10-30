@@ -36,6 +36,29 @@ function assert(cond: boolean, msg: string) {
   console.log(`PASS: ${msg}`);
 }
 
+const cleanupState = {
+  dealId: "",
+  traderIds: [] as string[],
+  lockEmail: "f5-lock-admin@rareoud.local",
+};
+
+async function cleanup() {
+  // DealProposal.trader is onDelete: Restrict, so the deal (and its cascaded
+  // NegotiationEntry rows) must go before the trader rows.
+  if (cleanupState.dealId) {
+    await prisma.dealProposal.deleteMany({ where: { id: cleanupState.dealId } });
+  }
+  if (cleanupState.traderIds.length > 0) {
+    await prisma.traderAccount.deleteMany({
+      where: { id: { in: cleanupState.traderIds } },
+    });
+  }
+  await prisma.adminUser.deleteMany({
+    where: { email: cleanupState.lockEmail },
+  });
+  console.log("cleanup: removed f5-security-checks fixtures");
+}
+
 async function main() {
   if (!process.env.AUTH_SECRET || process.env.AUTH_SECRET.length < 16) {
     process.env.AUTH_SECRET = "f5-security-checks-secret";
@@ -63,6 +86,8 @@ async function main() {
     },
   });
 
+  cleanupState.traderIds = [traderA.id, traderB.id];
+
   const deal = await createDealProposal({
     traderId: traderA.id,
     dealKind: "non_catalog",
@@ -72,6 +97,7 @@ async function main() {
     quantity: 1,
     message: "seed",
   });
+  cleanupState.dealId = deal.id;
 
   let idor = false;
   try {
@@ -177,12 +203,19 @@ async function main() {
   assert(!upload.ok && upload.error === "TYPE", "SVG upload rejected (TYPE)");
 
   console.log(`\nf5-security-checks: ${passed} passed, ${failed} failed`);
-  await prisma.$disconnect();
-  process.exit(failed > 0 ? 1 : 0);
 }
 
-main().catch(async (e) => {
-  console.error(e);
-  await prisma.$disconnect();
-  process.exit(1);
-});
+main()
+  .catch((e) => {
+    console.error(e);
+    failed += 1;
+  })
+  .then(() => cleanup())
+  .catch((e) => {
+    console.error("cleanup failed", e);
+    failed += 1;
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+    process.exit(failed > 0 ? 1 : 0);
+  });

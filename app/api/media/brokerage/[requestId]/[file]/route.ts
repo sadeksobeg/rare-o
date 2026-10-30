@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getAdminSession } from "@/lib/auth/admin-session";
-import { getTraderSession } from "@/lib/auth/trader-session";
+import { getTraderSessionDb } from "@/lib/auth/trader-session";
 import { uploadsRoot } from "@/lib/brokerage/media";
 
 /** Server-generated names only — see saveBrokeragePhotos in lib/brokerage/media.ts. */
@@ -27,9 +27,19 @@ export async function GET(
 
   const [adminSession, traderSession] = await Promise.all([
     getAdminSession(),
-    getTraderSession(),
+    getTraderSessionDb(),
   ]);
   if (!adminSession && !traderSession) {
+    return notFound();
+  }
+  // A session forced to change its password is not fully authenticated for
+  // any protected resource — same gate as requireAdminSession/
+  // requireTraderSession apply everywhere else (AUDIT-PHASE-1.md, L-1).
+  // Admin takes priority when both cookies are present, matching the
+  // ownership check below.
+  if (adminSession) {
+    if (adminSession.mustChangePassword) return notFound();
+  } else if (traderSession?.mustChangePassword) {
     return notFound();
   }
 

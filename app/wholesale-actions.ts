@@ -2,8 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import type { ActionResult } from "@/app/actions";
-import { requireAdminSession } from "@/lib/auth/admin-session";
-import { requireTraderSession } from "@/lib/auth/trader-session";
+import {
+  handleAdminSessionError,
+  requireAdminSession,
+} from "@/lib/auth/admin-session";
+import {
+  handleTraderSessionError,
+  requireTraderSession,
+} from "@/lib/auth/trader-session";
 import {
   wholesaleAdminTransitionSchema,
   wholesaleQuoteSchema,
@@ -40,8 +46,8 @@ export async function traderCreateWholesaleRequestAction(
   let session;
   try {
     session = await requireTraderSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleTraderSessionError(e);
   }
 
   let linesRaw: unknown = [];
@@ -101,8 +107,8 @@ export async function traderRespondWholesaleQuoteAction(
   let session;
   try {
     session = await requireTraderSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleTraderSessionError(e);
   }
 
   const parsed = wholesaleTraderRespondSchema.safeParse({
@@ -138,8 +144,8 @@ export async function traderCancelWholesaleRequestAction(
   let session;
   try {
     session = await requireTraderSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleTraderSessionError(e);
   }
 
   const parsed = wholesaleRequestIdSchema.safeParse({
@@ -170,8 +176,8 @@ export async function adminTransitionWholesaleAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const parsed = wholesaleAdminTransitionSchema.safeParse({
@@ -206,8 +212,8 @@ export async function adminProvideWholesaleQuoteAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const parsed = wholesaleQuoteSchema.safeParse({
@@ -260,8 +266,8 @@ export async function adminUpdateWholesaleShippingAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const requestId = String(formData.get("requestId") || "").trim();

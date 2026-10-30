@@ -16,13 +16,17 @@ import {
 import {
   clearTraderSessionCookie,
   createTraderSessionToken,
+  handleTraderSessionError,
   hashPassword,
   requireTraderSession,
   requireTraderSessionAllowPasswordChange,
   setTraderSessionCookie,
   verifyPassword,
 } from "@/lib/auth/trader-session";
-import { requireAdminSession } from "@/lib/auth/admin-session";
+import {
+  handleAdminSessionError,
+  requireAdminSession,
+} from "@/lib/auth/admin-session";
 import { checkNewPassword } from "@/lib/auth/password-policy";
 import { safePortalReturnTo } from "@/lib/auth/return-to";
 import { prisma } from "@/lib/db/prisma";
@@ -105,8 +109,8 @@ export async function traderChangePasswordAction(
   let session;
   try {
     session = await requireTraderSessionAllowPasswordChange();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleTraderSessionError(e);
   }
 
   const parsed = changePasswordSchema.safeParse({
@@ -193,8 +197,8 @@ export async function adminCreateTraderAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const tempPassword = generateTempPassword();
@@ -246,8 +250,8 @@ export async function adminSetTraderStatusAction(
 ): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const traderId = String(formData.get("traderId") || "");
@@ -274,8 +278,8 @@ export async function adminResetTraderPasswordAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const traderId = String(formData.get("traderId") || "");
@@ -322,8 +326,8 @@ export async function traderCreateDealAction(
   let session;
   try {
     session = await requireTraderSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleTraderSessionError(e);
   }
 
   const parsed = dealProposalCreateSchema.safeParse({
@@ -376,8 +380,8 @@ export async function traderNegotiateAction(
   let session;
   try {
     session = await requireTraderSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleTraderSessionError(e);
   }
 
   const parsed = negotiationEntrySchema.safeParse({
@@ -431,8 +435,8 @@ export async function adminNegotiateAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const parsed = negotiationEntrySchema.safeParse({
@@ -490,8 +494,8 @@ export async function adminUpsertPublicOfferAction(
 ): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const id = String(formData.get("id") || "");
@@ -544,8 +548,8 @@ export async function adminSetPublicOfferStatusAction(
 ): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const parsed = publicOfferStatusSchema.safeParse({

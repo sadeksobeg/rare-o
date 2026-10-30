@@ -16,6 +16,7 @@ import {
 import { oudSpecsFromFormData } from "@/lib/catalog/oud-specs";
 import {
   createAdminSessionToken,
+  handleAdminSessionError,
   hashPassword,
   requireAdminSession,
   requireAdminSessionAllowPasswordChange,
@@ -170,8 +171,8 @@ export async function adminChangePasswordAction(
   let session;
   try {
     session = await requireAdminSessionAllowPasswordChange();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const parsed = changePasswordSchema.safeParse({
@@ -254,8 +255,8 @@ export async function enrollAdminTotpAction(): Promise<
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
   const {
     generateTotpSecret,
@@ -284,8 +285,8 @@ export async function confirmAdminTotpAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
   const code = String(formData.get("totpCode") || "").trim();
   const admin = await prisma.adminUser.findUnique({
@@ -323,8 +324,8 @@ export async function upsertProductAction(
   let adminSession;
   try {
     adminSession = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const id = String(formData.get("id") || "");
@@ -435,8 +436,8 @@ export async function attachProductImageAction(
 ): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const productId = String(formData.get("productId") || "");
@@ -542,8 +543,8 @@ export async function updateCategoryAction(
 ): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
   const parsed = categoryLabelUpdateSchema.safeParse({
     id: formData.get("id"),
@@ -568,8 +569,8 @@ export async function createCategoryAction(
 ): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
   const parsed = categoryCreateSchema.safeParse({
     slug: formData.get("slug"),
@@ -597,8 +598,8 @@ export async function deleteCategoryAction(
 ): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
   const id = String(formData.get("id") || "");
   if (!id) return { ok: false, error: "CATEGORY_INVALID" };
@@ -735,8 +736,8 @@ export async function adminTransitionRetailRequestAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const parsed = retailRequestTransitionSchema.safeParse({
@@ -774,8 +775,8 @@ export async function adminRetriggerRetailHandoffAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const parsed = retailRequestIdSchema.safeParse({
@@ -818,8 +819,8 @@ export async function adminMarkRetailHandoffOpenedAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const parsed = retailRequestIdSchema.safeParse({
@@ -857,8 +858,8 @@ export async function upsertPromoBandAction(
 ): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const id = String(formData.get("id") || "");

@@ -2,7 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import type { ActionResult } from "@/app/actions";
-import { requireTraderSession } from "@/lib/auth/trader-session";
+import {
+  handleTraderSessionError,
+  requireTraderSession,
+} from "@/lib/auth/trader-session";
 import { prisma } from "@/lib/db/prisma";
 import {
   markAllTraderNotificationsRead,
@@ -17,8 +20,8 @@ export async function traderUpdatePreferencesAction(
   let session;
   try {
     session = await requireTraderSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleTraderSessionError(e);
   }
 
   const slugs = formData
