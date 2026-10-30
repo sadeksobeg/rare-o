@@ -118,6 +118,17 @@ export async function traderChangePasswordAction(
     return { ok: false, error: "LOGIN_INVALID" };
   }
 
+  const { clearLoginFailures, isLoginLocked, recordLoginFailure } =
+    await import("@/lib/auth/rate-limit");
+  const lock = isLoginLocked("trader-pwchange", session.sub);
+  if (lock.locked) {
+    return {
+      ok: false,
+      error: "LOGIN_LOCKED",
+      data: { retryAfterSec: lock.retryAfterSec ?? 60 },
+    };
+  }
+
   const trader = await prisma.traderAccount.findUnique({
     where: { id: session.sub },
     select: { id: true, email: true, passwordHash: true },
@@ -131,8 +142,10 @@ export async function traderChangePasswordAction(
     trader.passwordHash
   );
   if (!currentOk) {
+    recordLoginFailure("trader-pwchange", session.sub);
     return { ok: false, error: "CURRENT_WRONG" };
   }
+  clearLoginFailures("trader-pwchange", session.sub);
 
   const policyError = checkNewPassword(
     parsed.data.newPassword,

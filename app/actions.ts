@@ -183,6 +183,17 @@ export async function adminChangePasswordAction(
     return { ok: false, error: "LOGIN_INVALID" };
   }
 
+  const { clearLoginFailures, isLoginLocked, recordLoginFailure } =
+    await import("@/lib/auth/rate-limit");
+  const lock = isLoginLocked("admin-pwchange", session.sub);
+  if (lock.locked) {
+    return {
+      ok: false,
+      error: "LOGIN_LOCKED",
+      data: { retryAfterSec: lock.retryAfterSec ?? 60 },
+    };
+  }
+
   const admin = await prisma.adminUser.findUnique({
     where: { id: session.sub },
     select: { id: true, email: true, name: true, passwordHash: true },
@@ -196,8 +207,10 @@ export async function adminChangePasswordAction(
     admin.passwordHash
   );
   if (!currentOk) {
+    recordLoginFailure("admin-pwchange", session.sub);
     return { ok: false, error: "CURRENT_WRONG" };
   }
+  clearLoginFailures("admin-pwchange", session.sub);
 
   const policyError = checkNewPassword(
     parsed.data.newPassword,

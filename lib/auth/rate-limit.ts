@@ -20,7 +20,7 @@ function key(scope: string, identity: string) {
 }
 
 export function isLoginLocked(
-  scope: "admin" | "trader",
+  scope: string,
   identity: string
 ): { locked: boolean; retryAfterSec?: number } {
   const b = buckets.get(key(scope, identity));
@@ -40,7 +40,7 @@ export function isLoginLocked(
 }
 
 export function recordLoginFailure(
-  scope: "admin" | "trader",
+  scope: string,
   identity: string
 ): { locked: boolean; retryAfterSec?: number } {
   const k = key(scope, identity);
@@ -64,7 +64,7 @@ export function recordLoginFailure(
 }
 
 export function clearLoginFailures(
-  scope: "admin" | "trader",
+  scope: string,
   identity: string
 ): void {
   buckets.delete(key(scope, identity));
