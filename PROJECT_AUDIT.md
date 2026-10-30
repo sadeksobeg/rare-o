@@ -413,3 +413,76 @@ implementation cycles." Continuing to the next route.
 - `app/admin/(protected)/page.tsx` (real layout fix)
 - `docs/pro-readiness/AXE-RESULTS.json` (regenerated)
 - `PROJECT_AUDIT.md` (this entry)
+
+---
+
+## Session 6 — 2026-10-30 — REMAINING-PLAN.md Phase 0 + Phase 1
+
+Phase 0 (safety net) and Phase 1 (security gaps) executed per
+`docs/ui-planning/REMAINING-PLAN.md` on branch `feat/port-lab-to-real` then
+`phase/01-security`. Full reports live in this session's chat log; summary here
+for future sessions.
+
+**Phase 0:** committed and pushed Cursor's uncommitted port work (9 commits),
+reconciled the `20261029160000_brokerage_request_photos` migration (proved no
+drift, `migrate resolve --applied`, proved the migration SQL on a disposable
+fresh database), cleaned 12 leftover E2E test rows, made
+`scripts/brokerage-lifecycle-e2e.ts` self-cleaning + added the CANCELLED
+scenario, added the AR/EN dictionary-keys section to `BROKERAGE-SPEC.md`.
+Push initially failed twice with a mid-transfer HTTPS connection reset on the
+~77MB/55-commit payload (not a credential or file-size issue) — resolved by
+splitting the push into two smaller transfers.
+
+**Phase 1:** AUDIT-2026-10-30.md's C-1 and C-2 findings fixed and verified live:
+- **C-1 (brokerage photos unauthenticated):** moved storage from
+  `public/uploads/brokerage` to `storage/uploads/brokerage` (outside the web
+  root, gitignored), added `app/api/media/brokerage/[requestId]/[file]/route.ts`
+  (session + ownership check, strict filename validation, path-traversal
+  guard, 404 never 403). Verified with a real HTTP test against the running
+  dev server (`scripts/brokerage-media-security-checks.ts`, 9/9 passed:
+  unauthenticated/wrong-trader/traversal → 404, owner/admin → 200).
+- **C-2 (no forced password change):** additive migration
+  (`mustChangePassword`, `passwordChangedAt` on `AdminUser` and
+  `TraderAccount`), server-enforced via `requireAdminSession`/
+  `requireTraderSession` (DB-authoritative, not just the JWT claim) plus a
+  middleware redirect, a `pwv` JWT claim that invalidates sessions on other
+  devices the moment a password changes, `/admin/force-password-change` and
+  `/trader/force-password-change` screens, an admin "reset trader password"
+  action, and the same `ChangePasswordForm` reused in profile/security.
+  Verified live end-to-end in both AR and EN (reset → forced screen → change
+  → access restored → old temp password confirmed rejected).
+- Security sweep: extended login rate-limiting to the two new change-password
+  actions; confirmed `next.config.ts` + `middleware.ts`/`lib/security/csp.ts`
+  already carry a full header set (CSP with per-request nonce, X-Frame-Options,
+  X-Content-Type-Options, Referrer-Policy, Permissions-Policy, HSTS in prod) —
+  nothing missing, nothing changed there.
+
+**Gap found, not fixed (out of scope for Phase 1 — recorded per CLAUDE.md):**
+the dev database has 7 leftover test trader accounts
+(`f5-trader-a@rareoud.local`, `f5-trader-b@rareoud.local`, four
+`e2e-trader-*@rareoud.test`, `e2e-foreign-trader@rareoud.test`) left behind by
+`scripts/f5-security-checks.ts` and other e2e scripts that, unlike
+`brokerage-lifecycle-e2e.ts` (fixed in Phase 0 this session), don't delete
+their own rows. Low impact (dev DB only, doesn't affect production data or
+security), but should be fixed the same way before Phase 2's broader
+regression runs accumulate more of them.
+
+### Tests executed and results
+| Check | Result |
+|---|---|
+| `tsc --noEmit` | PASS |
+| `next lint` | PASS (4 pre-existing warnings, unrelated) |
+| `npm run build` | PASS (clean, all routes) |
+| `check:i18n` | PASS — 1080 string keys match AR/EN |
+| `test:week3` | PASS 58/58 |
+| `test:wholesale-security` | PASS |
+| `test:brokerage-media-security` (new) | PASS 9/9, live HTTP against dev server |
+| `brokerage-lifecycle-e2e.ts` | PASS, self-cleaning confirmed |
+| Live browser: reset → forced change → access restored, AR | PASS |
+| Live browser: reset → forced change → access restored, EN | PASS |
+| Live browser: old temp password rejected after change | PASS |
+
+### Files changed this session
+Commits `3b19c3b`, `52f65c3`, `4df5128`, `c7ff622` on `phase/01-security`
+(branched from `feat/port-lab-to-real` at `ae819db`) — see commit messages for
+the full file list per commit.
