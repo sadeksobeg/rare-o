@@ -2,6 +2,7 @@
 
 import {
   adminCreateTraderAction,
+  adminResetTraderPasswordAction,
   adminSetTraderStatusAction,
 } from "@/app/deal-actions";
 import type { ActionResult } from "@/app/actions";
@@ -133,6 +134,140 @@ export function CreateTraderForm({ dict }: { dict: Dictionary }) {
               onClick={closeReveal}
             >
               {u.traderTempPasswordClose}
+            </Button>
+          </div>
+        ) : null}
+      </Dialog>
+    </>
+  );
+}
+
+export function TraderResetPasswordButton({
+  traderId,
+  label,
+  confirmTitle,
+  confirmBody,
+  confirmLabel,
+  cancelLabel,
+  tempPasswordTitle,
+  tempPasswordLead,
+  tempPasswordCopy,
+  tempPasswordCopied,
+  tempPasswordAck,
+  tempPasswordClose,
+}: {
+  traderId: string;
+  label: string;
+  confirmTitle: string;
+  confirmBody: string;
+  confirmLabel: string;
+  cancelLabel: string;
+  tempPasswordTitle: string;
+  tempPasswordLead: string;
+  tempPasswordCopy: string;
+  tempPasswordCopied: string;
+  tempPasswordAck: string;
+  tempPasswordClose: string;
+}) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [revealed, setRevealed] = useState<TempPasswordPayload | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [acked, setAcked] = useState(false);
+
+  function run() {
+    const fd = new FormData();
+    fd.set("traderId", traderId);
+    startTransition(async () => {
+      const res = await adminResetTraderPasswordAction(fd);
+      setConfirmOpen(false);
+      if (res.ok && res.data && typeof res.data === "object") {
+        const data = res.data as Partial<TempPasswordPayload>;
+        if (
+          typeof data.tempPassword === "string" &&
+          typeof data.email === "string"
+        ) {
+          setRevealed({ tempPassword: data.tempPassword, email: data.email });
+          setCopied(false);
+          setAcked(false);
+        }
+      }
+    });
+  }
+
+  async function copyPassword() {
+    if (!revealed) return;
+    try {
+      await navigator.clipboard.writeText(revealed.tempPassword);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  function closeReveal() {
+    if (!acked) return;
+    setRevealed(null);
+    router.refresh();
+  }
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="secondary"
+        size="sm"
+        loading={pending}
+        className="h-8 px-3"
+        onClick={() => setConfirmOpen(true)}
+      >
+        {label}
+      </Button>
+      <ConfirmDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={run}
+        title={confirmTitle}
+        body={confirmBody}
+        confirmLabel={confirmLabel}
+        cancelLabel={cancelLabel}
+        pending={pending}
+      />
+      <Dialog
+        open={!!revealed}
+        onClose={closeReveal}
+        title={tempPasswordTitle}
+        preventDismiss={!acked}
+      >
+        {revealed ? (
+          <div className="space-y-4">
+            <p className="text-sm text-ro-muted">{tempPasswordLead}</p>
+            <p className="text-sm" dir="ltr">
+              {revealed.email}
+            </p>
+            <p
+              className="rounded-[var(--ro-r-sm)] border border-ro-line bg-ro-paper px-3 py-2 font-mono text-sm tracking-wide"
+              dir="ltr"
+            >
+              {revealed.tempPassword}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" size="sm" variant="secondary" onClick={copyPassword}>
+                {copied ? tempPasswordCopied : tempPasswordCopy}
+              </Button>
+            </div>
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={acked}
+                onChange={(e) => setAcked(e.target.checked)}
+                className="mt-1"
+              />
+              <span>{tempPasswordAck}</span>
+            </label>
+            <Button type="button" size="sm" disabled={!acked} onClick={closeReveal}>
+              {tempPasswordClose}
             </Button>
           </div>
         ) : null}

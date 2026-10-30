@@ -1081,6 +1081,8 @@ type Dict = {
     errorSameAsEmail: string;
     success: string;
     signOut: string;
+    showPassword: string;
+    hidePassword: string;
   };
   changePassword: {
     sectionTitle: string;
@@ -2277,6 +2279,8 @@ const ar: Dict = {
     errorSameAsEmail: "لا يمكن أن تكون كلمة المرور بريدك الإلكتروني.",
     success: "تم تعيين كلمة المرور. سجّلنا خروجك من الأجهزة الأخرى.",
     signOut: "تسجيل الخروج",
+    showPassword: "إظهار",
+    hidePassword: "إخفاء",
   },
   changePassword: {
     sectionTitle: "تغيير كلمة المرور",
@@ -3490,6 +3494,8 @@ const en: Dict = {
     errorSameAsEmail: "Your password can't be your email address.",
     success: "Password set. We signed you out of other devices.",
     signOut: "Sign out",
+    showPassword: "Show",
+    hidePassword: "Hide",
   },
   changePassword: {
     sectionTitle: "Change password",

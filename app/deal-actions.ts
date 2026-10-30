@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { revalidateHomepageAndCatalogTags } from "@/lib/cache/revalidate-storefront";
 import {
+  changePasswordSchema,
   dealProposalCreateSchema,
   negotiationEntrySchema,
   publicOfferStatusSchema,
@@ -15,17 +16,21 @@ import {
 import {
   clearTraderSessionCookie,
   createTraderSessionToken,
+  hashPassword,
   requireTraderSession,
+  requireTraderSessionAllowPasswordChange,
   setTraderSessionCookie,
   verifyPassword,
 } from "@/lib/auth/trader-session";
 import { requireAdminSession } from "@/lib/auth/admin-session";
+import { checkNewPassword } from "@/lib/auth/password-policy";
 import { safePortalReturnTo } from "@/lib/auth/return-to";
 import { prisma } from "@/lib/db/prisma";
 import {
   addNegotiationEntry,
   createDealProposal,
   createTraderAccount,
+  resetTraderAccountPassword,
   setTraderAccountStatus,
 } from "@/lib/deals/service";
 import {
@@ -79,6 +84,8 @@ export async function traderLoginAction(
     sub: trader.id,
     email: trader.email,
     displayName: trader.displayName,
+    mustChangePassword: trader.mustChangePassword,
+    pwv: trader.passwordChangedAt?.getTime() ?? 0,
   });
   await setTraderSessionCookie(token);
   redirect(safePortalReturnTo(formData.get("returnTo"), "/trader"));
@@ -87,6 +94,72 @@ export async function traderLoginAction(
 export async function traderLogoutAction(): Promise<void> {
   await clearTraderSessionCookie();
   redirect("/trader/login");
+}
+
+/** Used both by the forced /trader/force-password-change screen and the
+ *  normal profile "change password" section — same policy either way. */
+export async function traderChangePasswordAction(
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireTraderSessionAllowPasswordChange();
+  } catch {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const parsed = changePasswordSchema.safeParse({
+    currentPassword: formData.get("currentPassword"),
+    newPassword: formData.get("newPassword"),
+    confirmPassword: formData.get("confirmPassword"),
+  });
+  if (!parsed.success) {
+    return { ok: false, error: "LOGIN_INVALID" };
+  }
+
+  const trader = await prisma.traderAccount.findUnique({
+    where: { id: session.sub },
+    select: { id: true, email: true, passwordHash: true },
+  });
+  if (!trader) {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const currentOk = await verifyPassword(
+    parsed.data.currentPassword,
+    trader.passwordHash
+  );
+  if (!currentOk) {
+    return { ok: false, error: "CURRENT_WRONG" };
+  }
+
+  const policyError = checkNewPassword(
+    parsed.data.newPassword,
+    parsed.data.confirmPassword,
+    parsed.data.currentPassword,
+    trader.email
+  );
+  if (policyError) {
+    return { ok: false, error: policyError };
+  }
+
+  const passwordHash = await hashPassword(parsed.data.newPassword);
+  const now = new Date();
+  await prisma.traderAccount.update({
+    where: { id: trader.id },
+    data: { passwordHash, mustChangePassword: false, passwordChangedAt: now },
+  });
+
+  const token = await createTraderSessionToken({
+    sub: trader.id,
+    email: trader.email,
+    displayName: session.displayName,
+    mustChangePassword: false,
+    pwv: now.getTime(),
+  });
+  await setTraderSessionCookie(token);
+  return { ok: true };
 }
 
 function generateTempPassword(length = 14): string {
@@ -178,6 +251,53 @@ export async function adminSetTraderStatusAction(
     return {
       ok: false,
       error: e instanceof Error ? e.message : "Update failed",
+    };
+  }
+}
+
+export async function adminResetTraderPasswordAction(
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const traderId = String(formData.get("traderId") || "");
+  if (!traderId) {
+    return { ok: false, error: "Invalid trader" };
+  }
+
+  const trader = await prisma.traderAccount.findUnique({
+    where: { id: traderId },
+    select: { id: true, email: true },
+  });
+  if (!trader) {
+    return { ok: false, error: "Trader not found" };
+  }
+
+  const tempPassword = generateTempPassword();
+  try {
+    await resetTraderAccountPassword(traderId, tempPassword);
+    const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
+    await writeAdminAudit({
+      adminId: session.sub,
+      action: "trader.password_reset",
+      targetType: "trader",
+      targetId: traderId,
+    });
+    revalidatePath("/admin/traders");
+    return {
+      ok: true,
+      message: "Password reset",
+      data: { tempPassword, email: trader.email },
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Reset failed",
     };
   }
 }

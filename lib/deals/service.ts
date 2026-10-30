@@ -44,7 +44,20 @@ export async function createTraderAccount(input: CreateTraderInput) {
       phone: input.phone?.trim() || "",
       adminNotes: input.adminNotes?.trim() || "",
       status: "active",
+      mustChangePassword: true,
     },
+  });
+}
+
+/** Admin reset: new temp password, forces the change-password screen on next sign-in. */
+export async function resetTraderAccountPassword(
+  traderId: string,
+  tempPassword: string
+) {
+  const passwordHash = await hashPassword(tempPassword);
+  return prisma.traderAccount.update({
+    where: { id: traderId },
+    data: { passwordHash, mustChangePassword: true },
   });
 }
 

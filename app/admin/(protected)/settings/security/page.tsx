@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/admin/page-header";
 import { AdminSecuritySettings } from "@/components/admin/security-settings";
+import { AdminPasswordSettings } from "@/components/admin/password-settings";
 import { getAdminSession } from "@/lib/auth/admin-session";
 import { prisma } from "@/lib/db/prisma";
 import { getRequestDictionary } from "@/lib/i18n/server";
@@ -27,6 +28,10 @@ export default async function AdminSecuritySettingsPage() {
         title={dict.admin.settings}
         description={dict.auth.totpLabel}
         icon={<ShieldCheck className="size-5" strokeWidth={2} />}
+      />
+      <AdminPasswordSettings
+        forceDict={dict.forcePasswordChange}
+        sectionDict={dict.changePassword}
       />
       <AdminSecuritySettings
         email={admin?.email ?? session.email}

@@ -20,6 +20,11 @@ export type AdminSession = {
   sub: string;
   email: string;
   name: string;
+  mustChangePassword: boolean;
+  /** passwordChangedAt.getTime(), or 0 if never changed — a token whose pwv
+   *  doesn't match the DB's current value was issued before a later
+   *  password change and is treated as invalid (other devices/sessions). */
+  pwv: number;
 };
 
 export async function hashPassword(password: string): Promise<string> {
@@ -40,6 +45,8 @@ export async function createAdminSessionToken(
     email: admin.email,
     name: admin.name,
     role: ADMIN_ROLE,
+    mustChangePassword: admin.mustChangePassword,
+    pwv: admin.pwv,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(admin.sub)
@@ -60,6 +67,8 @@ export async function verifyAdminSessionToken(
       sub: payload.sub,
       email: payload.email,
       name: typeof payload.name === "string" ? payload.name : "Admin",
+      mustChangePassword: payload.mustChangePassword === true,
+      pwv: typeof payload.pwv === "number" ? payload.pwv : 0,
     };
   } catch {
     return null;
@@ -102,15 +111,35 @@ export const getAdminSessionChrome = cache(
 export const getAdminSession = cache(async (): Promise<AdminSession | null> => {
   const session = await getAdminSessionChrome();
   if (!session) return null;
-  const exists = await prisma.adminUser.findUnique({
+  const row = await prisma.adminUser.findUnique({
     where: { id: session.sub },
-    select: { id: true },
+    select: { mustChangePassword: true, passwordChangedAt: true },
   });
-  if (!exists) return null;
-  return session;
+  if (!row) return null;
+  const currentPwv = row.passwordChangedAt?.getTime() ?? 0;
+  // A token issued before the last password change is a stale session on
+  // another device/browser — treat it as signed out.
+  if (session.pwv !== currentPwv) return null;
+  // DB is authoritative for this flag — a stale JWT from before a reset
+  // must not let a server action skip the gate.
+  return { ...session, mustChangePassword: row.mustChangePassword };
 });
 
+/**
+ * Use everywhere except the change-password action and sign-out: throws
+ * MUST_CHANGE_PASSWORD so every other action is blocked server-side while
+ * the flag is set, regardless of what the client UI shows.
+ */
 export async function requireAdminSession(): Promise<AdminSession> {
+  const session = await requireAdminSessionAllowPasswordChange();
+  if (session.mustChangePassword) {
+    throw new Error("MUST_CHANGE_PASSWORD");
+  }
+  return session;
+}
+
+/** Only for the change-password action and sign-out — skips the gate above. */
+export async function requireAdminSessionAllowPasswordChange(): Promise<AdminSession> {
   const session = await getAdminSession();
   if (!session) {
     throw new Error("UNAUTHORIZED");

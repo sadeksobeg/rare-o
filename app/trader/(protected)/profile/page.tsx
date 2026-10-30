@@ -6,6 +6,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { TraderPreferencesForm } from "@/components/trader/preferences-form";
+import { TraderPasswordSettings } from "@/components/trader/password-settings";
 import { TraderPageHeader } from "@/components/trader/page-header";
 import { StatusChip } from "@/components/ui/status-chip";
 import { requireTraderSession } from "@/lib/auth/trader-session";
@@ -136,6 +137,11 @@ export default async function TraderProfilePage() {
               ? c.nameAr || c.nameEn || c.slug
               : c.nameEn || c.nameAr || c.slug,
         }))}
+      />
+
+      <TraderPasswordSettings
+        forceDict={dict.forcePasswordChange}
+        sectionDict={dict.changePassword}
       />
     </section>
   );

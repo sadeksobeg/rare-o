@@ -77,6 +77,8 @@ export async function runF5LibUnit(): Promise<{ passed: number; failed: number }
     sub: "admin-1",
     email: "a@example.com",
     name: "Admin",
+    mustChangePassword: false,
+    pwv: 0,
   });
   const adminSession = await verifyAdminSessionToken(adminToken);
   assert(adminSession?.sub === "admin-1", "admin JWT round-trip");
@@ -85,6 +87,8 @@ export async function runF5LibUnit(): Promise<{ passed: number; failed: number }
     sub: "trader-1",
     email: "t@example.com",
     displayName: "Trader",
+    mustChangePassword: false,
+    pwv: 0,
   });
   assert(
     (await verifyAdminSessionToken(traderToken)) === null,

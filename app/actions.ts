@@ -6,6 +6,7 @@ import {
   adminLoginSchema,
   categoryCreateSchema,
   categoryLabelUpdateSchema,
+  changePasswordSchema,
   productUpsertSchema,
   promoBandUpsertSchema,
   retailRequestCreateSchema,
@@ -15,10 +16,13 @@ import {
 import { oudSpecsFromFormData } from "@/lib/catalog/oud-specs";
 import {
   createAdminSessionToken,
+  hashPassword,
   requireAdminSession,
+  requireAdminSessionAllowPasswordChange,
   setAdminSessionCookie,
   verifyPassword,
 } from "@/lib/auth/admin-session";
+import { checkNewPassword } from "@/lib/auth/password-policy";
 import { prisma } from "@/lib/db/prisma";
 import {
   createCategory,
@@ -150,9 +154,83 @@ export async function adminLoginAction(
     sub: admin.id,
     email: admin.email,
     name: admin.name,
+    mustChangePassword: admin.mustChangePassword,
+    pwv: admin.passwordChangedAt?.getTime() ?? 0,
   });
   await setAdminSessionCookie(token);
   redirect(safePortalReturnTo(formData.get("returnTo"), "/admin"));
+}
+
+/** Used both by the forced /admin/force-password-change screen and the
+ *  normal security-settings "change password" section — same policy either way. */
+export async function adminChangePasswordAction(
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSessionAllowPasswordChange();
+  } catch {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const parsed = changePasswordSchema.safeParse({
+    currentPassword: formData.get("currentPassword"),
+    newPassword: formData.get("newPassword"),
+    confirmPassword: formData.get("confirmPassword"),
+  });
+  if (!parsed.success) {
+    return { ok: false, error: "LOGIN_INVALID" };
+  }
+
+  const admin = await prisma.adminUser.findUnique({
+    where: { id: session.sub },
+    select: { id: true, email: true, name: true, passwordHash: true },
+  });
+  if (!admin) {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const currentOk = await verifyPassword(
+    parsed.data.currentPassword,
+    admin.passwordHash
+  );
+  if (!currentOk) {
+    return { ok: false, error: "CURRENT_WRONG" };
+  }
+
+  const policyError = checkNewPassword(
+    parsed.data.newPassword,
+    parsed.data.confirmPassword,
+    parsed.data.currentPassword,
+    admin.email
+  );
+  if (policyError) {
+    return { ok: false, error: policyError };
+  }
+
+  const passwordHash = await hashPassword(parsed.data.newPassword);
+  const now = new Date();
+  await prisma.adminUser.update({
+    where: { id: admin.id },
+    data: { passwordHash, mustChangePassword: false, passwordChangedAt: now },
+  });
+
+  const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
+  await writeAdminAudit({
+    adminId: admin.id,
+    action: "admin.password_change",
+  });
+
+  const token = await createAdminSessionToken({
+    sub: admin.id,
+    email: admin.email,
+    name: admin.name,
+    mustChangePassword: false,
+    pwv: now.getTime(),
+  });
+  await setAdminSessionCookie(token);
+  return { ok: true };
 }
 
 /** Start TOTP enrollment — returns otpauth URL + plaintext recovery codes once. */

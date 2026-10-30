@@ -194,6 +194,12 @@ export const traderLoginSchema = z.object({
   password: z.string().min(8).max(200),
 });
 
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1).max(200),
+  newPassword: z.string().min(10).max(200),
+  confirmPassword: z.string().min(1).max(200),
+});
+
 export const traderCreateSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8).max(200),

@@ -1,5 +1,6 @@
 import {
   CreateTraderForm,
+  TraderResetPasswordButton,
   TraderStatusButton,
 } from "@/components/admin/trader-forms";
 import {
@@ -109,17 +110,33 @@ export default async function AdminTradersPage() {
                 </Td>
                 <Td className="tabular-nums">{t._count.deals}</Td>
                 <Td>
-                  <TraderStatusButton
-                    traderId={t.id}
-                    nextStatus={t.status === "active" ? "disabled" : "active"}
-                    label={
-                      t.status === "active" ? u.traderDisable : u.traderActivate
-                    }
-                    confirmTitle={u.traderDisableTitle}
-                    confirmBody={u.traderDisableBody}
-                    confirmLabel={u.traderDisable}
-                    cancelLabel={dict.common.cancel}
-                  />
+                  <div className="flex flex-wrap gap-2">
+                    <TraderStatusButton
+                      traderId={t.id}
+                      nextStatus={t.status === "active" ? "disabled" : "active"}
+                      label={
+                        t.status === "active" ? u.traderDisable : u.traderActivate
+                      }
+                      confirmTitle={u.traderDisableTitle}
+                      confirmBody={u.traderDisableBody}
+                      confirmLabel={u.traderDisable}
+                      cancelLabel={dict.common.cancel}
+                    />
+                    <TraderResetPasswordButton
+                      traderId={t.id}
+                      label={u.traderResetPassword}
+                      confirmTitle={u.traderResetPasswordConfirmTitle}
+                      confirmBody={u.traderResetPasswordConfirmBody}
+                      confirmLabel={u.traderResetPasswordConfirmLabel}
+                      cancelLabel={dict.common.cancel}
+                      tempPasswordTitle={u.traderTempPasswordTitle}
+                      tempPasswordLead={u.traderTempPasswordLead}
+                      tempPasswordCopy={u.traderTempPasswordCopy}
+                      tempPasswordCopied={u.traderTempPasswordCopied}
+                      tempPasswordAck={u.traderTempPasswordAck}
+                      tempPasswordClose={u.traderTempPasswordClose}
+                    />
+                  </div>
                 </Td>
               </Tr>
             ))}
