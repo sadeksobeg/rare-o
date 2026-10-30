@@ -14,6 +14,7 @@ import {
 import { ActionQueue } from "@/components/admin/action-queue";
 import { ActivityFeed } from "@/components/admin/activity-feed";
 import { DashboardAside } from "@/components/admin/dashboard-aside";
+import { DashboardDomainChartMount } from "@/components/admin/dashboard-domain-chart-mount";
 import { ManageHub } from "@/components/admin/manage-hub";
 import { PageHeader } from "@/components/admin/page-header";
 import { ButtonLink } from "@/components/ui/button";
@@ -57,48 +58,6 @@ function KpiCard({
         <span className="text-[0.7rem] text-[var(--ro-ink-600)]">{idleLabel}</span>
       ) : null}
     </Link>
-  );
-}
-
-function DomainBreakdown({
-  title,
-  slices,
-}: {
-  title: string;
-  slices: { key: string; label: string; value: number; color: string }[];
-}) {
-  const max = Math.max(...slices.map((s) => s.value), 1);
-  return (
-    <div className="rounded-[var(--ro-r-lg)] border border-[var(--ro-border-subtle)] bg-[var(--ro-sand-50)] p-4">
-      <h2 className="font-display text-lg font-semibold text-ro-ink">{title}</h2>
-      <ul className="mt-3 space-y-2.5">
-        {slices.map((s) => (
-          <li key={s.key} className="space-y-1">
-            <div className="flex items-center justify-between gap-2 text-sm">
-              <span className="flex items-center gap-2">
-                <span
-                  className="size-2.5 shrink-0 rounded-sm"
-                  style={{ background: s.color }}
-                />
-                {s.label}
-              </span>
-              <span className="tabular-nums text-[var(--ro-ink-600)]">
-                {s.value}
-              </span>
-            </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--ro-ink-950)_8%,transparent)]">
-              <div
-                className="h-full rounded-full"
-                style={{
-                  width: `${Math.round((s.value / max) * 100)}%`,
-                  background: s.color,
-                }}
-              />
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
   );
 }
 
@@ -171,10 +130,8 @@ async function AdminDashboardBody({
         />
       </div>
 
-      <DomainBreakdown
-        title={
-          locale === "ar" ? "توزيع الانتظار حسب النطاق" : "Waiting by domain"
-        }
+      <DashboardDomainChartMount
+        title={a.domainMixTitle}
         slices={[
           {
             key: "retail",
