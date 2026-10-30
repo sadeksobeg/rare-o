@@ -11,6 +11,10 @@ export const BROKERAGE_ALLOWED_IMAGE_TYPES = [
 
 export type BrokerageMediaError = "TYPE" | "SIZE" | "MAX" | "GENERIC";
 
+/** Served only through the authenticated route handler — see
+ *  app/api/media/brokerage/[requestId]/[file]/route.ts. Never under public/. */
+export const BROKERAGE_MEDIA_URL_PREFIX = "/api/media/brokerage/";
+
 export function parsePhotoPaths(json: string | null | undefined): string[] {
   if (!json) return [];
   try {
@@ -18,7 +22,7 @@ export function parsePhotoPaths(json: string | null | undefined): string[] {
     if (!Array.isArray(parsed)) return [];
     return parsed.filter(
       (p): p is string =>
-        typeof p === "string" && p.startsWith("/uploads/brokerage/")
+        typeof p === "string" && p.startsWith(BROKERAGE_MEDIA_URL_PREFIX)
     );
   } catch {
     return [];

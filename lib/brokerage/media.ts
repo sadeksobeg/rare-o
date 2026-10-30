@@ -47,8 +47,11 @@ function detectImageMagic(buf: Buffer): boolean {
   return false;
 }
 
-function uploadsRoot() {
-  return path.join(process.cwd(), "public", "uploads", "brokerage");
+/** Outside the web root — never served directly by Next's static file
+ *  handler. Only app/api/media/brokerage/[requestId]/[file]/route.ts reads
+ *  from here, after checking session + ownership. */
+export function uploadsRoot() {
+  return path.join(process.cwd(), "storage", "uploads", "brokerage");
 }
 
 /** Collect File entries from FormData under `photos`. */
@@ -135,7 +138,7 @@ export async function saveBrokeragePhotos(
 
     const name = `${Date.now()}-${randomBytes(6).toString("hex")}.webp`;
     await writeFile(path.join(dir, name), outBuf);
-    paths.push(`/uploads/brokerage/${requestId}/${name}`);
+    paths.push(`/api/media/brokerage/${requestId}/${name}`);
   }
 
   return { ok: true, paths };

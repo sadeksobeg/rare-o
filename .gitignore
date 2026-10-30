@@ -44,6 +44,11 @@ next-env.d.ts
 public/uploads/*
 !public/uploads/.gitkeep
 
+# Private uploads served only through an authenticated route handler —
+# never under public/. See app/api/media/brokerage/[requestId]/[file]/route.ts.
+storage/uploads/*
+!storage/uploads/.gitkeep
+
 # WhatsApp Baileys session (high-value secret — never commit)
 .wa-auth/
 **/.wa-auth/
