@@ -39,7 +39,7 @@ export default async function AdminSecuritySettingsPage() {
         accountLabel={dict.common.email}
         enabledLabel={dict.common.switchOn}
         disabledLabel={dict.common.switchOff}
-        enrollLabel={dict.auth.totpLabel}
+        enrollLabel={dict.auth.totpEnrollButton}
       />
     </section>
   );

@@ -60,7 +60,7 @@ export function AdminSecuritySettings({
             });
           }}
         >
-          Start 2FA enrollment
+          {enrollLabel}
         </Button>
       ) : null}
 
