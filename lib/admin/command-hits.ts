@@ -9,7 +9,8 @@ export type AdminCommandHit = {
     | "deal"
     | "wholesale"
     | "customer"
-    | "trader";
+    | "trader"
+    | "brokerage";
 };
 
 const PAGE_HREFS = [

@@ -18,7 +18,7 @@ export async function searchAdminCommand(
   if (q.length < 2) return [];
   const match = containsCI(q);
 
-  const [products, retail, deals, wholesale, customers, traders] =
+  const [products, retail, deals, wholesale, customers, traders, brokerage] =
     await Promise.all([
       prisma.product.findMany({
         where: {
@@ -83,6 +83,15 @@ export async function searchAdminCommand(
         select: { id: true, displayName: true, email: true },
         take: 3,
       }),
+      prisma.brokerageRequest.findMany({
+        where: { reference: match },
+        select: {
+          id: true,
+          reference: true,
+          trader: { select: { displayName: true } },
+        },
+        take: 3,
+      }),
     ]);
 
   const hits: AdminCommandHit[] = [
@@ -121,6 +130,12 @@ export async function searchAdminCommand(
       title: row.displayName,
       subtitle: row.email,
       kind: "trader" as const,
+    })),
+    ...brokerage.map((row) => ({
+      href: `/admin/brokerage/${row.id}`,
+      title: row.reference,
+      subtitle: row.trader.displayName,
+      kind: "brokerage" as const,
     })),
   ];
 
