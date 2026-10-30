@@ -449,6 +449,10 @@ type Dict = {
     traderDisable: string;
     traderDisableTitle: string;
     traderDisableBody: string;
+    traderResetPassword: string;
+    traderResetPasswordConfirmTitle: string;
+    traderResetPasswordConfirmBody: string;
+    traderResetPasswordConfirmLabel: string;
     categorySave: string;
     categoryNameAr: string;
     categoryNameEn: string;
@@ -1053,6 +1057,37 @@ type Dict = {
     showPassword: string;
     hidePassword: string;
   };
+  forcePasswordChange: {
+    title: string;
+    subtitle: string;
+    explanation: string;
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+    mismatch: string;
+    submit: string;
+    strengthLabel: string;
+    strengthWeak: string;
+    strengthFair: string;
+    strengthGood: string;
+    strengthStrong: string;
+    strengthVeryStrong: string;
+    ruleLength: string;
+    ruleNotTemp: string;
+    ruleNotEmail: string;
+    errorCurrentWrong: string;
+    errorWeak: string;
+    errorSameAsTemp: string;
+    errorSameAsEmail: string;
+    success: string;
+    signOut: string;
+  };
+  changePassword: {
+    sectionTitle: string;
+    sectionLead: string;
+    submit: string;
+    success: string;
+  };
   seo: {
     catalogDescription: string;
     productFallbackDescription: string;
@@ -1524,6 +1559,11 @@ const ar: Dict = {
     traderTempPasswordClose: "تم — إغلاق",
     traderActivate: "تفعيل",
     traderDisable: "تعطيل",
+    traderResetPassword: "إعادة تعيين كلمة المرور",
+    traderResetPasswordConfirmTitle: "إعادة تعيين كلمة مرور التاجر؟",
+    traderResetPasswordConfirmBody:
+      "ستُنشأ كلمة مرور مؤقتة جديدة، والقديمة لن تعمل بعد الآن. سيُطلب من التاجر تغييرها فوراً عند دخوله.",
+    traderResetPasswordConfirmLabel: "إعادة تعيين",
     traderDisableTitle: "تعطيل حساب التاجر؟",
     traderDisableBody: "لن يستطيع التاجر الدخول حتى يُعاد تفعيله. سجلاته تبقى ظاهرة.",
     categorySave: "حفظ التسميات",
@@ -2212,6 +2252,38 @@ const ar: Dict = {
     showPassword: "إظهار",
     hidePassword: "إخفاء",
   },
+  forcePasswordChange: {
+    title: "عيّن كلمة مرور جديدة",
+    subtitle: "هذه خطوة لمرة واحدة",
+    explanation:
+      "أعادت الإدارة تعيين كلمة مرور حسابك. لأسباب أمنية لا تستطيع الإدارة رؤية كلمة مرورك الحالية في أي وقت — عليك اختيار كلمة مرور جديدة الآن قبل المتابعة.",
+    currentPassword: "كلمة المرور المؤقتة الحالية",
+    newPassword: "كلمة المرور الجديدة",
+    confirmPassword: "تأكيد كلمة المرور",
+    mismatch: "كلمتا المرور غير متطابقتين",
+    submit: "تعيين كلمة المرور والمتابعة",
+    strengthLabel: "قوة كلمة المرور",
+    strengthWeak: "ضعيفة",
+    strengthFair: "مقبولة",
+    strengthGood: "جيدة",
+    strengthStrong: "قوية",
+    strengthVeryStrong: "قوية جداً",
+    ruleLength: "10 أحرف على الأقل",
+    ruleNotTemp: "مختلفة عن كلمة المرور المؤقتة",
+    ruleNotEmail: "مختلفة عن بريدك الإلكتروني",
+    errorCurrentWrong: "كلمة المرور الحالية غير صحيحة.",
+    errorWeak: "كلمة المرور يجب أن تكون 10 أحرف على الأقل.",
+    errorSameAsTemp: "لا يمكن استخدام كلمة المرور المؤقتة نفسها.",
+    errorSameAsEmail: "لا يمكن أن تكون كلمة المرور بريدك الإلكتروني.",
+    success: "تم تعيين كلمة المرور. سجّلنا خروجك من الأجهزة الأخرى.",
+    signOut: "تسجيل الخروج",
+  },
+  changePassword: {
+    sectionTitle: "تغيير كلمة المرور",
+    sectionLead: "استخدم كلمة مرور قوية خاصة بهذا الحساب فقط.",
+    submit: "تحديث كلمة المرور",
+    success: "تم تحديث كلمة المرور.",
+  },
   seo: {
     catalogDescription:
       "تصفّح المجموعة المنشورة من RARE OUD — قطع مختارة بعناية، يمكن إضافتها إلى قائمة الطلب وإرسالها للفريق عبر واتساب.",
@@ -2687,6 +2759,11 @@ const en: Dict = {
     traderTempPasswordClose: "Done — close",
     traderActivate: "Activate",
     traderDisable: "Disable",
+    traderResetPassword: "Reset password",
+    traderResetPasswordConfirmTitle: "Reset this trader's password?",
+    traderResetPasswordConfirmBody:
+      "A new temporary password will be generated and the old one will stop working. The trader will be required to change it immediately at their next sign-in.",
+    traderResetPasswordConfirmLabel: "Reset",
     traderDisableTitle: "Disable this trader?",
     traderDisableBody: "They will not be able to sign in until reactivated. Their records stay visible.",
     categorySave: "Save labels",
@@ -3387,6 +3464,38 @@ const en: Dict = {
     totpEnrollRequired: "Turn on two-factor authentication in security settings before signing in.",
     showPassword: "Show",
     hidePassword: "Hide",
+  },
+  forcePasswordChange: {
+    title: "Set a new password",
+    subtitle: "This is a one-time step",
+    explanation:
+      "An admin reset your account's password. For security reasons, admins can never see your actual password — you need to choose a new one now before continuing.",
+    currentPassword: "Current temporary password",
+    newPassword: "New password",
+    confirmPassword: "Confirm password",
+    mismatch: "Passwords don't match",
+    submit: "Set password and continue",
+    strengthLabel: "Password strength",
+    strengthWeak: "Weak",
+    strengthFair: "Fair",
+    strengthGood: "Good",
+    strengthStrong: "Strong",
+    strengthVeryStrong: "Very strong",
+    ruleLength: "At least 10 characters",
+    ruleNotTemp: "Different from the temporary password",
+    ruleNotEmail: "Different from your email",
+    errorCurrentWrong: "The current password is incorrect.",
+    errorWeak: "Password must be at least 10 characters.",
+    errorSameAsTemp: "You can't reuse the temporary password.",
+    errorSameAsEmail: "Your password can't be your email address.",
+    success: "Password set. We signed you out of other devices.",
+    signOut: "Sign out",
+  },
+  changePassword: {
+    sectionTitle: "Change password",
+    sectionLead: "Use a strong password unique to this account.",
+    submit: "Update password",
+    success: "Password updated.",
   },
   seo: {
     catalogDescription:

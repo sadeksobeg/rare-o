@@ -185,6 +185,9 @@ model AdminUser {
   /// JSON array of bcrypt-hashed one-time recovery codes
   totpRecoveryHashes String  @default("[]")
   totpEnabledAt   DateTime?
+  /// Forces the change-password screen on next sign-in (e.g. after a reset)
+  mustChangePassword Boolean @default(false)
+  passwordChangedAt  DateTime?
   createdAt       DateTime  @default(now())
 }
 
@@ -217,6 +220,9 @@ model TraderAccount {
   interestCategorySlugs String               @default("")
   /// Free-text deal preferences for admin matching
   interestNotes         String               @default("")
+  /// Forces the change-password screen on next sign-in (e.g. after an admin reset)
+  mustChangePassword    Boolean              @default(false)
+  passwordChangedAt     DateTime?
   deals                 DealProposal[]
   wholesaleRequests     WholesaleRequest[]
   brokerageRequests     BrokerageRequest[]
