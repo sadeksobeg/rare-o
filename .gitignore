@@ -60,3 +60,7 @@ test-results/
 
 # Wave 1 checkpoint video captures (large binaries, delivered directly, not committed)
 docs/ui-planning/wave1-capture/videos/
+
+# Visual evidence (screenshots/videos) from MASTER-BUILD-PLAN.md Part B7 onward —
+# heavy binaries stay out of git; only text summaries in docs/ui-planning/evidence/ are committed.
+artifacts/

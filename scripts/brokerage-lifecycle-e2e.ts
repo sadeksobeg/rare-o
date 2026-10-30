@@ -17,6 +17,8 @@ function assert(cond: unknown, msg: string): asserts cond {
   if (!cond) throw new Error(msg);
 }
 
+const createdIds: string[] = [];
+
 async function happyPath(traderId: string) {
   const row = await createBrokerageRequest({
     traderId,
@@ -28,6 +30,7 @@ async function happyPath(traderId: string) {
     budgetMinUsd: 1000,
     budgetMaxUsd: 2000,
   });
+  createdIds.push(row.id);
   assert(row.status === "SUBMITTED", "create → SUBMITTED");
 
   await adminTransitionBrokerage({ id: row.id, toStatus: "ACCEPTED" });
@@ -97,6 +100,7 @@ async function adminDeclinePath(traderId: string) {
     descriptionAr: "E2E وساطة — رفض إداري",
     descriptionEn: "E2E admin decline",
   });
+  createdIds.push(row.id);
   await adminTransitionBrokerage({
     id: row.id,
     toStatus: "DECLINED",
@@ -115,6 +119,7 @@ async function traderRejectQuotePath(traderId: string) {
     descriptionAr: "E2E وساطة — رفض عرض",
     descriptionEn: "E2E trader reject quote",
   });
+  createdIds.push(row.id);
   await adminTransitionBrokerage({ id: row.id, toStatus: "ACCEPTED" });
   await adminTransitionBrokerage({
     id: row.id,
@@ -152,6 +157,7 @@ async function needsInfoPath(traderId: string) {
     descriptionAr: "E2E وساطة — بحاجة لمعلومات ثم قبول",
     descriptionEn: "E2E needs info then accept",
   });
+  createdIds.push(row.id);
   await adminTransitionBrokerage({ id: row.id, toStatus: "NEEDS_INFO" });
   await traderTransitionBrokerage({
     id: row.id,
@@ -166,6 +172,33 @@ async function needsInfoPath(traderId: string) {
   console.log(`✓ needs-info loop ${cur.reference}`);
 }
 
+async function traderCancelPath(traderId: string) {
+  const row = await createBrokerageRequest({
+    traderId,
+    descriptionAr: "E2E وساطة — إلغاء من التاجر",
+    descriptionEn: "E2E trader cancel",
+  });
+  createdIds.push(row.id);
+  await traderTransitionBrokerage({
+    id: row.id,
+    traderId,
+    toStatus: "CANCELLED",
+  });
+  const cur = await prisma.brokerageRequest.findUniqueOrThrow({
+    where: { id: row.id },
+  });
+  assert(cur.status === "CANCELLED", "CANCELLED");
+  console.log(`✓ trader cancel ${cur.reference}`);
+}
+
+async function cleanup() {
+  if (createdIds.length === 0) return;
+  const { count } = await prisma.brokerageRequest.deleteMany({
+    where: { id: { in: createdIds } },
+  });
+  console.log(`cleanup: removed ${count} E2E brokerage request(s)`);
+}
+
 async function main() {
   const trader = await prisma.traderAccount.findFirst({
     where: { email: "trader@rareoud.local" },
@@ -176,6 +209,7 @@ async function main() {
   await adminDeclinePath(trader.id);
   await traderRejectQuotePath(trader.id);
   await needsInfoPath(trader.id);
+  await traderCancelPath(trader.id);
 
   console.log("\nAll brokerage lifecycle checks passed.");
 }
@@ -183,8 +217,15 @@ async function main() {
 main()
   .catch((e) => {
     console.error("FAIL", e);
-    process.exit(1);
+    process.exitCode = 1;
   })
   .finally(async () => {
+    try {
+      await cleanup();
+    } catch (e) {
+      console.error("cleanup failed", e);
+      process.exitCode = 1;
+    }
     await prisma.$disconnect();
+    if (process.exitCode) process.exit(process.exitCode);
   });
