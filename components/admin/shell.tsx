@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LogOut, MessageSquare, UserRound } from "lucide-react";
 import { adminLogoutAction } from "@/app/admin-logout-action";
+import { AdminCommandSearchMount } from "@/components/admin/command-search-mount";
 import { AdminLocaleToggle } from "@/components/admin/locale-toggle";
 import {
   AdminMobileNav,
@@ -28,6 +29,9 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
   const unreadInbox = await prisma.whatsAppConversation.count({
     where: { unreadCount: { gt: 0 } },
   });
+
+  const brand = `RARE OUD · ${a.dashboard}`;
+  const teamLabel = locale === "ar" ? "الفريق" : "Team";
 
   const groups: AdminNavGroup[] = [
     {
@@ -59,14 +63,12 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
         { href: "/admin/traders", label: a.traders },
         {
           href: "/admin/team",
-          label: locale === "ar" ? "الفريق" : "Team",
+          label: teamLabel,
         },
         { href: "/admin/settings/security", label: a.settings },
       ],
     },
   ];
-
-  const brand = `RARE OUD · ${a.dashboard}`;
 
   return (
     <AppToast dismissLabel={dict.common.toastDismiss}>
@@ -94,7 +96,34 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
                   </span>
                 </Link>
               </div>
-              <div className="flex items-center gap-2 text-sm sm:gap-3">
+              <div className="flex min-w-0 flex-1 items-center justify-end gap-2 text-sm sm:gap-3">
+                <div className="me-auto min-w-0 shrink-0 md:max-w-md md:flex-1 lg:max-w-lg">
+                  <AdminCommandSearchMount
+                    labels={{
+                      search: a.commandSearch,
+                      placeholder: a.commandPlaceholder,
+                      empty: a.commandEmpty,
+                      searching: a.commandSearching,
+                      close: dict.common.close,
+                      pages: {
+                        "/admin": a.dashboard,
+                        "/admin/inbox": a.inbox,
+                        "/admin/requests": a.requests,
+                        "/admin/deals": a.deals,
+                        "/admin/wholesale": a.wholesale,
+                        "/admin/brokerage": a.brokerage,
+                        "/admin/products": a.products,
+                        "/admin/categories": a.categories,
+                        "/admin/offers": a.offers,
+                        ...(promoFeatures ? { "/admin/promos": a.promos } : {}),
+                        "/admin/customers": a.customers,
+                        "/admin/traders": a.traders,
+                        "/admin/team": teamLabel,
+                        "/admin/settings/security": a.settings,
+                      },
+                    }}
+                  />
+                </div>
                 <Link
                   href="/admin/inbox"
                   className="ro-icon-btn relative"

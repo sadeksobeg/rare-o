@@ -3,52 +3,18 @@ import { prisma } from "@/lib/db/prisma";
 import { listLaunchCategories } from "@/lib/catalog/service";
 import { listPublishedPublicOffers } from "@/lib/offers/service";
 import { isOudTierSlug, LAUNCH_CATEGORY_SLUGS } from "@/lib/catalog/constants";
+import type {
+  HomepageCategory,
+  HomepageOffer,
+  HomepageProduct,
+} from "@/lib/catalog/homepage-types";
 
-export type HomepageProductImage = {
-  path: string;
-  altAr: string;
-  altEn: string;
-};
-
-export type HomepageProduct = {
-  id: string;
-  slug: string;
-  nameAr: string;
-  nameEn: string;
-  descriptionAr: string;
-  descriptionEn: string;
-  specsTextAr: string;
-  specsTextEn: string;
-  retailPrice: string;
-  compareAtPrice: string | null;
-  currency: string;
-  availability: string;
-  updatedAt: string;
-  category: {
-    id: string;
-    slug: string;
-    nameAr: string;
-    nameEn: string;
-  };
-  images: HomepageProductImage[];
-};
-
-export type HomepageCategory = {
-  id: string;
-  slug: string;
-  nameAr: string;
-  nameEn: string;
-  productCount: number;
-};
-
-export type HomepageOffer = {
-  id: string;
-  slug: string;
-  titleAr: string;
-  titleEn: string;
-  summaryAr: string;
-  summaryEn: string;
-};
+export type {
+  HomepageProduct,
+  HomepageProductImage,
+  HomepageCategory,
+  HomepageOffer,
+} from "@/lib/catalog/homepage-types";
 
 function mapProduct(
   p: Awaited<ReturnType<typeof fetchPublishedProducts>>[number]
@@ -186,25 +152,8 @@ export type HomepageDiscoveryData = Awaited<
   ReturnType<typeof loadHomepageDiscoveryData>
 >;
 
-export type HomepageSearchItem = HomepageDiscoveryData["searchIndex"][number];
-
-export function toSearchIndex(products: HomepageProduct[]): HomepageSearchItem[] {
-  return products.map((p) => ({
-    id: p.id,
-    slug: p.slug,
-    nameAr: p.nameAr,
-    nameEn: p.nameEn,
-    descriptionAr: p.descriptionAr,
-    descriptionEn: p.descriptionEn,
-    categorySlug: p.category.slug,
-    categoryNameAr: p.category.nameAr,
-    categoryNameEn: p.category.nameEn,
-    imagePath: p.images[0]?.path ?? null,
-    availability: p.availability,
-    retailPrice: p.retailPrice,
-    currency: p.currency,
-  }));
-}
+export type { HomepageSearchItem } from "@/lib/catalog/homepage-search";
+export { toSearchIndex } from "@/lib/catalog/homepage-search";
 
 /**
  * All published products, mapped the same way the homepage does — used to

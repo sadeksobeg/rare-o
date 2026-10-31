@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ComponentType } from "react";
 import { usePathname } from "next/navigation";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
@@ -13,12 +13,22 @@ import Link from "next/link";
 /** Scroll distance (px) after which the over-hero header turns solid. */
 const SCROLL_THRESHOLD = 80;
 
+type SearchSlotProps = {
+  dict: Dictionary;
+  locale: Locale;
+  products: unknown[];
+  initialOpen?: boolean;
+};
+
 export function StorefrontHeader({
   dict,
   locale,
+  discoveryProducts = [],
 }: {
   dict: Dictionary;
   locale: Locale;
+  /** Opaque published products for global search (layout → header). */
+  discoveryProducts?: unknown[];
 }) {
   const nextLocale: Locale = locale === "ar" ? "en" : "ar";
   const { items } = useCart();
@@ -26,6 +36,9 @@ export function StorefrontHeader({
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [cartPulse, setCartPulse] = useState(false);
+  const [SearchSlot, setSearchSlot] = useState<ComponentType<SearchSlotProps> | null>(
+    null
+  );
   const prevCount = useRef(cartCount);
   const pathname = usePathname();
   const { path: barePath } = stripLocalePrefix(pathname || "/");
@@ -37,6 +50,23 @@ export function StorefrontHeader({
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    let live = true;
+    void import("@/components/storefront/discovery/global-search-slot")
+      .then((mod) => {
+        const next = mod?.GlobalSearchSlot;
+        if (live && typeof next === "function") {
+          setSearchSlot(() => next as ComponentType<SearchSlotProps>);
+        }
+      })
+      .catch(() => {
+        /* search unavailable — header still usable */
+      });
+    return () => {
+      live = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -84,15 +114,16 @@ export function StorefrontHeader({
 
   const overHero = isHome && !scrolled;
 
+  /** GlobalSearchSlot (dynamic, ssr:false) listens for this on every storefront page. */
   const openSearch = () => {
-    if (isHome) {
-      window.dispatchEvent(new Event("ro:open-search"));
-    } else {
-      window.location.href = href("/catalog", locale);
-    }
+    window.dispatchEvent(new Event("ro:open-search"));
   };
 
   return (
+    <>
+    {SearchSlot ? (
+      <SearchSlot dict={dict} locale={locale} products={discoveryProducts} />
+    ) : null}
     <header
       data-over-hero={overHero ? "true" : "false"}
       className={cn(
@@ -326,5 +357,6 @@ export function StorefrontHeader({
         </nav>
       </div>
     </header>
+    </>
   );
 }

@@ -7,7 +7,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import type { HomepageProduct } from "@/lib/catalog/homepage";
+import type { HomepageProduct } from "@/lib/catalog/homepage-types";
 
 type DiscoveryContextValue = {
   products: HomepageProduct[];
@@ -29,13 +29,15 @@ const MAX_COMPARE = 3;
 export function DiscoveryProvider({
   products,
   children,
+  initialSearchOpen = false,
 }: {
   products: HomepageProduct[];
   children: React.ReactNode;
+  initialSearchOpen?: boolean;
 }) {
   const [quickViewId, setQuickViewId] = useState<string | null>(null);
   const [compareIds, setCompareIds] = useState<string[]>([]);
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(initialSearchOpen);
 
   const openQuickView = useCallback((id: string) => setQuickViewId(id), []);
   const closeQuickView = useCallback(() => setQuickViewId(null), []);

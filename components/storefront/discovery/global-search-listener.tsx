@@ -5,7 +5,7 @@ import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 import { useDiscovery } from "./discovery-context";
 import { SearchOverlay } from "./search-overlay";
-import { toSearchIndex } from "@/lib/catalog/homepage";
+import { toSearchIndex } from "@/lib/catalog/homepage-search";
 
 export function GlobalSearchListener({
   dict,

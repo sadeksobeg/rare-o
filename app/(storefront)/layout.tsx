@@ -2,7 +2,6 @@ import { DeferredBrandWallpaper } from "@/components/brand/deferred-wallpaper";
 import { StorefrontHeader } from "@/components/storefront/header";
 import { StorefrontFooter } from "@/components/storefront/footer";
 import { StorefrontProviders } from "@/components/storefront/providers";
-import { GlobalSearchMount } from "@/components/storefront/discovery/global-search-mount";
 import { OfflineBanner } from "@/components/system/offline-banner";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { getDiscoveryProducts } from "@/lib/catalog/homepage";
@@ -17,7 +16,6 @@ export default async function StorefrontLayout({
 
   return (
     <StorefrontProviders toastDismissLabel={dict.common.toastDismiss}>
-      <GlobalSearchMount dict={dict} locale={locale} products={discoveryProducts} />
       {/* No overflow-x-clip here: it forces y-clip and crops hero instruments */}
       <div className="relative flex min-h-screen flex-col bg-[var(--ro-sand-100)] text-ro-ink">
         <DeferredBrandWallpaper
@@ -27,7 +25,11 @@ export default async function StorefrontLayout({
         />
         <div className="relative z-10 flex min-h-screen flex-col">
           <OfflineBanner />
-          <StorefrontHeader dict={dict} locale={locale} />
+          <StorefrontHeader
+            dict={dict}
+            locale={locale}
+            discoveryProducts={discoveryProducts}
+          />
           <main
             id="main-content"
             className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 has-[[data-page=home]]:max-w-none has-[[data-page=home]]:px-0 has-[[data-page=home]]:py-0"

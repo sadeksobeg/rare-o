@@ -163,3 +163,36 @@ possible duplication between `/admin/settings/security` and `/admin/team`'s secu
 (ADM-03), and `/admin/offers` vs `/admin/promos` naming overlap with Part C's single "CAT-03"
 (these may be two intentionally distinct domain concepts, not a gap â€” not verified either way
 this phase).
+
+---
+
+## Phase 2 closure — High findings H-1 / H-2 — 2026-10-31
+
+Per `docs/ui-planning/MASTER-ROADMAP-FOR-CURSOR.md` §0–§1.3 and §5 (owner direction:
+follow the roadmap file when unsure). Path assumptions recorded in `CLAUDE.md` the same day.
+
+### Governance assumptions adopted (roadmap §1.1 / §1.2)
+
+- Practical phase numbering follows `REMAINING-PLAN.md` + `MASTER-BUILD-PLAN.md`, not the
+  research-only stages in `docs/ui/MASTER-PLAN.md`.
+- D20 (no admin charts) treated as practically superseded by ADM-01 charts in
+  `MASTER-BUILD-PLAN.md` until the owner explicitly reinstates D20.
+
+### H-1 — Storefront header search (High)
+
+`components/storefront/header.tsx` `openSearch` always dispatched `ro:open-search` only on
+the homepage and navigated to `/catalog` elsewhere. `GlobalSearchMount` already wraps the
+whole storefront layout, so the `isHome` branch was wrong. Fixed to always dispatch
+`ro:open-search`.
+
+### H-2 — Admin command palette never mounted (High)
+
+`AdminCommandSearchMount` existed and the search API/index worked, but nothing imported it into
+the live admin chrome. Mounted it in `components/admin/shell.tsx` header with dictionary labels
+(`commandSearch` / placeholder / empty / searching + `common.close` + page title map).
+Ctrl/?K and the header control are reachable on every `/admin/*` protected page.
+
+### Follow-up still required by the roadmap
+
+Independent mini-audit focused on H-1 and H-2 only (new session, no memory of this fix), then
+owner written approval before Phase 3.
