@@ -16,7 +16,7 @@ Self-review / world-class references / videos: brief notes in REVIEW-LOG appendi
 
 | ID | Route | Status | Notes |
 |---|---|---|---|
-| OPS-01 | `/admin/inbox` | Done (polish) | Resizable list↔thread (localStorage widths); resizable thread↔context on xl; quick-reply chips; keyboard inset kept; tabs/search/unread already present. **Brokerage link type still not in allowlist** (`link-constants.ts` + Prisma comment) — reported, not invented. Label key `typeBrokerage` ready if added later. **No Baileys adapter changes.** |
+| OPS-01 | `/admin/inbox` | Done (polish) | Resizable list↔thread (localStorage widths); resizable thread↔context on xl; quick-reply chips; keyboard inset kept; tabs/search/unread already present. **Brokerage link type still not in allowlist** (`link-constants.ts` + Prisma comment) — reported, not invented. Label key `typeBrokerage` ready if added later. **No Baileys adapter changes.** **[Stale — corrected 2026-11-02]** the brokerage link type was wired in later (allowlist entry, existence check, picker UI all present as of the independent audit); see `docs/ui-planning/AUDIT-PHASE-5.md` finding M-2 and `docs/ui-planning/DOD/OPS-01.md`. |
 | OPS-02 | `/admin/requests` | Done (polish) | `?view=kanban` board with drag → confirm → `adminTransitionRetailRequestAction` (valid transitions only). Table/cards unchanged. Detail already had stepper, handoff, linked WA. |
 | OPS-03 | `/admin/deals` | Done (polish) | Waiting chip already on list; detail now shows waiting badge + linked conversation link. Negotiation thread reused. |
 | OPS-04 | `/admin/wholesale/[id]` | Done (polish) | Shipping tracker steps from real status + `shippedAt` / carrier / tracking. Lines + quote controls unchanged (no invented math). |

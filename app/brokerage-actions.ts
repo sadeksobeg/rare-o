@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import type { ActionResult } from "@/app/actions";
 import {
@@ -107,7 +106,7 @@ export async function traderCreateBrokerageAction(
     }
   }
   revalidateBrokerage(row.id);
-  redirect(`/trader/brokerage/${row.id}`);
+  return { ok: true, data: { id: row.id } };
 }
 
 export async function traderRespondQuoteAction(

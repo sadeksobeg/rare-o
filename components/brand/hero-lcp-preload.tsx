@@ -1,4 +1,4 @@
-import { HERO_OUD_LCP_SRC } from "@/components/brand/hero-oud-field";
+import { HERO_OUD_LCP_SRC } from "@/components/brand/hero-oud-constants";
 
 /**
  * Optional `<link rel="preload">` for the hero LCP asset (home only).

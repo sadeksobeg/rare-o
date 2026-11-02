@@ -65,6 +65,7 @@ export function WholesaleRequestForm({
   const [hydrated, setHydrated] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [navigating, setNavigating] = useState(false);
+  const [successId, setSuccessId] = useState<string | null>(null);
   const [state, action, pending] = useActionState(
     traderCreateWholesaleRequestAction,
     initial
@@ -121,16 +122,24 @@ export function WholesaleRequestForm({
   useEffect(() => {
     if (!state?.ok || !state.data || typeof state.data !== "object") return;
     const id = (state.data as { id?: string }).id;
-    if (!id || navigating) return;
+    if (!id || navigating || successId) return;
     try {
       sessionStorage.removeItem(DRAFT_KEY);
     } catch {
       /* ignore */
     }
-    setNavigating(true);
     setReviewOpen(false);
-    router.push(`/trader/wholesale/${id}`);
-  }, [state, router, navigating]);
+    setSuccessId(id);
+  }, [state, navigating, successId]);
+
+  useEffect(() => {
+    if (!successId) return;
+    const handle = window.setTimeout(() => {
+      setNavigating(true);
+      router.push(`/trader/wholesale/${successId}`);
+    }, 1600);
+    return () => window.clearTimeout(handle);
+  }, [successId, router]);
 
   function patch(p: Partial<Draft>) {
     setDraft((d) => ({ ...d, ...p }));
@@ -317,6 +326,29 @@ export function WholesaleRequestForm({
           </Button>
         </form>
       </Dialog>
+
+      {successId ? (
+        <div
+          role="status"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--ro-ink-950)_45%,transparent)] p-6"
+        >
+          <div className="ro-portal-card max-w-sm space-y-3 border p-6 text-center shadow-[0_24px_60px_-28px_rgba(11,8,13,0.55)]">
+            <p className="font-display text-2xl font-semibold text-ro-ink">
+              {t.wholesaleSuccessTitle}
+            </p>
+            <p className="text-sm text-ro-muted">{t.wholesaleSuccessBody}</p>
+            <Button
+              type="button"
+              onClick={() => {
+                setNavigating(true);
+                router.push(`/trader/wholesale/${successId}`);
+              }}
+            >
+              {t.wholesaleSuccessContinue}
+            </Button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

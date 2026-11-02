@@ -33,7 +33,12 @@ function isStaleRow(r: { createdAt: Date; status: string }) {
 export default async function AdminBrokeragePage({
   searchParams,
 }: {
-  searchParams: Promise<{ trader?: string; city?: string; stale?: string }>;
+  searchParams: Promise<{
+    trader?: string;
+    city?: string;
+    stale?: string;
+    status?: string;
+  }>;
 }) {
   const { locale, dict } = await getRequestDictionary();
   const ar = locale === "ar";
@@ -42,6 +47,7 @@ export default async function AdminBrokeragePage({
   const traderQ = q.trader?.trim().toLowerCase() ?? "";
   const cityQ = q.city?.trim().toLowerCase() ?? "";
   const staleOnly = q.stale === "1";
+  const activeOnly = q.status === "active";
   const allRows = await listAdminBrokerage();
 
   const textFiltered = allRows.filter((r) => {
@@ -52,6 +58,12 @@ export default async function AdminBrokeragePage({
     if (cityQ) {
       const city = `${r.cityAr} ${r.cityEn}`.toLowerCase();
       if (!city.includes(cityQ)) return false;
+    }
+    if (
+      activeOnly &&
+      ["CLOSED", "DECLINED", "REJECTED", "CANCELLED"].includes(r.status)
+    ) {
+      return false;
     }
     return true;
   });

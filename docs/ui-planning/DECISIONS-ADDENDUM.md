@@ -303,6 +303,13 @@ Pill/`grid` sizing is dynamic from `tabs.length` so profile is not clipped.
 
 Evidence: `docs/ui-planning/evidence/phase-07-trader.md`.
 
+**Superseded 2026-11-01 by the VISION program** (see "Admin + Trader VISION program" below and
+`docs/ui-planning/evidence/phase-vision-admin-trader.md`): the shell ships **5** tabs
+(Home · Deals · Wholesale · Brokerage · Account), Brokerage replacing Offers, which stays
+reachable via deep links only. The dynamic `tabs.length` sizing described above still applies,
+just to 5 items instead of 6 — confirmed current and correct by independent audit
+(`docs/ui-planning/AUDIT-PHASE-7.md`).
+
 ---
 
 ## Phase 8 (Storefront) — 2026-10-31

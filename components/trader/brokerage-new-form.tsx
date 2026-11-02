@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Check, Info } from "lucide-react";
 import { traderCreateBrokerageAction } from "@/app/brokerage-actions";
 import type { ActionResult } from "@/app/actions";
@@ -86,9 +87,12 @@ export function BrokerageNewForm({
     traderCreateBrokerageAction,
     initial
   );
+  const router = useRouter();
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [hydrated, setHydrated] = useState(false);
   const [photosNeedReattach, setPhotosNeedReattach] = useState(false);
+  const [successId, setSuccessId] = useState<string | null>(null);
+  const [navigating, setNavigating] = useState(false);
 
   const dirty = isDirty(draft);
   useUnsavedGuard(dirty && !(state?.ok));
@@ -152,13 +156,25 @@ export function BrokerageNewForm({
   }, [draft, state?.ok, t.wizardLeaveConfirm]);
 
   useEffect(() => {
-    if (!state?.ok) return;
+    if (!state?.ok || !state.data || typeof state.data !== "object") return;
+    const id = (state.data as { id?: string }).id;
+    if (!id || successId) return;
     try {
       sessionStorage.removeItem(DRAFT_KEY);
     } catch {
       /* ignore */
     }
-  }, [state?.ok]);
+    setSuccessId(id);
+  }, [state, successId]);
+
+  useEffect(() => {
+    if (!successId) return;
+    const handle = window.setTimeout(() => {
+      setNavigating(true);
+      router.push(`/trader/brokerage/${successId}`);
+    }, 1600);
+    return () => window.clearTimeout(handle);
+  }, [successId, router]);
 
   function update<K extends keyof FormFields>(key: K, value: string) {
     setDraft((d) => ({
@@ -429,7 +445,7 @@ export function BrokerageNewForm({
           ) : (
             <Button
               type="submit"
-              disabled={pending}
+              disabled={pending || navigating || !!successId}
               className="ms-auto w-full sm:w-auto"
               size="lg"
             >
@@ -438,6 +454,29 @@ export function BrokerageNewForm({
           )}
         </div>
       </form>
+
+      {successId ? (
+        <div
+          role="status"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--ro-ink-950)_45%,transparent)] p-6"
+        >
+          <div className="ro-portal-card max-w-sm space-y-3 border p-6 text-center shadow-[0_24px_60px_-28px_rgba(11,8,13,0.55)]">
+            <p className="font-display text-2xl font-semibold text-ro-ink">
+              {t.brokerageSuccessTitle}
+            </p>
+            <p className="text-sm text-ro-muted">{t.brokerageSuccessBody}</p>
+            <Button
+              type="button"
+              onClick={() => {
+                setNavigating(true);
+                router.push(`/trader/brokerage/${successId}`);
+              }}
+            >
+              {t.brokerageSuccessContinue}
+            </Button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

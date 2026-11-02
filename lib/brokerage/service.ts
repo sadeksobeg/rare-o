@@ -352,22 +352,23 @@ export async function upsertAndSendQuote(input: {
   }
 }
 
+/**
+ * "Active" = not in a terminal state. Kept in sync with the same
+ * CLOSED/DECLINED/REJECTED/CANCELLED exclusion list the admin brokerage
+ * list page (`/admin/brokerage?status=active`) uses for its own "active"
+ * count and filter, so the dashboard KPI and the page it links to agree.
+ */
+const BROKERAGE_TERMINAL_STATUSES = [
+  "CLOSED",
+  "DECLINED",
+  "REJECTED",
+  "CANCELLED",
+] as const;
+
 export async function countActiveBrokerage() {
   return prisma.brokerageRequest.count({
     where: {
-      status: {
-        in: [
-          "SUBMITTED",
-          "NEEDS_INFO",
-          "ACCEPTED",
-          "INSPECTION_SCHEDULED",
-          "INSPECTED",
-          "QUOTE_SENT",
-          "APPROVED",
-          "PURCHASED",
-          "SHIPPED",
-        ],
-      },
+      status: { notIn: [...BROKERAGE_TERMINAL_STATUSES] },
     },
   });
 }

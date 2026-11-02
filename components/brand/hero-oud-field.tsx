@@ -3,12 +3,12 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { HERO_OUD_LCP_SRC } from "@/components/brand/hero-oud-constants";
 
 /**
  * Single hero oud — atelier-f (warm gold-rim cutout).
  * Mouse parallax + idle breathe.
  */
-export const HERO_OUD_LCP_SRC = "/brand/hero-oud-atelier-f-e1.webp";
 const SRC = HERO_OUD_LCP_SRC;
 /* Slight plum rim to sit in brand light — keep wood natural */
 /* Soft rim without drop-shadow (drop-shadow tanks Lighthouse paint). */

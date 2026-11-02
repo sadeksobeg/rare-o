@@ -745,6 +745,12 @@ type Dict = {
     dealSuccessTitle: string;
     dealSuccessBody: string;
     dealSuccessContinue: string;
+    wholesaleSuccessTitle: string;
+    wholesaleSuccessBody: string;
+    wholesaleSuccessContinue: string;
+    brokerageSuccessTitle: string;
+    brokerageSuccessBody: string;
+    brokerageSuccessContinue: string;
     offersViewDetails: string;
     notificationsFilterAll: string;
     notificationsFilterDeal: string;
@@ -2087,6 +2093,12 @@ const ar: Dict = {
     dealSuccessTitle: "أُرسل الاقتراح",
     dealSuccessBody: "سيظهر في قائمتك ويمكنك متابعة التفاوض من صفحة الصفقة.",
     dealSuccessContinue: "فتح الصفقة",
+    wholesaleSuccessTitle: "أُرسل طلب الجملة",
+    wholesaleSuccessBody: "سيظهر في قائمتك، وسيتواصل معك الفريق بعرض السعر.",
+    wholesaleSuccessContinue: "فتح الطلب",
+    brokerageSuccessTitle: "أُرسل طلب الوساطة",
+    brokerageSuccessBody: "سيراجع الفريق التفاصيل ويتواصل معك بعرض المعاينة.",
+    brokerageSuccessContinue: "فتح الطلب",
     offersViewDetails: "التفاصيل",
     notificationsFilterAll: "الكل",
     notificationsFilterDeal: "صفقات",
@@ -3492,6 +3504,12 @@ const en: Dict = {
     dealSuccessTitle: "Proposal sent",
     dealSuccessBody: "It is on your list — open the deal to continue negotiating.",
     dealSuccessContinue: "Open deal",
+    wholesaleSuccessTitle: "Wholesale request sent",
+    wholesaleSuccessBody: "It is on your list — our team will follow up with a quote.",
+    wholesaleSuccessContinue: "Open request",
+    brokerageSuccessTitle: "Brokerage request sent",
+    brokerageSuccessBody: "Our team will review the details and follow up with an inspection offer.",
+    brokerageSuccessContinue: "Open request",
     offersViewDetails: "Details",
     notificationsFilterAll: "All",
     notificationsFilterDeal: "Deals",

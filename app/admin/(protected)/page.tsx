@@ -115,7 +115,7 @@ async function AdminDashboardBody({
     {
       label: a.kpiBrokerage,
       value: data.kpis.activeBrokerage,
-      href: "/admin/brokerage",
+      href: "/admin/brokerage?status=active",
       tone: "success",
       icon: <Compass className="size-4" strokeWidth={1.5} aria-hidden />,
     },

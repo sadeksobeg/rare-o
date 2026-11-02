@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import {
   createRetailRequestAction,
@@ -25,6 +25,20 @@ type SuccessData = {
   whatsAppDeepLink?: string | null;
   handoffMessageText?: string | null;
 };
+
+const SUCCESS_STORAGE_KEY = "ro-request-success";
+
+function readStoredSuccess(): ActionResult | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(SUCCESS_STORAGE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw) as SuccessData;
+    return { ok: true, data };
+  } catch {
+    return null;
+  }
+}
 
 export function RequestForm({
   locale,
@@ -69,9 +83,16 @@ export function RequestForm({
 }) {
   const { items, clear } = useCart();
   const [result, setResult] = useState<ActionResult | null>(null);
+  const [restoring, setRestoring] = useState(true);
   const [pending, startTransition] = useTransition();
   const [opening, setOpening] = useState(false);
   const [openError, setOpenError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const stored = readStoredSuccess();
+    if (stored) setResult(stored);
+    setRestoring(false);
+  }, []);
   /** One idempotency key per mount — double-submit / retry reuses it. */
   const idempotencyKeyRef = useRef<string | null>(null);
 
@@ -82,6 +103,10 @@ export function RequestForm({
       ),
     [items]
   );
+
+  if (restoring) {
+    return null;
+  }
 
   if (items.length === 0 && !(result && result.ok)) {
     return (
@@ -181,7 +206,17 @@ export function RequestForm({
           startTransition(async () => {
             const res = await createRetailRequestAction(null, formData);
             setResult(res);
-            if (res.ok) clear();
+            if (res.ok) {
+              clear();
+              try {
+                sessionStorage.setItem(
+                  SUCCESS_STORAGE_KEY,
+                  JSON.stringify(res.data ?? {})
+                );
+              } catch {
+                /* ignore */
+              }
+            }
           });
         }}
       >

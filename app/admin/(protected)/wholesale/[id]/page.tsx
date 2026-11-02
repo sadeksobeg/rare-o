@@ -160,7 +160,10 @@ export default async function AdminWholesaleDetailPage({
               id: "delivered",
               label: u.shipStepDelivered,
               done: closed,
-              current: closed || cancelled,
+              // A cancelled order never reaches "delivered" — only mark it
+              // current when actually closed, so a cancelled request doesn't
+              // render as if delivery were in progress.
+              current: closed,
             },
           ];
         })()}
