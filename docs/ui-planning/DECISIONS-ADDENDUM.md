@@ -408,3 +408,28 @@ panel. Gates: `npm run test:whatsapp-outbound-safety`,
 - Apply migration `20261031170000_whatsapp_desk_media_crm` when DB is up.
 
 Evidence: env keys in `.env.example` and `docs/handover/ENV-REFERENCE.md`.
+
+## Owner ratification — 2026-11-02
+
+Following an independent review of all work through Phase 9 (see the review
+session that produced this entry), the owner explicitly approved, in writing
+in the conversation, proceeding on all fronts flagged as needing a decision
+("نفذ كل شيء" in response to a numbered list of exactly: (1) commit and push
+the then-uncommitted Phase 3–9 work, (2) rule on the D20 override below, (3)
+run independent audits for phases 4/5/7/8/9). This entry records the specific
+owner decision on (2); (1) and the dispatch of (3) are recorded in
+`CLAUDE.md` and in forthcoming `docs/ui-planning/AUDIT-PHASE-{4,5,7,8,9}.md`
+files respectively.
+
+**D20 override (admin dashboard charts) — ratified.** The Phase 4 entry above
+("ADM-01: charts allowed despite older D20") was the implementer's own
+unilateral call, made without a recorded owner decision at the time — a
+process violation, since `CLAUDE.md` states `PLAN.md`'s D1–D26 take
+precedence over any conflicting reference absent an explicit owner
+decision. The owner has now explicitly ratified that call after the fact:
+**`PLAN.md` D20 ("no charts") is superseded by `MASTER-BUILD-PLAN.md`'s ADM-01
+requirement (domain-mix donut + requests-over-time trend) for the admin
+dashboard, going forward.** `PLAN.md`'s Decision Lock table should be updated
+to reflect this the next time that file is revised, so it no longer reads as
+a live contradiction; until then, this entry is the binding record of which
+decision governs ADM-01.
