@@ -41,7 +41,7 @@ export function AdminCommandSearchMount({ labels }: SlotProps) {
   if (!Slot) {
     return (
       <span
-        className="hidden h-9 min-w-[9rem] items-center rounded-full border border-[color-mix(in_srgb,var(--ro-ink-950)_16%,transparent)] bg-[var(--ro-sand-50)] px-3 text-xs text-[var(--ro-ink-600)] md:inline-flex"
+        className="ro-cmd-search-trigger flex h-11 w-full min-w-0 flex-1 items-center rounded-[var(--ro-r-sm)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] px-3 text-xs text-[color:var(--ro-text-muted)]"
         aria-hidden
       >
         {labels.search}

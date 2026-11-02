@@ -9,13 +9,17 @@ const prisma = new PrismaClient();
 const DEMO_CURRENCY = "USD";
 
 const IMAGES = {
-  instrument: "/brand/editorial/instrument-dark.jpg",
-  closeup: "/brand/editorial/hero-closeup.jpg",
-  heritage: "/brand/editorial/oud-heritage.jpg",
-  signature: "/brand/editorial/hero-signature.jpg",
-  /** Prefer atelier cutouts for oud SKUs when available. */
+  instrument: "/brand/instruments/oud-stage-gold.jpg",
+  closeup: "/brand/instruments/oud-neck-detail.jpg",
+  heritage: "/brand/instruments/oud-handcraft.jpg",
+  signature: "/brand/instruments/oud-atelier-light.jpg",
+  /** Prefer atelier cutouts + Phase 8 temporary instrument set. */
   oudPrimary: "/brand/hero-oud-atelier-f.png",
-  oudAlt: "/brand/hero-oud-atelier-e.png",
+  oudAlt: "/brand/instruments/oud-strings-close.jpg",
+  oudWorkshop: "/brand/instruments/oud-workshop.jpg",
+  oudWarm: "/brand/instruments/oud-body-warm.jpg",
+  oudLive: "/brand/instruments/oud-performance.jpg",
+  oudResonance: "/brand/instruments/oud-resonance.jpg",
 } as const;
 
 type SeedCategory =
@@ -155,7 +159,9 @@ const DEMO_PRODUCTS: SeedProduct[] = [
     wholesaleEligible: true,
     images: [
       { path: IMAGES.oudPrimary, altAr: "عود — منظر أمامي", altEn: "Oud — front view" },
-      { path: IMAGES.oudAlt, altAr: "تفاصيل الحرفة", altEn: "Craft detail" },
+      { path: IMAGES.oudAlt, altAr: "تفاصيل الأوتار", altEn: "String detail" },
+      { path: IMAGES.oudWorkshop, altAr: "الورشة", altEn: "Workshop" },
+      { path: IMAGES.closeup, altAr: "تفاصيل العنق", altEn: "Neck detail" },
     ],
   },
   {
@@ -171,8 +177,10 @@ const DEMO_PRODUCTS: SeedProduct[] = [
     retailPrice: 3180,
     compareAtPrice: 3550,
     images: [
-      { path: IMAGES.oudPrimary, altAr: "عود كلاسيك", altEn: "Classic oud" },
+      { path: IMAGES.oudWarm, altAr: "عود كلاسيك", altEn: "Classic oud" },
+      { path: IMAGES.oudPrimary, altAr: "منظر أمامي", altEn: "Front view" },
       { path: IMAGES.oudAlt, altAr: "تفصيل الوجه", altEn: "Face detail" },
+      { path: IMAGES.oudResonance, altAr: "حضور المسرح", altEn: "Stage presence" },
     ],
   },
   {
@@ -187,8 +195,10 @@ const DEMO_PRODUCTS: SeedProduct[] = [
     oudSpecs: CONCERT_OUD_SPECS,
     retailPrice: 4920,
     images: [
-      { path: IMAGES.oudAlt, altAr: "عود حفلات", altEn: "Concert oud" },
+      { path: IMAGES.oudLive, altAr: "عود حفلات", altEn: "Concert oud" },
       { path: IMAGES.oudPrimary, altAr: "منظر جانبي", altEn: "Side view" },
+      { path: IMAGES.oudAlt, altAr: "تفاصيل الأوتار", altEn: "String detail" },
+      { path: IMAGES.instrument, altAr: "إضاءة المسرح", altEn: "Stage light" },
     ],
   },
   {
@@ -212,8 +222,10 @@ const DEMO_PRODUCTS: SeedProduct[] = [
     retailPrice: 8900,
     wholesaleEligible: true,
     images: [
-      { path: IMAGES.oudPrimary, altAr: "عود توقيع", altEn: "Signature oud" },
-      { path: IMAGES.oudAlt, altAr: "تفاصيل الأتيليه", altEn: "Atelier detail" },
+      { path: IMAGES.signature, altAr: "عود توقيع", altEn: "Signature oud" },
+      { path: IMAGES.oudPrimary, altAr: "منظر أمامي", altEn: "Front view" },
+      { path: IMAGES.oudWorkshop, altAr: "تفاصيل الأتيليه", altEn: "Atelier detail" },
+      { path: IMAGES.heritage, altAr: "حرفة اليد", altEn: "Hand craft" },
     ],
   },
   {

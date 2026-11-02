@@ -14,9 +14,11 @@ import {
   AdminRecordCardList,
 } from "@/components/admin/list-record-card";
 import { PageHeader } from "@/components/admin/page-header";
+import { RetailKanbanBoard } from "@/components/admin/retail-kanban";
 import { AdminTableFilters } from "@/components/admin/table-filters";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusChip } from "@/components/ui/status-chip";
+import { cn } from "@/lib/utils";
 import { uiVisibleRetailRequestWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
 import { containsCI } from "@/lib/db/search";
@@ -52,9 +54,16 @@ export const dynamic = "force-dynamic";
 export default async function AdminRequestsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; q?: string; page?: string }>;
+  searchParams: Promise<{
+    tab?: string;
+    q?: string;
+    page?: string;
+    view?: string;
+  }>;
 }) {
-  const { tab: tabRaw, q: qRaw, page: pageRaw } = await searchParams;
+  const { tab: tabRaw, q: qRaw, page: pageRaw, view: viewRaw } =
+    await searchParams;
+  const view = viewRaw === "kanban" ? "kanban" : "table";
   const { locale, dict } = await getRequestDictionary();
   const a = dict.admin;
   const u = dict.adminUi;
@@ -106,8 +115,8 @@ export default async function AdminRequestsPage({
   const requests = await prisma.retailRequest.findMany({
     where,
     orderBy: { updatedAt: "desc" },
-    skip: (page - 1) * PAGE_SIZE,
-    take: PAGE_SIZE,
+    skip: view === "kanban" ? 0 : (page - 1) * PAGE_SIZE,
+    take: view === "kanban" ? 200 : PAGE_SIZE,
     include: {
       _count: { select: { lines: true } },
       handoffEvents: {
@@ -137,6 +146,30 @@ export default async function AdminRequestsPage({
         description={u.requestsLead}
         icon={<ShoppingBag className="size-5" strokeWidth={1.5} />}
       />
+      <div className="flex flex-wrap items-center gap-2">
+        <Link
+          href={`/admin/requests?view=table${tab !== "all" ? `&tab=${encodeURIComponent(tab)}` : ""}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
+          className={cn(
+            "inline-flex h-10 items-center rounded-[var(--ro-r-sm)] px-3 text-sm font-semibold",
+            view === "table"
+              ? "bg-[var(--ro-plum-900)] text-[var(--ro-sand-50)]"
+              : "border border-ro-line text-ro-ink"
+          )}
+        >
+          {u.viewTable}
+        </Link>
+        <Link
+          href={`/admin/requests?view=kanban${tab !== "all" ? `&tab=${encodeURIComponent(tab)}` : ""}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
+          className={cn(
+            "inline-flex h-10 items-center rounded-[var(--ro-r-sm)] px-3 text-sm font-semibold",
+            view === "kanban"
+              ? "bg-[var(--ro-plum-900)] text-[var(--ro-sand-50)]"
+              : "border border-ro-line text-ro-ink"
+          )}
+        >
+          {u.viewKanban}
+        </Link>
+      </div>
       <Suspense fallback={null}>
         <AdminTableFilters
           tabsLabel={u.filterTabs}
@@ -160,9 +193,27 @@ export default async function AdminRequestsPage({
         />
       </Suspense>
       {requests.length === 0 ? (
-        <div className="border border-ro-line">
-          <EmptyState title={u.emptyTitle} body={a.noRequests} />
-        </div>
+        <EmptyState
+          variant={tab !== "all" || q ? "no-results" : "first-use"}
+          title={u.emptyTitle}
+          body={a.noRequests}
+          actionHref={
+            tab !== "all" || q ? "/admin/requests" : "/admin/products/new"
+          }
+          actionLabel={
+            tab !== "all" || q ? dict.catalog.clearFilters : a.newProduct
+          }
+        />
+      ) : view === "kanban" ? (
+        <RetailKanbanBoard
+          dict={dict}
+          cards={requests.map((r) => ({
+            id: r.id,
+            reference: r.reference,
+            customerName: r.customerName,
+            status: r.status,
+          }))}
+        />
       ) : (
         <>
           <AdminRecordCardList>

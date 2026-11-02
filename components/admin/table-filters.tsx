@@ -31,7 +31,7 @@ export function AdminTableFilters({
   return (
     <div
       className={cn(
-        "sticky top-14 z-20 space-y-3 border-b border-ro-line bg-ro-surface/95 py-3 backdrop-blur",
+        "sticky top-16 z-20 space-y-3 border-b border-ro-line bg-ro-surface/95 py-3 backdrop-blur",
         className
       )}
     >

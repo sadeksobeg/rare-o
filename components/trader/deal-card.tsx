@@ -33,10 +33,18 @@ export function DealCard({
       href={href}
       className={cn(
         "ro-portal-card group flex min-h-20 items-center gap-3 border px-4 py-3.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]",
+        waitingLabel &&
+          "border-[color-mix(in_srgb,var(--ro-plum-900)_28%,transparent)] shadow-[0_0_0_1px_color-mix(in_srgb,var(--ro-plum-900)_12%,transparent)]",
         className
       )}
     >
-      <span className="ro-portal-icon-well size-10 transition-transform duration-[var(--ro-dur-fast)] group-hover:scale-105 [&>svg]:size-4">
+      <span className="relative ro-portal-icon-well size-10 transition-transform duration-[var(--ro-dur-fast)] group-hover:scale-105 [&>svg]:size-4">
+        {waitingLabel ? (
+          <span
+            aria-hidden
+            className="absolute -end-0.5 -top-0.5 size-2.5 rounded-full bg-[var(--ro-plum-900)] motion-safe:animate-pulse"
+          />
+        ) : null}
         <Handshake className="size-4" strokeWidth={1.5} aria-hidden />
       </span>
       <span className="min-w-0 flex-1 space-y-1.5">

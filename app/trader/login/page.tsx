@@ -1,9 +1,9 @@
+import type { Metadata } from "next";
 import { traderLoginAction } from "@/app/deal-actions";
 import { LoginForm } from "@/components/auth/login-form";
 import { AdminLocaleToggle } from "@/components/admin/locale-toggle";
 import { whatsAppGreetingLink } from "@/lib/config/contact";
 import { getRequestDictionary } from "@/lib/i18n/server";
-import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -16,10 +16,10 @@ export default async function TraderLoginPage({
 }) {
   const { locale, dict } = await getRequestDictionary();
   const { returnTo, notice } = await searchParams;
-  const ar = locale === "ar";
+  const a = dict.auth;
   const accountRequestHref =
     whatsAppGreetingLink(
-      ar
+      locale === "ar"
         ? "مرحباً، أود طلب حساب تاجر في منصة RARE OUD."
         : "Hello — I would like to request a trader account on RARE OUD."
     ) || "/contact";
@@ -29,22 +29,12 @@ export default async function TraderLoginPage({
       action={traderLoginAction}
       brand={dict.brand}
       role="trader"
-      roleAdminLabel={ar ? "إدارة" : "Admin"}
-      roleTraderLabel={ar ? "تاجر" : "Trader"}
-      tagline={
-        ar
-          ? "آلات عود نادرة — مصنوعة يدوياً"
-          : "Rare oud instruments — handcrafted"
-      }
-      headline={
-        ar ? "صدى الصنعة، محفوظ بدقّة" : "The echo of craft, kept precisely"
-      }
-      title={ar ? "دخول التاجر" : "Trader Sign In"}
-      subtitle={
-        ar
-          ? "اقترح صفقات، اطلب بالجملة، واطلب وساطة على قطعة رأيتها"
-          : "Propose deals, request wholesale, and ask us to broker a piece you've found"
-      }
+      roleAdminLabel={a.roleAdmin}
+      roleTraderLabel={a.roleTrader}
+      tagline={a.tagline}
+      headline={a.headline}
+      title={a.traderTitle}
+      subtitle={a.traderSubtitle}
       footer={
         <a
           href={accountRequestHref}
@@ -58,20 +48,22 @@ export default async function TraderLoginPage({
       emailLabel={dict.common.email}
       passwordLabel={dict.common.password}
       submitLabel={dict.common.signIn}
-      showPasswordLabel={dict.auth.showPassword}
-      hidePasswordLabel={dict.auth.hidePassword}
-      loginErrorLabel={dict.auth.loginError}
-      loginLockedLabel={dict.auth.loginLocked}
-      capsLockLabel={ar ? "مفتاح Caps Lock مُفعَّل" : "Caps Lock is on"}
-      rateLimitFooter={
-        ar
-          ? "محاولات الدخول المتكررة تُوقَف مؤقتاً لحماية حسابك"
-          : "Repeated sign-in attempts are paused temporarily to protect your account"
-      }
+      showPasswordLabel={a.showPassword}
+      hidePasswordLabel={a.hidePassword}
+      loginErrorLabel={a.loginError}
+      loginLockedLabel={a.loginLocked}
+      capsLockLabel={a.capsLockOn}
+      rateLimitFooter={a.rateLimitFooter}
+      forgotPasswordLabel={a.forgotPassword}
+      forgotTitle={a.forgotTitle}
+      forgotSubtitle={a.forgotSubtitle}
+      forgotWhatsAppLabel={a.forgotWhatsApp}
+      forgotWhatsAppHref={whatsAppGreetingLink(a.forgotWhatsAppMessage)}
+      backToSignInLabel={a.backToSignIn}
       returnTo={returnTo}
       notice={
         notice === "session_invalidated"
-          ? dict.auth.sessionInvalidatedNotice
+          ? a.sessionInvalidatedNotice
           : undefined
       }
     >

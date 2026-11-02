@@ -30,12 +30,12 @@ function barClass(domain: ActionQueueDomain) {
 
 function chipClass(domain: ActionQueueDomain) {
   if (domain === "wholesale") {
-    return "bg-[var(--ro-amber-100)] text-[var(--ro-amber-800)]";
+    return "bg-[color-mix(in_srgb,var(--ro-amber-500)_22%,transparent)] text-[var(--ro-amber-500)]";
   }
   if (domain === "deal") {
-    return "bg-[var(--ro-plum-100)] text-[var(--ro-plum-900)]";
+    return "bg-[color-mix(in_srgb,var(--ro-plum-700)_22%,transparent)] text-[var(--ro-plum-300)]";
   }
-  return "bg-[var(--ro-sand-300)] text-[var(--ro-ink-600)]";
+  return "bg-[color-mix(in_srgb,var(--ro-text)_10%,transparent)] text-[color:var(--ro-text-muted)]";
 }
 
 function asDate(value: Date | string) {
@@ -74,9 +74,9 @@ export function ActionQueue({
 
   return (
     <section className={cn("space-y-3", className)}>
-      <div className="ro-portal-card border p-3 sm:p-3.5">
+      <div className="ro-portal-card border p-3 sm:p-4">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="font-display text-base font-medium text-ro-ink">
+          <h2 className="font-display text-lg font-semibold text-[color:var(--ro-text)]">
             {a.actionQueue}
           </h2>
           <div
@@ -94,10 +94,10 @@ export function ActionQueue({
                   aria-selected={on}
                   onClick={() => setFilter(tab.id)}
                   className={cn(
-                    "rounded-full px-2.5 py-1 transition-colors duration-[var(--ro-dur-fast)]",
+                    "min-h-9 rounded-[var(--ro-r-sm)] px-2.5 py-1 transition-colors duration-[var(--ro-dur-fast)]",
                     on
-                      ? "bg-[var(--ro-plum-900)] text-[var(--ro-sand-100)]"
-                      : "text-[var(--ro-ink-600)] hover:bg-[var(--ro-sand-200)]"
+                      ? "bg-[var(--ro-plum-700)] text-[var(--ro-sand-50)]"
+                      : "text-[color:var(--ro-text-muted)] hover:bg-[color-mix(in_srgb,var(--ro-text)_8%,transparent)]"
                   )}
                 >
                   {tab.label}
@@ -108,7 +108,7 @@ export function ActionQueue({
         </div>
 
         {visible.length === 0 ? (
-          <p className="border-t border-[color-mix(in_srgb,var(--ro-ink-950)_10%,transparent)] py-4 text-sm font-bold text-[var(--ro-success-700)]">
+          <p className="border-t border-[color:var(--ro-border-subtle)] py-4 text-sm font-bold text-[var(--ro-success-700)]">
             {a.actionEmpty}
           </p>
         ) : (
@@ -129,7 +129,7 @@ export function ActionQueue({
                   <Link
                     key={`${row.domain}-${row.id}`}
                     href={row.href}
-                    className="group grid grid-cols-[3px_auto_minmax(0,1fr)_auto] items-center gap-2.5 border-t border-[color-mix(in_srgb,var(--ro-ink-950)_10%,transparent)] py-2.5 transition-colors hover:bg-[color-mix(in_srgb,var(--ro-plum-50)_70%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)] sm:gap-2.5"
+                    className="group grid min-h-11 grid-cols-[3px_auto_minmax(0,1fr)_auto] items-center gap-2.5 border-t border-[color:var(--ro-border-subtle)] py-2.5 transition-colors hover:bg-[color-mix(in_srgb,var(--ro-plum-700)_10%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)] sm:gap-2.5"
                   >
                     <span
                       className={cn("h-7 rounded-[2px]", barClass(row.domain))}
@@ -149,15 +149,15 @@ export function ActionQueue({
                           : a.filterWholesale}
                     </span>
                     <div className="min-w-0">
-                      <p className="truncate text-[13px] font-medium text-ro-ink">
+                      <p className="truncate text-[13px] font-medium text-[color:var(--ro-text)]">
                         {heading}
                       </p>
-                      <p className="truncate text-[11px] text-[var(--ro-ink-600)]">
+                      <p className="truncate text-[11px] text-[color:var(--ro-text-muted)]">
                         {meta}
                       </p>
                     </div>
                     <span
-                      className="inline-flex size-8 items-center justify-center text-[var(--ro-plum-900)] transition-transform group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5"
+                      className="inline-flex size-8 items-center justify-center text-[var(--ro-plum-300)] transition-transform group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5"
                       aria-hidden
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>

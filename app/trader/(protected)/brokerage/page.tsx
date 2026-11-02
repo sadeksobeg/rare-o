@@ -20,8 +20,8 @@ export const dynamic = "force-dynamic";
 export default async function TraderBrokeragePage() {
   const session = await getTraderSession();
   if (!session) redirect("/trader/login");
-  const { locale } = await getRequestDictionary();
-  const ar = locale === "ar";
+  const { locale, dict } = await getRequestDictionary();
+  const t = dict.trader;
   const rows = await listTraderBrokerage(session.sub);
 
   const needsYou = rows.filter((r) => nextActor(r.status) === "trader").length;
@@ -34,56 +34,42 @@ export default async function TraderBrokeragePage() {
   return (
     <section className="space-y-6">
       <BrokerageHeroStrip
-        eyebrow={ar ? "بوابة التاجر" : "Trader portal"}
+        eyebrow={t.brand}
         title={
           <span className="inline-flex items-center gap-2.5">
-            <Compass className="size-7 shrink-0 text-[var(--ro-plum-800)]" strokeWidth={1.5} />
-            {ar ? "طلبات الوساطة" : "Brokerage requests"}
+            <Compass
+              className="size-7 shrink-0 text-[var(--ro-plum-800)]"
+              strokeWidth={1.5}
+            />
+            {t.brokerageListTitle}
           </span>
         }
-        subtitle={
-          ar
-            ? "نتابع القطعة، نعاينها، ونرسل عرضاً قبل أي شراء"
-            : "We inspect the piece and send a quote before any purchase"
-        }
+        subtitle={t.brokerageListSubtitle}
         actions={
           <ButtonLink href="/trader/brokerage/new" className="min-h-11">
             <Plus className="size-4" strokeWidth={1.5} />
-            {ar ? "طلب وساطة" : "New request"}
+            {t.brokerageNewCta}
           </ButtonLink>
         }
         stats={[
+          { label: t.brokerageStatTotal, value: rows.length },
+          { label: t.brokerageStatInProgress, value: inFlight },
           {
-            label: ar ? "الكل" : "Total",
-            value: rows.length,
-          },
-          {
-            label: ar ? "قيد المتابعة" : "In progress",
-            value: inFlight,
-          },
-          {
-            label: ar ? "ينتظرك" : "Needs you",
+            label: t.brokerageStatNeedsYou,
             value: needsYou,
-            hint: needsYou > 0 ? (ar ? "رد الآن" : "Respond now") : undefined,
+            hint: needsYou > 0 ? t.brokerageStatNeedsYouHint : undefined,
           },
-          {
-            label: ar ? "مغلق" : "Closed",
-            value: closed,
-          },
+          { label: t.brokerageStatClosed, value: closed },
         ]}
       />
 
       {rows.length === 0 ? (
         <EmptyState
           variant="first-use"
-          title={ar ? "لا طلبات بعد" : "No requests yet"}
-          body={
-            ar
-              ? "ابدأ أول وساطة — نعاين القطعة ونرسل عرضاً قبل الشراء"
-              : "Start your first brokerage — we inspect and quote before purchase"
-          }
+          title={t.brokerageEmptyTitle}
+          body={t.brokerageEmptyBody}
           actionHref="/trader/brokerage/new"
-          actionLabel={ar ? "طلب وساطة" : "New request"}
+          actionLabel={t.brokerageNewCta}
         />
       ) : (
         <ul className="grid gap-3">
@@ -110,10 +96,10 @@ export default async function TraderBrokeragePage() {
                         className="font-mono text-[0.7rem] text-[var(--ro-ink-500)]"
                         dir="ltr"
                       >
-                        {r.reference}
+                        <bdi dir="ltr">{r.reference}</bdi>
                       </p>
                       <span className="text-[0.65rem] tabular-nums text-[var(--ro-ink-500)]">
-                        {age}d
+                        <bdi dir="ltr">{age}d</bdi>
                       </span>
                     </div>
                     <p className="mt-1 truncate text-base font-medium text-ro-ink">
@@ -128,7 +114,7 @@ export default async function TraderBrokeragePage() {
                   <div className="flex items-center gap-2.5">
                     {waiting ? (
                       <span className="text-xs font-semibold text-[var(--ro-amber-800)]">
-                        {ar ? "ينتظرك" : "Needs you"}
+                        {t.brokerageNeedsYouChip}
                       </span>
                     ) : null}
                     <BrokerageStatusBadge

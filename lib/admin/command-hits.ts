@@ -27,7 +27,9 @@ const PAGE_HREFS = [
   "/admin/customers",
   "/admin/traders",
   "/admin/team",
+  "/admin/settings",
   "/admin/settings/security",
+  "/admin/notifications",
 ] as const;
 
 export function adminCommandPages(

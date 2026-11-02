@@ -6,8 +6,9 @@ import { AdminLocaleToggle } from "@/components/admin/locale-toggle";
 import { Emblem } from "@/components/brand";
 import { ChromeBadge } from "@/components/portal/chrome-badge";
 import { PortalRouteProgressMount } from "@/components/portal/route-progress-mount";
+import { PortalShellFrame } from "@/components/portal/portal-shell-frame";
+import { PortalThemeToggle } from "@/components/portal/portal-theme";
 import { OfflineBanner } from "@/components/system/offline-banner";
-import { AppToast } from "@/components/system/app-toast";
 import { SonnerToaster } from "@/components/ui/sonner-toaster";
 import {
   TraderBottomTabs,
@@ -30,6 +31,7 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
     getTraderWaitingCounts(session.sub),
   ]);
 
+  /** VISION program: 5 tabs — Home · Deals · Wholesale · Brokerage · Account */
   const tabs: TraderTab[] = [
     {
       href: "/trader",
@@ -56,12 +58,7 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
       label: dict.trader.brokerage,
       match: "prefix",
       icon: "brokerage",
-    },
-    {
-      href: "/trader/offers",
-      label: dict.trader.offers,
-      match: "prefix",
-      icon: "offers",
+      waiting: waiting.brokerage,
     },
     {
       href: "/trader/profile",
@@ -72,9 +69,12 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <AppToast dismissLabel={dict.common.toastDismiss}>
+    <>
       <SonnerToaster />
-      <div className="ro-portal ro-portal-trader relative min-h-screen overflow-x-clip text-ro-ink">
+      <PortalShellFrame
+        surface="trader"
+        className="ro-portal ro-portal-trader relative min-h-screen overflow-x-clip"
+      >
         <div className="ro-portal-atmosphere" aria-hidden />
         <Suspense fallback={null}>
           <PortalRouteProgressMount />
@@ -82,7 +82,7 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
         <div className="relative z-10">
           <OfflineBanner />
           <header className="sticky top-0 z-30 border-b border-[color-mix(in_srgb,var(--ro-sand-100)_12%,transparent)] bg-[linear-gradient(105deg,var(--ro-plum-900)_0%,var(--ro-ink-950)_58%,var(--ro-ink-900)_100%)] text-[var(--ro-sand-100)] shadow-[0_16px_40px_-28px_rgba(11,8,13,0.45)]">
-            <div className="mx-auto flex h-16 max-w-[1180px] items-center justify-between gap-4 px-4 sm:px-6">
+            <div className="mx-auto flex h-16 max-w-[1120px] items-center justify-between gap-4 px-4 sm:px-6">
               <Link
                 href="/trader"
                 className="group flex items-center gap-3 transition-opacity hover:opacity-95"
@@ -91,18 +91,22 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
                   variant="small"
                   className="size-8 brightness-110 transition-transform duration-[var(--ro-dur-fast)] group-hover:scale-105"
                 />
-                <span className="font-display text-sm font-bold tracking-[0.24em] text-[var(--ro-sand-50)]">
-                  RARE OUD
-                  <span className="mt-0.5 block text-[0.65rem] font-semibold tracking-[0.18em] text-[var(--ro-plum-300)]">
+                <span className="font-display text-sm font-bold text-[var(--ro-sand-50)]">
+                  <bdi dir="ltr">RARE OUD</bdi>
+                  <span className="mt-0.5 block text-[0.65rem] font-semibold text-[var(--ro-plum-300)]">
                     {dict.trader.brand}
                   </span>
                 </span>
               </Link>
-              <TraderDesktopNav tabs={tabs} tone="on-dark" />
+              <TraderDesktopNav
+                tabs={tabs}
+                tone="on-dark"
+                navLabel={dict.common.navLabelTrader}
+              />
               <div className="flex items-center gap-1.5 text-sm sm:gap-2.5">
                 <Link
                   href="/trader/notifications"
-                  className="ro-icon-btn relative size-10 min-h-0 px-0"
+                  className="ro-icon-btn relative size-11 min-h-11 px-0"
                   data-tone="on-dark"
                   aria-label={dict.trader.notifications}
                 >
@@ -112,6 +116,11 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
                     className="absolute end-1 top-1 flex min-w-[1.1rem] items-center justify-center rounded-full bg-[var(--ro-plum-300)] px-1 text-[0.65rem] font-bold text-[var(--ro-ink-950)]"
                   />
                 </Link>
+                <PortalThemeToggle
+                  lightLabel={dict.common.themeLight}
+                  darkLabel={dict.common.themeDark}
+                  className="hidden items-center gap-1 lg:inline-flex"
+                />
                 <AdminLocaleToggle
                   locale={locale}
                   label={dict.common.language}
@@ -137,14 +146,17 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
           </header>
           <main
             id="main-content"
-            className="ro-portal-main-enter mx-auto max-w-[1180px] px-4 py-6 pb-28 sm:px-6 md:pb-10"
+            className="ro-portal-main-enter mx-auto max-w-[1120px] px-4 py-6 pb-28 sm:px-6 md:pb-10"
           >
             {children}
           </main>
-          <TraderBottomTabs tabs={tabs} />
+          <TraderBottomTabs
+            tabs={tabs}
+            navLabel={dict.common.navLabelTrader}
+          />
         </div>
-      </div>
-    </AppToast>
+      </PortalShellFrame>
+    </>
   );
 }
 

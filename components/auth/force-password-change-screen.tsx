@@ -29,7 +29,11 @@ export function ForcePasswordChangeScreen({
 
   return (
     <main className="relative flex min-h-svh items-center justify-center bg-[var(--ro-sand-100)] px-6 py-12">
-      <form action={logoutAction} className="absolute end-6 top-6">
+      <div
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--ro-plum-900)_10%,transparent),transparent_50%),radial-gradient(ellipse_at_bottom,color-mix(in_srgb,var(--ro-amber-500)_8%,transparent),transparent_45%)]"
+        aria-hidden
+      />
+      <form action={logoutAction} className="absolute end-6 top-6 z-10">
         <button
           type="submit"
           className="ro-icon-btn"
@@ -39,7 +43,7 @@ export function ForcePasswordChangeScreen({
           <span className="hidden sm:inline">{logoutLabel}</span>
         </button>
       </form>
-      <div className="w-full max-w-md rounded-[var(--ro-r-lg)] border border-[var(--ro-border-subtle)] bg-[var(--ro-paper)] p-6 shadow-sm">
+      <div className="relative z-10 w-full max-w-md rounded-[var(--ro-r-lg)] border border-[var(--ro-border-subtle)] bg-[var(--ro-paper)] p-6 shadow-sm">
         <div className="mb-5 flex items-center gap-3">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-[color-mix(in_srgb,var(--ro-amber-500)_18%,transparent)] text-[var(--ro-amber-800)]">
             {icon}

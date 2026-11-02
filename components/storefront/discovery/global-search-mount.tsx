@@ -1,31 +1,39 @@
 "use client";
 
-import type { Dictionary } from "@/lib/i18n/dictionaries";
-import type { Locale } from "@/lib/i18n/config";
-import type { HomepageProduct } from "@/lib/catalog/homepage";
-import { DiscoveryProvider } from "./discovery-context";
-import { GlobalSearchListener } from "./global-search-listener";
+import { useEffect, useState, type ComponentType } from "react";
+
+type SlotProps = {
+  dict: unknown;
+  locale: string;
+  /** Opaque payload from the server layout — typed inside the lazy slot only. */
+  products: unknown[];
+};
 
 /**
- * Makes the full-screen search overlay (triggered by the header's "search"
- * button, event "ro:open-search") work on every storefront page, not only
- * the homepage. The homepage keeps its own, more specific DiscoveryProvider
- * (components/storefront/discovery/homepage-shell.tsx) for quick-view and
- * compare — React's nearest-provider-wins means that instance simply shadows
- * this one there, so nothing about the homepage's existing behavior changes.
+ * Isolates discovery/search from the storefront layout client graph so a
+ * poisoned webpack chunk (e.g. accidental Prisma import) cannot crash the
+ * whole storefront with `undefined.call`.
  */
-export function GlobalSearchMount({
-  dict,
-  locale,
-  products,
-}: {
-  dict: Dictionary;
-  locale: Locale;
-  products: HomepageProduct[];
-}) {
-  return (
-    <DiscoveryProvider products={products}>
-      <GlobalSearchListener dict={dict} locale={locale} />
-    </DiscoveryProvider>
-  );
+export function GlobalSearchMount(props: SlotProps) {
+  const [Slot, setSlot] = useState<ComponentType<SlotProps> | null>(null);
+
+  useEffect(() => {
+    let live = true;
+    void import("./global-search-slot")
+      .then((mod) => {
+        const next = mod?.GlobalSearchSlot;
+        if (live && typeof next === "function") {
+          setSlot(() => next as ComponentType<SlotProps>);
+        }
+      })
+      .catch(() => {
+        /* keep null — search unavailable, page still usable */
+      });
+    return () => {
+      live = false;
+    };
+  }, []);
+
+  if (!Slot) return null;
+  return <Slot {...props} />;
 }

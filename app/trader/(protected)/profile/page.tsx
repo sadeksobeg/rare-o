@@ -7,7 +7,9 @@ import {
 } from "lucide-react";
 import { TraderPreferencesForm } from "@/components/trader/preferences-form";
 import { TraderPasswordSettings } from "@/components/trader/password-settings";
+import { TraderSignOutOthers } from "@/components/trader/sign-out-others";
 import { TraderPageHeader } from "@/components/trader/page-header";
+import { AppearanceCard } from "@/components/portal/appearance-card";
 import { StatusChip } from "@/components/ui/status-chip";
 import { requireTraderSession } from "@/lib/auth/trader-session";
 import { listLaunchCategories } from "@/lib/catalog/service";
@@ -71,7 +73,13 @@ export default async function TraderProfilePage() {
       <TraderPageHeader
         title={t.profileTitle}
         description={t.profileNote}
-        icon={<UserRound className="size-5" strokeWidth={2} />}
+        icon={<UserRound className="size-5" strokeWidth={1.5} />}
+      />
+      <AppearanceCard
+        title={dict.common.themeGroup}
+        description={t.profileNote}
+        lightLabel={dict.common.themeLight}
+        darkLabel={dict.common.themeDark}
       />
       <div className="ro-portal-card overflow-hidden border">
         <div className="flex flex-wrap items-center gap-5 border-b border-[color-mix(in_srgb,var(--ro-plum-900)_14%,transparent)] bg-[linear-gradient(135deg,var(--ro-plum-900)_0%,var(--ro-ink-950)_100%)] px-5 py-7 text-[var(--ro-sand-100)] sm:px-6">
@@ -143,6 +151,25 @@ export default async function TraderProfilePage() {
         forceDict={dict.forcePasswordChange}
         sectionDict={dict.changePassword}
       />
+
+      <div className="ro-portal-card space-y-4 border p-5 sm:p-6">
+        <div>
+          <h2 className="font-display text-base font-semibold text-ro-ink">
+            {dict.auth.activeSessions}
+          </h2>
+          <p className="text-sm text-ro-muted">
+            {dict.auth.activeSessionsDesc}
+          </p>
+        </div>
+        <TraderSignOutOthers
+          label={dict.auth.signOutOthers}
+          title={dict.auth.signOutOthersTitle}
+          description={dict.auth.signOutOthersDesc}
+          confirmLabel={dict.auth.signOutOthers}
+          cancelLabel={dict.common.cancel}
+          successLabel={dict.auth.signedOutOthers}
+        />
+      </div>
     </section>
   );
 }

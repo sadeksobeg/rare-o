@@ -7,7 +7,10 @@ import {
   CheckCheck,
   CircleAlert,
   Clock,
+  FileText,
   Loader,
+  MapPin,
+  UserRound,
 } from "lucide-react";
 import { adminRetryWhatsAppMessageAction } from "@/app/whatsapp-actions";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -32,6 +35,127 @@ function DeliveryIcon({ status }: { status: string }) {
   }
 }
 
+function MediaBody({
+  message,
+  isOut,
+  dict,
+}: {
+  message: InboxMessageItem;
+  isOut: boolean;
+  dict: Dictionary;
+}) {
+  const muted = isOut ? "text-[var(--ro-sand-200)]" : "text-ro-muted";
+  const caption = message.caption?.trim() || null;
+
+  if (message.messageType === "image" || message.messageType === "sticker") {
+    return (
+      <div className="space-y-1">
+        {message.mediaUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element -- private admin media URL
+          <img
+            src={message.mediaUrl}
+            alt=""
+            className="max-h-64 max-w-full rounded-[var(--ro-r-sm)] object-contain"
+          />
+        ) : (
+          <p className={muted}>{dict.inbox.nonText}</p>
+        )}
+        {caption ? (
+          <p className="whitespace-pre-wrap break-words">
+            <bdi>{caption}</bdi>
+          </p>
+        ) : null}
+      </div>
+    );
+  }
+
+  if (message.messageType === "video") {
+    return (
+      <div className="space-y-1">
+        {message.mediaUrl ? (
+          <video
+            controls
+            preload="metadata"
+            className="max-h-64 max-w-full rounded-[var(--ro-r-sm)]"
+            src={message.mediaUrl}
+          />
+        ) : (
+          <p className={muted}>{dict.inbox.nonText}</p>
+        )}
+        {caption ? (
+          <p className="whitespace-pre-wrap break-words">
+            <bdi>{caption}</bdi>
+          </p>
+        ) : null}
+      </div>
+    );
+  }
+
+  if (message.messageType === "audio") {
+    return message.mediaUrl ? (
+      <audio controls preload="metadata" className="max-w-full" src={message.mediaUrl} />
+    ) : (
+      <p className={muted}>{dict.inbox.nonText}</p>
+    );
+  }
+
+  if (message.messageType === "document") {
+    return (
+      <div className="space-y-1">
+        {message.mediaUrl ? (
+          <a
+            href={message.mediaUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              "inline-flex items-center gap-2 font-semibold underline-offset-2 hover:underline",
+              isOut ? "text-[var(--ro-sand-100)]" : "text-ro-plum"
+            )}
+          >
+            <FileText className="size-4 shrink-0" strokeWidth={1.5} aria-hidden />
+            <bdi>{message.mediaFileName || dict.inbox.nonText}</bdi>
+          </a>
+        ) : (
+          <p className={muted}>{dict.inbox.nonText}</p>
+        )}
+        {caption ? (
+          <p className="whitespace-pre-wrap break-words">
+            <bdi>{caption}</bdi>
+          </p>
+        ) : null}
+      </div>
+    );
+  }
+
+  if (message.messageType === "location") {
+    return (
+      <p className={cn("inline-flex items-center gap-1.5", muted)}>
+        <MapPin className="size-4 shrink-0" strokeWidth={1.5} aria-hidden />
+        {dict.inbox.msgLocation}
+      </p>
+    );
+  }
+
+  if (message.messageType === "contact") {
+    return (
+      <p className={cn("inline-flex items-center gap-1.5", muted)}>
+        <UserRound className="size-4 shrink-0" strokeWidth={1.5} aria-hidden />
+        {dict.inbox.msgContact}
+      </p>
+    );
+  }
+
+  if (message.messageType === "unsupported") {
+    return <p className={muted}>{dict.inbox.nonText}</p>;
+  }
+
+  return (
+    <p className="whitespace-pre-wrap break-words">
+      <bdi>{message.body}</bdi>
+    </p>
+  );
+}
+
 /** A14 — MessageBubble (RTL-correct start/end alignment). */
 export function MessageBubble({
   message,
@@ -44,7 +168,6 @@ export function MessageBubble({
 }) {
   const isOut = message.direction === "outbound";
   const failed = message.status === "failed";
-  const nonText = message.messageType === "unsupported";
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -62,22 +185,14 @@ export function MessageBubble({
     <article
       data-bubble={isOut ? "out" : "in"}
       className={cn(
-        "max-w-[70%] space-y-1 rounded-[var(--ro-r-sm)] px-3 py-2 text-sm",
+        "max-w-[min(34rem,92%)] space-y-1.5 rounded-[var(--ro-r-sm)] px-4 py-2.5 text-[0.9375rem] leading-relaxed shadow-[0_1px_0_color-mix(in_srgb,var(--ro-ink-950)_6%,transparent)]",
         isOut
           ? "ms-auto bg-[var(--ro-plum-900)] text-[var(--ro-sand-100)]"
           : "me-auto border border-ro-border bg-[var(--ro-sand-50)] text-ro-ink",
         failed && "ring-1 ring-[var(--ro-danger-700)]"
       )}
     >
-      {nonText ? (
-        <p className={cn(isOut ? "text-[var(--ro-sand-200)]" : "text-ro-muted")}>
-          {dict.inbox.nonText}
-        </p>
-      ) : (
-        <p className="whitespace-pre-wrap break-words">
-          <bdi>{message.body}</bdi>
-        </p>
-      )}
+      <MediaBody message={message} isOut={isOut} dict={dict} />
       <footer
         className={cn(
           "flex flex-wrap items-center gap-1.5 text-[11px]",

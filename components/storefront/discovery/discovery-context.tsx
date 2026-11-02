@@ -7,7 +7,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import type { HomepageProduct } from "@/lib/catalog/homepage";
+import type { HomepageProduct } from "@/lib/catalog/homepage-types";
 
 type DiscoveryContextValue = {
   products: HomepageProduct[];

@@ -98,13 +98,14 @@ model ProductImage {
 
 /// Contact record — phone is NOT a unique business identity
 model Customer {
-  id        String          @id @default(cuid())
-  name      String
-  phone     String
-  notes     String?
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
-  requests  RetailRequest[]
+  id                    String                 @id @default(cuid())
+  name                  String
+  phone                 String
+  notes                 String?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  requests              RetailRequest[]
+  whatsAppConversations WhatsAppConversation[]
 
   @@index([phone])
 }
@@ -227,6 +228,7 @@ model TraderAccount {
   wholesaleRequests     WholesaleRequest[]
   brokerageRequests     BrokerageRequest[]
   notifications         TraderNotification[]
+  whatsAppConversations WhatsAppConversation[]
   createdAt             DateTime             @default(now())
   updatedAt             DateTime             @updatedAt
 }
@@ -397,8 +399,8 @@ model WholesaleRequestEvent {
   @@index([requestId])
 }
 
-/// WhatsApp communication domain (Stage A) — independent of Retail/Deal/Wholesale.
-/// Phase D: optional explicit primary link to one Week 3 domain record (not a merge).
+/// WhatsApp communication domain — human admin desk (Baileys linked device).
+/// Optional CRM FKs + one primary business-request link (not a merge).
 model WhatsAppConversation {
   id                 String              @id @default(cuid())
   /// Stable WhatsApp chat JID (one-to-one). Unique conversation identity.
@@ -409,12 +411,17 @@ model WhatsAppConversation {
   lastMessageAt      DateTime?
   lastMessagePreview String              @default("")
   unreadCount        Int                 @default(0)
-  /// none | retail_request | deal_proposal | wholesale_request — ONE active primary link
+  /// none | retail_request | deal_proposal | wholesale_request | brokerage_request
   linkType           String              @default("none")
   /// Domain record id when linked; null when linkType=none
   linkId             String?
   linkedAt           DateTime?
   linkedByAdminId    String?
+  /// Optional CRM party (owner confirms; may be suggested from phone)
+  customerId         String?
+  customer           Customer?           @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  traderId           String?
+  trader             TraderAccount?      @relation(fields: [traderId], references: [id], onDelete: SetNull)
   messages           WhatsAppMessage[]
   linkAudits         WhatsAppLinkAudit[]
   createdAt          DateTime            @default(now())
@@ -423,33 +430,45 @@ model WhatsAppConversation {
   @@index([lastMessageAt])
   @@index([participantE164])
   @@index([linkType, linkId])
+  @@index([customerId])
+  @@index([traderId])
 }
 
 model WhatsAppMessage {
-  id              String               @id @default(cuid())
-  conversationId  String
-  conversation    WhatsAppConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  id               String               @id @default(cuid())
+  conversationId   String
+  conversation     WhatsAppConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   /// inbound | outbound
-  direction       String
-  /// text | unsupported (Stage A text-only)
-  messageType     String               @default("text")
-  body            String               @default("")
+  direction        String
+  /// text | image | video | audio | document | sticker | location | contact | unsupported
+  messageType      String               @default("text")
+  body             String               @default("")
+  /// Optional caption for media; location/contact may store JSON in body
+  caption          String?
+  mediaMime        String?
+  mediaSize        Int?
+  mediaDurationSec Int?
+  mediaFileName    String?
+  mediaSha256      String?
+  /// Relative key under storage/uploads/whatsapp — never a public URL
+  storageKey       String?
+  thumbnailKey     String?
   /// Baileys/WhatsApp message id — inbound idempotency (unique when present)
-  waMessageId     String?              @unique
+  waMessageId      String?              @unique
   /// Admin action idempotency key — outbound (unique when present)
-  clientRequestId String?              @unique
+  clientRequestId  String?              @unique
   /// received | pending | sending | sent | failed
-  status          String
+  status           String
   /// Outbound attempt counter (bounded retry). Inbound stays 0.
-  attemptCount    Int                  @default(0)
-  lastAttemptAt   DateTime?
+  attemptCount     Int                  @default(0)
+  lastAttemptAt    DateTime?
   /// Safe operator error — never session/QR material
-  errorSafe       String?
+  errorSafe        String?
   /// WhatsApp-side timestamp when known
-  waTimestamp     DateTime?
-  adminId         String?
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
+  waTimestamp      DateTime?
+  adminId          String?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
 
   @@index([conversationId, createdAt])
   @@index([status])

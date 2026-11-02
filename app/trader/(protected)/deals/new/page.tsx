@@ -25,6 +25,11 @@ export default async function NewTraderDealPage({
       slug: true,
       currency: true,
       category: { select: { slug: true, nameEn: true, nameAr: true } },
+      images: {
+        orderBy: { sortOrder: "asc" },
+        take: 1,
+        select: { path: true },
+      },
     },
   });
 
@@ -48,6 +53,7 @@ export default async function NewTraderDealPage({
           categorySlug: p.category.slug,
           categoryNameEn: p.category.nameEn,
           categoryNameAr: p.category.nameAr,
+          imagePath: p.images[0]?.path ?? null,
         }))}
         labels={t}
         locale={locale}

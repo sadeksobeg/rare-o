@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react";
 import { MaterialPlate } from "@/components/storefront/material-plate";
 import type { MediaItem } from "@/components/storefront/product-media";
+import { ProductZoomStage } from "@/components/storefront/product-zoom-stage";
 import { cn } from "@/lib/utils";
 
 export type ProductGalleryLabels = {
@@ -133,6 +134,36 @@ export function ProductGallery({
 
   const current = images[index] ?? images[0];
 
+  const thumb = (img: MediaItem, i: number, sizeClass: string) => {
+    const active = i === index;
+    return (
+      <button
+        type="button"
+        aria-label={fill(labels.showImage, { n: i + 1 })}
+        aria-current={active ? "true" : undefined}
+        onClick={() => select(i)}
+        className={cn(
+          "relative block overflow-hidden rounded-[var(--ro-r-xs)] bg-ro-sunken outline-offset-2 transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--ro-focus)]",
+          sizeClass,
+          active ? "ring-2 ring-[var(--ro-plum-900)]" : "opacity-70 hover:opacity-100"
+        )}
+      >
+        {img.kind === "video" ? (
+          <video
+            src={img.path}
+            muted
+            playsInline
+            preload="metadata"
+            className="absolute inset-0 h-full w-full object-cover"
+            aria-hidden
+          />
+        ) : (
+          <Image src={img.path} alt="" fill sizes="72px" className="object-cover" />
+        )}
+      </button>
+    );
+  };
+
   return (
     <div
       className={cn("space-y-3", className)}
@@ -140,104 +171,109 @@ export function ProductGallery({
       aria-label={labels.gallery}
       onKeyDown={onKeyDown}
     >
-      <div className="relative">
-        <ul
-          ref={stageRef}
-          className="flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain rounded-[var(--ro-r-xs)] bg-ro-sunken [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {images.map((img, i) => (
-            <li
-              key={`${img.path}-${i}`}
-              className="relative aspect-[4/5] w-full shrink-0 snap-center"
-            >
-              {img.kind === "video" ? (
-                <video
-                  src={img.path}
-                  className="absolute inset-0 h-full w-full object-cover"
-                  controls
-                  playsInline
-                  preload="metadata"
-                  aria-label={img.alt}
-                />
-              ) : (
-                <button
-                  type="button"
-                  aria-label={`${labels.enlarge}: ${img.alt}`}
-                  className="absolute inset-0 cursor-zoom-in focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
-                  onClick={() => {
-                    select(i, { scroll: false });
-                    setLightboxOpen(true);
-                  }}
-                >
-                  <Image
-                    src={img.path}
-                    alt={img.alt}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 58vw"
-                    className="object-cover"
-                    priority={priority && i === 0}
-                  />
-                </button>
-              )}
-            </li>
-          ))}
-        </ul>
-        <span
-          aria-hidden
-          className="pointer-events-none absolute end-3 top-3 inline-flex size-9 items-center justify-center rounded-[var(--ro-r-full)] bg-ro-canvas/85 text-ro-ink"
-        >
-          <Expand className="size-4" />
-        </span>
+      <div className="lg:grid lg:grid-cols-[4.5rem_minmax(0,1fr)] lg:gap-3">
         {count > 1 ? (
-          <p
-            aria-hidden
-            className="pointer-events-none absolute bottom-3 start-3 rounded-[var(--ro-r-full)] bg-ro-ink/70 px-2.5 py-1 text-xs text-ro-canvas tabular-nums md:hidden"
+          <ul className="hidden max-h-[min(70vh,36rem)] flex-col gap-2 overflow-y-auto lg:flex">
+            {images.map((img, i) => (
+              <li key={`v-${img.path}-${i}`} className="shrink-0">
+                {thumb(img, i, "size-[4.5rem]")}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <span className="hidden lg:block" />
+        )}
+
+        <div className="relative min-w-0">
+          {/* Mobile / tablet swipe stage */}
+          <ul
+            ref={stageRef}
+            className="flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain rounded-[var(--ro-r-xs)] bg-ro-sunken [scrollbar-width:none] lg:hidden [&::-webkit-scrollbar]:hidden"
           >
-            {index + 1} / {count}
-          </p>
-        ) : null}
+            {images.map((img, i) => (
+              <li
+                key={`${img.path}-${i}`}
+                className="relative aspect-[4/5] w-full shrink-0 snap-center"
+              >
+                {img.kind === "video" ? (
+                  <video
+                    src={img.path}
+                    className="absolute inset-0 h-full w-full object-cover"
+                    controls
+                    playsInline
+                    preload="metadata"
+                    aria-label={img.alt}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    aria-label={`${labels.enlarge}: ${img.alt}`}
+                    className="absolute inset-0 cursor-zoom-in focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
+                    onClick={() => {
+                      select(i, { scroll: false });
+                      setLightboxOpen(true);
+                    }}
+                  >
+                    <Image
+                      src={img.path}
+                      alt={img.alt}
+                      fill
+                      sizes="100vw"
+                      className="object-cover"
+                      priority={priority && i === 0}
+                    />
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+
+          {/* Desktop zoom stage */}
+          {current.kind === "video" ? (
+            <div className="relative hidden aspect-[4/5] lg:block">
+              <video
+                src={current.path}
+                className="absolute inset-0 h-full w-full object-cover"
+                controls
+                playsInline
+                preload="metadata"
+                aria-label={current.alt}
+              />
+            </div>
+          ) : (
+            <ProductZoomStage
+              src={current.path}
+              alt={current.alt}
+              priority={priority}
+              enlargeLabel={`${labels.enlarge}: ${current.alt}`}
+              onEnlarge={() => setLightboxOpen(true)}
+            />
+          )}
+
+          <span
+            aria-hidden
+            className="pointer-events-none absolute end-3 top-3 inline-flex size-9 items-center justify-center rounded-[var(--ro-r-full)] bg-ro-canvas/85 text-ro-ink"
+          >
+            <Expand className="size-4" />
+          </span>
+          {count > 1 ? (
+            <p
+              aria-hidden
+              className="pointer-events-none absolute bottom-3 start-3 rounded-[var(--ro-r-full)] bg-ro-ink/70 px-2.5 py-1 text-xs text-ro-canvas tabular-nums lg:hidden"
+            >
+              {index + 1} / {count}
+            </p>
+          ) : null}
+        </div>
       </div>
 
       {count > 1 ? (
-        <ul className="flex gap-2 overflow-x-auto pb-1">
-          {images.map((img, i) => {
-            const active = i === index;
-            return (
-              <li key={img.path} className="shrink-0">
-                <button
-                  type="button"
-                  aria-label={fill(labels.showImage, { n: i + 1 })}
-                  aria-current={active ? "true" : undefined}
-                  onClick={() => select(i)}
-                  className={cn(
-                    "relative block size-[72px] overflow-hidden rounded-[var(--ro-r-xs)] bg-ro-sunken outline-offset-2 transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--ro-focus)]",
-                    active
-                      ? "ring-2 ring-ro-ink"
-                      : "opacity-70 hover:opacity-100"
-                  )}
-                >
-                  {img.kind === "video" ? (
-                    <video
-                      src={img.path}
-                      muted
-                      playsInline
-                      preload="metadata"
-                      className="absolute inset-0 h-full w-full object-cover"
-                      aria-hidden
-                    />
-                  ) : (
-                    <Image
-                      src={img.path}
-                      alt=""
-                      fill
-                      sizes="72px"
-                      className="object-cover"
-                    />
-                  )}
-                </button>
-              </li>
-            );
-          })}
+        <ul className="flex gap-2 overflow-x-auto pb-1 lg:hidden">
+          {images.map((img, i) => (
+            <li key={`h-${img.path}-${i}`} className="shrink-0">
+              {thumb(img, i, "size-[72px]")}
+            </li>
+          ))}
         </ul>
       ) : null}
 

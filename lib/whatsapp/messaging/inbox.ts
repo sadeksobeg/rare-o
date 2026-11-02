@@ -15,6 +15,7 @@ import {
   type WhatsAppActiveLinkType,
   type WhatsAppLinkType,
 } from "@/lib/whatsapp/messaging/link-constants";
+import { mediaUrl, parseStorageKey } from "@/lib/whatsapp/media";
 import { isOutboundEnabled } from "@/lib/whatsapp/types";
 
 export type DbClient = PrismaClient;
@@ -40,20 +41,36 @@ export type InboxConversationListItem = {
 export type InboxMessageItem = {
   id: string;
   direction: "inbound" | "outbound";
-  messageType: "text" | "unsupported";
+  messageType: string;
   body: string;
+  caption: string | null;
+  mediaMime: string | null;
+  mediaFileName: string | null;
+  mediaUrl: string | null;
   status: string;
   errorSafe: string | null;
   waTimestamp: string | null;
   createdAt: string;
 };
 
+export type InboxCrmParty = {
+  customer: { id: string; name: string; phone: string } | null;
+  trader: {
+    id: string;
+    displayName: string;
+    phone: string;
+    companyName: string;
+  } | null;
+};
+
 export type InboxConversationDetail = {
   id: string;
   displayLabel: string;
   waChatId: string;
+  participantE164: string | null;
   unreadCount: number;
   link: InboxLinkSummary;
+  crm: InboxCrmParty;
   messages: InboxMessageItem[];
 };
 
@@ -81,16 +98,27 @@ export function formatConversationDisplayLabel(input: {
   displayName: string | null;
   waChatId: string;
 }): string {
-  const e164 = input.participantE164?.trim();
-  if (e164) {
-    const name = input.displayName?.trim();
-    return name ? `${name} · +${e164}` : `+${e164}`;
-  }
-  const name = input.displayName?.trim();
-  const user = input.waChatId.split("@")[0] ?? input.waChatId;
+  const name = input.displayName?.trim() || null;
+  const server = (input.waChatId.split("@")[1] ?? "").toLowerCase();
+  const user = (input.waChatId.split("@")[0] ?? "").split(":")[0] ?? "";
+  // LID digits must never be shown as a phone number
+  const rawE164 = input.participantE164?.trim() || null;
+  const e164 =
+    rawE164 && !(server === "lid" && rawE164 === user.replace(/\D/g, ""))
+      ? rawE164
+      : server === "s.whatsapp.net" || server === "c.us"
+        ? user.replace(/\D/g, "") || null
+        : null;
+  const phone =
+    e164 && e164.length >= 8 && e164.length <= 15 ? `+${e164}` : null;
+
+  if (name && phone) return `${name} · ${phone}`;
+  if (name) return name;
+  if (phone) return phone;
+
   const masked =
     user.length <= 4 ? user : `${user.slice(0, 2)}…${user.slice(-4)}`;
-  return name ? `${name} · ${masked}` : masked;
+  return masked;
 }
 
 function toIso(d: Date | null | undefined): string | null {
@@ -131,19 +159,28 @@ async function listInboxConversationsImpl(
     },
   });
 
-  return rows.map((r) => ({
-    id: r.id,
-    displayLabel: formatConversationDisplayLabel({
-      participantE164: r.participantE164,
-      displayName: r.displayName,
-      waChatId: r.waChatId,
-    }),
-    lastMessagePreview: r.lastMessagePreview,
-    lastMessageAt: toIso(r.lastMessageAt),
-    unreadCount: r.unreadCount,
-    hasUnread: r.unreadCount > 0,
-    link: toLinkSummary(r),
-  }));
+  return rows
+    .filter(
+      (r) =>
+        r.waChatId !== "0@s.whatsapp.net" && !r.waChatId.startsWith("0@")
+    )
+    .map((r) => ({
+      id: r.id,
+      displayLabel: formatConversationDisplayLabel({
+        participantE164: r.participantE164,
+        displayName: r.displayName,
+        waChatId: r.waChatId,
+      }),
+      lastMessagePreview:
+        r.lastMessagePreview === "[unsupported:unknown]" ||
+        r.lastMessagePreview === "[unsupported]"
+          ? "—"
+          : r.lastMessagePreview,
+      lastMessageAt: toIso(r.lastMessageAt),
+      unreadCount: r.unreadCount,
+      hasUnread: r.unreadCount > 0,
+      link: toLinkSummary(r),
+    }));
 }
 
 /** Per-request cache for default inbox list (layout + children share one query). */
@@ -153,7 +190,7 @@ const listInboxConversationsCached = cache((take: number) =>
 
 export async function listInboxConversations(
   db: DbClient = defaultPrisma,
-  take = 100
+  take = 500
 ): Promise<InboxConversationListItem[]> {
   if (db === defaultPrisma) {
     return listInboxConversationsCached(take);
@@ -171,6 +208,10 @@ export async function getInboxConversation(
   const row = await db.whatsAppConversation.findUnique({
     where: { id },
     include: {
+      customer: { select: { id: true, name: true, phone: true } },
+      trader: {
+        select: { id: true, displayName: true, phone: true, companyName: true },
+      },
       messages: {
         orderBy: [
           { waTimestamp: "asc" },
@@ -190,18 +231,32 @@ export async function getInboxConversation(
       waChatId: row.waChatId,
     }),
     waChatId: row.waChatId,
+    participantE164: row.participantE164,
     unreadCount: row.unreadCount,
     link: toLinkSummary(row),
-    messages: row.messages.map((m) => ({
-      id: m.id,
-      direction: m.direction as "inbound" | "outbound",
-      messageType: m.messageType as "text" | "unsupported",
-      body: m.body,
-      status: m.status,
-      errorSafe: m.errorSafe,
-      waTimestamp: toIso(m.waTimestamp),
-      createdAt: m.createdAt.toISOString(),
-    })),
+    crm: {
+      customer: row.customer,
+      trader: row.trader,
+    },
+    messages: row.messages.map((m) => {
+      const parsed = m.storageKey ? parseStorageKey(m.storageKey) : null;
+      return {
+        id: m.id,
+        direction: m.direction as "inbound" | "outbound",
+        messageType: m.messageType,
+        body: m.body,
+        caption: m.caption,
+        mediaMime: m.mediaMime,
+        mediaFileName: m.mediaFileName,
+        mediaUrl: parsed
+          ? mediaUrl(parsed.conversationId, parsed.fileName)
+          : null,
+        status: m.status,
+        errorSafe: m.errorSafe,
+        waTimestamp: toIso(m.waTimestamp),
+        createdAt: m.createdAt.toISOString(),
+      };
+    }),
   };
 }
 

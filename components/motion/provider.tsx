@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
+import { LazyMotion, domAnimation, MotionConfig } from "motion/react";
 import { MotionContext } from "./context";
 import {
   resolveMotionTier,
@@ -90,9 +91,17 @@ export function MotionProvider({
 
   return (
     <MotionContext.Provider value={value}>
-      <div data-ro-motion-tier={tier} data-ro-motion-surface={surface}>
-        {children}
-      </div>
+      <LazyMotion features={domAnimation} strict>
+        <MotionConfig reducedMotion={lite || reducedMotion ? "always" : "user"}>
+          <div
+            data-ro-motion-tier={tier}
+            data-ro-motion-surface={surface}
+            data-ro-motion-lite={lite ? "true" : "false"}
+          >
+            {children}
+          </div>
+        </MotionConfig>
+      </LazyMotion>
     </MotionContext.Provider>
   );
 }

@@ -22,7 +22,11 @@ export default async function ForbiddenPage({
         : null;
 
   return (
-    <main className="mx-auto flex min-h-[70vh] max-w-lg flex-col items-center justify-center px-6 text-center">
+    <main className="relative mx-auto flex min-h-[70vh] max-w-lg flex-col items-center justify-center px-6 text-center">
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--ro-plum-900)_12%,transparent),transparent_55%)]"
+        aria-hidden
+      />
       <Rings className="mb-6 h-24 w-24 text-ro-ink opacity-30" />
       <h1 className="ro-type-h1">{dict.common.errorForbidden}</h1>
       <p className="mt-3 text-ro-text-2">{dict.common.errorBody}</p>

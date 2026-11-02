@@ -124,6 +124,11 @@ export async function listPublishedPublicOffers() {
           currency: true,
           retailPrice: true,
           category: { select: { slug: true, nameAr: true, nameEn: true } },
+          images: {
+            orderBy: { sortOrder: "asc" },
+            take: 1,
+            select: { path: true },
+          },
         },
       },
     },

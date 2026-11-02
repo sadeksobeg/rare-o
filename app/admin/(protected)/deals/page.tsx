@@ -104,9 +104,19 @@ export default async function AdminDealsPage({
         />
       </Suspense>
       {filtered.length === 0 ? (
-        <div className="border border-ro-line">
-          <EmptyState title={u.emptyTitle} body={u.emptyBody} />
-        </div>
+        <EmptyState
+          variant={tab !== "all" || q ? "no-results" : "first-use"}
+          title={u.emptyTitle}
+          body={u.emptyBody}
+          actionHref={
+            tab !== "all" || q ? "/admin/deals" : "/admin/traders"
+          }
+          actionLabel={
+            tab !== "all" || q
+              ? dict.catalog.clearFilters
+              : u.newTrader
+          }
+        />
       ) : (
         <>
           <AdminRecordCardList>

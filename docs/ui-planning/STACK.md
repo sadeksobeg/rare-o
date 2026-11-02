@@ -1,3 +1,23 @@
+# UI stack — production + design-lab
+
+## Production app (Admin Trader VISION program — 2026-11-01)
+
+Authority: `docs/ui-planning/VISION.md` for visual/motion; PLAN.md for business.
+
+| Package | Role in production portals |
+|---|---|
+| `motion` (^14, Motion for React) | Allowed behind `MotionProvider` + Lite path |
+| `sonner` | Primary toast in admin/trader shells (AppToast dual retired on portals) |
+| `recharts` | Admin dashboard charts (real data only) |
+| `lucide-react` | Icons stroke 1.5 |
+| Three.js / R3F | Optional login accent via existing `LogoSceneMount` + static fallback |
+| Hand-rolled command palette | Kept; `cmdk` optional if a11y win is proven |
+
+Portal theme: `components/portal/portal-theme.tsx` + `data-theme` on `.ro-portal`.
+Tokens: `styles/tokens.css` (dark-luxury block for `[data-theme=dark]`).
+
+---
+
 # Design-lab stack (post checkpoint-2 pivot)
 
 The owner's checkpoint-2 verdict ("IMPROVED, NOT ACCEPTED") identified the

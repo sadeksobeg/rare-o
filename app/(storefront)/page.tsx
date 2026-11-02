@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import { HeroLcpPreload } from "@/components/brand/hero-lcp-preload";
-import { storefrontMetadata } from "@/lib/seo";
+import {
+  jsonLdString,
+  organizationJsonLd,
+  storefrontMetadata,
+  websiteJsonLd,
+  withDefaultOgImage,
+} from "@/lib/seo";
 import { HomepageShell } from "@/components/storefront/discovery/homepage-shell";
 import { CategoryExplorer } from "@/components/storefront/discovery/category-explorer";
 import { FeaturedInstrument } from "@/components/storefront/discovery/featured-instrument";
@@ -21,12 +27,14 @@ import { localizedName } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { locale, dict } = await getRequestDictionary();
-  return storefrontMetadata({
-    locale,
-    title: `${dict.brand} — ${dict.home.headline}`,
-    description: dict.home.sub,
-    path: "/",
-  });
+  return withDefaultOgImage(
+    storefrontMetadata({
+      locale,
+      title: `${dict.brand} — ${dict.home.headline}`,
+      description: dict.home.sub,
+      path: "/",
+    })
+  );
 }
 
 /**
@@ -49,6 +57,18 @@ export default async function HomePage() {
 
   return (
     <HomepageShell dict={dict} locale={locale} data={data}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: jsonLdString(organizationJsonLd()),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: jsonLdString(websiteJsonLd()),
+        }}
+      />
       <HeroLcpPreload />
       <div data-page="home" data-skin="h1-h9">
         {/* H1 */}
@@ -205,7 +225,7 @@ export default async function HomePage() {
             title={dict.home.oudTitle}
             body={dict.home.oudBody}
             pullQuote={dict.home.oudDetail}
-            imageSrc="/brand/editorial-wood-grain.webp"
+            imageSrc="/brand/instruments/oud-workshop.jpg"
             imageAlt=""
           />
         </div>

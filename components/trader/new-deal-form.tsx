@@ -77,20 +77,29 @@ export function NewDealForm({
   const [hydrated, setHydrated] = useState(false);
   const [stepError, setStepError] = useState<string | null>(null);
   const [navigating, setNavigating] = useState(false);
+  const [successId, setSuccessId] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (!state?.ok || !state.data || typeof state.data !== "object") return;
     const id = (state.data as { id?: string }).id;
-    if (!id || navigating) return;
-    setNavigating(true);
+    if (!id || navigating || successId) return;
     try {
       sessionStorage.removeItem(DRAFT_KEY);
     } catch {
       /* ignore */
     }
-    router.push(`/trader/deals/${id}`);
-  }, [state, router, navigating]);
+    setSuccessId(id);
+  }, [state, navigating, successId]);
+
+  useEffect(() => {
+    if (!successId) return;
+    const handle = window.setTimeout(() => {
+      setNavigating(true);
+      router.push(`/trader/deals/${successId}`);
+    }, 1600);
+    return () => window.clearTimeout(handle);
+  }, [successId, router]);
 
   const steps = useMemo(
     () => [
@@ -417,6 +426,29 @@ export function NewDealForm({
         <Banner tone="danger" alert>
           {traderActionMessage(t, state.error)}
         </Banner>
+      ) : null}
+
+      {successId ? (
+        <div
+          role="status"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--ro-ink-950)_45%,transparent)] p-6"
+        >
+          <div className="ro-portal-card max-w-sm space-y-3 border p-6 text-center shadow-[0_24px_60px_-28px_rgba(11,8,13,0.55)]">
+            <p className="font-display text-2xl font-semibold text-ro-ink">
+              {t.dealSuccessTitle}
+            </p>
+            <p className="text-sm text-ro-muted">{t.dealSuccessBody}</p>
+            <Button
+              type="button"
+              onClick={() => {
+                setNavigating(true);
+                router.push(`/trader/deals/${successId}`);
+              }}
+            >
+              {t.dealSuccessContinue}
+            </Button>
+          </div>
+        </div>
       ) : null}
     </form>
   );

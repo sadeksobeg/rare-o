@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog, Dialog } from "@/components/ui/dialog";
 import { TextField } from "@/components/ui/text-field";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import { useUnsavedGuard } from "@/lib/ui/use-unsaved-guard";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState, useTransition } from "react";
 
@@ -29,7 +30,9 @@ export function CreateTraderForm({ dict }: { dict: Dictionary }) {
   const [revealed, setRevealed] = useState<TempPasswordPayload | null>(null);
   const [copied, setCopied] = useState(false);
   const [acked, setAcked] = useState(false);
+  const [dirty, setDirty] = useState(false);
   const router = useRouter();
+  useUnsavedGuard(dirty && !revealed);
 
   useEffect(() => {
     if (!state?.ok || !state.data || typeof state.data !== "object") return;
@@ -38,6 +41,7 @@ export function CreateTraderForm({ dict }: { dict: Dictionary }) {
       setRevealed({ tempPassword: data.tempPassword, email: data.email });
       setCopied(false);
       setAcked(false);
+      setDirty(false);
     }
   }, [state]);
 
@@ -62,6 +66,7 @@ export function CreateTraderForm({ dict }: { dict: Dictionary }) {
       <form
         action={action}
         className="grid max-w-xl gap-3 border border-ro-line bg-ro-surface p-4"
+        onChange={() => setDirty(true)}
       >
         <h2 className="text-lg font-semibold">{u.traderCreateTitle}</h2>
         <p className="text-sm text-ro-muted">{u.traderCreateLead}</p>

@@ -37,4 +37,5 @@ export function surfaceFromPathname(pathname: string): MotionSurface {
 export const AMBIENT_MAX_MS = 5000;
 export const STAGGER_MS = 70;
 export const RIPPLE_MS = 600;
-export const ADMIN_MAX_MS = 200;
+/** VISION: admin UI transitions ≤300ms (data anims may run longer separately). */
+export const ADMIN_MAX_MS = 300;

@@ -486,3 +486,67 @@ regression runs accumulate more of them.
 Commits `3b19c3b`, `52f65c3`, `4df5128`, `c7ff622` on `phase/01-security`
 (branched from `feat/port-lab-to-real` at `ae819db`) — see commit messages for
 the full file list per commit.
+
+## Session note — 2026-10-31 — WhatsApp number survival (owner constraint)
+
+**Owner:** Official WhatsApp Business / Cloud API is blocked; product must stay
+on unofficial linked-device (Baileys). **#1 priority:** avoid phone number ban.
+
+Recorded as standing rule in
+`docs/ui-planning/DECISIONS-ADDENDUM.md` (section “WhatsApp number survival”).
+Do **not** swap stack to Mid Auto `whatsapp-web.js`.
+
+**Shipped (code only, kill switch still off):** `lib/whatsapp/outbound-safety.ts`
+wired into enqueue + `dispatchOutboundMessage` (before claim); tunables in
+`.env.example` / `ENV-REFERENCE`; gate `npm run test:whatsapp-outbound-safety`.
+
+**STOP until separate owner OK:** no QR scan; no
+`WHATSAPP_OUTBOUND_ENABLED=true`.
+
+## Session note — 2026-10-31 — WhatsApp desk parity (code)
+
+Built human desk features on Baileys (no live enable): typed media inbound/
+outbound, private `storage/uploads/whatsapp`, admin media API, CRM
+`customerId`/`traderId` + phone suggestions, brokerage request link type.
+Migration `20261031170000_whatsapp_desk_media_crm` additive — apply when
+Postgres is reachable. Kill switch remains off.
+
+## Session note — 2026-11-01 — Admin + Trader VISION program (started)
+
+Owner approved VISION-first plan (dark luxury + stronger motion; Framer/`motion`
+allowed; trader tabs = 5 with Brokerage replacing Offers). Shipped foundation:
+`rareoud-ui.mdc` authority update; dark `data-theme` tokens + `PortalTheme`;
+shells on Sonner-only toasts + `LazyMotion`; login ceremony MotionProvider;
+admin sidebar user collapse + h-16; trader 5-tab shell; unsaved guards + empty
+CTAs on admin ops; wholesale/brokerage drafts; brokerage list/detail dict i18n;
+home per-block errors. Evidence:
+`docs/ui-planning/evidence/phase-vision-admin-trader.md`. Further depth
+(charts choreography, inbox a11y English aria, full axe matrix) continues
+under the same plan acceptance gates.
+
+## Session note — 2026-11-01 — VPS deploy (isolated + media)
+
+Owner approved plan `rareoud_vps_deploy_9c2a49cf`. Live on Hostinger VPS
+`72.62.155.198` beside Tenegta — **Tenegta untouched**.
+
+| Layer | Location |
+|---|---|
+| Code | `/srv/rareoud` |
+| Data | `/var/lib/rareoud/{media,wa-auth,pg,backups}` |
+| Compose | project `rare-oud-prod`, network `rareoud` |
+| Edge | host nginx → `127.0.0.1:3010` |
+| Public | `https://rareoud.com` (LE cert to 2027-01-30) |
+
+DNS: use Hostinger **dns-parking** NS (`ns1`/`ns2.dns-parking.com`) — not
+`ns1.hostinger.com` (those refuse customer zones). A `@` → VPS IP; `www` CNAME.
+
+WhatsApp kill switches remain off (`CONNECT_ON_START=false`,
+`OUTBOUND_ENABLED=false`). Worker idle / no session files.
+
+Verified: public smoke 200 on `/`, `/api/health`, `/api/ready`, `/catalog`,
+login pages; `https://tenegta.com` + `mail.tenegta.com` OK; daily backups
+writing under `/var/lib/rareoud/backups`; hourly disk alert cron
+(`/usr/local/sbin/rareoud-disk-alert.sh`, gate free &lt;40GB / media ≥75%/90%).
+
+**Still owner-gated:** live WhatsApp QR/outbound; Object Storage; do not run
+`docker compose down -v` on this host.

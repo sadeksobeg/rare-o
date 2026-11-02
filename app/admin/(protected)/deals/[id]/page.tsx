@@ -6,12 +6,15 @@ import { StatusChip } from "@/components/ui/status-chip";
 import { StatusStepper } from "@/components/ui/status-stepper";
 import { getDealForAdmin } from "@/lib/deals/service";
 import { isDealStatus, isOpenDealStatus } from "@/lib/deals/constants";
+import { prisma } from "@/lib/db/prisma";
 import { formatCurrency, formatNumber } from "@/lib/i18n/format";
 import { getRequestDictionary } from "@/lib/i18n/server";
+import { dealNextActor } from "@/lib/ui/status";
 import { getStatusChipProps } from "@/lib/ui/status-labels";
 import {
   FilePlus2,
   Handshake,
+  MessageSquare,
   Package,
   Store,
   Tags,
@@ -39,6 +42,16 @@ export default async function AdminDealDetailPage({
   }
 
   const open = isDealStatus(deal.status) && isOpenDealStatus(deal.status);
+  const lastEntry = deal.entries[deal.entries.length - 1];
+  const lastActor = (lastEntry?.actorRole ?? null) as
+    | "trader"
+    | "admin"
+    | null;
+  const waiting = dealNextActor(deal.status, lastActor) === "admin";
+  const linkedConversation = await prisma.whatsAppConversation.findFirst({
+    where: { linkType: "deal_proposal", linkId: deal.id },
+    select: { id: true, displayName: true, unreadCount: true },
+  });
   const money = (value: unknown, currency: string | null | undefined) =>
     currency
       ? formatCurrency(
@@ -69,12 +82,29 @@ export default async function AdminDealDetailPage({
             {deal.title}
           </h1>
           <StatusChip {...getStatusChipProps(dict, "deal", deal.status)} />
+          {waiting ? (
+            <StatusChip size="sm" tone="attention" label={u.waitingOnYou} />
+          ) : null}
         </div>
         <p className="text-sm font-semibold">
           <span className="text-ro-muted">{u.colKind}: </span>
           {t.dealKind[deal.dealKind] ?? deal.dealKind}
         </p>
         <StatusStepper domain="deal" current={deal.status} dict={dict} />
+        {linkedConversation ? (
+          <Link
+            href={`/admin/inbox/${linkedConversation.id}`}
+            className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--ro-plum-900)] underline-offset-4 hover:underline"
+          >
+            <MessageSquare className="size-4" strokeWidth={1.5} aria-hidden />
+            {d.linkedConversationOpen}
+            {linkedConversation.unreadCount > 0
+              ? ` · ${linkedConversation.unreadCount}`
+              : ""}
+          </Link>
+        ) : (
+          <p className="text-sm text-ro-muted">{d.linkedConversationNone}</p>
+        )}
       </div>
 
       <DetailList>

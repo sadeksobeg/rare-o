@@ -40,9 +40,13 @@ import {
 } from "@/lib/whatsapp/messaging/pairing";
 import {
   dispatchPendingOutbound,
+  persistInboundMedia,
   persistInboundText,
+  applyContactIdentity,
+  persistOutboundEcho,
   persistUnsupportedInbound,
   recoverInterruptedOutbound,
+  seedConversationFromChat,
   upsertConnectionHealth,
 } from "@/lib/whatsapp/messaging/service";
 import {
@@ -122,6 +126,7 @@ async function main(): Promise<void> {
   let linkTimer: ReturnType<typeof setInterval> | null = null;
   let lastSupervisedAt = 0;
   let pollingLinkCommands = false;
+  const adapterRef: { current: WhatsAppAdapter | null } = { current: null };
 
   const events: WhatsAppAdapterEvents = {
     onHealth: async (health) => {
@@ -134,6 +139,51 @@ async function main(): Promise<void> {
         // Linked — pairing material is no longer needed
         if (health.state === "CONNECTED") {
           await clearPairingDisplay();
+          // Defer so socket is fully ready, then map known phones → @lid chats
+          setTimeout(() => {
+            void (async () => {
+              try {
+                const current = adapterRef.current;
+                const resolve = current?.resolvePhonesToLids;
+                if (!current || !resolve) return;
+                const [customers, traders, convos] = await Promise.all([
+                  prisma.customer.findMany({
+                    where: { phone: { not: "" } },
+                    select: { phone: true },
+                    take: 100,
+                  }),
+                  prisma.traderAccount.findMany({
+                    where: { phone: { not: "" } },
+                    select: { phone: true },
+                    take: 100,
+                  }),
+                  prisma.whatsAppConversation.findMany({
+                    where: { participantE164: { not: null } },
+                    select: { participantE164: true },
+                    take: 100,
+                  }),
+                ]);
+                const phones = [
+                  ...customers.map((c: { phone: string }) => c.phone),
+                  ...traders.map((t: { phone: string }) => t.phone),
+                  ...convos
+                    .map((c: { participantE164: string | null }) => c.participantE164)
+                    .filter((p): p is string => !!p),
+                ];
+                const n = await resolve.call(current, phones);
+                if (n > 0) {
+                  console.log(
+                    `[whatsapp-worker] lid phone mappings linked=${n}`
+                  );
+                }
+              } catch (err) {
+                const message = err instanceof Error ? err.message : String(err);
+                console.error(
+                  `[whatsapp-worker] lid resolve failed: ${message.slice(0, 160)}`
+                );
+              }
+            })();
+          }, 4_000);
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -184,6 +234,73 @@ async function main(): Promise<void> {
         );
       }
     },
+    onInboundMedia: async (event) => {
+      try {
+        const result = await persistInboundMedia(event);
+        if (!result.ok) {
+          console.error(
+            `[whatsapp-worker] media persist failed: ${result.error}`
+          );
+          return;
+        }
+        console.log(
+          `[whatsapp-worker] inbound media waMessageId=${event.waMessageId} type=${event.messageType} created=${result.created}`
+        );
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(
+          `[whatsapp-worker] media handler error: ${message.slice(0, 200)}`
+        );
+      }
+    },
+    onOutboundEcho: async (event) => {
+      try {
+        const result = await persistOutboundEcho(event);
+        if (!result.ok) {
+          if (result.reason !== "INVALID_INPUT") {
+            console.error(
+              `[whatsapp-worker] outbound echo failed: ${result.error}`
+            );
+          }
+          return;
+        }
+        if (result.created) {
+          console.log(
+            `[whatsapp-worker] outbound echo waMessageId=${event.waMessageId}`
+          );
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(
+          `[whatsapp-worker] outbound echo error: ${message.slice(0, 200)}`
+        );
+      }
+    },
+    onChatSeed: async (event) => {
+      try {
+        await seedConversationFromChat(event);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(
+          `[whatsapp-worker] chat seed error: ${message.slice(0, 200)}`
+        );
+      }
+    },
+    onContactIdentity: async (event) => {
+      try {
+        const { updated } = await applyContactIdentity(event);
+        if (updated > 0) {
+          console.log(
+            `[whatsapp-worker] contact identity updated=${updated} chat=${event.waChatId.includes("@lid") ? "lid" : "pn"}`
+          );
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(
+          `[whatsapp-worker] contact identity error: ${message.slice(0, 200)}`
+        );
+      }
+    },
     onInboundUnsupported: async (event) => {
       try {
         const result = await persistUnsupportedInbound(event);
@@ -222,6 +339,7 @@ async function main(): Promise<void> {
         connectOnStart: connect,
         events,
       });
+  adapterRef.current = adapter;
 
   const drainOutbound = async () => {
     if (!isOutboundEnabled()) return;

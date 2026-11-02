@@ -52,6 +52,7 @@ export function RecordPicker({
     { id: "retail_request", label: i.typeRetail },
     { id: "deal_proposal", label: i.typeDeal },
     { id: "wholesale_request", label: i.typeWholesale },
+    { id: "brokerage_request", label: i.typeBrokerage },
   ];
 
   return (

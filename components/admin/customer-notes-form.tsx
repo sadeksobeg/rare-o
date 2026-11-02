@@ -1,6 +1,10 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/text-field";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import { useUnsavedGuard } from "@/lib/ui/use-unsaved-guard";
 
 export function CustomerNotesForm({
   customerId,
@@ -16,6 +20,13 @@ export function CustomerNotesForm({
   error?: boolean;
 }) {
   const u = dict.adminUi;
+  const [value, setValue] = useState(notes);
+  const dirty = value !== notes;
+  useUnsavedGuard(dirty);
+
+  useEffect(() => {
+    setValue(notes);
+  }, [notes]);
 
   return (
     <form
@@ -27,7 +38,8 @@ export function CustomerNotesForm({
       <Textarea
         name="notes"
         label={u.detail.customerNotes}
-        defaultValue={notes}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
         helper={u.customerNotesHelper}
         error={error ? u.customerNotesInvalid : undefined}
         maxLength={2000}

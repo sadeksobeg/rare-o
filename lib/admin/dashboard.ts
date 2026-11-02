@@ -147,12 +147,14 @@ export async function getAdminHomeData() {
     getActivityFeedItems(),
   ]);
 
-  const [series, catalogHealth, pipeline, lastWhatsAppAt] = await Promise.all([
-    getKpiSeries(sevenDaysAgo()),
-    getCatalogHealth(),
-    getRetailPipeline(),
-    latestWhatsAppAt(),
-  ]);
+  const [series, requestsTrend, catalogHealth, pipeline, lastWhatsAppAt] =
+    await Promise.all([
+      getKpiSeries(sevenDaysAgo()),
+      getRequestsTrend(14),
+      getCatalogHealth(),
+      getRetailPipeline(),
+      latestWhatsAppAt(),
+    ]);
 
   const dealsAwaitingAdmin = dealCandidates.filter((d) => {
     const last = d.entries[0]?.actorRole;
@@ -170,6 +172,7 @@ export async function getAdminHomeData() {
       activeBrokerage,
     },
     series,
+    requestsTrend,
     catalogHealth,
     manageHub: {
       publishedProducts: catalogHealth.published,
@@ -184,6 +187,12 @@ export async function getAdminHomeData() {
     activityFeed,
   };
 }
+
+export type RequestsTrend = {
+  /** Oldest → newest daily totals (retail + deals + wholesale created). */
+  points: number[];
+  total: number;
+};
 
 /**
  * D31b — merged retail / deal / wholesale where nextActor === admin,
@@ -471,6 +480,41 @@ async function getKpiSeries(since: Date): Promise<AdminKpiSeriesMap> {
       inbound.map((row) => row.createdAt),
       keys
     ),
+  };
+}
+
+async function getRequestsTrend(days: number): Promise<RequestsTrend> {
+  const since = new Date(Date.now() - (days + 1) * 24 * 60 * 60 * 1000);
+  const keys = lastCalendarDayKeys(days);
+  const [retail, deals, wholesale] = await Promise.all([
+    prisma.retailRequest.findMany({
+      where: {
+        AND: [uiVisibleRetailRequestWhere(), { createdAt: { gte: since } }],
+      },
+      select: { createdAt: true },
+    }),
+    prisma.dealProposal.findMany({
+      where: {
+        AND: [uiVisibleDealWhere(), { createdAt: { gte: since } }],
+      },
+      select: { createdAt: true },
+    }),
+    prisma.wholesaleRequest.findMany({
+      where: {
+        AND: [uiVisibleWholesaleWhere(), { createdAt: { gte: since } }],
+      },
+      select: { createdAt: true },
+    }),
+  ]);
+  const dates = [
+    ...retail.map((r) => r.createdAt),
+    ...deals.map((d) => d.createdAt),
+    ...wholesale.map((w) => w.createdAt),
+  ];
+  const series = toSeries(dates, keys);
+  return {
+    points: series.points,
+    total: series.points.reduce((a, b) => a + b, 0),
   };
 }
 

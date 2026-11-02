@@ -95,10 +95,9 @@ export function InboxConversationList({
       aria-label={i.conversations}
       data-inbox-pane="list"
       className={cn(
-        "flex min-h-0 min-w-0 flex-col border border-ro-border bg-ro-paper",
+        "flex h-full min-h-0 min-w-0 flex-1 flex-col border border-ro-border bg-ro-paper",
         // <1024: hide list when a thread is open (two-screen pattern)
-        activeId ? "hidden lg:flex" : "flex",
-        "lg:max-h-[calc(100vh-11rem)]"
+        activeId ? "hidden lg:flex" : "flex"
       )}
     >
       <div className="shrink-0 space-y-2 border-b border-ro-border p-3">

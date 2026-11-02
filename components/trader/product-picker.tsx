@@ -16,6 +16,7 @@ export type PickerProduct = {
   categorySlug?: string | null;
   categoryNameEn?: string | null;
   categoryNameAr?: string | null;
+  imagePath?: string | null;
 };
 
 /** T05 — eligible products grid; QtyStepper; search + category chips; no prices. */
@@ -141,6 +142,20 @@ export function ProductPicker({
               key={p.id}
               className="flex flex-col gap-3 border border-ro-line bg-ro-surface p-3"
             >
+              <div className="aspect-[4/5] overflow-hidden rounded-[var(--ro-r-sm)] bg-[var(--ro-sand-200)]">
+                {p.imagePath ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- upload paths vary; avoid next/image remote config
+                  <img
+                    src={p.imagePath}
+                    alt=""
+                    className="size-full object-cover"
+                  />
+                ) : (
+                  <div className="flex size-full items-center justify-center text-xs text-ro-muted">
+                    —
+                  </div>
+                )}
+              </div>
               <div className="min-w-0 flex-1 space-y-1">
                 <p className="text-sm font-semibold leading-snug">{name}</p>
                 {(() => {

@@ -130,6 +130,15 @@ existing behavior, verified live (homepage renders and functions identically; `/
 search button now opens the overlay with real results, confirmed against a freshly started dev
 server).
 
+**Follow-up (2026-10-31 mini-audit):** two gaps remained after the mount landed. (1) The header
+still only dispatched `ro:open-search` on `/` and used `window.location` to `/catalog` elsewhere —
+so on `/catalog` itself the button reloaded the page instead of opening search; it now always
+dispatches. (2) Client discovery imported `@/lib/catalog/homepage` (Prisma / `next/cache`) and
+crashed hydration with webpack `undefined.call`; types/helpers moved to client-safe
+`homepage-types.ts` / `homepage-search.ts`, and `GlobalSearchMount` lazy-loads the slot.
+Admin Ctrl/⌘K was also unwired in the shell; `AdminCommandSearchMount` is mounted there now.
+Evidence: `docs/ui-planning/AUDIT-PHASE-2-H-FIX.md`.
+
 ### Offline page: deliberately not built
 
 `AUTH-06` and `SF-11` both call for an "offline" screen. No service worker or PWA manifest
@@ -163,3 +172,239 @@ possible duplication between `/admin/settings/security` and `/admin/team`'s secu
 (ADM-03), and `/admin/offers` vs `/admin/promos` naming overlap with Part C's single "CAT-03"
 (these may be two intentionally distinct domain concepts, not a gap — not verified either way
 this phase).
+
+---
+
+## Phase 3 (Auth) — 2026-10-31
+
+### AUTH-03: in-form recovery, not a separate route
+
+Forgot-password is a view inside `LoginForm` (admin + trader), not `/forgot-password`.
+Reason: accounts are admin-provisioned; there is no email self-reset API. The view explains
+that and offers WhatsApp via `whatsAppGreetingLink`. Matches plan wording (“report if
+unsupported”) without inventing a fake reset flow.
+
+### AUTH-07: admin `/admin/profile`; avatar deferred
+
+Added `/admin/(protected)/profile` with tabs (profile / security / sessions). Security reuses
+existing password + TOTP components. Sessions “sign out others” bumps `passwordChangedAt` /
+`pwv` (same invalidation as a password change) without requiring a device-session table.
+**Avatar upload not built** — `AdminUser` has no photo field; UI states the gap. Theme
+preference not in the real stack; language remains the shell locale toggle.
+
+### AUTH-05: no “remember this device”
+
+Not implemented. Phase 1 TOTP is code-or-recovery on each login when enabled; inventing a
+trusted-device cookie would be new security surface outside “build on Phase 1 without
+weakening it.”
+
+### AUTH-06: `/session-expired` added; offline stays banner-only
+
+Standalone branded page at `/session-expired?portal=admin|trader`. Offline page still deferred
+until a service worker exists (Phase 2 decision unchanged).
+
+Evidence: `docs/ui-planning/evidence/phase-03-auth.md`.
+
+---
+
+## Phase 4 (Admin core) — 2026-10-31
+
+### ADM-01: charts allowed despite older D20
+
+`PLAN.md` D20 said “no charts” for the admin dashboard. `MASTER-BUILD-PLAN` ADM-01
+and the design-lab both require area + donut. Per standing priority, BUILD-PLAN wins:
+real 14-day requests trend + domain donut ship on `/admin`. Sparklines on KPI tiles use
+existing 7-day series (only when ≥ 7 points).
+
+### ADM-03: no invented admin roles
+
+Lab shows Owner/Manager/Staff + permission matrix + invite. Real `AdminUser` has no
+`role` column. Phase 4 ships team list + audit tab/filter/CSV only and documents the
+gap — no fake role UI over a flat admin table.
+
+### ADM-02: trader detail route added
+
+`/admin/traders/[id]` is new. List rows link there. Counts for deals / wholesale /
+brokerage are real `_count`s. “Last login” omitted (not stored).
+
+Evidence: `docs/ui-planning/evidence/phase-04-admin-core.md`.
+
+---
+
+## Phase 5 (Admin ops) — 2026-10-31
+
+### OPS-01: no Baileys changes; brokerage link deferred
+
+Inbox UX polished (resizable panes, quick replies). Primary WhatsApp↔business
+link still allowlists retail / deal / wholesale only. Adding `brokerage_request`
+needs an explicit linking-contract update — reported in
+`evidence/phase-05-admin-ops.md`, not silently extended.
+
+### OPS-02: Kanban confirms before transition
+
+Drag-and-drop never mutates status directly; it opens `ConfirmDialog` then calls
+the existing `adminTransitionRetailRequestAction` so invalid edges fail the same
+way as the detail form.
+
+Evidence: `docs/ui-planning/evidence/phase-05-admin-ops.md`.
+
+---
+
+## Phase 6 (Catalog / system) — 2026-10-31
+
+### CAT-02/03: no invented media or schedule columns
+
+Category cards reorder via `sortOrder` only — no cover image field. Curated offers
+get a live preview from title/summary/product; scheduled publish / offer hero image
+are not on `PublicCuratedOffer`. Promo bands already have `startsAt`/`endsAt` and
+show a validity progress bar + tone preview.
+
+### SYS-01: queue-derived admin alerts
+
+`/admin/notifications` aggregates `getActionQueueRows` + unread conversation count.
+No new Prisma notification model. Matches “build on real data” without a fake inbox
+of alerts.
+
+### SYS-02: settings hub, not a third WA console
+
+`/admin/settings` links WhatsApp → inbox, brand → public contact, security → existing
+page. Avoids inventing reconnect/QR UI (Stage A / Phase 6 WA prod remains owner-gated).
+
+### SYS-03: highlight in command palette
+
+Dedicated `/admin/search` page deferred; palette is the admin global search. Match
+spans use `<mark>` via `lib/ui/highlight-match.tsx`.
+
+Evidence: `docs/ui-planning/evidence/phase-06-catalog-system.md`.
+
+---
+
+## Phase 7 (Trader portal) — 2026-10-31
+
+### TRD-01: real open counts, not lab accept-rate
+
+Design-lab shows `acceptRate` / monthly deals from fixtures. Production home
+shows **open** deal / wholesale / brokerage counts derived from live rows.
+No invented KPI columns on `TraderAccount`.
+
+### TRD-04: wizard without new schema
+
+Four-step brokerage create maps existing `BrokerageRequest` fields only.
+Commission explainer is copy; rates remain whatever the quote stores.
+
+### TRD-05: product image as offer cover
+
+When an offer links a product with images, that thumbnail is the card media.
+Offers without a product use a brand/gradient fallback — no offer image column.
+
+### TRD-00: six bottom tabs
+
+Pill/`grid` sizing is dynamic from `tabs.length` so profile is not clipped.
+
+Evidence: `docs/ui-planning/evidence/phase-07-trader.md`.
+
+---
+
+## Phase 8 (Storefront) — 2026-10-31
+
+### Temporary instrument photography approved
+
+Owner allowed starting Phase 8 with internet photography not already in
+the repo. Files live under `public/brand/instruments/` (Unsplash license;
+see `ATTRIBUTION.txt`). Seed galleries and PDP A+ modules use them until
+client product photos replace them.
+
+### SF-03 Amazon-like without payment UI
+
+PDP adds vertical thumbs, hover zoom, bordered buy box, feature bullets,
+trust rows (WhatsApp handoff — **no checkout/payment icons**), and A+
+editorial modules. Ratings/reviews not invented (no review schema).
+
+Evidence: `docs/ui-planning/evidence/phase-08-storefront.md`.
+
+---
+
+## Phase 9 (Hardening) — 2026-10-31
+
+### i18n ratchet lowered, not raised
+
+Phases 6–8 briefly grew inline `locale === "ar"` ternaries above baseline 55.
+Phase 9 migrated call sites to `localizedName` / dictionary keys and set
+baseline to **53**. Raising the baseline remains forbidden without evidence.
+
+### npm audit highs are mostly tooling
+
+`security:audit` still fails the gate on high findings in eslint/puppeteer
+transitive trees. Plan: no `audit fix --force`; track in excellence-plan;
+app runtime zod stays current. Documented in `evidence/phase-09-hardening.md`.
+
+### Backup restore proven locally; offsite MinIO optional here
+
+`backup:daily` + `test:d2-restore` PASS. F4 MinIO upload failed on image pull
+in this environment — reported, not papered over.
+
+Evidence: `docs/ui-planning/evidence/phase-09-hardening.md`.
+
+---
+
+## Standing rule — WhatsApp number survival (owner, 2026-10-31)
+
+### Constraint
+
+Official **WhatsApp Business / Cloud API is not available** for this
+deployment (blocked). The product **must** use an unofficial linked-device
+session (**Baileys**, already Stage A). Mid Auto’s `whatsapp-web.js` bridge
+is **not** adopted as a stack swap.
+
+### Priority #1 (overrides convenience)
+
+**Protect the business phone from ban / restriction.** Every outbound design
+choice is subordinate to this: volume, timing, content, reconnect, and
+automation.
+
+### Operating policy (safety module shipped 2026-10-31; kill switch still off)
+
+1. Keep `WHATSAPP_OUTBOUND_ENABLED=false` until owner explicitly lifts it
+   **and** separately OK’s QR / live session.
+2. Prefer **human replies from `/admin/inbox`** — no bots, no broadcast lists,
+   no mass templates, no auto-follow-ups.
+3. Storefront handoff stays **customer-initiated `wa.me`** where possible
+   (customer opens chat; platform does not cold-message at scale).
+4. One auth directory / one linked device; no parallel sessions on the same
+   number.
+5. Outbound path uses `lib/whatsapp/outbound-safety.ts`: min gap + jitter,
+   sliding-window + daily caps, circuit on repeated send failures — checked on
+   enqueue (`assessOutboundEnqueue`) and **before claim** in
+   `dispatchOutboundMessage` (`acquireOutboundSendSlot`). Kill switch remains
+   independent and defaults off.
+
+### Gaps vs Mid Auto (do not enable live WA yet)
+
+| Control | Mid Auto | Rare Oud today |
+|---|---|---|
+| Session stack | whatsapp-web.js bridge | Baileys worker |
+| Kill switch | runtime flags + env | `WHATSAPP_OUTBOUND_ENABLED` (default **off**) |
+| Per-window rate + jitter | yes (`whatsappSafetyLayer`) | **shipped** — `outbound-safety.ts` + env tunables |
+| Circuit breaker | yes | **shipped** — `SAFETY_CIRCUIT` after N failures |
+| Multi-tenant routing | yes | not needed |
+
+### Desk parity build (owner goal, 2026-10-31) — code shipped, live still STOP
+
+Client requirement: WhatsApp **inside** the platform as a human owner desk
+(text + image/video/audio/document send/receive; location/contact display;
+CRM customer/trader link + request link including brokerage). Stack remains
+Baileys — not embedded WhatsApp Web / not whatsapp-web.js.
+
+Evidence modules: `lib/whatsapp/media.ts`, `persistInboundMedia`,
+`enqueueOutboundMedia`, `/api/media/whatsapp/…`, inbox composer attach + CRM
+panel. Gates: `npm run test:whatsapp-outbound-safety`,
+`npm run test:whatsapp-media-store`.
+
+### STOP — still blocked without owner OK
+
+- No QR scan / linked-device auth on a real number.
+- No `WHATSAPP_OUTBOUND_ENABLED=true`.
+- No Cloud API plan while the ban constraint holds.
+- Apply migration `20261031170000_whatsapp_desk_media_crm` when DB is up.
+
+Evidence: env keys in `.env.example` and `docs/handover/ENV-REFERENCE.md`.

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   adminLinkWhatsAppConversationAction,
+  adminSetWhatsAppCrmPartyAction,
   adminUnlinkWhatsAppConversationAction,
   type LinkableRecordHit,
 } from "@/app/whatsapp-actions";
@@ -14,10 +15,14 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
-import type { InboxLinkSummary } from "@/lib/whatsapp/messaging/inbox";
+import type {
+  InboxCrmParty,
+  InboxLinkSummary,
+} from "@/lib/whatsapp/messaging/inbox";
 import { formatDate } from "@/lib/i18n/format";
 import type {
   BusinessContextView,
+  CrmPartySuggestion,
   LinkAuditEntry,
 } from "@/lib/whatsapp/messaging/linking";
 
@@ -30,6 +35,8 @@ function adminHref(link: InboxLinkSummary): string | null {
       return `/admin/deals/${link.linkId}`;
     case "wholesale_request":
       return `/admin/wholesale/${link.linkId}`;
+    case "brokerage_request":
+      return `/admin/brokerage/${link.linkId}`;
     default:
       return null;
   }
@@ -43,6 +50,8 @@ export function LinkedRecordPanel({
   conversationId,
   link,
   context,
+  crm,
+  suggestions = [],
   audits = [],
   dict,
   locale,
@@ -50,6 +59,8 @@ export function LinkedRecordPanel({
   conversationId: string;
   link: InboxLinkSummary;
   context: BusinessContextView;
+  crm: InboxCrmParty;
+  suggestions?: CrmPartySuggestion[];
   /** Recent link/unlink audit entries (newest first). */
   audits?: LinkAuditEntry[];
   dict: Dictionary;
@@ -71,9 +82,25 @@ export function LinkedRecordPanel({
         return i.typeDeal;
       case "wholesale_request":
         return i.typeWholesale;
+      case "brokerage_request":
+        return i.typeBrokerage;
       default:
         return type;
     }
+  }
+
+  function setCrm(kind: "customer" | "trader" | "clear", id?: string) {
+    const fd = new FormData();
+    fd.set("conversationId", conversationId);
+    if (kind === "clear") fd.set("clear", "1");
+    else if (kind === "customer" && id) fd.set("customerId", id);
+    else if (kind === "trader" && id) fd.set("traderId", id);
+    startTransition(async () => {
+      setError(null);
+      const res = await adminSetWhatsAppCrmPartyAction(fd);
+      if (!res.ok) setError(i.linkErrorNotFound);
+      else router.refresh();
+    });
   }
 
   function onConfirmLink(hit: LinkableRecordHit) {
@@ -109,6 +136,84 @@ export function LinkedRecordPanel({
 
   return (
     <div data-inbox-pane="context" className="space-y-3">
+      <section
+        aria-label={i.crmParty}
+        className="space-y-2 border border-ro-border bg-ro-paper p-4 text-sm"
+      >
+        <h3 className="text-xs font-semibold tracking-wide text-ro-text-2">
+          {i.crmParty}
+        </h3>
+        {crm.customer ? (
+          <p>
+            <Link
+              href={`/admin/customers`}
+              className="font-semibold text-ro-plum underline-offset-2 hover:underline"
+            >
+              {crm.customer.name}
+            </Link>
+            <span className="text-ro-muted">
+              {" "}
+              · <bdi dir="ltr">+{crm.customer.phone.replace(/^\+/, "")}</bdi>
+            </span>
+          </p>
+        ) : null}
+        {crm.trader ? (
+          <p>
+            <Link
+              href={`/admin/traders`}
+              className="font-semibold text-ro-plum underline-offset-2 hover:underline"
+            >
+              {crm.trader.displayName}
+            </Link>
+            <span className="text-ro-muted">
+              {" "}
+              · <bdi dir="ltr">{crm.trader.phone || crm.trader.companyName}</bdi>
+            </span>
+          </p>
+        ) : null}
+        {!crm.customer && !crm.trader ? (
+          <p className="text-ro-muted">{i.crmNone}</p>
+        ) : (
+          <Button
+            type="button"
+            variant="text"
+            size="sm"
+            disabled={pending}
+            onClick={() => setCrm("clear")}
+          >
+            {i.crmClear}
+          </Button>
+        )}
+        {suggestions.length > 0 ? (
+          <div className="space-y-1.5 border-t border-ro-border pt-2">
+            <p className="text-xs text-ro-muted">{i.crmSuggest}</p>
+            <ul className="space-y-1">
+              {suggestions.map((s) => (
+                <li key={`${s.kind}-${s.id}`} className="flex flex-wrap items-center gap-2">
+                  <span className="min-w-0 flex-1 truncate">
+                    {s.label}{" "}
+                    <bdi dir="ltr" className="text-ro-muted">
+                      {s.phone}
+                    </bdi>
+                  </span>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    disabled={pending}
+                    onClick={() =>
+                      setCrm(s.kind === "customer" ? "customer" : "trader", s.id)
+                    }
+                  >
+                    {s.kind === "customer" ? i.crmLinkCustomer : i.crmLinkTrader}
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </section>
+
       <BusinessContextPanel context={context} dict={dict} locale={locale} />
 
       <div className="space-y-2 border border-ro-border bg-ro-paper p-4 text-sm">

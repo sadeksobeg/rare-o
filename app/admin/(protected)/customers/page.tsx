@@ -76,9 +76,13 @@ export default async function AdminCustomersPage({
         </Button>
       </form>
       {customers.length === 0 ? (
-        <div className="border border-ro-line">
-          <EmptyState title={u.emptyTitle} body={u.emptyBody} />
-        </div>
+        <EmptyState
+          variant={query ? "no-results" : "first-use"}
+          title={u.emptyTitle}
+          body={u.emptyBody}
+          actionHref={query ? "/admin/customers" : "/admin/requests"}
+          actionLabel={query ? dict.catalog.clearFilters : a.requests}
+        />
       ) : (
         <>
           <ul className="space-y-2.5 md:hidden">
@@ -96,7 +100,15 @@ export default async function AdminCustomersPage({
                     }
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <p className="min-w-0 font-medium text-ro-ink">{c.name}</p>
+                      <p className="flex min-w-0 items-center gap-3 font-medium text-ro-ink">
+                        <span
+                          aria-hidden
+                          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--ro-plum-100)] text-sm font-semibold text-[var(--ro-plum-900)]"
+                        >
+                          {c.name.trim().slice(0, 1) || "C"}
+                        </span>
+                        {c.name}
+                      </p>
                       <span className="shrink-0 text-xs font-semibold tabular-nums text-[var(--ro-plum-900)]">
                         {c._count.requests}
                       </span>
@@ -141,7 +153,20 @@ export default async function AdminCustomersPage({
                       key={c.id}
                       flash={isFresh(last?.createdAt ?? c.createdAt)}
                     >
-                      <Td className="font-medium">{c.name}</Td>
+                      <Td className="font-medium">
+                        <Link
+                          href={`/admin/customers/${c.id}`}
+                          className="inline-flex items-center gap-3 underline-offset-4 hover:underline"
+                        >
+                          <span
+                            aria-hidden
+                            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--ro-plum-100)] text-sm font-semibold text-[var(--ro-plum-900)]"
+                          >
+                            {c.name.trim().slice(0, 1) || "C"}
+                          </span>
+                          {c.name}
+                        </Link>
+                      </Td>
                       <Td>
                         <span dir="ltr">{c.phone}</span>
                       </Td>

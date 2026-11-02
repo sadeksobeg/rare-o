@@ -1,7 +1,8 @@
+import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { Stagger } from "@/components/motion/reveal";
-import { PressLink } from "@/components/portal/press-link";
 import { TraderPageHeader } from "@/components/trader/page-header";
+import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requireTraderSession } from "@/lib/auth/trader-session";
 import { prisma } from "@/lib/db/prisma";
@@ -59,15 +60,33 @@ export default async function TraderOffersPage() {
                 ? o.product.nameAr || o.product.nameEn
                 : o.product.nameEn || o.product.nameAr
               : null;
+            const imagePath = o.product?.images?.[0]?.path ?? null;
+            const dealHref = `/trader/deals/new?title=${encodeURIComponent(
+              (title || o.slug).slice(0, 200)
+            )}`;
             return (
-              <div key={o.id}>
-                <PressLink
-                  href={`/trader/offers/${o.slug}`}
-                  className="ro-portal-card group block h-full space-y-3 border p-5 transition-[transform,border-color,box-shadow] duration-[var(--ro-dur-fast)] hover:-translate-y-1"
-                >
-                  <p className="font-display text-xl font-semibold leading-snug group-hover:text-[var(--ro-plum-900)]">
+              <article
+                key={o.id}
+                className="ro-portal-card flex h-full flex-col overflow-hidden border"
+              >
+                <div className="relative h-36 bg-[var(--ro-sand-200)]">
+                  {imagePath ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={imagePath}
+                      alt=""
+                      className="size-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex size-full items-center justify-center bg-[linear-gradient(160deg,var(--ro-plum-100),var(--ro-sand-200))] text-xs text-ro-muted">
+                      RARE OUD
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-1 flex-col gap-3 p-5">
+                  <h2 className="font-display text-xl font-semibold leading-snug">
                     {title}
-                  </p>
+                  </h2>
                   {summary ? (
                     <p className="line-clamp-3 text-sm leading-relaxed text-ro-muted">
                       {summary}
@@ -78,15 +97,29 @@ export default async function TraderOffersPage() {
                       {t.offersRelatedProduct}: {productName}
                     </p>
                   ) : null}
-                  <span className="inline-flex text-sm font-semibold text-[var(--ro-plum-900)] transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5">
-                    {t.openRecord}
-                  </span>
-                </PressLink>
-              </div>
+                  <div className="mt-auto flex flex-wrap gap-2 pt-1">
+                    <ButtonLink
+                      href={`/trader/offers/${o.slug}`}
+                      variant="secondary"
+                      size="sm"
+                    >
+                      {t.offersViewDetails}
+                    </ButtonLink>
+                    <ButtonLink href={dealHref} variant="primary" size="sm">
+                      {t.offersStartDeal}
+                    </ButtonLink>
+                  </div>
+                </div>
+              </article>
             );
           })}
         </Stagger>
       )}
+      <p className="text-center text-sm text-ro-muted">
+        <Link href="/trader" className="font-medium text-ro-plum hover:underline">
+          {t.overview}
+        </Link>
+      </p>
     </section>
   );
 }

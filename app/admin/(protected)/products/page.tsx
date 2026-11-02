@@ -14,6 +14,7 @@ import {
   AdminRecordCardList,
 } from "@/components/admin/list-record-card";
 import { PageHeader } from "@/components/admin/page-header";
+import { ProductPublishToggle } from "@/components/admin/product-publish-toggle";
 import { AdminTableFilters } from "@/components/admin/table-filters";
 import { ProductThumb } from "@/components/storefront/product-media";
 import { StatusChip } from "@/components/ui/status-chip";
@@ -24,6 +25,7 @@ import { listAdminProducts } from "@/lib/catalog/service";
 import { formatCurrency } from "@/lib/i18n/format";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { isFresh } from "@/lib/ui/fresh";
+import { cn } from "@/lib/utils";
 
 function productStatusTone(
   status: string
@@ -37,9 +39,9 @@ function productStatusTone(
 export default async function AdminProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; q?: string }>;
+  searchParams: Promise<{ tab?: string; q?: string; view?: string }>;
 }) {
-  const { tab: tabRaw, q: qRaw } = await searchParams;
+  const { tab: tabRaw, q: qRaw, view: viewRaw } = await searchParams;
   const { locale, dict } = await getRequestDictionary();
   const a = dict.admin;
   const u = dict.adminUi;
@@ -47,6 +49,7 @@ export default async function AdminProductsPage({
   const plateCaption = dict.catalog.photoCaption;
   const q = qRaw?.trim().toLowerCase() ?? "";
   const tab = tabRaw?.trim() || "all";
+  const view = viewRaw === "gallery" ? "gallery" : "table";
 
   const counts: Record<string, number> = { all: products.length };
   for (const s of PRODUCT_STATUSES) {
@@ -64,6 +67,14 @@ export default async function AdminProductsPage({
     return hay.includes(q);
   });
 
+  const viewQs = (next: "table" | "gallery") => {
+    const params = new URLSearchParams();
+    params.set("view", next);
+    if (tab !== "all") params.set("tab", tab);
+    if (q) params.set("q", q);
+    return `/admin/products?${params.toString()}`;
+  };
+
   return (
     <section className="space-y-6">
       <PageHeader
@@ -76,6 +87,31 @@ export default async function AdminProductsPage({
           </ButtonLink>
         }
       />
+
+      <div className="flex flex-wrap gap-2">
+        <Link
+          href={viewQs("table")}
+          className={cn(
+            "inline-flex h-10 items-center rounded-[var(--ro-r-sm)] px-3 text-sm font-semibold",
+            view === "table"
+              ? "bg-[var(--ro-plum-900)] text-[var(--ro-sand-50)]"
+              : "border border-ro-line text-ro-ink"
+          )}
+        >
+          {u.viewTable}
+        </Link>
+        <Link
+          href={viewQs("gallery")}
+          className={cn(
+            "inline-flex h-10 items-center rounded-[var(--ro-r-sm)] px-3 text-sm font-semibold",
+            view === "gallery"
+              ? "bg-[var(--ro-plum-900)] text-[var(--ro-sand-50)]"
+              : "border border-ro-line text-ro-ink"
+          )}
+        >
+          {u.viewGallery}
+        </Link>
+      </div>
 
       <Suspense fallback={null}>
         <AdminTableFilters
@@ -96,9 +132,84 @@ export default async function AdminProductsPage({
       </Suspense>
 
       {filtered.length === 0 ? (
-        <div className="border border-ro-line">
-          <EmptyState title={u.emptyTitle} body={u.emptyBody} />
-        </div>
+        <EmptyState
+          variant={tab !== "all" || q ? "no-results" : "first-use"}
+          title={u.emptyTitle}
+          body={u.emptyBody}
+          actionHref={
+            tab !== "all" || q ? "/admin/products" : "/admin/products/new"
+          }
+          actionLabel={
+            tab !== "all" || q ? dict.catalog.clearFilters : a.newProduct
+          }
+        />
+      ) : view === "gallery" ? (
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filtered.map((p) => {
+            const thumb = p.images[0];
+            const name =
+              locale === "ar"
+                ? p.nameAr || p.nameEn || "—"
+                : p.nameEn || p.nameAr || "—";
+            const canPublish =
+              Boolean(p.nameAr?.trim()) && p.images.length > 0;
+            return (
+              <li
+                key={p.id}
+                className={cn(
+                  "ro-portal-card overflow-hidden border",
+                  isFresh(p.updatedAt) && "ro-s10-flash"
+                )}
+              >
+                <Link href={`/admin/products/${p.id}`} className="block">
+                  <ProductThumb
+                    path={thumb?.path}
+                    alt={
+                      locale === "ar"
+                        ? thumb?.altAr || name
+                        : thumb?.altEn || name
+                    }
+                    plateCaption={plateCaption}
+                    className="aspect-[4/5]"
+                  />
+                </Link>
+                <div className="space-y-2 p-3">
+                  <Link
+                    href={`/admin/products/${p.id}`}
+                    className="font-display text-base font-semibold text-ro-ink hover:underline"
+                  >
+                    {name}
+                  </Link>
+                  <p className="text-xs text-ro-muted" dir="ltr">
+                    {p.slug}
+                  </p>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <StatusChip
+                      tone={productStatusTone(p.status)}
+                      label={u.productStatus[p.status] ?? p.status}
+                      size="sm"
+                    />
+                    {p.status !== "archived" ? (
+                      <ProductPublishToggle
+                        productId={p.id}
+                        published={p.status === "published"}
+                        publishLabel={u.publishNow}
+                        unpublishLabel={u.unpublish}
+                        disabledReason={
+                          canPublish
+                            ? null
+                            : !p.nameAr?.trim()
+                              ? u.form.publishNeedsNameAr
+                              : u.form.publishNeedsImage
+                        }
+                      />
+                    ) : null}
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
       ) : (
         <>
           <AdminRecordCardList>
@@ -127,86 +238,109 @@ export default async function AdminProductsPage({
             })}
           </AdminRecordCardList>
           <div className="hidden md:block">
-        <DataTable>
-          <DataTableHead>
-            <Th>{a.colThumb}</Th>
-            <Th>{a.colName}</Th>
-            <Th>{a.colCategory}</Th>
-            <Th>{a.colStatus}</Th>
-            <Th>{a.colAvailability}</Th>
-            <Th>{a.colPrice}</Th>
-            <Th>{a.colSlug}</Th>
-            <Th />
-          </DataTableHead>
-          <tbody>
-            {filtered.map((p) => {
-              const thumb = p.images[0];
-              const name =
-                locale === "ar"
-                  ? p.nameAr || p.nameEn || "—"
-                  : p.nameEn || p.nameAr || "—";
-              const categoryName =
-                locale === "ar"
-                  ? p.category.nameAr || p.category.nameEn
-                  : p.category.nameEn || p.category.nameAr;
-              return (
-                <Tr key={p.id} flash={isFresh(p.updatedAt)}>
-                  <Td>
-                    <div className="w-14">
-                      <ProductThumb
-                        path={thumb?.path}
-                        alt={
-                          locale === "ar"
-                            ? thumb?.altAr || name
-                            : thumb?.altEn || name
-                        }
-                        plateCaption={plateCaption}
-                        className="aspect-square"
-                      />
-                    </div>
-                  </Td>
-                  <Td>
-                    <RowHit href={`/admin/products/${p.id}`}>{name}</RowHit>
-                  </Td>
-                  <Td className="text-ro-muted">{categoryName}</Td>
-                  <Td>
-                    <StatusChip
-                      tone={productStatusTone(p.status)}
-                      label={u.productStatus[p.status] ?? p.status}
-                      size="sm"
-                    />
-                  </Td>
-                  <Td>
-                    <StatusChip
-                      tone={
-                        p.availability === "available" ? "success" : "closed"
-                      }
-                      label={u.availability[p.availability] ?? p.availability}
-                      size="sm"
-                    />
-                  </Td>
-                  <Td className="tabular-nums">
-                    {formatCurrency(
-                      Number(p.retailPrice),
-                      p.currency,
-                      locale,
-                      dict.product.priceOnRequest
-                    )}
-                  </Td>
-                  <Td className="text-ro-muted">{p.slug}</Td>
-                  <Td>
-                    <Link
-                      href={`/admin/products/${p.id}`}
-                      className="text-ro-plum hover:underline"
-                    >
-                      {a.edit}
-                    </Link>
-                  </Td>
-                </Tr>
-              );
-            })}
-          </tbody>
-        </DataTable>
+            <DataTable>
+              <DataTableHead>
+                <Th>{a.colThumb}</Th>
+                <Th>{a.colName}</Th>
+                <Th>{a.colCategory}</Th>
+                <Th>{a.colStatus}</Th>
+                <Th>{a.colAvailability}</Th>
+                <Th>{a.colPrice}</Th>
+                <Th>{a.colSlug}</Th>
+                <Th />
+              </DataTableHead>
+              <tbody>
+                {filtered.map((p) => {
+                  const thumb = p.images[0];
+                  const name =
+                    locale === "ar"
+                      ? p.nameAr || p.nameEn || "—"
+                      : p.nameEn || p.nameAr || "—";
+                  const categoryName =
+                    locale === "ar"
+                      ? p.category.nameAr || p.category.nameEn
+                      : p.category.nameEn || p.category.nameAr;
+                  const canPublish =
+                    Boolean(p.nameAr?.trim()) && p.images.length > 0;
+                  return (
+                    <Tr key={p.id} flash={isFresh(p.updatedAt)}>
+                      <Td>
+                        <div className="w-14">
+                          <ProductThumb
+                            path={thumb?.path}
+                            alt={
+                              locale === "ar"
+                                ? thumb?.altAr || name
+                                : thumb?.altEn || name
+                            }
+                            plateCaption={plateCaption}
+                            className="aspect-square"
+                          />
+                        </div>
+                      </Td>
+                      <Td>
+                        <RowHit href={`/admin/products/${p.id}`}>{name}</RowHit>
+                      </Td>
+                      <Td className="text-ro-muted">{categoryName}</Td>
+                      <Td>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <StatusChip
+                            tone={productStatusTone(p.status)}
+                            label={u.productStatus[p.status] ?? p.status}
+                            size="sm"
+                          />
+                          {p.status !== "archived" ? (
+                            <ProductPublishToggle
+                              productId={p.id}
+                              published={p.status === "published"}
+                              publishLabel={u.publishNow}
+                              unpublishLabel={u.unpublish}
+                              disabledReason={
+                                canPublish
+                                  ? null
+                                  : !p.nameAr?.trim()
+                                    ? u.form.publishNeedsNameAr
+                                    : u.form.publishNeedsImage
+                              }
+                            />
+                          ) : null}
+                        </div>
+                      </Td>
+                      <Td>
+                        <StatusChip
+                          tone={
+                            p.availability === "available"
+                              ? "success"
+                              : "closed"
+                          }
+                          label={
+                            u.availability[p.availability] ?? p.availability
+                          }
+                          size="sm"
+                        />
+                      </Td>
+                      <Td className="tabular-nums">
+                        {formatCurrency(
+                          Number(p.retailPrice),
+                          p.currency,
+                          locale,
+                          dict.product.priceOnRequest
+                        )}
+                      </Td>
+                      <Td className="text-ro-muted">{p.slug}</Td>
+                      <Td>
+                        <Link
+                          href={`/admin/products/${p.id}`}
+                          className="text-ro-plum hover:underline"
+                        >
+                          {a.edit}
+                        </Link>
+                      </Td>
+                    </Tr>
+                  );
+                })}
+              </tbody>
+            </DataTable>
           </div>
         </>
       )}

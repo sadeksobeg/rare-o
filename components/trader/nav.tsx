@@ -38,14 +38,16 @@ function isActive(pathname: string, tab: TraderTab) {
 export function TraderDesktopNav({
   tabs,
   tone = "on-light",
+  navLabel,
 }: {
   tabs: TraderTab[];
   tone?: "on-light" | "on-dark";
+  navLabel: string;
 }) {
   const pathname = usePathname();
   const onDark = tone === "on-dark";
   return (
-    <nav aria-label="Trader" className="hidden items-center gap-0.5 md:flex">
+    <nav aria-label={navLabel} className="hidden items-center gap-0.5 md:flex">
       {tabs.map((tab) => {
         const active = isActive(pathname, tab);
         const Icon = icons[tab.icon];
@@ -55,7 +57,7 @@ export function TraderDesktopNav({
             href={tab.href}
             data-active={active ? "true" : undefined}
             className={cn(
-              "relative inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold transition-[color,transform,background-color] duration-[var(--ro-dur-fast)]",
+              "relative inline-flex min-h-11 items-center gap-1.5 px-3 py-2 text-sm font-semibold transition-[color,transform,background-color] duration-[var(--ro-dur-fast)]",
               active
                 ? onDark
                   ? "rounded-[var(--ro-r-sm)] bg-[color-mix(in_srgb,var(--ro-sand-100)_14%,transparent)] text-[var(--ro-sand-50)]"
@@ -99,7 +101,13 @@ export function TraderDesktopNav({
   );
 }
 
-export function TraderBottomTabs({ tabs }: { tabs: TraderTab[] }) {
+export function TraderBottomTabs({
+  tabs,
+  navLabel,
+}: {
+  tabs: TraderTab[];
+  navLabel: string;
+}) {
   const pathname = usePathname();
   const activeIndex = Math.max(
     0,
@@ -107,16 +115,21 @@ export function TraderBottomTabs({ tabs }: { tabs: TraderTab[] }) {
   );
   return (
     <nav
-      aria-label="Trader"
+      aria-label={navLabel}
       className="fixed inset-x-0 bottom-0 z-40 border-t border-[color-mix(in_srgb,var(--ro-plum-900)_18%,transparent)] bg-[color-mix(in_srgb,var(--ro-sand-50)_96%,transparent)] pb-[env(safe-area-inset-bottom)] shadow-[0_-14px_40px_-18px_rgba(50,16,79,0.32)] backdrop-blur-md md:hidden"
     >
-      <ul className="relative grid h-16 grid-cols-5">
+      <ul
+        className="relative grid h-16"
+        style={{
+          gridTemplateColumns: `repeat(${Math.max(tabs.length, 1)}, minmax(0, 1fr))`,
+        }}
+      >
         <span
           aria-hidden
-          className="ro-tab-pill"
+          className="ro-tab-pill motion-safe:transition-[inset-inline-start,width] motion-safe:duration-[var(--ro-dur-base)] motion-safe:ease-[var(--ro-ease-out)]"
           style={{
-            width: "20%",
-            insetInlineStart: `${activeIndex * 20}%`,
+            width: `${100 / Math.max(tabs.length, 1)}%`,
+            insetInlineStart: `${(activeIndex * 100) / Math.max(tabs.length, 1)}%`,
           }}
         />
         {tabs.map((tab) => {
@@ -128,7 +141,7 @@ export function TraderBottomTabs({ tabs }: { tabs: TraderTab[] }) {
                 href={tab.href}
                 data-active={active ? "true" : undefined}
                 className={cn(
-                  "relative flex h-full flex-col items-center justify-center gap-1 text-[10px] transition-[color,transform] duration-[var(--ro-dur-fast)]",
+                  "relative flex h-full min-h-11 flex-col items-center justify-center gap-0.5 px-0.5 text-[11px] transition-[color,transform,opacity] duration-[var(--ro-dur-fast)]",
                   active
                     ? "font-semibold text-[var(--ro-plum-900)]"
                     : "text-ro-muted"

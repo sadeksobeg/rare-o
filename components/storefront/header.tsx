@@ -84,12 +84,9 @@ export function StorefrontHeader({
 
   const overHero = isHome && !scrolled;
 
+  /** GlobalSearchMount listens for this on every storefront page (layout). */
   const openSearch = () => {
-    if (isHome) {
-      window.dispatchEvent(new Event("ro:open-search"));
-    } else {
-      window.location.href = href("/catalog", locale);
-    }
+    window.dispatchEvent(new Event("ro:open-search"));
   };
 
   return (

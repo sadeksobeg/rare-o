@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LogOut, MessageSquare, UserRound } from "lucide-react";
 import { adminLogoutAction } from "@/app/admin-logout-action";
+import { AdminCommandSearchMount } from "@/components/admin/command-search-mount";
 import { AdminLocaleToggle } from "@/components/admin/locale-toggle";
 import {
   AdminMobileNav,
@@ -9,8 +10,9 @@ import {
 } from "@/components/admin/nav";
 import { Emblem } from "@/components/brand";
 import { ChromeBadge } from "@/components/portal/chrome-badge";
+import { PortalShellFrame } from "@/components/portal/portal-shell-frame";
+import { PortalThemeToggle } from "@/components/portal/portal-theme";
 import { OfflineBanner } from "@/components/system/offline-banner";
-import { AppToast } from "@/components/system/app-toast";
 import { SonnerToaster } from "@/components/ui/sonner-toaster";
 import { getAdminSessionChrome } from "@/lib/auth/admin-session";
 import { isPromoFeaturesEnabled } from "@/lib/config/feature-flags";
@@ -59,45 +61,90 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
         { href: "/admin/traders", label: a.traders },
         {
           href: "/admin/team",
-          label: locale === "ar" ? "الفريق" : "Team",
+          label: a.team,
         },
-        { href: "/admin/settings/security", label: a.settings },
+        {
+          href: "/admin/notifications",
+          label: dict.adminUi.notificationsTitle,
+        },
+        { href: "/admin/settings", label: dict.adminUi.settingsHubTitle },
       ],
     },
   ];
 
   const brand = `RARE OUD · ${a.dashboard}`;
+  const commandLabels = {
+    search: a.commandSearch,
+    placeholder: a.commandPlaceholder,
+    empty: a.commandEmpty,
+    searching: a.commandSearching,
+    close: dict.common.close,
+    pages: {
+      "/admin": a.dashboard,
+      "/admin/inbox": a.inbox,
+      "/admin/requests": a.requests,
+      "/admin/deals": a.deals,
+      "/admin/wholesale": a.wholesale,
+      "/admin/brokerage": a.brokerage,
+      "/admin/products": a.products,
+      "/admin/categories": a.categories,
+      "/admin/offers": a.offers,
+      "/admin/promos": a.promos,
+      "/admin/customers": a.customers,
+      "/admin/traders": a.traders,
+      "/admin/team":
+        groups
+          .flatMap((g) => g.items)
+          .find((i) => i.href === "/admin/team")?.label ?? a.dashboard,
+      "/admin/settings": dict.adminUi.settingsHubTitle,
+      "/admin/settings/security": dict.adminUi.settingsSecurity,
+      "/admin/notifications": dict.adminUi.notificationsTitle,
+    },
+  };
 
   return (
-    <AppToast dismissLabel={dict.common.toastDismiss}>
+    <>
       <SonnerToaster />
-      <div className="ro-portal ro-portal-admin relative flex min-h-screen text-ro-ink">
+      <PortalShellFrame
+        surface="admin"
+        className="ro-portal ro-portal-admin relative min-h-screen"
+      >
         <div className="ro-portal-atmosphere" aria-hidden />
-        <div className="relative z-10 flex min-h-screen w-full">
-          <AdminSidebar groups={groups} brand={brand} />
-          <div className="flex min-w-0 flex-1 flex-col">
+        <div className="ro-portal-shell relative z-10">
+          <AdminSidebar
+            groups={groups}
+            brand={brand}
+            navLabel={dict.common.navLabelAdmin}
+            collapseLabel={dict.common.menu}
+            expandLabel={dict.common.close}
+          />
+          <div className="ro-portal-main-col">
             <OfflineBanner />
-            <header className="ro-portal-header sticky top-0 z-30 flex h-14 items-center justify-between gap-3 px-4">
-              <div className="flex min-w-0 items-center gap-3">
+            <header className="ro-portal-header sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-[color:var(--border)] px-3 backdrop-blur-md sm:h-16 sm:gap-3 sm:px-4 lg:px-5">
+              <div className="ro-portal-header-start">
                 <AdminMobileNav
                   groups={groups}
                   menuLabel={dict.common.menu}
                   closeLabel={dict.common.close}
+                  navLabel={dict.common.navLabelAdmin}
                 />
                 <Link
                   href="/admin"
-                  className="flex items-center gap-2 lg:hidden"
+                  className="flex shrink-0 items-center gap-2 lg:hidden"
                 >
                   <Emblem variant="small" className="size-7" />
-                  <span className="font-display text-sm font-bold tracking-[0.14em] text-ro-ink">
-                    {brand}
+                  <span className="font-display text-sm font-bold text-[color:var(--text)]">
+                    <bdi dir="ltr">RARE OUD</bdi>
                   </span>
                 </Link>
+                <div className="ro-portal-header-search">
+                  <AdminCommandSearchMount labels={commandLabels} />
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-sm sm:gap-3">
+              <div className="ro-portal-header-actions flex shrink-0 items-center gap-1 sm:gap-1.5">
                 <Link
                   href="/admin/inbox"
-                  className="ro-icon-btn relative"
+                  className="ro-icon-btn relative size-11 min-h-11 px-0"
                   aria-label={a.inbox}
                 >
                   <MessageSquare className="size-4" strokeWidth={1.5} aria-hidden />
@@ -106,38 +153,45 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
                     className="absolute end-1 top-1 flex min-w-[1.05rem] items-center justify-center rounded-full bg-[var(--ro-plum-900)] px-1 text-[0.6rem] font-bold text-[var(--ro-sand-50)]"
                   />
                 </Link>
+                <PortalThemeToggle
+                  lightLabel={dict.common.themeLight}
+                  darkLabel={dict.common.themeDark}
+                />
                 <AdminLocaleToggle
                   locale={locale}
                   label={dict.common.language}
-                  tone="on-light"
+                  tone="auto"
                 />
-                <span className="hidden items-center gap-1.5 rounded-[var(--ro-r-sm)] border border-[color-mix(in_srgb,var(--ro-plum-900)_14%,transparent)] bg-[color-mix(in_srgb,var(--ro-sand-50)_90%,var(--ro-plum-50))] px-2.5 py-1.5 font-semibold text-ro-ink sm:inline-flex">
-                  <UserRound className="size-3.5 text-[var(--ro-plum-800)]" aria-hidden />
-                  <span className="max-w-[12rem] truncate text-xs sm:text-sm">
-                    {session.email}
+                <Link
+                  href="/admin/profile"
+                  className="ro-icon-btn size-11 min-h-11 px-0"
+                  aria-label={dict.auth.profileTitle}
+                >
+                  <UserRound className="size-4" strokeWidth={1.5} aria-hidden />
+                  <span className="sr-only">
+                    <bdi dir="ltr">{session.email}</bdi>
                   </span>
-                </span>
+                </Link>
                 <form action={adminLogoutAction}>
                   <button
                     type="submit"
-                    className="ro-icon-btn"
+                    className="ro-icon-btn size-11 min-h-11 px-0"
                     aria-label={a.logout}
                   >
                     <LogOut className="size-4" strokeWidth={1.5} aria-hidden />
-                    <span className="hidden sm:inline">{a.logout}</span>
                   </button>
                 </form>
               </div>
             </header>
             <main
               id="main-content"
-              className="ro-portal-main-enter mx-auto w-full max-w-[1440px] flex-1 px-4 py-6 has-[[data-admin-inbox]]:max-w-none has-[[data-admin-inbox]]:px-3 has-[[data-admin-inbox]]:py-4 sm:px-6 lg:px-8"
+              className="ro-portal-main-enter ro-portal-main"
             >
               {children}
             </main>
           </div>
         </div>
-      </div>
-    </AppToast>
+      </PortalShellFrame>
+    </>
   );
 }

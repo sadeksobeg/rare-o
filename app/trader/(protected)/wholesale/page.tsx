@@ -45,6 +45,7 @@ export default async function TraderWholesaleCatalogPage() {
             categorySlug: p.category?.slug ?? null,
             categoryNameEn: p.category?.nameEn ?? null,
             categoryNameAr: p.category?.nameAr ?? null,
+            imagePath: p.images[0]?.path ?? null,
           }))}
         />
       </div>

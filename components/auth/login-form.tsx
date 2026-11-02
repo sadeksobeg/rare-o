@@ -5,6 +5,7 @@ import { useActionState, useEffect, useState } from "react";
 import { AlertTriangle, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import type { ActionResult } from "@/app/actions";
 import { LogoSceneMount } from "@/components/brand/logo-scene-mount";
+import { MotionProvider } from "@/components/motion/provider";
 import { TextField } from "@/components/ui/text-field";
 import { Button } from "@/components/ui/button";
 import { Banner } from "@/components/ui/banner";
@@ -48,6 +49,12 @@ export function LoginForm({
   rateLimitFooter,
   capsLockLabel = "Caps Lock is on",
   notice,
+  forgotPasswordLabel,
+  forgotTitle,
+  forgotSubtitle,
+  forgotWhatsAppLabel,
+  forgotWhatsAppHref,
+  backToSignInLabel,
 }: {
   action: (
     prev: ActionResult | null,
@@ -82,11 +89,22 @@ export function LoginForm({
   capsLockLabel?: string;
   /** e.g. "Your password was changed on another device. Please sign in again." */
   notice?: string;
+  /** AUTH-03 — admin-managed recovery (no self-serve email reset). */
+  forgotPasswordLabel?: string;
+  forgotTitle?: string;
+  forgotSubtitle?: string;
+  forgotWhatsAppLabel?: string;
+  forgotWhatsAppHref?: string | null;
+  backToSignInLabel?: string;
 }) {
   const [state, formAction, pending] = useActionState(action, initial);
   const [reveal, setReveal] = useState(false);
   const [capsLock, setCapsLock] = useState(false);
   const [lockLeft, setLockLeft] = useState(0);
+  const [view, setView] = useState<"form" | "forgot">("form");
+  const canForgot = Boolean(
+    forgotPasswordLabel && forgotTitle && forgotSubtitle && backToSignInLabel
+  );
 
   useEffect(() => {
     if (!state || state.ok || state.error !== "LOGIN_LOCKED") {
@@ -102,13 +120,14 @@ export function LoginForm({
     setLockLeft(Number.isFinite(sec) ? sec : 60);
   }, [state]);
 
+  const lockedCountdown = lockLeft > 0;
   useEffect(() => {
-    if (lockLeft <= 0) return;
+    if (!lockedCountdown) return;
     const id = window.setInterval(() => {
       setLockLeft((n) => Math.max(0, n - 1));
     }, 1000);
     return () => window.clearInterval(id);
-  }, [lockLeft > 0]);
+  }, [lockedCountdown]);
 
   const locked = lockLeft > 0;
   const headlineWords = (headline ?? title).split(/\s+/).filter(Boolean);
@@ -132,11 +151,15 @@ export function LoginForm({
       : null;
 
   return (
-    <main className="grid min-h-[100dvh] grid-cols-1 md:grid-cols-[1.15fr_1fr]">
-      {/* Living brand scene — design-lab (stacked on small screens so the ceremony always shows) */}
+    <MotionProvider surface={role === "admin" ? "admin" : "trader"}>
+    <main
+      data-theme="dark"
+      className="ro-portal grid min-h-[100dvh] grid-cols-1 md:grid-cols-[1.15fr_1fr]"
+    >
+      {/* Living brand scene — VISION ceremony (stacked on small screens) */}
       <section className="relative flex min-h-[44vh] flex-col justify-between overflow-hidden bg-[var(--ro-ink-950)] p-6 text-[var(--ro-sand-100)] sm:p-8 md:min-h-[100dvh]">
         <div
-          className="pointer-events-none absolute inset-[-10%]"
+          className="pointer-events-none absolute inset-[-10%] motion-safe:animate-[ro-portal-ambient_9s_var(--ro-ease-resonance)_infinite]"
           aria-hidden
           style={{
             background: [
@@ -150,14 +173,14 @@ export function LoginForm({
           <LogoSceneMount className="h-full w-full" />
         </div>
         <div className="relative z-10 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 font-display text-xl font-semibold tracking-[0.12em]">
+          <div className="flex items-center gap-3 font-display text-xl font-semibold">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/brand/logo-mark-small.svg"
               alt=""
               className="h-6 w-6 invert"
             />
-            {brand}
+            <bdi dir="ltr">{brand}</bdi>
           </div>
           {children}
         </div>
@@ -218,125 +241,188 @@ export function LoginForm({
             </Link>
           </div>
 
-          <h1 className="mb-1 font-display text-2xl font-semibold text-ro-ink">
-            {title}
-          </h1>
-          {subtitle ? (
-            <p className="mb-6 text-sm text-[var(--ro-ink-600)]">{subtitle}</p>
-          ) : hint ? (
-            <div className="mb-6 text-sm text-[var(--ro-ink-600)]">{hint}</div>
-          ) : (
-            <div className="mb-6" />
-          )}
-
-          {notice ? (
-            <Banner tone="info" className="mb-4">
-              {notice}
-            </Banner>
-          ) : null}
-
-          {locked ? (
-            <div className="mb-4 flex items-start gap-2 rounded-[8px] bg-[var(--ro-danger-100)] p-3 text-sm text-[var(--ro-danger-700)]">
-              <ShieldCheck
-                className="mt-0.5 size-4 shrink-0"
-                strokeWidth={1.5}
-              />
-              <span>{errorText}</span>
-            </div>
-          ) : null}
-
-          <form
-            action={formAction}
-            className={cn("space-y-4", locked && "pointer-events-none opacity-50")}
-          >
-            {returnTo ? (
-              <input type="hidden" name="returnTo" value={returnTo} />
-            ) : null}
-            <TextField
-              name="email"
-              type="email"
-              label={emailLabel}
-              required
-              dir="ltr"
-              autoComplete="username"
-              inputMode="email"
-              autoFocus
-            />
-            <TextField
-              name="password"
-              type={reveal ? "text" : "password"}
-              label={passwordLabel}
-              required
-              minLength={8}
-              dir="ltr"
-              autoComplete="current-password"
-              onKeyUp={(e) => setCapsLock(e.getModifierState("CapsLock"))}
-              onKeyDown={(e) => setCapsLock(e.getModifierState("CapsLock"))}
-              endAdornment={
-                <button
-                  type="button"
-                  className="text-[var(--ro-ink-600)]"
-                  onClick={() => setReveal((v) => !v)}
-                  aria-pressed={reveal}
-                  aria-label={reveal ? hidePasswordLabel : showPasswordLabel}
-                >
-                  {reveal ? (
-                    <EyeOff className="size-5" strokeWidth={1.5} aria-hidden />
-                  ) : (
-                    <Eye className="size-5" strokeWidth={1.5} aria-hidden />
-                  )}
-                </button>
-              }
-            />
-            {capsLock ? (
-              <p
-                className="flex items-center gap-1.5 text-xs text-[var(--ro-amber-800)]"
-                role="status"
+          {view === "forgot" && canForgot ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setView("form")}
+                className="mb-5 text-sm text-[var(--ro-ink-600)] underline-offset-4 hover:underline"
               >
-                <AlertTriangle className="size-4" strokeWidth={1.5} aria-hidden />
-                {capsLockLabel}
+                {backToSignInLabel}
+              </button>
+              <h1 className="mb-1 font-display text-2xl font-semibold text-ro-ink">
+                {forgotTitle}
+              </h1>
+              <p className="mb-6 text-sm text-[var(--ro-ink-600)]">
+                {forgotSubtitle}
               </p>
-            ) : null}
-            {totpLabel ? (
-              <TextField
-                name="totpCode"
-                type="text"
-                label={totpLabel}
-                dir="ltr"
-                autoComplete="one-time-code"
-                inputMode="numeric"
-              />
-            ) : null}
-            {!locked && errorText ? (
-              <Banner tone="danger" alert aria-live="assertive">
-                {errorText}
-              </Banner>
-            ) : null}
-            <Button
-              type="submit"
-              className="w-full"
-              size="lg"
-              loading={pending}
-              disabled={locked || pending}
-            >
-              {submitLabel}
-            </Button>
-          </form>
+              {forgotWhatsAppHref && forgotWhatsAppLabel ? (
+                <a
+                  href={forgotWhatsAppHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex w-full items-center justify-center rounded-[10px] bg-[var(--ro-plum-900)] px-4 py-3 text-sm font-semibold text-[var(--ro-sand-50)] transition-opacity hover:opacity-90"
+                >
+                  {forgotWhatsAppLabel}
+                </a>
+              ) : footer ? (
+                <div className="text-center text-sm text-[var(--ro-ink-600)]">
+                  {footer}
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <h1 className="mb-1 font-display text-2xl font-semibold text-ro-ink">
+                {title}
+              </h1>
+              {subtitle ? (
+                <p className="mb-6 text-sm text-[var(--ro-ink-600)]">{subtitle}</p>
+              ) : hint ? (
+                <div className="mb-6 text-sm text-[var(--ro-ink-600)]">{hint}</div>
+              ) : (
+                <div className="mb-6" />
+              )}
 
-          {rateLimitFooter ? (
-            <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-xs text-[var(--ro-ink-600)]">
-              <ShieldCheck className="size-4" strokeWidth={1.5} aria-hidden />
-              {rateLimitFooter}
-            </p>
-          ) : null}
+              {notice ? (
+                <Banner tone="info" className="mb-4">
+                  {notice}
+                </Banner>
+              ) : null}
 
-          {footer ? (
-            <div className="mt-4 text-center text-sm text-[var(--ro-ink-600)]">
-              {footer}
-            </div>
-          ) : null}
+              {locked ? (
+                <div className="mb-4 flex items-start gap-2 rounded-[8px] bg-[var(--ro-danger-100)] p-3 text-sm text-[var(--ro-danger-700)]">
+                  <ShieldCheck
+                    className="mt-0.5 size-4 shrink-0"
+                    strokeWidth={1.5}
+                  />
+                  <span>{errorText}</span>
+                </div>
+              ) : null}
+
+              <form
+                action={formAction}
+                className={cn(
+                  "space-y-4",
+                  locked && "pointer-events-none opacity-50"
+                )}
+              >
+                {returnTo ? (
+                  <input type="hidden" name="returnTo" value={returnTo} />
+                ) : null}
+                <TextField
+                  name="email"
+                  type="email"
+                  label={emailLabel}
+                  required
+                  dir="ltr"
+                  autoComplete="username"
+                  inputMode="email"
+                  autoFocus
+                />
+                <TextField
+                  name="password"
+                  type={reveal ? "text" : "password"}
+                  label={passwordLabel}
+                  required
+                  minLength={8}
+                  dir="ltr"
+                  autoComplete="current-password"
+                  onKeyUp={(e) => setCapsLock(e.getModifierState("CapsLock"))}
+                  onKeyDown={(e) => setCapsLock(e.getModifierState("CapsLock"))}
+                  endAdornment={
+                    <button
+                      type="button"
+                      className="text-[var(--ro-ink-600)]"
+                      onClick={() => setReveal((v) => !v)}
+                      aria-pressed={reveal}
+                      aria-label={
+                        reveal ? hidePasswordLabel : showPasswordLabel
+                      }
+                    >
+                      {reveal ? (
+                        <EyeOff
+                          className="size-5"
+                          strokeWidth={1.5}
+                          aria-hidden
+                        />
+                      ) : (
+                        <Eye className="size-5" strokeWidth={1.5} aria-hidden />
+                      )}
+                    </button>
+                  }
+                />
+                {capsLock ? (
+                  <p
+                    className="flex items-center gap-1.5 text-xs text-[var(--ro-amber-800)]"
+                    role="status"
+                  >
+                    <AlertTriangle
+                      className="size-4"
+                      strokeWidth={1.5}
+                      aria-hidden
+                    />
+                    {capsLockLabel}
+                  </p>
+                ) : null}
+                {canForgot ? (
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setView("forgot")}
+                      className="text-sm font-medium text-[var(--ro-plum-900)] underline-offset-4 hover:underline"
+                    >
+                      {forgotPasswordLabel}
+                    </button>
+                  </div>
+                ) : null}
+                {totpLabel ? (
+                  <TextField
+                    name="totpCode"
+                    type="text"
+                    label={totpLabel}
+                    dir="ltr"
+                    autoComplete="one-time-code"
+                    inputMode="numeric"
+                  />
+                ) : null}
+                {!locked && errorText ? (
+                  <Banner tone="danger" alert aria-live="assertive">
+                    {errorText}
+                  </Banner>
+                ) : null}
+                <Button
+                  type="submit"
+                  className="w-full"
+                  size="lg"
+                  loading={pending}
+                  disabled={locked || pending}
+                >
+                  {submitLabel}
+                </Button>
+              </form>
+
+              {rateLimitFooter ? (
+                <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-xs text-[var(--ro-ink-600)]">
+                  <ShieldCheck
+                    className="size-4"
+                    strokeWidth={1.5}
+                    aria-hidden
+                  />
+                  {rateLimitFooter}
+                </p>
+              ) : null}
+
+              {footer ? (
+                <div className="mt-4 text-center text-sm text-[var(--ro-ink-600)]">
+                  {footer}
+                </div>
+              ) : null}
+            </>
+          )}
         </div>
       </section>
     </main>
+    </MotionProvider>
   );
 }

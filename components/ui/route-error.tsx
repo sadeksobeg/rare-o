@@ -27,8 +27,14 @@ export function RouteError({
       : dict.nav.contact;
 
   return (
-    <div className="mx-auto flex min-h-[50vh] max-w-lg flex-col items-center justify-center px-6 py-16 text-center">
-      <h1 className="text-2xl font-semibold">{dict.common.errorTitle}</h1>
+    <div className="relative mx-auto flex min-h-[50vh] max-w-lg flex-col items-center justify-center px-6 py-16 text-center">
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--ro-plum-900)_10%,transparent),transparent_55%)]"
+        aria-hidden
+      />
+      <h1 className="font-display text-2xl font-semibold text-ro-ink">
+        {dict.common.errorTitle}
+      </h1>
       <p className="mt-3 text-sm text-ro-muted">{dict.common.errorBody}</p>
       <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
         <Button type="button" variant="primary" onClick={reset}>

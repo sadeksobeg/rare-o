@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { adminCommandPages } from "@/lib/admin/command-hits";
+import { highlightMatch } from "@/lib/ui/highlight-match";
 import { cn } from "@/lib/utils";
 
 export type CommandPaletteLabels = {
@@ -124,23 +125,24 @@ export function AdminCommandPalette({
   }
 
   return (
-    <>
+    <div className="flex w-full min-w-0 flex-1 items-center">
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="hidden h-9 min-w-[11rem] items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--ro-ink-950)_16%,transparent)] bg-[var(--ro-sand-50)] px-3 text-xs text-[var(--ro-ink-600)] transition-[border-color,background-color,box-shadow] duration-[var(--ro-dur-fast)] hover:border-[var(--ro-plum-900)] hover:bg-white hover:shadow-[0_8px_18px_-14px_color-mix(in_srgb,var(--ro-plum-900)_45%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)] md:inline-flex"
+        className="ro-cmd-search-trigger flex h-11 w-full min-w-0 flex-1 items-center gap-2 rounded-[var(--ro-r-sm)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] px-3 text-xs text-[color:var(--ro-text-muted)] transition-[border-color,background-color] duration-[var(--ro-dur-fast)] hover:border-[color:var(--ro-border)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
       >
-        <Search className="size-3.5" strokeWidth={1.5} aria-hidden />
-        {labels.search}
-        <kbd className="rounded bg-[var(--ro-sand-200)] px-1.5 py-0.5 font-medium text-[11px] text-ro-ink">
-          {kbd}
+        <Search className="size-3.5 shrink-0" strokeWidth={1.5} aria-hidden />
+        <span className="min-w-0 truncate">{labels.search}</span>
+        <kbd className="ms-auto hidden rounded bg-[color-mix(in_srgb,var(--ro-text)_10%,transparent)] px-1.5 py-0.5 font-medium text-[11px] text-[color:var(--ro-text)] sm:inline-block">
+          <bdi dir="ltr">{kbd}</bdi>
         </kbd>
       </button>
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="ro-icon-btn md:hidden"
+        className="ro-cmd-search-icon-only ro-icon-btn"
         aria-label={labels.search}
+        hidden
       >
         <Search className="size-4" strokeWidth={1.5} aria-hidden />
       </button>
@@ -154,15 +156,15 @@ export function AdminCommandPalette({
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className="w-full max-w-lg overflow-hidden rounded-[12px] border border-[color-mix(in_srgb,var(--ro-ink-950)_14%,transparent)] bg-[var(--ro-sand-50)] shadow-[0_24px_60px_-28px_rgba(11,8,13,0.55)]"
+            className="w-full max-w-lg overflow-hidden rounded-[12px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] text-[color:var(--ro-text)] shadow-[var(--shadow-3)]"
             onClick={(event) => event.stopPropagation()}
           >
             <h2 id={titleId} className="sr-only">
               {labels.search}
             </h2>
-            <div className="flex items-center gap-2 border-b border-[color-mix(in_srgb,var(--ro-ink-950)_10%,transparent)] px-3">
+            <div className="flex items-center gap-2 border-b border-[color:var(--ro-border-subtle)] px-3">
               <Search
-                className="size-4 text-[var(--ro-ink-600)]"
+                className="size-4 text-[color:var(--ro-text-muted)]"
                 strokeWidth={1.5}
                 aria-hidden
               />
@@ -178,12 +180,12 @@ export function AdminCommandPalette({
                 aria-activedescendant={
                   activeHref ? `${listId}-${active}` : undefined
                 }
-                className="h-12 w-full bg-transparent text-sm text-ro-ink outline-none placeholder:text-[var(--ro-ink-500)]"
+                className="h-12 w-full bg-transparent text-sm text-[color:var(--ro-text)] outline-none placeholder:text-[color:var(--ro-text-muted)]"
               />
             </div>
             <ul id={listId} role="listbox" className="max-h-[min(52vh,22rem)] overflow-auto p-1.5">
               {shown.length === 0 ? (
-                <li className="px-3 py-4 text-sm text-[var(--ro-ink-600)]">
+                <li className="px-3 py-4 text-sm text-[color:var(--ro-text-muted)]">
                   {pending ? labels.searching : labels.empty}
                 </li>
               ) : (
@@ -201,16 +203,20 @@ export function AdminCommandPalette({
                       className={cn(
                         "flex w-full flex-col items-start rounded-[8px] px-3 py-2 text-start",
                         index === active
-                          ? "bg-[var(--ro-sand-200)]"
-                          : "hover:bg-[var(--ro-sand-200)]"
+                          ? "bg-[color-mix(in_srgb,var(--ro-plum-700)_16%,transparent)]"
+                          : "hover:bg-[color-mix(in_srgb,var(--ro-text)_6%,transparent)]"
                       )}
                     >
-                      <span className="text-sm font-medium text-ro-ink">
-                        {hit.title}
+                      <span className="text-sm font-medium text-[color:var(--ro-text)]">
+                        {query.trim().length >= 2
+                          ? highlightMatch(hit.title, query)
+                          : hit.title}
                       </span>
                       {hit.subtitle ? (
-                        <span className="text-[11px] text-[var(--ro-ink-600)]">
-                          {hit.subtitle}
+                        <span className="text-[11px] text-[color:var(--ro-text-muted)]">
+                          {query.trim().length >= 2
+                            ? highlightMatch(hit.subtitle, query)
+                            : hit.subtitle}
                         </span>
                       ) : null}
                     </button>
@@ -221,6 +227,6 @@ export function AdminCommandPalette({
           </div>
         </div>
       ) : null}
-    </>
+    </div>
   );
 }

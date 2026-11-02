@@ -80,35 +80,35 @@ export function DashboardAside({
     : a.whatsappNoMessage;
 
   return (
-    <aside className={cn("grid gap-2.5 content-start", className)}>
+    <aside className={cn("grid gap-3 content-start", className)}>
       <Link
         href="/admin/inbox"
         className="ro-portal-card flex items-center gap-3 border p-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
       >
         <span className="relative inline-flex">
-        <svg width="52" height="52" viewBox="0 0 52 52" aria-hidden>
-          <circle
-            cx="26"
-            cy="26"
-            r="21"
-            fill="none"
-            stroke="var(--ro-sand-300)"
-            strokeWidth="5"
-          />
-          <circle
-            cx="26"
-            cy="26"
-            r="21"
-            fill="none"
-            stroke={stroke}
-            strokeWidth="5"
-            strokeDasharray={RING}
-            strokeDashoffset={ringOffset(health.state)}
-            transform="rotate(-90 26 26)"
-            strokeLinecap="round"
-          />
-          <circle cx="26" cy="26" r="4" fill={stroke} />
-        </svg>
+          <svg width="52" height="52" viewBox="0 0 52 52" aria-hidden>
+            <circle
+              cx="26"
+              cy="26"
+              r="21"
+              fill="none"
+              stroke="var(--ro-border)"
+              strokeWidth="5"
+            />
+            <circle
+              cx="26"
+              cy="26"
+              r="21"
+              fill="none"
+              stroke={stroke}
+              strokeWidth="5"
+              strokeDasharray={RING}
+              strokeDashoffset={ringOffset(health.state)}
+              transform="rotate(-90 26 26)"
+              strokeLinecap="round"
+            />
+            <circle cx="26" cy="26" r="4" fill={stroke} />
+          </svg>
           <span
             className={cn(
               "absolute end-0.5 top-0.5 size-2 rounded-full",
@@ -119,10 +119,10 @@ export function DashboardAside({
           />
         </span>
         <div className="min-w-0">
-          <p className="font-medium text-ro-ink">
+          <p className="font-medium text-[color:var(--ro-text)]">
             {a.whatsappNoun} {healthLabel(dict, health.state)}
           </p>
-          <p className="text-[11px] text-[var(--ro-ink-600)]">{lastMessage}</p>
+          <p className="text-[11px] text-[color:var(--ro-text-muted)]">{lastMessage}</p>
         </div>
       </Link>
 
@@ -131,21 +131,21 @@ export function DashboardAside({
         className="ro-portal-card space-y-1.5 border p-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
       >
         <div className="flex items-center justify-between gap-2">
-          <p className="font-medium text-ro-ink">{a.contentHealth}</p>
-          <p className="text-[11px] text-[var(--ro-ink-600)]">
+          <p className="font-medium text-[color:var(--ro-text)]">{a.contentHealth}</p>
+          <p className="text-[11px] text-[color:var(--ro-text-muted)]">
             {fmt(a.contentHealthRatio, {
               have: catalogHealth.withPhoto,
               total: catalogHealth.published,
             })}
           </p>
         </div>
-        <div className="flex h-2 overflow-hidden rounded bg-[var(--ro-sand-300)]">
+        <div className="flex h-2 overflow-hidden rounded bg-[color:var(--ro-bg-sunken)]">
           <span
-            className="h-full bg-[var(--ro-plum-900)]"
+            className="h-full bg-[var(--ro-plum-700)]"
             style={{ width: `${photoPct}%` }}
           />
         </div>
-        <p className="text-[11px] text-[var(--ro-ink-600)]">
+        <p className="text-[11px] text-[color:var(--ro-text-muted)]">
           {catalogHealth.missingPhoto === 0
             ? a.contentHealthComplete
             : fmt(a.contentHealthMissing, { n: catalogHealth.missingPhoto })}
@@ -156,10 +156,10 @@ export function DashboardAside({
         href="/admin/requests"
         className="ro-portal-card space-y-1.5 border p-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
       >
-        <p className="font-medium text-ro-ink">{a.pipeline}</p>
-        <div className="flex h-2 overflow-hidden rounded bg-[var(--ro-sand-300)]">
+        <p className="font-medium text-[color:var(--ro-text)]">{a.pipeline}</p>
+        <div className="flex h-2 overflow-hidden rounded bg-[color:var(--ro-bg-sunken)]">
           {pipelineTotal === 0 ? (
-            <span className="h-full w-full bg-[var(--ro-sand-300)]" />
+            <span className="h-full w-full bg-[color:var(--ro-border-subtle)]" />
           ) : (
             <>
               <span
@@ -167,7 +167,7 @@ export function DashboardAside({
                 style={{ width: `${share(pipeline.ready_for_handoff)}%` }}
               />
               <span
-                className="h-full bg-[var(--ro-plum-900)]"
+                className="h-full bg-[var(--ro-plum-700)]"
                 style={{ width: `${share(pipeline.in_follow_up)}%` }}
               />
               <span
@@ -181,7 +181,7 @@ export function DashboardAside({
             </>
           )}
         </div>
-        <p className="text-[11px] text-[var(--ro-ink-600)]">{a.pipelineLegend}</p>
+        <p className="text-[11px] text-[color:var(--ro-text-muted)]">{a.pipelineLegend}</p>
       </Link>
     </aside>
   );

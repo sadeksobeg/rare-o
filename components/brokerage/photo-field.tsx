@@ -10,18 +10,28 @@ import { cn } from "@/lib/utils";
 
 type Preview = { id: string; file: File; url: string };
 
+export type BrokeragePhotoMeta = {
+  name: string;
+  size: number;
+  type: string;
+  lastModified: number;
+};
+
 export function BrokeragePhotoField({
   locale,
   name = "photos",
   max = BROKERAGE_MAX_PHOTOS,
   alreadyCount = 0,
   className,
+  onMetaChange,
 }: {
   locale: string;
   name?: string;
   max?: number;
   alreadyCount?: number;
   className?: string;
+  /** Session-safe photo metadata (files themselves cannot be drafted). */
+  onMetaChange?: (meta: BrokeragePhotoMeta[]) => void;
 }) {
   const ar = locale === "ar";
   const inputId = useId();
@@ -35,6 +45,17 @@ export function BrokeragePhotoField({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- revoke on unmount only
   }, []);
+
+  function emitMeta(next: Preview[]) {
+    onMetaChange?.(
+      next.map((p) => ({
+        name: p.file.name,
+        size: p.file.size,
+        type: p.file.type,
+        lastModified: p.file.lastModified,
+      }))
+    );
+  }
 
   function onPick(list: FileList | null) {
     if (!list || list.length === 0) return;
@@ -74,13 +95,16 @@ export function BrokeragePhotoField({
       });
     }
     setPreviews(next);
+    emitMeta(next);
   }
 
   function removeAt(id: string) {
     setPreviews((prev) => {
       const hit = prev.find((p) => p.id === id);
       if (hit) URL.revokeObjectURL(hit.url);
-      return prev.filter((p) => p.id !== id);
+      const next = prev.filter((p) => p.id !== id);
+      emitMeta(next);
+      return next;
     });
   }
 

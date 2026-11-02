@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { InboxConversationList } from "@/components/admin/inbox-conversation-list";
 import type { InboxListRow } from "@/components/admin/inbox-conversation-list";
 import { InboxConnectionBanner } from "@/components/admin/inbox-connection-banner";
+import { InboxResizablePanes } from "@/components/admin/inbox-resizable-panes";
 import { MessageSquare } from "lucide-react";
 import { PageHeader } from "@/components/admin/page-header";
 import { WhatsAppLinkAccount } from "@/components/admin/whatsapp-link-account";
@@ -26,6 +27,19 @@ function formatWhen(iso: string | null, locale: string): string {
   }
 }
 
+function linkLabelFor(
+  dict: Dictionary,
+  linkType: string,
+  linked: boolean
+): string {
+  if (!linked) return dict.inbox.notLinked;
+  if (linkType === "retail_request") return dict.inbox.typeRetail;
+  if (linkType === "deal_proposal") return dict.inbox.typeDeal;
+  if (linkType === "wholesale_request") return dict.inbox.typeWholesale;
+  if (linkType === "brokerage_request") return dict.inbox.typeBrokerage;
+  return dict.inbox.notLinked;
+}
+
 async function InboxListShell({
   locale,
   dict,
@@ -41,20 +55,15 @@ async function InboxListShell({
   ]);
 
   const rows: InboxListRow[] = conversations.map((c) => {
-    const linkLabel = c.link.linked
-      ? c.link.linkType === "retail_request"
-        ? dict.inbox.typeRetail
-        : c.link.linkType === "deal_proposal"
-          ? dict.inbox.typeDeal
-          : dict.inbox.typeWholesale
-      : dict.inbox.notLinked;
+    const linked = c.link.linked;
+    const linkType = linked ? c.link.linkType : "none";
     return {
       id: c.id,
       displayLabel: c.displayLabel,
       preview: c.lastMessagePreview || "—",
       whenLabel: formatWhen(c.lastMessageAt, locale),
-      linkLabel,
-      linked: c.link.linked,
+      linkLabel: linkLabelFor(dict, linkType, linked),
+      linked,
       hasUnread: c.hasUnread,
       unreadCount: c.unreadCount,
       searchText: c.displayLabel.toLowerCase(),
@@ -65,17 +74,21 @@ async function InboxListShell({
     <>
       <InboxConnectionBanner health={health} dict={dict} />
       <WhatsAppLinkAccount health={health} dict={dict} />
-      <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[340px_minmax(0,1fr)]">
-        <InboxConversationList rows={rows} dict={dict} />
-        <div className="flex min-h-0 min-w-0 flex-col">{children}</div>
-      </div>
+      <InboxResizablePanes
+        className="min-h-0 flex-1"
+        list={<InboxConversationList rows={rows} dict={dict} />}
+        main={
+          <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
+            {children}
+          </div>
+        }
+      />
     </>
   );
 }
 
 /**
- * AD-03 inbox shell: banner + list | thread.
- * Header paints immediately; list/health stream so thread children can show sooner.
+ * OPS-01 inbox shell: banner + resizable list | thread (+ context inside thread route).
  */
 export default async function AdminInboxLayout({
   children,
@@ -87,27 +100,30 @@ export default async function AdminInboxLayout({
   return (
     <section
       data-admin-inbox
-      className="flex min-h-[calc(100vh-5.5rem)] flex-col gap-3"
+      className="flex h-[calc(100dvh-4.25rem)] min-h-[28rem] flex-col gap-2 overflow-hidden"
     >
       <PageHeader
         title={dict.inbox.title}
         description={dict.inbox.subtitle}
         icon={<MessageSquare className="size-5" strokeWidth={2} />}
+        className="shrink-0 !mb-0"
       />
       <Suspense
         fallback={
-          <div className="space-y-3" aria-busy="true">
-            <Skeleton className="h-10 w-full" />
-            <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[340px_minmax(0,1fr)]">
-              <Skeleton className="min-h-[320px] w-full" />
+          <div className="flex min-h-0 flex-1 flex-col gap-2" aria-busy="true">
+            <Skeleton className="h-10 w-full shrink-0" />
+            <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[360px_minmax(0,1fr)]">
+              <Skeleton className="min-h-[240px] w-full" />
               <div className="flex min-h-0 min-w-0 flex-col">{children}</div>
             </div>
           </div>
         }
       >
-        <InboxListShell locale={locale} dict={dict}>
-          {children}
-        </InboxListShell>
+        <div className="flex min-h-0 flex-1 flex-col gap-2">
+          <InboxListShell locale={locale} dict={dict}>
+            {children}
+          </InboxListShell>
+        </div>
       </Suspense>
     </section>
   );

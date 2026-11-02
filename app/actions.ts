@@ -247,6 +247,46 @@ export async function adminChangePasswordAction(
   return { ok: true };
 }
 
+/** AUTH-07 — bump passwordChangedAt so other JWTs fail pwv without changing the password. */
+export async function adminInvalidateOtherSessionsAction(): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+
+  const admin = await prisma.adminUser.findUnique({
+    where: { id: session.sub },
+    select: { id: true, email: true, name: true, mustChangePassword: true },
+  });
+  if (!admin) {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const now = new Date();
+  await prisma.adminUser.update({
+    where: { id: admin.id },
+    data: { passwordChangedAt: now },
+  });
+
+  const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
+  await writeAdminAudit({
+    adminId: admin.id,
+    action: "admin.sessions.invalidate_others",
+  });
+
+  const token = await createAdminSessionToken({
+    sub: admin.id,
+    email: admin.email,
+    name: admin.name,
+    mustChangePassword: admin.mustChangePassword,
+    pwv: now.getTime(),
+  });
+  await setAdminSessionCookie(token);
+  return { ok: true };
+}
+
 /** Start TOTP enrollment — returns otpauth URL + plaintext recovery codes once. */
 export async function enrollAdminTotpAction(): Promise<
   | { ok: true; otpauthUrl: string; secret: string; recoveryCodes: string[] }
@@ -411,6 +451,92 @@ export async function upsertProductAction(
     if (typeof e === "object" && e && "digest" in e) throw e;
     return { ok: false, error: msg };
   }
+}
+
+/** CAT-01 — one-click publish/unpublish from the products gallery/table. */
+export async function adminQuickSetProductStatusAction(
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+
+  const id = String(formData.get("productId") || "");
+  const nextStatus = String(formData.get("status") || "");
+  if (!id || (nextStatus !== "published" && nextStatus !== "draft")) {
+    return { ok: false, error: "Invalid status" };
+  }
+
+  const product = await prisma.product.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      nameAr: true,
+      status: true,
+      _count: { select: { images: true } },
+    },
+  });
+  if (!product) return { ok: false, error: "Not found" };
+
+  if (nextStatus === "published") {
+    if (!product.nameAr.trim()) {
+      return { ok: false, error: "PUBLISH_NEEDS_NAME_AR" };
+    }
+    if (product._count.images < 1) {
+      return { ok: false, error: "PUBLISH_NEEDS_IMAGE" };
+    }
+  }
+
+  await prisma.product.update({
+    where: { id },
+    data: { status: nextStatus },
+  });
+
+  if (nextStatus === "published" && product.status !== "published") {
+    const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
+    await writeAdminAudit({
+      adminId: session.sub,
+      action: "product.publish",
+      targetType: "product",
+      targetId: id,
+    });
+  }
+
+  revalidatePath("/admin/products");
+  revalidatePath(`/admin/products/${id}`);
+  revalidateProductStorefront();
+  return { ok: true };
+}
+
+/** CAT-02 — persist drag-reorder as contiguous sortOrder values. */
+export async function adminReorderCategoriesAction(
+  formData: FormData
+): Promise<ActionResult> {
+  try {
+    await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+
+  const ids = formData
+    .getAll("ids")
+    .map((v) => String(v).trim())
+    .filter(Boolean);
+  if (ids.length === 0) return { ok: false, error: "Empty order" };
+
+  await prisma.$transaction(
+    ids.map((id, index) =>
+      prisma.category.update({
+        where: { id },
+        data: { sortOrder: index },
+      })
+    )
+  );
+  revalidateCategoryPaths();
+  return { ok: true };
 }
 
 function imageErrorMessage(code: ImageActionError): string {

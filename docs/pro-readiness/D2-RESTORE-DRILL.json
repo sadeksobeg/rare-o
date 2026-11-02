@@ -1,12 +1,12 @@
 {
   "ok": true,
-  "at": "2026-10-19T08:54:34.200Z",
+  "at": "2026-10-31T10:57:28.922Z",
   "tools": "docker",
-  "backupDir": "backups\\restore-drill-pg-1792400074199",
+  "backupDir": "backups\\restore-drill-pg-1793444248922",
   "dump": {
     "file": "db.dump",
-    "bytes": 74778,
-    "sha256": "4f264d0648278f6ec41e979d86c5cb25e6ad6f46addfc7737bae019e45be39d5"
+    "bytes": 113416,
+    "sha256": "15cf484b62516d5979088a9d81af167a4d542416d661c371942281beb9370b1e"
   },
   "uploads": {
     "source": "public/uploads",
@@ -20,45 +20,75 @@
   },
   "tables": [
     {
+      "table": "AdminAuditLog",
+      "source": 60,
+      "restored": 60,
+      "ok": true
+    },
+    {
       "table": "AdminUser",
       "source": 1,
       "restored": 1,
       "ok": true
     },
     {
+      "table": "BrokerageEvent",
+      "source": 26,
+      "restored": 26,
+      "ok": true
+    },
+    {
+      "table": "BrokerageInspection",
+      "source": 3,
+      "restored": 3,
+      "ok": true
+    },
+    {
+      "table": "BrokerageQuote",
+      "source": 3,
+      "restored": 3,
+      "ok": true
+    },
+    {
+      "table": "BrokerageRequest",
+      "source": 3,
+      "restored": 3,
+      "ok": true
+    },
+    {
       "table": "Category",
-      "source": 2,
-      "restored": 2,
+      "source": 6,
+      "restored": 6,
       "ok": true
     },
     {
       "table": "Customer",
-      "source": 24,
-      "restored": 24,
+      "source": 51,
+      "restored": 51,
       "ok": true
     },
     {
       "table": "DealProposal",
-      "source": 22,
-      "restored": 22,
+      "source": 60,
+      "restored": 60,
       "ok": true
     },
     {
       "table": "NegotiationEntry",
-      "source": 54,
-      "restored": 54,
+      "source": 149,
+      "restored": 149,
       "ok": true
     },
     {
       "table": "Product",
-      "source": 21,
-      "restored": 21,
+      "source": 50,
+      "restored": 50,
       "ok": true
     },
     {
       "table": "ProductImage",
-      "source": 15,
-      "restored": 15,
+      "source": 17,
+      "restored": 17,
       "ok": true
     },
     {
@@ -69,38 +99,38 @@
     },
     {
       "table": "PublicCuratedOffer",
-      "source": 11,
-      "restored": 11,
+      "source": 30,
+      "restored": 30,
       "ok": true
     },
     {
       "table": "RetailHandoffEvent",
-      "source": 57,
-      "restored": 57,
+      "source": 141,
+      "restored": 141,
       "ok": true
     },
     {
       "table": "RetailRequest",
-      "source": 24,
-      "restored": 24,
+      "source": 50,
+      "restored": 50,
       "ok": true
     },
     {
       "table": "RetailRequestLine",
-      "source": 24,
-      "restored": 24,
+      "source": 50,
+      "restored": 50,
       "ok": true
     },
     {
       "table": "TraderAccount",
-      "source": 8,
-      "restored": 8,
+      "source": 3,
+      "restored": 3,
       "ok": true
     },
     {
       "table": "TraderNotification",
-      "source": 27,
-      "restored": 27,
+      "source": 208,
+      "restored": 208,
       "ok": true
     },
     {
@@ -129,26 +159,26 @@
     },
     {
       "table": "WholesaleRequest",
-      "source": 16,
-      "restored": 16,
+      "source": 29,
+      "restored": 29,
       "ok": true
     },
     {
       "table": "WholesaleRequestEvent",
-      "source": 53,
-      "restored": 53,
+      "source": 111,
+      "restored": 111,
       "ok": true
     },
     {
       "table": "WholesaleRequestLine",
-      "source": 16,
-      "restored": 16,
+      "source": 29,
+      "restored": 29,
       "ok": true
     },
     {
       "table": "_prisma_migrations",
-      "source": 1,
-      "restored": 1,
+      "source": 6,
+      "restored": 6,
       "ok": true
     }
   ]

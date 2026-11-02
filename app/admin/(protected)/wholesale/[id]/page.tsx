@@ -5,6 +5,7 @@ import {
   DetailList,
   DetailSection,
 } from "@/components/admin/detail-list";
+import { ShippingTracker } from "@/components/admin/shipping-tracker";
 import { StatusChip } from "@/components/ui/status-chip";
 import { StatusStepper } from "@/components/ui/status-stepper";
 import { formatCurrency, formatDate, formatNumber } from "@/lib/i18n/format";
@@ -116,6 +117,54 @@ export default async function AdminWholesaleDetailPage({
             : "—"}
         </DetailItem>
       </DetailList>
+
+      <ShippingTracker
+        title={u.shippingTracker}
+        carrier={request.carrier}
+        tracking={request.trackingReference}
+        steps={(() => {
+          const closed = request.status === "completed";
+          const cancelled = request.status === "cancelled";
+          const shipped = Boolean(request.shippedAt) || closed;
+          const quoted =
+            request.status === "quote_provided" ||
+            request.status === "confirmed" ||
+            shipped ||
+            closed;
+          return [
+            {
+              id: "open",
+              label: u.shipStepOpen,
+              done: quoted || shipped || closed || cancelled,
+              current:
+                !quoted &&
+                !shipped &&
+                !closed &&
+                !cancelled &&
+                (request.status === "submitted" ||
+                  request.status === "under_review"),
+            },
+            {
+              id: "quoted",
+              label: u.shipStepQuoted,
+              done: shipped || closed,
+              current: quoted && !shipped && !closed && !cancelled,
+            },
+            {
+              id: "shipped",
+              label: u.shipStepShipped,
+              done: closed,
+              current: shipped && !closed && !cancelled,
+            },
+            {
+              id: "delivered",
+              label: u.shipStepDelivered,
+              done: closed,
+              current: closed || cancelled,
+            },
+          ];
+        })()}
+      />
 
       <DetailSection title={d.linesSnapshot}>
         <ul className="divide-y divide-ro-line border border-ro-line text-sm">

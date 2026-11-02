@@ -179,6 +179,40 @@ export async function traderChangePasswordAction(
   return { ok: true };
 }
 
+/** AUTH-07 — bump passwordChangedAt so other trader JWTs fail pwv. */
+export async function traderInvalidateOtherSessionsAction(): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireTraderSession();
+  } catch (e) {
+    return handleTraderSessionError(e);
+  }
+
+  const trader = await prisma.traderAccount.findUnique({
+    where: { id: session.sub },
+    select: { id: true, email: true, mustChangePassword: true },
+  });
+  if (!trader) {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const now = new Date();
+  await prisma.traderAccount.update({
+    where: { id: trader.id },
+    data: { passwordChangedAt: now },
+  });
+
+  const token = await createTraderSessionToken({
+    sub: trader.id,
+    email: trader.email,
+    displayName: session.displayName,
+    mustChangePassword: trader.mustChangePassword,
+    pwv: now.getTime(),
+  });
+  await setTraderSessionCookie(token);
+  return { ok: true };
+}
+
 function generateTempPassword(length = 14): string {
   const alphabet =
     "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
@@ -263,6 +297,8 @@ export async function adminSetTraderStatusAction(
   try {
     await setTraderAccountStatus(traderId, status);
     revalidatePath("/admin/traders");
+    revalidatePath(`/admin/traders/${traderId}`);
+
     return { ok: true };
   } catch (e) {
     return {
@@ -306,6 +342,7 @@ export async function adminResetTraderPasswordAction(
       targetId: traderId,
     });
     revalidatePath("/admin/traders");
+    revalidatePath(`/admin/traders/${traderId}`);
     return {
       ok: true,
       message: "Password reset",

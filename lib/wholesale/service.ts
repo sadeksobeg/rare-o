@@ -53,6 +53,11 @@ export async function listWholesaleEligibleProducts() {
       currency: true,
       retailPrice: true,
       category: { select: { nameEn: true, nameAr: true, slug: true } },
+      images: {
+        orderBy: { sortOrder: "asc" },
+        take: 1,
+        select: { path: true, altAr: true, altEn: true },
+      },
     },
   });
 }

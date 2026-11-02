@@ -8,6 +8,7 @@ import { TextField } from "@/components/ui/text-field";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { OudSpecsFields } from "@/components/admin/oud-specs-fields";
+import { ProductLivePreview } from "@/components/admin/product-live-preview";
 import {
   EMPTY_OUD_SPECS_FORM,
   type OudSpecsFormValues,
@@ -18,6 +19,10 @@ import {
   controlLabelTextClass,
   formErrorClass,
 } from "@/lib/ui/form-classes";
+
+function fieldScore(value: string, weight = 1) {
+  return value.trim().length > 0 ? weight : 0;
+}
 
 const initial: ActionResult | null = null;
 
@@ -65,6 +70,10 @@ export function ProductForm({
   const f = labels.form;
   const [state, action, pending] = useActionState(upsertProductAction, initial);
   const [nameAr, setNameAr] = useState(product?.nameAr ?? "");
+  const [nameEn, setNameEn] = useState(product?.nameEn ?? "");
+  const [descAr, setDescAr] = useState(product?.descriptionAr ?? "");
+  const [descEn, setDescEn] = useState(product?.descriptionEn ?? "");
+  const [price, setPrice] = useState(product?.retailPrice ?? "");
   const [status, setStatus] = useState(product?.status ?? "draft");
   const [dirty, setDirty] = useState(false);
 
@@ -88,6 +97,12 @@ export function ProductForm({
       ? f.publishNeedsImage
       : null;
 
+  const arScore =
+    fieldScore(nameAr, 2) + fieldScore(descAr, 1) + (hasImage ? 1 : 0);
+  const enScore = fieldScore(nameEn, 2) + fieldScore(descEn, 1);
+  const arPct = Math.round((arScore / 4) * 100);
+  const enPct = Math.round((enScore / 3) * 100);
+
   const categoryName = (c: CategoryOption) =>
     (locale === "ar" ? c.nameAr || c.nameEn : c.nameEn || c.nameAr) || c.slug;
 
@@ -101,11 +116,36 @@ export function ProductForm({
       : null;
 
   return (
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_17rem]">
     <form
       action={action}
       className="max-w-2xl space-y-4"
       onChange={() => setDirty(true)}
     >
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <p className="text-xs font-medium text-ro-muted">
+            {labels.completenessAr}
+          </p>
+          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[var(--ro-sand-200)]">
+            <div
+              className="h-full bg-[var(--ro-plum-900)] transition-[width]"
+              style={{ width: `${arPct}%` }}
+            />
+          </div>
+        </div>
+        <div>
+          <p className="text-xs font-medium text-ro-muted">
+            {labels.completenessEn}
+          </p>
+          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[var(--ro-sand-200)]">
+            <div
+              className="h-full bg-[var(--ro-progress-700)] transition-[width]"
+              style={{ width: `${enPct}%` }}
+            />
+          </div>
+        </div>
+      </div>
       {product?.id ? <input type="hidden" name="id" value={product.id} /> : null}
       <TextField
         name="slug"
@@ -127,7 +167,8 @@ export function ProductForm({
         <TextField
           name="nameEn"
           label={f.productNameEn}
-          defaultValue={product?.nameEn}
+          value={nameEn}
+          onChange={(e) => setNameEn(e.target.value)}
           dir="ltr"
           dense
         />
@@ -136,13 +177,15 @@ export function ProductForm({
         name="descriptionAr"
         label={f.descriptionAr}
         dir="rtl"
-        defaultValue={product?.descriptionAr}
+        value={descAr}
+        onChange={setDescAr}
       />
       <TextArea
         name="descriptionEn"
         label={f.descriptionEn}
         dir="ltr"
-        defaultValue={product?.descriptionEn}
+        value={descEn}
+        onChange={setDescEn}
       />
       <label className={controlLabelClass}>
         <span className={controlLabelTextClass}>{f.category}</span>
@@ -189,7 +232,8 @@ export function ProductForm({
           type="number"
           step="0.01"
           dir="ltr"
-          defaultValue={product?.retailPrice ?? "0"}
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
           required
           dense
         />
@@ -330,6 +374,20 @@ export function ProductForm({
         ) : null}
       </div>
     </form>
+    <ProductLivePreview
+      className="hidden lg:block"
+      title={labels.livePreview}
+      nameAr={nameAr}
+      nameEn={nameEn}
+      priceLabel={price.trim() || "—"}
+      statusLabel={labels.productStatus[status] ?? status}
+      imageHint={
+        hasImage
+          ? `${imageCount}`
+          : f.publishNeedsImage
+      }
+    />
+    </div>
   );
 }
 
@@ -338,6 +396,8 @@ function TextArea(props: {
   label: string;
   dir: "ltr" | "rtl";
   defaultValue?: string;
+  value?: string;
+  onChange?: (value: string) => void;
 }) {
   return (
     <label className={controlLabelClass}>
@@ -346,7 +406,13 @@ function TextArea(props: {
         name={props.name}
         rows={3}
         dir={props.dir}
-        defaultValue={props.defaultValue}
+        value={props.value}
+        defaultValue={props.value == null ? props.defaultValue : undefined}
+        onChange={
+          props.onChange
+            ? (e) => props.onChange?.(e.target.value)
+            : undefined
+        }
         className={controlClass}
       />
     </label>

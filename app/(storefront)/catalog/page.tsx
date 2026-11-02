@@ -13,7 +13,7 @@ import { getRequestDictionary } from "@/lib/i18n/server";
 import { formatNumber } from "@/lib/i18n/format";
 import { href } from "@/lib/href";
 import { localizedName } from "@/lib/utils";
-import { storefrontMetadata } from "@/lib/seo";
+import { storefrontMetadata, withDefaultOgImage } from "@/lib/seo";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HandoffExplainer } from "@/components/storefront/handoff-explainer";
 import { FilterBar } from "@/components/storefront/catalog/filter-bar";
@@ -23,12 +23,14 @@ import { Reveal } from "@/components/storefront/motion/reveal";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { locale, dict } = await getRequestDictionary();
-  return storefrontMetadata({
-    locale,
-    title: `${dict.catalog.title} — ${dict.brand}`,
-    description: dict.seo.catalogDescription || dict.catalog.lead,
-    path: "/catalog",
-  });
+  return withDefaultOgImage(
+    storefrontMetadata({
+      locale,
+      title: `${dict.catalog.title} — ${dict.brand}`,
+      description: dict.seo.catalogDescription || dict.catalog.lead,
+      path: "/catalog",
+    })
+  );
 }
 
 type SearchParams = {

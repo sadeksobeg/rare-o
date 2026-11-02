@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { Compass, LayoutGrid, List } from "lucide-react";
+import { BrokerageAdminFilters } from "@/components/admin/brokerage-filters";
 import { BrokerageHeroStrip } from "@/components/brokerage/hero-strip";
 import {
   brokerageActorLabel,
@@ -24,10 +26,37 @@ const COL_ACCENT: Record<string, string> = {
   APPROVED: "border-t-[var(--ro-success-700)]",
 };
 
-export default async function AdminBrokeragePage() {
+function isStaleRow(r: { createdAt: Date; status: string }) {
+  return daysSince(r.createdAt) >= 3 && nextActor(r.status) === "admin";
+}
+
+export default async function AdminBrokeragePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ trader?: string; city?: string; stale?: string }>;
+}) {
   const { locale, dict } = await getRequestDictionary();
   const ar = locale === "ar";
-  const rows = await listAdminBrokerage();
+  const u = dict.adminUi;
+  const q = await searchParams;
+  const traderQ = q.trader?.trim().toLowerCase() ?? "";
+  const cityQ = q.city?.trim().toLowerCase() ?? "";
+  const staleOnly = q.stale === "1";
+  const allRows = await listAdminBrokerage();
+
+  const textFiltered = allRows.filter((r) => {
+    if (traderQ) {
+      const hay = `${r.trader.displayName} ${r.trader.email}`.toLowerCase();
+      if (!hay.includes(traderQ)) return false;
+    }
+    if (cityQ) {
+      const city = `${r.cityAr} ${r.cityEn}`.toLowerCase();
+      if (!city.includes(cityQ)) return false;
+    }
+    return true;
+  });
+
+  const rows = textFiltered.filter((r) => (staleOnly ? isStaleRow(r) : true));
   const boardCols = BROKERAGE_LIFECYCLE.slice(0, 6);
 
   const awaitingAdmin = rows.filter((r) => nextActor(r.status) === "admin").length;
@@ -36,9 +65,7 @@ export default async function AdminBrokeragePage() {
     (r) =>
       !["CLOSED", "DECLINED", "REJECTED", "CANCELLED"].includes(r.status)
   ).length;
-  const stale = rows.filter(
-    (r) => daysSince(r.createdAt) >= 3 && nextActor(r.status) === "admin"
-  ).length;
+  const stale = textFiltered.filter(isStaleRow).length;
 
   return (
     <section className="space-y-6">
@@ -80,6 +107,22 @@ export default async function AdminBrokeragePage() {
         ]}
       />
 
+      <Suspense fallback={null}>
+        <BrokerageAdminFilters
+          tabsLabel={u.filterTabs}
+          allLabel={u.filterAll}
+          allCount={textFiltered.length}
+          staleLabel={ar ? "متأخر فقط" : "Stale only"}
+          staleCount={stale}
+          traderLabel={ar ? "تاجر" : "Trader"}
+          cityLabel={ar ? "مدينة" : "City"}
+          searchLabel={u.search}
+          clearLabel={dict.catalog.clearFilters}
+          resultCount={rows.length}
+          resultLabel={u.resultsLabel}
+        />
+      </Suspense>
+
       <div className="flex items-center gap-2 text-xs text-[var(--ro-ink-500)]">
         <LayoutGrid className="size-3.5" strokeWidth={1.5} />
         <span>{ar ? "لوحة كانبان" : "Kanban board"}</span>
@@ -88,6 +131,9 @@ export default async function AdminBrokeragePage() {
         </span>
         <List className="size-3.5" strokeWidth={1.5} />
         <span>{ar ? "جدول كامل أدناه" : "Full table below"}</span>
+        <span className="tabular-nums">
+          · {rows.length}/{allRows.length}
+        </span>
       </div>
 
       <div

@@ -14,6 +14,8 @@ import {
   type WhatsAppAdapterEvents,
   type WhatsAppConnectionState,
   type WhatsAppHealth,
+  type WhatsAppSendMediaInput,
+  type WhatsAppSendResult,
   type WhatsAppSendTextInput,
   type WhatsAppSendTextResult,
 } from "@/lib/whatsapp/types";
@@ -214,6 +216,59 @@ export class FakeWhatsAppAdapter implements WhatsAppAdapter {
       waMessageId,
       waChatId: input.waChatId,
       text,
+      clientRequestId,
+    });
+    return { ok: true, waMessageId, clientRequestId };
+  }
+
+  async sendMedia(input: WhatsAppSendMediaInput): Promise<WhatsAppSendResult> {
+    const clientRequestId = input.clientRequestId?.trim() ?? "";
+    if (!clientRequestId) {
+      return {
+        ok: false,
+        clientRequestId: "",
+        error: "clientRequestId is required",
+        code: "INVALID_INPUT",
+      };
+    }
+    if (this.seenClientRequestIds.has(clientRequestId)) {
+      return {
+        ok: false,
+        clientRequestId,
+        error: "Duplicate clientRequestId",
+        code: "DUPLICATE",
+      };
+    }
+    if (!isOutboundEnabled()) {
+      return {
+        ok: false,
+        clientRequestId,
+        error: "Outbound messaging is disabled (WHATSAPP_OUTBOUND_ENABLED)",
+        code: "OUTBOUND_DISABLED",
+      };
+    }
+    if (this.state !== "CONNECTED") {
+      return {
+        ok: false,
+        clientRequestId,
+        error: "WhatsApp is not connected",
+        code: "NOT_CONNECTED",
+      };
+    }
+    if (!input.bytes?.length) {
+      return {
+        ok: false,
+        clientRequestId,
+        error: "Media payload is empty",
+        code: "INVALID_INPUT",
+      };
+    }
+    const waMessageId = `FAKE-MEDIA-${randomUUID()}`;
+    this.seenClientRequestIds.add(clientRequestId);
+    this.sent.push({
+      waMessageId,
+      waChatId: input.waChatId,
+      text: `[${input.messageType}] ${input.fileName ?? ""}`.trim(),
       clientRequestId,
     });
     return { ok: true, waMessageId, clientRequestId };

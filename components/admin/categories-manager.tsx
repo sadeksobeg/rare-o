@@ -1,19 +1,15 @@
 "use client";
 
 import { useActionState, useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
+  adminReorderCategoriesAction,
   createCategoryAction,
   deleteCategoryAction,
   updateCategoryAction,
   type ActionResult,
 } from "@/app/actions";
-import {
-  DataTable,
-  DataTableHead,
-  Td,
-  Th,
-  Tr,
-} from "@/components/admin/data-table";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog, Dialog } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -21,6 +17,7 @@ import { TextField } from "@/components/ui/text-field";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { formErrorClass } from "@/lib/ui/form-classes";
+import { useUnsavedGuard } from "@/lib/ui/use-unsaved-guard";
 
 export type CategoryRow = {
   id: string;
@@ -53,6 +50,14 @@ export function CategoriesManager({
   const [toDelete, setToDelete] = useState<CategoryRow | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleting, startDelete] = useTransition();
+  const [ordered, setOrdered] = useState(rows);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [reordering, startReorder] = useTransition();
+  const router = useRouter();
+
+  useEffect(() => {
+    setOrdered(rows);
+  }, [rows]);
 
   function openDialog(next: NonNullable<typeof dialog>) {
     setNonce((n) => n + 1);
@@ -94,7 +99,7 @@ export function CategoriesManager({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div id="category-create" className="flex scroll-mt-20 justify-end">
         <Button
           type="button"
           size="sm"
@@ -105,68 +110,98 @@ export function CategoriesManager({
         </Button>
       </div>
 
-      {rows.length === 0 ? (
-        <div className="border border-ro-line">
-          <EmptyState title={u.emptyTitle} body={u.emptyBody} />
-        </div>
+      {ordered.length === 0 ? (
+        <EmptyState
+          variant="first-use"
+          title={u.emptyTitle}
+          body={u.emptyBody}
+          actionHref="#category-create"
+          actionLabel={u.categoryCreate}
+        />
       ) : (
-        <DataTable>
-          <DataTableHead>
-            <Th>{u.categorySortOrder}</Th>
-            <Th>{u.categoryNameAr}</Th>
-            <Th>{u.categoryNameEn}</Th>
-            <Th>{u.categorySlug}</Th>
-            <Th>{u.categoryProducts}</Th>
-            <Th>{u.categoryActions}</Th>
-          </DataTableHead>
-          <tbody>
-            {rows.map((r) => (
-              <Tr key={r.id}>
-                <Td className="tabular-nums">{r.sortOrder}</Td>
-                <Td dir="rtl">
-                  <span className="font-medium">{r.nameAr}</span>
-                </Td>
-                <Td dir="ltr">{r.nameEn}</Td>
-                <Td dir="ltr" className="text-ro-muted">
-                  {r.slug}
-                </Td>
-                <Td className="tabular-nums">{r.productCount}</Td>
-                <Td>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => openDialog({ mode: "edit", row: r })}
-                    >
-                      {dict.admin.edit}
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="danger"
-                      disabled={r.isLaunch || r.productCount > 0}
-                      title={
-                        r.isLaunch
-                          ? u.categoryDeleteLaunch
-                          : r.productCount > 0
-                            ? u.categoryDeleteBlocked
-                            : undefined
-                      }
-                      aria-label={`${u.categoryDelete}: ${display(r)}`}
-                      onClick={() => {
-                        setDeleteError(null);
-                        setToDelete(r);
-                      }}
-                    >
-                      {u.categoryDelete}
-                    </Button>
+        <>
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {ordered.map((r, index) => (
+              <li
+                key={r.id}
+                draggable
+                onDragStart={() => setDragId(r.id)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => {
+                  if (!dragId || dragId === r.id) return;
+                  const from = ordered.findIndex((x) => x.id === dragId);
+                  const to = index;
+                  if (from < 0) return;
+                  const next = [...ordered];
+                  const [moved] = next.splice(from, 1);
+                  next.splice(to, 0, moved!);
+                  setOrdered(next);
+                  setDragId(null);
+                  const fd = new FormData();
+                  for (const row of next) fd.append("ids", row.id);
+                  startReorder(async () => {
+                    await adminReorderCategoriesAction(fd);
+                    router.refresh();
+                  });
+                }}
+                className={cn(
+                  "ro-portal-card cursor-grab border p-4 active:cursor-grabbing",
+                  dragId === r.id && "opacity-60",
+                  reordering && "pointer-events-none"
+                )}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 space-y-1">
+                    <p className="font-display text-lg font-semibold text-ro-ink">
+                      {display(r)}
+                    </p>
+                    <p className="text-xs text-ro-muted" dir="ltr">
+                      {r.slug}
+                    </p>
+                    <p className="text-xs text-ro-muted">
+                      {u.categoryProducts}: {r.productCount}
+                    </p>
                   </div>
-                </Td>
-              </Tr>
+                  <span
+                    aria-hidden
+                    className="flex size-12 items-center justify-center rounded-full bg-[var(--ro-plum-100)] font-display text-lg font-semibold text-[var(--ro-plum-900)]"
+                  >
+                    {(display(r) || "?").slice(0, 1)}
+                  </span>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => openDialog({ mode: "edit", row: r })}
+                  >
+                    {dict.admin.edit}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="danger"
+                    disabled={r.isLaunch || r.productCount > 0}
+                    title={
+                      r.isLaunch
+                        ? u.categoryDeleteLaunch
+                        : r.productCount > 0
+                          ? u.categoryDeleteBlocked
+                          : undefined
+                    }
+                    onClick={() => {
+                      setDeleteError(null);
+                      setToDelete(r);
+                    }}
+                  >
+                    {u.categoryDelete}
+                  </Button>
+                </div>
+              </li>
             ))}
-          </tbody>
-        </DataTable>
+          </ul>
+        </>
       )}
 
       <Dialog
@@ -223,13 +258,19 @@ function CategoryForm({
     mode === "edit" ? updateCategoryAction : createCategoryAction,
     initial
   );
+  const [dirty, setDirty] = useState(false);
+  useUnsavedGuard(dirty);
 
   useEffect(() => {
     if (state?.ok) onDone();
   }, [state, onDone]);
 
   return (
-    <form action={action} className="space-y-3">
+    <form
+      action={action}
+      className="space-y-3"
+      onChange={() => setDirty(true)}
+    >
       {row ? <input type="hidden" name="id" value={row.id} /> : null}
       {mode === "create" ? (
         <TextField

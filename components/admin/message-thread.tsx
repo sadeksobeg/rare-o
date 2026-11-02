@@ -115,15 +115,15 @@ export function MessageThread({
   return (
     <div
       data-inbox-pane="thread"
-      className="flex min-h-0 min-w-0 flex-1 flex-col border border-ro-border bg-ro-paper"
+      className="flex h-full min-h-0 min-w-0 flex-1 flex-col bg-[color-mix(in_srgb,var(--ro-sand-100)_70%,var(--ro-sand-50))]"
     >
-      <header className="flex shrink-0 items-center justify-between gap-3 border-b border-ro-border px-4 py-3">
+      <header className="flex shrink-0 items-center justify-between gap-3 border-b border-ro-border bg-ro-paper px-5 py-3.5">
         <div className="min-w-0">
-          <h2 className="truncate text-base font-semibold">
+          <h2 className="truncate text-lg font-semibold tracking-tight">
             <bdi>{displayLabel}</bdi>
           </h2>
           {phoneHint ? (
-            <p className="truncate text-xs text-ro-muted">
+            <p className="truncate text-sm text-ro-muted">
               <bdi>{phoneHint}</bdi>
             </p>
           ) : null}
@@ -134,10 +134,12 @@ export function MessageThread({
       <div className="relative min-h-0 flex-1">
         <div
           ref={scrollerRef}
-          className="absolute inset-0 space-y-2 overflow-y-auto px-4 py-3"
+          className="absolute inset-0 space-y-3 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5"
         >
           {messages.length === 0 ? (
-            <p className="text-sm text-ro-muted">{dict.inbox.emptyThread}</p>
+            <p className="py-8 text-center text-base text-ro-muted">
+              {dict.inbox.emptyThread}
+            </p>
           ) : (
             items
           )}
@@ -157,7 +159,7 @@ export function MessageThread({
         ) : null}
       </div>
 
-      <div className="shrink-0 border-t border-ro-border px-3 py-2 ps-[max(1.25rem,env(safe-area-inset-left))] pe-[max(1rem,env(safe-area-inset-right))] pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <div className="shrink-0 border-t border-ro-border bg-ro-paper px-4 py-3 ps-[max(1.25rem,env(safe-area-inset-left))] pe-[max(1rem,env(safe-area-inset-right))] pb-[max(1rem,env(safe-area-inset-bottom))]">
         <InboxComposer
           conversationId={conversationId}
           outboundEnabled={health.outboundEnabled}

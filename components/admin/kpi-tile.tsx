@@ -16,22 +16,22 @@ const TONE: Record<
   { well: string; icon: string; stroke: string }
 > = {
   amber: {
-    well: "bg-[var(--ro-amber-100)]",
-    icon: "text-[var(--ro-amber-800)]",
+    well: "bg-[color-mix(in_srgb,var(--ro-amber-500)_22%,transparent)]",
+    icon: "text-[var(--ro-amber-500)]",
     stroke: "var(--ro-amber-500)",
   },
   plum: {
-    well: "bg-[var(--ro-plum-100)]",
-    icon: "text-[var(--ro-plum-900)]",
-    stroke: "var(--ro-plum-900)",
+    well: "bg-[color-mix(in_srgb,var(--ro-plum-700)_22%,transparent)]",
+    icon: "text-[var(--ro-plum-300)]",
+    stroke: "var(--ro-plum-400)",
   },
   progress: {
-    well: "bg-[var(--ro-progress-100)]",
+    well: "bg-[color-mix(in_srgb,var(--ro-progress-700)_22%,transparent)]",
     icon: "text-[var(--ro-progress-700)]",
     stroke: "var(--ro-progress-700)",
   },
   success: {
-    well: "bg-[var(--ro-success-100)]",
+    well: "bg-[color-mix(in_srgb,var(--ro-success-700)_22%,transparent)]",
     icon: "text-[var(--ro-success-700)]",
     stroke: "var(--ro-success-700)",
   },
@@ -79,41 +79,47 @@ export function KpiTile({
   const trend =
     value === 0 ? idleLabel : trendLabel;
   const trendUp = series ? series.today > series.yesterday : false;
-  const trendDown = series ? series.today < series.yesterday : false;
 
   return (
-    <PressRipple className="h-full">
+    <PressRipple className="flex h-full min-w-0 w-full flex-col">
     <Link
       href={href}
       data-kpi=""
       data-tone={tone}
       className={cn(
-        "ro-portal-kpi group block border p-3 sm:p-3.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]",
+        "ro-portal-kpi group flex h-full min-w-0 w-full flex-col border p-3 sm:p-3.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]",
         className
       )}
     >
-      {icon ? (
-        <span
-          className={cn(
-            "mb-1 inline-flex size-7 items-center justify-center rounded-[8px] [&>svg]:size-4",
-            palette.well,
-            palette.icon
-          )}
-          aria-hidden
-        >
-          {icon}
-        </span>
-      ) : null}
-      <p className="text-[12px] font-medium leading-snug text-[var(--ro-ink-600)]">
+      <div className="mb-2 flex items-start justify-between gap-2">
+        {icon ? (
+          <span
+            className={cn(
+              "inline-flex size-8 items-center justify-center rounded-[8px] [&>svg]:size-4",
+              palette.well,
+              palette.icon
+            )}
+            aria-hidden
+          >
+            {icon}
+          </span>
+        ) : (
+          <span />
+        )}
+        {series && series.points.length >= 7 ? (
+          <Sparkline points={series.points} stroke={palette.stroke} />
+        ) : null}
+      </div>
+      <p className="text-[12px] font-medium leading-snug text-[color:var(--ro-text-muted)]">
         {label}
       </p>
-      <p className="mt-0.5 font-display text-[1.65rem] font-medium leading-none tabular-nums text-ro-ink sm:text-[1.75rem]">
+      <p className="mt-1 font-display text-[1.85rem] font-medium leading-none tabular-nums text-[color:var(--ro-text)] sm:text-[2rem]">
         <AnimatedValue value={value} />
       </p>
-      {series && series.points.length >= 7 ? (
-        <Sparkline points={series.points} stroke={palette.stroke} />
-      ) : series && series.today !== series.yesterday ? (
-        <p className="mt-0.5 text-[11px] text-[var(--ro-ink-600)]">
+      {series &&
+      series.points.length < 7 &&
+      series.today !== series.yesterday ? (
+        <p className="mt-1 text-[11px] text-[color:var(--ro-text-muted)]">
           {series.today > series.yesterday ? "+" : ""}
           {series.today - series.yesterday}
         </p>
@@ -121,14 +127,12 @@ export function KpiTile({
       {trend ? (
         <p
           className={cn(
-            "mt-0.5 text-[11px] leading-snug",
+            "mt-auto pt-2 text-[11px] leading-snug",
             value === 0
               ? "font-bold text-[var(--ro-success-700)]"
               : trendUp
                 ? "text-[var(--ro-success-700)]"
-                : trendDown
-                  ? "text-[var(--ro-ink-600)]"
-                  : "text-[var(--ro-ink-600)]"
+                : "text-[color:var(--ro-text-muted)]"
           )}
         >
           {trend}

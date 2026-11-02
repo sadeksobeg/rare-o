@@ -1,0 +1,33 @@
+{
+  "at": "2026-10-31T10:57:11.344Z",
+  "steps": [
+    {
+      "name": "create_payload",
+      "ok": true,
+      "marker": "f4-1793444231449",
+      "bytes": 33
+    },
+    {
+      "name": "pack",
+      "ok": true,
+      "size": 5120,
+      "sha256": "fece77a6e1bab953131e1c51e523e3ec46c48f9cd6f2ff6a1593dd0df6a40daf"
+    },
+    {
+      "name": "encrypt",
+      "ok": true,
+      "tool": "aes-gcm-standin",
+      "note": "install age for production"
+    },
+    {
+      "name": "upload_minio",
+      "ok": false,
+      "error": "Command failed: docker run --rm --network host -v \"D:\\N I G H T\\rare-oud-platform\\tmp\\f4-drill-1793444231344:/w\" minio/mc:RELEASE.2024-11-17T19-35-56Z /bin/sh -c \"mc alias set local http://127.0.0.1:9000 minioadmin minioadmin; mc mb -p local/rare-oud-backups || true; mc cp /w/backup.tar.age local/rare-oud-backups/drill/backup.tar.age\"\nUnable to find image 'minio/mc:RELEASE.2024-11-17T19-35-56Z' locally\ndocker: Error response from daemon: pull access denied for minio/mc, repository does not exist or may require 'docker login'\n\nRun 'docker run --help' for more information\n"
+    }
+  ],
+  "ok": false,
+  "blocked": [
+    "age CLI not installed — using Node crypto AES-GCM envelope as drill stand-in"
+  ],
+  "fatal": "Command failed: docker run --rm --network host -v \"D:\\N I G H T\\rare-oud-platform\\tmp\\f4-drill-1793444231344:/w\" minio/mc:RELEASE.2024-11-17T19-35-56Z /bin/sh -c \"mc alias set local http://127.0.0.1:9000 minioadmin minioadmin; mc mb -p local/rare-oud-backups || true; mc cp /w/backup.tar.age local/rare-oud-backups/drill/backup.tar.age\"\nUnable to find image 'minio/mc:RELEASE.2024-11-17T19-35-56Z' locally\ndocker: Error response from daemon: pull access denied for minio/mc, repository does not exist or may require 'docker login'\n\nRun 'docker run --help' for more information\n"
+}

@@ -6,13 +6,10 @@ import {
   adminUpdateWholesaleShippingAction,
 } from "@/app/wholesale-actions";
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
+import { TextField, Textarea } from "@/components/ui/text-field";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
-import {
-  controlClass,
-  controlLabelClass,
-  controlLabelTextClass,
-  formErrorClass,
-} from "@/lib/ui/form-classes";
+import { formErrorClass } from "@/lib/ui/form-classes";
 import { WHOLESALE_TRANSITIONS, type WholesaleStatus } from "@/lib/wholesale/constants";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
@@ -78,25 +75,29 @@ export function AdminWholesaleControls({
           }}
         >
           <input type="hidden" name="requestId" value={requestId} />
-          <label className={controlLabelClass}>
-            <span className={controlLabelTextClass}>{f.moveTo}</span>
-            <select name="toStatus" required className={controlClass}>
-              {nextStatuses.map((s) => (
-                <option key={s} value={s}>
-                  {labels.status.wholesale[s] ?? s}
-                  {s === "confirmed" &&
-                  status === "under_review" &&
-                  requestMode === "request_quote"
-                    ? ` ${f.blockedUntilQuote}`
-                    : ""}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className={controlLabelClass}>
-            <span className={controlLabelTextClass}>{f.note}</span>
-            <input name="note" className={controlClass} />
-          </label>
+          <Select
+            name="toStatus"
+            label={f.moveTo}
+            required
+            dense
+            className="min-w-[12rem]"
+            options={nextStatuses.map((s) => ({
+              value: s,
+              label:
+                (labels.status.wholesale[s] ?? s) +
+                (s === "confirmed" &&
+                status === "under_review" &&
+                requestMode === "request_quote"
+                  ? ` ${f.blockedUntilQuote}`
+                  : ""),
+            }))}
+          />
+          <TextField
+            name="note"
+            label={f.note}
+            dense
+            className="min-w-[12rem] flex-1"
+          />
           <Button type="submit" size="sm" loading={pending}>
             {f.apply}
           </Button>
@@ -125,46 +126,42 @@ export function AdminWholesaleControls({
           <p className="text-sm text-ro-muted">{f.quoteHint}</p>
           <input type="hidden" name="requestId" value={requestId} />
           <input type="hidden" name="lineQuotesJson" value={lineQuotesJson} />
-          <label className={`${controlLabelClass} max-w-xs`}>
-            <span className={controlLabelTextClass}>{f.quoteCurrency}</span>
-            <input
-              name="quoteCurrency"
-              required
-              dir="ltr"
-              defaultValue={quoteCurrencyDefault}
-              className={controlClass}
-            />
-          </label>
+          <TextField
+            name="quoteCurrency"
+            label={f.quoteCurrency}
+            required
+            dir="ltr"
+            defaultValue={quoteCurrencyDefault}
+            dense
+            className="max-w-xs"
+          />
           <div className="space-y-2">
             {lines.map((l) => (
-              <label
+              <TextField
                 key={l.id}
-                className="flex flex-wrap items-center gap-3 text-sm"
-              >
-                <span className="min-w-[12rem]">
-                  {l.productName} × {l.quantity}
-                </span>
-                <input
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  required
-                  dir="ltr"
-                  aria-label={`${f.quotedUnitPrice} — ${l.productName}`}
-                  placeholder={f.quotedUnitPrice}
-                  value={prices[l.id] ?? ""}
-                  onChange={(e) =>
-                    setPrices((prev) => ({ ...prev, [l.id]: e.target.value }))
-                  }
-                  className={`${controlClass} w-44`}
-                />
-              </label>
+                name={`price-${l.id}`}
+                type="number"
+                min={0}
+                step="0.01"
+                required
+                dir="ltr"
+                label={`${l.productName} × ${l.quantity}`}
+                placeholder={f.quotedUnitPrice}
+                value={prices[l.id] ?? ""}
+                onChange={(e) =>
+                  setPrices((prev) => ({ ...prev, [l.id]: e.target.value }))
+                }
+                dense
+                className="max-w-sm"
+              />
             ))}
           </div>
-          <label className={controlLabelClass}>
-            <span className={controlLabelTextClass}>{f.quoteMessage}</span>
-            <textarea name="quoteMessage" rows={3} className={controlClass} />
-          </label>
+          <Textarea
+            name="quoteMessage"
+            label={f.quoteMessage}
+            rows={3}
+            dense
+          />
           <Button
             type="submit"
             variant="secondary"
@@ -176,7 +173,7 @@ export function AdminWholesaleControls({
         </form>
       ) : null}
 
-      {(status === "confirmed" || status === "completed") ? (
+      {status === "confirmed" || status === "completed" ? (
         <form
           className="space-y-3 border-t border-ro-line pt-4"
           action={(fd) => {
@@ -194,19 +191,14 @@ export function AdminWholesaleControls({
         >
           <h3 className="text-base font-semibold">{f.shippingTitle}</h3>
           <input type="hidden" name="requestId" value={requestId} />
-          <label className={controlLabelClass}>
-            <span className={controlLabelTextClass}>{f.carrier}</span>
-            <input name="carrier" required className={controlClass} />
-          </label>
-          <label className={controlLabelClass}>
-            <span className={controlLabelTextClass}>{f.trackingReference}</span>
-            <input
-              name="trackingReference"
-              required
-              dir="ltr"
-              className={controlClass}
-            />
-          </label>
+          <TextField name="carrier" label={f.carrier} required dense />
+          <TextField
+            name="trackingReference"
+            label={f.trackingReference}
+            required
+            dir="ltr"
+            dense
+          />
           <Button type="submit" variant="secondary" size="sm" loading={pending}>
             {f.saveShipping}
           </Button>

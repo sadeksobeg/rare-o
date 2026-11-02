@@ -1,8 +1,13 @@
-# Production stack — local verify / VPS. Does NOT deploy by itself.
+# Production stack — isolated Rare Oud on shared VPS.
 # Usage:
 #   cp .env.production.example .env.production   # fill secrets + DOMAIN
 #   docker compose -f docker-compose.prod.yml --env-file .env.production config
 #   docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+#
+# Host isolation (plan):
+#   code: /srv/rareoud
+#   data: /var/lib/rareoud/{media,wa-auth,pg,backups}
+#   loopback only: 127.0.0.1:3010 → nginx vhost rareoud.com
 
 name: rare-oud-prod
 
@@ -15,7 +20,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB:-rareoud}
     volumes:
-      - rare_oud_pgdata:/var/lib/postgresql/data
+      - /var/lib/rareoud/pg:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
@@ -28,6 +33,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      # Host network: next/font Google fetch fails in bridge (empty CSS / null parse).
+      network: host
+      args:
+        SITE_URL: https://${DOMAIN:?set DOMAIN}
+        NEXT_PUBLIC_SITE_URL: https://${DOMAIN}
+        SECURITY_EMAIL: ${SECURITY_EMAIL:-security@${DOMAIN}}
     image: rare-oud-web:prod
     restart: unless-stopped
     depends_on:
@@ -49,11 +60,12 @@ services:
       PORT: "3000"
       HOSTNAME: 0.0.0.0
     volumes:
-      - rare_oud_uploads:/app/public/uploads
-      - rare_oud_wa_auth:/app/.wa-auth
-    # Host bind for local smoke (Caddy still fronts 80/443 when profile `tls` is on).
+      - /var/lib/rareoud/media/public:/app/public/uploads
+      - /var/lib/rareoud/media/storage:/app/storage/uploads
+      - /var/lib/rareoud/wa-auth:/app/.wa-auth
+    # Loopback only — host nginx terminates TLS for rareoud.com
     ports:
-      - "${WEB_HOST_PORT:-3000}:3000"
+      - "127.0.0.1:${WEB_HOST_PORT:-3010}:3000"
     healthcheck:
       test:
         [
@@ -84,15 +96,19 @@ services:
       WHATSAPP_OUTBOUND_ENABLED: ${WHATSAPP_OUTBOUND_ENABLED:-false}
       NODE_ENV: production
     volumes:
-      - rare_oud_uploads:/app/public/uploads
-      - rare_oud_wa_auth:/app/.wa-auth
+      - /var/lib/rareoud/media/public:/app/public/uploads
+      - /var/lib/rareoud/media/storage:/app/storage/uploads
+      - /var/lib/rareoud/wa-auth:/app/.wa-auth
     command: ["node", "node_modules/tsx/dist/cli.mjs", "worker/whatsapp-worker.ts"]
+    # Image HEALTHCHECK hits Next /api/health; worker does not serve HTTP.
+    healthcheck:
+      disable: true
     networks:
       - rareoud
 
   caddy:
-    # Enable with: docker compose … --profile tls up
-    # (requires a real DOMAIN with DNS A/AAAA pointing at the host)
+    # Optional standalone TLS — NOT used when host nginx already owns 80/443.
+    # Enable only if ports are free: docker compose … --profile tls up
     profiles: ["tls"]
     image: caddy:2.8-alpine
     restart: unless-stopped
@@ -122,24 +138,21 @@ services:
       PGUSER: ${POSTGRES_USER:-rareoud}
       PGPASSWORD: ${POSTGRES_PASSWORD}
       PGDATABASE: ${POSTGRES_DB:-rareoud}
-      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-7}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
       BACKUP_ROOT: /backups
     volumes:
-      - rare_oud_uploads:/uploads:ro
-      - rare_oud_wa_auth:/wa-auth:ro
-      - rare_oud_backups:/backups
+      - /var/lib/rareoud/media/public:/uploads:ro
+      - /var/lib/rareoud/media/storage:/uploads-storage:ro
+      - /var/lib/rareoud/wa-auth:/wa-auth:ro
+      - /var/lib/rareoud/backups:/backups
       - ./deploy/backup-loop.sh:/backup-loop.sh:ro
     entrypoint: ["/bin/sh", "/backup-loop.sh"]
     networks:
       - rareoud
 
 volumes:
-  rare_oud_pgdata:
-  rare_oud_uploads:
-  rare_oud_wa_auth:
   rare_oud_caddy_data:
   rare_oud_caddy_config:
-  rare_oud_backups:
 
 networks:
   rareoud:

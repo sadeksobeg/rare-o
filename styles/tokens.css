@@ -87,7 +87,89 @@
   --dur-base: 220ms;
   --dur-slow: 360ms;
   --dur-enter: 480ms;
+  --dur-data: 900ms;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
+
+  /* VISION dark-luxury accents (admin/trader/login) */
+  --amber-400: #c4a574;
+  --glow-plum: rgba(94, 58, 134, 0.42);
+  --glow-ink: rgba(11, 8, 13, 0.55);
+  --grain-opacity: 0.045;
+  --hairline-cream: rgba(244, 231, 216, 0.12);
+  --surface-elevated: color-mix(in srgb, var(--ink-800) 92%, var(--plum-700));
+  --surface-overlay: color-mix(in srgb, var(--ink-950) 72%, transparent);
+}
+
+/**
+ * Portal dark-luxury theme — apply via data-theme="dark" on .ro-portal roots.
+ * Light remains the :root defaults for cream reading surfaces.
+ */
+.ro-portal[data-theme="dark"] {
+  --bg-page: var(--ink-950);
+  --bg-surface: color-mix(in srgb, var(--ink-800) 88%, var(--plum-900));
+  --bg-surface-solid: var(--ink-900);
+  --bg-inverse: var(--sand-100);
+  --text: var(--sand-200);
+  --text-muted: color-mix(in srgb, var(--sand-300) 72%, var(--ink-400));
+  --text-inverse: var(--ink-950);
+  --border: rgba(244, 231, 216, 0.12);
+  --border-strong: rgba(244, 231, 216, 0.28);
+  --accent: var(--plum-300);
+  --focus: var(--plum-400);
+  --ok-bg: color-mix(in srgb, var(--ok) 22%, var(--ink-900));
+  --warn-bg: color-mix(in srgb, var(--warn) 22%, var(--ink-900));
+  --danger-bg: color-mix(in srgb, var(--danger) 22%, var(--ink-900));
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.35), 0 0 0 1px var(--hairline-cream);
+  --shadow-2: 0 12px 32px -12px rgba(0, 0, 0, 0.55),
+    0 0 0 1px var(--hairline-cream);
+  --shadow-3: 0 28px 64px -20px rgba(0, 0, 0, 0.65),
+    0 0 40px -10px var(--glow-plum);
+  --ring-focus: 0 0 0 2px var(--ink-900), 0 0 0 4px var(--focus);
+
+  /* Legacy role aliases used across admin/trader chrome (do NOT invert raw sand/ink scales) */
+  --ro-bg: var(--ink-950);
+  --ro-bg-raised: var(--ink-900);
+  --ro-bg-sunken: var(--ink-950);
+  --ro-text: var(--sand-200);
+  --ro-text-2: color-mix(in srgb, var(--sand-300) 82%, var(--ink-300));
+  --ro-text-muted: color-mix(in srgb, var(--sand-300) 62%, var(--ink-400));
+  --ro-link: var(--plum-300);
+  --ro-link-hover: var(--sand-100);
+  --ro-border-subtle: rgba(244, 231, 216, 0.14);
+  --ro-border: rgba(244, 231, 216, 0.28);
+  --ro-border-control: #7c7288;
+  --ro-focus: var(--plum-300);
+  --ro-line: var(--ro-border-subtle);
+  --ro-ink-muted: var(--ro-text-muted);
+  --background: var(--ro-bg);
+  --foreground: var(--ro-text);
+}
+
+.ro-portal[data-theme="light"] {
+  --bg-page: var(--sand-100);
+  --bg-surface: rgba(255, 255, 255, 0.72);
+  --bg-surface-solid: var(--sand-50);
+  --bg-inverse: var(--ink-950);
+  --text: var(--ink-950);
+  --text-muted: var(--ink-400);
+  --text-inverse: var(--sand-200);
+  --border: rgba(50, 16, 79, 0.14);
+  --border-strong: rgba(50, 16, 79, 0.32);
+  --accent: var(--plum-700);
+  --focus: var(--plum-500);
+  --ro-bg: var(--sand-100);
+  --ro-bg-raised: var(--sand-50);
+  --ro-bg-sunken: var(--sand-200);
+  --ro-text: var(--ink-950);
+  --ro-text-2: var(--ink-700);
+  --ro-text-muted: var(--ink-600);
+  --ro-link: var(--plum-900);
+  --ro-link-hover: var(--plum-700);
+  --ro-border-subtle: rgba(11, 8, 13, 0.14);
+  --ro-border: rgba(11, 8, 13, 0.28);
+  --ro-line: var(--ro-border-subtle);
+  --background: var(--ro-bg);
+  --foreground: var(--ro-text);
 }

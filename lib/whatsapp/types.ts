@@ -50,7 +50,7 @@ export type WhatsAppInboundTextEvent = {
   timestamp: string;
 };
 
-/** Non-text inbound (Stage A records as unsupported; no media handling). */
+/** Non-media inbound we do not fully model (or media download failed). */
 export type WhatsAppInboundUnsupportedEvent = {
   waMessageId: string;
   waChatId: string;
@@ -62,6 +62,34 @@ export type WhatsAppInboundUnsupportedEvent = {
   kindHint?: string;
 };
 
+export type WhatsAppInboundMediaKind =
+  | "image"
+  | "video"
+  | "audio"
+  | "document"
+  | "sticker"
+  | "location"
+  | "contact";
+
+/** Inbound media / structured non-text — bytes only for file kinds. */
+export type WhatsAppInboundMediaEvent = {
+  waMessageId: string;
+  waChatId: string;
+  waRemoteJid: string;
+  senderE164: string | null;
+  displayName: string | null;
+  timestamp: string;
+  messageType: WhatsAppInboundMediaKind;
+  mime: string | null;
+  fileName: string | null;
+  caption: string | null;
+  durationSec: number | null;
+  /** Present for image/video/audio/document/sticker */
+  bytes: Buffer | null;
+  /** JSON body for location/contact when bytes is null */
+  structuredBody: string | null;
+};
+
 export type WhatsAppSendTextInput = {
   /** WhatsApp chat JID or E.164 digits — worker normalizes */
   waChatId: string;
@@ -71,7 +99,7 @@ export type WhatsAppSendTextInput = {
   adminId: string;
 };
 
-export type WhatsAppSendTextResult =
+export type WhatsAppSendResult =
   | {
       ok: true;
       waMessageId: string;
@@ -90,6 +118,49 @@ export type WhatsAppSendTextResult =
         | "DUPLICATE";
     };
 
+export type WhatsAppSendTextResult = WhatsAppSendResult;
+
+export type WhatsAppSendMediaInput = {
+  waChatId: string;
+  clientRequestId: string;
+  adminId: string;
+  messageType: "image" | "video" | "audio" | "document";
+  mime: string;
+  fileName: string | null;
+  caption: string | null;
+  bytes: Buffer;
+  /** Voice note (PTT) when audio */
+  ptt?: boolean;
+};
+
+/** Own-device / history echo (message sent from phone or prior sync). */
+export type WhatsAppOutboundEchoEvent = {
+  waMessageId: string;
+  waChatId: string;
+  waRemoteJid: string;
+  text: string;
+  timestamp: string;
+};
+
+/** Seed a 1:1 chat row from history sync (may have no messages yet). */
+export type WhatsAppChatSeedEvent = {
+  waChatId: string;
+  displayName: string | null;
+  participantE164: string | null;
+  lastMessagePreview: string;
+  lastMessageAt: string | null;
+};
+
+/** Contact / LID↔phone enrichment for the admin roster (WhatsApp-like identity). */
+export type WhatsAppContactIdentityEvent = {
+  /** Chat addressing id (@lid or @s.whatsapp.net) */
+  waChatId: string;
+  /** Alternate id when LID maps to a phone jid */
+  altWaChatId: string | null;
+  participantE164: string | null;
+  displayName: string | null;
+};
+
 export type WhatsAppAdapterEvents = {
   onHealth?: (health: WhatsAppHealth) => void | Promise<void>;
   onQr?: (payload: WhatsAppQrPayload) => void | Promise<void>;
@@ -97,14 +168,24 @@ export type WhatsAppAdapterEvents = {
   onInboundText?: (
     event: WhatsAppInboundTextEvent
   ) => void | Promise<void>;
+  onInboundMedia?: (
+    event: WhatsAppInboundMediaEvent
+  ) => void | Promise<void>;
   onInboundUnsupported?: (
     event: WhatsAppInboundUnsupportedEvent
+  ) => void | Promise<void>;
+  onOutboundEcho?: (
+    event: WhatsAppOutboundEchoEvent
+  ) => void | Promise<void>;
+  onChatSeed?: (event: WhatsAppChatSeedEvent) => void | Promise<void>;
+  onContactIdentity?: (
+    event: WhatsAppContactIdentityEvent
   ) => void | Promise<void>;
 };
 
 /**
  * Live WhatsApp transport contract used by the long-running worker.
- * Persistence / inbox UI (Phase B+) consume DB, not this socket directly.
+ * Persistence / inbox UI consume DB, not this socket directly.
  */
 export interface WhatsAppAdapter {
   getHealth(): WhatsAppHealth;
@@ -117,6 +198,12 @@ export interface WhatsAppAdapter {
   /** Controlled logout — clears in-memory socket; session wipe is explicit */
   logout(): Promise<void>;
   sendText(input: WhatsAppSendTextInput): Promise<WhatsAppSendTextResult>;
+  sendMedia?(input: WhatsAppSendMediaInput): Promise<WhatsAppSendResult>;
+  /**
+   * Resolve known E.164 phones → LID via USync and emit onContactIdentity.
+   * Used after connect so @lid inbox rows get real numbers when we already know the phone.
+   */
+  resolvePhonesToLids?(phonesE164: string[]): Promise<number>;
 }
 
 /** WHATSAPP_ADAPTER=fake — E2E without a real phone / Baileys socket. */
