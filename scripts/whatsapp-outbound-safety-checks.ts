@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 import {
   acquireOutboundSendSlot,
   assessOutboundEnqueue,
+  clearPersistedSafetyStateForTests,
   getOutboundSafetyStatus,
   recordOutboundSendFailure,
   resetOutboundSafetyForTests,
@@ -72,6 +73,9 @@ async function main() {
 
   const status = getOutboundSafetyStatus();
   assert.equal(status.circuitOpen, true);
+
+  // Leave no persisted rate-limit state behind for the next real run.
+  await clearPersistedSafetyStateForTests();
 
   console.log("PASS: whatsapp-outbound-safety-checks");
 }

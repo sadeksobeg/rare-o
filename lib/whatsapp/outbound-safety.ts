@@ -5,7 +5,16 @@
  * Does NOT lift WHATSAPP_OUTBOUND_ENABLED — that kill switch stays separate.
  *
  * Conservative defaults assume human inbox replies, not broadcasts.
+ *
+ * State durability: the in-memory counters below are the fast path for
+ * every per-message check, but they are mirrored (best-effort, fire and
+ * forget) to the single-row `WhatsAppOutboundSafetyState` table so a
+ * worker crash/restart (Docker `restart: unless-stopped`, a redeploy)
+ * cannot silently re-arm the full daily cap or clear an open failure
+ * circuit. `hydrateFromDb()` is awaited once, lazily, by the first caller
+ * after process start — never on the hot send path once hydrated.
  */
+import { prisma } from "@/lib/db/prisma";
 
 export type OutboundSafetyCode =
   | "RATE_LIMITED"
@@ -66,6 +75,90 @@ const state: State = {
   circuitOpenUntil: 0,
 };
 
+const SAFETY_STATE_ROW_ID = "default";
+let hydratePromise: Promise<void> | null = null;
+
+function parseStampsJson(raw: string): number[] {
+  try {
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr.filter((n) => typeof n === "number") : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Lazily hydrate from the DB exactly once per process. Safe to call often. */
+function hydrateFromDb(): Promise<void> {
+  if (!hydratePromise) {
+    hydratePromise = prisma.whatsAppOutboundSafetyState
+      .findUnique({ where: { id: SAFETY_STATE_ROW_ID } })
+      .then((row) => {
+        if (!row) return;
+        state.dayKey = row.dayKey;
+        state.dayCount = row.dayCount;
+        state.windowStamps = parseStampsJson(row.windowStampsJson);
+        state.failureStamps = parseStampsJson(row.failureStampsJson);
+        state.lastAttemptAt = row.lastAttemptAt?.getTime() ?? 0;
+        state.circuitOpenUntil = row.circuitOpenUntil?.getTime() ?? 0;
+      })
+      .catch((err) => {
+        console.error(
+          "[whatsapp-safety] failed to hydrate persisted state, starting from empty:",
+          err instanceof Error ? err.message : err
+        );
+      });
+  }
+  return hydratePromise;
+}
+
+/**
+ * All DB writes for this module (upserts and the test-only delete) run
+ * through this single chain, strictly in call order. Without it, two
+ * fire-and-forget writes started close together can finish out of order
+ * (the connection pool doesn't guarantee otherwise), so a stale write from
+ * an older call could land *after* a newer one — or after a test's
+ * cleanup delete, resurrecting a row the test just cleared. Chaining onto
+ * one promise makes "wait for every write issued so far" a single await.
+ */
+let writeQueue: Promise<void> = Promise.resolve();
+
+function enqueueWrite(run: () => Promise<unknown>, onErrorLabel: string): void {
+  writeQueue = writeQueue.then(() =>
+    run()
+      .then(() => {})
+      .catch((err) => {
+        console.error(
+          `[whatsapp-safety] ${onErrorLabel}:`,
+          err instanceof Error ? err.message : err
+        );
+      })
+  );
+}
+
+/** Fire-and-forget mirror of the in-memory state to the DB. Never throws. */
+function persistState(): void {
+  // Snapshot now — state may mutate again before this turn of the queue runs.
+  const snapshot = {
+    dayKey: state.dayKey,
+    dayCount: state.dayCount,
+    windowStampsJson: JSON.stringify(state.windowStamps),
+    failureStampsJson: JSON.stringify(state.failureStamps),
+    lastAttemptAt: state.lastAttemptAt ? new Date(state.lastAttemptAt) : null,
+    circuitOpenUntil: state.circuitOpenUntil
+      ? new Date(state.circuitOpenUntil)
+      : null,
+  };
+  enqueueWrite(
+    () =>
+      prisma.whatsAppOutboundSafetyState.upsert({
+        where: { id: SAFETY_STATE_ROW_ID },
+        create: { id: SAFETY_STATE_ROW_ID, ...snapshot },
+        update: snapshot,
+      }),
+    "failed to persist state (in-memory limiter still active)"
+  );
+}
+
 function utcDayKey(now = Date.now()): string {
   return new Date(now).toISOString().slice(0, 10);
 }
@@ -109,6 +202,12 @@ function snapshotLimits(now: number) {
  * Blocks when circuit is open or caps are already exhausted.
  */
 export function assessOutboundEnqueue(): OutboundSafetyDecision {
+  // Best-effort, non-blocking — this check must stay synchronous for UI
+  // callers. If hydration hasn't finished yet (cold start), it briefly
+  // assesses against whatever is in memory (empty, i.e. permissive) rather
+  // than waiting; acquireOutboundSendSlot always awaits hydration before
+  // it actually reserves a slot, so this can only under-count, never send.
+  void hydrateFromDb();
   const now = Date.now();
   const cfg = snapshotLimits(now);
 
@@ -162,6 +261,7 @@ function msUntilNextUtcDay(now: number): number {
  * Before Baileys transmit: wait for min gap + jitter, or fail closed.
  */
 export async function acquireOutboundSendSlot(): Promise<OutboundSafetyDecision> {
+  await hydrateFromDb();
   const started = Date.now();
   const cfg = snapshotLimits(started);
 
@@ -223,6 +323,7 @@ export async function acquireOutboundSendSlot(): Promise<OutboundSafetyDecision>
     state.windowStamps.push(state.lastAttemptAt);
     ensureDay(state.lastAttemptAt);
     state.dayCount += 1;
+    persistState();
     return { ok: true };
   }
 }
@@ -242,6 +343,7 @@ export function recordOutboundSendFailure(now = Date.now()): void {
         `(${state.failureStamps.length} failures / ${cfg.circuitWindowMs}ms)`
     );
   }
+  persistState();
 }
 
 /** Successful transmit — cool the failure window slightly by pruning only. */
@@ -272,4 +374,30 @@ export function resetOutboundSafetyForTests(): void {
   state.dayCount = 0;
   state.failureStamps = [];
   state.circuitOpenUntil = 0;
+  // Treat this process as already hydrated with "empty" state, and don't
+  // let a later real hydration overwrite the test's manipulated in-memory
+  // state mid-run. The persisted row itself is cleared below (best-effort)
+  // so test runs never leave stale rate-limit state behind in the DB.
+  hydratePromise = Promise.resolve();
+  enqueueWrite(
+    () =>
+      prisma.whatsAppOutboundSafetyState.deleteMany({
+        where: { id: SAFETY_STATE_ROW_ID },
+      }),
+    "test-only state delete failed"
+  );
+}
+
+/**
+ * Awaitable counterpart for test teardown. `resetOutboundSafetyForTests`
+ * stays synchronous (it's also used mid-test to reset in-memory state
+ * between scenarios, where fire-and-forget is fine), but a test's *final*
+ * cleanup needs to actually wait for every write the whole run has queued
+ * — including ones from earlier scenarios that may still be in flight —
+ * which is exactly what awaiting the shared `writeQueue` guarantees.
+ */
+export async function clearPersistedSafetyStateForTests(): Promise<void> {
+  await writeQueue.catch(() => {});
+  resetOutboundSafetyForTests();
+  await writeQueue.catch(() => {});
 }

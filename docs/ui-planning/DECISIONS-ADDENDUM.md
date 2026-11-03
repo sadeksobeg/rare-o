@@ -440,3 +440,51 @@ dashboard, going forward.** `PLAN.md`'s Decision Lock table should be updated
 to reflect this the next time that file is revised, so it no longer reads as
 a live contradiction; until then, this entry is the binding record of which
 decision governs ADM-01.
+
+## WhatsApp number-survival hardening — 2026-11-03
+
+Owner asked for a review of the existing WhatsApp integration against current
+ban-avoidance practice for unofficial (Baileys) clients, researched this
+session (community/vendor sources — Meta publishes no official detection
+criteria for unofficial clients; see
+`docs/handover/RUNBOOKS/whatsapp-relink.md`'s new "Number-survival checklist"
+for the full writeup and caveats). **No QR scan, no outbound enable — this
+is code-only hardening of the existing, still-disabled safety layer.**
+
+Three concrete gaps closed:
+
+1. **Rate-limiter state was in-memory only.** `WHATSAPP_OUTBOUND_ENABLED`
+   staying off was never at risk, but the daily/burst counters and an open
+   failure circuit reset to zero on every worker restart (Docker
+   `restart: unless-stopped` on crash, or a redeploy) — a crash loop could
+   re-arm the full daily allowance repeatedly. Added a single-row
+   `WhatsAppOutboundSafetyState` table (additive migration
+   `20261103074226_whatsapp_outbound_safety_state`); the worker hydrates
+   from it once at startup and mirrors every state change back,
+   fire-and-forget on the hot path, serialized through one write queue so
+   test resets can't race a real write and leave stale state behind.
+2. **No visible "typing…" cue before a send.** Research consistently flags
+   instantaneous, machine-paced sends as a detection signal for unofficial
+   clients — a human composing a reply doesn't send in 0ms. The adapter now
+   calls Baileys' real `sendPresenceUpdate("composing"/"recording", jid)`
+   before every text/media send (text/image/video/document → composing,
+   voice notes → recording), holds briefly (capped ~2.5s, scaled by content
+   length), then clears to `paused`. This is on top of, not instead of, the
+   existing gap+jitter pacing in `acquireOutboundSendSlot` — that pacing
+   already happens upstream before the adapter is even called; this only
+   makes the wait visible to the recipient instead of silent.
+3. **No documented number-warm-up / profile-completeness process.** Added
+   the "Number-survival checklist" section to
+   `docs/handover/RUNBOOKS/whatsapp-relink.md` — operational steps for
+   whoever does the actual QR scan later (profile completeness first,
+   gradual warm-up, conservative initial caps, the datacenter-IP caveat for
+   this VPS specifically, what to do if a restriction happens anyway).
+
+**Deliberately not done this session** (each needs more design/wiring than
+a safety hardening pass, or isn't purely code): sending real WhatsApp read
+receipts for inbound messages (`sock.readMessages`) when the admin opens a
+conversation — valuable, same "look human" rationale, but needs a new
+adapter method wired through `markConversationRead` and an admin-action
+call site, left as a follow-up; moving the WhatsApp worker off the
+datacenter VPS onto a residential-style connection — an infrastructure
+decision, not a code change, flagged in the runbook for the owner.

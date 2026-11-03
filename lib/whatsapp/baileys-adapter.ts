@@ -319,6 +319,40 @@ export class BaileysWhatsAppAdapter implements WhatsAppAdapter {
     this.connectOnStart = options.connectOnStart ?? false;
   }
 
+  /**
+   * Shows a real "typing…"/"recording…" presence to the recipient and holds
+   * briefly before the actual send — a cheap, low-risk anti-ban signal:
+   * research on unofficial-client detection consistently flags
+   * instantaneous, inhuman-looking sends as a risk factor, and a visible
+   * composing indicator is exactly what a human typing a reply produces.
+   * This is deliberately short (hundreds of ms to a couple of seconds) —
+   * the real pacing/jitter already happens upstream in
+   * `acquireOutboundSendSlot` before this is ever called; this only adds
+   * the *visible* cue, not another long wait on top of that gap.
+   * Best-effort: presence failures must never block the actual send.
+   */
+  private async simulateTyping(
+    jid: string,
+    kind: "composing" | "recording",
+    contentLength: number
+  ): Promise<void> {
+    if (!this.sock) return;
+    try {
+      await this.sock.sendPresenceUpdate(kind, jid);
+    } catch {
+      /* presence is cosmetic — never fail the send over it */
+    }
+    const base = kind === "recording" ? 400 : 250;
+    const perUnit = kind === "recording" ? 60 : 18;
+    const duration = Math.min(2_500, base + contentLength * perUnit);
+    await new Promise((resolve) => setTimeout(resolve, duration));
+    try {
+      await this.sock.sendPresenceUpdate("paused", jid);
+    } catch {
+      /* ignore */
+    }
+  }
+
   private async emitContactIdentity(
     chatJid: string,
     identity: {
@@ -561,6 +595,7 @@ export class BaileysWhatsAppAdapter implements WhatsAppAdapter {
     }
 
     try {
+      await this.simulateTyping(jid, "composing", text.length);
       const result = await this.sock.sendMessage(jid, { text });
       const waMessageId = result?.key?.id;
       if (!waMessageId) {
@@ -649,6 +684,11 @@ export class BaileysWhatsAppAdapter implements WhatsAppAdapter {
     const mime = input.mime?.trim() || "application/octet-stream";
 
     try {
+      await this.simulateTyping(
+        jid,
+        input.messageType === "audio" ? "recording" : "composing",
+        input.bytes.length / 1024
+      );
       let result;
       switch (input.messageType) {
         case "image":

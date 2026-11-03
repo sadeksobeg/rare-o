@@ -475,6 +475,28 @@ model WhatsAppMessage {
   @@index([direction])
 }
 
+/// Persisted mirror of the in-memory outbound anti-ban rate limiter
+/// (lib/whatsapp/outbound-safety.ts), single row. Exists only so a worker
+/// restart (Docker `restart: unless-stopped` on crash, or a redeploy)
+/// cannot silently reset the daily send cap or an open failure circuit —
+/// without this, a crash loop could re-arm the full daily allowance on
+/// every restart, defeating the cap's entire purpose. Hydrated once at
+/// worker startup; the in-memory counters remain the fast path for every
+/// per-message check.
+model WhatsAppOutboundSafetyState {
+  /// Always "default" — single worker state row
+  id                String    @id @default("default")
+  dayKey            String    @default("")
+  dayCount          Int       @default(0)
+  /// JSON array of epoch-ms send timestamps within the sliding burst window
+  windowStampsJson  String    @default("[]")
+  /// JSON array of epoch-ms timestamps of recent send failures
+  failureStampsJson String    @default("[]")
+  lastAttemptAt     DateTime?
+  circuitOpenUntil  DateTime?
+  updatedAt         DateTime  @updatedAt
+}
+
 /// Singleton connection health mirror for admin UI (Phase C). No secrets.
 model WhatsAppConnectionHealth {
   /// Always "default" — single worker health row
