@@ -21,6 +21,7 @@ import {
   sendOutboundText,
   upsertConnectionHealth,
 } from "../lib/whatsapp/messaging/service";
+import { clearPersistedSafetyStateForTests } from "../lib/whatsapp/outbound-safety";
 import type {
   WhatsAppAdapter,
   WhatsAppHealth,
@@ -139,6 +140,10 @@ async function setupIsolatedDb(): Promise<{
 
 async function main(): Promise<void> {
   const prevOutbound = process.env.WHATSAPP_OUTBOUND_ENABLED;
+  // See scripts/whatsapp-phase-e-checks.ts's comment at the same spot: the
+  // outbound-safety rate-limiter/circuit-breaker state is persisted to the
+  // shared dev Postgres regardless of this script's own isolated SQLite DB.
+  await clearPersistedSafetyStateForTests();
   const { db, cleanup } = await setupIsolatedDb();
 
   try {
@@ -496,6 +501,7 @@ async function main(): Promise<void> {
     if (prevOutbound === undefined) delete process.env.WHATSAPP_OUTBOUND_ENABLED;
     else process.env.WHATSAPP_OUTBOUND_ENABLED = prevOutbound;
     await cleanup();
+    await clearPersistedSafetyStateForTests();
   }
 }
 

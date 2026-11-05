@@ -35,6 +35,7 @@ import {
   sendOutboundText,
   upsertConnectionHealth,
 } from "../lib/whatsapp/messaging/service";
+import { clearPersistedSafetyStateForTests } from "../lib/whatsapp/outbound-safety";
 import {
   adminListInboxConversationsAction,
   adminSendWhatsAppTextAction,
@@ -156,6 +157,15 @@ async function main(): Promise<void> {
     process.env.AUTH_SECRET = "week4-phase-e-auth-secret";
   }
   const prevOutbound = process.env.WHATSAPP_OUTBOUND_ENABLED;
+  // This script's fixtures live in an isolated SQLite DB (see setupIsolatedDb
+  // below), but lib/whatsapp/outbound-safety.ts's rate-limiter/circuit-breaker
+  // state is persisted to the shared dev Postgres `WhatsAppOutboundSafetyState`
+  // row regardless — it's a process-wide module, not parameterized by the
+  // isolated `db` client. Without this reset, failures recorded by *any*
+  // other recent process against the real dev DB (another test run, the
+  // real worker) are hydrated in here too and can open the circuit before
+  // this script's own "bounded retry" scenario expects it to.
+  await clearPersistedSafetyStateForTests();
   const { db, cleanup } = await setupIsolatedDb();
 
   try {
@@ -378,6 +388,12 @@ async function main(): Promise<void> {
       "attemptCount equals max"
     );
 
+    // The exhaust-to-failed loop above intentionally racks up enough
+    // failures to open the circuit breaker; reset it so the unrelated
+    // scenarios below aren't blocked by it (assessOutboundEnqueue rejects
+    // new enqueues while the circuit is open — see outbound-safety.ts).
+    await clearPersistedSafetyStateForTests();
+
     // --- claim prevents double dispatch ---
     const claimEnq = await enqueueOutboundText(
       {
@@ -523,6 +539,9 @@ async function main(): Promise<void> {
     if (prevOutbound === undefined) delete process.env.WHATSAPP_OUTBOUND_ENABLED;
     else process.env.WHATSAPP_OUTBOUND_ENABLED = prevOutbound;
     await cleanup();
+    // Leave no persisted rate-limit/circuit state behind for the next run
+    // (this script's own real-dispatch scenarios can open the circuit).
+    await clearPersistedSafetyStateForTests();
   }
 }
 
