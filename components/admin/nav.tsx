@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
   type ComponentType,
+  type ReactNode,
 } from "react";
 import { ChromeBadge } from "@/components/portal/chrome-badge";
 import {
@@ -294,11 +295,14 @@ export function AdminMobileNav({
   menuLabel,
   closeLabel,
   navLabel,
+  footer,
 }: {
   groups: AdminNavGroup[];
   menuLabel: string;
   closeLabel: string;
   navLabel: string;
+  /** Theme / locale / profile / logout — shown under nav on phones */
+  footer?: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -320,7 +324,7 @@ export function AdminMobileNav({
             aria-label={closeLabel}
             onClick={() => setOpen(false)}
           />
-          <div className="ro-portal-sidebar relative z-10 flex h-full w-[min(18rem,85vw)] flex-col text-[var(--ro-sand-100)]">
+          <div className="ro-portal-sidebar relative z-10 flex h-full w-[min(20rem,88vw)] flex-col text-[var(--ro-sand-100)]">
             <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
               <span className="text-xs font-semibold">{menuLabel}</span>
               <button
@@ -332,9 +336,20 @@ export function AdminMobileNav({
                 <X className="size-5" strokeWidth={1.5} />
               </button>
             </div>
-            <nav aria-label={navLabel} className="flex-1 overflow-y-auto px-2 py-4">
+            <nav
+              aria-label={navLabel}
+              className="flex-1 overflow-y-auto px-2 py-4"
+            >
               <NavList groups={groups} onNavigate={() => setOpen(false)} />
             </nav>
+            {footer ? (
+              <div
+                className="shrink-0 space-y-3 border-t border-white/10 px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+                onClick={() => setOpen(false)}
+              >
+                {footer}
+              </div>
+            ) : null}
           </div>
         </div>
       ) : null}

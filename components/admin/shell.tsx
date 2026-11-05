@@ -133,6 +133,43 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
                   menuLabel={dict.common.menu}
                   closeLabel={dict.common.close}
                   navLabel={dict.common.navLabelAdmin}
+                  footer={
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-2 rounded-[10px] bg-white/5 px-2 py-1.5">
+                        <span className="text-[0.7rem] font-medium text-[color-mix(in_srgb,var(--ro-sand-100)_72%,transparent)]">
+                          {dict.common.language} · {dict.common.themeLight}/
+                          {dict.common.themeDark}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <AdminLocaleToggle
+                            locale={locale}
+                            label={dict.common.language}
+                            tone="on-dark"
+                          />
+                          <PortalThemeToggle
+                            lightLabel={dict.common.themeLight}
+                            darkLabel={dict.common.themeDark}
+                          />
+                        </div>
+                      </div>
+                      <Link
+                        href="/admin/profile"
+                        className="flex items-center gap-2 rounded-[10px] px-3 py-2.5 text-sm font-medium text-[var(--ro-sand-50)] hover:bg-white/10"
+                      >
+                        <UserRound className="size-4" strokeWidth={1.5} />
+                        {dict.auth.profileTitle}
+                      </Link>
+                      <form action={adminLogoutAction}>
+                        <button
+                          type="submit"
+                          className="flex w-full items-center gap-2 rounded-[10px] px-3 py-2.5 text-sm font-medium text-[var(--ro-sand-50)] hover:bg-white/10"
+                        >
+                          <LogOut className="size-4" strokeWidth={1.5} />
+                          {a.logout}
+                        </button>
+                      </form>
+                    </div>
+                  }
                 />
                 <Link
                   href="/admin"
@@ -175,39 +212,41 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
                     viewAllLabel={a.viewAll}
                     emptyLabel={dict.adminUi.notificationsEmpty}
                   />
-                  <PortalThemeToggle
-                    lightLabel={dict.common.themeLight}
-                    darkLabel={dict.common.themeDark}
-                    chrome
-                  />
-                  <AdminLocaleToggle
-                    locale={locale}
-                    label={dict.common.language}
-                    tone="auto"
-                    chrome
-                  />
-                  <ChromeIconButton
-                    href="/admin/profile"
-                    aria-label={dict.auth.profileTitle}
-                  >
-                    <UserRound
-                      className="size-[1.05rem]"
-                      strokeWidth={1.5}
-                      aria-hidden
+                  <span data-chrome-secondary className="contents">
+                    <PortalThemeToggle
+                      lightLabel={dict.common.themeLight}
+                      darkLabel={dict.common.themeDark}
+                      chrome
                     />
-                    <span className="sr-only">
-                      <bdi dir="ltr">{session.email}</bdi>
-                    </span>
-                  </ChromeIconButton>
-                  <form action={adminLogoutAction}>
-                    <ChromeIconButton type="submit" aria-label={a.logout}>
-                      <LogOut
+                    <AdminLocaleToggle
+                      locale={locale}
+                      label={dict.common.language}
+                      tone="auto"
+                      chrome
+                    />
+                    <ChromeIconButton
+                      href="/admin/profile"
+                      aria-label={dict.auth.profileTitle}
+                    >
+                      <UserRound
                         className="size-[1.05rem]"
                         strokeWidth={1.5}
                         aria-hidden
                       />
+                      <span className="sr-only">
+                        <bdi dir="ltr">{session.email}</bdi>
+                      </span>
                     </ChromeIconButton>
-                  </form>
+                    <form action={adminLogoutAction}>
+                      <ChromeIconButton type="submit" aria-label={a.logout}>
+                        <LogOut
+                          className="size-[1.05rem]"
+                          strokeWidth={1.5}
+                          aria-hidden
+                        />
+                      </ChromeIconButton>
+                    </form>
+                  </span>
                 </ChromeActionCluster>
               </div>
             </header>

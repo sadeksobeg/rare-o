@@ -154,7 +154,7 @@ export function LoginForm({
     <MotionProvider surface={role === "admin" ? "admin" : "trader"}>
     <main
       data-theme="light"
-      className="ro-portal grid min-h-[100dvh] grid-cols-1 bg-[var(--ro-sand-50,#fffcf8)] md:grid-cols-[1.15fr_1fr]"
+      className="ro-portal grid min-h-[100dvh] w-full max-w-[100vw] grid-cols-1 overflow-x-hidden bg-[var(--ro-sand-50,#fffcf8)] md:grid-cols-[1.15fr_1fr]"
     >
       {/* Living brand scene — VISION ceremony (stacked on small screens) */}
       <section className="relative flex min-h-[44vh] flex-col justify-between overflow-hidden bg-[var(--ro-ink-950)] p-6 text-[var(--ro-sand-100)] sm:p-8 md:min-h-[100dvh]">

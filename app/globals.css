@@ -1697,6 +1697,26 @@ html[lang="en"] .ro-portal {
     0 32px 72px -40px rgba(0, 0, 0, 0.85);
 }
 
+/* Light theme: keep hero with plum depth — never flat white card */
+.ro-portal[data-theme="light"] .ro-portal-hero {
+  background:
+    radial-gradient(
+      ellipse 70% 90% at 12% 30%,
+      color-mix(in srgb, var(--ro-plum-300) 45%, transparent) 0%,
+      transparent 62%
+    ),
+    radial-gradient(
+      ellipse 50% 60% at 95% 10%,
+      color-mix(in srgb, var(--ro-plum-100) 70%, transparent) 0%,
+      transparent 58%
+    ),
+    linear-gradient(125deg, #f7f3fb 0%, #efe8f6 48%, #e7dff0 100%);
+  border-color: var(--ro-border-subtle);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.85) inset,
+    0 18px 40px -28px rgba(50, 16, 79, 0.28);
+}
+
 .ro-portal-hero-glow {
   position: absolute;
   inset: -20% 20% auto;
@@ -2426,24 +2446,72 @@ body:has(.ro-portal-admin) {
   }
 
   .ro-portal-admin .ro-portal-header {
-    gap: 0.35rem;
-    padding-inline: 0.55rem;
+    gap: 0.4rem;
+    padding-inline: 0.65rem;
+  }
+
+  .ro-portal-header-start {
+    gap: 0.35rem !important;
+  }
+
+  /* Brand must stay visible — mark + wordmark */
+  .ro-portal-header-start > a {
+    min-width: 0;
+  }
+  .ro-portal-header-start > a span {
+    display: inline !important;
+    max-width: 7.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ro-portal-header-actions {
+    max-width: min(58vw, 14.5rem);
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .ro-portal-header-actions::-webkit-scrollbar {
+    display: none;
   }
 
   .ro-portal-header-actions .ro-chrome-cluster {
     gap: 0;
     padding: 0.1rem;
+    flex-wrap: nowrap;
   }
 
   .ro-portal-header-actions .ro-chrome-icon {
-    width: 2.25rem;
-    height: 2.25rem;
-    min-height: 2.25rem;
+    width: 2.35rem;
+    height: 2.35rem;
+    min-height: 2.35rem;
+    flex-shrink: 0;
   }
 
-  /* Keep brand mark; hide wordmark when chrome is tight */
-  .ro-portal-header-start > a span {
-    display: none;
+  /* Secondary chrome lives in the drawer on phones */
+  .ro-portal-header-actions [data-chrome-secondary] {
+    display: none !important;
+  }
+}
+
+@media (max-width: 639px) {
+  .ro-portal-admin .ro-portal-header {
+    height: 3.5rem;
+  }
+
+  .ro-admin-greeting {
+    min-height: 7.5rem;
+  }
+
+  .ro-admin-kpi-hero {
+    min-height: 5.75rem;
+  }
+
+  .ro-admin-kpi-cell {
+    min-height: 7.5rem;
   }
 }
 
@@ -2678,39 +2746,38 @@ body:has(.ro-portal-admin) {
     );
 }
 
-/* Light: open plum-mist banner — ink text, keep plum bloom only */
+/*
+ * Greeting stays cinematic plum on BOTH themes.
+ * Flat white “light” banner read as broken empty space on mobile.
+ */
 .ro-portal[data-theme="light"] .ro-admin-greeting {
-  border-bottom-color: var(--ro-border-subtle);
-  color: var(--ro-text);
+  border-bottom-color: color-mix(in srgb, var(--ro-sand-100) 14%, transparent);
+  color: var(--ro-sand-100);
   background:
     radial-gradient(
-      60% 130% at 100% 0%,
-      color-mix(in srgb, var(--ro-plum-300) 42%, transparent),
-      transparent 64%
+      55% 120% at 100% 0%,
+      color-mix(in srgb, var(--ro-plum-700) 52%, transparent),
+      transparent 62%
     ),
     radial-gradient(
-      45% 100% at 0% 110%,
-      color-mix(in srgb, var(--ro-plum-100) 70%, transparent),
-      transparent 58%
+      40% 90% at 0% 100%,
+      color-mix(in srgb, var(--ro-amber-500) 18%, transparent),
+      transparent 55%
     ),
-    linear-gradient(108deg, #ffffff 0%, #f5f1f9 55%, #ebe4f3 100%);
-  box-shadow: inset 0 -1px 0 var(--ro-border-subtle);
+    linear-gradient(
+      108deg,
+      #241832 0%,
+      #2a1c40 48%,
+      color-mix(in srgb, var(--ro-plum-700) 55%, #1e1530) 100%
+    );
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--ro-sand-100) 8%, transparent);
 }
 .ro-portal[data-theme="light"] .ro-admin-greeting h1,
 .ro-portal[data-theme="light"] .ro-admin-greeting [id="admin-greeting-title"] {
-  color: var(--ro-text) !important;
+  color: var(--ro-sand-50) !important;
 }
 .ro-portal[data-theme="light"] .ro-admin-greeting p {
-  color: var(--ro-text-muted) !important;
-}
-.ro-portal[data-theme="light"] .ro-admin-greeting-orb--a {
-  background: color-mix(in srgb, var(--ro-plum-400) 35%, transparent);
-}
-.ro-portal[data-theme="light"] .ro-admin-greeting-orb--b {
-  background: color-mix(in srgb, var(--ro-plum-300) 28%, transparent);
-}
-.ro-portal[data-theme="light"] .ro-admin-greeting-ring {
-  stroke: color-mix(in srgb, var(--ro-plum-700) 28%, transparent);
+  color: color-mix(in srgb, var(--ro-sand-100) 78%, transparent) !important;
 }
 
 .ro-admin-greeting-fx {

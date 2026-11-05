@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 export type PortalThemeMode = "dark" | "light";
 
 /** Bumped key resets prior light sessions so VISION dark-luxury is first paint. */
-const STORAGE_KEY = "ro-portal-theme-v3";
+const STORAGE_KEY = "ro-portal-theme-v4";
 
 type PortalThemeContextValue = {
   theme: PortalThemeMode;
