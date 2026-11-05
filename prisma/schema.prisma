@@ -92,7 +92,7 @@ model ProductImage {
   altAr     String  @default("")
   altEn     String  @default("")
   sortOrder Int     @default(0)
-  /// image | video
+  /// image | video | audio
   kind      String  @default("image")
 }
 

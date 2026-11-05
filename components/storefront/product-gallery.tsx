@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react";
+import {
+  AudioPlayerStage,
+  AudioThumbTile,
+} from "@/components/storefront/audio-player-stage";
 import { MaterialPlate } from "@/components/storefront/material-plate";
 import type { MediaItem } from "@/components/storefront/product-media";
 import { ProductZoomStage } from "@/components/storefront/product-zoom-stage";
@@ -157,6 +161,8 @@ export function ProductGallery({
             className="absolute inset-0 h-full w-full object-cover"
             aria-hidden
           />
+        ) : img.kind === "audio" ? (
+          <AudioThumbTile className="absolute inset-0" />
         ) : (
           <Image src={img.path} alt="" fill sizes="72px" className="object-cover" />
         )}
@@ -204,6 +210,12 @@ export function ProductGallery({
                     preload="metadata"
                     aria-label={img.alt}
                   />
+                ) : img.kind === "audio" ? (
+                  <AudioPlayerStage
+                    src={img.path}
+                    title={img.alt}
+                    className="absolute inset-0"
+                  />
                 ) : (
                   <button
                     type="button"
@@ -240,6 +252,10 @@ export function ProductGallery({
                 aria-label={current.alt}
               />
             </div>
+          ) : current.kind === "audio" ? (
+            <div className="hidden lg:block">
+              <AudioPlayerStage src={current.path} title={current.alt} />
+            </div>
           ) : (
             <ProductZoomStage
               src={current.path}
@@ -250,12 +266,14 @@ export function ProductGallery({
             />
           )}
 
-          <span
-            aria-hidden
-            className="pointer-events-none absolute end-3 top-3 inline-flex size-9 items-center justify-center rounded-[var(--ro-r-full)] bg-ro-canvas/85 text-ro-ink"
-          >
-            <Expand className="size-4" />
-          </span>
+          {current.kind !== "audio" ? (
+            <span
+              aria-hidden
+              className="pointer-events-none absolute end-3 top-3 inline-flex size-9 items-center justify-center rounded-[var(--ro-r-full)] bg-ro-canvas/85 text-ro-ink"
+            >
+              <Expand className="size-4" />
+            </span>
+          ) : null}
           {count > 1 ? (
             <p
               aria-hidden
@@ -300,6 +318,14 @@ export function ProductGallery({
                 autoPlay
                 aria-label={current.alt}
               />
+            ) : current.kind === "audio" ? (
+              <div className="flex h-full w-full items-center justify-center p-6">
+                <AudioPlayerStage
+                  src={current.path}
+                  title={current.alt}
+                  className="aspect-square w-full max-w-md"
+                />
+              </div>
             ) : (
               <Image
                 src={current.path}

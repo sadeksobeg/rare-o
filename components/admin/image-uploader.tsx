@@ -74,40 +74,60 @@ export function ImageUploader({
         <ul className="space-y-4">
           {images.map((img, index) => {
             const isVideo = img.kind === "video";
+            const isAudio = img.kind === "audio";
             return (
               <li
                 key={img.id}
                 className="flex flex-col gap-3 border border-ro-line p-3 sm:flex-row"
               >
-                <div className="relative size-24 shrink-0 overflow-hidden bg-ro-sunken">
-                  {isVideo ? (
-                    <video
+                {isAudio ? (
+                  <div className="relative flex w-full shrink-0 items-center gap-2 bg-ro-sunken p-2.5 sm:w-56">
+                    {index === 0 ? (
+                      <span className="absolute start-1 top-1 bg-ro-ink px-1.5 py-0.5 text-[10px] text-ro-canvas">
+                        {dict.imagesPrimary}
+                      </span>
+                    ) : null}
+                    <span className="shrink-0 bg-[var(--ro-plum-900)] px-1.5 py-0.5 text-[10px] text-[var(--ro-sand-50)]">
+                      {dict.imagesKindAudio}
+                    </span>
+                    <audio
                       src={img.path}
-                      className="size-full object-cover"
-                      muted
-                      playsInline
+                      controls
                       preload="metadata"
+                      className="h-9 min-w-0 flex-1"
                     />
-                  ) : (
-                    <Image
-                      src={img.path}
-                      alt={img.altAr || img.altEn || ""}
-                      fill
-                      sizes="96px"
-                      className="object-cover"
-                    />
-                  )}
-                  {index === 0 ? (
-                    <span className="absolute start-1 top-1 bg-ro-ink px-1.5 py-0.5 text-[10px] text-ro-canvas">
-                      {dict.imagesPrimary}
-                    </span>
-                  ) : null}
-                  {isVideo ? (
-                    <span className="absolute end-1 bottom-1 bg-[var(--ro-plum-900)] px-1.5 py-0.5 text-[10px] text-[var(--ro-sand-50)]">
-                      {dict.imagesKindVideo}
-                    </span>
-                  ) : null}
-                </div>
+                  </div>
+                ) : (
+                  <div className="relative size-24 shrink-0 overflow-hidden bg-ro-sunken">
+                    {isVideo ? (
+                      <video
+                        src={img.path}
+                        className="size-full object-cover"
+                        muted
+                        playsInline
+                        preload="metadata"
+                      />
+                    ) : (
+                      <Image
+                        src={img.path}
+                        alt={img.altAr || img.altEn || ""}
+                        fill
+                        sizes="96px"
+                        className="object-cover"
+                      />
+                    )}
+                    {index === 0 ? (
+                      <span className="absolute start-1 top-1 bg-ro-ink px-1.5 py-0.5 text-[10px] text-ro-canvas">
+                        {dict.imagesPrimary}
+                      </span>
+                    ) : null}
+                    {isVideo ? (
+                      <span className="absolute end-1 bottom-1 bg-[var(--ro-plum-900)] px-1.5 py-0.5 text-[10px] text-[var(--ro-sand-50)]">
+                        {dict.imagesKindVideo}
+                      </span>
+                    ) : null}
+                  </div>
+                )}
                 <div className="min-w-0 flex-1 space-y-2">
                   <form
                     action={updateProductImageAltsAction}
@@ -183,7 +203,7 @@ export function ImageUploader({
             ref={inputRef}
             type="file"
             name="file"
-            accept="image/jpeg,image/png,image/webp,video/mp4,video/webm"
+            accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,audio/mpeg,audio/ogg"
             required
             className="mt-1 block w-full text-sm"
           />

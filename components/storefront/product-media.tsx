@@ -1,12 +1,13 @@
 import Image from "next/image";
+import { AudioThumbTile } from "@/components/storefront/audio-player-stage";
 import { MaterialPlate } from "@/components/storefront/material-plate";
 import { cn } from "@/lib/utils";
 
 export type MediaItem = {
   path: string;
   alt: string;
-  /** image | video — admin-uploaded media kind */
-  kind?: "image" | "video" | string;
+  /** image | video | audio — admin-uploaded media kind */
+  kind?: "image" | "video" | "audio" | string;
 };
 
 export function ProductMedia({
@@ -29,14 +30,18 @@ export function ProductMedia({
   return (
     <div className={cn("space-y-3", className)}>
       <div className="relative aspect-[4/5] overflow-hidden rounded-[var(--ro-r-xs)] bg-ro-sunken">
-        <Image
-          src={primary.path}
-          alt={primary.alt}
-          fill
-          sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover"
-          priority={priority}
-        />
+        {primary.kind === "audio" ? (
+          <AudioThumbTile className="size-full" />
+        ) : (
+          <Image
+            src={primary.path}
+            alt={primary.alt}
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover"
+            priority={priority}
+          />
+        )}
       </div>
       {images.length > 1 ? (
         <ul className="flex gap-2 overflow-x-auto">
@@ -100,6 +105,14 @@ export function ProductThumb({
           aria-label={alt}
         />
       </div>
+    );
+  }
+
+  if (kind === "audio") {
+    return (
+      <AudioThumbTile
+        className={cn("aspect-[4/5] w-full rounded-[var(--ro-r-xs)]", className)}
+      />
     );
   }
 

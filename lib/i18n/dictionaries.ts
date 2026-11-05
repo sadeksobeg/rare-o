@@ -343,6 +343,7 @@ type Dict = {
     imagesAdd: string;
     imagesFileLabel: string;
     imagesKindVideo: string;
+    imagesKindAudio: string;
     imagesAfterSaveHint: string;
     imagesAltAr: string;
     imagesAltEn: string;
@@ -1726,15 +1727,16 @@ const ar: Dict = {
     colAvailability: "التوفر",
     colPrice: "السعر",
     colCategory: "الفئة",
-    imagesTitle: "صور وفيديو المنتج",
-    imagesEmpty: "لا وسائط بعد — ارفع صورة أو فيديو أعلاه.",
+    imagesTitle: "صور وفيديو وصوت المنتج",
+    imagesEmpty: "لا وسائط بعد — ارفع صورة أو فيديو أو صوتاً أعلاه.",
     imagesLimits:
-      "صورة: JPEG / PNG / WebP حتى 8 ميغابايت (الضلع الأطول ≥ 1600 بكسل) · فيديو: MP4 / WebM حتى 48 ميغابايت · حد 8 ملفات",
-    imagesAdd: "رفع صورة أو فيديو",
-    imagesFileLabel: "اختر صورة أو فيديو",
+      "صورة: JPEG / PNG / WebP حتى 8 ميغابايت (الضلع الأطول ≥ 1600 بكسل) · فيديو: MP4 / WebM حتى 48 ميغابايت · صوت: MP3 / OGG حتى 16 ميغابايت · حد 8 ملفات",
+    imagesAdd: "رفع صورة أو فيديو أو صوت",
+    imagesFileLabel: "اختر صورة أو فيديو أو صوتاً",
     imagesKindVideo: "فيديو",
+    imagesKindAudio: "صوت",
     imagesAfterSaveHint:
-      "احفظ بيانات المنتج أولاً — بعدها ستُفتح صفحة التعديل لرفع الصور والفيديو.",
+      "احفظ بيانات المنتج أولاً — بعدها ستُفتح صفحة التعديل لرفع الصور والفيديو والصوت.",
     imagesAltAr: "النص البديل (عربي)",
     imagesAltEn: "النص البديل (إنجليزي)",
     imagesPrimary: "الرئيسية",
@@ -1742,8 +1744,10 @@ const ar: Dict = {
     imagesMoveEarlier: "تحريك للأمام",
     imagesMoveLater: "تحريك للخلف",
     imagesUploading: "جارٍ الرفع…",
-    imagesErrorType: "نوع الملف غير مدعوم. استخدم صورة JPEG/PNG/WebP أو فيديو MP4/WebM.",
-    imagesErrorSize: "الملف أكبر من الحد المسموح (8 ميغابايت للصورة أو 48 للفيديو).",
+    imagesErrorType:
+      "نوع الملف غير مدعوم. استخدم صورة JPEG/PNG/WebP أو فيديو MP4/WebM أو صوت MP3/OGG.",
+    imagesErrorSize:
+      "الملف أكبر من الحد المسموح (8 ميغابايت للصورة، 48 للفيديو، 16 للصوت).",
     imagesErrorDim: "للصور: الضلع الأطول يجب أن يكون 1600 بكسل على الأقل.",
     imagesErrorMax: "وصلت إلى الحد الأقصى (8 ملفات).",
     imagesErrorGeneric: "تعذّر رفع الملف.",
@@ -3247,15 +3251,16 @@ const en: Dict = {
     colAvailability: "Availability",
     colPrice: "Price",
     colCategory: "Category",
-    imagesTitle: "Product images & video",
-    imagesEmpty: "No media yet — upload an image or video below.",
+    imagesTitle: "Product images, video & audio",
+    imagesEmpty: "No media yet — upload an image, video, or audio below.",
     imagesLimits:
-      "Image: JPEG / PNG / WebP up to 8 MB (longest side ≥ 1600 px) · Video: MP4 / WebM up to 48 MB · max 8 files",
-    imagesAdd: "Upload image or video",
-    imagesFileLabel: "Choose image or video",
+      "Image: JPEG / PNG / WebP up to 8 MB (longest side ≥ 1600 px) · Video: MP4 / WebM up to 48 MB · Audio: MP3 / OGG up to 16 MB · max 8 files",
+    imagesAdd: "Upload image, video, or audio",
+    imagesFileLabel: "Choose image, video, or audio",
     imagesKindVideo: "Video",
+    imagesKindAudio: "Audio",
     imagesAfterSaveHint:
-      "Save the product details first — you will then open the edit page to upload images and video.",
+      "Save the product details first — you will then open the edit page to upload images, video, and audio.",
     imagesAltAr: "Alt text (Arabic)",
     imagesAltEn: "Alt text (English)",
     imagesPrimary: "Primary",
@@ -3264,8 +3269,9 @@ const en: Dict = {
     imagesMoveLater: "Move later",
     imagesUploading: "Uploading…",
     imagesErrorType:
-      "Unsupported file type. Use JPEG/PNG/WebP images or MP4/WebM video.",
-    imagesErrorSize: "File exceeds the limit (8 MB for images, 48 MB for video).",
+      "Unsupported file type. Use JPEG/PNG/WebP images, MP4/WebM video, or MP3/OGG audio.",
+    imagesErrorSize:
+      "File exceeds the limit (8 MB for images, 48 MB for video, 16 MB for audio).",
     imagesErrorDim: "For images: longest side must be at least 1600 px.",
     imagesErrorMax: "Maximum of 8 media files reached.",
     imagesErrorGeneric: "Could not upload the file.",

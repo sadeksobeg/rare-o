@@ -120,7 +120,9 @@ export default async function ProductPage({
   const jsonLd = productJsonLd({
     name: name || product.slug,
     description: description || undefined,
-    images: product.images.map((img) => absoluteUrl(img.path)),
+    images: product.images
+      .filter((img) => img.kind !== "audio")
+      .map((img) => absoluteUrl(img.path)),
     price: Number.isFinite(priceNumber) ? priceNumber : null,
     currency:
       product.currency && /^[A-Z]{3}$/.test(product.currency)
