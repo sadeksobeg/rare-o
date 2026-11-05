@@ -4,11 +4,8 @@ import { adminLogoutAction } from "@/app/admin-logout-action";
 import { AdminCommandSearchMount } from "@/components/admin/command-search-mount";
 import { AdminLocaleToggle } from "@/components/admin/locale-toggle";
 import { AdminMainEnter } from "@/components/admin/main-enter";
-import {
-  AdminMobileNav,
-  AdminSidebar,
-  type AdminNavGroup,
-} from "@/components/admin/nav";
+import { AdminMobileChrome } from "@/components/admin/mobile-nav";
+import { AdminSidebar, type AdminNavGroup } from "@/components/admin/nav";
 import { Emblem } from "@/components/brand";
 import { ChromeBadge } from "@/components/portal/chrome-badge";
 import {
@@ -128,15 +125,23 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
             <OfflineBanner />
             <header className="ro-portal-header z-30 flex h-14 shrink-0 items-center gap-2 border-b border-[color:var(--border)] px-3 backdrop-blur-md sm:h-16 sm:gap-3 sm:px-4 lg:px-5">
               <div className="ro-portal-header-start">
-                <AdminMobileNav
+                <AdminMobileChrome
                   groups={groups}
                   menuLabel={dict.common.menu}
                   closeLabel={dict.common.close}
                   navLabel={dict.common.navLabelAdmin}
+                  brand="RARE OUD"
+                  inboxBadge={unreadInbox}
+                  tabLabels={{
+                    home: a.dashboard,
+                    inbox: a.inbox,
+                    requests: a.requests,
+                    products: a.products,
+                  }}
                   footer={
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between gap-2 rounded-[10px] bg-white/5 px-2 py-1.5">
-                        <span className="text-[0.7rem] font-medium text-[color-mix(in_srgb,var(--ro-sand-100)_72%,transparent)]">
+                      <div className="flex items-center justify-between gap-2 rounded-[12px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] px-2 py-1.5">
+                        <span className="text-[0.7rem] font-medium text-[color:var(--ro-text-muted)]">
                           {dict.common.language} · {dict.common.themeLight}/
                           {dict.common.themeDark}
                         </span>
@@ -144,7 +149,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
                           <AdminLocaleToggle
                             locale={locale}
                             label={dict.common.language}
-                            tone="on-dark"
+                            tone="auto"
                           />
                           <PortalThemeToggle
                             lightLabel={dict.common.themeLight}
@@ -154,7 +159,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
                       </div>
                       <Link
                         href="/admin/profile"
-                        className="flex items-center gap-2 rounded-[10px] px-3 py-2.5 text-sm font-medium text-[var(--ro-sand-50)] hover:bg-white/10"
+                        className="flex items-center gap-2 rounded-[12px] px-3 py-2.5 text-sm font-medium text-[color:var(--ro-text)] hover:bg-[color-mix(in_srgb,var(--ro-plum-700)_8%,transparent)]"
                       >
                         <UserRound className="size-4" strokeWidth={1.5} />
                         {dict.auth.profileTitle}
@@ -162,7 +167,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
                       <form action={adminLogoutAction}>
                         <button
                           type="submit"
-                          className="flex w-full items-center gap-2 rounded-[10px] px-3 py-2.5 text-sm font-medium text-[var(--ro-sand-50)] hover:bg-white/10"
+                          className="flex w-full items-center gap-2 rounded-[12px] px-3 py-2.5 text-sm font-medium text-[color:var(--ro-text)] hover:bg-[color-mix(in_srgb,var(--ro-plum-700)_8%,transparent)]"
                         >
                           <LogOut className="size-4" strokeWidth={1.5} />
                           {a.logout}

@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 
 export type PortalThemeMode = "dark" | "light";
 
-/** Bumped key resets prior light sessions so VISION dark-luxury is first paint. */
-const STORAGE_KEY = "ro-portal-theme-v4";
+/** Bumped key resets prior dark sessions — light is the product default. */
+const STORAGE_KEY = "ro-portal-theme-v5";
 
 type PortalThemeContextValue = {
   theme: PortalThemeMode;
@@ -38,11 +38,11 @@ function readStored(): PortalThemeMode | null {
 
 export function PortalThemeProvider({
   children,
-  defaultTheme = "dark",
+  defaultTheme = "light",
   className,
 }: {
   children: ReactNode;
-  /** VISION: dark-luxury first for admin/trader. */
+  /** Product default: open light surfaces; user can still switch to dark. */
   defaultTheme?: PortalThemeMode;
   className?: string;
 }) {
@@ -51,7 +51,7 @@ export function PortalThemeProvider({
 
   useEffect(() => {
     const stored = readStored();
-    /* VISION: dark-luxury first. Only honor an explicit stored choice. */
+    /* Honor an explicit stored choice; otherwise seed light default. */
     if (stored) setThemeState(stored);
     else {
       try {
@@ -100,7 +100,7 @@ export function usePortalTheme(): PortalThemeContextValue {
   const ctx = useContext(PortalThemeContext);
   if (!ctx) {
     return {
-      theme: "dark",
+      theme: "light",
       setTheme: () => undefined,
       toggle: () => undefined,
     };

@@ -8,12 +8,12 @@ import {
 } from "@/components/portal/portal-theme";
 import type { MotionSurface } from "@/components/motion/resolve-tier";
 
-/** Client frame: dark-luxury theme + motion tier for admin/trader shells. */
+/** Client frame: light-default theme + motion tier for admin/trader shells. */
 export function PortalShellFrame({
   children,
   surface,
   className,
-  defaultTheme = "dark",
+  defaultTheme = "light",
 }: {
   children: ReactNode;
   surface: MotionSurface;

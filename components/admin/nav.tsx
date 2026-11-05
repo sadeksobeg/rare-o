@@ -22,8 +22,6 @@ import {
   Percent,
   Users,
   Store,
-  Menu,
-  X,
   Megaphone,
   ShieldCheck,
   UsersRound,
@@ -68,14 +66,17 @@ function itemActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function NavList({
+export function NavList({
   groups,
   onNavigate,
   collapsed = false,
+  surface = "sidebar",
 }: {
   groups: AdminNavGroup[];
   onNavigate?: () => void;
   collapsed?: boolean;
+  /** `sheet` = light/dark portal sheet (mobile drawer); `sidebar` = plum rail */
+  surface?: "sidebar" | "sheet";
 }) {
   const pathname = usePathname();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -117,7 +118,14 @@ function NavList({
       {groups.map((group) => (
         <div key={group.title}>
           {!collapsed ? (
-            <p className="px-3 text-[11px] font-bold text-[var(--ro-ink-200)]">
+            <p
+              className={cn(
+                "px-3 text-[11px] font-bold",
+                surface === "sheet"
+                  ? "text-[color:var(--ro-text-muted)]"
+                  : "text-[var(--ro-ink-200)]"
+              )}
+            >
               {group.title}
             </p>
           ) : null}
@@ -145,11 +153,17 @@ function NavList({
                       collapsed
                         ? "mx-auto size-10 justify-center rounded-[var(--ro-r-sm)]"
                         : "gap-2.5 rounded-[var(--ro-r-sm)] px-3 py-2.5 text-sm font-semibold",
-                      active
-                        ? "font-bold"
-                        : "text-[var(--ro-ink-300)] hover:bg-white/8 hover:text-[var(--ro-sand-100)]",
+                      active ? "font-bold" : null,
+                      surface === "sheet"
+                        ? active
+                          ? "bg-[color-mix(in_srgb,var(--ro-plum-700)_12%,transparent)] text-[color:var(--ro-plum-800)]"
+                          : "text-[color:var(--ro-text-2)] hover:bg-[color-mix(in_srgb,var(--ro-plum-700)_8%,transparent)] hover:text-[color:var(--ro-text)]"
+                        : active
+                          ? null
+                          : "text-[var(--ro-ink-300)] hover:bg-white/8 hover:text-[var(--ro-sand-100)]",
                       collapsed &&
                         active &&
+                        surface === "sidebar" &&
                         "bg-[color-mix(in_srgb,var(--ro-sand-100)_16%,transparent)] text-[var(--ro-sand-50)]"
                     )}
                   >
@@ -290,69 +304,3 @@ export function AdminSidebar({
   );
 }
 
-export function AdminMobileNav({
-  groups,
-  menuLabel,
-  closeLabel,
-  navLabel,
-  footer,
-}: {
-  groups: AdminNavGroup[];
-  menuLabel: string;
-  closeLabel: string;
-  navLabel: string;
-  /** Theme / locale / profile / logout — shown under nav on phones */
-  footer?: React.ReactNode;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="lg:hidden">
-      <button
-        type="button"
-        className="ro-icon-btn size-11 min-h-11 px-0"
-        aria-label={menuLabel}
-        aria-expanded={open}
-        onClick={() => setOpen(true)}
-      >
-        <Menu className="size-5" strokeWidth={1.5} aria-hidden />
-      </button>
-      {open ? (
-        <div className="fixed inset-0 z-50 flex">
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/40"
-            aria-label={closeLabel}
-            onClick={() => setOpen(false)}
-          />
-          <div className="ro-portal-sidebar relative z-10 flex h-full w-[min(20rem,88vw)] flex-col text-[var(--ro-sand-100)]">
-            <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
-              <span className="text-xs font-semibold">{menuLabel}</span>
-              <button
-                type="button"
-                className="inline-flex size-11 items-center justify-center"
-                aria-label={closeLabel}
-                onClick={() => setOpen(false)}
-              >
-                <X className="size-5" strokeWidth={1.5} />
-              </button>
-            </div>
-            <nav
-              aria-label={navLabel}
-              className="flex-1 overflow-y-auto px-2 py-4"
-            >
-              <NavList groups={groups} onNavigate={() => setOpen(false)} />
-            </nav>
-            {footer ? (
-              <div
-                className="shrink-0 space-y-3 border-t border-white/10 px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
-                onClick={() => setOpen(false)}
-              >
-                {footer}
-              </div>
-            ) : null}
-          </div>
-        </div>
-      ) : null}
-    </div>
-  );
-}

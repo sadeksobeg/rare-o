@@ -49,7 +49,7 @@ export function DashboardGreeting({
       <div className="ro-admin-home-pad relative z-[1] flex flex-wrap items-end justify-between gap-3 py-3.5 sm:py-4">
         <div className="min-w-0 max-w-3xl space-y-1.5">
           <m.p
-            className="flex items-center gap-2 text-xs font-medium text-[color-mix(in_srgb,var(--ro-sand-100)_72%,transparent)] sm:text-sm"
+            className="ro-admin-greeting-kicker flex items-center gap-2 text-xs font-medium sm:text-sm"
             initial={lite ? false : { opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: lite ? 0.14 : 0.28, ease: [0.22, 1, 0.36, 1] }}
@@ -78,7 +78,7 @@ export function DashboardGreeting({
 
           <m.h1
             id="admin-greeting-title"
-            className="font-display text-[1.55rem] font-semibold tracking-tight text-[var(--ro-sand-50)] sm:text-[1.9rem]"
+            className="ro-admin-greeting-title font-display text-[1.55rem] font-semibold tracking-tight sm:text-[1.9rem]"
             initial={lite ? false : { opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
@@ -91,7 +91,7 @@ export function DashboardGreeting({
           </m.h1>
 
           <m.p
-            className="max-w-xl text-sm leading-relaxed text-[color-mix(in_srgb,var(--ro-sand-100)_70%,transparent)] sm:text-[0.95rem]"
+            className="ro-admin-greeting-lead max-w-xl text-sm leading-relaxed sm:text-[0.95rem]"
             initial={lite ? false : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{

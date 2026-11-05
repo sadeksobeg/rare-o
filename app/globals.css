@@ -2412,6 +2412,13 @@ body:has(.ro-portal-admin) {
   -webkit-overflow-scrolling: touch;
 }
 
+@media (max-width: 1023px) {
+  .ro-portal-admin .ro-portal-main,
+  .ro-portal-admin #main-content {
+    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 .ro-portal-admin .ro-portal-header {
   position: sticky;
   top: 0;
@@ -2726,6 +2733,25 @@ body:has(.ro-portal-admin) {
   box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--ro-sand-100) 8%, transparent);
 }
 
+.ro-admin-greeting-kicker {
+  color: color-mix(in srgb, var(--ro-sand-100) 72%, transparent);
+}
+.ro-admin-greeting-title {
+  color: var(--ro-sand-50);
+}
+.ro-admin-greeting-lead {
+  color: color-mix(in srgb, var(--ro-sand-100) 70%, transparent);
+}
+.ro-portal[data-theme="light"] .ro-admin-greeting-kicker {
+  color: var(--ro-text-muted);
+}
+.ro-portal[data-theme="light"] .ro-admin-greeting-title {
+  color: var(--ro-text);
+}
+.ro-portal[data-theme="light"] .ro-admin-greeting-lead {
+  color: var(--ro-text-muted);
+}
+
 .ro-portal[data-theme="dark"] .ro-admin-greeting {
   background:
     radial-gradient(
@@ -2746,38 +2772,44 @@ body:has(.ro-portal-admin) {
     );
 }
 
-/*
- * Greeting stays cinematic plum on BOTH themes.
- * Flat white “light” banner read as broken empty space on mobile.
- */
+/* Light greeting — open plum mist with ink type (never flat empty white) */
 .ro-portal[data-theme="light"] .ro-admin-greeting {
-  border-bottom-color: color-mix(in srgb, var(--ro-sand-100) 14%, transparent);
-  color: var(--ro-sand-100);
+  border-bottom-color: var(--ro-border-subtle);
+  color: var(--ro-text);
   background:
     radial-gradient(
-      55% 120% at 100% 0%,
-      color-mix(in srgb, var(--ro-plum-700) 52%, transparent),
+      70% 140% at 100% -10%,
+      color-mix(in srgb, var(--ro-plum-300) 55%, transparent),
       transparent 62%
     ),
     radial-gradient(
-      40% 90% at 0% 100%,
-      color-mix(in srgb, var(--ro-amber-500) 18%, transparent),
-      transparent 55%
+      50% 110% at 0% 120%,
+      color-mix(in srgb, var(--ro-plum-100) 80%, transparent),
+      transparent 58%
     ),
-    linear-gradient(
-      108deg,
-      #241832 0%,
-      #2a1c40 48%,
-      color-mix(in srgb, var(--ro-plum-700) 55%, #1e1530) 100%
-    );
-  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--ro-sand-100) 8%, transparent);
+    linear-gradient(108deg, #fbf8ff 0%, #f3eef8 48%, #ebe4f4 100%);
+  box-shadow:
+    inset 0 -1px 0 var(--ro-border-subtle),
+    0 18px 40px -32px rgba(50, 16, 79, 0.22);
 }
 .ro-portal[data-theme="light"] .ro-admin-greeting h1,
 .ro-portal[data-theme="light"] .ro-admin-greeting [id="admin-greeting-title"] {
-  color: var(--ro-sand-50) !important;
+  color: var(--ro-text) !important;
 }
 .ro-portal[data-theme="light"] .ro-admin-greeting p {
-  color: color-mix(in srgb, var(--ro-sand-100) 78%, transparent) !important;
+  color: var(--ro-text-muted) !important;
+}
+.ro-portal[data-theme="light"] .ro-admin-greeting-orb--a {
+  background: color-mix(in srgb, var(--ro-plum-400) 38%, transparent);
+}
+.ro-portal[data-theme="light"] .ro-admin-greeting-orb--b {
+  background: color-mix(in srgb, var(--ro-plum-300) 30%, transparent);
+}
+.ro-portal[data-theme="light"] .ro-admin-greeting-ring {
+  stroke: color-mix(in srgb, var(--ro-plum-700) 26%, transparent);
+}
+.ro-portal[data-theme="light"] .ro-admin-greeting-wave {
+  color: color-mix(in srgb, var(--ro-plum-700) 28%, transparent);
 }
 
 .ro-admin-greeting-fx {
@@ -3892,6 +3924,115 @@ body:has(.ro-portal-admin) {
 }
 @media (prefers-reduced-motion: reduce) {
   .ro-row-flash {
+    animation: none;
+  }
+}
+
+/* -- Admin mobile chrome: drawer + bottom tabs ------------------------- */
+.ro-admin-mobile-drawer-scrim {
+  border: 0;
+  background: color-mix(in srgb, var(--ro-ink-950, #08060a) 48%, transparent);
+  backdrop-filter: blur(2px);
+  animation: ro-mobile-scrim-in 180ms var(--ro-ease-out, ease) both;
+}
+.ro-admin-mobile-drawer-panel {
+  background: var(--ro-bg-raised, #ffffff);
+  color: var(--ro-text, #140f1a);
+  box-shadow:
+    0 0 0 1px var(--ro-border-subtle, rgba(50, 16, 79, 0.08)),
+    24px 0 64px -28px rgba(20, 10, 40, 0.45);
+  animation: ro-mobile-drawer-in 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+[dir="rtl"] .ro-admin-mobile-drawer-panel {
+  animation-name: ro-mobile-drawer-in-rtl;
+}
+.ro-portal[data-theme="dark"] .ro-admin-mobile-drawer-panel,
+.ro-admin-mobile-drawer[data-theme="dark"] .ro-admin-mobile-drawer-panel {
+  background: var(--ro-bg-raised, #403b58);
+  color: var(--ro-text, #fbf8ff);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    24px 0 64px -28px rgba(10, 6, 20, 0.65);
+}
+
+@keyframes ro-mobile-scrim-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes ro-mobile-drawer-in {
+  from { transform: translateX(-104%); }
+  to { transform: translateX(0); }
+}
+@keyframes ro-mobile-drawer-in-rtl {
+  from { transform: translateX(104%); }
+  to { transform: translateX(0); }
+}
+
+.ro-admin-mobile-tabs {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 90;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.15rem;
+  padding: 0.35rem 0.4rem calc(0.35rem + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--ro-border-subtle, rgba(50, 16, 79, 0.1));
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--ro-bg-raised, #fff) 92%, transparent),
+      var(--ro-bg-raised, #ffffff)
+    );
+  box-shadow: 0 -12px 32px -24px rgba(20, 10, 40, 0.35);
+  backdrop-filter: blur(16px);
+}
+.ro-portal[data-theme="dark"] .ro-admin-mobile-tabs {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--ro-bg-raised) 88%, transparent),
+      var(--ro-bg-raised)
+    );
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.ro-admin-mobile-tab {
+  display: inline-flex;
+  min-width: 0;
+  min-height: 3.15rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  border: 0;
+  border-radius: 0.85rem;
+  background: transparent;
+  color: var(--ro-text-muted, #6a6178);
+  font-size: 0.62rem;
+  font-weight: 650;
+  line-height: 1.1;
+  text-decoration: none;
+  transition:
+    color var(--ro-dur-fast, 140ms) ease,
+    background-color var(--ro-dur-fast, 140ms) ease,
+    transform var(--ro-dur-fast, 140ms) ease;
+}
+.ro-admin-mobile-tab:active {
+  transform: scale(0.96);
+}
+.ro-admin-mobile-tab--active {
+  color: var(--ro-plum-800, #2a0d44);
+  background: color-mix(in srgb, var(--ro-plum-700, #32104f) 12%, transparent);
+}
+.ro-portal[data-theme="dark"] .ro-admin-mobile-tab--active {
+  color: var(--ro-accent-fg, #e0c8f5);
+  background: color-mix(in srgb, #d4b8ef 18%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ro-admin-mobile-drawer-scrim,
+  .ro-admin-mobile-drawer-panel {
     animation: none;
   }
 }
