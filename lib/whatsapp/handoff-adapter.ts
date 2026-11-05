@@ -41,6 +41,11 @@ export function buildHandoffMessageText(payload: HandoffPayload): string {
     payload.shippingMethodLabel ||
     payload.shippingMethodCode ||
     (isAr ? "(يُؤكَّد مع الفريق)" : "(confirm with team)");
+  const shippingCost = payload.shippingCharge
+    ? isAr
+      ? `تقدير الشحن: ${payload.shippingCharge.amount} ${payload.shippingCharge.currency}`
+      : `Shipping estimate: ${payload.shippingCharge.amount} ${payload.shippingCharge.currency}`
+    : null;
 
   const notes = payload.customer.notes?.trim()
     ? payload.customer.notes.trim()
@@ -56,6 +61,7 @@ export function buildHandoffMessageText(payload: HandoffPayload): string {
       `الهاتف: ${payload.customer.phone}`,
       `الوجهة: ${payload.destinationCountry}`,
       `تفضيل الشحن: ${shipping}`,
+      ...(shippingCost ? [shippingCost] : []),
       `المجموع الفرعي: ${payload.subtotal} ${payload.currency}`,
       "البنود:",
       lineBlock,
@@ -72,6 +78,7 @@ export function buildHandoffMessageText(payload: HandoffPayload): string {
     `Phone: ${payload.customer.phone}`,
     `Destination: ${payload.destinationCountry}`,
     `Shipping preference: ${shipping}`,
+    ...(shippingCost ? [shippingCost] : []),
     `Subtotal: ${payload.subtotal} ${payload.currency}`,
     "Lines:",
     lineBlock,

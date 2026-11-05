@@ -43,6 +43,7 @@
     "test:brokerage-media-security": "node node_modules/tsx/dist/cli.mjs scripts/brokerage-media-security-checks.ts",
     "test:session-invalidation": "node node_modules/tsx/dist/cli.mjs scripts/session-invalidation-checks.ts",
     "test:whatsapp-outbound-safety": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-outbound-safety-checks.ts",
+    "test:shipping-rates": "node node_modules/tsx/dist/cli.mjs scripts/shipping-rates-checks.ts",
     "test:whatsapp-media-store": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-media-store-checks.ts",
     "test:whatsapp-jid": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-jid-checks.ts",
     "test:whatsapp-phase-a": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-phase-a-checks.ts",

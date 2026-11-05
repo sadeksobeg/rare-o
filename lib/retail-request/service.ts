@@ -1,11 +1,12 @@
 import { prisma } from "@/lib/db/prisma";
 import type { RetailRequestCreateInput } from "@/lib/validation/schemas";
 import { resolveAvailableMethods } from "@/lib/shipping/resolve-available-methods";
+import { calculateOudShipmentWeightKg } from "@/lib/shipping/rates";
 import {
   assertNoWhatsAppBusinessApiSend,
   prepareWhatsAppHandoff,
 } from "@/lib/whatsapp/handoff-adapter";
-import type { Product } from "@prisma/client";
+import type { Prisma, Product } from "@prisma/client";
 import {
   canTransitionRetailRequest,
   isRetailRequestStatus,
@@ -49,6 +50,13 @@ export async function createRetailRequestFromCart(
     where: { id: { in: productIds } },
   });
   const byId = new Map(products.map((p) => [p.id, p]));
+  const categorySlugs = await prisma.product.findMany({
+    where: { id: { in: productIds } },
+    select: { id: true, category: { select: { slug: true } } },
+  });
+  const categorySlugById = new Map(
+    categorySlugs.map((p) => [p.id, p.category.slug])
+  );
 
   const resolvedLines: Array<{
     productId: string;
@@ -89,9 +97,20 @@ export async function createRetailRequestFromCart(
   const currency = resolvedLines[0].currency;
   const subtotal = resolvedLines.reduce((s, l) => s + l.lineTotal, 0);
 
-  const availableMethods = resolveAvailableMethods(input.destinationCountry);
+  const oudUnitCount = input.lines.reduce((sum, line) => {
+    const isOud = categorySlugById.get(line.productId) !== "accessories";
+    return isOud ? sum + line.quantity : sum;
+  }, 0);
+  const shippingWeightKg = calculateOudShipmentWeightKg(
+    oudUnitCount > 0 ? oudUnitCount : 1
+  );
+  const availableMethods = input.destinationCode
+    ? resolveAvailableMethods(input.destinationCode, shippingWeightKg)
+    : [];
   let shippingMethodCode: string | null = null;
   let shippingMethodLabel: string | null = null;
+  let shippingCostAmount: number | null = null;
+  let shippingCostCurrency: string | null = null;
 
   if (input.shippingMethodCode) {
     const match = availableMethods.find(
@@ -103,6 +122,8 @@ export async function createRetailRequestFromCart(
     shippingMethodCode = match.code;
     shippingMethodLabel =
       input.locale === "ar" ? match.labelAr : match.labelEn;
+    shippingCostAmount = match.amount;
+    shippingCostCurrency = match.currency;
   }
 
   const customer = await prisma.customer.create({
@@ -113,111 +134,155 @@ export async function createRetailRequestFromCart(
     },
   });
 
-  const reference = buildReference();
   const status = input.status as RetailRequestStatus;
   const createdAt = new Date();
 
-  const handoffPayload: HandoffPayload = {
-    reference,
-    locale: input.locale,
-    status,
-    lines: resolvedLines.map((l) => ({
-      productId: l.productId,
-      nameAr: l.productNameAr,
-      nameEn: l.productNameEn,
-      qty: l.quantity,
-      unitPriceSnapshot: l.unitPriceSnapshot,
-      lineTotal: l.lineTotal,
-      currency: l.currency,
-    })),
-    subtotal,
-    currency,
-    customer: {
-      name: input.customerName,
-      phone: input.customerPhone,
-      notes: input.customerNotes || "",
-    },
-    destinationCountry: input.destinationCountry,
-    shippingMethodCode,
-    shippingMethodLabel,
-    shippingCharge: null,
-    packagingCharge: null,
-    createdAt: createdAt.toISOString(),
-  };
+  // buildReference() draws from only 9000 values per year (RO-YYYY-1000..9999),
+  // so a random collision is a real, if infrequent, production possibility —
+  // not just a test artifact. Retry with a fresh reference on that specific
+  // unique-constraint violation instead of failing the customer's submission.
+  const MAX_REFERENCE_ATTEMPTS = 8;
+  let request:
+    | Prisma.RetailRequestGetPayload<{ include: { lines: true } }>
+    | undefined;
 
-  let handoffMessageText: string | null = null;
-  let whatsAppDeepLink: string | null = null;
-  let handoffPreparedAt: Date | null = null;
+  for (let attempt = 1; attempt <= MAX_REFERENCE_ATTEMPTS; attempt += 1) {
+    const reference = buildReference();
 
-  if (status === "ready_for_handoff") {
-    const prepared = prepareWhatsAppHandoff(handoffPayload);
-    handoffMessageText = prepared.messageText;
-    whatsAppDeepLink = prepared.deepLink;
-    handoffPreparedAt = createdAt;
-  }
-
-  const request = await prisma.retailRequest.create({
-    data: {
+    const handoffPayload: HandoffPayload = {
       reference,
       locale: input.locale,
       status,
-      customerName: input.customerName,
-      customerPhone: input.customerPhone,
-      customerNotes: input.customerNotes || "",
-      destinationCountry: input.destinationCountry,
-      shippingMethodCode,
-      shippingMethodLabel,
+      lines: resolvedLines.map((l) => ({
+        productId: l.productId,
+        nameAr: l.productNameAr,
+        nameEn: l.productNameEn,
+        qty: l.quantity,
+        unitPriceSnapshot: l.unitPriceSnapshot,
+        lineTotal: l.lineTotal,
+        currency: l.currency,
+      })),
       subtotal,
       currency,
-      handoffPayloadJson: JSON.stringify(handoffPayload),
-      handoffMessageText,
-      whatsAppDeepLink,
-      handoffPreparedAt,
-      idempotencyKey: input.idempotencyKey ?? null,
-      customerId: customer.id,
-      lines: {
-        create: resolvedLines.map((l) => ({
-          productId: l.productId,
-          productNameAr: l.productNameAr,
-          productNameEn: l.productNameEn,
-          quantity: l.quantity,
-          unitPriceSnapshot: l.unitPriceSnapshot,
-          lineTotal: l.lineTotal,
-          currency: l.currency,
-        })),
+      customer: {
+        name: input.customerName,
+        phone: input.customerPhone,
+        notes: input.customerNotes || "",
       },
-      handoffEvents:
-        status === "ready_for_handoff"
-          ? {
-              create: {
-                eventType: "prepared",
-                fromStatus: null,
-                toStatus: status,
-                actor: "customer",
-                note: "Initial handoff prepared from storefront",
-              },
-            }
-          : undefined,
-    },
-    include: { lines: true },
-  }).catch(async (e: unknown) => {
-    // Concurrent duplicate submit lost the unique-key race: return the winner
-    const isUniqueViolation =
-      typeof e === "object" &&
-      e !== null &&
-      (e as { code?: string }).code === "P2002";
-    if (input.idempotencyKey && isUniqueViolation) {
-      const winner = await prisma.retailRequest.findUnique({
-        where: { idempotencyKey: input.idempotencyKey },
+      destinationCountry: input.destinationCountry,
+      destinationCode: input.destinationCode ?? null,
+      shippingMethodCode,
+      shippingMethodLabel,
+      shippingCharge:
+        shippingCostAmount != null && shippingCostCurrency != null
+          ? { amount: shippingCostAmount, currency: shippingCostCurrency }
+          : null,
+      packagingCharge: null,
+      createdAt: createdAt.toISOString(),
+    };
+
+    let handoffMessageText: string | null = null;
+    let whatsAppDeepLink: string | null = null;
+    let handoffPreparedAt: Date | null = null;
+
+    if (status === "ready_for_handoff") {
+      const prepared = prepareWhatsAppHandoff(handoffPayload);
+      handoffMessageText = prepared.messageText;
+      whatsAppDeepLink = prepared.deepLink;
+      handoffPreparedAt = createdAt;
+    }
+
+    try {
+      request = await prisma.retailRequest.create({
+        data: {
+          reference,
+          locale: input.locale,
+          status,
+          customerName: input.customerName,
+          customerPhone: input.customerPhone,
+          customerNotes: input.customerNotes || "",
+          destinationCountry: input.destinationCountry,
+          destinationCode: input.destinationCode ?? null,
+          shippingMethodCode,
+          shippingMethodLabel,
+          shippingCostAmount,
+          shippingCostCurrency,
+          shippingWeightKg,
+          subtotal,
+          currency,
+          handoffPayloadJson: JSON.stringify(handoffPayload),
+          handoffMessageText,
+          whatsAppDeepLink,
+          handoffPreparedAt,
+          idempotencyKey: input.idempotencyKey ?? null,
+          customerId: customer.id,
+          lines: {
+            create: resolvedLines.map((l) => ({
+              productId: l.productId,
+              productNameAr: l.productNameAr,
+              productNameEn: l.productNameEn,
+              quantity: l.quantity,
+              unitPriceSnapshot: l.unitPriceSnapshot,
+              lineTotal: l.lineTotal,
+              currency: l.currency,
+            })),
+          },
+          handoffEvents:
+            status === "ready_for_handoff"
+              ? {
+                  create: {
+                    eventType: "prepared",
+                    fromStatus: null,
+                    toStatus: status,
+                    actor: "customer",
+                    note: "Initial handoff prepared from storefront",
+                  },
+                }
+              : undefined,
+        },
         include: { lines: true },
       });
-      if (winner) {
-        await prisma.customer.delete({ where: { id: customer.id } }).catch(() => {});
-        return winner;
+      break;
+    } catch (e) {
+      const isUniqueViolation =
+        typeof e === "object" &&
+        e !== null &&
+        (e as { code?: string }).code === "P2002";
+      const target = (e as { meta?: { target?: unknown } })?.meta?.target;
+      const targetsReference =
+        Array.isArray(target) && target.includes("reference");
+
+      // Concurrent duplicate submit lost the idempotency-key race: return
+      // the winner instead of erroring the retrying client.
+      if (input.idempotencyKey && isUniqueViolation && !targetsReference) {
+        const winner = await prisma.retailRequest.findUnique({
+          where: { idempotencyKey: input.idempotencyKey },
+          include: { lines: true },
+        });
+        if (winner) {
+          await prisma.customer
+            .delete({ where: { id: customer.id } })
+            .catch(() => {});
+          request = winner;
+          break;
+        }
       }
+
+      if (isUniqueViolation && targetsReference && attempt < MAX_REFERENCE_ATTEMPTS) {
+        continue; // draw a new reference and retry
+      }
+      await prisma.customer
+        .delete({ where: { id: customer.id } })
+        .catch(() => {});
+      throw e;
     }
-    throw e;
-  });
+  }
+
+  if (!request) {
+    // Unreachable in practice (the loop always either returns or throws),
+    // but keeps this function's return type honest for TypeScript.
+    throw new Error("RETAIL_REQUEST_CREATE_FAILED");
+  }
 
   return { request, handoffPayload: parsePayload(request.handoffPayloadJson) };
 }

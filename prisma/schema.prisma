@@ -111,34 +111,41 @@ model Customer {
 }
 
 model RetailRequest {
-  id                  String               @id @default(cuid())
-  reference           String               @unique
-  locale              String
+  id                   String               @id @default(cuid())
+  reference            String               @unique
+  locale               String
   /// draft | ready_for_handoff | handoff_opened | in_follow_up | completed | cancelled
-  status              String               @default("draft")
-  customerName        String
-  customerPhone       String
-  customerNotes       String               @default("")
-  destinationCountry  String
-  shippingMethodCode  String?
-  shippingMethodLabel String?
-  subtotal            Decimal
-  currency            String
-  handoffPayloadJson  String
+  status               String               @default("draft")
+  customerName         String
+  customerPhone        String
+  customerNotes        String               @default("")
+  destinationCountry   String
+  /// ISO-ish code into lib/shipping/rates.ts zones, or a Syria governorate
+  /// code — null for requests placed before the shipping calculator shipped
+  destinationCode      String?
+  shippingMethodCode   String?
+  shippingMethodLabel  String?
+  /// Calculator estimate, not a charge — platform has no payment gateway
+  shippingCostAmount   Decimal?
+  shippingCostCurrency String?
+  shippingWeightKg     Decimal?
+  subtotal             Decimal
+  currency             String
+  handoffPayloadJson   String
   /// Stored/generated WhatsApp prefilled message text (Week 3 wa.me handoff)
-  handoffMessageText  String?
+  handoffMessageText   String?
   /// Built wa.me deep link — no WhatsApp Business API
-  whatsAppDeepLink    String?
+  whatsAppDeepLink     String?
   /// Client-generated UUID — makes storefront submit idempotent
-  idempotencyKey      String?              @unique
-  handoffPreparedAt   DateTime?
-  handoffOpenedAt     DateTime?
-  customerId          String?
-  customer            Customer?            @relation(fields: [customerId], references: [id])
-  lines               RetailRequestLine[]
-  handoffEvents       RetailHandoffEvent[]
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
+  idempotencyKey       String?              @unique
+  handoffPreparedAt    DateTime?
+  handoffOpenedAt      DateTime?
+  customerId           String?
+  customer             Customer?            @relation(fields: [customerId], references: [id])
+  lines                RetailRequestLine[]
+  handoffEvents        RetailHandoffEvent[]
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
 
   @@index([status])
   @@index([customerPhone])
@@ -177,19 +184,19 @@ model RetailRequestLine {
 }
 
 model AdminUser {
-  id              String    @id @default(cuid())
-  email           String    @unique
-  passwordHash    String
-  name            String
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  passwordHash       String
+  name               String
   /// Encrypted TOTP secret (AES via AUTH_SECRET); null until 2FA enrolled
-  totpSecretEnc   String?
+  totpSecretEnc      String?
   /// JSON array of bcrypt-hashed one-time recovery codes
-  totpRecoveryHashes String  @default("[]")
-  totpEnabledAt   DateTime?
+  totpRecoveryHashes String    @default("[]")
+  totpEnabledAt      DateTime?
   /// Forces the change-password screen on next sign-in (e.g. after a reset)
-  mustChangePassword Boolean @default(false)
+  mustChangePassword Boolean   @default(false)
   passwordChangedAt  DateTime?
-  createdAt       DateTime  @default(now())
+  createdAt          DateTime  @default(now())
 }
 
 /// Append-only admin audit trail (F3)
@@ -208,29 +215,29 @@ model AdminAuditLog {
 
 /// Minimal admin-provisioned trader identity — not a marketplace seller account
 model TraderAccount {
-  id                    String               @id @default(cuid())
-  email                 String               @unique
+  id                    String                 @id @default(cuid())
+  email                 String                 @unique
   passwordHash          String
   displayName           String
-  companyName           String               @default("")
-  phone                 String               @default("")
+  companyName           String                 @default("")
+  phone                 String                 @default("")
   /// active | disabled
-  status                String               @default("active")
-  adminNotes            String               @default("")
+  status                String                 @default("active")
+  adminNotes            String                 @default("")
   /// Comma-separated launch category slugs the trader is interested in
-  interestCategorySlugs String               @default("")
+  interestCategorySlugs String                 @default("")
   /// Free-text deal preferences for admin matching
-  interestNotes         String               @default("")
+  interestNotes         String                 @default("")
   /// Forces the change-password screen on next sign-in (e.g. after an admin reset)
-  mustChangePassword    Boolean              @default(false)
+  mustChangePassword    Boolean                @default(false)
   passwordChangedAt     DateTime?
   deals                 DealProposal[]
   wholesaleRequests     WholesaleRequest[]
   brokerageRequests     BrokerageRequest[]
   notifications         TraderNotification[]
   whatsAppConversations WhatsAppConversation[]
-  createdAt             DateTime             @default(now())
-  updatedAt             DateTime             @updatedAt
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
 }
 
 /// In-app status center for traders (deals + wholesale + brokerage) — pull inbox, not push.
@@ -254,36 +261,36 @@ model TraderNotification {
 
 /// Trader commercial deal proposal — separate from RetailRequest / Wholesale
 model DealProposal {
-  id              String               @id @default(cuid())
-  reference       String               @unique
-  traderId        String
-  trader          TraderAccount        @relation(fields: [traderId], references: [id], onDelete: Restrict)
+  id                        String               @id @default(cuid())
+  reference                 String               @unique
+  traderId                  String
+  trader                    TraderAccount        @relation(fields: [traderId], references: [id], onDelete: Restrict)
   /// catalog | non_catalog
-  dealKind        String
-  title           String
+  dealKind                  String
+  title                     String
   /// Catalog deals may reference an existing RARE OUD Product (ownership stays with RARE OUD)
-  productId       String?
-  product         Product?             @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productId                 String?
+  product                   Product?             @relation(fields: [productId], references: [id], onDelete: SetNull)
   /// Trader-stated price (required on new creates — payment-first, 2026-11-03)
-  proposedPrice   Decimal?
-  currency        String?
-  quantity        Int?
-  conditionsNotes String               @default("")
+  proposedPrice             Decimal?
+  currency                  String?
+  quantity                  Int?
+  conditionsNotes           String               @default("")
   /// Model / SKU identifier (replaces category language on deals UI)
-  modelNumber     String               @default("")
+  modelNumber               String               @default("")
   /// proposed | negotiating | accepted | awaiting_payment | payment_confirmed | rejected | closed
-  status          String               @default("proposed")
+  status                    String               @default("proposed")
   /// WhatsApp payment handoff (additive — mirrors retail pattern; no online pay)
-  handoffMessageText String?
-  whatsAppDeepLink   String?
-  handoffPreparedAt  DateTime?
-  handoffOpenedAt    DateTime?
-  paymentConfirmedAt DateTime?
+  handoffMessageText        String?
+  whatsAppDeepLink          String?
+  handoffPreparedAt         DateTime?
+  handoffOpenedAt           DateTime?
+  paymentConfirmedAt        DateTime?
   paymentConfirmedByAdminId String?
-  entries         NegotiationEntry[]
-  curatedOffers   PublicCuratedOffer[]
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
+  entries                   NegotiationEntry[]
+  curatedOffers             PublicCuratedOffer[]
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
 
   @@index([traderId])
   @@index([status])
@@ -337,32 +344,42 @@ model PublicCuratedOffer {
 
 /// Wholesale trader ordering — separate from RetailRequest and DealProposal
 model WholesaleRequest {
-  id                 String                  @id @default(cuid())
-  reference          String                  @unique
-  traderId           String
-  trader             TraderAccount           @relation(fields: [traderId], references: [id], onDelete: Restrict)
+  id                   String                  @id @default(cuid())
+  reference            String                  @unique
+  traderId             String
+  trader               TraderAccount           @relation(fields: [traderId], references: [id], onDelete: Restrict)
   /// request_quote | propose_price
-  requestMode        String
+  requestMode          String
   /// submitted | under_review | quote_provided | confirmed | completed | cancelled
-  status             String                  @default("submitted")
-  traderNotes        String                  @default("")
+  status               String                  @default("submitted")
+  traderNotes          String                  @default("")
   /// Admin quotation response (simple Week 3 workflow)
-  quoteMessage       String?
-  quoteCurrency      String?
-  quotedAt           DateTime?
-  quotedByAdminId    String?
-  traderResponseNote String?
-  confirmedAt        DateTime?
-  completedAt        DateTime?
-  cancelledAt        DateTime?
+  quoteMessage         String?
+  quoteCurrency        String?
+  quotedAt             DateTime?
+  quotedByAdminId      String?
+  traderResponseNote   String?
+  confirmedAt          DateTime?
+  completedAt          DateTime?
+  cancelledAt          DateTime?
+  /// Trader-declared destination — country name or Syria governorate name
+  destinationCountry   String?
+  /// Zone/governorate code into lib/shipping/rates.ts
+  destinationCode      String?
+  shippingMethodCode   String?
+  shippingMethodLabel  String?
+  /// Calculator estimate, not a charge — platform has no payment gateway
+  shippingCostAmount   Decimal?
+  shippingCostCurrency String?
+  shippingWeightKg     Decimal?
   /// D37b / Appendix S 8.3 — shipping fulfillment (nullable until set)
-  carrier            String?
-  trackingReference  String?
-  shippedAt          DateTime?
-  lines              WholesaleRequestLine[]
-  events             WholesaleRequestEvent[]
-  createdAt          DateTime                @default(now())
-  updatedAt          DateTime                @updatedAt
+  carrier              String?
+  trackingReference    String?
+  shippedAt            DateTime?
+  lines                WholesaleRequestLine[]
+  events               WholesaleRequestEvent[]
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
 
   @@index([traderId])
   @@index([status])
@@ -547,104 +564,104 @@ model WhatsAppLinkAudit {
 
 /// Fourth commercial domain — trader asks RARE OUD to inspect/source goods (VISION §7).
 model BrokerageRequest {
-  id               String                @id @default(cuid())
-  reference        String                @unique
-  traderId         String
-  trader           TraderAccount         @relation(fields: [traderId], references: [id], onDelete: Restrict)
+  id                        String               @id @default(cuid())
+  reference                 String               @unique
+  traderId                  String
+  trader                    TraderAccount        @relation(fields: [traderId], references: [id], onDelete: Restrict)
   /// SUBMITTED | NEEDS_INFO | AWAITING_PAYMENT | PAYMENT_CONFIRMED | ACCEPTED | INSPECTION_SCHEDULED | INSPECTED | QUOTE_SENT | APPROVED | PURCHASED | SHIPPED | DELIVERED | CLOSED | DECLINED | REJECTED | CANCELLED
-  status           String                @default("SUBMITTED")
-  descriptionAr    String
-  descriptionEn    String                @default("")
+  status                    String               @default("SUBMITTED")
+  descriptionAr             String
+  descriptionEn             String               @default("")
   /// Legacy free-text category — kept for old rows; new UI writes modelNumber
-  categoryAr       String                @default("")
-  categoryEn       String                @default("")
+  categoryAr                String               @default("")
+  categoryEn                String               @default("")
   /// Model / SKU (owner 2026-11-03 — replaces category on create)
-  modelNumber      String                @default("")
+  modelNumber               String               @default("")
   /// Trader-stated goods price in USD (payment-first; no admin quote gate)
-  statedPriceUsd   Int?
-  quantity         Int                   @default(1)
-  cityAr           String                @default("")
-  cityEn           String                @default("")
-  placeNameAr      String                @default("")
-  placeNameEn      String                @default("")
-  sellerContact    String                @default("")
-  sourceUrl        String                @default("")
-  budgetMinUsd     Int?
-  budgetMaxUsd     Int?
-  timelineNotes    String                @default("")
-  traderNotes      String                @default("")
+  statedPriceUsd            Int?
+  quantity                  Int                  @default(1)
+  cityAr                    String               @default("")
+  cityEn                    String               @default("")
+  placeNameAr               String               @default("")
+  placeNameEn               String               @default("")
+  sellerContact             String               @default("")
+  sourceUrl                 String               @default("")
+  budgetMinUsd              Int?
+  budgetMaxUsd              Int?
+  timelineNotes             String               @default("")
+  traderNotes               String               @default("")
   /// JSON string array of public image paths (trader request photos)
-  photoPaths       String                @default("[]")
-  adminDeclineReason String              @default("")
-  inspectionAt     DateTime?
-  inspectionAssignee String              @default("")
-  inspectionLocation String              @default("")
-  carrier          String                @default("")
-  trackingRef      String                @default("")
-  shippedAt        DateTime?
-  deliveredAt      DateTime?
+  photoPaths                String               @default("[]")
+  adminDeclineReason        String               @default("")
+  inspectionAt              DateTime?
+  inspectionAssignee        String               @default("")
+  inspectionLocation        String               @default("")
+  carrier                   String               @default("")
+  trackingRef               String               @default("")
+  shippedAt                 DateTime?
+  deliveredAt               DateTime?
   /// WhatsApp payment handoff (additive)
-  handoffMessageText String?
-  whatsAppDeepLink   String?
-  handoffPreparedAt  DateTime?
-  handoffOpenedAt    DateTime?
-  paymentConfirmedAt DateTime?
+  handoffMessageText        String?
+  whatsAppDeepLink          String?
+  handoffPreparedAt         DateTime?
+  handoffOpenedAt           DateTime?
+  paymentConfirmedAt        DateTime?
   paymentConfirmedByAdminId String?
-  inspection       BrokerageInspection?
-  quote            BrokerageQuote?
-  events           BrokerageEvent[]
-  createdAt        DateTime              @default(now())
-  updatedAt        DateTime              @updatedAt
+  inspection                BrokerageInspection?
+  quote                     BrokerageQuote?
+  events                    BrokerageEvent[]
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
 
   @@index([traderId, createdAt])
   @@index([status, createdAt])
 }
 
 model BrokerageInspection {
-  id          String           @id @default(cuid())
-  requestId   String           @unique
-  request     BrokerageRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  id         String           @id @default(cuid())
+  requestId  String           @unique
+  request    BrokerageRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
   /// A | B | C | D
-  grade       String           @default("B")
-  notesAr     String           @default("")
-  notesEn     String           @default("")
-  verdictAr   String           @default("")
-  verdictEn   String           @default("")
+  grade      String           @default("B")
+  notesAr    String           @default("")
+  notesEn    String           @default("")
+  verdictAr  String           @default("")
+  verdictEn  String           @default("")
   /// JSON string array of public image paths
-  photoPaths  String           @default("[]")
-  checklist   String           @default("")
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  photoPaths String           @default("[]")
+  checklist  String           @default("")
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
 }
 
 model BrokerageQuote {
-  id              String           @id @default(cuid())
-  requestId       String           @unique
-  request         BrokerageRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
-  goodsValueUsd   Int
+  id             String           @id @default(cuid())
+  requestId      String           @unique
+  request        BrokerageRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  goodsValueUsd  Int
   /// 1.0 – 2.0
-  commissionRate  Float
-  shippingUsd     Int              @default(0)
-  notesAr         String           @default("")
-  notesEn         String           @default("")
-  validUntil      DateTime?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  commissionRate Float
+  shippingUsd    Int              @default(0)
+  notesAr        String           @default("")
+  notesEn        String           @default("")
+  validUntil     DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 }
 
 model BrokerageEvent {
-  id        String           @id @default(cuid())
-  requestId String
-  request   BrokerageRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  id         String           @id @default(cuid())
+  requestId  String
+  request    BrokerageRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
   /// status_change | note | system
-  kind      String           @default("status_change")
+  kind       String           @default("status_change")
   /// admin | trader | system
-  actor     String
+  actor      String
   fromStatus String?
   toStatus   String?
-  messageAr  String          @default("")
-  messageEn  String          @default("")
-  createdAt  DateTime        @default(now())
+  messageAr  String           @default("")
+  messageEn  String           @default("")
+  createdAt  DateTime         @default(now())
 
   @@index([requestId, createdAt])
 }

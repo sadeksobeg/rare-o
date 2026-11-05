@@ -102,6 +102,40 @@ export default async function TraderWholesaleDetailPage({
         </div>
       ) : null}
 
+      {request.destinationCountry || request.shippingCostAmount != null ? (
+        <div className="ro-portal-card space-y-2 border p-4 text-sm">
+          <h2 className="font-semibold">
+            {locale === "ar" ? "تقدير الشحن عند الطلب" : "Shipping estimate at submission"}
+          </h2>
+          {request.destinationCountry ? (
+            <p>
+              <span className="text-ro-muted">
+                {locale === "ar" ? "الوجهة: " : "Destination: "}
+              </span>
+              {request.destinationCountry}
+            </p>
+          ) : null}
+          {request.shippingMethodLabel ? (
+            <p>
+              <span className="text-ro-muted">
+                {locale === "ar" ? "طريقة الشحن: " : "Method: "}
+              </span>
+              {request.shippingMethodLabel}
+            </p>
+          ) : null}
+          {request.shippingCostAmount != null ? (
+            <p>
+              <span className="text-ro-muted">
+                {locale === "ar" ? "التكلفة التقديرية: " : "Estimated cost: "}
+              </span>
+              <bdi dir="ltr">
+                {Number(request.shippingCostAmount)} {request.shippingCostCurrency}
+              </bdi>
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
       {request.carrier || request.trackingReference ? (
         <div className="ro-portal-card space-y-2 border p-4 text-sm">
           <h2 className="font-semibold">{dict.adminUi.form.shippingTitle}</h2>

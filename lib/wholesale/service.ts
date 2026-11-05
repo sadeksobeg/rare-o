@@ -2,6 +2,8 @@ import { uiVisibleWholesaleWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { notifyTrader } from "@/lib/trader/notifications";
+import { calculateOudShipmentWeightKg } from "@/lib/shipping/rates";
+import { resolveAvailableMethods } from "@/lib/shipping/resolve-available-methods";
 import {
   WHOLESALE_QTY_TECHNICAL_MAX,
   canTransitionWholesale,
@@ -32,6 +34,10 @@ export type CreateWholesaleRequestInput = {
   requestMode: WholesaleRequestMode;
   traderNotes?: string;
   lines: WholesaleLineInput[];
+  destinationCountry?: string | null;
+  destinationCode?: string | null;
+  shippingMethodCode?: string | null;
+  shippingMethodLabel?: string | null;
 };
 
 export function isWholesaleEligibleProduct(product: {
@@ -138,6 +144,26 @@ export async function createWholesaleRequest(input: CreateWholesaleRequestInput)
   const reference = buildReference();
   const status: WholesaleStatus = "submitted";
 
+  const totalQty = resolved.reduce((sum, l) => sum + l.quantity, 0);
+  const shippingWeightKg = calculateOudShipmentWeightKg(Math.max(1, totalQty));
+  let shippingMethodCode: string | null = null;
+  let shippingMethodLabel: string | null = null;
+  let shippingCostAmount: number | null = null;
+  let shippingCostCurrency: string | null = null;
+
+  if (input.destinationCode && input.shippingMethodCode) {
+    const available = resolveAvailableMethods(
+      input.destinationCode,
+      shippingWeightKg
+    );
+    const match = available.find((m) => m.code === input.shippingMethodCode);
+    if (!match) throw new Error("SHIPPING_METHOD_NOT_AVAILABLE");
+    shippingMethodCode = match.code;
+    shippingMethodLabel = input.shippingMethodLabel?.trim() || match.labelAr;
+    shippingCostAmount = match.amount;
+    shippingCostCurrency = match.currency;
+  }
+
   return prisma.wholesaleRequest.create({
     data: {
       reference,
@@ -145,6 +171,13 @@ export async function createWholesaleRequest(input: CreateWholesaleRequestInput)
       requestMode: input.requestMode,
       status,
       traderNotes: input.traderNotes?.trim() || "",
+      destinationCountry: input.destinationCountry?.trim() || null,
+      destinationCode: input.destinationCode?.trim() || null,
+      shippingMethodCode,
+      shippingMethodLabel,
+      shippingCostAmount,
+      shippingCostCurrency,
+      shippingWeightKg,
       lines: {
         create: resolved.map((l) => ({
           productId: l.productId,

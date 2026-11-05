@@ -60,6 +60,10 @@ export async function traderCreateWholesaleRequestAction(
   const parsed = wholesaleRequestCreateSchema.safeParse({
     requestMode: formData.get("requestMode"),
     traderNotes: formData.get("traderNotes") || "",
+    destinationCountry: formData.get("destinationCountry") || null,
+    destinationCode: formData.get("destinationCode") || null,
+    shippingMethodCode: formData.get("shippingMethodCode") || null,
+    shippingMethodLabel: formData.get("shippingMethodLabel") || null,
     lines: linesRaw,
   });
   if (!parsed.success) {
@@ -75,6 +79,10 @@ export async function traderCreateWholesaleRequestAction(
       traderId: session.sub,
       requestMode: parsed.data.requestMode,
       traderNotes: parsed.data.traderNotes,
+      destinationCountry: parsed.data.destinationCountry,
+      destinationCode: parsed.data.destinationCode,
+      shippingMethodCode: parsed.data.shippingMethodCode,
+      shippingMethodLabel: parsed.data.shippingMethodLabel,
       lines: parsed.data.lines.map((l) => ({
         productId: l.productId,
         quantity: l.quantity,

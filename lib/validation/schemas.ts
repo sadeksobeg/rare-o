@@ -169,6 +169,8 @@ export const retailRequestCreateSchema = z.object({
   customerPhone: z.string().trim().min(5).max(40),
   customerNotes: z.string().trim().max(2000).optional().default(""),
   destinationCountry: z.string().trim().min(2).max(80),
+  /** Country or Syria-governorate code into lib/shipping/rates.ts */
+  destinationCode: z.string().trim().max(40).nullable().optional(),
   shippingMethodCode: z.string().trim().max(40).nullable().optional(),
   shippingMethodLabel: z.string().trim().max(120).nullable().optional(),
   lines: z.array(cartLineSchema).min(1),
@@ -341,6 +343,11 @@ export const wholesaleRequestCreateSchema = z
   .object({
     requestMode: z.enum(WHOLESALE_REQUEST_MODES),
     traderNotes: z.string().trim().max(5000).optional().default(""),
+    destinationCountry: z.string().trim().max(80).nullable().optional(),
+    /** Country or Syria-governorate code into lib/shipping/rates.ts */
+    destinationCode: z.string().trim().max(40).nullable().optional(),
+    shippingMethodCode: z.string().trim().max(40).nullable().optional(),
+    shippingMethodLabel: z.string().trim().max(120).nullable().optional(),
     lines: z.array(wholesaleLineSchema).min(1).max(50),
   })
   .superRefine((data, ctx) => {

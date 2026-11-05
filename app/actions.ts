@@ -811,6 +811,7 @@ export async function createRetailRequestAction(
     customerPhone: formData.get("customerPhone"),
     customerNotes: formData.get("customerNotes") || "",
     destinationCountry: formData.get("destinationCountry"),
+    destinationCode: formData.get("destinationCode") || null,
     shippingMethodCode: formData.get("shippingMethodCode") || null,
     shippingMethodLabel: formData.get("shippingMethodLabel") || null,
     lines,

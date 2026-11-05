@@ -3,6 +3,7 @@
 import { traderCreateWholesaleRequestAction } from "@/app/wholesale-actions";
 import type { ActionResult } from "@/app/actions";
 import { BuilderSummaryBar } from "@/components/trader/builder-summary-bar";
+import { ShippingCostSelector } from "@/components/storefront/shipping-cost-selector";
 import {
   ProductPicker,
   type PickerProduct,
@@ -303,6 +304,11 @@ export function WholesaleRequestForm({
               </li>
             ))}
           </ul>
+
+          <ShippingCostSelector
+            locale={locale}
+            oudUnitCount={selected.reduce((s, x) => s + x.quantity, 0)}
+          />
 
           <label className="block space-y-1.5 text-sm">
             <span className="font-medium">{t.wsNotes}</span>
