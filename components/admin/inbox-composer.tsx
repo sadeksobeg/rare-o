@@ -42,6 +42,73 @@ function formatElapsed(sec: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+const WAVEFORM_BARS = 28;
+
+/**
+ * Live mic-level waveform while recording. Reads the analyser on every
+ * animation frame and writes straight to each bar's transform via refs —
+ * React never re-renders for this, only `transform`/`opacity` change (per
+ * the motion rules: no `transition: all`, no layout-affecting properties).
+ * Falls back to a static bar row when the OS/browser asks for reduced motion.
+ */
+function RecordingWaveform({ stream }: { stream: MediaStream | null }) {
+  const barRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!stream || typeof AudioContext === "undefined") return;
+    const reduceMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) return;
+
+    const ctx = new AudioContext();
+    const source = ctx.createMediaStreamSource(stream);
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 64;
+    analyser.smoothingTimeConstant = 0.75;
+    source.connect(analyser);
+    const data = new Uint8Array(analyser.frequencyBinCount);
+
+    const tick = () => {
+      analyser.getByteFrequencyData(data);
+      const step = Math.floor(data.length / WAVEFORM_BARS) || 1;
+      for (let i = 0; i < WAVEFORM_BARS; i++) {
+        const v = data[i * step] ?? 0;
+        const scale = Math.max(0.12, Math.min(1, v / 180));
+        const bar = barRefs.current[i];
+        if (bar) bar.style.transform = `scaleY(${scale})`;
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+      source.disconnect();
+      void ctx.close();
+    };
+  }, [stream]);
+
+  return (
+    <div
+      className="flex h-6 flex-1 items-center gap-[2.5px] overflow-hidden"
+      aria-hidden
+    >
+      {Array.from({ length: WAVEFORM_BARS }).map((_, i) => (
+        <span
+          key={i}
+          ref={(el) => {
+            barRefs.current[i] = el;
+          }}
+          className="h-full w-[2.5px] shrink-0 origin-center rounded-full bg-[color:var(--ro-danger-700)] opacity-70 motion-reduce:opacity-40"
+          style={{ transform: "scaleY(0.12)" }}
+        />
+      ))}
+    </div>
+  );
+}
+
 /**
  * A15 — Composer: compact bar + quick replies + voice note (ptt audio).
  */
@@ -63,6 +130,9 @@ export function InboxComposer({
   const [file, setFile] = useState<File | null>(null);
   const [recording, setRecording] = useState(false);
   const [elapsed, setElapsed] = useState(0);
+  const [recordingStream, setRecordingStream] = useState<MediaStream | null>(
+    null
+  );
   const fileRef = useRef<HTMLInputElement>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const clientRequestIdRef = useRef<string | null>(null);
@@ -137,6 +207,7 @@ export function InboxComposer({
     mediaRecorderRef.current = null;
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
+    setRecordingStream(null);
     if (discard) chunksRef.current = [];
   }
 
@@ -250,6 +321,7 @@ export function InboxComposer({
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
+      setRecordingStream(stream);
       const mime = pickRecorderMime();
       const rec = new MediaRecorder(stream, { mimeType: mime });
       chunksRef.current = [];
@@ -296,6 +368,7 @@ export function InboxComposer({
       chunksRef.current = [];
       streamRef.current?.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
+      setRecordingStream(null);
       mediaRecorderRef.current = null;
       setRecording(false);
       setElapsed(0);
@@ -399,22 +472,19 @@ export function InboxComposer({
 
       {recording ? (
         <div
-          className="flex items-center gap-2 rounded-[16px] border border-[color:color-mix(in_srgb,var(--ro-danger-700)_35%,var(--ro-border-subtle))] bg-[color:var(--ro-bg-sunken)] px-2 py-1.5"
+          className="flex items-center gap-2.5 rounded-[16px] border border-[color:color-mix(in_srgb,var(--ro-danger-700)_35%,var(--ro-border-subtle))] bg-[color:var(--ro-bg-sunken)] px-3 py-2"
           role="status"
           aria-live="polite"
         >
-          <span
-            className="ms-1 inline-flex size-2.5 shrink-0 rounded-full bg-[color:var(--ro-danger-700)] motion-safe:animate-pulse"
-            aria-hidden
-          />
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-[color:var(--ro-text)]">
-              {i.voiceRecording}
-            </p>
-            <p className="font-mono text-[11px] tabular-nums text-[color:var(--ro-text-muted)]">
-              <bdi dir="ltr">{formatElapsed(elapsed)}</bdi>
-            </p>
-          </div>
+          <span className="relative ms-0.5 flex size-2.5 shrink-0" aria-hidden>
+            <span className="absolute inline-flex size-full rounded-full bg-[color:var(--ro-danger-700)] opacity-60 motion-safe:animate-ping" />
+            <span className="relative inline-flex size-2.5 rounded-full bg-[color:var(--ro-danger-700)]" />
+          </span>
+          <p className="shrink-0 font-mono text-[12px] font-semibold tabular-nums text-[color:var(--ro-text)]">
+            <bdi dir="ltr">{formatElapsed(elapsed)}</bdi>
+          </p>
+          <RecordingWaveform stream={recordingStream} />
+          <p className="sr-only">{i.voiceRecording}</p>
           <button
             type="button"
             onClick={cancelRecording}
@@ -426,7 +496,7 @@ export function InboxComposer({
             type="button"
             onClick={stopAndSendRecording}
             disabled={pending || elapsed < 1}
-            className="inline-flex size-9 items-center justify-center rounded-full bg-[color:var(--ro-plum-700)] text-[var(--ro-sand-50)] transition-[opacity,transform] duration-[var(--ro-dur-fast)] hover:opacity-90 active:scale-[0.96] disabled:opacity-40"
+            className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-[color:var(--ro-plum-700)] text-[var(--ro-sand-50)] transition-[opacity,transform] duration-[var(--ro-dur-fast)] hover:opacity-90 active:scale-[0.96] disabled:opacity-40"
             aria-label={i.voiceStop}
           >
             <Square className="size-3.5 fill-current" strokeWidth={1.5} aria-hidden />

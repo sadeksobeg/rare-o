@@ -45,6 +45,7 @@ import {
   applyContactIdentity,
   persistOutboundEcho,
   persistUnsupportedInbound,
+  recordOutboundStatusUpdate,
   recoverInterruptedOutbound,
   seedConversationFromChat,
   upsertConnectionHealth,
@@ -298,6 +299,24 @@ async function main(): Promise<void> {
         const message = err instanceof Error ? err.message : String(err);
         console.error(
           `[whatsapp-worker] contact identity error: ${message.slice(0, 200)}`
+        );
+      }
+    },
+    onOutboundStatusUpdate: async (event) => {
+      try {
+        const result = await recordOutboundStatusUpdate(
+          event.waMessageId,
+          event.status
+        );
+        if (result.applied) {
+          console.log(
+            `[whatsapp-worker] outbound status waMessageId=${event.waMessageId} status=${event.status}`
+          );
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(
+          `[whatsapp-worker] outbound status error: ${message.slice(0, 200)}`
         );
       }
     },

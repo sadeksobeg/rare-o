@@ -790,6 +790,10 @@ export class BaileysWhatsAppAdapter implements WhatsAppAdapter {
         void this.handleMessagesUpsert(payload);
       });
 
+      sock.ev.on("messages.update", (updates) => {
+        void this.handleMessagesUpdate(updates);
+      });
+
       sock.ev.on("messaging-history.set", (payload) => {
         void this.handleHistorySet(payload);
       });
@@ -1054,6 +1058,30 @@ export class BaileysWhatsAppAdapter implements WhatsAppAdapter {
         void this.ingestHistoryPhoneMappings(msg);
       }
       await this.processWaMessage(msg, { downloadMedia: true });
+    }
+  }
+
+  /**
+   * Delivery/read receipts for messages we sent. `update.status` only
+   * appears on the row that actually changed, so most events here are for
+   * someone else's inbound ack and have nothing to report — bail quietly.
+   */
+  private async handleMessagesUpdate(
+    updates: Array<{ key: { id?: string | null; fromMe?: boolean | null }; update: Partial<WAMessage> }>
+  ): Promise<void> {
+    if (this.stopped) return;
+    for (const { key, update } of updates) {
+      if (!key.fromMe || !key.id) continue;
+      const level = update.status;
+      if (level == null) continue;
+      // WAMessageStatus: ERROR=0 PENDING=1 SERVER_ACK=2 DELIVERY_ACK=3 READ=4 PLAYED=5
+      const status = level >= 4 ? "read" : level === 3 ? "delivered" : null;
+      if (!status) continue;
+      await this.events.onOutboundStatusUpdate?.({
+        waMessageId: key.id,
+        status,
+        timestamp: nowIso(),
+      });
     }
   }
 

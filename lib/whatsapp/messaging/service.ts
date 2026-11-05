@@ -1108,6 +1108,45 @@ export async function recoverInterruptedOutbound(
   return { recoveredToPending, markedFailed, markedSent };
 }
 
+const STATUS_RANK: Record<string, number> = {
+  pending: 0,
+  sending: 1,
+  sent: 2,
+  delivered: 3,
+  read: 4,
+};
+
+/**
+ * Apply a delivery/read receipt from the transport (Baileys `messages.update`
+ * ack levels). Only ever moves status forward — a late-arriving "delivered"
+ * after "read" (out-of-order receipts happen) or any receipt for a message
+ * already "failed" is a no-op, never a downgrade.
+ */
+export async function recordOutboundStatusUpdate(
+  waMessageId: string,
+  status: "delivered" | "read",
+  db: DbClient = defaultPrisma
+): Promise<{ ok: boolean; applied: boolean }> {
+  const id = waMessageId.trim();
+  if (!id) return { ok: false, applied: false };
+
+  const row = await db.whatsAppMessage.findUnique({
+    where: { waMessageId: id },
+    select: { id: true, status: true, direction: true },
+  });
+  if (!row || row.direction !== "outbound") return { ok: false, applied: false };
+
+  const current = STATUS_RANK[row.status] ?? -1;
+  const next = STATUS_RANK[status];
+  if (next <= current) return { ok: true, applied: false };
+
+  await db.whatsAppMessage.update({
+    where: { id: row.id },
+    data: { status },
+  });
+  return { ok: true, applied: true };
+}
+
 /**
  * Atomically claim a pending outbound row for sending.
  * Prevents duplicate concurrent dispatch across workers/polls.

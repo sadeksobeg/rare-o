@@ -906,6 +906,7 @@ type Dict = {
     waitingOnYou: string;
     waitingOnAdmin: string;
     dealsTitle: string;
+    dealsLead: string;
     dealsEmpty: string;
     dealsEmptyBody: string;
     dealsTabList: string;
@@ -1183,6 +1184,8 @@ type Dict = {
     reconnect: string;
     nonText: string;
     retry: string;
+    statusDelivered: string;
+    statusRead: string;
     newMessages: string;
     linkRecord: string;
     unlinkConfirm: string;
@@ -2397,6 +2400,7 @@ const ar: Dict = {
     waitingOnYou: "بانتظارك",
     waitingOnAdmin: "بانتظار الإدارة",
     dealsTitle: "مقترحات صفقاتي",
+    dealsLead: "تابع مقترحاتك المرسلة وتفاوض مباشرة مع فريق RARE OUD.",
     dealsEmpty: "لا توجد مقترحات بعد",
     dealsEmptyBody: "ابدأ بتقديم أول مقترح صفقة إلى RARE OUD.",
     dealsTabList: "تصفية الصفقات",
@@ -2683,6 +2687,8 @@ const ar: Dict = {
     reconnect: "إعادة الاتصال",
     nonText: "مرفق",
     retry: "إعادة المحاولة",
+    statusDelivered: "تم التسليم",
+    statusRead: "تمت القراءة",
     newMessages: "رسائل جديدة ↓",
     linkRecord: "ربط بسجل",
     unlinkConfirm: "إزالة الربط؟",
@@ -3922,6 +3928,7 @@ const en: Dict = {
     waitingOnYou: "Waiting on you",
     waitingOnAdmin: "Waiting on RARE OUD",
     dealsTitle: "My deal proposals",
+    dealsLead: "Track your submitted proposals and negotiate directly with the RARE OUD team.",
     dealsEmpty: "No proposals yet",
     dealsEmptyBody: "Start by sending your first deal proposal to RARE OUD.",
     dealsTabList: "Filter deals",
@@ -4216,6 +4223,8 @@ const en: Dict = {
     reconnect: "Reconnect",
     nonText: "Attachment",
     retry: "Retry",
+    statusDelivered: "Delivered",
+    statusRead: "Read",
     newMessages: "New messages ↓",
     linkRecord: "Link to record",
     unlinkConfirm: "Remove link?",

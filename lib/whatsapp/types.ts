@@ -161,6 +161,13 @@ export type WhatsAppContactIdentityEvent = {
   displayName: string | null;
 };
 
+/** Delivery/read receipt for a message we sent (fromMe), by WA ack level. */
+export type WhatsAppOutboundStatusEvent = {
+  waMessageId: string;
+  status: "delivered" | "read";
+  timestamp: string;
+};
+
 export type WhatsAppAdapterEvents = {
   onHealth?: (health: WhatsAppHealth) => void | Promise<void>;
   onQr?: (payload: WhatsAppQrPayload) => void | Promise<void>;
@@ -180,6 +187,9 @@ export type WhatsAppAdapterEvents = {
   onChatSeed?: (event: WhatsAppChatSeedEvent) => void | Promise<void>;
   onContactIdentity?: (
     event: WhatsAppContactIdentityEvent
+  ) => void | Promise<void>;
+  onOutboundStatusUpdate?: (
+    event: WhatsAppOutboundStatusEvent
   ) => void | Promise<void>;
 };
 

@@ -17,22 +17,50 @@ import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { InboxMessageItem } from "@/lib/whatsapp/messaging/inbox";
 import { cn } from "@/lib/utils";
 
-function DeliveryIcon({ status }: { status: string }) {
-  const cls = "size-3 shrink-0 opacity-80";
+/**
+ * WhatsApp-recognizable progression without introducing a new color: sent
+ * and delivered share the same dim tick (single → double); "read" lifts to
+ * full opacity so it visibly "lights up" against the dimmer unread states —
+ * identity-compliant (ink/sand/plum only, no blue).
+ */
+function DeliveryIcon({ status, dict }: { status: string; dict: Dictionary }) {
+  const base = "size-3 shrink-0";
+  const dim = cn(base, "opacity-70");
   switch (status) {
     case "pending":
-      return <Clock className={cls} aria-hidden />;
+      return (
+        <span title={dict.inbox.statusPending}>
+          <Clock className={dim} aria-hidden />
+        </span>
+      );
     case "sending":
-      return <Loader className={cn(cls, "animate-spin")} aria-hidden />;
+      return (
+        <span title={dict.inbox.statusSending}>
+          <Loader className={cn(dim, "animate-spin")} aria-hidden />
+        </span>
+      );
     case "sent":
-      return <Check className={cls} aria-hidden />;
+      return (
+        <span title={dict.inbox.statusSent}>
+          <Check className={dim} aria-hidden />
+        </span>
+      );
     case "delivered":
+      return (
+        <span title={dict.inbox.statusDelivered}>
+          <CheckCheck className={dim} aria-hidden />
+        </span>
+      );
     case "read":
-      return <CheckCheck className={cls} aria-hidden />;
+      return (
+        <span title={dict.inbox.statusRead}>
+          <CheckCheck className={cn(base, "opacity-100")} aria-hidden />
+        </span>
+      );
     case "failed":
       return (
         <CircleAlert
-          className={cn(cls, "text-[color:var(--ro-danger-700)] opacity-100")}
+          className={cn(base, "text-[color:var(--ro-danger-700)]")}
           aria-hidden
         />
       );
@@ -219,7 +247,7 @@ export function MessageBubble({
         <time dateTime={message.waTimestamp ?? message.createdAt}>
           {timeLabel}
         </time>
-        {isOut ? <DeliveryIcon status={message.status} /> : null}
+        {isOut ? <DeliveryIcon status={message.status} dict={dict} /> : null}
         {failed ? (
           <button
             type="button"
