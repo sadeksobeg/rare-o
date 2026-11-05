@@ -40,11 +40,20 @@ export function AdminMobileChrome({
 }) {
   const [open, setOpen] = useState(false);
   const [host, setHost] = useState<Element | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const titleId = useId();
   const { theme } = usePortalTheme();
 
   useEffect(() => {
     setHost(document.querySelector(".ro-portal") ?? document.body);
+    const mq = window.matchMedia("(max-width: 1023px)");
+    const sync = () => {
+      setIsMobile(mq.matches);
+      if (!mq.matches) setOpen(false);
+    };
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
   }, []);
 
   useEffect(() => {
@@ -92,17 +101,19 @@ export function AdminMobileChrome({
         </button>
       </div>
 
-      {createPortal(
-        <AdminMobileTabBar
-          labels={tabLabels}
-          inboxBadge={inboxBadge}
-          moreLabel={menuLabel}
-          onMore={() => setOpen(true)}
-        />,
-        host
-      )}
+      {isMobile
+        ? createPortal(
+            <AdminMobileTabBar
+              labels={tabLabels}
+              inboxBadge={inboxBadge}
+              moreLabel={menuLabel}
+              onMore={() => setOpen(true)}
+            />,
+            host
+          )
+        : null}
 
-      {open
+      {isMobile && open
         ? createPortal(
             <div
               className="ro-admin-mobile-drawer fixed inset-0 z-[200] lg:hidden"

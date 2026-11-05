@@ -66,7 +66,7 @@ export function AdminQuickCreate({
   return createPortal(
     <div
       ref={rootRef}
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-[95] flex justify-end p-6 pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] md:p-8 md:pb-8"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-[95] flex justify-end p-6 pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] lg:p-8 lg:pb-8"
     >
       <div className="pointer-events-auto flex flex-col items-end">
         {open ? (
