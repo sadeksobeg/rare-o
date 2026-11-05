@@ -104,7 +104,8 @@ export type EnqueueOutboundTextResult =
         | "INVALID_INPUT"
         | "PERSIST_FAILED"
         | "RATE_LIMITED"
-        | "SAFETY_CIRCUIT";
+        | "SAFETY_CIRCUIT"
+        | "RECONNECT_COOLDOWN";
       error: string;
     };
 
@@ -130,7 +131,8 @@ export type DispatchOutboundResult =
         | "MAX_ATTEMPTS"
         | "CLAIM_FAILED"
         | "RATE_LIMITED"
-        | "SAFETY_CIRCUIT";
+        | "SAFETY_CIRCUIT"
+        | "RECONNECT_COOLDOWN";
       error: string;
     };
 

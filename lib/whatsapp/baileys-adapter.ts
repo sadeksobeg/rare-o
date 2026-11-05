@@ -32,6 +32,7 @@ import {
   wipeAuthState,
   type WhatsAppSessionStoreConfig,
 } from "@/lib/whatsapp/session-store";
+import { noteConnectionEstablished } from "@/lib/whatsapp/outbound-safety";
 import {
   isOutboundEnabled,
   type WhatsAppAdapter,
@@ -842,6 +843,9 @@ export class BaileysWhatsAppAdapter implements WhatsAppAdapter {
     if (update.connection === "open") {
       this.reconnectAttempt = 0;
       this.lastConnectedAt = nowIso();
+      // A burst of outbound traffic the instant the session reconnects is a
+      // known ban signal — arm a brief cooldown before sends resume.
+      noteConnectionEstablished();
       await this.setHealth("CONNECTED", "Baileys connection open");
       // Nudge app-state / roster sync so chat list fills beyond the last open slice
       void this.requestRosterRefresh();

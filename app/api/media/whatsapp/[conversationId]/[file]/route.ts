@@ -64,11 +64,11 @@ export async function GET(
     return notFound();
   }
 
-  const row = await prisma.whatsAppConversation.findUnique({
-    where: { id: conversationId },
-    select: { id: true },
+  const message = await prisma.whatsAppMessage.findFirst({
+    where: { conversationId, storageKey: `${conversationId}/${file}` },
+    select: { mediaMime: true },
   });
-  if (!row) return notFound();
+  if (!message) return notFound();
 
   const root = whatsappUploadsRoot();
   const filePath = path.join(root, conversationId, file);
@@ -84,7 +84,10 @@ export async function GET(
     return notFound();
   }
 
-  const contentType = guessContentType(file);
+  // Prefer the mime recorded at save time (verified, not guessed) — the
+  // file extension is a best-effort fallback for rows saved before mime
+  // was tracked, or an exotic subtype that didn't map to a known extension.
+  const contentType = message.mediaMime?.trim() || guessContentType(file);
   const disposition =
     contentType.startsWith("image/") ||
     contentType.startsWith("video/") ||

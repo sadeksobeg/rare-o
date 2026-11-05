@@ -19,13 +19,14 @@ import { prisma } from "@/lib/db/prisma";
 export type OutboundSafetyCode =
   | "RATE_LIMITED"
   | "SAFETY_CIRCUIT"
+  | "RECONNECT_COOLDOWN"
   | "OK";
 
 export type OutboundSafetyDecision =
   | { ok: true }
   | {
       ok: false;
-      code: "RATE_LIMITED" | "SAFETY_CIRCUIT";
+      code: "RATE_LIMITED" | "SAFETY_CIRCUIT" | "RECONNECT_COOLDOWN";
       error: string;
       retryAfterMs: number;
     };
@@ -54,6 +55,13 @@ export function getOutboundSafetyConfig() {
     /** Failures in circuitWindow that open the circuit. */
     circuitFailures: envInt("WHATSAPP_OUTBOUND_CIRCUIT_FAILURES", 5, 2),
     circuitWindowMs: envInt("WHATSAPP_OUTBOUND_CIRCUIT_WINDOW_MS", 300_000, 30_000),
+    /**
+     * Quiet period after the Baileys socket reaches CONNECTED (fresh login
+     * or reconnect) before outbound sends resume. A burst of messages the
+     * instant a session re-establishes is a known ban signal; this buys
+     * time for the connection to look "settled" first.
+     */
+    reconnectCooldownMs: envInt("WHATSAPP_OUTBOUND_RECONNECT_COOLDOWN_MS", 20_000, 0),
   };
 }
 
@@ -64,6 +72,12 @@ type State = {
   dayCount: number;
   failureStamps: number[];
   circuitOpenUntil: number;
+  /**
+   * Not persisted to the DB (deliberately — see `noteConnectionEstablished`):
+   * a worker restart already implies a fresh connection event, so there is
+   * no gap in coverage to close by mirroring this across restarts.
+   */
+  reconnectCooldownUntil: number;
 };
 
 const state: State = {
@@ -73,6 +87,7 @@ const state: State = {
   dayCount: 0,
   failureStamps: [],
   circuitOpenUntil: 0,
+  reconnectCooldownUntil: 0,
 };
 
 const SAFETY_STATE_ROW_ID = "default";
@@ -221,6 +236,15 @@ export function assessOutboundEnqueue(): OutboundSafetyDecision {
     };
   }
 
+  if (state.reconnectCooldownUntil > now) {
+    return {
+      ok: false,
+      code: "RECONNECT_COOLDOWN",
+      error: "WhatsApp connection just (re)established — pausing sends briefly",
+      retryAfterMs: state.reconnectCooldownUntil - now,
+    };
+  }
+
   if (state.dayCount >= cfg.dailyMax) {
     return {
       ok: false,
@@ -275,9 +299,27 @@ export async function acquireOutboundSendSlot(): Promise<OutboundSafetyDecision>
     };
   }
 
+  if (state.reconnectCooldownUntil > started) {
+    return {
+      ok: false,
+      code: "RECONNECT_COOLDOWN",
+      error: "WhatsApp connection just (re)established — pausing sends briefly",
+      retryAfterMs: state.reconnectCooldownUntil - started,
+    };
+  }
+
   for (;;) {
     const now = Date.now();
     snapshotLimits(now);
+
+    if (state.reconnectCooldownUntil > now) {
+      return {
+        ok: false,
+        code: "RECONNECT_COOLDOWN",
+        error: "WhatsApp connection just (re)established — pausing sends briefly",
+        retryAfterMs: state.reconnectCooldownUntil - now,
+      };
+    }
 
     if (state.dayCount >= cfg.dailyMax) {
       return {
@@ -353,6 +395,18 @@ export function recordOutboundSendSuccess(now = Date.now()): void {
   // But if circuit was open and we somehow sent, leave untilUntil natural expiry.
 }
 
+/**
+ * Call every time the Baileys socket transitions to CONNECTED (fresh QR
+ * pairing or a reconnect after a drop) — never on every `connection.update`
+ * event. Arms a short cooldown so queued/pending outbound doesn't fire the
+ * instant the session looks alive again.
+ */
+export function noteConnectionEstablished(now = Date.now()): void {
+  const cfg = getOutboundSafetyConfig();
+  if (cfg.reconnectCooldownMs <= 0) return;
+  state.reconnectCooldownUntil = now + cfg.reconnectCooldownMs;
+}
+
 export function getOutboundSafetyStatus(now = Date.now()) {
   const cfg = snapshotLimits(now);
   return {
@@ -362,6 +416,8 @@ export function getOutboundSafetyStatus(now = Date.now()) {
     windowCount: state.windowStamps.length,
     circuitOpen: state.circuitOpenUntil > now,
     circuitOpenUntil: state.circuitOpenUntil,
+    reconnectCooldownActive: state.reconnectCooldownUntil > now,
+    reconnectCooldownUntil: state.reconnectCooldownUntil,
     lastAttemptAt: state.lastAttemptAt,
   };
 }
@@ -374,6 +430,7 @@ export function resetOutboundSafetyForTests(): void {
   state.dayCount = 0;
   state.failureStamps = [];
   state.circuitOpenUntil = 0;
+  state.reconnectCooldownUntil = 0;
   // Treat this process as already hydrated with "empty" state, and don't
   // let a later real hydration overwrite the test's manipulated in-memory
   // state mid-run. The persisted row itself is cleared below (best-effort)

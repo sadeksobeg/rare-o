@@ -162,7 +162,11 @@ export async function adminSendWhatsAppTextAction(
     if (result.code === "OUTBOUND_DISABLED") {
       return { ok: false, error: "OUTBOUND_DISABLED" };
     }
-    if (result.code === "RATE_LIMITED" || result.code === "SAFETY_CIRCUIT") {
+    if (
+      result.code === "RATE_LIMITED" ||
+      result.code === "SAFETY_CIRCUIT" ||
+      result.code === "RECONNECT_COOLDOWN"
+    ) {
       return { ok: false, error: "RATE_LIMITED" };
     }
     return { ok: false, error: result.error };
@@ -247,7 +251,11 @@ export async function adminSendWhatsAppMediaAction(
     if (result.code === "OUTBOUND_DISABLED") {
       return { ok: false, error: "OUTBOUND_DISABLED" };
     }
-    if (result.code === "RATE_LIMITED" || result.code === "SAFETY_CIRCUIT") {
+    if (
+      result.code === "RATE_LIMITED" ||
+      result.code === "SAFETY_CIRCUIT" ||
+      result.code === "RECONNECT_COOLDOWN"
+    ) {
       return { ok: false, error: "RATE_LIMITED" };
     }
     return { ok: false, error: result.error };

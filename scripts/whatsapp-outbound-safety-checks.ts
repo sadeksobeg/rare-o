@@ -7,6 +7,7 @@ import {
   assessOutboundEnqueue,
   clearPersistedSafetyStateForTests,
   getOutboundSafetyStatus,
+  noteConnectionEstablished,
   recordOutboundSendFailure,
   resetOutboundSafetyForTests,
 } from "../lib/whatsapp/outbound-safety";
@@ -73,6 +74,37 @@ async function main() {
 
   const status = getOutboundSafetyStatus();
   assert.equal(status.circuitOpen, true);
+
+  // --- reconnect cooldown ---
+  resetOutboundSafetyForTests();
+  process.env.WHATSAPP_OUTBOUND_MIN_GAP_MS = "0";
+  process.env.WHATSAPP_OUTBOUND_MAX_WAIT_MS = "0";
+  process.env.WHATSAPP_OUTBOUND_RECONNECT_COOLDOWN_MS = "60000";
+
+  assert.equal(assessOutboundEnqueue().ok, true, "enqueue allowed before any connection");
+
+  noteConnectionEstablished();
+  const cooldownEnqueue = assessOutboundEnqueue();
+  assert.equal(cooldownEnqueue.ok, false, "enqueue blocked right after reconnect");
+  if (!cooldownEnqueue.ok) {
+    assert.equal(cooldownEnqueue.code, "RECONNECT_COOLDOWN");
+    assert.ok(cooldownEnqueue.retryAfterMs > 0);
+  }
+  const cooldownSend = await acquireOutboundSendSlot();
+  assert.equal(cooldownSend.ok, false, "send slot blocked right after reconnect");
+  if (!cooldownSend.ok) assert.equal(cooldownSend.code, "RECONNECT_COOLDOWN");
+
+  const statusDuringCooldown = getOutboundSafetyStatus();
+  assert.equal(statusDuringCooldown.reconnectCooldownActive, true);
+
+  process.env.WHATSAPP_OUTBOUND_RECONNECT_COOLDOWN_MS = "0";
+  resetOutboundSafetyForTests();
+  noteConnectionEstablished();
+  assert.equal(
+    assessOutboundEnqueue().ok,
+    true,
+    "cooldown of 0ms is a no-op (disabled)"
+  );
 
   // Leave no persisted rate-limit state behind for the next real run.
   await clearPersistedSafetyStateForTests();
