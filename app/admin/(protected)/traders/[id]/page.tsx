@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { Store } from "lucide-react";
+import { TraderEditForm } from "@/components/admin/trader-edit-form";
 import {
   TraderResetPasswordButton,
   TraderStatusButton,
@@ -9,9 +10,11 @@ import {
 import {
   DetailItem,
   DetailList,
+  DetailSection,
 } from "@/components/admin/detail-list";
-import { PageHeader } from "@/components/admin/page-header";
+import { PortalHeroStrip } from "@/components/admin/portal-hero";
 import { StatusChip } from "@/components/ui/status-chip";
+import { findWhatsAppConversationsForPhone } from "@/lib/admin/wa-phone-match";
 import { uiVisibleTraderWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
 import { formatDate, formatRelative } from "@/lib/i18n/format";
@@ -33,72 +36,110 @@ export default async function AdminTraderDetailPage({
   const a = dict.admin;
   const u = dict.adminUi;
 
-  const trader = await prisma.traderAccount.findFirst({
-    where: { AND: [{ id }, uiVisibleTraderWhere()] },
-    include: {
-      _count: {
-        select: {
-          deals: true,
-          wholesaleRequests: true,
-          brokerageRequests: true,
+  const [trader, categories] = await Promise.all([
+    prisma.traderAccount.findFirst({
+      where: { AND: [{ id }, uiVisibleTraderWhere()] },
+      include: {
+        _count: {
+          select: {
+            deals: true,
+            wholesaleRequests: true,
+            brokerageRequests: true,
+          },
+        },
+        deals: {
+          orderBy: { updatedAt: "desc" },
+          take: 8,
+          select: {
+            id: true,
+            reference: true,
+            title: true,
+            status: true,
+            updatedAt: true,
+          },
+        },
+        wholesaleRequests: {
+          orderBy: { updatedAt: "desc" },
+          take: 8,
+          select: {
+            id: true,
+            reference: true,
+            status: true,
+            updatedAt: true,
+          },
+        },
+        brokerageRequests: {
+          orderBy: { updatedAt: "desc" },
+          take: 8,
+          select: {
+            id: true,
+            reference: true,
+            status: true,
+            cityAr: true,
+            cityEn: true,
+            updatedAt: true,
+          },
+        },
+        whatsAppConversations: {
+          orderBy: { lastMessageAt: "desc" },
+          take: 10,
+          select: {
+            id: true,
+            displayName: true,
+            participantE164: true,
+            lastMessageAt: true,
+            lastMessagePreview: true,
+            unreadCount: true,
+          },
         },
       },
-      deals: {
-        orderBy: { updatedAt: "desc" },
-        take: 8,
-        select: {
-          id: true,
-          reference: true,
-          title: true,
-          status: true,
-          updatedAt: true,
-        },
-      },
-      wholesaleRequests: {
-        orderBy: { updatedAt: "desc" },
-        take: 8,
-        select: {
-          id: true,
-          reference: true,
-          status: true,
-          updatedAt: true,
-        },
-      },
-      brokerageRequests: {
-        orderBy: { updatedAt: "desc" },
-        take: 8,
-        select: {
-          id: true,
-          reference: true,
-          status: true,
-          cityAr: true,
-          cityEn: true,
-          updatedAt: true,
-        },
-      },
-    },
-  });
+    }),
+    prisma.category.findMany({
+      orderBy: { sortOrder: "asc" },
+      select: { slug: true, nameAr: true, nameEn: true },
+    }),
+  ]);
   if (!trader) notFound();
 
   const interests = parseInterestSlugs(trader.interestCategorySlugs);
-  const initial = trader.displayName.trim().slice(0, 1) || "T";
+  const phoneMatched = trader.phone
+    ? await findWhatsAppConversationsForPhone(trader.phone)
+    : [];
+  const linkedIds = new Set(trader.whatsAppConversations.map((c) => c.id));
+  const waConversations = [
+    ...trader.whatsAppConversations,
+    ...phoneMatched.filter((c) => !linkedIds.has(c.id)),
+  ];
+
+  const categoryOptions = categories.map((c) => ({
+    slug: c.slug,
+    name: localizedName(locale, c.nameAr, c.nameEn) || c.slug,
+  }));
 
   return (
-    <section className="space-y-8">
+    <section className="space-y-8 pb-16">
       <p>
         <Link
           href="/admin/traders"
-          className="text-sm font-medium text-[var(--ro-plum-900)] underline-offset-4 hover:underline"
+          className="text-sm font-medium text-[color:var(--ro-accent-fg,var(--ro-plum-800))] underline-offset-4 hover:underline"
         >
           {u.traderBack}
         </Link>
       </p>
-      <PageHeader
-        overline={a.traders}
-        title={trader.displayName}
-        description={u.traderDetailLead}
-        icon={<Store className="size-5" strokeWidth={2} />}
-        action={
+
+      <PortalHeroStrip
+        eyebrow={a.traders}
+        title={
+          <span className="inline-flex items-center gap-2.5">
+            <Store
+              className="size-7 shrink-0 text-[color:var(--ro-accent-fg,var(--ro-plum-800))]"
+              strokeWidth={1.5}
+            />
+            {trader.displayName}
+          </span>
+        }
+        subtitle={u.traderDetailLead}
+        actions={
           <div className="flex flex-wrap gap-2">
             <TraderStatusButton
               traderId={trader.id}
@@ -127,15 +168,20 @@ export default async function AdminTraderDetailPage({
             />
           </div>
         }
+        stats={[
+          { label: u.colDeals, value: trader._count.deals },
+          { label: u.colWholesale, value: trader._count.wholesaleRequests },
+          { label: u.colBrokerage, value: trader._count.brokerageRequests },
+        ]}
       />
 
-      <div className="overflow-hidden rounded-[var(--ro-r-sm)] border border-ro-line bg-ro-surface">
+      <div className="overflow-hidden rounded-[var(--ro-r-sm)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-panel)]">
         <div className="flex flex-wrap items-center gap-4 border-b border-[color-mix(in_srgb,var(--ro-plum-900)_12%,transparent)] bg-[linear-gradient(135deg,var(--ro-plum-900)_0%,var(--ro-ink-950)_100%)] px-5 py-6 text-[var(--ro-sand-100)]">
           <span
             aria-hidden
             className="flex size-14 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--ro-sand-100)_16%,transparent)] font-display text-xl font-semibold"
           >
-            {initial}
+            {trader.displayName.trim().slice(0, 1) || "T"}
           </span>
           <div className="min-w-0 flex-1 space-y-1">
             <p className="font-display text-xl font-semibold">
@@ -160,17 +206,26 @@ export default async function AdminTraderDetailPage({
           <DetailItem label={u.colCreated}>
             {formatDate(trader.createdAt, locale, { dateStyle: "medium" })}
           </DetailItem>
-          <DetailItem label={u.traderNotes}>
-            {trader.adminNotes?.trim() || "—"}
-          </DetailItem>
           <DetailItem label={u.traderInterests}>
             {interests.length > 0 ? interests.join(" · ") : "—"}
           </DetailItem>
         </DetailList>
       </div>
 
+      <TraderEditForm
+        traderId={trader.id}
+        displayName={trader.displayName}
+        companyName={trader.companyName}
+        phone={trader.phone}
+        adminNotes={trader.adminNotes}
+        interestNotes={trader.interestNotes}
+        selectedSlugs={interests}
+        categories={categoryOptions}
+        dict={dict}
+      />
+
       <div>
-        <h2 className="mb-3 font-display text-lg font-semibold text-ro-ink">
+        <h2 className="mb-3 font-display text-lg font-semibold text-[color:var(--ro-text)]">
           {u.traderActivity}
         </h2>
         <div className="grid gap-2.5 sm:grid-cols-3">
@@ -196,14 +251,57 @@ export default async function AdminTraderDetailPage({
               href={card.href}
               className="ro-portal-card border p-4 transition-opacity hover:opacity-95"
             >
-              <p className="text-xs font-medium text-ro-muted">{card.label}</p>
-              <p className="mt-1 font-display text-2xl font-semibold tabular-nums">
+              <p className="text-xs font-medium text-[color:var(--ro-text-muted)]">
+                {card.label}
+              </p>
+              <p className="mt-1 font-display text-2xl font-semibold tabular-nums text-[color:var(--ro-text)]">
                 {card.value}
               </p>
             </Link>
           ))}
         </div>
       </div>
+
+      <DetailSection title={u.traderWaTitle}>
+        {waConversations.length === 0 ? (
+          <p className="text-sm text-[color:var(--ro-text-muted)]">
+            {u.traderWaEmpty}
+          </p>
+        ) : (
+          <ul className="divide-y divide-[color:var(--ro-border-subtle)] overflow-hidden rounded-[var(--ro-r-sm)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-panel)] text-sm">
+            {waConversations.map((c) => (
+              <li
+                key={c.id}
+                className="flex flex-wrap items-center justify-between gap-3 p-3"
+              >
+                <div className="min-w-0 space-y-1">
+                  <Link
+                    href={`/admin/inbox/${c.id}`}
+                    className="font-medium text-[color:var(--ro-accent-fg,var(--ro-plum-800))] hover:underline"
+                  >
+                    <bdi>{c.displayName || c.participantE164 || c.id}</bdi>
+                  </Link>
+                  {c.lastMessagePreview ? (
+                    <p className="line-clamp-1 text-[color:var(--ro-text-muted)]">
+                      <bdi>{c.lastMessagePreview}</bdi>
+                    </p>
+                  ) : null}
+                  {c.lastMessageAt ? (
+                    <p className="text-xs text-[color:var(--ro-text-muted)]">
+                      {formatRelative(c.lastMessageAt, locale)}
+                    </p>
+                  ) : null}
+                </div>
+                {c.unreadCount > 0 ? (
+                  <span className="text-xs font-semibold tabular-nums text-[color:var(--ro-accent-fg,var(--ro-plum-800))]">
+                    {c.unreadCount}
+                  </span>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </DetailSection>
 
       <ActivityBlock
         title={u.traderRecentDeals}
@@ -283,13 +381,13 @@ function ActivityBlock({
 }) {
   return (
     <div className="space-y-3">
-      <h2 className="font-display text-base font-semibold text-ro-ink">
+      <h2 className="font-display text-base font-semibold text-[color:var(--ro-text)]">
         {title}
       </h2>
       {rows.length === 0 ? (
-        <p className="text-sm text-ro-muted">{empty}</p>
+        <p className="text-sm text-[color:var(--ro-text-muted)]">{empty}</p>
       ) : (
-        <ul className="divide-y divide-[color-mix(in_srgb,var(--ro-plum-900)_10%,transparent)] rounded-[var(--ro-r-sm)] border border-ro-line bg-ro-surface">
+        <ul className="divide-y divide-[color:var(--ro-border-subtle)] overflow-hidden rounded-[var(--ro-r-sm)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-panel)]">
           {rows.map((row) => (
             <li key={row.id}>
               <Link
@@ -297,14 +395,18 @@ function ActivityBlock({
                 className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 transition-opacity hover:opacity-90"
               >
                 <div className="min-w-0">
-                  <p className="truncate font-medium text-ro-ink">{row.title}</p>
-                  <p className="text-xs text-ro-muted" dir="ltr">
+                  <p className="truncate font-medium text-[color:var(--ro-text)]">
+                    {row.title}
+                  </p>
+                  <p className="text-xs text-[color:var(--ro-text-muted)]" dir="ltr">
                     {row.meta}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
                   {row.status}
-                  <span className="text-xs text-ro-muted">{row.when}</span>
+                  <span className="text-xs text-[color:var(--ro-text-muted)]">
+                    {row.when}
+                  </span>
                 </div>
               </Link>
             </li>

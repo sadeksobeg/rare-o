@@ -39,6 +39,11 @@ export default async function EditProductPage({
           kind: img.kind,
         }))}
         dict={dict.admin}
+        translate={{
+          translateSuggest: dict.adminUi.form.translateSuggest,
+          translatePending: dict.adminUi.form.translatePending,
+          translateFailed: dict.adminUi.form.translateFailed,
+        }}
       />
 
       <ProductForm

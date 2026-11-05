@@ -86,7 +86,11 @@ export default async function AdminPromosPage() {
                   ? b.titleAr || b.titleEn
                   : b.titleEn || b.titleAr;
               return (
-                <Tr key={b.id} flash={isFresh(b.updatedAt)}>
+                <Tr
+                  key={b.id}
+                  href={`/admin/promos/${b.id}`}
+                  flash={isFresh(b.updatedAt)}
+                >
                   <Td className="text-ro-muted" dir="ltr">
                     {b.slug}
                   </Td>

@@ -42,6 +42,9 @@ function adminHref(link: InboxLinkSummary): string | null {
   }
 }
 
+const cardClass =
+  "space-y-2.5 rounded-[14px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-panel)] p-3.5 text-sm text-[color:var(--ro-text)] shadow-[inset_0_1px_0_color-mix(in_srgb,var(--ro-text)_4%,transparent)]";
+
 /**
  * A16 — LinkedRecordPanel + confirm link/unlink via A17 picker.
  * Linking never changes the business record status.
@@ -135,23 +138,23 @@ export function LinkedRecordPanel({
   }
 
   return (
-    <div data-inbox-pane="context" className="space-y-3">
-      <section
-        aria-label={i.crmParty}
-        className="space-y-2 border border-ro-border bg-ro-paper p-4 text-sm"
-      >
-        <h3 className="text-xs font-semibold tracking-wide text-ro-text-2">
+    <div
+      data-inbox-pane="context"
+      className="space-y-3 bg-[color:var(--ro-bg-raised)] p-3 text-[color:var(--ro-text)]"
+    >
+      <section aria-label={i.crmParty} className={cardClass}>
+        <h3 className="text-[11px] font-semibold uppercase tracking-wide text-[color:var(--ro-text-muted)]">
           {i.crmParty}
         </h3>
         {crm.customer ? (
           <p>
             <Link
               href={`/admin/customers`}
-              className="font-semibold text-ro-plum underline-offset-2 hover:underline"
+              className="font-semibold text-[color:var(--ro-accent-fg,var(--ro-plum-700))] underline-offset-2 hover:underline"
             >
               {crm.customer.name}
             </Link>
-            <span className="text-ro-muted">
+            <span className="text-[color:var(--ro-text-muted)]">
               {" "}
               · <bdi dir="ltr">+{crm.customer.phone.replace(/^\+/, "")}</bdi>
             </span>
@@ -161,18 +164,18 @@ export function LinkedRecordPanel({
           <p>
             <Link
               href={`/admin/traders`}
-              className="font-semibold text-ro-plum underline-offset-2 hover:underline"
+              className="font-semibold text-[color:var(--ro-accent-fg,var(--ro-plum-700))] underline-offset-2 hover:underline"
             >
               {crm.trader.displayName}
             </Link>
-            <span className="text-ro-muted">
+            <span className="text-[color:var(--ro-text-muted)]">
               {" "}
               · <bdi dir="ltr">{crm.trader.phone || crm.trader.companyName}</bdi>
             </span>
           </p>
         ) : null}
         {!crm.customer && !crm.trader ? (
-          <p className="text-ro-muted">{i.crmNone}</p>
+          <p className="text-[color:var(--ro-text-2)]">{i.crmNone}</p>
         ) : (
           <Button
             type="button"
@@ -185,14 +188,19 @@ export function LinkedRecordPanel({
           </Button>
         )}
         {suggestions.length > 0 ? (
-          <div className="space-y-1.5 border-t border-ro-border pt-2">
-            <p className="text-xs text-ro-muted">{i.crmSuggest}</p>
+          <div className="space-y-1.5 border-t border-[color:var(--ro-border-subtle)] pt-2">
+            <p className="text-xs text-[color:var(--ro-text-muted)]">
+              {i.crmSuggest}
+            </p>
             <ul className="space-y-1">
               {suggestions.map((s) => (
-                <li key={`${s.kind}-${s.id}`} className="flex flex-wrap items-center gap-2">
+                <li
+                  key={`${s.kind}-${s.id}`}
+                  className="flex flex-wrap items-center gap-2"
+                >
                   <span className="min-w-0 flex-1 truncate">
                     {s.label}{" "}
-                    <bdi dir="ltr" className="text-ro-muted">
+                    <bdi dir="ltr" className="text-[color:var(--ro-text-muted)]">
                       {s.phone}
                     </bdi>
                   </span>
@@ -216,12 +224,10 @@ export function LinkedRecordPanel({
 
       <BusinessContextPanel context={context} dict={dict} locale={locale} />
 
-      <div className="space-y-2 border border-ro-border bg-ro-paper p-4 text-sm">
+      <div className={cardClass}>
         {link.linked ? (
           <>
-            {href ? (
-              <ButtonLinkish href={href} label={i.openLinkedRecord} />
-            ) : null}
+            {href ? <ButtonLinkish href={href} label={i.openLinkedRecord} /> : null}
             <Button
               type="button"
               variant="secondary"
@@ -252,20 +258,19 @@ export function LinkedRecordPanel({
             {i.linkRecord}
           </Button>
         )}
-        <p className="text-xs text-ro-muted">{i.linkConfirmHint}</p>
+        <p className="text-xs text-[color:var(--ro-text-muted)]">
+          {i.linkConfirmHint}
+        </p>
         {error ? (
-          <p className="text-[var(--ro-danger-700)]" role="alert">
+          <p className="text-[color:var(--ro-danger-700)]" role="alert">
             {error}
           </p>
         ) : null}
       </div>
 
       {audits.length > 0 ? (
-        <section
-          aria-label={i.linkHistory}
-          className="space-y-2 border border-ro-border bg-ro-paper p-4 text-sm"
-        >
-          <h3 className="text-xs font-semibold tracking-wide text-ro-text-2">
+        <section aria-label={i.linkHistory} className={cardClass}>
+          <h3 className="text-[11px] font-semibold uppercase tracking-wide text-[color:var(--ro-text-muted)]">
             {i.linkHistory}
           </h3>
           <ul className="space-y-1.5">
@@ -280,11 +285,13 @@ export function LinkedRecordPanel({
                     : a.action === "change"
                       ? i.linkAuditChange
                       : i.linkAuditSet}
-                  {a.action !== "clear" ? ` · ${linkTypeLabel(a.newLinkType)}` : ""}
+                  {a.action !== "clear"
+                    ? ` · ${linkTypeLabel(a.newLinkType)}`
+                    : ""}
                 </span>
                 <time
                   dateTime={a.createdAt}
-                  className="text-xs tabular-nums text-ro-muted"
+                  className="text-xs tabular-nums text-[color:var(--ro-text-muted)]"
                 >
                   {formatDate(a.createdAt, locale, {
                     dateStyle: "short",
@@ -338,7 +345,7 @@ function ButtonLinkish({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="inline-flex h-9 items-center justify-center border border-ro-ink px-5 text-xs font-semibold !text-ro-ink hover:bg-ro-sunken"
+      className="inline-flex h-9 items-center justify-center rounded-[10px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-sunken)] px-4 text-xs font-semibold text-[color:var(--ro-text)] transition-[background-color] hover:bg-[color:var(--ro-panel-hover)]"
     >
       {label}
     </Link>

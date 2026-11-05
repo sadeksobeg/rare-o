@@ -113,17 +113,17 @@ export function RetailKanbanBoard({
                 onDrop(status);
               }}
               className={cn(
-                "w-[16.5rem] shrink-0 rounded-[var(--ro-r-lg)] border border-[var(--ro-border-subtle)] bg-[var(--ro-sand-50)] p-3",
+                "w-[16.5rem] shrink-0 rounded-[14px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] p-3",
                 overStatus === status && canDrop
-                  ? "border-[var(--ro-plum-900)]"
+                  ? "border-[color:var(--ro-plum-700)] ring-1 ring-[color:var(--ro-plum-700)]"
                   : null
               )}
             >
               <div className="mb-3 flex items-center justify-between gap-2">
-                <h2 className="text-sm font-semibold text-ro-ink">
+                <h2 className="text-sm font-semibold text-[color:var(--ro-text)]">
                   {u.status.retail[status] ?? status}
                 </h2>
-                <span className="tabular-nums text-xs text-ro-muted">
+                <span className="tabular-nums text-xs text-[color:var(--ro-text-muted)]">
                   {items.length}
                 </span>
               </div>
@@ -141,20 +141,20 @@ export function RetailKanbanBoard({
                         setOverStatus(null);
                       }}
                       className={cn(
-                        "rounded-[var(--ro-r-md)] border border-transparent bg-[var(--ro-sand-100)] p-3",
+                        "rounded-[12px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-panel)] p-3 shadow-[inset_0_1px_0_color-mix(in_srgb,var(--ro-text)_4%,transparent)]",
                         dragId === card.id ? "opacity-60" : null,
                         "cursor-grab active:cursor-grabbing"
                       )}
                     >
                       <Link
                         href={`/admin/requests/${card.id}`}
-                        className="block font-mono text-xs text-ro-muted underline-offset-2 hover:underline"
+                        className="block font-mono text-xs text-[color:var(--ro-text-muted)] underline-offset-2 hover:text-[color:var(--ro-accent-fg)] hover:underline"
                         dir="ltr"
                         onClick={(e) => e.stopPropagation()}
                       >
                         {card.reference}
                       </Link>
-                      <p className="mt-1 text-sm font-medium text-ro-ink">
+                      <p className="mt-1 text-sm font-medium text-[color:var(--ro-text)]">
                         {card.customerName}
                       </p>
                       <div className="mt-2">

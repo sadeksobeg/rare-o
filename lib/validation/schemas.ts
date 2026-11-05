@@ -21,12 +21,16 @@ import {
 } from "@/lib/wholesale/constants";
 
 export const productUpsertSchema = z.object({
+  /** Empty on create — server generates a unique protected slug. */
   slug: z
     .string()
     .trim()
-    .min(1)
     .max(120)
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Invalid slug"),
+    .default("")
+    .refine(
+      (v) => v === "" || /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(v),
+      "Invalid slug"
+    ),
   nameAr: z.string().max(200).default(""),
   nameEn: z.string().max(200).default(""),
   descriptionAr: z.string().max(10000).default(""),
@@ -209,6 +213,21 @@ export const traderCreateSchema = z.object({
   adminNotes: z.string().trim().max(2000).optional().default(""),
 });
 
+export const customerUpdateSchema = z.object({
+  customerId: z.string().trim().min(1).max(64),
+  name: z.string().trim().min(1).max(160),
+  phone: z.string().trim().min(5).max(40),
+});
+
+export const traderProfileUpdateSchema = z.object({
+  traderId: z.string().trim().min(1).max(64),
+  displayName: z.string().trim().min(1).max(120),
+  companyName: z.string().trim().max(160).optional().default(""),
+  phone: z.string().trim().max(40).optional().default(""),
+  adminNotes: z.string().trim().max(2000).optional().default(""),
+  interestNotes: z.string().trim().max(2000).optional().default(""),
+});
+
 const optionalMoney = z.preprocess((v) => {
   if (v === "" || v === null || v === undefined) return null;
   return v;
@@ -233,13 +252,27 @@ const optionalCurrency = z.preprocess((v) => {
     "Currency must be a short uppercase code"
   ));
 
+const requiredMoney = z.preprocess((v) => {
+  if (v === "" || v === null || v === undefined) return undefined;
+  return v;
+}, z.coerce.number().positive());
+
+const requiredCurrency = z.preprocess((v) => {
+  if (v === "" || v === null || v === undefined) return undefined;
+  return String(v).trim().toUpperCase();
+}, z
+  .string()
+  .min(1)
+  .refine((s) => isCurrencyCode(s), "Currency must be a short uppercase code"));
+
 export const dealProposalCreateSchema = z
   .object({
     dealKind: z.enum(DEAL_KINDS),
     title: z.string().trim().min(1).max(200),
     productId: z.string().trim().min(1).optional().nullable(),
-    proposedPrice: optionalMoney,
-    currency: optionalCurrency,
+    modelNumber: z.string().trim().min(1).max(120),
+    proposedPrice: requiredMoney,
+    currency: requiredCurrency,
     quantity: optionalQty,
     conditionsNotes: z.string().trim().max(5000).optional().default(""),
     message: z.string().trim().max(5000).optional().default(""),

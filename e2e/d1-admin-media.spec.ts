@@ -47,7 +47,7 @@ test.describe("D1 admin media + guards", () => {
     await page.locator('input[name="slug"]').fill(slug);
     await page.locator('input[name="nameEn"]').fill("E2E D1 Product");
     await page.locator('input[name="nameAr"]').fill("");
-    await page.locator('input[name="currency"]').fill("USD");
+    await page.locator('select[name="currency"]').selectOption("USD");
     await page.locator('select[name="status"]').selectOption("draft");
     await page.getByRole("button", { name: /save product|حفظ المنتج/i }).click();
     await page.waitForURL(/\/admin\/products\/[^/]+/, { timeout: 30_000 });

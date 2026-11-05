@@ -3,6 +3,7 @@
 import { useActionState, useMemo, useState } from "react";
 import {
   adminBrokerageTransitionAction,
+  adminConfirmBrokeragePaymentAction,
   adminSaveInspectionAction,
   adminSendQuoteAction,
 } from "@/app/brokerage-actions";
@@ -91,6 +92,10 @@ export function BrokerageAdminPanel({
     adminSendQuoteAction,
     initial
   );
+  const [payState, payAction, payPending] = useActionState(
+    adminConfirmBrokeragePaymentAction,
+    initial
+  );
 
   const ar = locale === "ar";
   const err = (s: ActionResult | null) =>
@@ -104,19 +109,57 @@ export function BrokerageAdminPanel({
         {brokerageNextHint(status, locale, "admin")}
       </p>
 
+      {status === "AWAITING_PAYMENT" ? (
+        <div className="space-y-3 rounded-[var(--ro-r-md)] border border-[color-mix(in_srgb,var(--ro-plum-900)_22%,transparent)] bg-[color-mix(in_srgb,var(--ro-plum-100)_40%,var(--ro-sand-50))] p-4">
+          <p className="text-sm font-semibold text-ro-ink">
+            {ar ? "تأكيد استلام الدفع" : "Confirm payment received"}
+          </p>
+          <p className="text-xs text-ro-muted">
+            {ar
+              ? "بعد تحقق التحويل عبر واتساب، أكّد النجاح لفتح المعاينة وباقي المراحل."
+              : "After verifying the WhatsApp transfer, confirm to unlock inspection and the rest."}
+          </p>
+          {err(payState)}
+          <form action={payAction}>
+            <input type="hidden" name="id" value={requestId} />
+            <Button type="submit" size="sm" disabled={payPending} className="min-h-11">
+              {ar ? "تأكيد نجاح الدفع" : "Confirm payment success"}
+            </Button>
+          </form>
+        </div>
+      ) : null}
+
+      {status === "PAYMENT_CONFIRMED" ? (
+        <div className="rounded-[var(--ro-r-md)] border border-[var(--ro-border-subtle)] bg-[var(--ro-sand-50)] p-3">
+          <TransitionButton
+            action={tAction}
+            requestId={requestId}
+            toStatus="ACCEPTED"
+            pending={tPending}
+            label={ar ? "قبول للمعاينة" : "Accept for inspection"}
+            hint={
+              ar
+                ? "بعد تأكيد الدفع — ينقل الطلب لترتيب المعاينة."
+                : "After payment — moves into the inspection phase."
+            }
+          />
+          {err(tState)}
+        </div>
+      ) : null}
+
       {status === "SUBMITTED" ? (
         <div className="space-y-4">
           <div className="rounded-[var(--ro-r-md)] border border-[var(--ro-border-subtle)] bg-[var(--ro-sand-50)] p-3">
             <TransitionButton
               action={tAction}
               requestId={requestId}
-              toStatus="ACCEPTED"
+              toStatus="AWAITING_PAYMENT"
               pending={tPending}
-              label={ar ? "قبول للمعاينة" : "Accept for inspection"}
+              label={ar ? "فتح مسار الدفع" : "Open payment path"}
               hint={
                 ar
-                  ? "ينقل الطلب إلى مرحلة ترتيب المعاينة."
-                  : "Moves the request into the inspection phase."
+                  ? "ينقل الطلب إلى انتظار الدفع عبر واتساب."
+                  : "Moves the request to awaiting WhatsApp payment."
               }
             />
           </div>

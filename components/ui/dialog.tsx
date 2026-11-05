@@ -17,19 +17,24 @@ export function Dialog({
   open,
   onClose,
   title,
+  description,
   children,
   className,
   size = "sm",
   preventDismiss = false,
+  hideHeader = false,
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
+  description?: string;
   children: React.ReactNode;
   className?: string;
   size?: DialogSize;
   /** Block Esc / backdrop close (e.g. show-once password). */
   preventDismiss?: boolean;
+  /** Caller renders its own title block. */
+  hideHeader?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -71,9 +76,9 @@ export function Dialog({
       ref={ref}
       aria-labelledby={titleId}
       className={cn(
-        "ro-dialog m-0 max-h-[min(90vh,100%)] border border-ro-line bg-ro-paper p-0 text-ro-ink shadow-none backdrop:bg-[color-mix(in_srgb,var(--ro-ink-950)_55%,transparent)] open:flex open:flex-col",
+        "ro-dialog m-0 max-h-[min(90vh,100%)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] p-0 text-[color:var(--ro-text)] shadow-[var(--ro-e3)] backdrop:bg-[color-mix(in_srgb,var(--ro-ink-950)_60%,transparent)] open:flex open:flex-col",
         "max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:top-auto max-md:w-full max-md:max-w-none max-md:rounded-t-[var(--ro-r-lg)] max-md:rounded-b-none",
-        "md:fixed md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-[var(--ro-r-sm)]",
+        "md:fixed md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-[14px]",
         sizeClass[size],
         "max-md:!w-full",
         className
@@ -89,11 +94,27 @@ export function Dialog({
         }
       }}
     >
-      <div className="space-y-4 overflow-auto p-5">
-        <h2 id={titleId} className="text-lg font-semibold">
-          {title}
-        </h2>
-        {children}
+      <div className="flex max-h-[inherit] flex-col overflow-hidden">
+        {!hideHeader ? (
+          <div className="shrink-0 border-b border-[color:var(--ro-border-subtle)] px-5 pb-3 pt-5">
+            <h2
+              id={titleId}
+              className="font-display text-lg font-semibold text-[color:var(--ro-text)]"
+            >
+              {title}
+            </h2>
+            {description ? (
+              <p className="mt-1.5 text-sm leading-relaxed text-[color:var(--ro-text-muted)]">
+                {description}
+              </p>
+            ) : null}
+          </div>
+        ) : (
+          <h2 id={titleId} className="sr-only">
+            {title}
+          </h2>
+        )}
+        <div className="min-h-0 flex-1 overflow-auto px-5 py-4">{children}</div>
       </div>
     </dialog>
   );
@@ -125,7 +146,7 @@ export function ConfirmDialog({
 }) {
   return (
     <Dialog open={open} onClose={onClose} title={title} size="sm">
-      <p className="text-sm text-ro-muted">{body}</p>
+      <p className="text-sm text-[color:var(--ro-text-muted)]">{body}</p>
       {/* Destructive: cancel start-side, danger end-side (logical). */}
       <div className="flex flex-wrap justify-end gap-2 pt-2">
         <Button type="button" variant="secondary" size="sm" onClick={onClose}>

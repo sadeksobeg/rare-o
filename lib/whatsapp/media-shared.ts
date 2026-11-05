@@ -16,6 +16,7 @@ export const WHATSAPP_OUTBOUND_MIME: Readonly<Record<string, string>> = {
   "video/webm": "webm",
   "audio/ogg": "ogg",
   "audio/opus": "opus",
+  "audio/webm": "webm",
   "audio/mpeg": "mp3",
   "audio/mp4": "m4a",
   "audio/aac": "aac",
@@ -29,9 +30,18 @@ export type WhatsAppMediaKind =
   | "document"
   | "sticker";
 
+/** Strip parameters (`audio/webm;codecs=opus` → `audio/webm`). */
+export function normalizeOutboundMime(mime: string): string {
+  return mime.trim().toLowerCase().split(";")[0]!.trim();
+}
+
+export function outboundExtForMime(mime: string): string | null {
+  return WHATSAPP_OUTBOUND_MIME[normalizeOutboundMime(mime)] ?? null;
+}
+
 export function mediaKindFromMime(mime: string): WhatsAppMediaKind | null {
-  const m = mime.trim().toLowerCase();
-  if (m.startsWith("image/")) return m === "image/webp" ? "image" : "image";
+  const m = normalizeOutboundMime(mime);
+  if (m.startsWith("image/")) return "image";
   if (m.startsWith("video/")) return "video";
   if (m.startsWith("audio/")) return "audio";
   if (m === "application/pdf") return "document";

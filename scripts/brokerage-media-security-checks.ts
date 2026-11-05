@@ -73,6 +73,8 @@ async function main() {
     traderId: traderA.id,
     descriptionAr: "فحص أمان الوسائط — E2E",
     descriptionEn: "Media security check — E2E",
+    modelNumber: "MEDIA-SEC-1",
+    statedPriceUsd: 500,
   });
 
   const file = new File([PNG_1X1], "test.png", { type: "image/png" });

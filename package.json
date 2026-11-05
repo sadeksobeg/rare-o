@@ -67,6 +67,8 @@
     "test:f5-load": "node scripts/f5-load-gate.mjs",
     "test:f3-2fa": "node node_modules/tsx/dist/cli.mjs scripts/f3-2fa-checks.ts",
     "test:f3-upload": "node node_modules/tsx/dist/cli.mjs scripts/f3-upload-checks.ts",
+    "test:security-storage": "node scripts/security-storage-gate.mjs",
+
     "sbom": "node scripts/generate-sbom.mjs",
     "test:docs-as-tests": "node scripts/docs-as-tests.mjs",
     "check:site-env": "node scripts/check-site-env.mjs"

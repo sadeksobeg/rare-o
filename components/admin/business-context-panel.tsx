@@ -42,6 +42,9 @@ function statusDomain(linkType: string): StatusDomain | null {
   }
 }
 
+const cardClass =
+  "space-y-3 rounded-[14px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-panel)] p-3.5 text-sm text-[color:var(--ro-text)] shadow-[inset_0_1px_0_color-mix(in_srgb,var(--ro-text)_4%,transparent)]";
+
 export function BusinessContextPanel({
   context,
   dict,
@@ -53,11 +56,11 @@ export function BusinessContextPanel({
 }) {
   if (!context.linked) {
     return (
-      <aside className="border border-ro-line p-4 text-sm">
-        <h2 className="mb-2 text-lg font-semibold">
+      <aside className={cardClass} aria-label={dict.inbox.businessContext}>
+        <h2 className="text-[11px] font-semibold uppercase tracking-wide text-[color:var(--ro-text-muted)]">
           {dict.inbox.businessContext}
         </h2>
-        <p className="text-ro-muted">{dict.inbox.notLinked}</p>
+        <p className="text-[color:var(--ro-text-2)]">{dict.inbox.notLinked}</p>
       </aside>
     );
   }
@@ -75,20 +78,28 @@ export function BusinessContextPanel({
     : null;
 
   return (
-    <aside className="space-y-3 border border-ro-line p-4 text-sm">
-      <h2 className="text-lg font-semibold">{dict.inbox.businessContext}</h2>
+    <aside className={cardClass} aria-label={dict.inbox.businessContext}>
+      <h2 className="text-[11px] font-semibold uppercase tracking-wide text-[color:var(--ro-text-muted)]">
+        {dict.inbox.businessContext}
+      </h2>
       <p>
-        <span className="text-ro-muted">{dict.inbox.linkedAs}: </span>
+        <span className="text-[color:var(--ro-text-muted)]">
+          {dict.inbox.linkedAs}:{" "}
+        </span>
         {typeLabel(dict, context.linkType)}
       </p>
       <p>
-        <span className="text-ro-muted">{dict.inbox.contextReference}: </span>
+        <span className="text-[color:var(--ro-text-muted)]">
+          {dict.inbox.contextReference}:{" "}
+        </span>
         <span className="font-mono text-xs" dir="ltr">
           {context.reference} · {context.recordId}
         </span>
       </p>
       <p className="flex flex-wrap items-center gap-2">
-        <span className="text-ro-muted">{dict.inbox.contextStatus}: </span>
+        <span className="text-[color:var(--ro-text-muted)]">
+          {dict.inbox.contextStatus}:{" "}
+        </span>
         {domain ? (
           <StatusChip
             size="sm"
@@ -99,31 +110,42 @@ export function BusinessContextPanel({
         )}
       </p>
       <p>
-        <span className="text-ro-muted">{dict.inbox.contextUpdated}: </span>
+        <span className="text-[color:var(--ro-text-muted)]">
+          {dict.inbox.contextUpdated}:{" "}
+        </span>
         {formatWhen(context.updatedAt, locale)}
       </p>
       <p>
-        <span className="text-ro-muted">{dict.inbox.contextIdentity}: </span>
+        <span className="text-[color:var(--ro-text-muted)]">
+          {dict.inbox.contextIdentity}:{" "}
+        </span>
         {context.identityLabel}
         {context.identityDetail ? (
-          <span className="text-ro-muted"> · {context.identityDetail}</span>
+          <span className="text-[color:var(--ro-text-muted)]">
+            {" "}
+            · {context.identityDetail}
+          </span>
         ) : null}
       </p>
       {context.title ? (
         <p>
-          <span className="text-ro-muted">{dict.inbox.contextTitle}: </span>
+          <span className="text-[color:var(--ro-text-muted)]">
+            {dict.inbox.contextTitle}:{" "}
+          </span>
           {context.title}
         </p>
       ) : null}
       {dealKind ? (
         <p>
-          <span className="text-ro-muted">{dict.inbox.contextDealKind}: </span>
+          <span className="text-[color:var(--ro-text-muted)]">
+            {dict.inbox.contextDealKind}:{" "}
+          </span>
           {dealKind}
         </p>
       ) : null}
       {requestMode ? (
         <p>
-          <span className="text-ro-muted">
+          <span className="text-[color:var(--ro-text-muted)]">
             {dict.inbox.contextRequestMode}:{" "}
           </span>
           {requestMode}
@@ -131,13 +153,15 @@ export function BusinessContextPanel({
       ) : null}
       {context.productLabel ? (
         <p>
-          <span className="text-ro-muted">{dict.inbox.contextProduct}: </span>
+          <span className="text-[color:var(--ro-text-muted)]">
+            {dict.inbox.contextProduct}:{" "}
+          </span>
           {context.productLabel}
         </p>
       ) : null}
       {context.latestNegotiation ? (
         <p>
-          <span className="text-ro-muted">
+          <span className="text-[color:var(--ro-text-muted)]">
             {dict.inbox.contextLatestNegotiation}:{" "}
           </span>
           {context.latestNegotiation}
@@ -145,8 +169,10 @@ export function BusinessContextPanel({
       ) : null}
       {context.lines.length > 0 ? (
         <div>
-          <p className="mb-1 text-ro-muted">{dict.inbox.contextLines}</p>
-          <ul className="list-inside list-disc space-y-1 text-ro-muted">
+          <p className="mb-1 text-[color:var(--ro-text-muted)]">
+            {dict.inbox.contextLines}
+          </p>
+          <ul className="list-inside list-disc space-y-1 text-[color:var(--ro-text-2)]">
             {context.lines.map((l, i) => (
               <li key={`${lineName(l)}-${i}`}>
                 {lineName(l)} × {l.quantity}
@@ -157,7 +183,7 @@ export function BusinessContextPanel({
       ) : null}
       <Link
         href={context.adminHref}
-        className="inline-block text-ro-plum hover:underline"
+        className="inline-flex min-h-9 items-center text-sm font-semibold text-[color:var(--ro-accent-fg,var(--ro-plum-700))] underline-offset-2 hover:underline"
       >
         {dict.inbox.openLinkedRecord}
       </Link>

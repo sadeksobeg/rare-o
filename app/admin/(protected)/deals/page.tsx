@@ -58,28 +58,23 @@ export default async function AdminDealsPage({
       return false;
     }
     if (!q) return true;
-    const hay = [
-      d.reference,
-      d.title,
-      d.trader.displayName,
-      d.trader.email,
-    ]
+    const hay = [d.reference, d.title, d.trader.displayName, d.trader.email]
       .join(" ")
       .toLowerCase();
     return hay.includes(q);
   });
 
   const statusLabel = (status: string) =>
-    u.status.deal[status] ??
-    dict.trader.dealStatus[status] ??
-    status;
+    u.status.deal[status] ?? dict.trader.dealStatus[status] ?? status;
+
+  const filteredEmpty = tab !== "all" || Boolean(q);
 
   return (
-    <section className="space-y-6">
+    <section data-admin-deals="" className="space-y-5 pb-2">
       <PageHeader
         title={a.deals}
         description={u.dealsLead}
-        icon={<Handshake className="size-5" strokeWidth={2} />}
+        icon={<Handshake className="size-5" strokeWidth={1.5} />}
       />
       <Suspense fallback={null}>
         <AdminTableFilters
@@ -105,17 +100,13 @@ export default async function AdminDealsPage({
       </Suspense>
       {filtered.length === 0 ? (
         <EmptyState
-          variant={tab !== "all" || q ? "no-results" : "first-use"}
-          title={u.emptyTitle}
-          body={u.emptyBody}
-          actionHref={
-            tab !== "all" || q ? "/admin/deals" : "/admin/traders"
+          variant={filteredEmpty ? "no-results" : "first-use"}
+          title={
+            filteredEmpty ? u.dealsEmptyFilteredTitle : u.dealsEmptyTitle
           }
-          actionLabel={
-            tab !== "all" || q
-              ? dict.catalog.clearFilters
-              : u.newTrader
-          }
+          body={filteredEmpty ? u.dealsEmptyFilteredBody : u.dealsEmptyBody}
+          actionHref={filteredEmpty ? "/admin/deals" : "/admin/traders"}
+          actionLabel={filteredEmpty ? dict.catalog.clearFilters : u.newTrader}
         />
       ) : (
         <>
@@ -143,64 +134,81 @@ export default async function AdminDealsPage({
             ))}
           </AdminRecordCardList>
           <div className="hidden md:block">
-        <DataTable>
-          <DataTableHead>
-            <Th>{u.colReference}</Th>
-            <Th>{u.colTrader}</Th>
-            <Th>{u.colTitle}</Th>
-            <Th>{u.colKind}</Th>
-            <Th>{a.colStatus}</Th>
-            <Th>{u.colEntries}</Th>
-            <Th />
-          </DataTableHead>
-          <tbody>
-            {filtered.map(({ d, waiting }) => (
-              <Tr key={d.id} flash={isFresh(d.updatedAt)}>
-                <Td>
-                  <RowHit href={`/admin/deals/${d.id}`}>{d.reference}</RowHit>
-                </Td>
-                <Td>
-                  {d.trader.displayName}
-                  <div className="text-ro-muted" dir="ltr">
-                    {d.trader.email}
-                  </div>
-                </Td>
-                <Td>{d.title}</Td>
-                <Td>
-                  {d.dealKind === "catalog"
-                    ? u.kindCatalog
-                    : d.dealKind === "non_catalog"
-                      ? u.kindNonCatalog
-                      : d.dealKind}
-                </Td>
-                <Td>
-                  <span className="flex flex-wrap items-center gap-2">
-                    <StatusChip
-                      size="sm"
-                      {...getStatusChipProps(dict, "deal", d.status)}
-                    />
-                    {waiting ? (
-                      <StatusChip
-                        size="sm"
-                        tone="attention"
-                        label={u.waitingOnYou}
-                      />
-                    ) : null}
-                  </span>
-                </Td>
-                <Td className="tabular-nums">{d._count.entries}</Td>
-                <Td>
-                  <Link
+            <DataTable>
+              <DataTableHead>
+                <Th>{u.colReference}</Th>
+                <Th>{u.colTrader}</Th>
+                <Th>{u.colTitle}</Th>
+                <Th>{u.colKind}</Th>
+                <Th>{a.colStatus}</Th>
+                <Th>{u.colEntries}</Th>
+                <Th />
+              </DataTableHead>
+              <tbody>
+                {filtered.map(({ d, waiting }) => (
+                  <Tr
+                    key={d.id}
                     href={`/admin/deals/${d.id}`}
-                    className="text-ro-plum hover:underline"
+                    flash={isFresh(d.updatedAt)}
                   >
-                    {u.actionNegotiate}
-                  </Link>
-                </Td>
-              </Tr>
-            ))}
-          </tbody>
-        </DataTable>
+                    <Td>
+                      <RowHit href={`/admin/deals/${d.id}`}>
+                        {d.reference}
+                      </RowHit>
+                    </Td>
+                    <Td>
+                      <span className="font-medium text-[color:var(--ro-text)]">
+                        {d.trader.displayName}
+                      </span>
+                      <div
+                        className="text-xs text-[color:var(--ro-text-muted)]"
+                        dir="ltr"
+                      >
+                        <bdi>{d.trader.email}</bdi>
+                      </div>
+                    </Td>
+                    <Td className="max-w-[16rem] truncate text-[color:var(--ro-text-2)]">
+                      {d.title}
+                    </Td>
+                    <Td>
+                      <span className="inline-flex rounded-full border border-[color:var(--ro-border-subtle)] bg-[color:color-mix(in_srgb,var(--ro-text)_6%,transparent)] px-2.5 py-1 text-xs font-medium text-[color:var(--ro-text-2)]">
+                        {d.dealKind === "catalog"
+                          ? u.kindCatalog
+                          : d.dealKind === "non_catalog"
+                            ? u.kindNonCatalog
+                            : d.dealKind}
+                      </span>
+                    </Td>
+                    <Td>
+                      <span className="flex flex-wrap items-center gap-2">
+                        <StatusChip
+                          size="sm"
+                          {...getStatusChipProps(dict, "deal", d.status)}
+                        />
+                        {waiting ? (
+                          <StatusChip
+                            size="sm"
+                            tone="attention"
+                            label={u.waitingOnYou}
+                          />
+                        ) : null}
+                      </span>
+                    </Td>
+                    <Td className="tabular-nums text-[color:var(--ro-text-2)]">
+                      {d._count.entries}
+                    </Td>
+                    <Td>
+                      <Link
+                        href={`/admin/deals/${d.id}`}
+                        className="relative z-[2] text-sm font-semibold text-[color:var(--ro-accent-fg,var(--ro-plum-700))] underline-offset-2 hover:underline"
+                      >
+                        {u.actionNegotiate}
+                      </Link>
+                    </Td>
+                  </Tr>
+                ))}
+              </tbody>
+            </DataTable>
           </div>
         </>
       )}

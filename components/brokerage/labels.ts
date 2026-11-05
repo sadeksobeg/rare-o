@@ -3,6 +3,7 @@ import { nextActor } from "@/lib/brokerage/status";
 
 export type BrokeragePhase =
   | "intake"
+  | "payment"
   | "inspection"
   | "quote"
   | "fulfillment"
@@ -27,8 +28,9 @@ export const BROKERAGE_PHASE_LABEL: Record<
   { ar: string; en: string }
 > = {
   intake: { ar: "استقبال", en: "Intake" },
+  payment: { ar: "الدفع", en: "Payment" },
   inspection: { ar: "معاينة", en: "Inspection" },
-  quote: { ar: "عرض السعر", en: "Quote" },
+  quote: { ar: "عرض (قديم)", en: "Quote (legacy)" },
   fulfillment: { ar: "تنفيذ", en: "Fulfillment" },
   closed: { ar: "إغلاق", en: "Closed" },
 };
@@ -63,12 +65,48 @@ export const BROKERAGE_STATUS_META: Record<BrokerageStatus, BrokerageStatusMeta>
       },
       nextHint: {
         admin: {
-          ar: "بانتظار رد التاجر. بعد اكتمال المعلومات يمكنك القبول أو الرفض.",
-          en: "Waiting on the trader. Once info is complete you can accept or decline.",
+          ar: "بانتظار رد التاجر. بعد اكتمال المعلومات يمكنك المتابعة للدفع أو الرفض.",
+          en: "Waiting on the trader. Once info is complete you can proceed to payment or decline.",
         },
         trader: {
           ar: "أكمِل المعلومات المطلوبة ثم أعد إرسال الطلب.",
           en: "Provide the requested information and resubmit.",
+        },
+      },
+    },
+    AWAITING_PAYMENT: {
+      label: { ar: "بانتظار الدفع", en: "Awaiting payment" },
+      phase: "payment",
+      meaning: {
+        ar: "التاجر يدفع عبر واتساب مع الإدارة وبانتظار تأكيد استلام الدفع.",
+        en: "Trader pays via WhatsApp with admin; waiting for payment confirmation.",
+      },
+      nextHint: {
+        admin: {
+          ar: "بعد استلام التحويل: أكّد نجاح الدفع لفتح بقية المراحل.",
+          en: "After receiving the transfer: confirm payment to unlock remaining stages.",
+        },
+        trader: {
+          ar: "افتح واتساب وأتمّ الدفع، ثم انتظر تأكيد الإدارة.",
+          en: "Open WhatsApp, complete payment, then wait for admin confirmation.",
+        },
+      },
+    },
+    PAYMENT_CONFIRMED: {
+      label: { ar: "تأكيد الدفع", en: "Payment confirmed" },
+      phase: "payment",
+      meaning: {
+        ar: "أكدت الإدارة نجاح الدفع. يمكن بدء المعاينة والتنفيذ.",
+        en: "Admin confirmed payment. Inspection and fulfillment can begin.",
+      },
+      nextHint: {
+        admin: {
+          ar: "اقبل الطلب للمعاينة أو ارفض إن لزم.",
+          en: "Accept for inspection or decline if needed.",
+        },
+        trader: {
+          ar: "تم تأكيد الدفع — الإدارة تتابع بقية المراحل.",
+          en: "Payment confirmed — admin continues the remaining stages.",
         },
       },
     },
@@ -110,19 +148,19 @@ export const BROKERAGE_STATUS_META: Record<BrokerageStatus, BrokerageStatusMeta>
     },
     INSPECTED: {
       label: { ar: "اكتملت المعاينة", en: "Inspected" },
-      phase: "quote",
+      phase: "fulfillment",
       meaning: {
-        ar: "تقرير المعاينة جاهز. الخطوة التالية هي بناء عرض السعر.",
-        en: "Inspection report is ready. Next: build and send a quote.",
+        ar: "تقرير المعاينة جاهز. الخطوة التالية تنفيذ الشراء (بعد الدفع المؤكد).",
+        en: "Inspection report is ready. Next: purchase (payment already confirmed).",
       },
       nextHint: {
         admin: {
-          ar: "ابنِ عرض السعر (بضاعة + عمولة + شحن) وأرسله للتاجر، أو ارفض إن لزم.",
-          en: "Build the quote (goods + commission + shipping) and send it, or decline.",
+          ar: "نفّذ الشراء من المصدر ثم سجّله، أو ارفض إن لزم.",
+          en: "Complete the purchase from the source, or decline if needed.",
         },
         trader: {
-          ar: "اكتملت المعاينة — بانتظار عرض السعر من الإدارة.",
-          en: "Inspection done — waiting for admin’s quote.",
+          ar: "اكتملت المعاينة — الإدارة تتابع الشراء.",
+          en: "Inspection done — admin continues with purchase.",
         },
       },
     },

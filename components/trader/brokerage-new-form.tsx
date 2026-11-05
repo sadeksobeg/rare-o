@@ -22,7 +22,8 @@ type Labels = Dictionary["trader"];
 
 type FormFields = {
   descriptionAr: string;
-  categoryAr: string;
+  modelNumber: string;
+  statedPriceUsd: string;
   quantity: string;
   cityAr: string;
   placeNameAr: string;
@@ -41,7 +42,8 @@ type Draft = {
 
 const emptyForm = (): FormFields => ({
   descriptionAr: "",
-  categoryAr: "",
+  modelNumber: "",
+  statedPriceUsd: "",
   quantity: "1",
   cityAr: "",
   placeNameAr: "",
@@ -62,7 +64,8 @@ function isDirty(d: Draft) {
   const f = d.form;
   return Boolean(
     f.descriptionAr.trim() ||
-      f.categoryAr.trim() ||
+      f.modelNumber.trim() ||
+      f.statedPriceUsd.trim() ||
       (f.quantity.trim() && f.quantity !== "1") ||
       f.cityAr.trim() ||
       f.placeNameAr.trim() ||
@@ -191,7 +194,15 @@ export function BrokerageNewForm({
   }
 
   function canNext() {
-    if (draft.step === 0) return draft.form.descriptionAr.trim().length >= 8;
+    if (draft.step === 0) {
+      const price = Number(draft.form.statedPriceUsd);
+      return (
+        draft.form.descriptionAr.trim().length >= 8 &&
+        draft.form.modelNumber.trim().length > 0 &&
+        Number.isFinite(price) &&
+        price > 0
+      );
+    }
     return true;
   }
 
@@ -264,7 +275,8 @@ export function BrokerageNewForm({
       >
         {/* Always present so multipart submit has all fields */}
         <input type="hidden" name="descriptionAr" value={form.descriptionAr} />
-        <input type="hidden" name="categoryAr" value={form.categoryAr} />
+        <input type="hidden" name="modelNumber" value={form.modelNumber} />
+        <input type="hidden" name="statedPriceUsd" value={form.statedPriceUsd} />
         <input type="hidden" name="quantity" value={form.quantity || "1"} />
         <input type="hidden" name="cityAr" value={form.cityAr} />
         <input type="hidden" name="placeNameAr" value={form.placeNameAr} />
@@ -302,10 +314,20 @@ export function BrokerageNewForm({
           </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <TextField
-              name="categoryArVisible"
+              name="modelNumberVisible"
               label={t.brokerageFieldCategory}
-              value={form.categoryAr}
-              onChange={(e) => update("categoryAr", e.target.value)}
+              required
+              value={form.modelNumber}
+              onChange={(e) => update("modelNumber", e.target.value)}
+            />
+            <TextField
+              name="statedPriceUsdVisible"
+              type="number"
+              label={t.brokerageFieldBudgetMin}
+              required
+              min={1}
+              value={form.statedPriceUsd}
+              onChange={(e) => update("statedPriceUsd", e.target.value)}
             />
             <TextField
               name="quantityVisible"

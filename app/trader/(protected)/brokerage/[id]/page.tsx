@@ -10,6 +10,7 @@ import { BrokerageStatusBrief } from "@/components/brokerage/status-brief";
 import { BrokerageTimeline } from "@/components/brokerage/timeline";
 import { BrokerageNeedsInfoActions } from "@/components/trader/brokerage-needs-info-actions";
 import { BrokerageQuoteActions } from "@/components/trader/brokerage-quote-actions";
+import { PaymentHandoffCard } from "@/components/trader/payment-handoff-card";
 import { getBrokerageForTrader } from "@/lib/brokerage/service";
 import { parsePhotoPaths } from "@/lib/brokerage/media-shared";
 import { getTraderSession } from "@/lib/auth/trader-session";
@@ -74,6 +75,42 @@ export default async function TraderBrokerageDetailPage({
         </p>
         <BrokerageLifecycleRail status={row.status} locale={locale} />
       </div>
+
+      <dl className="grid gap-3 rounded-[var(--ro-r-lg)] border border-[var(--ro-border-subtle)] bg-[var(--ro-sand-50)] p-5 text-sm sm:grid-cols-2">
+        <div>
+          <dt className="text-[0.65rem] text-[var(--ro-ink-500)]">
+            {t.modelNumberLabel}
+          </dt>
+          <dd className="mt-1 font-semibold text-ro-ink" dir="ltr">
+            <bdi dir="ltr">{row.modelNumber || "—"}</bdi>
+          </dd>
+        </div>
+        <div>
+          <dt className="text-[0.65rem] text-[var(--ro-ink-500)]">
+            {t.brokerageFieldBudgetMin}
+          </dt>
+          <dd className="mt-1 font-semibold tabular-nums text-ro-ink" dir="ltr">
+            {row.statedPriceUsd != null ? (
+              <bdi dir="ltr">{row.statedPriceUsd} USD</bdi>
+            ) : (
+              "—"
+            )}
+          </dd>
+        </div>
+      </dl>
+
+      {row.status === "AWAITING_PAYMENT" ? (
+        <PaymentHandoffCard
+          kind="brokerage"
+          recordId={row.id}
+          title={t.brokeragePayTitle}
+          body={t.brokeragePayBody}
+          openLabel={t.dealPayOpenWa}
+          unavailableLabel={t.dealPayUnavailable}
+          deepLink={row.whatsAppDeepLink}
+          messageText={row.handoffMessageText}
+        />
+      ) : null}
 
       <BrokeragePhotoGallery
         paths={requestPhotos}

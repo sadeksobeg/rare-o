@@ -9,6 +9,10 @@ import {
   updateProductImageAltsAction,
   type ActionResult,
 } from "@/app/actions";
+import {
+  SuggestEnAltPair,
+  type SuggestEnLabels,
+} from "@/components/admin/suggest-en";
 import { Button } from "@/components/ui/button";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
@@ -42,10 +46,12 @@ export function ImageUploader({
   productId,
   images,
   dict,
+  translate,
 }: {
   productId: string;
   images: MediaRow[];
   dict: Dictionary["admin"];
+  translate: SuggestEnLabels;
 }) {
   const [state, action, pending] = useActionState(
     attachProductImageAction,
@@ -105,31 +111,20 @@ export function ImageUploader({
                 <div className="min-w-0 flex-1 space-y-2">
                   <form
                     action={updateProductImageAltsAction}
-                    className="grid gap-2 sm:grid-cols-2"
+                    className="space-y-2"
                   >
                     <input type="hidden" name="imageId" value={img.id} />
                     <input type="hidden" name="productId" value={productId} />
-                    <label className="block space-y-1 text-xs">
-                      <span>{dict.imagesAltAr}</span>
-                      <input
-                        name="altAr"
-                        defaultValue={img.altAr}
-                        className="w-full border border-ro-line bg-transparent px-2 py-1.5 text-sm"
-                      />
-                    </label>
-                    <label className="block space-y-1 text-xs">
-                      <span>{dict.imagesAltEn}</span>
-                      <input
-                        name="altEn"
-                        defaultValue={img.altEn}
-                        className="w-full border border-ro-line bg-transparent px-2 py-1.5 text-sm"
-                      />
-                    </label>
-                    <div className="sm:col-span-2">
-                      <Button type="submit" variant="quiet" size="sm">
-                        {dict.edit}
-                      </Button>
-                    </div>
+                    <SuggestEnAltPair
+                      arLabel={dict.imagesAltAr}
+                      enLabel={dict.imagesAltEn}
+                      arDefault={img.altAr}
+                      enDefault={img.altEn}
+                      labels={translate}
+                    />
+                    <Button type="submit" variant="quiet" size="sm">
+                      {dict.edit}
+                    </Button>
                   </form>
                   <div className="flex flex-wrap gap-2">
                     <form action={reorderProductImageAction}>
@@ -177,22 +172,11 @@ export function ImageUploader({
 
       <form action={action} className="space-y-3 border-t border-ro-line pt-4">
         <input type="hidden" name="productId" value={productId} />
-        <div className="grid gap-2 sm:grid-cols-2">
-          <label className="block space-y-1 text-xs">
-            <span>{dict.imagesAltAr}</span>
-            <input
-              name="altAr"
-              className="w-full border border-ro-line bg-transparent px-2 py-1.5 text-sm"
-            />
-          </label>
-          <label className="block space-y-1 text-xs">
-            <span>{dict.imagesAltEn}</span>
-            <input
-              name="altEn"
-              className="w-full border border-ro-line bg-transparent px-2 py-1.5 text-sm"
-            />
-          </label>
-        </div>
+        <SuggestEnAltPair
+          arLabel={dict.imagesAltAr}
+          enLabel={dict.imagesAltEn}
+          labels={translate}
+        />
         <label className="block space-y-1 text-sm">
           <span className="font-medium">{dict.imagesFileLabel}</span>
           <input

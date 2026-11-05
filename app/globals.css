@@ -2,29 +2,31 @@
 @import "tailwindcss";
 
 :root {
-  /* sand */
-  --ro-sand-50: #fbf6ee;
-  --ro-sand-100: #f4e7d8;
-  --ro-sand-200: #efe3d4;
-  --ro-sand-300: #e3d6c5;
-  --ro-sand-400: #d2c2ac;
-  /* ink */
-  --ro-ink-950: #0b080d;
-  --ro-ink-900: #15101a;
-  --ro-ink-800: #211a29;
-  --ro-ink-700: #332a3c;
-  --ro-ink-600: #4b4056;
-  --ro-ink-500: #5a4f66;
-  --ro-ink-400: #6b6074;
-  --ro-ink-300: #a79db3;
-  --ro-ink-200: #b9afc4;
-  /* plum */
-  --ro-plum-900: #32104f;
-  --ro-plum-800: #3f1962;
-  --ro-plum-700: #52277c;
-  --ro-plum-300: #c9b2e3;
-  --ro-plum-100: #e9ddf3;
-  --ro-plum-50: #f5effa;
+  /* sand — brighter reading neutrals */
+  --ro-sand-50: #fffcf8;
+  --ro-sand-100: #f4f1f7;
+  --ro-sand-200: #ebe6f0;
+  --ro-sand-300: #ddd5e6;
+  --ro-sand-400: #c4b8d0;
+  /* ink — cool-plum neutrals */
+  --ro-ink-950: #08060a;
+  --ro-ink-900: #100c14;
+  --ro-ink-800: #18131f;
+  --ro-ink-700: #241c2e;
+  --ro-ink-600: #3a3048;
+  --ro-ink-500: #564a66;
+  --ro-ink-400: #7a6e88;
+  --ro-ink-300: #a89ab8;
+  --ro-ink-200: #cfc4d9;
+  /* plum — brand accent */
+  --ro-plum-900: #1f0a32;
+  --ro-plum-800: #2a0d44;
+  --ro-plum-700: #32104f;
+  --ro-plum-500: #6b3d9a;
+  --ro-plum-400: #8f63b8;
+  --ro-plum-300: #b794d4;
+  --ro-plum-100: #ebe3f4;
+  --ro-plum-50: #f6f2fa;
   /* amber */
   --ro-amber-800: #6b4614;
   --ro-amber-600: #8a5a22;
@@ -32,26 +34,31 @@
   --ro-amber-400: #cfa25e;
   --ro-amber-100: #f1e0bf;
   /* semantic */
-  --ro-success-700: #1f5130;
-  --ro-success-100: #dcebdd;
-  --ro-danger-700: #8a2433;
-  --ro-danger-100: #f4dadc;
+  --ro-success-700: #1a8f4c;
+  --ro-success-100: #e8f7ee;
+  --ro-danger-700: #c93a4a;
+  --ro-danger-100: #fce9eb;
   --ro-progress-700: #1f3f57;
   --ro-progress-100: #d9e6ee;
 
-  /* roles (light) */
-  --ro-bg: var(--ro-sand-100);
-  --ro-bg-raised: var(--ro-sand-50);
-  --ro-bg-sunken: var(--ro-sand-200);
-  --ro-text: var(--ro-ink-950);
-  --ro-text-2: var(--ro-ink-700);
-  --ro-text-muted: var(--ro-ink-600);
-  --ro-link: var(--ro-plum-900);
+  /* roles (light — open / bright) */
+  --ro-bg: #f3f0f7;
+  --ro-bg-raised: #ffffff;
+  --ro-bg-elevated: #ffffff;
+  --ro-bg-sunken: #e8e3ef;
+  --ro-panel: #ffffff;
+  --ro-panel-hover: color-mix(in srgb, var(--ro-plum-50) 80%, #ffffff);
+  --ro-accent-fg: var(--ro-plum-700);
+  --ro-accent-well: color-mix(in srgb, var(--ro-plum-700) 14%, transparent);
+  --ro-text: #140f1a;
+  --ro-text-2: #3d3548;
+  --ro-text-muted: #6a6178;
+  --ro-link: var(--ro-plum-800);
   --ro-link-hover: var(--ro-plum-700);
-  --ro-border-subtle: rgba(11, 8, 13, 0.14);
-  --ro-border: rgba(11, 8, 13, 0.28);
-  --ro-border-control: #8f8473;
-  --ro-focus: var(--ro-plum-900);
+  --ro-border-subtle: rgba(50, 16, 79, 0.08);
+  --ro-border: rgba(50, 16, 79, 0.14);
+  --ro-border-control: color-mix(in srgb, var(--ro-plum-700) 28%, #c8bfd4);
+  --ro-focus: var(--ro-plum-500);
 
   /* space (4px base) */
   --ro-s-1: 4px;
@@ -76,10 +83,10 @@
   --ro-r-lg: 16px;
   --ro-r-full: 9999px;
 
-  /* elevation */
-  --ro-e2: 0 1px 2px rgba(11, 8, 13, 0.06),
-    0 8px 24px -12px rgba(11, 8, 13, 0.18);
-  --ro-e3: 0 24px 64px -24px rgba(11, 8, 13, 0.45);
+  /* elevation — plum-tinted */
+  --ro-e2: 0 1px 2px rgba(20, 15, 26, 0.04),
+    0 14px 36px -18px rgba(50, 16, 79, 0.18);
+  --ro-e3: 0 28px 64px -24px rgba(50, 16, 79, 0.28);
 
   /* motion */
   --ro-dur-instant: 90ms;
@@ -128,18 +135,23 @@
 }
 
 .ro-inverse {
-  --ro-bg: var(--ro-ink-950);
-  --ro-bg-raised: var(--ro-ink-900);
-  --ro-bg-sunken: var(--ro-ink-950);
-  --ro-text: var(--ro-sand-100);
-  --ro-text-2: var(--ro-ink-200);
-  --ro-text-muted: var(--ro-ink-300);
-  --ro-link: var(--ro-plum-300);
-  --ro-link-hover: var(--ro-sand-100);
-  --ro-border-subtle: rgba(244, 231, 216, 0.16);
-  --ro-border: rgba(244, 231, 216, 0.3);
-  --ro-border-control: #7c7288;
-  --ro-focus: var(--ro-sand-100);
+  --ro-bg: #221a32;
+  --ro-bg-raised: #2c2340;
+  --ro-bg-elevated: #372e4c;
+  --ro-bg-sunken: #1a1428;
+  --ro-panel: #372e4c;
+  --ro-panel-hover: #44385c;
+  --ro-accent-fg: #c9a6e6;
+  --ro-accent-well: color-mix(in srgb, var(--ro-plum-400) 26%, transparent);
+  --ro-text: #f7f2fb;
+  --ro-text-2: #ddd2ea;
+  --ro-text-muted: #b5a8c6;
+  --ro-link: #c9a6e6;
+  --ro-link-hover: #f7f2fb;
+  --ro-border-subtle: rgba(255, 255, 255, 0.09);
+  --ro-border: rgba(255, 255, 255, 0.14);
+  --ro-border-control: rgba(255, 255, 255, 0.22);
+  --ro-focus: #c9a6e6;
   --background: var(--ro-bg);
   --foreground: var(--ro-text);
   color: var(--ro-text);
@@ -989,9 +1001,9 @@ html[lang="ar"] .ro-type-overline {
 }
 
 .ro-oud-admin-section {
-  border: 1px solid color-mix(in srgb, var(--ro-plum-900) 12%, transparent);
+  border: 1px solid var(--ro-border-subtle);
   border-radius: var(--ro-r-sm);
-  background: color-mix(in srgb, white 72%, var(--ro-sand-50));
+  background: var(--ro-bg-elevated);
   padding: 1rem;
 }
 
@@ -1001,7 +1013,7 @@ html[lang="ar"] .ro-type-overline {
   gap: 0.75rem;
   margin-bottom: 0.9rem;
   padding-bottom: 0.7rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--ro-plum-900) 10%, transparent);
+  border-bottom: 1px solid var(--ro-border-subtle);
 }
 
 .ro-oud-admin-section__title {
@@ -1009,7 +1021,7 @@ html[lang="ar"] .ro-type-overline {
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--ro-plum-900);
+  color: var(--ro-text);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -1028,7 +1040,7 @@ html[lang="ar"] .ro-type-overline {
   .ro-oud-spec-tile:focus-within {
     transform: translateY(-3px);
     border-color: color-mix(in srgb, var(--ro-plum-700) 45%, var(--ro-border));
-    background: color-mix(in srgb, var(--ro-plum-50) 35%, white);
+    background: color-mix(in srgb, var(--ro-plum-50) 35%, var(--ro-bg-elevated));
     box-shadow: var(--ro-e2);
   }
 
@@ -1558,70 +1570,89 @@ html[lang="en"] .ro-portal {
   --ro-portal-title-weight: 650;
 }
 
-/* Portal canvas — driven by data-theme semantic tokens (no raw sand hardcodes) */
+/* Portal canvas — soft atmosphere; theme tokens drive the plane */
 .ro-portal-admin,
 .ro-portal-trader {
   color: var(--text, var(--ro-text));
   background-color: var(--bg-page, var(--ro-bg));
   background-image:
     radial-gradient(
-      90% 55% at 12% -8%,
-      color-mix(in srgb, var(--ro-plum-400) 28%, transparent),
-      transparent 58%
+      70% 48% at 8% -12%,
+      color-mix(in srgb, var(--ro-plum-400, var(--plum-400)) 18%, transparent),
+      transparent 62%
     ),
     radial-gradient(
-      70% 45% at 100% 0%,
-      color-mix(in srgb, var(--ro-amber-500) 16%, transparent),
-      transparent 55%
+      55% 40% at 100% -4%,
+      color-mix(in srgb, var(--ro-plum-700) 8%, transparent),
+      transparent 58%
     ),
     linear-gradient(
-      165deg,
+      180deg,
       var(--bg-page, var(--ro-bg)) 0%,
-      color-mix(in srgb, var(--bg-surface-solid, var(--ro-bg-raised)) 70%, var(--bg-page, var(--ro-bg))) 48%,
-      color-mix(in srgb, var(--ro-plum-900) 22%, var(--bg-page, var(--ro-bg))) 100%
+      var(--bg-page, var(--ro-bg)) 100%
     );
 }
 
-/* VISION dark-luxury portal canvas — stronger ink plane */
+/* Dark — open lilac studio (admin + trader), warm and bright */
 .ro-portal-admin[data-theme="dark"],
 .ro-portal-trader[data-theme="dark"] {
   color-scheme: dark;
   color: var(--text);
-  background-color: var(--ink-950);
+  background-color: var(--bg-page, #35314a);
   background-image:
     radial-gradient(
-      80% 50% at 8% -10%,
-      var(--glow-plum),
+      78% 52% at 6% -12%,
+      color-mix(in srgb, #e0c8f5 42%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      58% 42% at 100% -4%,
+      color-mix(in srgb, #c4a574 16%, transparent),
       transparent 58%
     ),
     radial-gradient(
-      60% 40% at 100% 0%,
-      color-mix(in srgb, var(--plum-700) 35%, transparent),
-      transparent 55%
+      48% 36% at 70% 100%,
+      color-mix(in srgb, #b794d4 22%, transparent),
+      transparent 62%
     ),
     linear-gradient(
-      165deg,
-      var(--ink-950) 0%,
-      var(--ink-900) 48%,
-      color-mix(in srgb, var(--plum-900) 55%, var(--ink-950)) 100%
+      180deg,
+      #3d3854 0%,
+      #35314a 48%,
+      #302c44 100%
     );
 }
 
+/* Light — open lilac-grey plane, clean white cards */
 .ro-portal-admin[data-theme="light"],
 .ro-portal-trader[data-theme="light"] {
   color-scheme: light;
+  background-color: var(--bg-page, #f3f0f7);
+  background-image:
+    radial-gradient(
+      70% 45% at 10% -10%,
+      color-mix(in srgb, var(--plum-300) 22%, transparent),
+      transparent 58%
+    ),
+    radial-gradient(
+      50% 35% at 100% 0%,
+      color-mix(in srgb, var(--plum-100) 55%, transparent),
+      transparent 55%
+    ),
+    linear-gradient(180deg, #f6f3fa 0%, #f0ecf5 100%);
 }
 
 .ro-portal[data-theme="dark"] .ro-portal-header {
-  --ro-portal-header-bg: color-mix(in srgb, var(--ink-900) 88%, transparent);
+  --ro-portal-header-bg: color-mix(in srgb, var(--ro-bg-raised) 82%, transparent);
   background-color: var(--ro-portal-header-bg);
   border-color: var(--border);
   color: var(--text);
+  backdrop-filter: blur(14px);
 }
 
 .ro-portal[data-theme="dark"] .ro-portal-atmosphere::before,
 .ro-portal[data-theme="dark"] .ro-portal-atmosphere::after {
-  opacity: 0.55;
+  opacity: 0.7;
 }
 
 /* Grain overlay for dark luxury surfaces */
@@ -1645,17 +1676,22 @@ html[lang="en"] .ro-portal {
 .ro-portal-hero {
   background:
     radial-gradient(
-      ellipse 70% 90% at 20% 40%,
-      rgba(82, 39, 124, 0.45) 0%,
-      transparent 60%
+      ellipse 70% 90% at 18% 35%,
+      color-mix(in srgb, #d4b8ef 38%, transparent) 0%,
+      transparent 62%
     ),
     radial-gradient(
-      ellipse 50% 60% at 90% 20%,
-      rgba(50, 16, 79, 0.35) 0%,
-      transparent 55%
+      ellipse 50% 60% at 92% 18%,
+      color-mix(in srgb, #c4a574 18%, transparent) 0%,
+      transparent 58%
     ),
-    linear-gradient(125deg, #0b080d 0%, #1a1024 48%, #0b080d 100%);
-  border: 1px solid color-mix(in srgb, var(--ro-sand-100) 14%, transparent);
+    linear-gradient(
+      125deg,
+      color-mix(in srgb, var(--ro-bg-raised) 92%, #5a4a78) 0%,
+      var(--ro-bg-elevated) 48%,
+      color-mix(in srgb, var(--ro-bg-raised) 88%, #3a3058) 100%
+    );
+  border: 1px solid color-mix(in srgb, var(--ro-border) 80%, transparent);
   box-shadow:
     0 1px 0 color-mix(in srgb, var(--ro-sand-100) 10%, transparent) inset,
     0 32px 72px -40px rgba(0, 0, 0, 0.85);
@@ -1842,6 +1878,50 @@ html[lang="en"] .ro-portal {
   border: 1px solid color-mix(in srgb, var(--ro-plum-900) 14%, transparent);
 }
 
+.ro-portal[data-theme="dark"] .ro-portal-icon-well {
+  background: var(--ro-accent-well);
+  color: var(--ro-accent-fg);
+  border-color: color-mix(in srgb, var(--ro-plum-400) 28%, transparent);
+}
+
+/* Luxury empty canvas — depth without flat void */
+.ro-portal .ro-portal-empty {
+  position: relative;
+  isolation: isolate;
+  min-height: min(28rem, 62vh);
+  overflow: hidden;
+  border-radius: 16px;
+  padding-block: 3.5rem;
+  background:
+    radial-gradient(
+      90% 70% at 50% -10%,
+      color-mix(in srgb, var(--ro-plum-700) 22%, transparent),
+      transparent 58%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--ro-panel) 88%, var(--ro-bg-raised)) 0%,
+      var(--ro-bg-raised) 100%
+    );
+}
+
+.ro-portal .ro-portal-empty::before {
+  content: "";
+  position: absolute;
+  inset: auto 12% -40% 12%;
+  height: 70%;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ro-plum-700) 18%, transparent);
+  filter: blur(48px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.ro-portal .ro-portal-empty > * {
+  position: relative;
+  z-index: 1;
+}
+
 .ro-portal-header {
   border-bottom: 1px solid color-mix(in srgb, var(--ro-plum-900) 18%, transparent);
   background: var(--ro-portal-header-bg);
@@ -1855,13 +1935,26 @@ html[lang="en"] .ro-portal {
   background:
     linear-gradient(
       195deg,
-      var(--ro-plum-900) 0%,
-      var(--ro-ink-950) 38%,
-      var(--ro-ink-900) 100%
+      color-mix(in srgb, var(--ro-plum-700) 72%, #2a1a3c) 0%,
+      #1f1630 42%,
+      #1a1426 100%
     );
   box-shadow:
-    inset -1px 0 0 color-mix(in srgb, var(--ro-sand-100) 14%, transparent),
-    12px 0 40px -28px rgba(0, 0, 0, 0.55);
+    inset -1px 0 0 color-mix(in srgb, var(--ro-sand-100) 12%, transparent),
+    12px 0 40px -28px rgba(20, 8, 40, 0.45);
+}
+
+.ro-portal[data-theme="dark"] .ro-portal-sidebar {
+  background:
+    linear-gradient(
+      195deg,
+      #5a3d7a 0%,
+      #46305f 42%,
+      #3a2a52 100%
+    );
+  box-shadow:
+    inset -1px 0 0 rgba(255, 255, 255, 0.1),
+    12px 0 36px -28px rgba(60, 40, 90, 0.35);
 }
 
 .ro-portal-sidebar-brand {
@@ -1974,23 +2067,81 @@ html[lang="en"] .ro-portal {
     inset -3px 0 0 0 var(--ro-plum-300);
 }
 
-/* Opacity-only enter — avoid transform so position:fixed children (FAB) stay viewport-fixed */
-.ro-portal-main-enter {
-  animation: ro-portal-enter 0.45s var(--ro-ease-enter) both;
-}
+/* Enter handled by PageEnter (motion) — class retained as a hook; no CSS transform (FAB-safe). */
 
-/* OPS-01 inbox: full-bleed main */
+/* OPS-01 inbox: fill viewport — no page scroll; composer stays docked */
 #main-content:has([data-admin-inbox]) {
   max-width: none;
   width: 100%;
-  overflow: hidden;
-  padding-inline: 0.5rem;
-  padding-block: 0.5rem;
+  height: 100%;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 0% !important;
+  padding-inline: 0.65rem;
+  padding-block: 0.65rem;
 }
 @media (min-width: 640px) {
   #main-content:has([data-admin-inbox]) {
-    padding-inline: 0.75rem;
+    padding-inline: 0.85rem;
+    padding-block: 0.75rem;
   }
+}
+
+/* PageEnter wrapper must not grow with thread content */
+#main-content:has([data-admin-inbox]) > [data-ro-page-enter],
+#main-content:has([data-admin-inbox]) > .ro-portal-page-enter {
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.ro-inbox-workspace {
+  flex: 1 1 0%;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+}
+
+.ro-inbox-workspace [data-inbox-pane="list"] {
+  border-inline-end: 1px solid var(--ro-border-subtle);
+}
+
+.ro-inbox-workspace [data-inbox-panes] {
+  flex: 1 1 0%;
+  min-height: 0;
+  max-height: 100%;
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.ro-inbox-workspace [data-inbox-pane="thread"] {
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+}
+
+.ro-inbox-workspace [data-inbox-pane="context"] {
+  min-height: 100%;
+}
+
+/* Subtle thread canvas wash — luxury ink, not flat void */
+.ro-inbox-thread {
+  background-image:
+    radial-gradient(
+      120% 80% at 50% -10%,
+      color-mix(in srgb, var(--ro-plum-700) 14%, transparent),
+      transparent 55%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--ro-bg-sunken) 92%, var(--ro-panel)) 0%,
+      var(--ro-bg-sunken) 100%
+    );
 }
 
 /*
@@ -2004,12 +2155,24 @@ body {
   max-width: 100%;
 }
 
+html:has(.ro-portal-admin),
+body:has(.ro-portal-admin) {
+  height: 100%;
+  overflow: hidden;
+}
+
 .ro-portal.ro-portal-admin {
-  display: flex !important;
-  flex-direction: column !important;
+  position: relative !important;
+  display: block !important;
   width: 100% !important;
   max-width: none !important;
   min-width: 0;
+  /* Fixed app chrome — sidebar stays; only main scrolls */
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
+  overflow: hidden !important;
 }
 
 .ro-portal-shell {
@@ -2023,13 +2186,38 @@ body {
   min-height: 100dvh;
 }
 
-.ro-portal-main-col {
+.ro-portal-admin .ro-portal-shell {
+  position: absolute !important;
+  inset: 0 !important;
+  flex: none !important;
+  width: auto !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: hidden !important;
+}
+
+.ro-portal-admin .ro-portal-sidebar {
+  position: relative;
+  flex: 0 0 auto;
+  align-self: stretch;
+  height: 100% !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden;
+}
+
+.ro-portal-admin .ro-portal-main-col {
   display: flex !important;
   flex-direction: column !important;
   flex: 1 1 0% !important;
   width: 0 !important; /* force claim of leftover row space */
   min-width: 0 !important;
   max-width: none !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
 }
 
 .ro-portal-header {
@@ -2067,6 +2255,123 @@ body {
   flex-shrink: 0;
 }
 
+/* —— Linear-grade header chrome (search + icon cluster) —— */
+.ro-chrome-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.2rem;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, var(--ro-border-subtle) 90%, transparent);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--ro-bg-elevated, var(--ro-bg-raised)) 92%, transparent),
+      color-mix(in srgb, var(--ro-bg-raised) 88%, transparent)
+    );
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--ro-sand-100) 8%, transparent) inset,
+    0 8px 22px -18px color-mix(in srgb, var(--ro-ink-950) 45%, transparent);
+}
+.ro-chrome-cluster--on-dark {
+  border-color: color-mix(in srgb, var(--ro-sand-100) 18%, transparent);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--ro-sand-100) 10%, transparent),
+      color-mix(in srgb, var(--ro-ink-950) 35%, transparent)
+    );
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--ro-sand-100) 10%, transparent) inset,
+    0 10px 24px -18px color-mix(in srgb, var(--ro-ink-950) 70%, transparent);
+}
+
+.ro-chrome-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  min-height: 2.5rem;
+  border: 0;
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--ro-text-2, var(--ro-plum-900));
+  cursor: pointer;
+  transition:
+    background-color var(--ro-dur-fast, 140ms) var(--ro-ease-out, ease),
+    color var(--ro-dur-fast, 140ms) var(--ro-ease-out, ease),
+    transform var(--ro-dur-fast, 140ms) var(--ro-ease-out, ease);
+}
+.ro-chrome-icon:hover {
+  background: color-mix(in srgb, var(--ro-plum-700) 12%, transparent);
+  color: var(--ro-plum-900);
+}
+.ro-chrome-icon:focus-visible {
+  outline: 2px solid var(--ro-focus);
+  outline-offset: 2px;
+}
+.ro-chrome-icon-glyph {
+  display: inline-flex;
+  transition: transform var(--ro-dur-fast, 140ms) var(--ro-ease-out, ease);
+}
+.ro-chrome-icon:hover .ro-chrome-icon-glyph {
+  transform: scale(1.08);
+}
+.ro-chrome-icon--on-dark {
+  color: color-mix(in srgb, var(--ro-sand-100) 88%, transparent);
+}
+.ro-chrome-icon--on-dark:hover {
+  background: color-mix(in srgb, var(--ro-sand-100) 14%, transparent);
+  color: var(--ro-sand-50);
+}
+
+.ro-portal-header .ro-cmd-search-trigger {
+  height: 2.75rem !important;
+  gap: 0.65rem !important;
+  padding-inline: 0.9rem !important;
+  border-radius: 9999px !important;
+  border: 1px solid color-mix(in srgb, var(--ro-border-subtle) 95%, transparent) !important;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--ro-bg-elevated, var(--ro-bg-raised)) 96%, transparent),
+      var(--ro-bg-raised)
+    ) !important;
+  color: var(--ro-text-muted) !important;
+  font-size: 0.8125rem !important;
+  font-weight: 550 !important;
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--ro-sand-100) 7%, transparent) inset,
+    0 10px 24px -20px color-mix(in srgb, var(--ro-ink-950) 40%, transparent);
+  transition:
+    border-color var(--ro-dur-fast, 140ms) ease,
+    background-color var(--ro-dur-fast, 140ms) ease,
+    transform var(--ro-dur-fast, 140ms) ease !important;
+}
+.ro-portal-header .ro-cmd-search-trigger:hover {
+  border-color: color-mix(in srgb, var(--ro-plum-700) 35%, var(--ro-border-subtle)) !important;
+  transform: translateY(-1px);
+}
+.ro-portal-header .ro-cmd-search-trigger kbd {
+  border-radius: 9999px !important;
+  border: 1px solid color-mix(in srgb, var(--ro-border-subtle) 90%, transparent);
+  background: color-mix(in srgb, var(--ro-bg) 70%, transparent) !important;
+  padding-inline: 0.55rem !important;
+  padding-block: 0.2rem !important;
+  font-size: 0.65rem !important;
+  letter-spacing: 0.02em;
+  color: var(--ro-text-2) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ro-chrome-icon:hover .ro-chrome-icon-glyph,
+  .ro-portal-header .ro-cmd-search-trigger:hover {
+    transform: none !important;
+  }
+}
+
 .ro-portal-main,
 #main-content {
   display: flex !important;
@@ -2075,10 +2380,26 @@ body {
   width: 100% !important;
   max-width: none !important;
   min-width: 0 !important;
+  min-height: 0 !important;
   box-sizing: border-box;
 }
 
-/* Command search trigger always fills header (all breakpoints) */
+.ro-portal-admin .ro-portal-main,
+.ro-portal-admin #main-content {
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ro-portal-admin .ro-portal-header {
+  position: sticky;
+  top: 0;
+  flex-shrink: 0;
+  z-index: 30;
+}
+
+/* Command search: full trigger on desktop; icon-only on narrow chrome */
 .ro-portal-header .ro-cmd-search-trigger {
   display: inline-flex !important;
   flex: 1 1 0% !important;
@@ -2090,25 +2411,73 @@ body {
   display: none !important;
 }
 
+@media (max-width: 1023px) {
+  .ro-portal-header .ro-cmd-search-trigger {
+    display: none !important;
+  }
+
+  .ro-portal-header .ro-cmd-search-icon-only {
+    display: inline-flex !important;
+  }
+
+  .ro-portal-header-search {
+    flex: 0 0 auto !important;
+    width: auto !important;
+  }
+
+  .ro-portal-admin .ro-portal-header {
+    gap: 0.35rem;
+    padding-inline: 0.55rem;
+  }
+
+  .ro-portal-header-actions .ro-chrome-cluster {
+    gap: 0;
+    padding: 0.1rem;
+  }
+
+  .ro-portal-header-actions .ro-chrome-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    min-height: 2.25rem;
+  }
+
+  /* Keep brand mark; hide wordmark when chrome is tight */
+  .ro-portal-header-start > a span {
+    display: none;
+  }
+}
+
 #main-content:has([data-admin-home]) {
   padding: 0 !important;
 }
 
-/* Non-home admin pages keep comfortable inset */
+/* Non-home admin pages keep comfortable inset + room under last row */
 #main-content:not(:has([data-admin-home])):not(:has([data-admin-inbox])) {
   padding-inline: 0.75rem;
   padding-block: 0.75rem;
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px) + 1.25rem);
 }
 @media (min-width: 640px) {
   #main-content:not(:has([data-admin-home])):not(:has([data-admin-inbox])) {
     padding-inline: 1rem;
     padding-block: 1rem;
+    padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px) + 1.5rem);
   }
 }
 @media (min-width: 1024px) {
   #main-content:not(:has([data-admin-home])):not(:has([data-admin-inbox])) {
     padding-inline: 1.25rem;
   }
+}
+
+/* List pages: PageEnter must grow with content so #main-content can scroll */
+#main-content:not(:has([data-admin-inbox])) > [data-ro-page-enter],
+#main-content:not(:has([data-admin-inbox])) > .ro-portal-page-enter {
+  flex: 1 0 auto !important;
+  min-height: min-content !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
 }
 
 .ro-admin-home-bleed {
@@ -2126,80 +2495,392 @@ body {
   }
 }
 
-/* Continuous KPI strip — Linear density, kills card-island look */
+/* KPI stack — hero waiting total + equal path cells */
+.ro-admin-kpi-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.65rem 1rem 0.85rem;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--ro-ink-950) 6%, transparent),
+      transparent 40%
+    ),
+    var(--ro-bg);
+}
+@media (min-width: 1024px) {
+  .ro-admin-kpi-stack {
+    padding-inline: 1.25rem;
+    gap: 0.75rem;
+  }
+}
+.ro-admin-kpi-hero {
+  display: flex;
+  min-width: 0;
+  min-height: 6.75rem;
+}
 .ro-admin-kpi-strip {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
   width: 100%;
-  border-block: 1px solid var(--ro-border-subtle);
-  background: var(--ro-bg-raised);
+  padding: 0;
+  background: transparent;
 }
 @media (min-width: 1024px) {
   .ro-admin-kpi-strip {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.85rem;
   }
 }
-.ro-admin-kpi-strip > * {
+.ro-admin-kpi-cell {
   display: flex;
   min-width: 0;
-  min-height: 8rem;
-  border-inline-end: 1px solid var(--ro-border-subtle);
-  border-radius: 0 !important;
-  box-shadow: none !important;
+  min-height: 9.25rem;
 }
-.ro-admin-kpi-strip > *:nth-child(2n) {
-  border-inline-end: none;
-}
-@media (min-width: 1024px) {
-  .ro-admin-kpi-strip > *:nth-child(2n) {
-    border-inline-end: 1px solid var(--ro-border-subtle);
-  }
-  .ro-admin-kpi-strip > *:last-child {
-    border-inline-end: none;
-  }
-}
-.ro-admin-kpi-strip .ro-portal-kpi,
-.ro-admin-kpi-strip .ro-portal-kpi[data-kpi] {
+/* Stripe/Linear enterprise KPI — solid panel lift off canvas */
+.ro-admin-kpi-stack .ro-portal-kpi,
+.ro-admin-kpi-stack .ro-portal-kpi[data-kpi] {
   flex: 1;
   width: 100%;
   height: 100%;
-  border: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  background: transparent !important;
+  padding: 0 !important;
+  overflow: hidden;
+  border: 1px solid var(--ro-border-subtle) !important;
+  border-radius: 1rem !important;
+  background: var(--ro-panel, var(--ro-bg-elevated, var(--ro-bg-raised))) !important;
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--ro-text) 6%, transparent) inset,
+    var(--ro-e2) !important;
+  transition:
+    transform var(--ro-dur-fast, 140ms) var(--ro-ease-out, ease),
+    border-color var(--ro-dur-fast, 140ms) ease,
+    box-shadow var(--ro-dur-fast, 140ms) ease,
+    background-color var(--ro-dur-fast, 140ms) ease !important;
 }
-.ro-admin-kpi-strip .ro-portal-kpi::after,
-.ro-admin-kpi-strip .ro-portal-kpi[data-kpi]::after {
-  display: block;
-  width: 3px;
+.ro-admin-kpi-stack .ro-portal-kpi::after,
+.ro-admin-kpi-stack .ro-portal-kpi[data-kpi]::after {
+  display: none !important;
 }
-.ro-admin-kpi-strip .ro-portal-kpi:hover {
-  transform: none !important;
-  background: color-mix(in srgb, var(--ro-plum-700) 14%, transparent) !important;
+.ro-admin-kpi-stack .ro-portal-kpi:hover {
+  transform: translateY(-2px) !important;
+  border-color: color-mix(in srgb, var(--ro-plum-500, var(--ro-plum-700)) 42%, var(--ro-border-subtle)) !important;
+  background: var(--ro-panel-hover, var(--ro-panel)) !important;
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--ro-text) 8%, transparent) inset,
+    var(--ro-e3) !important;
+}
+.ro-admin-kpi-stack .ro-portal-kpi[data-active="true"] {
+  border-color: color-mix(in srgb, var(--ro-plum-500, var(--ro-plum-700)) 55%, var(--ro-border-subtle)) !important;
+  background: color-mix(
+    in srgb,
+    var(--ro-plum-700) 12%,
+    var(--ro-panel, var(--ro-bg-elevated))
+  ) !important;
+}
+.ro-portal[data-theme="dark"] .ro-admin-kpi-stack .ro-portal-kpi:hover {
+  border-color: color-mix(in srgb, var(--ro-plum-300) 40%, var(--ro-border-subtle)) !important;
+}
+.ro-portal[data-theme="dark"] .ro-admin-kpi-stack .ro-portal-kpi[data-active="true"] {
+  border-color: color-mix(in srgb, var(--ro-plum-300) 50%, var(--ro-border-subtle)) !important;
+  background: color-mix(in srgb, var(--ro-plum-400) 14%, var(--ro-panel)) !important;
+}
+.ro-kpi-sheen::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: -40%;
+  width: 38%;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    color-mix(in srgb, var(--ro-sand-100) 14%, transparent) 48%,
+    transparent 100%
+  );
+  transform: translateX(-120%);
+  opacity: 0;
+}
+.ro-kpi-sheen:hover::before {
+  opacity: 1;
+  transform: translateX(280%);
+  transition:
+    transform 520ms var(--ro-ease-out, ease),
+    opacity 220ms ease;
+}
+.ro-kpi-icon-well {
+  transition: transform var(--ro-dur-fast, 140ms) var(--ro-ease-out, ease);
+}
+.ro-admin-kpi-stack .ro-portal-kpi:hover .ro-kpi-icon-well {
+  transform: scale(1.06);
+}
+.ro-kpi-spark {
+  mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 100%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ro-admin-kpi-stack .ro-portal-kpi:hover {
+    transform: none !important;
+  }
+  .ro-admin-kpi-stack .ro-portal-kpi:hover .ro-kpi-icon-well {
+    transform: none;
+  }
+  .ro-kpi-sheen::before,
+  .ro-kpi-sheen:hover::before {
+    display: none;
+  }
 }
 
 .ro-admin-greeting {
   position: relative;
   overflow: hidden;
-  border-bottom: 1px solid color-mix(in srgb, var(--ro-sand-100) 12%, transparent);
+  isolation: isolate;
+  border-bottom: 1px solid color-mix(in srgb, var(--ro-sand-100) 14%, transparent);
   background:
     radial-gradient(
       55% 120% at 100% 0%,
-      color-mix(in srgb, var(--ro-plum-700) 45%, transparent),
+      color-mix(in srgb, var(--ro-plum-700) 52%, transparent),
       transparent 62%
     ),
     radial-gradient(
       40% 90% at 0% 100%,
-      color-mix(in srgb, var(--ro-amber-500) 16%, transparent),
+      color-mix(in srgb, var(--ro-amber-500) 18%, transparent),
       transparent 55%
     ),
     linear-gradient(
-      105deg,
-      var(--ro-ink-950) 0%,
-      var(--ro-ink-900) 55%,
-      color-mix(in srgb, var(--ro-plum-900) 70%, var(--ro-ink-950)) 100%
+      108deg,
+      #241832 0%,
+      #2a1c40 48%,
+      color-mix(in srgb, var(--ro-plum-700) 55%, #1e1530) 100%
     );
   color: var(--ro-sand-100);
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--ro-sand-100) 8%, transparent);
+}
+
+.ro-portal[data-theme="dark"] .ro-admin-greeting {
+  background:
+    radial-gradient(
+      55% 120% at 100% 0%,
+      color-mix(in srgb, var(--ro-plum-400) 42%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      40% 90% at 0% 100%,
+      color-mix(in srgb, var(--ro-plum-500) 22%, transparent),
+      transparent 55%
+    ),
+    linear-gradient(
+      108deg,
+      #2e2144 0%,
+      #352650 45%,
+      #2a1c40 100%
+    );
+}
+
+/* Light: open plum-mist banner — ink text, keep plum bloom only */
+.ro-portal[data-theme="light"] .ro-admin-greeting {
+  border-bottom-color: var(--ro-border-subtle);
+  color: var(--ro-text);
+  background:
+    radial-gradient(
+      60% 130% at 100% 0%,
+      color-mix(in srgb, var(--ro-plum-300) 42%, transparent),
+      transparent 64%
+    ),
+    radial-gradient(
+      45% 100% at 0% 110%,
+      color-mix(in srgb, var(--ro-plum-100) 70%, transparent),
+      transparent 58%
+    ),
+    linear-gradient(108deg, #ffffff 0%, #f5f1f9 55%, #ebe4f3 100%);
+  box-shadow: inset 0 -1px 0 var(--ro-border-subtle);
+}
+.ro-portal[data-theme="light"] .ro-admin-greeting h1,
+.ro-portal[data-theme="light"] .ro-admin-greeting [id="admin-greeting-title"] {
+  color: var(--ro-text) !important;
+}
+.ro-portal[data-theme="light"] .ro-admin-greeting p {
+  color: var(--ro-text-muted) !important;
+}
+.ro-portal[data-theme="light"] .ro-admin-greeting-orb--a {
+  background: color-mix(in srgb, var(--ro-plum-400) 35%, transparent);
+}
+.ro-portal[data-theme="light"] .ro-admin-greeting-orb--b {
+  background: color-mix(in srgb, var(--ro-plum-300) 28%, transparent);
+}
+.ro-portal[data-theme="light"] .ro-admin-greeting-ring {
+  stroke: color-mix(in srgb, var(--ro-plum-700) 28%, transparent);
+}
+
+.ro-admin-greeting-fx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.ro-admin-greeting-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(28px);
+  opacity: 0.45;
+  will-change: transform, opacity;
+}
+.ro-admin-greeting-orb--a {
+  inset-inline-end: -4%;
+  top: -40%;
+  width: min(42vw, 28rem);
+  height: min(42vw, 28rem);
+  background: color-mix(in srgb, var(--ro-plum-700) 55%, transparent);
+  animation: ro-greeting-drift-a 14s ease-in-out infinite alternate;
+}
+.ro-admin-greeting-orb--b {
+  inset-inline-start: -6%;
+  bottom: -55%;
+  width: min(36vw, 22rem);
+  height: min(36vw, 22rem);
+  background: color-mix(in srgb, var(--ro-amber-500) 28%, transparent);
+  animation: ro-greeting-drift-b 18s ease-in-out infinite alternate;
+}
+.ro-admin-greeting-orb--c {
+  inset-inline-start: 38%;
+  top: -30%;
+  width: 12rem;
+  height: 12rem;
+  background: color-mix(in srgb, var(--ro-plum-300) 22%, transparent);
+  animation: ro-greeting-drift-c 11s ease-in-out infinite alternate;
+}
+
+.ro-admin-greeting-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 20%,
+    color-mix(in srgb, var(--ro-sand-100) 10%, transparent) 42%,
+    transparent 58%
+  );
+  transform: translateX(-40%);
+  opacity: 0.55;
+  animation: ro-greeting-sheen 7.5s ease-in-out infinite;
+}
+
+.ro-admin-greeting-rings {
+  position: absolute;
+  inset-inline-end: -2rem;
+  top: 50%;
+  width: min(22rem, 48vw);
+  height: min(22rem, 48vw);
+  transform: translateY(-50%);
+  color: color-mix(in srgb, var(--ro-sand-100) 28%, transparent);
+  opacity: 0.55;
+}
+.ro-admin-greeting-ring {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 0.9;
+  opacity: 0.55;
+  transform-origin: 100px 100px;
+  animation: ro-greeting-ring 6.5s ease-in-out infinite;
+}
+.ro-admin-greeting-ring--2 {
+  opacity: 0.35;
+  animation-delay: 0.6s;
+  animation-duration: 8s;
+}
+.ro-admin-greeting-ring--3 {
+  opacity: 0.22;
+  animation-delay: 1.2s;
+  animation-duration: 9.5s;
+}
+
+.ro-admin-greeting-wave {
+  color: color-mix(in srgb, var(--ro-plum-300) 55%, var(--ro-sand-100));
+  z-index: 1;
+}
+.ro-admin-greeting-wave-path {
+  stroke-dasharray: 1800;
+  stroke-dashoffset: 1800;
+  animation: ro-greeting-draw 1.1s var(--ro-ease-out, ease) forwards;
+}
+.ro-admin-greeting-wave-path--soft {
+  opacity: 0.45;
+  animation-delay: 0.18s;
+}
+
+.ro-admin-greeting-mark {
+  position: relative;
+  width: 4.5rem;
+  height: 4.5rem;
+}
+.ro-admin-greeting-mark-core {
+  position: absolute;
+  inset: 34%;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--ro-sand-100) 88%, var(--ro-plum-300));
+  box-shadow: 0 0 24px color-mix(in srgb, var(--ro-plum-300) 45%, transparent);
+}
+.ro-admin-greeting-mark-ring {
+  position: absolute;
+  inset: 8%;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, var(--ro-sand-100) 35%, transparent);
+  animation: ro-greeting-pulse 2.8s ease-out infinite;
+}
+.ro-admin-greeting-mark-ring--delay {
+  inset: 0;
+  opacity: 0.55;
+  animation-delay: 0.9s;
+}
+
+@keyframes ro-greeting-drift-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(-6%, 8%, 0) scale(1.08); }
+}
+@keyframes ro-greeting-drift-b {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(8%, -6%, 0) scale(1.1); }
+}
+@keyframes ro-greeting-drift-c {
+  from { transform: translate3d(0, 0, 0); opacity: 0.35; }
+  to { transform: translate3d(-10%, 12%, 0); opacity: 0.55; }
+}
+@keyframes ro-greeting-sheen {
+  0%, 35% { transform: translateX(-45%); opacity: 0; }
+  45% { opacity: 0.5; }
+  55% { transform: translateX(45%); opacity: 0; }
+  100% { transform: translateX(45%); opacity: 0; }
+}
+@keyframes ro-greeting-ring {
+  0%, 100% { transform: scale(1); opacity: 0.45; }
+  50% { transform: scale(1.06); opacity: 0.7; }
+}
+@keyframes ro-greeting-pulse {
+  0% { transform: scale(0.92); opacity: 0.65; }
+  70% { transform: scale(1.18); opacity: 0; }
+  100% { transform: scale(1.18); opacity: 0; }
+}
+@keyframes ro-greeting-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ro-admin-greeting-orb,
+  .ro-admin-greeting-sheen,
+  .ro-admin-greeting-ring,
+  .ro-admin-greeting-mark-ring {
+    animation: none !important;
+  }
+  .ro-admin-greeting-wave-path {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+    animation: none !important;
+  }
+  .ro-admin-greeting[data-greeting-motion="lite"] .ro-admin-greeting-orb {
+    opacity: 0.28;
+  }
 }
 
 .ro-portal-stagger > * {
@@ -2400,16 +3081,30 @@ body {
 }
 
 .ro-portal [data-ro-variant="secondary"] {
+  border-color: var(--ro-border) !important;
+  background: var(--ro-bg-sunken) !important;
+  color: var(--ro-link) !important;
+}
+
+.ro-portal [data-ro-variant="secondary"]:hover {
+  border-color: color-mix(in srgb, var(--ro-plum-700) 55%, var(--ro-border)) !important;
+  background: var(--ro-panel-hover) !important;
+  color: var(--ro-link-hover) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px -16px color-mix(in srgb, var(--ro-plum-900) 45%, transparent);
+}
+
+/* Light portal: keep cream secondary chips */
+.ro-portal[data-theme="light"] [data-ro-variant="secondary"] {
   border-color: color-mix(in srgb, var(--ro-plum-900) 55%, var(--ro-ink-950)) !important;
   background: color-mix(in srgb, var(--ro-sand-50) 88%, var(--ro-plum-50)) !important;
   color: var(--ro-plum-900) !important;
 }
 
-.ro-portal [data-ro-variant="secondary"]:hover {
+.ro-portal[data-theme="light"] [data-ro-variant="secondary"]:hover {
   border-color: var(--ro-plum-900) !important;
   background: var(--ro-sand-50) !important;
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px -16px color-mix(in srgb, var(--ro-plum-900) 55%, transparent);
+  color: var(--ro-plum-900) !important;
 }
 
 .ro-portal .ro-portal-kpi {
@@ -2464,22 +3159,54 @@ body {
   border: 1px solid var(--ro-border-subtle);
   background: var(--ro-bg-raised);
   color: var(--ro-text);
-  box-shadow: var(--ro-e2);
-  overflow: hidden;
+  box-shadow:
+    var(--ro-e2),
+    inset 0 1px 0 color-mix(in srgb, var(--ro-text) 4%, transparent);
+  overflow: visible;
+  border-radius: 14px;
+}
+.ro-portal .ro-portal-table > table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: collapse;
 }
 
 .ro-portal .ro-portal-table thead {
-  background: color-mix(in srgb, var(--ro-bg-sunken) 70%, var(--ro-bg-raised));
+  background: color-mix(in srgb, var(--ro-bg-sunken) 78%, var(--ro-bg-raised));
   color: var(--ro-text-2);
+}
+.ro-portal .ro-portal-table thead th {
+  color: var(--ro-text-2);
+  letter-spacing: 0;
+  font-size: 0.72rem;
+  text-transform: none;
+  font-weight: 600;
+}
+.ro-portal[data-theme="dark"] .ro-portal-table thead th {
+  color: color-mix(in srgb, var(--ro-text) 78%, var(--ro-text-muted));
+}
+
+.ro-portal .ro-portal-table tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--ro-text) 2.5%, transparent);
+}
+
+.ro-portal .ro-portal-table tbody tr:last-child td {
+  padding-bottom: 1.05rem;
+}
+
+.ro-portal .ro-portal-header {
+  background: color-mix(in srgb, var(--ro-bg-elevated) 88%, transparent);
+  color: var(--ro-text);
 }
 
 .ro-portal .ro-portal-card {
   border: 1px solid var(--ro-border-subtle);
-  background: var(--ro-bg-raised);
+  background: var(--ro-panel, var(--ro-bg-elevated));
   color: var(--ro-text);
+  border-radius: var(--r-lg, 14px);
   box-shadow:
     var(--ro-e2),
-    inset 0 1px 0 color-mix(in srgb, var(--ro-text) 8%, transparent);
+    inset 0 1px 0 color-mix(in srgb, var(--ro-text) 5%, transparent);
   transition:
     transform var(--ro-dur-fast) var(--ro-ease-standard),
     border-color var(--ro-dur-fast) var(--ro-ease-standard),
@@ -2488,14 +3215,33 @@ body {
 }
 
 .ro-portal .ro-portal-card:hover {
-  border-color: color-mix(in srgb, var(--ro-plum-400) 48%, var(--ro-border));
+  border-color: color-mix(
+    in srgb,
+    var(--ro-accent-fg, var(--ro-plum-400)) 36%,
+    var(--ro-border)
+  );
+  background: var(--ro-panel-hover, var(--ro-panel));
   transform: translateY(-2px);
-  box-shadow: 0 16px 36px -22px color-mix(in srgb, var(--ro-ink-950) 40%, transparent);
+  box-shadow: var(--ro-e3);
 }
 
 .ro-portal-tab-underline {
   transform-origin: center;
   animation: ro-portal-underline 0.35s var(--ro-ease-enter) both;
+}
+
+/* Portal dark — native controls follow dusk tokens (not browser light scheme) */
+.ro-portal[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+.ro-portal[data-theme="dark"] textarea,
+.ro-portal[data-theme="dark"] select {
+  color-scheme: dark;
+  background-color: var(--ro-bg-elevated);
+  color: var(--ro-text);
+  border-color: var(--ro-border-control);
+}
+.ro-portal[data-theme="dark"] input::placeholder,
+.ro-portal[data-theme="dark"] textarea::placeholder {
+  color: var(--ro-text-muted);
 }
 
 /* Interaction layer — feel alive without white stage / dark hero */
@@ -2526,30 +3272,31 @@ body {
     box-shadow var(--ro-dur-fast) var(--ro-ease-standard);
 }
 
-.ro-portal .ro-portal-interactive-row {
+/*
+ * Never set position:relative on <tr> — it desyncs thead/tbody column widths
+ * in Chromium (undefined CSS table behavior). Accent lives on the first cell.
+ * Whole-row open is handled in data-table.tsx (Tr + RowHit), not a stretched
+ * absolute ::after — that required relative on <tr>.
+ */
+.ro-portal .ro-portal-interactive-row > td:first-child {
   position: relative;
 }
-.ro-portal .ro-portal-interactive-row::before {
+.ro-portal .ro-portal-interactive-row > td:first-child::before {
   content: "";
   position: absolute;
+  inset-block: 0;
   inset-inline-start: 0;
-  top: 0;
-  bottom: 0;
   width: 0;
   background: var(--ro-plum-800);
   transition: width var(--ro-dur-fast) var(--ro-ease-standard);
+  pointer-events: none;
+  z-index: 1;
 }
-.ro-portal .ro-portal-interactive-row:hover::before,
-.ro-portal .ro-portal-interactive-row:focus-within::before {
+.ro-portal .ro-portal-interactive-row:hover > td:first-child::before,
+.ro-portal .ro-portal-interactive-row:focus-within > td:first-child::before {
   width: 3px;
 }
 
-.ro-portal .ro-row-hit::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-}
 .ro-portal .ro-portal-interactive-row a:not(.ro-row-hit),
 .ro-portal .ro-portal-interactive-row button {
   position: relative;
@@ -2560,28 +3307,88 @@ body {
   position: relative;
   gap: 0.25rem;
   padding: 0.25rem;
-  border: 1px solid color-mix(in srgb, var(--ro-plum-900) 14%, transparent);
+  border: 1px solid var(--ro-border-subtle);
   border-radius: var(--ro-r-sm);
-  background: color-mix(in srgb, var(--ro-sand-50) 78%, transparent);
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ro-sand-50) 80%, transparent);
+  background: var(--ro-bg-sunken);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ro-text) 4%, transparent);
 }
 
 .ro-portal-tablist [role="tab"] {
   border-bottom-width: 0 !important;
   border-radius: var(--ro-r-xs);
   padding-inline: 0.9rem;
+  color: var(--ro-text-2);
 }
 
 .ro-portal-tablist [role="tab"][aria-selected="true"] {
+  background: var(--ro-panel);
+  color: var(--ro-text) !important;
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--ro-text) 6%, transparent) inset,
+    0 6px 16px -12px color-mix(in srgb, var(--ro-plum-900) 45%, transparent);
+}
+
+.ro-portal-tablist [role="tab"]:hover:not([aria-selected="true"]) {
+  background: color-mix(in srgb, var(--ro-panel-hover) 70%, transparent);
+  color: var(--ro-text);
+}
+
+.ro-portal[data-theme="light"] .ro-portal-tablist {
+  border-color: color-mix(in srgb, var(--ro-plum-900) 14%, transparent);
+  background: color-mix(in srgb, var(--ro-sand-50) 78%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ro-sand-50) 80%, transparent);
+}
+
+.ro-portal[data-theme="light"] .ro-portal-tablist [role="tab"][aria-selected="true"] {
   background: var(--ro-sand-50);
-  color: var(--ro-plum-900);
+  color: var(--ro-plum-900) !important;
   box-shadow:
     0 1px 0 color-mix(in srgb, var(--ro-sand-50) 90%, transparent) inset,
     0 6px 16px -12px color-mix(in srgb, var(--ro-plum-900) 40%, transparent);
 }
 
-.ro-portal-tablist [role="tab"]:hover:not([aria-selected="true"]) {
+.ro-portal[data-theme="light"] .ro-portal-tablist [role="tab"]:hover:not([aria-selected="true"]) {
   background: color-mix(in srgb, var(--ro-plum-50) 70%, transparent);
+}
+
+/* Status chips — dark portal uses tone wells, not cream paper */
+.ro-portal[data-theme="dark"] [data-ro-status] {
+  border-color: transparent;
+}
+.ro-portal[data-theme="dark"] [data-ro-status="neutral"] {
+  background: color-mix(in srgb, var(--ro-text) 10%, transparent);
+  color: var(--ro-text-2);
+  border-color: var(--ro-border-subtle);
+}
+.ro-portal[data-theme="dark"] [data-ro-status="info"] {
+  background: color-mix(in srgb, var(--ro-plum-400) 22%, transparent);
+  color: var(--ro-accent-fg);
+  border-color: color-mix(in srgb, var(--ro-plum-400) 32%, transparent);
+}
+.ro-portal[data-theme="dark"] [data-ro-status="progress"] {
+  background: color-mix(in srgb, #7eb6ff 18%, transparent);
+  color: #b9d6ff;
+  border-color: color-mix(in srgb, #7eb6ff 28%, transparent);
+}
+.ro-portal[data-theme="dark"] [data-ro-status="attention"] {
+  background: var(--ro-warn-bg, color-mix(in srgb, #efb04a 18%, transparent));
+  color: var(--ro-warn, #efb04a);
+  border-color: color-mix(in srgb, #efb04a 28%, transparent);
+}
+.ro-portal[data-theme="dark"] [data-ro-status="success"] {
+  background: var(--ro-success-100, var(--ro-ok-bg));
+  color: var(--ro-success-700, var(--ro-ok));
+  border-color: color-mix(in srgb, var(--ro-success-700, var(--ro-ok)) 28%, transparent);
+}
+.ro-portal[data-theme="dark"] [data-ro-status="danger"] {
+  background: var(--ro-danger-100, var(--ro-danger-bg));
+  color: var(--ro-danger-700, var(--ro-danger));
+  border-color: color-mix(in srgb, var(--ro-danger-700) 28%, transparent);
+}
+.ro-portal[data-theme="dark"] [data-ro-status="closed"] {
+  background: color-mix(in srgb, var(--ro-text) 6%, transparent);
+  color: var(--ro-text-muted);
+  border-color: var(--ro-border-subtle);
 }
 
 .ro-portal [data-ro-variant="secondary"]:active,
@@ -2706,8 +3513,36 @@ body {
   top: 0.2rem;
   bottom: 0.2rem;
   border-radius: var(--ro-r-sm);
-  background: color-mix(in srgb, var(--ro-plum-100) 78%, var(--ro-sand-50));
+  background: color-mix(in srgb, var(--ro-plum-900) 14%, var(--ro-bg-elevated));
   transition: inset-inline-start var(--ro-dur-fast) var(--ro-ease-standard);
+}
+
+.ro-portal[data-theme="dark"] .ro-tab-pill {
+  background: color-mix(in srgb, var(--ro-plum-300) 18%, var(--ro-bg-elevated));
+}
+
+/* Payment/status row flash — plum ~400ms, transform/opacity only via filter */
+@keyframes ro-row-flash {
+  0% {
+    background-color: color-mix(in srgb, var(--ro-plum-900) 28%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+.ro-portal .ro-row-flash {
+  animation: ro-row-flash 0.4s var(--ro-ease-standard) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ro-portal-main-enter,
+  .ro-portal-page-enter,
+  .ro-portal-tab-underline,
+  .ro-tab-pill,
+  .ro-row-flash {
+    animation: none !important;
+    transition-duration: 0.14s !important;
+  }
 }
 
 .ro-home-ambient[data-ambient="on"] {
@@ -2729,6 +3564,14 @@ body {
 }
 .ro-wa-live {
   animation: ro-wa-live 1.6s var(--ro-ease-standard) 3;
+}
+.ro-wa-live--pulse {
+  animation: ro-wa-live 1.6s var(--ro-ease-standard) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ro-wa-live--pulse {
+    animation: none;
+  }
 }
 
 /* Design-lab login ceremony (CSS instead of Framer Motion) */
@@ -2767,21 +3610,110 @@ body {
   .ro-login-orbit { animation: none; opacity: 0.7; }
 }
 
-/* Brokerage ceremony */
+/* Portal ceremony hero — catalog + ops (no cream paper) */
+.ro-portal-hero,
 .ro-brokerage-hero {
   position: relative;
   overflow: hidden;
-  border-radius: var(--ro-r-lg);
+  border-radius: 16px;
   border: 1px solid var(--ro-border-subtle);
   background:
-    radial-gradient(80% 120% at 100% 0%, color-mix(in srgb, var(--ro-plum-300) 28%, transparent), transparent 55%),
-    radial-gradient(70% 100% at 0% 100%, color-mix(in srgb, var(--ro-amber-500) 12%, transparent), transparent 50%),
-    var(--ro-sand-50);
+    radial-gradient(
+      90% 120% at 100% 0%,
+      color-mix(in srgb, var(--ro-plum-700) 28%, transparent),
+      transparent 58%
+    ),
+    radial-gradient(
+      70% 100% at 0% 100%,
+      color-mix(in srgb, var(--ro-amber-500) 10%, transparent),
+      transparent 52%
+    ),
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--ro-panel) 88%, var(--ro-bg-raised)) 0%,
+      var(--ro-bg-raised) 100%
+    );
+  box-shadow:
+    var(--ro-e2),
+    inset 0 1px 0 color-mix(in srgb, var(--ro-text) 5%, transparent);
+}
+
+/* Catalog gallery tiles — editorial product cards */
+.ro-catalog-tile {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid var(--ro-border-subtle);
+  background: var(--ro-bg-raised);
+  color: var(--ro-text);
+  box-shadow:
+    var(--ro-e2),
+    inset 0 1px 0 color-mix(in srgb, var(--ro-text) 5%, transparent);
+  transition:
+    transform var(--ro-dur-fast) var(--ro-ease-standard),
+    border-color var(--ro-dur-fast) var(--ro-ease-standard),
+    box-shadow var(--ro-dur-fast) var(--ro-ease-standard);
+}
+.ro-catalog-tile:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(
+    in srgb,
+    var(--ro-accent-fg, var(--ro-plum-700)) 36%,
+    var(--ro-border)
+  );
+  box-shadow: var(--ro-e3);
+}
+.ro-catalog-tile-media {
+  position: relative;
+  overflow: hidden;
+  background: var(--ro-bg-sunken);
+}
+.ro-catalog-tile-media::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 55%,
+    color-mix(in srgb, var(--ro-ink-950, #120c1c) 55%, transparent) 100%
+  );
+  opacity: 0.55;
+}
+.ro-catalog-tile:hover .ro-catalog-tile-media::after {
+  opacity: 0.72;
+}
+.ro-catalog-monogram {
+  display: inline-flex;
+  size: 3rem;
+  width: 3rem;
+  height: 3rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--ro-accent-fg, var(--ro-plum-700)) 28%, transparent);
+  background: var(--ro-accent-well, color-mix(in srgb, var(--ro-plum-700) 18%, transparent));
+  color: var(--ro-accent-fg, var(--ro-plum-800));
+  font-family: var(--ro-font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ro-catalog-tile:hover { transform: none; }
 }
 .ro-brokerage-col {
-  background: color-mix(in srgb, var(--ro-sand-50) 92%, var(--ro-plum-50));
+  background: var(--ro-bg-raised) !important;
+  border-color: var(--ro-border-subtle) !important;
+  color: var(--ro-text);
+  min-height: 15rem;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ro-text) 4%, transparent);
 }
 .ro-brokerage-card {
+  background: color-mix(in srgb, var(--ro-panel) 82%, var(--ro-text) 4%) !important;
+  border: 1px solid var(--ro-border) !important;
+  color: var(--ro-text) !important;
+  text-align: start;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ro-text) 6%, transparent);
   transition:
     transform var(--ro-dur-fast) var(--ro-ease-standard),
     border-color var(--ro-dur-fast) var(--ro-ease-standard),
@@ -2789,6 +3721,33 @@ body {
 }
 .ro-brokerage-card:hover {
   transform: translateY(-1px);
+  border-color: color-mix(
+    in srgb,
+    var(--ro-accent-fg, var(--ro-plum-700)) 36%,
+    var(--ro-border)
+  ) !important;
+  background: var(--ro-panel-hover) !important;
+}
+.ro-brokerage-board {
+  display: flex;
+  gap: 0.85rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding-block: 0.15rem 0.85rem;
+  margin-inline: -0.1rem;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--ro-text) 28%, transparent) transparent;
+}
+.ro-brokerage-board::-webkit-scrollbar {
+  height: 5px;
+}
+.ro-brokerage-board::-webkit-scrollbar-track {
+  background: transparent;
+  margin-inline: 0.25rem;
+}
+.ro-brokerage-board::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--ro-text) 28%, transparent);
+  border-radius: 999px;
 }
 .ro-brokerage-pulse {
   position: relative;
@@ -2808,6 +3767,48 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .ro-brokerage-pulse::after { animation: none; }
   .ro-brokerage-card:hover { transform: none; }
+}
+
+/* Brokerage status pills — dark wells */
+.ro-portal[data-theme="dark"] [data-ro-brokerage-status] {
+  ring-color: transparent;
+}
+.ro-portal[data-theme="dark"] [data-ro-brokerage-status="SUBMITTED"],
+.ro-portal[data-theme="dark"] [data-ro-brokerage-status="INSPECTED"] {
+  background: color-mix(in srgb, var(--ro-plum-400) 22%, transparent);
+  color: var(--ro-accent-fg);
+}
+.ro-portal[data-theme="dark"] [data-ro-brokerage-status="AWAITING_PAYMENT"],
+.ro-portal[data-theme="dark"] [data-ro-brokerage-status="NEEDS_INFO"],
+.ro-portal[data-theme="dark"] [data-ro-brokerage-status="QUOTE_SENT"] {
+  background: var(--ro-warn-bg, color-mix(in srgb, #efb04a 18%, transparent));
+  color: var(--ro-warn, #efb04a);
+}
+.ro-portal[data-theme="dark"] [data-ro-brokerage-status="PAYMENT_CONFIRMED"] {
+  background: var(--ro-success-100, var(--ro-ok-bg));
+  color: var(--ro-success-700, var(--ro-ok));
+}
+.ro-portal[data-theme="dark"] [data-ro-brokerage-status="ACCEPTED"],
+.ro-portal[data-theme="dark"] [data-ro-brokerage-status="INSPECTION_SCHEDULED"],
+.ro-portal[data-theme="dark"] [data-ro-brokerage-status="SHIPPED"] {
+  background: color-mix(in srgb, #7eb6ff 18%, transparent);
+  color: #b9d6ff;
+}
+.ro-portal[data-theme="dark"] [data-ro-brokerage-status="APPROVED"],
+.ro-portal[data-theme="dark"] [data-ro-brokerage-status="PURCHASED"],
+.ro-portal[data-theme="dark"] [data-ro-brokerage-status="DELIVERED"] {
+  background: var(--ro-success-100, var(--ro-ok-bg));
+  color: var(--ro-success-700, var(--ro-ok));
+}
+.ro-portal[data-theme="dark"] [data-ro-brokerage-status="CLOSED"],
+.ro-portal[data-theme="dark"] [data-ro-brokerage-status="CANCELLED"] {
+  background: color-mix(in srgb, var(--ro-text) 8%, transparent);
+  color: var(--ro-text-muted);
+}
+.ro-portal[data-theme="dark"] [data-ro-brokerage-status="DECLINED"],
+.ro-portal[data-theme="dark"] [data-ro-brokerage-status="REJECTED"] {
+  background: var(--ro-danger-100, var(--ro-danger-bg));
+  color: var(--ro-danger-700, var(--ro-danger));
 }
 
 /* VISION S10 — new/updated row plum flash (~400ms) */

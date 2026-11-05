@@ -8,7 +8,9 @@ import {
 } from "@/components/trader/product-picker";
 import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
+import { CurrencySelect } from "@/components/ui/currency-select";
 import { Wizard } from "@/components/ui/wizard";
+import { coercePlatformCurrency } from "@/lib/catalog/currency";
 import type { Locale } from "@/lib/i18n/config";
 import { fmt, traderActionMessage, type TraderDict } from "@/lib/ui/trader-labels";
 import { useRouter } from "next/navigation";
@@ -26,6 +28,7 @@ type Draft = {
   title: string;
   productId: string;
   message: string;
+  modelNumber: string;
   proposedPrice: string;
   currency: string;
   quantity: string;
@@ -38,8 +41,9 @@ const emptyDraft = (): Draft => ({
   title: "",
   productId: "",
   message: "",
+  modelNumber: "",
   proposedPrice: "",
-  currency: "",
+  currency: "USD",
   quantity: "",
   conditionsNotes: "",
 });
@@ -49,6 +53,7 @@ function isDirty(d: Draft) {
     d.title.trim() ||
       d.productId ||
       d.message.trim() ||
+      d.modelNumber.trim() ||
       d.proposedPrice ||
       d.currency ||
       d.quantity ||
@@ -177,6 +182,20 @@ export function NewDealForm({
         return false;
       }
     }
+    if (step === 1) {
+      if (!draft.modelNumber.trim()) {
+        setStepError(t.wizardNeedModel);
+        return false;
+      }
+      if (!draft.proposedPrice.trim() || Number(draft.proposedPrice) <= 0) {
+        setStepError(t.wizardNeedPrice);
+        return false;
+      }
+      if (!draft.currency.trim()) {
+        setStepError(t.wizardNeedCurrency);
+        return false;
+      }
+    }
     return true;
   }
 
@@ -219,6 +238,7 @@ export function NewDealForm({
         <input type="hidden" name="productId" value={draft.productId} />
       ) : null}
       <input type="hidden" name="message" value={draft.message} />
+      <input type="hidden" name="modelNumber" value={draft.modelNumber} />
       <input type="hidden" name="proposedPrice" value={draft.proposedPrice} />
       <input type="hidden" name="currency" value={draft.currency} />
       <input type="hidden" name="quantity" value={draft.quantity} />
@@ -294,7 +314,9 @@ export function NewDealForm({
                     const p = products.find((x) => x.id === id);
                     patch({
                       productId: id,
-                      currency: p?.currency || draft.currency,
+                      currency: coercePlatformCurrency(
+                        p?.currency || draft.currency
+                      ),
                     });
                   }}
                   labels={t}
@@ -319,6 +341,18 @@ export function NewDealForm({
         {draft.step === 1 ? (
           <fieldset className="space-y-4 border border-ro-line bg-ro-surface p-4 sm:p-5">
             <legend className="sr-only">{t.sectionTerms}</legend>
+            <label className="block space-y-1.5 text-sm">
+              <span className="font-medium">{t.modelNumberLabel}</span>
+              <input
+                type="text"
+                required
+                maxLength={120}
+                dir="ltr"
+                value={draft.modelNumber}
+                onChange={(e) => patch({ modelNumber: e.target.value })}
+                className={control}
+              />
+            </label>
             <div className="grid gap-3 sm:grid-cols-3">
               <label className="block space-y-1.5 text-sm">
                 <span className="font-medium">{t.priceOptional}</span>
@@ -326,26 +360,28 @@ export function NewDealForm({
                   type="number"
                   step="0.01"
                   min="0"
+                  required
                   dir="ltr"
                   value={draft.proposedPrice}
                   onChange={(e) => patch({ proposedPrice: e.target.value })}
                   className={control}
                 />
               </label>
-              <label className="block space-y-1.5 text-sm">
-                <span className="font-medium">{t.currencyLabel}</span>
-                <input
-                  placeholder={
+              <CurrencySelect
+                name="currencyUi"
+                required
+                value={coercePlatformCurrency(
+                  draft.currency ||
                     products.find((p) => p.id === draft.productId)?.currency ||
-                    products.find((p) => p.currency)?.currency ||
-                    undefined
-                  }
-                  dir="ltr"
-                  value={draft.currency}
-                  onChange={(e) => patch({ currency: e.target.value })}
-                  className={control}
-                />
-              </label>
+                    products.find((p) => p.currency)?.currency
+                )}
+                onChange={(code) => patch({ currency: code })}
+                labels={{
+                  currency: t.currencyLabel,
+                  currencyUsd: t.currencyUsd,
+                  currencySyp: t.currencySyp,
+                }}
+              />
               <label className="block space-y-1.5 text-sm">
                 <span className="font-medium">{t.quantityLabel}</span>
                 <input
@@ -397,6 +433,10 @@ export function NewDealForm({
               editLabel={t.wizardEdit}
             >
               <ul className="space-y-1 text-sm">
+                <li>
+                  {t.modelNumberLabel}:{" "}
+                  <bdi dir="ltr">{draft.modelNumber || "—"}</bdi>
+                </li>
                 <li>
                   {t.priceOptional}:{" "}
                   {draft.proposedPrice

@@ -100,8 +100,9 @@ export function InboxResizablePanes({
   return (
     <div
       ref={shellRef}
+      data-inbox-panes=""
       className={cn(
-        "grid min-h-0 flex-1 gap-0 overflow-hidden border border-ro-border bg-ro-paper lg:gap-0",
+        "grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)] gap-0 overflow-hidden border-t border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] lg:gap-0",
         hasContext
           ? "lg:grid-cols-[var(--ro-inbox-list)_8px_minmax(0,1fr)_8px_var(--ro-inbox-ctx)]"
           : "lg:grid-cols-[var(--ro-inbox-list)_8px_minmax(0,1fr)]",
@@ -114,29 +115,33 @@ export function InboxResizablePanes({
         } as CSSProperties
       }
     >
-      <div className="flex min-h-0 min-w-0 flex-col lg:pe-0">{list}</div>
+      <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden lg:pe-0">
+        {list}
+      </div>
       <button
         type="button"
         aria-label="Resize conversation list"
-        className="hidden cursor-col-resize touch-none bg-transparent lg:block"
+        className="hidden cursor-col-resize touch-none border-e border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-border-subtle)] opacity-60 transition-opacity hover:opacity-100 lg:block"
         onPointerDown={(e) => {
           e.preventDefault();
           start("list");
         }}
       />
-      <div className="flex min-h-0 min-w-0 flex-col">{main}</div>
+      <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-[color:var(--ro-bg-sunken)]">
+        {main}
+      </div>
       {hasContext ? (
         <>
           <button
             type="button"
             aria-label="Resize context panel"
-            className="hidden cursor-col-resize touch-none bg-transparent xl:block"
+            className="hidden cursor-col-resize touch-none border-e border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-border-subtle)] opacity-60 transition-opacity hover:opacity-100 xl:block"
             onPointerDown={(e) => {
               e.preventDefault();
               start("ctx");
             }}
           />
-          <div className="hidden min-h-0 min-w-0 overflow-y-auto xl:block">
+          <div className="hidden min-h-0 min-w-0 overflow-y-auto border-s border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] xl:block">
             {context}
           </div>
         </>

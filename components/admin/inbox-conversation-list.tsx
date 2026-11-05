@@ -95,12 +95,12 @@ export function InboxConversationList({
       aria-label={i.conversations}
       data-inbox-pane="list"
       className={cn(
-        "flex h-full min-h-0 min-w-0 flex-1 flex-col border border-ro-border bg-ro-paper",
+        "flex h-full min-h-0 min-w-0 flex-1 flex-col bg-[color:var(--ro-panel,var(--ro-bg-elevated))]",
         // <1024: hide list when a thread is open (two-screen pattern)
         activeId ? "hidden lg:flex" : "flex"
       )}
     >
-      <div className="shrink-0 space-y-2 border-b border-ro-border p-3">
+      <div className="shrink-0 space-y-2.5 border-b border-[color:var(--ro-border-subtle)] p-3">
         <div
           role="tablist"
           aria-label={i.conversations}
@@ -114,10 +114,10 @@ export function InboxConversationList({
               aria-selected={tab === t.id}
               onClick={() => setTab(t.id)}
               className={cn(
-                "shrink-0 px-2.5 py-1.5 text-xs font-semibold transition-colors",
+                "shrink-0 rounded-full px-2.5 py-1.5 text-xs font-semibold transition-[background-color,color] duration-[var(--ro-dur-fast)]",
                 tab === t.id
-                  ? "bg-[var(--ro-plum-900)] text-[var(--ro-sand-100)]"
-                  : "text-ro-text-2 hover:bg-ro-sunken hover:text-ro-ink"
+                  ? "bg-[color:var(--ro-plum-700)] text-[var(--ro-sand-50)]"
+                  : "text-[color:var(--ro-text-muted)] hover:bg-[color:var(--ro-panel-hover)] hover:text-[color:var(--ro-text)]"
               )}
             >
               {t.label}
@@ -134,24 +134,21 @@ export function InboxConversationList({
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={i.searchPlaceholder}
-            className="w-full border border-ro-border bg-ro-canvas px-3 py-2 text-sm"
+            className="w-full rounded-[10px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-sunken)] px-3 py-2 text-sm text-[color:var(--ro-text)] outline-none placeholder:text-[color:var(--ro-text-muted)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
           />
         </label>
-        <p className="text-xs text-ro-muted" aria-live="polite">
-          {filtered.length}
-        </p>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center gap-3 p-8 text-center">
-            <DrawIn durationMs={800} className="size-16">
-              <RosetteMark width={64} height={64} />
+            <DrawIn durationMs={800} className="size-14">
+              <RosetteMark width={56} height={56} />
             </DrawIn>
-            <p className="text-sm text-ro-muted">{i.empty}</p>
+            <p className="text-sm text-[color:var(--ro-text-muted)]">{i.empty}</p>
           </div>
         ) : (
-          <ul className="divide-y divide-ro-border">
+          <ul>
             {filtered.map((c) => {
               const active = c.id === activeId;
               const unread = c.hasUnread && !active;
@@ -161,11 +158,13 @@ export function InboxConversationList({
                     href={`/admin/inbox/${c.id}`}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "ro-press-ripple relative flex gap-3 border-s-2 p-3 transition-colors hover:bg-ro-sunken",
+                      "ro-press-ripple relative flex gap-3 border-s-2 px-3 py-2.5 transition-[background-color] duration-[var(--ro-dur-fast)] hover:bg-[color:var(--ro-panel-hover)]",
                       active
-                        ? "border-s-[var(--ro-plum-900)] bg-[var(--ro-plum-50)]"
+                        ? "border-s-[color:var(--ro-accent-fg,var(--ro-plum-700))] bg-[color-mix(in_srgb,var(--ro-plum-700)_10%,transparent)]"
                         : "border-s-transparent",
-                      unread && "bg-[color-mix(in_srgb,var(--ro-plum-50)_35%,transparent)]",
+                      unread &&
+                        !active &&
+                        "bg-[color-mix(in_srgb,var(--ro-plum-700)_5%,transparent)]",
                       flashIds.has(c.id) && "ro-s10-flash"
                     )}
                     onPointerDown={(e) => {
@@ -174,7 +173,7 @@ export function InboxConversationList({
                   >
                     <span
                       aria-hidden
-                      className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--ro-plum-100)] text-[var(--ro-plum-900)]"
+                      className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-[color:var(--ro-accent-well)] text-[color:var(--ro-accent-fg)]"
                     >
                       <UserRound className="size-4" strokeWidth={1.5} />
                     </span>
@@ -182,31 +181,33 @@ export function InboxConversationList({
                       <span className="flex items-center justify-between gap-2">
                         <span
                           className={cn(
-                            "min-w-0 truncate text-sm",
-                            unread ? "font-bold text-ro-ink" : "font-medium"
+                            "min-w-0 truncate text-[13px]",
+                            unread
+                              ? "font-bold text-[color:var(--ro-text)]"
+                              : "font-medium text-[color:var(--ro-text)]"
                           )}
                         >
                           <bdi>{c.displayLabel}</bdi>
                         </span>
-                        <span className="shrink-0 text-[11px] text-ro-muted">
+                        <span className="shrink-0 text-[11px] text-[color:var(--ro-text-muted)]">
                           {c.whenLabel}
                         </span>
                       </span>
-                      <span className="block truncate text-sm text-ro-muted">
+                      <span className="block truncate text-[12px] text-[color:var(--ro-text-muted)]">
                         <bdi>{c.preview}</bdi>
                       </span>
-                      <span className="flex flex-wrap items-center gap-2 text-[11px] text-ro-muted">
+                      <span className="flex flex-wrap items-center gap-2 text-[11px] text-[color:var(--ro-text-muted)]">
                         {unread ? (
-                          <span className="inline-flex items-center gap-1">
+                          <span className="inline-flex items-center gap-1 font-semibold text-[color:var(--ro-accent-fg)]">
                             <span
                               aria-hidden
-                              className="size-1.5 rounded-full bg-[var(--ro-plum-900)]"
+                              className="size-1.5 rounded-full bg-[color:var(--ro-accent-fg)]"
                             />
                             {i.unread}
                             {c.unreadCount > 1 ? ` (${c.unreadCount})` : ""}
                           </span>
                         ) : null}
-                        <span className="rounded-[var(--ro-r-sm)] border border-ro-border px-1.5 py-0.5">
+                        <span className="rounded-full border border-[color:var(--ro-border-subtle)] px-1.5 py-0.5">
                           {c.linkLabel}
                         </span>
                       </span>

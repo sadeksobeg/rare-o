@@ -1,5 +1,6 @@
 import { NegotiationThread } from "@/components/deals/negotiation-thread";
 import { adminCreateOfferDraftFromDealAction } from "@/app/deal-actions";
+import { DealPaymentConfirm } from "@/components/admin/deal-payment-confirm";
 import { DetailItem, DetailList } from "@/components/admin/detail-list";
 import { Button } from "@/components/ui/button";
 import { StatusChip } from "@/components/ui/status-chip";
@@ -14,6 +15,7 @@ import { getStatusChipProps } from "@/lib/ui/status-labels";
 import {
   FilePlus2,
   Handshake,
+  Hash,
   MessageSquare,
   Package,
   Store,
@@ -135,6 +137,14 @@ export default async function AdminDealDetailPage({
           )}
         </DetailItem>
         <DetailItem
+          label={locale === "ar" ? "رقم الموديل" : "Model number"}
+          icon={<Hash className="size-3.5" strokeWidth={2} />}
+        >
+          <span dir="ltr">
+            <bdi dir="ltr">{deal.modelNumber || "—"}</bdi>
+          </span>
+        </DetailItem>
+        <DetailItem
           label={d.commercialSnapshot}
           icon={<Tags className="size-3.5" strokeWidth={2} />}
         >
@@ -149,6 +159,21 @@ export default async function AdminDealDetailPage({
           </span>
         </DetailItem>
       </DetailList>
+
+      {deal.status === "awaiting_payment" ? (
+        <DealPaymentConfirm
+          dealId={deal.id}
+          title={locale === "ar" ? "تأكيد استلام الدفع" : "Confirm payment received"}
+          body={
+            locale === "ar"
+              ? "بعد تحقق التحويل عبر واتساب، أكّد النجاح لإكمال الطلب."
+              : "After verifying the WhatsApp transfer, confirm to complete the order."
+          }
+          confirmLabel={
+            locale === "ar" ? "تأكيد نجاح الدفع" : "Confirm payment success"
+          }
+        />
+      ) : null}
 
       <NegotiationThread
         currency={deal.currency}

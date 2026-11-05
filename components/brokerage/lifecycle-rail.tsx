@@ -11,23 +11,26 @@ import { cn } from "@/lib/utils";
 const RAIL: BrokerageStatus[] = [...BROKERAGE_LIFECYCLE, "CLOSED"];
 
 const PHASE_GROUPS: { phase: BrokeragePhase; statuses: BrokerageStatus[] }[] = [
-  { phase: "intake", statuses: ["SUBMITTED"] },
+  { phase: "payment", statuses: ["AWAITING_PAYMENT", "PAYMENT_CONFIRMED"] },
   {
     phase: "inspection",
-    statuses: ["ACCEPTED", "INSPECTION_SCHEDULED"],
+    statuses: ["ACCEPTED", "INSPECTION_SCHEDULED", "INSPECTED"],
   },
-  { phase: "quote", statuses: ["INSPECTED", "QUOTE_SENT"] },
   {
     phase: "fulfillment",
-    statuses: ["APPROVED", "PURCHASED", "SHIPPED", "DELIVERED"],
+    statuses: ["PURCHASED", "SHIPPED", "DELIVERED"],
   },
   { phase: "closed", statuses: ["CLOSED"] },
 ];
 
 function railIndex(status: string): number {
-  if (status === "NEEDS_INFO") return RAIL.indexOf("SUBMITTED");
+  if (status === "NEEDS_INFO" || status === "SUBMITTED") {
+    return RAIL.indexOf("AWAITING_PAYMENT");
+  }
   if (status === "DECLINED" || status === "CANCELLED") return -1;
-  if (status === "REJECTED") return RAIL.indexOf("QUOTE_SENT");
+  if (status === "REJECTED" || status === "QUOTE_SENT" || status === "APPROVED") {
+    return RAIL.indexOf("INSPECTED");
+  }
   return RAIL.indexOf(status as BrokerageStatus);
 }
 

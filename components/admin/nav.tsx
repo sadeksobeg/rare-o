@@ -206,22 +206,25 @@ export function AdminSidebar({
   const pathname = usePathname();
   const inboxForce =
     pathname === "/admin/inbox" || pathname.startsWith("/admin/inbox/");
-  const [userCollapsed, setUserCollapsed] = useState(false);
+  /** Pref only after mount — keeps SSR HTML identical to first client paint. */
+  const [prefCollapsed, setPrefCollapsed] = useState(false);
+  const [prefReady, setPrefReady] = useState(false);
 
   useEffect(() => {
     try {
-      setUserCollapsed(window.localStorage.getItem(SIDEBAR_PREF_KEY) === "1");
+      setPrefCollapsed(window.localStorage.getItem(SIDEBAR_PREF_KEY) === "1");
     } catch {
       /* ignore */
     }
+    setPrefReady(true);
   }, []);
 
-  const collapsed = inboxForce || userCollapsed;
+  const collapsed = inboxForce || (prefReady && prefCollapsed);
 
   function toggleUserCollapse() {
     if (inboxForce) return;
-    const next = !userCollapsed;
-    setUserCollapsed(next);
+    const next = !prefCollapsed;
+    setPrefCollapsed(next);
     try {
       window.localStorage.setItem(SIDEBAR_PREF_KEY, next ? "1" : "0");
     } catch {
@@ -233,6 +236,7 @@ export function AdminSidebar({
     <aside
       data-admin-sidebar={collapsed ? "collapsed" : "expanded"}
       className={cn(
+        /* Height comes from .ro-portal-admin .ro-portal-sidebar CSS — avoid h-full hydration drift */
         "ro-portal-sidebar hidden shrink-0 flex-col text-[var(--ro-sand-100)] lg:flex",
         collapsed ? "w-[72px]" : "w-64"
       )}

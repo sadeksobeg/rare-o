@@ -70,7 +70,7 @@ export function InboxThreadContextSplit({
     <div
       ref={shellRef}
       className={cn(
-        "flex h-full min-h-0 flex-1 flex-col gap-0 xl:grid xl:gap-0",
+        "flex h-full min-h-0 flex-1 flex-col gap-0 overflow-hidden xl:grid xl:grid-rows-[minmax(0,1fr)] xl:gap-0",
         className
       )}
       style={
@@ -79,7 +79,9 @@ export function InboxThreadContextSplit({
         } as React.CSSProperties
       }
     >
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">{thread}</div>
+      <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        {thread}
+      </div>
       <button
         type="button"
         aria-label="Resize context panel"
@@ -91,7 +93,7 @@ export function InboxThreadContextSplit({
           document.body.style.userSelect = "none";
         }}
       />
-      <div className="hidden min-h-0 min-w-0 overflow-y-auto xl:block">
+      <div className="hidden h-full min-h-0 min-w-0 overflow-y-auto xl:block">
         {context}
       </div>
     </div>

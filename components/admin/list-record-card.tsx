@@ -30,13 +30,19 @@ export function AdminRecordCard({
   const body = (
     <>
         <div className="flex items-start justify-between gap-3">
-          <p className="min-w-0 font-medium text-ro-ink">{title}</p>
+          <p className="min-w-0 font-medium text-[color:var(--ro-text)]">
+            {title}
+          </p>
           {trailing ? <div className="shrink-0">{trailing}</div> : null}
         </div>
-        {meta ? <div className="text-sm text-ro-muted">{meta}</div> : null}
+        {meta ? (
+          <div className="text-sm text-[color:var(--ro-text-muted)]">{meta}</div>
+        ) : null}
         {children}
         {actionLabel ? (
-          <span className="text-sm font-medium text-ro-plum">{actionLabel}</span>
+          <span className="text-sm font-medium text-[color:var(--ro-accent-fg,var(--ro-plum-700))]">
+            {actionLabel}
+          </span>
         ) : null}
     </>
   );

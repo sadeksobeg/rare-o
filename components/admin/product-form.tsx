@@ -4,15 +4,22 @@ import { useActionState, useEffect, useState } from "react";
 import Link from "next/link";
 import { upsertProductAction, type ActionResult } from "@/app/actions";
 import { Button } from "@/components/ui/button";
+import { CurrencySelect } from "@/components/ui/currency-select";
 import { TextField } from "@/components/ui/text-field";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { OudSpecsFields } from "@/components/admin/oud-specs-fields";
 import { ProductLivePreview } from "@/components/admin/product-live-preview";
 import {
+  SuggestEnButton,
+  SuggestEnTextAreaPair,
+  useSuggestEnglish,
+} from "@/components/admin/suggest-en";
+import {
   EMPTY_OUD_SPECS_FORM,
   type OudSpecsFormValues,
 } from "@/lib/catalog/oud-specs";
+import { productSlugCandidate } from "@/lib/catalog/slug";
 import {
   controlClass,
   controlLabelClass,
@@ -68,6 +75,7 @@ export function ProductForm({
   imageCount?: number;
 }) {
   const f = labels.form;
+  const isEdit = Boolean(product?.id);
   const [state, action, pending] = useActionState(upsertProductAction, initial);
   const [nameAr, setNameAr] = useState(product?.nameAr ?? "");
   const [nameEn, setNameEn] = useState(product?.nameEn ?? "");
@@ -76,6 +84,27 @@ export function ProductForm({
   const [price, setPrice] = useState(product?.retailPrice ?? "");
   const [status, setStatus] = useState(product?.status ?? "draft");
   const [dirty, setDirty] = useState(false);
+  const [enNameTouched, setEnNameTouched] = useState(
+    Boolean(product?.nameEn?.trim())
+  );
+  const [enDescTouched, setEnDescTouched] = useState(
+    Boolean(product?.descriptionEn?.trim())
+  );
+  const translateLabels = {
+    translateSuggest: f.translateSuggest,
+    translatePending: f.translatePending,
+    translateFailed: f.translateFailed,
+  };
+  const {
+    suggesting,
+    error: translateError,
+    runSuggest,
+    scheduleSuggest,
+  } = useSuggestEnglish(translateLabels);
+
+  const previewSlug = isEdit
+    ? product?.slug ?? ""
+    : productSlugCandidate(nameEn, nameAr) || "product";
 
   useEffect(() => {
     if (!dirty) return;
@@ -127,9 +156,9 @@ export function ProductForm({
           <p className="text-xs font-medium text-ro-muted">
             {labels.completenessAr}
           </p>
-          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[var(--ro-sand-200)]">
+          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[var(--ro-bg-sunken)]">
             <div
-              className="h-full bg-[var(--ro-plum-900)] transition-[width]"
+              className="h-full bg-[var(--ro-accent-fg)] transition-[width]"
               style={{ width: `${arPct}%` }}
             />
           </div>
@@ -138,55 +167,117 @@ export function ProductForm({
           <p className="text-xs font-medium text-ro-muted">
             {labels.completenessEn}
           </p>
-          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[var(--ro-sand-200)]">
+          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[var(--ro-bg-sunken)]">
             <div
-              className="h-full bg-[var(--ro-progress-700)] transition-[width]"
+              className="h-full bg-[var(--ro-progress-700,var(--ro-accent-fg))] transition-[width]"
               style={{ width: `${enPct}%` }}
             />
           </div>
         </div>
       </div>
       {product?.id ? <input type="hidden" name="id" value={product.id} /> : null}
-      <TextField
-        name="slug"
-        label={f.slug}
-        defaultValue={product?.slug}
-        required
-        dir="ltr"
-        dense
-      />
+      <input type="hidden" name="slug" value={isEdit ? product?.slug ?? "" : ""} />
+      <div className="space-y-1.5">
+        <p className={controlLabelTextClass}>{f.slug}</p>
+        <p
+          className="rounded-[12px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-sunken)] px-3 py-2.5 font-mono text-sm text-[color:var(--ro-text-2)]"
+          dir="ltr"
+        >
+          {previewSlug || "—"}
+        </p>
+        <p className="text-xs text-[color:var(--ro-text-muted)]">
+          {isEdit ? f.slugLockedHint : f.slugAutoHint}
+        </p>
+      </div>
+      <p className="text-xs text-[color:var(--ro-text-muted)]">
+        {f.translateDraftHint}
+      </p>
+      {translateError ? (
+        <p role="alert" className="text-xs text-[color:var(--ro-danger,#e07070)]">
+          {translateError}
+        </p>
+      ) : null}
       <div className="grid gap-3 sm:grid-cols-2">
         <TextField
           name="nameAr"
           label={f.productNameAr}
           value={nameAr}
-          onChange={(e) => setNameAr(e.target.value)}
+          onChange={(e) => {
+            const v = e.target.value;
+            setNameAr(v);
+            scheduleSuggest("name", v, setNameEn, enNameTouched, 900);
+          }}
           dir="rtl"
           dense
         />
-        <TextField
-          name="nameEn"
-          label={f.productNameEn}
-          value={nameEn}
-          onChange={(e) => setNameEn(e.target.value)}
-          dir="ltr"
-          dense
-        />
+        <div className="space-y-1.5">
+          <TextField
+            name="nameEn"
+            label={f.productNameEn}
+            value={nameEn}
+            onChange={(e) => {
+              setEnNameTouched(true);
+              setNameEn(e.target.value);
+            }}
+            dir="ltr"
+            dense
+          />
+          <SuggestEnButton
+            labels={translateLabels}
+            suggesting={suggesting}
+            disabled={!nameAr.trim()}
+            onClick={() => {
+              setEnNameTouched(false);
+              runSuggest(
+                nameAr,
+                (t) => {
+                  setNameEn(t);
+                  setEnNameTouched(false);
+                },
+                false
+              );
+            }}
+          />
+        </div>
       </div>
       <TextArea
         name="descriptionAr"
         label={f.descriptionAr}
         dir="rtl"
         value={descAr}
-        onChange={setDescAr}
+        onChange={(v) => {
+          setDescAr(v);
+          scheduleSuggest("desc", v, setDescEn, enDescTouched, 1100);
+        }}
       />
-      <TextArea
-        name="descriptionEn"
-        label={f.descriptionEn}
-        dir="ltr"
-        value={descEn}
-        onChange={setDescEn}
-      />
+      <div className="space-y-1.5">
+        <TextArea
+          name="descriptionEn"
+          label={f.descriptionEn}
+          dir="ltr"
+          value={descEn}
+          onChange={(v) => {
+            setEnDescTouched(true);
+            setDescEn(v);
+          }}
+        />
+        <SuggestEnButton
+          labels={translateLabels}
+          suggesting={suggesting}
+          disabled={!descAr.trim()}
+          onClick={() => {
+            setEnDescTouched(false);
+            runSuggest(
+              descAr,
+              (t) => {
+                setDescEn(t);
+                setEnDescTouched(false);
+              },
+              false
+            );
+          }}
+        />
+      </div>
       <label className={controlLabelClass}>
         <span className={controlLabelTextClass}>{f.category}</span>
         <select
@@ -205,21 +296,17 @@ export function ProductForm({
       <OudSpecsFields
         labels={f}
         values={product?.oudSpecs ?? EMPTY_OUD_SPECS_FORM}
+        translate={translateLabels}
       />
-      <TextArea
-        name="specsTextAr"
-        label={f.specsAr}
-        dir="rtl"
-        defaultValue={product?.specsTextAr}
-      />
-      {f.specsHelp ? (
-        <p className="-mt-2 text-xs text-ro-muted">{f.specsHelp}</p>
-      ) : null}
-      <TextArea
-        name="specsTextEn"
-        label={f.specsEn}
-        dir="ltr"
-        defaultValue={product?.specsTextEn}
+      <SuggestEnTextAreaPair
+        arName="specsTextAr"
+        enName="specsTextEn"
+        arLabel={f.specsAr}
+        enLabel={f.specsEn}
+        arDefault={product?.specsTextAr ?? ""}
+        enDefault={product?.specsTextEn ?? ""}
+        arHelper={f.specsHelp}
+        labels={translateLabels}
       />
       <div
         className={
@@ -252,15 +339,17 @@ export function ProductForm({
           <input type="hidden" name="compareAtPrice" value={product.compareAtPrice} />
         ) : null}
       </div>
-      <TextField
+      <CurrencySelect
         name="currency"
-        label={f.currency}
-        helper={f.currencyHelp}
-        defaultValue={product?.currency ?? ""}
-        placeholder={f.currencyPlaceholder}
-        dir="ltr"
         required
-        dense
+        defaultValue={product?.currency ?? "USD"}
+        labels={{
+          currency: f.currency,
+          currencyUsd: f.currencyUsd,
+          currencySyp: f.currencySyp,
+          currencyHelp: f.currencyHelp,
+        }}
+        className="max-w-xs"
       />
       <div className="grid gap-3 sm:grid-cols-2">
         <label className={controlLabelClass}>
@@ -358,7 +447,7 @@ export function ProductForm({
           {publishBlockedText}
         </p>
       ) : null}
-      <div className="z-20 flex flex-wrap items-center gap-3 border-t border-ro-line bg-ro-surface/95 py-3 backdrop-blur md:sticky md:bottom-0">
+      <div className="z-20 flex flex-wrap items-center gap-3 border-t border-[color:var(--ro-border-subtle)] bg-[color:color-mix(in_srgb,var(--ro-bg-raised)_92%,transparent)] py-3 backdrop-blur md:sticky md:bottom-0">
         <Button type="submit" loading={pending} disabled={publishBlocked}>
           {pending ? f.saving : f.saveProduct}
         </Button>

@@ -1,12 +1,11 @@
 /**
- * End-to-end brokerage lifecycle against the real DB/service layer.
- * Covers happy path + decline + quote-reject branches.
- *
- *   npx tsx scripts/brokerage-lifecycle-e2e.ts
+ * Brokerage lifecycle E2E — payment-first path (2026-11-03).
+ * Run: npx tsx scripts/brokerage-lifecycle-e2e.ts
  */
 import { prisma } from "../lib/db/prisma";
 import {
   adminTransitionBrokerage,
+  confirmBrokeragePayment,
   createBrokerageRequest,
   traderTransitionBrokerage,
   upsertAndSendQuote,
@@ -19,21 +18,45 @@ function assert(cond: unknown, msg: string): asserts cond {
 
 const createdIds: string[] = [];
 
-async function happyPath(traderId: string) {
+const seedFields = {
+  modelNumber: "E2E-MODEL-1",
+  statedPriceUsd: 1500,
+} as const;
+
+async function createSeed(traderId: string, ar: string, en: string, extra?: Record<string, unknown>) {
   const row = await createBrokerageRequest({
     traderId,
-    descriptionAr: "E2E وساطة — مسار سعيد كامل",
-    descriptionEn: "E2E brokerage happy path",
-    categoryAr: "عود",
-    cityAr: "دمشق",
-    quantity: 1,
-    budgetMinUsd: 1000,
-    budgetMaxUsd: 2000,
+    descriptionAr: ar,
+    descriptionEn: en,
+    ...seedFields,
+    ...extra,
   });
   createdIds.push(row.id);
-  assert(row.status === "SUBMITTED", "create → SUBMITTED");
+  return row;
+}
 
-  await adminTransitionBrokerage({ id: row.id, toStatus: "ACCEPTED" });
+/** AWAITING_PAYMENT → PAYMENT_CONFIRMED → ACCEPTED */
+async function unlockAfterPayment(id: string, adminId: string) {
+  await confirmBrokeragePayment({ id, adminId });
+  await adminTransitionBrokerage({ id, toStatus: "ACCEPTED" });
+}
+
+async function happyPath(traderId: string, adminId: string) {
+  const row = await createSeed(
+    traderId,
+    "E2E وساطة — مسار سعيد كامل",
+    "E2E brokerage happy path",
+    {
+      categoryAr: "عود",
+      cityAr: "دمشق",
+      quantity: 1,
+      budgetMinUsd: 1000,
+      budgetMaxUsd: 2000,
+    }
+  );
+  assert(row.status === "AWAITING_PAYMENT", "create → AWAITING_PAYMENT");
+
+  await unlockAfterPayment(row.id, adminId);
   await adminTransitionBrokerage({
     id: row.id,
     toStatus: "INSPECTION_SCHEDULED",
@@ -54,20 +77,6 @@ async function happyPath(traderId: string) {
   });
   assert(cur.status === "INSPECTED", `inspect → INSPECTED got ${cur.status}`);
 
-  await upsertAndSendQuote({
-    requestId: row.id,
-    goodsValueUsd: 1800,
-    commissionRate: 1.5,
-    shippingUsd: 40,
-  });
-  cur = await prisma.brokerageRequest.findUniqueOrThrow({ where: { id: row.id } });
-  assert(cur.status === "QUOTE_SENT", "quote → QUOTE_SENT");
-
-  await traderTransitionBrokerage({
-    id: row.id,
-    traderId,
-    toStatus: "APPROVED",
-  });
   await adminTransitionBrokerage({ id: row.id, toStatus: "PURCHASED" });
   await adminTransitionBrokerage({
     id: row.id,
@@ -80,10 +89,9 @@ async function happyPath(traderId: string) {
 
   const done = await prisma.brokerageRequest.findUniqueOrThrow({
     where: { id: row.id },
-    include: { events: true, quote: true, inspection: true },
+    include: { events: true, inspection: true },
   });
   assert(done.status === "CLOSED", "final CLOSED");
-  assert(done.quote, "quote present");
   assert(done.inspection, "inspection present");
   assert(
     done.events.length >= 8,
@@ -95,12 +103,11 @@ async function happyPath(traderId: string) {
 }
 
 async function adminDeclinePath(traderId: string) {
-  const row = await createBrokerageRequest({
+  const row = await createSeed(
     traderId,
-    descriptionAr: "E2E وساطة — رفض إداري",
-    descriptionEn: "E2E admin decline",
-  });
-  createdIds.push(row.id);
+    "E2E وساطة — رفض إداري",
+    "E2E admin decline"
+  );
   await adminTransitionBrokerage({
     id: row.id,
     toStatus: "DECLINED",
@@ -113,14 +120,13 @@ async function adminDeclinePath(traderId: string) {
   console.log(`✓ admin decline ${cur.reference}`);
 }
 
-async function traderRejectQuotePath(traderId: string) {
-  const row = await createBrokerageRequest({
+async function traderRejectQuotePath(traderId: string, adminId: string) {
+  const row = await createSeed(
     traderId,
-    descriptionAr: "E2E وساطة — رفض عرض",
-    descriptionEn: "E2E trader reject quote",
-  });
-  createdIds.push(row.id);
-  await adminTransitionBrokerage({ id: row.id, toStatus: "ACCEPTED" });
+    "E2E وساطة — رفض عرض",
+    "E2E trader reject quote"
+  );
+  await unlockAfterPayment(row.id, adminId);
   await adminTransitionBrokerage({
     id: row.id,
     toStatus: "INSPECTION_SCHEDULED",
@@ -151,20 +157,19 @@ async function traderRejectQuotePath(traderId: string) {
   console.log(`✓ trader reject quote ${cur.reference}`);
 }
 
-async function needsInfoPath(traderId: string) {
-  const row = await createBrokerageRequest({
+async function needsInfoPath(traderId: string, adminId: string) {
+  const row = await createSeed(
     traderId,
-    descriptionAr: "E2E وساطة — بحاجة لمعلومات ثم قبول",
-    descriptionEn: "E2E needs info then accept",
-  });
-  createdIds.push(row.id);
+    "E2E وساطة — بحاجة لمعلومات ثم قبول",
+    "E2E needs info then accept"
+  );
   await adminTransitionBrokerage({ id: row.id, toStatus: "NEEDS_INFO" });
   await traderTransitionBrokerage({
     id: row.id,
     traderId,
-    toStatus: "SUBMITTED",
+    toStatus: "AWAITING_PAYMENT",
   });
-  await adminTransitionBrokerage({ id: row.id, toStatus: "ACCEPTED" });
+  await unlockAfterPayment(row.id, adminId);
   const cur = await prisma.brokerageRequest.findUniqueOrThrow({
     where: { id: row.id },
   });
@@ -173,12 +178,11 @@ async function needsInfoPath(traderId: string) {
 }
 
 async function traderCancelPath(traderId: string) {
-  const row = await createBrokerageRequest({
+  const row = await createSeed(
     traderId,
-    descriptionAr: "E2E وساطة — إلغاء من التاجر",
-    descriptionEn: "E2E trader cancel",
-  });
-  createdIds.push(row.id);
+    "E2E وساطة — إلغاء من التاجر",
+    "E2E trader cancel"
+  );
   await traderTransitionBrokerage({
     id: row.id,
     traderId,
@@ -204,11 +208,13 @@ async function main() {
     where: { email: "trader@rareoud.local" },
   });
   assert(trader, "seed trader missing — run npm run db:seed");
+  const admin = await prisma.adminUser.findFirst();
+  assert(admin, "seed admin missing — run npm run db:seed");
 
-  await happyPath(trader.id);
+  await happyPath(trader.id, admin.id);
   await adminDeclinePath(trader.id);
-  await traderRejectQuotePath(trader.id);
-  await needsInfoPath(trader.id);
+  await traderRejectQuotePath(trader.id, admin.id);
+  await needsInfoPath(trader.id, admin.id);
   await traderCancelPath(trader.id);
 
   console.log("\nAll brokerage lifecycle checks passed.");
@@ -216,16 +222,10 @@ async function main() {
 
 main()
   .catch((e) => {
-    console.error("FAIL", e);
+    console.error(e);
     process.exitCode = 1;
   })
   .finally(async () => {
-    try {
-      await cleanup();
-    } catch (e) {
-      console.error("cleanup failed", e);
-      process.exitCode = 1;
-    }
+    await cleanup();
     await prisma.$disconnect();
-    if (process.exitCode) process.exit(process.exitCode);
   });

@@ -9,6 +9,7 @@ import {
   changePasswordSchema,
   productUpsertSchema,
   promoBandUpsertSchema,
+  customerUpdateSchema,
   retailRequestCreateSchema,
   retailRequestIdSchema,
   retailRequestTransitionSchema,
@@ -32,6 +33,8 @@ import {
   updateCategoryLabels,
   updateProduct,
 } from "@/lib/catalog/service";
+import { productSlugCandidate } from "@/lib/catalog/slug";
+import { ensureUniqueProductSlug } from "@/lib/catalog/slug-unique";
 import {
   createPromoBand,
   deletePromoBand,
@@ -68,6 +71,7 @@ export async function adminLoginAction(
   const parsed = adminLoginSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
+    totpCode: formData.get("totpCode") || undefined,
   });
   if (!parsed.success) {
     return { ok: false, error: "LOGIN_INVALID" };
@@ -289,7 +293,13 @@ export async function adminInvalidateOtherSessionsAction(): Promise<ActionResult
 
 /** Start TOTP enrollment — returns otpauth URL + plaintext recovery codes once. */
 export async function enrollAdminTotpAction(): Promise<
-  | { ok: true; otpauthUrl: string; secret: string; recoveryCodes: string[] }
+  | {
+      ok: true;
+      otpauthUrl: string;
+      secret: string;
+      recoveryCodes: string[];
+      qrDataUrl: string;
+    }
   | { ok: false; error: string }
 > {
   let session;
@@ -304,8 +314,15 @@ export async function enrollAdminTotpAction(): Promise<
     generateRecoveryCodes,
     hashRecoveryCodes,
   } = await import("@/lib/auth/totp");
-  const { secret, otpauthUrl } = generateTotpSecret();
+  const QRCode = (await import("qrcode")).default;
+  const { secret, otpauthUrl } = generateTotpSecret(session.email);
   const recoveryCodes = generateRecoveryCodes(8);
+  const qrDataUrl = await QRCode.toDataURL(otpauthUrl, {
+    errorCorrectionLevel: "M",
+    margin: 2,
+    width: 200,
+    color: { dark: "#08060a", light: "#ffffff" },
+  });
   await prisma.adminUser.update({
     where: { id: session.sub },
     data: {
@@ -314,7 +331,31 @@ export async function enrollAdminTotpAction(): Promise<
       totpEnabledAt: null,
     },
   });
-  return { ok: true, otpauthUrl, secret, recoveryCodes };
+  return { ok: true, otpauthUrl, secret, recoveryCodes, qrDataUrl };
+}
+
+/** Clear TOTP so the admin can enroll again (e.g. new authenticator). */
+export async function disableAdminTotpAction(): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+  const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
+  await prisma.adminUser.update({
+    where: { id: session.sub },
+    data: {
+      totpSecretEnc: null,
+      totpRecoveryHashes: "[]",
+      totpEnabledAt: null,
+    },
+  });
+  await writeAdminAudit({
+    adminId: session.sub,
+    action: "admin.totp.disabled",
+  });
+  return { ok: true };
 }
 
 /** Confirm TOTP enrollment with a live code. */
@@ -415,12 +456,14 @@ export async function upsertProductAction(
     if (id) {
       const prev = await prisma.product.findUnique({
         where: { id },
-        select: { status: true },
+        select: { status: true, slug: true },
       });
-      await updateProduct(id, parsed.data);
+      if (!prev) return { ok: false, error: "NOT_FOUND" };
+      // Slug is system-protected after create — never accept client changes.
+      await updateProduct(id, { ...parsed.data, slug: prev.slug });
       if (
         parsed.data.status === "published" &&
-        prev?.status !== "published"
+        prev.status !== "published"
       ) {
         const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
         await writeAdminAudit({
@@ -435,7 +478,10 @@ export async function upsertProductAction(
       revalidateProductStorefront();
       redirect(`/admin/products/${id}`);
     }
-    const created = await createProduct(parsed.data);
+    const slug = await ensureUniqueProductSlug(
+      productSlugCandidate(parsed.data.nameEn, parsed.data.nameAr)
+    );
+    const created = await createProduct({ ...parsed.data, slug });
     revalidatePath("/admin/products");
     revalidateProductStorefront();
     redirect(`/admin/products/${created.id}`);
@@ -1040,4 +1086,61 @@ export async function deletePromoBandAction(formData: FormData): Promise<void> {
   revalidatePath("/");
   revalidatePath("/admin/promos");
   redirect("/admin/promos");
+}
+
+export async function adminUpdateCustomerAction(
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+
+  const parsed = customerUpdateSchema.safeParse({
+    customerId: formData.get("customerId"),
+    name: formData.get("name"),
+    phone: formData.get("phone"),
+  });
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid customer",
+    };
+  }
+
+  const existing = await prisma.customer.findUnique({
+    where: { id: parsed.data.customerId },
+    select: { id: true, name: true, phone: true },
+  });
+  if (!existing) {
+    return { ok: false, error: "Customer not found" };
+  }
+
+  await prisma.customer.update({
+    where: { id: existing.id },
+    data: {
+      name: parsed.data.name,
+      phone: parsed.data.phone,
+    },
+  });
+
+  const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
+  await writeAdminAudit({
+    adminId: session.sub,
+    action: "customer.update",
+    targetType: "customer",
+    targetId: existing.id,
+    meta: {
+      nameFrom: existing.name,
+      nameTo: parsed.data.name,
+      phoneChanged: existing.phone !== parsed.data.phone,
+    },
+  });
+
+  revalidatePath("/admin/customers");
+  revalidatePath(`/admin/customers/${existing.id}`);
+  return { ok: true, message: "Customer updated" };
 }

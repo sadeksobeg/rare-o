@@ -12,8 +12,9 @@ export async function POST(request: Request) {
   const redirectTo = (path: string) =>
     NextResponse.redirect(new URL(path, origin), 303);
 
+  let session;
   try {
-    await requireAdminSession();
+    session = await requireAdminSession();
   } catch {
     return redirectTo("/admin/login");
   }
@@ -28,15 +29,28 @@ export async function POST(request: Request) {
 
   const existing = await prisma.customer.findUnique({
     where: { id },
-    select: { id: true },
+    select: { id: true, notes: true },
   });
   if (!existing) {
     return redirectTo("/admin/customers");
   }
 
+  const nextNotes = notes.trim() || null;
   await prisma.customer.update({
     where: { id },
-    data: { notes: notes.trim() || null },
+    data: { notes: nextNotes },
+  });
+
+  const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
+  await writeAdminAudit({
+    adminId: session.sub,
+    action: "customer.notes_update",
+    targetType: "customer",
+    targetId: id,
+    meta: {
+      hadNotes: Boolean(existing.notes?.trim()),
+      hasNotes: Boolean(nextNotes),
+    },
   });
 
   revalidatePath("/admin/customers");

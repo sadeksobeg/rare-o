@@ -1,5 +1,6 @@
 import { NegotiationThread } from "@/components/deals/negotiation-thread";
 import { TraderPageHeader } from "@/components/trader/page-header";
+import { PaymentHandoffCard } from "@/components/trader/payment-handoff-card";
 import { Banner } from "@/components/ui/banner";
 import { StatusChip } from "@/components/ui/status-chip";
 import { StatusStepper } from "@/components/ui/status-stepper";
@@ -13,7 +14,7 @@ import {
   fmt,
   formatMoney,
 } from "@/lib/ui/trader-labels";
-import { Handshake, Package, Tags } from "lucide-react";
+import { Handshake, Hash, Package, Tags } from "lucide-react";
 import { notFound } from "next/navigation";
 
 export default async function TraderDealDetailPage({
@@ -103,6 +104,17 @@ export default async function TraderDealDetailPage({
         </div>
         <div className="flex items-start gap-2.5">
           <span className="ro-portal-icon-well size-8 [&>svg]:size-3.5" aria-hidden>
+            <Hash className="size-3.5" strokeWidth={2} />
+          </span>
+          <div>
+            <dt className="text-xs font-bold text-ro-muted">{t.modelNumberLabel}</dt>
+            <dd className="mt-0.5 font-semibold" dir="ltr">
+              <bdi dir="ltr">{deal.modelNumber || "—"}</bdi>
+            </dd>
+          </div>
+        </div>
+        <div className="flex items-start gap-2.5">
+          <span className="ro-portal-icon-well size-8 [&>svg]:size-3.5" aria-hidden>
             <Tags className="size-3.5" strokeWidth={2} />
           </span>
           <div>
@@ -125,6 +137,23 @@ export default async function TraderDealDetailPage({
         </div>
       </dl>
 
+      {deal.status === "awaiting_payment" ? (
+        <PaymentHandoffCard
+          kind="deal"
+          recordId={deal.id}
+          title={t.dealPayTitle}
+          body={t.dealPayBody}
+          openLabel={t.dealPayOpenWa}
+          unavailableLabel={t.dealPayUnavailable}
+          deepLink={deal.whatsAppDeepLink}
+          messageText={deal.handoffMessageText}
+        />
+      ) : null}
+
+      {deal.status === "payment_confirmed" ? (
+        <Banner tone="success">{t.dealPayConfirmed}</Banner>
+      ) : null}
+
       <NegotiationThread
         entries={deal.entries}
         dealId={deal.id}
@@ -139,7 +168,9 @@ export default async function TraderDealDetailPage({
         currency={deal.currency}
       />
 
-      {!open ? (
+      {!open &&
+      deal.status !== "awaiting_payment" &&
+      deal.status !== "payment_confirmed" ? (
         <p className="ro-portal-muted">
           {fmt(t.dealClosed, { status: statusText })}
         </p>

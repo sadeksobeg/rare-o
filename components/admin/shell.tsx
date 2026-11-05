@@ -3,6 +3,7 @@ import { LogOut, MessageSquare, UserRound } from "lucide-react";
 import { adminLogoutAction } from "@/app/admin-logout-action";
 import { AdminCommandSearchMount } from "@/components/admin/command-search-mount";
 import { AdminLocaleToggle } from "@/components/admin/locale-toggle";
+import { AdminMainEnter } from "@/components/admin/main-enter";
 import {
   AdminMobileNav,
   AdminSidebar,
@@ -10,6 +11,11 @@ import {
 } from "@/components/admin/nav";
 import { Emblem } from "@/components/brand";
 import { ChromeBadge } from "@/components/portal/chrome-badge";
+import {
+  ChromeActionCluster,
+  ChromeIconButton,
+} from "@/components/portal/chrome-icon-button";
+import { NotificationBell } from "@/components/portal/notification-bell";
 import { PortalShellFrame } from "@/components/portal/portal-shell-frame";
 import { PortalThemeToggle } from "@/components/portal/portal-theme";
 import { OfflineBanner } from "@/components/system/offline-banner";
@@ -107,7 +113,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
       <SonnerToaster />
       <PortalShellFrame
         surface="admin"
-        className="ro-portal ro-portal-admin relative min-h-screen"
+        className="ro-portal ro-portal-admin relative h-dvh max-h-dvh overflow-hidden"
       >
         <div className="ro-portal-atmosphere" aria-hidden />
         <div className="ro-portal-shell relative z-10">
@@ -120,7 +126,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
           />
           <div className="ro-portal-main-col">
             <OfflineBanner />
-            <header className="ro-portal-header sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-[color:var(--border)] px-3 backdrop-blur-md sm:h-16 sm:gap-3 sm:px-4 lg:px-5">
+            <header className="ro-portal-header z-30 flex h-14 shrink-0 items-center gap-2 border-b border-[color:var(--border)] px-3 backdrop-blur-md sm:h-16 sm:gap-3 sm:px-4 lg:px-5">
               <div className="ro-portal-header-start">
                 <AdminMobileNav
                   groups={groups}
@@ -141,53 +147,75 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
                   <AdminCommandSearchMount labels={commandLabels} />
                 </div>
               </div>
-              <div className="ro-portal-header-actions flex shrink-0 items-center gap-1 sm:gap-1.5">
-                <Link
-                  href="/admin/inbox"
-                  className="ro-icon-btn relative size-11 min-h-11 px-0"
-                  aria-label={a.inbox}
-                >
-                  <MessageSquare className="size-4" strokeWidth={1.5} aria-hidden />
-                  <ChromeBadge
-                    value={unreadInbox}
-                    className="absolute end-1 top-1 flex min-w-[1.05rem] items-center justify-center rounded-full bg-[var(--ro-plum-900)] px-1 text-[0.6rem] font-bold text-[var(--ro-sand-50)]"
-                  />
-                </Link>
-                <PortalThemeToggle
-                  lightLabel={dict.common.themeLight}
-                  darkLabel={dict.common.themeDark}
-                />
-                <AdminLocaleToggle
-                  locale={locale}
-                  label={dict.common.language}
-                  tone="auto"
-                />
-                <Link
-                  href="/admin/profile"
-                  className="ro-icon-btn size-11 min-h-11 px-0"
-                  aria-label={dict.auth.profileTitle}
-                >
-                  <UserRound className="size-4" strokeWidth={1.5} aria-hidden />
-                  <span className="sr-only">
-                    <bdi dir="ltr">{session.email}</bdi>
-                  </span>
-                </Link>
-                <form action={adminLogoutAction}>
-                  <button
-                    type="submit"
-                    className="ro-icon-btn size-11 min-h-11 px-0"
-                    aria-label={a.logout}
+              <div className="ro-portal-header-actions flex shrink-0 items-center gap-1.5 sm:gap-2">
+                <ChromeActionCluster>
+                  <ChromeIconButton
+                    href="/admin/inbox"
+                    aria-label={a.inbox}
+                    wrapGlyph={false}
                   >
-                    <LogOut className="size-4" strokeWidth={1.5} aria-hidden />
-                  </button>
-                </form>
+                    <span className="ro-chrome-icon-glyph">
+                      <MessageSquare
+                        className="size-[1.05rem]"
+                        strokeWidth={1.5}
+                        aria-hidden
+                      />
+                    </span>
+                    <ChromeBadge
+                      value={unreadInbox}
+                      className="absolute end-0.5 top-0.5 flex min-w-[1.05rem] items-center justify-center rounded-full bg-[var(--ro-plum-900)] px-1 text-[0.6rem] font-bold text-[var(--ro-sand-50)]"
+                    />
+                  </ChromeIconButton>
+                  <NotificationBell
+                    chrome
+                    ariaLabel={dict.adminUi.notificationsTitle}
+                    unread={0}
+                    items={[]}
+                    viewAllHref="/admin/notifications"
+                    viewAllLabel={a.viewAll}
+                    emptyLabel={dict.adminUi.notificationsEmpty}
+                  />
+                  <PortalThemeToggle
+                    lightLabel={dict.common.themeLight}
+                    darkLabel={dict.common.themeDark}
+                    chrome
+                  />
+                  <AdminLocaleToggle
+                    locale={locale}
+                    label={dict.common.language}
+                    tone="auto"
+                    chrome
+                  />
+                  <ChromeIconButton
+                    href="/admin/profile"
+                    aria-label={dict.auth.profileTitle}
+                  >
+                    <UserRound
+                      className="size-[1.05rem]"
+                      strokeWidth={1.5}
+                      aria-hidden
+                    />
+                    <span className="sr-only">
+                      <bdi dir="ltr">{session.email}</bdi>
+                    </span>
+                  </ChromeIconButton>
+                  <form action={adminLogoutAction}>
+                    <ChromeIconButton type="submit" aria-label={a.logout}>
+                      <LogOut
+                        className="size-[1.05rem]"
+                        strokeWidth={1.5}
+                        aria-hidden
+                      />
+                    </ChromeIconButton>
+                  </form>
+                </ChromeActionCluster>
               </div>
             </header>
             <main
               id="main-content"
               className="ro-portal-main-enter ro-portal-main"
             >
-              {children}
+              <AdminMainEnter>{children}</AdminMainEnter>
             </main>
           </div>
         </div>

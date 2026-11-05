@@ -15,10 +15,18 @@ export function CountUp({
 }) {
   const { lite, tier } = useMotion();
   const cap = tier === "C" ? Math.min(durationMs, 200) : durationMs;
-  const [display, setDisplay] = useState(0);
-  const fromRef = useRef(0);
+  /* SSR + first client paint share the same number (avoids hydration mismatch). */
+  const [display, setDisplay] = useState(value);
+  const fromRef = useRef(value);
+  const skipFirstAnim = useRef(true);
 
   useEffect(() => {
+    if (skipFirstAnim.current) {
+      skipFirstAnim.current = false;
+      fromRef.current = value;
+      setDisplay(value);
+      return;
+    }
     if (lite) {
       setDisplay(value);
       fromRef.current = value;

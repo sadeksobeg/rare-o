@@ -149,7 +149,11 @@ export default async function TraderDealsPage({
               <tbody>
                 {filtered.map(
                   ({ deal: d, tone, statusLabel, kindLabel, waiting }) => (
-                    <Tr key={d.id} flash={isFresh(d.updatedAt)}>
+                    <Tr
+                      key={d.id}
+                      href={`/trader/deals/${d.id}`}
+                      flash={isFresh(d.updatedAt)}
+                    >
                       <Td>
                         <RowHit href={`/trader/deals/${d.id}`}>
                           {d.reference}

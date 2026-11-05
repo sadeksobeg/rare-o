@@ -1,11 +1,8 @@
 import { Suspense } from "react";
 import { InboxConversationList } from "@/components/admin/inbox-conversation-list";
 import type { InboxListRow } from "@/components/admin/inbox-conversation-list";
-import { InboxConnectionBanner } from "@/components/admin/inbox-connection-banner";
 import { InboxResizablePanes } from "@/components/admin/inbox-resizable-panes";
-import { MessageSquare } from "lucide-react";
-import { PageHeader } from "@/components/admin/page-header";
-import { WhatsAppLinkAccount } from "@/components/admin/whatsapp-link-account";
+import { InboxWorkspaceHeader } from "@/components/admin/inbox-workspace-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
@@ -71,24 +68,27 @@ async function InboxListShell({
   });
 
   return (
-    <>
-      <InboxConnectionBanner health={health} dict={dict} />
-      <WhatsAppLinkAccount health={health} dict={dict} />
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <InboxWorkspaceHeader
+        health={health}
+        dict={dict}
+        title={dict.inbox.title}
+      />
       <InboxResizablePanes
         className="min-h-0 flex-1"
         list={<InboxConversationList rows={rows} dict={dict} />}
         main={
-          <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
+          <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
             {children}
           </div>
         }
       />
-    </>
+    </div>
   );
 }
 
 /**
- * OPS-01 inbox shell: banner + resizable list | thread (+ context inside thread route).
+ * OPS-01 inbox — Intercom/Front density: compact chrome, list | thread fill height.
  */
 export default async function AdminInboxLayout({
   children,
@@ -100,26 +100,20 @@ export default async function AdminInboxLayout({
   return (
     <section
       data-admin-inbox
-      className="flex h-[calc(100dvh-4.25rem)] min-h-[28rem] flex-col gap-2 overflow-hidden"
+      className="ro-inbox-workspace flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-[16px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] shadow-[var(--ro-e2)]"
     >
-      <PageHeader
-        title={dict.inbox.title}
-        description={dict.inbox.subtitle}
-        icon={<MessageSquare className="size-5" strokeWidth={2} />}
-        className="shrink-0 !mb-0"
-      />
       <Suspense
         fallback={
-          <div className="flex min-h-0 flex-1 flex-col gap-2" aria-busy="true">
-            <Skeleton className="h-10 w-full shrink-0" />
-            <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[360px_minmax(0,1fr)]">
-              <Skeleton className="min-h-[240px] w-full" />
+          <div className="flex min-h-0 flex-1 flex-col" aria-busy="true">
+            <Skeleton className="h-12 w-full shrink-0 rounded-none" />
+            <div className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[360px_minmax(0,1fr)]">
+              <Skeleton className="min-h-[240px] w-full rounded-none" />
               <div className="flex min-h-0 min-w-0 flex-col">{children}</div>
             </div>
           </div>
         }
       >
-        <div className="flex min-h-0 flex-1 flex-col gap-2">
+        <div className="flex min-h-0 flex-1 flex-col">
           <InboxListShell locale={locale} dict={dict}>
             {children}
           </InboxListShell>

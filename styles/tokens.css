@@ -1,73 +1,99 @@
 /**
  * RARE OUD design tokens — the only file that may contain hex colors.
- * Existing `--ro-*` names in `app/globals.css` stay as a bridge until
- * screens are migrated; new UI must prefer the names in this file.
+ * Dark: Linear-style luminance steps + plum brand undertone.
+ * Light: open bright surfaces; plum reserved for accent/structure.
  */
 :root {
-  /* identity */
-  --ink-950: #0b080d;
+  /* identity — brand core (keep plum) */
+  --ink-950: #08060a;
   --sand-200: #f4e7d8;
   --plum-700: #32104f;
 
-  /* ink scale */
-  --ink-900: #120d16;
-  --ink-800: #1b1421;
-  --ink-700: #2a2032;
-  --ink-600: #3d3248;
-  --ink-500: #5a4e66;
-  --ink-400: #6b5e73;
+  /* ink scale — cool-plum neutrals for dark luxury */
+  --ink-900: #100c14;
+  --ink-800: #18131f;
+  --ink-700: #241c2e;
+  --ink-600: #3a3048;
+  --ink-500: #564a66;
+  --ink-400: #7a6e88;
+  --ink-300: #a89ab8;
+  --ink-200: #cfc4d9;
 
-  /* plum scale */
-  --plum-900: #220a37;
+  /* plum scale — brand accent only */
+  --plum-900: #1f0a32;
   --plum-800: #2a0d44;
   --plum-600: #46206a;
-  --plum-500: #5e3a86;
-  --plum-400: #8566a8;
-  --plum-300: #a78bc4;
-  --plum-200: #cdbbe0;
-  --plum-100: #e9e0f1;
+  --plum-500: #6b3d9a;
+  --plum-400: #8f63b8;
+  --plum-300: #b794d4;
+  --plum-200: #d4c2e8;
+  --plum-100: #ebe3f4;
+  --plum-50: #f6f2fa;
 
-  /* sand scale */
-  --sand-50: #fcf8f2;
-  --sand-100: #f8f0e4;
-  --sand-300: #e9d8c2;
-  --sand-400: #d6bea0;
+  /* sand / cream — reading & light canvas */
+  --sand-50: #fffcf8;
+  --sand-100: #f8f4ee;
+  --sand-300: #e8dccb;
+  --sand-400: #d4c0a6;
   --sand-500: #b89c7a;
 
-  /* status only */
-  --ok: #2f6b4f;
-  --ok-bg: #e3efe8;
-  --warn: #a8691e;
-  --warn-bg: #f6e9d2;
-  --danger: #a32d3a;
-  --danger-bg: #f5dde0;
+  /* status — readable on both themes (overridden in dark) */
+  --ok: #1f9a55;
+  --ok-bg: #e5f6ec;
+  --warn: #c47a1a;
+  --warn-bg: #f8edd8;
+  --danger: #d64555;
+  --danger-bg: #fce8eb;
 
-  /* semantic */
-  --bg-page: var(--sand-100);
-  --bg-surface: rgba(255, 255, 255, 0.62);
-  --bg-surface-solid: var(--sand-50);
+  /* semantic light defaults (brighter portal light) */
+  --bg-page: #f4f1f7;
+  --bg-surface: rgba(255, 255, 255, 0.88);
+  --bg-surface-solid: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-overlay: color-mix(in srgb, var(--ink-950) 45%, transparent);
   --bg-inverse: var(--ink-950);
-  --text: var(--ink-950);
-  --text-muted: var(--ink-400);
-  --text-inverse: var(--sand-200);
-  --border: rgba(50, 16, 79, 0.14);
-  --border-strong: rgba(50, 16, 79, 0.32);
+  --text: #140f1a;
+  --text-muted: #5c5368;
+  --text-inverse: #f5f0f8;
+  --border: rgba(50, 16, 79, 0.1);
+  --border-strong: rgba(50, 16, 79, 0.22);
   --accent: var(--plum-700);
   --focus: var(--plum-500);
 
-  /* radius — sharp atelier, capsules for badges only */
+  /* Portal bridge aliases */
+  --ro-bg: var(--bg-page);
+  --ro-bg-elevated: var(--bg-elevated);
+  --ro-bg-raised: var(--bg-surface-solid);
+  --ro-bg-sunken: #ebe6f0;
+  --ro-bg-overlay: var(--bg-overlay);
+  --ro-panel: var(--bg-elevated);
+  --ro-panel-hover: color-mix(in srgb, var(--plum-100) 55%, #ffffff);
+  --ro-text: var(--text);
+  --ro-text-2: #3a3346;
+  --ro-text-muted: var(--text-muted);
+  --ro-border-subtle: rgba(50, 16, 79, 0.08);
+  --ro-border: rgba(50, 16, 79, 0.16);
+  --ro-focus: var(--plum-500);
+  --ro-ok: var(--ok);
+  --ro-warn: var(--warn);
+  --ro-danger: var(--danger);
+  --ro-ok-bg: var(--ok-bg);
+  --ro-warn-bg: var(--warn-bg);
+  --ro-danger-bg: var(--danger-bg);
+
+  /* radius */
   --r-sm: 6px;
   --r-md: 10px;
   --r-lg: 14px;
   --r-xl: 20px;
 
-  /* elevation — plum-tinted, never gray */
-  --shadow-1: 0 1px 2px rgba(34, 10, 55, 0.06), 0 1px 1px rgba(34, 10, 55, 0.04);
-  --shadow-2: 0 8px 20px -8px rgba(34, 10, 55, 0.16),
-    0 2px 4px rgba(34, 10, 55, 0.05);
-  --shadow-3: 0 24px 56px -16px rgba(34, 10, 55, 0.28),
+  /* elevation — plum-tinted */
+  --shadow-1: 0 1px 2px rgba(34, 10, 55, 0.05), 0 0 0 1px rgba(50, 16, 79, 0.05);
+  --shadow-2: 0 10px 28px -12px rgba(34, 10, 55, 0.18),
+    0 2px 6px rgba(34, 10, 55, 0.05);
+  --shadow-3: 0 28px 56px -18px rgba(34, 10, 55, 0.28),
     0 4px 12px rgba(34, 10, 55, 0.08);
-  --ring-focus: 0 0 0 2px var(--sand-50), 0 0 0 4px var(--focus);
+  --ring-focus: 0 0 0 2px #ffffff, 0 0 0 4px var(--focus);
 
   /* space 4px grid */
   --s-1: 4px;
@@ -92,84 +118,183 @@
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
 
-  /* VISION dark-luxury accents (admin/trader/login) */
+  /* VISION accents */
   --amber-400: #c4a574;
-  --glow-plum: rgba(94, 58, 134, 0.42);
-  --glow-ink: rgba(11, 8, 13, 0.55);
-  --grain-opacity: 0.045;
-  --hairline-cream: rgba(244, 231, 216, 0.12);
-  --surface-elevated: color-mix(in srgb, var(--ink-800) 92%, var(--plum-700));
-  --surface-overlay: color-mix(in srgb, var(--ink-950) 72%, transparent);
+  --glow-plum: rgba(107, 61, 154, 0.38);
+  --glow-ink: rgba(8, 6, 10, 0.55);
+  --grain-opacity: 0.035;
+  --hairline: rgba(255, 255, 255, 0.06);
+  --hairline-cream: rgba(245, 240, 248, 0.1);
+  --surface-elevated: var(--ink-800);
+  --surface-overlay: color-mix(in srgb, var(--ink-950) 78%, transparent);
 }
 
 /**
- * Portal dark-luxury theme — apply via data-theme="dark" on .ro-portal roots.
- * Light remains the :root defaults for cream reading surfaces.
+ * Portal dark — open lilac dusk (admin + trader).
+ * Cheerful / global: lifted luminance, soft violet bloom, warm amber kiss.
+ * Never cave-black. Page < raised < elevated < hover.
  */
 .ro-portal[data-theme="dark"] {
-  --bg-page: var(--ink-950);
-  --bg-surface: color-mix(in srgb, var(--ink-800) 88%, var(--plum-900));
-  --bg-surface-solid: var(--ink-900);
-  --bg-inverse: var(--sand-100);
-  --text: var(--sand-200);
-  --text-muted: color-mix(in srgb, var(--sand-300) 72%, var(--ink-400));
-  --text-inverse: var(--ink-950);
-  --border: rgba(244, 231, 216, 0.12);
-  --border-strong: rgba(244, 231, 216, 0.28);
-  --accent: var(--plum-300);
-  --focus: var(--plum-400);
-  --ok-bg: color-mix(in srgb, var(--ok) 22%, var(--ink-900));
-  --warn-bg: color-mix(in srgb, var(--warn) 22%, var(--ink-900));
-  --danger-bg: color-mix(in srgb, var(--danger) 22%, var(--ink-900));
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.35), 0 0 0 1px var(--hairline-cream);
-  --shadow-2: 0 12px 32px -12px rgba(0, 0, 0, 0.55),
-    0 0 0 1px var(--hairline-cream);
-  --shadow-3: 0 28px 64px -20px rgba(0, 0, 0, 0.65),
-    0 0 40px -10px var(--glow-plum);
-  --ring-focus: 0 0 0 2px var(--ink-900), 0 0 0 4px var(--focus);
+  color-scheme: dark;
 
-  /* Legacy role aliases used across admin/trader chrome (do NOT invert raw sand/ink scales) */
-  --ro-bg: var(--ink-950);
-  --ro-bg-raised: var(--ink-900);
-  --ro-bg-sunken: var(--ink-950);
-  --ro-text: var(--sand-200);
-  --ro-text-2: color-mix(in srgb, var(--sand-300) 82%, var(--ink-300));
-  --ro-text-muted: color-mix(in srgb, var(--sand-300) 62%, var(--ink-400));
-  --ro-link: var(--plum-300);
-  --ro-link-hover: var(--sand-100);
-  --ro-border-subtle: rgba(244, 231, 216, 0.14);
-  --ro-border: rgba(244, 231, 216, 0.28);
-  --ro-border-control: #7c7288;
-  --ro-focus: var(--plum-300);
+  --bg-page: #35314a;
+  --bg-surface: rgba(72, 66, 96, 0.92);
+  --bg-surface-solid: #403b58;
+  --bg-elevated: #4c4666;
+  --bg-overlay: rgba(28, 22, 44, 0.45);
+  --bg-inverse: #fbf8ff;
+
+  --text: #fbf8ff;
+  --text-muted: #d0c6e2;
+  --text-inverse: #2a2540;
+
+  --border: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.2);
+  --accent: #d4b8ef;
+  --focus: #c9a6e6;
+
+  --ok: #5eeba0;
+  --ok-bg: color-mix(in srgb, #5eeba0 20%, #35314a);
+  --warn: #f0bc62;
+  --warn-bg: color-mix(in srgb, #f0bc62 20%, #35314a);
+  --danger: #f79aa2;
+  --danger-bg: color-mix(in srgb, #f79aa2 18%, #35314a);
+
+  --shadow-1: 0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.06);
+  --shadow-2: 0 16px 40px -18px rgba(40, 28, 70, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.07);
+  --shadow-3: 0 28px 56px -20px rgba(40, 28, 70, 0.4),
+    0 0 48px -10px var(--glow-plum);
+  --ring-focus: 0 0 0 2px #35314a, 0 0 0 4px #c9a6e6;
+  --glow-plum: rgba(190, 150, 230, 0.38);
+  --grain-opacity: 0.012;
+
+  --ro-bg: #35314a;
+  --ro-bg-elevated: #4c4666;
+  --ro-bg-raised: #403b58;
+  --ro-bg-sunken: #2d2940;
+  --ro-bg-overlay: var(--bg-overlay);
+  --ro-panel: #4c4666;
+  --ro-panel-hover: #585275;
+  --ro-accent-fg: #e0c8f5;
+  --ro-accent-well: color-mix(in srgb, #d4b8ef 28%, transparent);
+  --ro-text: #fbf8ff;
+  --ro-text-2: #ebe3f6;
+  --ro-text-muted: #d0c6e2;
+  --ro-link: #dcc4f2;
+  --ro-link-hover: #ffffff;
+  --ro-border-subtle: rgba(255, 255, 255, 0.1);
+  --ro-border: rgba(255, 255, 255, 0.15);
+  --ro-border-control: rgba(255, 255, 255, 0.24);
+  --ro-focus: #c9a6e6;
+  --ro-success-700: #5eeba0;
+  --ro-success-100: color-mix(in srgb, #5eeba0 20%, #35314a);
+  --ro-danger-700: #f79aa2;
+  --ro-danger-100: color-mix(in srgb, #f79aa2 18%, #35314a);
   --ro-line: var(--ro-border-subtle);
   --ro-ink-muted: var(--ro-text-muted);
+  --ro-ok: var(--ok);
+  --ro-warn: var(--warn);
+  --ro-danger: var(--danger);
+  --ro-ok-bg: var(--ok-bg);
+  --ro-warn-bg: var(--warn-bg);
+  --ro-danger-bg: var(--danger-bg);
   --background: var(--ro-bg);
   --foreground: var(--ro-text);
+
+  /* Legacy utilities → cheerful dusk (admin + trader forms/cards) */
+  --color-ro-paper: var(--ro-bg-elevated);
+  --color-ro-ink: var(--ro-text);
+  --color-ro-surface: var(--ro-bg-raised);
+  --color-ro-sunken: var(--ro-bg-sunken);
+  --color-ro-canvas: var(--ro-bg);
+  --color-ro-cream: var(--ro-bg-raised);
+  --color-ro-ivory: var(--ro-bg-raised);
+  --color-ro-plum: var(--ro-accent-fg);
+  --color-ro-purple: var(--ro-accent-fg);
+  --color-ro-purple-soft: color-mix(in srgb, #d4b8ef 18%, var(--ro-bg-raised));
+  --ro-sand-50: #45405e;
+  --ro-sand-100: #403b58;
+  --ro-sand-200: #35314a;
+  --ro-plum-50: color-mix(in srgb, #d4b8ef 16%, #403b58);
+  --ro-plum-100: color-mix(in srgb, #d4b8ef 24%, #403b58);
 }
 
+/**
+ * Portal light — open, bright, editorial; plum for accent only.
+ */
 .ro-portal[data-theme="light"] {
-  --bg-page: var(--sand-100);
-  --bg-surface: rgba(255, 255, 255, 0.72);
-  --bg-surface-solid: var(--sand-50);
-  --bg-inverse: var(--ink-950);
-  --text: var(--ink-950);
-  --text-muted: var(--ink-400);
-  --text-inverse: var(--sand-200);
-  --border: rgba(50, 16, 79, 0.14);
-  --border-strong: rgba(50, 16, 79, 0.32);
+  color-scheme: light;
+
+  --bg-page: #f3f0f7;
+  --bg-surface: rgba(255, 255, 255, 0.92);
+  --bg-surface-solid: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-overlay: color-mix(in srgb, var(--ink-950) 40%, transparent);
+  --bg-inverse: #08060a;
+
+  --text: #140f1a;
+  --text-muted: #6a6178;
+  --text-inverse: #f5f0f8;
+
+  --border: rgba(50, 16, 79, 0.09);
+  --border-strong: rgba(50, 16, 79, 0.2);
   --accent: var(--plum-700);
   --focus: var(--plum-500);
-  --ro-bg: var(--sand-100);
-  --ro-bg-raised: var(--sand-50);
-  --ro-bg-sunken: var(--sand-200);
-  --ro-text: var(--ink-950);
-  --ro-text-2: var(--ink-700);
-  --ro-text-muted: var(--ink-600);
-  --ro-link: var(--plum-900);
-  --ro-link-hover: var(--plum-700);
-  --ro-border-subtle: rgba(11, 8, 13, 0.14);
-  --ro-border: rgba(11, 8, 13, 0.28);
+
+  --ok: #1a8f4c;
+  --ok-bg: #e8f7ee;
+  --warn: #b86e12;
+  --warn-bg: #f8eedc;
+  --danger: #c93a4a;
+  --danger-bg: #fce9eb;
+
+  --shadow-1: 0 1px 2px rgba(20, 15, 26, 0.04),
+    0 0 0 1px rgba(50, 16, 79, 0.05);
+  --shadow-2: 0 14px 36px -18px rgba(50, 16, 79, 0.22),
+    0 2px 6px rgba(20, 15, 26, 0.04);
+  --shadow-3: 0 32px 64px -28px rgba(50, 16, 79, 0.28);
+  --ring-focus: 0 0 0 2px #ffffff, 0 0 0 4px var(--plum-500);
+
+  --ro-bg: #f3f0f7;
+  --ro-bg-elevated: #ffffff;
+  --ro-bg-raised: #ffffff;
+  --ro-bg-sunken: #e8e3ef;
+  --ro-bg-overlay: var(--bg-overlay);
+  --ro-panel: #ffffff;
+  --ro-panel-hover: color-mix(in srgb, var(--plum-50) 80%, #ffffff);
+  --ro-accent-fg: var(--plum-700);
+  --ro-accent-well: color-mix(in srgb, var(--plum-700) 14%, transparent);
+  --ro-text: #140f1a;
+  --ro-text-2: #3d3548;
+  --ro-text-muted: #6a6178;
+  --ro-link: var(--plum-800);
+  --ro-link-hover: var(--plum-600);
+  --ro-border-subtle: rgba(50, 16, 79, 0.08);
+  --ro-border: rgba(50, 16, 79, 0.14);
+  --ro-border-control: color-mix(in srgb, var(--plum-700) 28%, #c8bfd4);
+  --ro-focus: var(--plum-500);
   --ro-line: var(--ro-border-subtle);
+  --ro-ink-muted: var(--ro-text-muted);
+  --ro-ok: var(--ok);
+  --ro-warn: var(--warn);
+  --ro-danger: var(--danger);
+  --ro-ok-bg: var(--ok-bg);
+  --ro-warn-bg: var(--warn-bg);
+  --ro-danger-bg: var(--danger-bg);
   --background: var(--ro-bg);
   --foreground: var(--ro-text);
+
+  /* Keep brand sands cream/white in light (dark remaps them). */
+  --ro-sand-50: #fffcf8;
+  --ro-sand-100: #f8f4ee;
+  --ro-sand-200: #ebe6f0;
+  --color-ro-paper: #ffffff;
+  --color-ro-ink: #140f1a;
+  --color-ro-surface: #ffffff;
+  --color-ro-sunken: #e8e3ef;
+  --color-ro-canvas: #f3f0f7;
+  --color-ro-cream: #fffcf8;
+  --color-ro-ivory: #fffcf8;
 }

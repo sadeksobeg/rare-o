@@ -207,6 +207,7 @@ async function main() {
     dealKind: "catalog",
     title: "Regression catalog deal",
     productId: product!.id,
+    modelNumber: "REG-MODEL-80",
     proposedPrice: 80,
     currency: "TEST",
     quantity: 2,
@@ -249,10 +250,14 @@ async function main() {
     message: "admin counter",
     proposedPrice: 75,
     currency: "TEST",
-    quantity: 2,
+    quantity: 3,
   });
   assert(countered.deal.status === "negotiating", "counter stays negotiating");
-  assert(Number(countered.deal.proposedPrice) === 75, "counter updates commercial snapshot");
+  assert(
+    Number(countered.deal.proposedPrice) === 80,
+    "payment-first: counter must not change price"
+  );
+  assert(countered.deal.quantity === 3, "counter may update quantity");
 
   const accepted = await addNegotiationEntry({
     dealId: countered.deal.id,
@@ -261,7 +266,10 @@ async function main() {
     actorTraderId: traderA.id,
     message: "trader accept",
   });
-  assert(accepted.deal.status === "accepted", "accept → accepted");
+  assert(
+    accepted.deal.status === "awaiting_payment",
+    "accept → awaiting_payment"
+  );
 
   await expectThrow(
     () =>
@@ -272,7 +280,7 @@ async function main() {
         actorAdminId: admin!.id,
         message: "too late",
       }),
-    "negotiation rejected on accepted deal"
+    "negotiation rejected on awaiting_payment deal"
   );
 
   const productsAfterAccept = await prisma.product.count();
@@ -291,6 +299,9 @@ async function main() {
     traderId: traderA.id,
     dealKind: "non_catalog",
     title: "Non-catalog opportunity",
+    modelNumber: "NONCAT-1",
+    proposedPrice: 120,
+    currency: "TEST",
     conditionsNotes: "custom opportunity",
     message: "propose non-catalog",
   });
@@ -301,6 +312,9 @@ async function main() {
         traderId: traderA.id,
         dealKind: "non_catalog",
         title: "bad",
+        modelNumber: "BAD",
+        proposedPrice: 1,
+        currency: "TEST",
         productId: product!.id,
       }),
     "non-catalog cannot reference product"

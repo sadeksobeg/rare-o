@@ -49,9 +49,10 @@ export function isSafeWhatsAppMediaFileName(name: string): boolean {
 }
 
 function extFromMime(mime: string, fallback = "bin"): string {
-  const mapped = WHATSAPP_OUTBOUND_MIME[mime.trim().toLowerCase()];
+  const base = mime.trim().toLowerCase().split(";")[0]!.trim();
+  const mapped = WHATSAPP_OUTBOUND_MIME[base];
   if (mapped) return mapped;
-  const sub = mime.split("/")[1]?.replace(/[^a-z0-9]/gi, "") ?? "";
+  const sub = base.split("/")[1]?.replace(/[^a-z0-9]/gi, "") ?? "";
   if (sub && EXT_ALLOW.has(sub)) return sub;
   if (sub === "jpeg") return "jpg";
   return fallback;

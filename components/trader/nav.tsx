@@ -116,7 +116,7 @@ export function TraderBottomTabs({
   return (
     <nav
       aria-label={navLabel}
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-[color-mix(in_srgb,var(--ro-plum-900)_18%,transparent)] bg-[color-mix(in_srgb,var(--ro-sand-50)_96%,transparent)] pb-[env(safe-area-inset-bottom)] shadow-[0_-14px_40px_-18px_rgba(50,16,79,0.32)] backdrop-blur-md md:hidden"
+      className="ro-trader-bottom-tabs fixed inset-x-0 bottom-0 z-40 border-t border-[color:var(--ro-border-subtle)] bg-[color-mix(in_srgb,var(--ro-bg-elevated)_94%,transparent)] pb-[env(safe-area-inset-bottom)] shadow-[var(--shadow-2)] backdrop-blur-md md:hidden"
     >
       <ul
         className="relative grid h-16"
@@ -143,14 +143,14 @@ export function TraderBottomTabs({
                 className={cn(
                   "relative flex h-full min-h-11 flex-col items-center justify-center gap-0.5 px-0.5 text-[11px] transition-[color,transform,opacity] duration-[var(--ro-dur-fast)]",
                   active
-                    ? "font-semibold text-[var(--ro-plum-900)]"
-                    : "text-ro-muted"
+                    ? "scale-[0.98] font-semibold text-[color:var(--ro-link)]"
+                    : "text-[color:var(--ro-text-muted)] active:scale-[0.97]"
                 )}
               >
                 {active ? (
                   <span
                     aria-hidden
-                    className="absolute top-1 size-1.5 rounded-full bg-[var(--ro-plum-900)] shadow-[0_0_0_4px_color-mix(in_srgb,var(--ro-plum-900)_20%,transparent)]"
+                    className="absolute top-1 size-1.5 rounded-full bg-[color:var(--ro-link)] shadow-[0_0_0_4px_color-mix(in_srgb,var(--ro-plum-900)_20%,transparent)]"
                   />
                 ) : tab.waiting && tab.waiting > 0 ? (
                   <LiveBadge

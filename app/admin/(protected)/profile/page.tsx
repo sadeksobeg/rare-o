@@ -145,6 +145,7 @@ export default async function AdminProfilePage() {
               enabledLabel={dict.common.switchOn}
               disabledLabel={dict.common.switchOff}
               enrollLabel={a.totpEnrollButton}
+              resetLabel={a.totpResetButton}
             />
           </div>
         }

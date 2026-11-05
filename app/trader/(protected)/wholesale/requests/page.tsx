@@ -140,7 +140,11 @@ export default async function TraderWholesaleRequestsPage({
               <tbody>
                 {filtered.map(
                   ({ r, tone, statusLabel, modeLabel, waiting }) => (
-                    <Tr key={r.id} flash={isFresh(r.updatedAt)}>
+                    <Tr
+                      key={r.id}
+                      href={`/trader/wholesale/${r.id}`}
+                      flash={isFresh(r.updatedAt)}
+                    >
                       <Td>
                         <RowHit href={`/trader/wholesale/${r.id}`}>
                           {r.reference}

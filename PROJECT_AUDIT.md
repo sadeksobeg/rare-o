@@ -550,3 +550,16 @@ writing under `/var/lib/rareoud/backups`; hourly disk alert cron
 
 **Still owner-gated:** live WhatsApp QR/outbound; Object Storage; do not run
 `docker compose down -v` on this host.
+
+## Session note — 2026-11-05 — Contract 7.1 closed + Section 07 client report
+
+Closed **7.1 Encryption & Secure Storage** within contract scope (app-layer
+sensitive credentials + TLS; field-level Postgres PII still out of scope):
+
+- Gate: `npm run test:security-storage` (`scripts/security-storage-gate.mjs`)
+- Docs: `docs/security/ENCRYPTION-AND-STORAGE.md`, `ASVS-L2.md` (TOTP marked shipped)
+- `.env.production.example` documents `WHATSAPP_AUTH_KEY` (WA connect/outbound still false)
+- Client AR delivery: `docs/client-report/SECTION-07-CLIENT-DELIVERY-AR.md`
+- Matrix: FINAL-REPORT + DELIVERY-VS-CONTRACT — **7.1–7.5 PASS**; **9.1 live WhatsApp** remains the open owner gate
+
+`npm run report:counts` after matrix edit: PASS 30 · PARTIAL 3 · OWNER-ACTION 0.

@@ -14,7 +14,9 @@ import {
 import {
   appendBrokerageRequestPhotos,
   adminTransitionBrokerage,
+  confirmBrokeragePayment,
   createBrokerageRequest,
+  markBrokerageHandoffOpened,
   setBrokerageRequestPhotos,
   traderTransitionBrokerage,
   upsertAndSendQuote,
@@ -34,8 +36,8 @@ import { prisma } from "@/lib/db/prisma";
 const createSchema = z.object({
   descriptionAr: z.string().trim().min(8).max(2000),
   descriptionEn: z.string().trim().max(2000).optional(),
-  categoryAr: z.string().trim().max(200).optional(),
-  categoryEn: z.string().trim().max(200).optional(),
+  modelNumber: z.string().trim().min(1).max(120),
+  statedPriceUsd: z.coerce.number().int().positive().max(10_000_000),
   quantity: z.coerce.number().int().min(1).max(99).optional(),
   cityAr: z.string().trim().max(120).optional(),
   cityEn: z.string().trim().max(120).optional(),
@@ -73,8 +75,8 @@ export async function traderCreateBrokerageAction(
   const parsed = createSchema.safeParse({
     descriptionAr: formData.get("descriptionAr"),
     descriptionEn: formData.get("descriptionEn") || undefined,
-    categoryAr: formData.get("categoryAr") || undefined,
-    categoryEn: formData.get("categoryEn") || undefined,
+    modelNumber: formData.get("modelNumber"),
+    statedPriceUsd: formData.get("statedPriceUsd"),
     quantity: formData.get("quantity") || 1,
     cityAr: formData.get("cityAr") || undefined,
     cityEn: formData.get("cityEn") || undefined,
@@ -97,6 +99,7 @@ export async function traderCreateBrokerageAction(
   }
   const row = await createBrokerageRequest({
     traderId: session.sub,
+    locale: "ar",
     ...parsed.data,
   });
   if (files.length > 0) {
@@ -299,5 +302,46 @@ export async function adminSendQuoteAction(
     return { ok: false, error: e instanceof Error ? e.message : "ERROR" };
   }
   revalidateBrokerage(requestId);
+  return { ok: true };
+}
+
+export async function adminConfirmBrokeragePaymentAction(
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+  const id = String(formData.get("id") ?? "");
+  if (!id) return { ok: false, error: "VALIDATION" };
+  try {
+    await confirmBrokeragePayment({ id, adminId: session.sub });
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "ERROR" };
+  }
+  revalidateBrokerage(id);
+  return { ok: true };
+}
+
+export async function traderOpenBrokerageHandoffAction(
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireTraderSession();
+  } catch (e) {
+    return handleTraderSessionError(e);
+  }
+  const id = String(formData.get("id") ?? "");
+  if (!id) return { ok: false, error: "VALIDATION" };
+  try {
+    await markBrokerageHandoffOpened({ id, traderId: session.sub });
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "ERROR" };
+  }
+  revalidateBrokerage(id);
   return { ok: true };
 }

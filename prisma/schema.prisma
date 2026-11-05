@@ -264,13 +264,22 @@ model DealProposal {
   /// Catalog deals may reference an existing RARE OUD Product (ownership stays with RARE OUD)
   productId       String?
   product         Product?             @relation(fields: [productId], references: [id], onDelete: SetNull)
-  /// Optional commercial fields — exact pricing rules remain OPEN; free-text covers ambiguity
+  /// Trader-stated price (required on new creates — payment-first, 2026-11-03)
   proposedPrice   Decimal?
   currency        String?
   quantity        Int?
   conditionsNotes String               @default("")
-  /// proposed | negotiating | accepted | rejected | closed
+  /// Model / SKU identifier (replaces category language on deals UI)
+  modelNumber     String               @default("")
+  /// proposed | negotiating | accepted | awaiting_payment | payment_confirmed | rejected | closed
   status          String               @default("proposed")
+  /// WhatsApp payment handoff (additive — mirrors retail pattern; no online pay)
+  handoffMessageText String?
+  whatsAppDeepLink   String?
+  handoffPreparedAt  DateTime?
+  handoffOpenedAt    DateTime?
+  paymentConfirmedAt DateTime?
+  paymentConfirmedByAdminId String?
   entries         NegotiationEntry[]
   curatedOffers   PublicCuratedOffer[]
   createdAt       DateTime             @default(now())
@@ -542,12 +551,17 @@ model BrokerageRequest {
   reference        String                @unique
   traderId         String
   trader           TraderAccount         @relation(fields: [traderId], references: [id], onDelete: Restrict)
-  /// SUBMITTED | NEEDS_INFO | ACCEPTED | INSPECTION_SCHEDULED | INSPECTED | QUOTE_SENT | APPROVED | PURCHASED | SHIPPED | DELIVERED | CLOSED | DECLINED | REJECTED | CANCELLED
+  /// SUBMITTED | NEEDS_INFO | AWAITING_PAYMENT | PAYMENT_CONFIRMED | ACCEPTED | INSPECTION_SCHEDULED | INSPECTED | QUOTE_SENT | APPROVED | PURCHASED | SHIPPED | DELIVERED | CLOSED | DECLINED | REJECTED | CANCELLED
   status           String                @default("SUBMITTED")
   descriptionAr    String
   descriptionEn    String                @default("")
+  /// Legacy free-text category — kept for old rows; new UI writes modelNumber
   categoryAr       String                @default("")
   categoryEn       String                @default("")
+  /// Model / SKU (owner 2026-11-03 — replaces category on create)
+  modelNumber      String                @default("")
+  /// Trader-stated goods price in USD (payment-first; no admin quote gate)
+  statedPriceUsd   Int?
   quantity         Int                   @default(1)
   cityAr           String                @default("")
   cityEn           String                @default("")
@@ -569,6 +583,13 @@ model BrokerageRequest {
   trackingRef      String                @default("")
   shippedAt        DateTime?
   deliveredAt      DateTime?
+  /// WhatsApp payment handoff (additive)
+  handoffMessageText String?
+  whatsAppDeepLink   String?
+  handoffPreparedAt  DateTime?
+  handoffOpenedAt    DateTime?
+  paymentConfirmedAt DateTime?
+  paymentConfirmedByAdminId String?
   inspection       BrokerageInspection?
   quote            BrokerageQuote?
   events           BrokerageEvent[]

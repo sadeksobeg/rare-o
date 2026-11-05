@@ -68,6 +68,16 @@ export const DEAL_STATUS: Record<string, StatusMeta> = {
   accepted: {
     tone: "success",
     labelKey: "status.deal.accepted",
+    nextActor: "trader",
+  },
+  awaiting_payment: {
+    tone: "attention",
+    labelKey: "status.deal.awaiting_payment",
+    nextActor: "admin",
+  },
+  payment_confirmed: {
+    tone: "success",
+    labelKey: "status.deal.payment_confirmed",
     nextActor: "none",
   },
   rejected: {
@@ -125,6 +135,8 @@ export function dealNextActor(
     if (lastActorRole === "trader") return "admin";
     return "admin";
   }
+  if (status === "awaiting_payment") return "admin";
+  if (status === "accepted") return "trader";
   return DEAL_STATUS[status]?.nextActor ?? "none";
 }
 
@@ -189,7 +201,12 @@ export const STATUS_SEQUENCE: Record<
     "in_follow_up",
     "completed",
   ],
-  deal: ["proposed", "negotiating", "accepted"],
+  deal: [
+    "proposed",
+    "negotiating",
+    "awaiting_payment",
+    "payment_confirmed",
+  ],
   wholesale: [
     "submitted",
     "under_review",

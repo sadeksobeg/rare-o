@@ -307,6 +307,7 @@ type Dict = {
     kpiDeals: string;
     kpiWholesale: string;
     kpiBrokerage: string;
+    kpiWaitingTotal: string;
     kpiUnread: string;
     kpiIdle: string;
     recentRequests: string;
@@ -315,6 +316,8 @@ type Dict = {
     actionOpen: string;
     actionEmpty: string;
     activityEmpty: string;
+    activityShowMore: string;
+    activityShowLess: string;
     nextActorAdmin: string;
     lastConnected: string;
     neverConnected: string;
@@ -485,6 +488,14 @@ type Dict = {
     negotiationThread: string;
     emptyTitle: string;
     emptyBody: string;
+    dealsEmptyTitle: string;
+    dealsEmptyBody: string;
+    dealsEmptyFilteredTitle: string;
+    dealsEmptyFilteredBody: string;
+    wholesaleEmptyTitle: string;
+    wholesaleEmptyBody: string;
+    wholesaleEmptyFilteredTitle: string;
+    wholesaleEmptyFilteredBody: string;
     newTrader: string;
     traderCreateTitle: string;
     traderCreateLead: string;
@@ -535,6 +546,65 @@ type Dict = {
     customerNotesFailed: string;
     customerNotesInvalid: string;
     customerNotesHelper: string;
+    customersFilterWithRequests: string;
+    customersFilterNoRequests: string;
+    customersKpiAll: string;
+    customersKpiWithRequests: string;
+    customersKpiNew: string;
+    customersKpiNewHint: string;
+    searchCustomers: string;
+    colLastActivity: string;
+    colWa: string;
+    customerEditTitle: string;
+    customerName: string;
+    customerEditSave: string;
+    customerEditSaved: string;
+    customerEditFailed: string;
+    customerOpenRequests: string;
+    customerOpenWa: string;
+    tradersFilterActive: string;
+    tradersFilterDisabled: string;
+    tradersKpiActive: string;
+    tradersKpiDisabled: string;
+    tradersKpiOpenDeals: string;
+    searchTraders: string;
+    traderEditTitle: string;
+    traderEditSave: string;
+    traderEditSaved: string;
+    traderEditFailed: string;
+    traderInterestNotes: string;
+    traderWaTitle: string;
+    traderWaEmpty: string;
+    notificationsFilterAction: string;
+    notificationsFilterInbox: string;
+    notificationsFilterTrade: string;
+    notificationsSectionAction: string;
+    notificationsSectionInbox: string;
+    notificationsSectionTrade: string;
+    notificationsDomainRetail: string;
+    notificationsDomainDeal: string;
+    notificationsDomainWholesale: string;
+    settingsProfile: string;
+    settingsProfileLead: string;
+    settingsWaConnected: string;
+    settingsWaDisconnected: string;
+    settingsWaOther: string;
+    settings2faOn: string;
+    settings2faOff: string;
+    teamTitle: string;
+    teamLead: string;
+    teamTabTeam: string;
+    teamTabAudit: string;
+    teamInviteNote: string;
+    teamAuditFilter: string;
+    teamAuditExport: string;
+    teamAuditCount: string;
+    teamAuditMeta: string;
+    teamAuditIp: string;
+    teamColName: string;
+    teamColEmail: string;
+    teamColSince: string;
+    teamSecurityLink: string;
     kindCatalog: string;
     kindNonCatalog: string;
     modeRequestQuote: string;
@@ -630,6 +700,12 @@ type Dict = {
       saveShipping: string;
       shippingSaved: string;
       slug: string;
+      slugAutoHint: string;
+      slugLockedHint: string;
+      translateDraftHint: string;
+      translateSuggest: string;
+      translatePending: string;
+      translateFailed: string;
       titleAr: string;
       titleEn: string;
       summaryAr: string;
@@ -699,6 +775,8 @@ type Dict = {
       currency: string;
       currencyHelp: string;
       currencyPlaceholder: string;
+      currencyUsd: string;
+      currencySyp: string;
       statusLabel: string;
       availabilityLabel: string;
       availabilityHelp: string;
@@ -860,6 +938,9 @@ type Dict = {
     wizardLeaveConfirm: string;
     wizardNeedTitle: string;
     wizardNeedProduct: string;
+    wizardNeedModel: string;
+    wizardNeedPrice: string;
+    wizardNeedCurrency: string;
     recentActivity: string;
     recentActivityEmpty: string;
     activityDeal: string;
@@ -880,13 +961,24 @@ type Dict = {
     productLabel: string;
     productPlaceholder: string;
     nonCatalogNote: string;
+    modelNumberLabel: string;
     priceOptional: string;
     currencyLabel: string;
+    currencyUsd: string;
+    currencySyp: string;
     quantityLabel: string;
     conditionsLabel: string;
     initialMessageLabel: string;
     submitProposal: string;
     submitting: string;
+    dealPayTitle: string;
+    dealPayBody: string;
+    dealPayOpenWa: string;
+    dealPayUnavailable: string;
+    dealPayConfirmed: string;
+    brokeragePayTitle: string;
+    brokeragePayBody: string;
+    negCounterPriceLocked: string;
     dealProduct: string;
     dealNonCatalog: string;
     dealSnapshot: string;
@@ -1109,6 +1201,11 @@ type Dict = {
     msgContact: string;
     attachFile: string;
     attachCaption: string;
+    voiceRecord: string;
+    voiceRecording: string;
+    voiceStop: string;
+    voiceCancel: string;
+    voiceDenied: string;
     crmParty: string;
     crmSuggest: string;
     crmLinkCustomer: string;
@@ -1222,6 +1319,7 @@ type Dict = {
     totpInvalid: string;
     totpEnrollRequired: string;
     totpEnrollButton: string;
+    totpResetButton: string;
     showPassword: string;
     hidePassword: string;
     sessionInvalidatedNotice: string;
@@ -1421,7 +1519,7 @@ const ar: Dict = {
     priceLabel: "السعر",
     priceMin: "الحد الأدنى",
     priceMax: "الحد الأقصى",
-    priceCurrencyHint: "رمز العملة كما في الكتالوج (مثال USD)",
+    priceCurrencyHint: "عملة الكتالوج: دولار أو ليرة سورية",
     priceCurrencyShort: "عملة",
     showResultsForms: {
       zero: "عرض {n} قطعة",
@@ -1595,6 +1693,7 @@ const ar: Dict = {
     kpiDeals: "صفقات بانتظار الرد",
     kpiWholesale: "طلبات جملة",
     kpiBrokerage: "وساطة نشطة",
+    kpiWaitingTotal: "إجمالي بانتظارك",
     kpiUnread: "محادثات غير مقروءة",
     kpiIdle: "لا شيء بانتظارك",
     recentRequests: "أحدث طلبات التجزئة",
@@ -1603,6 +1702,8 @@ const ar: Dict = {
     actionOpen: "فتح",
     actionEmpty: "لا شيء بانتظارك",
     activityEmpty: "لا أحداث بعد.",
+    activityShowMore: "عرض المزيد",
+    activityShowLess: "عرض أقل",
     nextActorAdmin: "بانتظار الإدارة",
     lastConnected: "آخر اتصال",
     neverConnected: "لم يُسجَّل اتصال بعد",
@@ -1788,6 +1889,18 @@ const ar: Dict = {
     negotiationThread: "سجل التفاوض",
     emptyTitle: "لا يوجد شيء هنا بعد",
     emptyBody: "ستظهر السجلات هنا عند إنشائها.",
+    dealsEmptyTitle: "لا صفقات بعد",
+    dealsEmptyBody:
+      "عندما يقترح تاجر صفقة تظهر هنا لمتابعة التفاوض والقبول والإغلاق — بمعزل تام عن طلبات التجزئة.",
+    dealsEmptyFilteredTitle: "لا نتائج لهذا التصفية",
+    dealsEmptyFilteredBody:
+      "جرّب تبويباً آخر أو امسح البحث لعرض كل الصفقات.",
+    wholesaleEmptyTitle: "لا طلبات جملة بعد",
+    wholesaleEmptyBody:
+      "طلبات الجملة من التجّار تظهر هنا لعرض السعر والتأكيد والإكمال — مسار منفصل عن التجزئة والصفقات.",
+    wholesaleEmptyFilteredTitle: "لا نتائج لهذا التصفية",
+    wholesaleEmptyFilteredBody:
+      "جرّب تبويباً آخر أو امسح البحث لعرض كل طلبات الجملة.",
     newTrader: "إضافة تاجر",
     traderCreateTitle: "إنشاء حساب تاجر",
     traderCreateLead:
@@ -1842,6 +1955,67 @@ const ar: Dict = {
     customerNotesInvalid: "الملاحظة أطول من المسموح.",
     customerNotesHelper:
       "ملاحظات داخلية للإدارة فقط. لا تغيّر حالة الطلب ولا محادثة واتساب.",
+    customersFilterWithRequests: "لديهم طلبات",
+    customersFilterNoRequests: "بلا طلبات",
+    customersKpiAll: "الكل",
+    customersKpiWithRequests: "مع طلبات",
+    customersKpiNew: "جدد",
+    customersKpiNewHint: "آخر 7 أيام",
+    searchCustomers: "ابحث بالاسم أو الهاتف",
+    colLastActivity: "آخر نشاط",
+    colWa: "واتساب",
+    customerEditTitle: "تعديل جهة الاتصال",
+    customerName: "الاسم",
+    customerEditSave: "حفظ البيانات",
+    customerEditSaved: "تم حفظ البيانات.",
+    customerEditFailed: "تعذّر حفظ البيانات.",
+    customerOpenRequests: "عرض الطلبات",
+    customerOpenWa: "فتح واتساب",
+    tradersFilterActive: "نشط",
+    tradersFilterDisabled: "معطّل",
+    tradersKpiActive: "نشط",
+    tradersKpiDisabled: "معطّل",
+    tradersKpiOpenDeals: "صفقات مفتوحة",
+    searchTraders: "ابحث بالاسم أو البريد أو الهاتف",
+    traderEditTitle: "تعديل ملف التاجر",
+    traderEditSave: "حفظ الملف",
+    traderEditSaved: "تم حفظ الملف.",
+    traderEditFailed: "تعذّر حفظ الملف.",
+    traderInterestNotes: "ملاحظات الاهتمام",
+    traderWaTitle: "محادثات واتساب",
+    traderWaEmpty: "لا توجد محادثات واتساب مرتبطة بهذا التاجر.",
+    notificationsFilterAction: "يحتاج إجراء",
+    notificationsFilterInbox: "صندوق وارد",
+    notificationsFilterTrade: "تجارة",
+    notificationsSectionAction: "يحتاج إجراءك",
+    notificationsSectionInbox: "صندوق واتساب",
+    notificationsSectionTrade: "صفقات وجملة",
+    notificationsDomainRetail: "تجزئة",
+    notificationsDomainDeal: "صفقة",
+    notificationsDomainWholesale: "جملة",
+    settingsProfile: "الملف الشخصي",
+    settingsProfileLead: "الاسم والبريد ومظهر الواجهة لهذا الحساب.",
+    settingsWaConnected: "متصل",
+    settingsWaDisconnected: "غير متصل",
+    settingsWaOther: "حالة أخرى",
+    settings2faOn: "التحقق بخطوتين مفعّل",
+    settings2faOff: "التحقق بخطوتين غير مفعّل",
+    teamTitle: "الفريق والأمان",
+    teamLead:
+      "حسابات الإدارة الحقيقية — لا أدوار مالك/مدير/موظف في المخطط بعد. التحقق بخطوتين من صفحة الأمان.",
+    teamTabTeam: "الفريق",
+    teamTabAudit: "سجل الأمان",
+    teamInviteNote:
+      "دعوة أعضاء جدد ومصفوفة الصلاحيات تتطلب حقول أدوار في قاعدة البيانات — غير مُنفَّذة في هذه المرحلة. أنشئ الحساب عبر التشغيل/البذرة.",
+    teamAuditFilter: "تصفية حسب الإجراء…",
+    teamAuditExport: "تصدير CSV",
+    teamAuditCount: "{n} حدثاً",
+    teamAuditMeta: "تفاصيل",
+    teamAuditIp: "IP",
+    teamColName: "الاسم",
+    teamColEmail: "البريد",
+    teamColSince: "منذ",
+    teamSecurityLink: "أمان حسابي",
     kindCatalog: "من الكتالوج",
     kindNonCatalog: "خارج الكتالوج",
     modeRequestQuote: "طلب عرض سعر",
@@ -1859,6 +2033,8 @@ const ar: Dict = {
         proposed: "مقترحة",
         negotiating: "قيد التفاوض",
         accepted: "مقبولة",
+        awaiting_payment: "بانتظار الدفع",
+        payment_confirmed: "تأكيد الدفع",
         rejected: "مرفوضة",
         closed: "مغلقة",
       },
@@ -1976,6 +2152,12 @@ const ar: Dict = {
       saveShipping: "حفظ الشحن",
       shippingSaved: "تم حفظ بيانات الشحن.",
       slug: "المعرّف (Slug)",
+      slugAutoHint: "يُولَّد تلقائياً من الاسم — لا يُدخله المشرف.",
+      slugLockedHint: "المعرّف محمي بعد الإنشاء لحماية روابط المتجر.",
+      translateDraftHint: "اقتراح ترجمة — راجع النص الإنجليزي قبل النشر.",
+      translateSuggest: "اقترح الإنجليزية",
+      translatePending: "جاري الاقتراح…",
+      translateFailed: "تعذّر الاقتراح الآن — أدخل الإنجليزية يدوياً.",
       titleAr: "العنوان (عربي)",
       titleEn: "العنوان (إنجليزي)",
       summaryAr: "الملخص (عربي)",
@@ -2044,9 +2226,11 @@ const ar: Dict = {
       retailPrice: "سعر التجزئة",
       compareAtPrice: "السعر السابق (اختياري)",
       compareAtHelp: "اتركه فارغاً إن لم يكن هناك سعر سابق. يظهر الخصم فقط إذا كان أعلى من سعر التجزئة.",
-      currency: "رمز العملة",
-      currencyHelp: "قابل للضبط — القيمة التجارية الافتراضية ما زالت مفتوحة.",
-      currencyPlaceholder: "مثال: TEST لبيانات الاختبار فقط",
+      currency: "العملة",
+      currencyHelp: "اختر دولار أمريكي أو ليرة سورية.",
+      currencyPlaceholder: "USD أو SYP",
+      currencyUsd: "دولار أمريكي (USD)",
+      currencySyp: "ليرة سورية (SYP)",
       statusLabel: "الحالة",
       availabilityLabel: "التوفر",
       availabilityHelp: "علامة توفر للتجزئة، وليست مخزوناً.",
@@ -2105,21 +2289,21 @@ const ar: Dict = {
     notificationsFilterWholesale: "جملة",
     notificationsFilterBrokerage: "وساطة",
     brokerageWizardTitle: "طلب وساطة جديد",
-    brokerageExplainerTitle: "كيف تعمل العمولة",
+    brokerageExplainerTitle: "الدفع أولاً ثم المتابعة",
     brokerageExplainerBody:
-      "نعاين القطعة ونقدّم عرضاً يشمل ثمن الشراء وعمولة الوساطة والشحن إن وُجد. لا التزام حتى توافق على العرض.",
+      "تُدخل رقم الموديل والسعر الذي تبلغ به. بعدها تفتح محادثة واتساب مع الإدارة للدفع. بعد تأكيد الإدارة لنجاح الدفع تُفتح بقية مراحل الوساطة (معاينة وشراء وشحن).",
     brokerageStepWhat: "القطعة",
     brokerageStepWhere: "المكان",
     brokerageStepExpectations: "التوقعات",
     brokerageStepReview: "مراجعة",
     brokerageFieldDescription: "وصف القطعة",
-    brokerageFieldCategory: "الفئة",
+    brokerageFieldCategory: "رقم الموديل",
     brokerageFieldQuantity: "الكمية",
     brokerageFieldCity: "المدينة",
     brokerageFieldPlace: "اسم المكان",
     brokerageFieldSeller: "تواصل البائع",
     brokerageFieldSource: "رابط (اختياري)",
-    brokerageFieldBudgetMin: "ميزانية من (USD)",
+    brokerageFieldBudgetMin: "السعر (USD)",
     brokerageFieldBudgetMax: "إلى",
     brokerageFieldNotes: "ملاحظات",
     brokerageSubmit: "إرسال الطلب",
@@ -2171,6 +2355,8 @@ const ar: Dict = {
       proposed: "مقترحة",
       negotiating: "قيد التفاوض",
       accepted: "مقبولة",
+      awaiting_payment: "بانتظار الدفع",
+      payment_confirmed: "تأكيد الدفع",
       rejected: "مرفوضة",
       closed: "مغلقة",
     },
@@ -2244,6 +2430,9 @@ const ar: Dict = {
     wizardLeaveConfirm: "لديك مسودة غير مرسلة. هل تريد المغادرة؟",
     wizardNeedTitle: "أدخل عنوان الصفقة للمتابعة.",
     wizardNeedProduct: "اختر منتجاً من الكتالوج للمتابعة.",
+    wizardNeedModel: "أدخل رقم الموديل للمتابعة.",
+    wizardNeedPrice: "أدخل سعراً موجباً للمتابعة.",
+    wizardNeedCurrency: "اختر العملة للمتابعة.",
     recentActivity: "نشاطي الأخير",
     recentActivityEmpty: "لا نشاط حديث بعد.",
     activityDeal: "صفقة {ref}",
@@ -2265,13 +2454,28 @@ const ar: Dict = {
     productPlaceholder: "اختر المنتج",
     nonCatalogNote:
       "المقترحات خارج الكتالوج لا تُنشئ ولا تعدّل أي منتجات أو تصنيفات.",
-    priceOptional: "السعر المقترح (اختياري)",
+    modelNumberLabel: "رقم الموديل",
+    priceOptional: "السعر (مطلوب)",
     currencyLabel: "العملة",
+    currencyUsd: "دولار أمريكي (USD)",
+    currencySyp: "ليرة سورية (SYP)",
     quantityLabel: "الكمية",
     conditionsLabel: "الشروط / ملاحظات",
     initialMessageLabel: "الرسالة الأولى",
     submitProposal: "إرسال المقترح",
     submitting: "جارٍ الإرسال…",
+    dealPayTitle: "ادفع عبر واتساب",
+    dealPayBody:
+      "افتح واتساب لإتمام التحويل بالسعر المتفق. بعد الدفع تنتظر تأكيد الإدارة.",
+    dealPayOpenWa: "فتح واتساب للدفع",
+    dealPayUnavailable:
+      "رابط واتساب غير جاهز بعد — تواصل مع الإدارة أو أعد المحاولة لاحقاً.",
+    dealPayConfirmed: "أكدت الإدارة استلام الدفع واكتمال الطلب.",
+    brokeragePayTitle: "ادفع عبر واتساب لإكمال الوساطة",
+    brokeragePayBody:
+      "افتح واتساب وأتمّ التحويل. بعد تأكيد الإدارة تُفتح بقية مراحل الوساطة.",
+    negCounterPriceLocked:
+      "السعر ثابت بعد مقترح التاجر — العرض المقابل يعدّل الكمية أو الملاحظات فقط.",
     dealProduct: "المنتج",
     dealNonCatalog: "خارج الكتالوج (بلا ربط بمنتج)",
     dealSnapshot: "الملخص التجاري",
@@ -2377,7 +2581,8 @@ const ar: Dict = {
     offersStartDeal: "بدء صفقة من هذا العرض",
     confirmCancel: "إلغاء",
     negConfirmAcceptTitle: "قبول هذه الصفقة؟",
-    negConfirmAcceptBody: "القبول يُقفل التفاوض ويسجّل موافقتك على الشروط الحالية.",
+    negConfirmAcceptBody:
+      "القبول يُقفل السعر المتفق ويفتح دفع واتساب — الإدارة تؤكّد الاستلام لإكمال الطلب.",
     negConfirmCloseTitle: "إغلاق هذه الصفقة؟",
     negConfirmCloseBody: "الإغلاق يُنهي التفاوض دون قبول. لا يمكن التراجع من هنا.",
     negConfirmRejectTitle: "رفض هذه الصفقة؟",
@@ -2509,6 +2714,11 @@ const ar: Dict = {
     msgContact: "جهة اتصال",
     attachFile: "إرفاق ملف",
     attachCaption: "تعليق (اختياري)",
+    voiceRecord: "تسجيل صوتي",
+    voiceRecording: "جارٍ التسجيل…",
+    voiceStop: "إيقاف",
+    voiceCancel: "إلغاء",
+    voiceDenied: "لم يُسمح بالوصول إلى الميكروفون",
     crmParty: "سجل العميل / التاجر",
     crmSuggest: "اقتراحات من رقم الهاتف",
     crmLinkCustomer: "ربط كعميل",
@@ -2619,6 +2829,7 @@ const ar: Dict = {
     totpInvalid: "رمز التحقق غير صحيح.",
     totpEnrollRequired: "فعّل التحقق بخطوتين من إعدادات الأمان قبل الدخول.",
     totpEnrollButton: "ابدأ تفعيل التحقق بخطوتين",
+    totpResetButton: "إعادة ضبط التحقق بخطوتين",
     showPassword: "إظهار",
     hidePassword: "إخفاء",
     sessionInvalidatedNotice:
@@ -2826,7 +3037,7 @@ const en: Dict = {
     priceLabel: "Price",
     priceMin: "Min",
     priceMax: "Max",
-    priceCurrencyHint: "Catalog currency code (e.g. USD)",
+    priceCurrencyHint: "Catalog currency: USD or Syrian pound",
     priceCurrencyShort: "ccy",
     showResultsForms: {
       zero: "Show {n} pieces",
@@ -3000,6 +3211,7 @@ const en: Dict = {
     kpiDeals: "Deals awaiting reply",
     kpiWholesale: "Wholesale requests",
     kpiBrokerage: "Active brokerage",
+    kpiWaitingTotal: "Total waiting",
     kpiUnread: "Unread conversations",
     kpiIdle: "Nothing waiting for you",
     recentRequests: "Recent retail requests",
@@ -3008,6 +3220,8 @@ const en: Dict = {
     actionOpen: "Open",
     actionEmpty: "Nothing waiting for you",
     activityEmpty: "No events yet.",
+    activityShowMore: "Show more",
+    activityShowLess: "Show less",
     nextActorAdmin: "Waiting on admin",
     lastConnected: "Last connected",
     neverConnected: "No connection recorded yet",
@@ -3194,6 +3408,18 @@ const en: Dict = {
     negotiationThread: "Negotiation history",
     emptyTitle: "Nothing here yet",
     emptyBody: "Records will appear here once they are created.",
+    dealsEmptyTitle: "No deals yet",
+    dealsEmptyBody:
+      "When a trader proposes a deal it appears here for negotiation, acceptance, and close — fully separate from retail requests.",
+    dealsEmptyFilteredTitle: "No deals match this filter",
+    dealsEmptyFilteredBody:
+      "Try another tab or clear search to see every deal.",
+    wholesaleEmptyTitle: "No wholesale requests yet",
+    wholesaleEmptyBody:
+      "Trader wholesale requests appear here for quoting, confirmation, and completion — a path separate from retail and deals.",
+    wholesaleEmptyFilteredTitle: "No wholesale requests match this filter",
+    wholesaleEmptyFilteredBody:
+      "Try another tab or clear search to see every wholesale request.",
     newTrader: "Add trader",
     traderCreateTitle: "Create trader account",
     traderCreateLead:
@@ -3250,6 +3476,67 @@ const en: Dict = {
     customerNotesInvalid: "The note is longer than allowed.",
     customerNotesHelper:
       "Internal admin notes only. Saving does not change a request status or a WhatsApp conversation.",
+    customersFilterWithRequests: "With requests",
+    customersFilterNoRequests: "No requests",
+    customersKpiAll: "All",
+    customersKpiWithRequests: "With requests",
+    customersKpiNew: "New",
+    customersKpiNewHint: "Last 7 days",
+    searchCustomers: "Search name or phone",
+    colLastActivity: "Last activity",
+    colWa: "WhatsApp",
+    customerEditTitle: "Edit contact",
+    customerName: "Name",
+    customerEditSave: "Save details",
+    customerEditSaved: "Details saved.",
+    customerEditFailed: "Could not save details.",
+    customerOpenRequests: "View requests",
+    customerOpenWa: "Open WhatsApp",
+    tradersFilterActive: "Active",
+    tradersFilterDisabled: "Disabled",
+    tradersKpiActive: "Active",
+    tradersKpiDisabled: "Disabled",
+    tradersKpiOpenDeals: "Open deals",
+    searchTraders: "Search name, email, or phone",
+    traderEditTitle: "Edit trader profile",
+    traderEditSave: "Save profile",
+    traderEditSaved: "Profile saved.",
+    traderEditFailed: "Could not save profile.",
+    traderInterestNotes: "Interest notes",
+    traderWaTitle: "WhatsApp conversations",
+    traderWaEmpty: "No WhatsApp conversations linked to this trader.",
+    notificationsFilterAction: "Needs action",
+    notificationsFilterInbox: "Inbox",
+    notificationsFilterTrade: "Trade",
+    notificationsSectionAction: "Needs your action",
+    notificationsSectionInbox: "WhatsApp inbox",
+    notificationsSectionTrade: "Deals & wholesale",
+    notificationsDomainRetail: "Retail",
+    notificationsDomainDeal: "Deal",
+    notificationsDomainWholesale: "Wholesale",
+    settingsProfile: "Profile",
+    settingsProfileLead: "Name, email, and appearance for this account.",
+    settingsWaConnected: "Connected",
+    settingsWaDisconnected: "Disconnected",
+    settingsWaOther: "Other status",
+    settings2faOn: "Two-factor is on",
+    settings2faOff: "Two-factor is off",
+    teamTitle: "Team & security",
+    teamLead:
+      "Live admin accounts — Owner/Manager/Staff roles are not in the schema yet. Manage 2FA on the security page.",
+    teamTabTeam: "Team",
+    teamTabAudit: "Audit log",
+    teamInviteNote:
+      "Invites and a permission matrix need role fields in the database — not built in this phase. Provision accounts via ops/seed.",
+    teamAuditFilter: "Filter by action…",
+    teamAuditExport: "Export CSV",
+    teamAuditCount: "{n} events",
+    teamAuditMeta: "Details",
+    teamAuditIp: "IP",
+    teamColName: "Name",
+    teamColEmail: "Email",
+    teamColSince: "Since",
+    teamSecurityLink: "My security",
     kindCatalog: "Catalog",
     kindNonCatalog: "Non-catalog",
     modeRequestQuote: "Request quote",
@@ -3267,6 +3554,8 @@ const en: Dict = {
         proposed: "Proposed",
         negotiating: "Negotiating",
         accepted: "Accepted",
+        awaiting_payment: "Awaiting payment",
+        payment_confirmed: "Payment confirmed",
         rejected: "Rejected",
         closed: "Closed",
       },
@@ -3385,6 +3674,12 @@ const en: Dict = {
       saveShipping: "Save shipping",
       shippingSaved: "Shipping details saved.",
       slug: "Slug",
+      slugAutoHint: "Generated automatically from the name — not admin-entered.",
+      slugLockedHint: "Slug is locked after create to protect storefront URLs.",
+      translateDraftHint: "Draft translation — review English before publishing.",
+      translateSuggest: "Suggest English",
+      translatePending: "Suggesting…",
+      translateFailed: "Suggestion unavailable — enter English manually.",
       titleAr: "Title (Arabic)",
       titleEn: "Title (English)",
       summaryAr: "Summary (Arabic)",
@@ -3455,9 +3750,11 @@ const en: Dict = {
       retailPrice: "Retail price",
       compareAtPrice: "Compare-at price (optional)",
       compareAtHelp: "Leave empty if there is no prior price. A discount shows only when this is higher than retail.",
-      currency: "Currency code",
-      currencyHelp: "Configurable — commercial default is still open.",
-      currencyPlaceholder: "e.g. TEST for fixtures only",
+      currency: "Currency",
+      currencyHelp: "Choose US dollar or Syrian pound.",
+      currencyPlaceholder: "USD or SYP",
+      currencyUsd: "US Dollar (USD)",
+      currencySyp: "Syrian Pound (SYP)",
       statusLabel: "Status",
       availabilityLabel: "Availability",
       availabilityHelp: "Retail flag, not inventory.",
@@ -3516,21 +3813,21 @@ const en: Dict = {
     notificationsFilterWholesale: "Wholesale",
     notificationsFilterBrokerage: "Brokerage",
     brokerageWizardTitle: "New brokerage request",
-    brokerageExplainerTitle: "How commission works",
+    brokerageExplainerTitle: "Payment first, then the rest",
     brokerageExplainerBody:
-      "We inspect the piece and send a quote with purchase price, brokerage commission, and shipping if any. You are not committed until you approve.",
+      "Enter the model number and the price you state. Then open WhatsApp with admin to pay. After admin confirms payment, the remaining brokerage stages unlock (inspection, purchase, shipping).",
     brokerageStepWhat: "The piece",
     brokerageStepWhere: "Location",
     brokerageStepExpectations: "Expectations",
     brokerageStepReview: "Review",
     brokerageFieldDescription: "Piece description",
-    brokerageFieldCategory: "Category",
+    brokerageFieldCategory: "Model number",
     brokerageFieldQuantity: "Quantity",
     brokerageFieldCity: "City",
     brokerageFieldPlace: "Place name",
     brokerageFieldSeller: "Seller contact",
     brokerageFieldSource: "Link (optional)",
-    brokerageFieldBudgetMin: "Budget min (USD)",
+    brokerageFieldBudgetMin: "Price (USD)",
     brokerageFieldBudgetMax: "Max",
     brokerageFieldNotes: "Notes",
     brokerageSubmit: "Submit request",
@@ -3583,6 +3880,8 @@ const en: Dict = {
       proposed: "Proposed",
       negotiating: "Negotiating",
       accepted: "Accepted",
+      awaiting_payment: "Awaiting payment",
+      payment_confirmed: "Payment confirmed",
       rejected: "Rejected",
       closed: "Closed",
     },
@@ -3656,6 +3955,9 @@ const en: Dict = {
     wizardLeaveConfirm: "You have an unsaved draft. Leave anyway?",
     wizardNeedTitle: "Enter a deal title to continue.",
     wizardNeedProduct: "Pick a catalog product to continue.",
+    wizardNeedModel: "Enter a model number to continue.",
+    wizardNeedPrice: "Enter a positive price to continue.",
+    wizardNeedCurrency: "Choose a currency to continue.",
     recentActivity: "Recent activity",
     recentActivityEmpty: "No recent activity yet.",
     activityDeal: "Deal {ref}",
@@ -3677,13 +3979,28 @@ const en: Dict = {
     productPlaceholder: "Select product",
     nonCatalogNote:
       "Non-catalog proposals do not create or modify products/categories.",
-    priceOptional: "Proposed price (optional)",
+    modelNumberLabel: "Model number",
+    priceOptional: "Price (required)",
     currencyLabel: "Currency",
+    currencyUsd: "US Dollar (USD)",
+    currencySyp: "Syrian Pound (SYP)",
     quantityLabel: "Quantity",
     conditionsLabel: "Conditions / notes",
     initialMessageLabel: "Initial message",
     submitProposal: "Submit proposal",
     submitting: "Submitting…",
+    dealPayTitle: "Pay via WhatsApp",
+    dealPayBody:
+      "Open WhatsApp to complete the transfer at the agreed price. After payment, wait for admin confirmation.",
+    dealPayOpenWa: "Open WhatsApp to pay",
+    dealPayUnavailable:
+      "WhatsApp link is not ready yet — contact admin or try again later.",
+    dealPayConfirmed: "Admin confirmed payment and completed the order.",
+    brokeragePayTitle: "Pay via WhatsApp to continue brokerage",
+    brokeragePayBody:
+      "Open WhatsApp and complete the transfer. After admin confirmation, remaining brokerage stages unlock.",
+    negCounterPriceLocked:
+      "Price stays fixed after the trader’s proposal — counter adjusts quantity or notes only.",
     dealProduct: "Product",
     dealNonCatalog: "Non-catalog (no product link)",
     dealSnapshot: "Commercial snapshot",
@@ -3792,7 +4109,7 @@ const en: Dict = {
     confirmCancel: "Cancel",
     negConfirmAcceptTitle: "Accept this deal?",
     negConfirmAcceptBody:
-      "Accepting locks negotiation and records your agreement to the current terms.",
+      "Accepting locks the agreed price and opens WhatsApp payment — admin must confirm receipt to complete the order.",
     negConfirmCloseTitle: "Close this deal?",
     negConfirmCloseBody:
       "Closing ends negotiation without accepting. This cannot be undone here.",
@@ -3930,6 +4247,11 @@ const en: Dict = {
     msgContact: "Contact",
     attachFile: "Attach file",
     attachCaption: "Caption (optional)",
+    voiceRecord: "Voice note",
+    voiceRecording: "Recording…",
+    voiceStop: "Stop",
+    voiceCancel: "Cancel",
+    voiceDenied: "Microphone access was denied",
     crmParty: "Customer / trader record",
     crmSuggest: "Suggestions from phone number",
     crmLinkCustomer: "Link as customer",
@@ -4040,6 +4362,7 @@ const en: Dict = {
     totpInvalid: "That verification code is not valid.",
     totpEnrollRequired: "Turn on two-factor authentication in security settings before signing in.",
     totpEnrollButton: "Start 2FA enrollment",
+    totpResetButton: "Reset two-factor authentication",
     showPassword: "Show",
     hidePassword: "Hide",
     sessionInvalidatedNotice:

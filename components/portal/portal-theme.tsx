@@ -87,6 +87,8 @@ export function PortalThemeProvider({
         className={className}
         data-theme={theme}
         data-theme-ready={ready ? "true" : "false"}
+        /* Theme may flip after mount from localStorage; avoid noisy mismatch. */
+        suppressHydrationWarning
       >
         {children}
       </div>
@@ -111,26 +113,41 @@ export function PortalThemeToggle({
   lightLabel,
   darkLabel,
   className,
+  chrome = false,
 }: {
   lightLabel: string;
   darkLabel: string;
   className?: string;
+  chrome?: boolean;
 }) {
   const { theme, toggle } = usePortalTheme();
   const isDark = theme === "dark";
   return (
     <button
       type="button"
-      className={cn("ro-icon-btn size-11 min-h-11 px-0", className)}
+      className={cn(
+        chrome ? "ro-chrome-icon" : "ro-icon-btn size-11 min-h-11 px-0",
+        className
+      )}
       aria-label={isDark ? lightLabel : darkLabel}
       aria-pressed={isDark}
       onClick={toggle}
     >
-      {isDark ? (
-        <Sun className="size-4" strokeWidth={1.5} aria-hidden />
-      ) : (
-        <Moon className="size-4" strokeWidth={1.5} aria-hidden />
-      )}
+      <span className={chrome ? "ro-chrome-icon-glyph" : undefined}>
+        {isDark ? (
+          <Sun
+            className={chrome ? "size-[1.05rem]" : "size-4"}
+            strokeWidth={1.5}
+            aria-hidden
+          />
+        ) : (
+          <Moon
+            className={chrome ? "size-[1.05rem]" : "size-4"}
+            strokeWidth={1.5}
+            aria-hidden
+          />
+        )}
+      </span>
     </button>
   );
 }

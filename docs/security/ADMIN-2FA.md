@@ -25,7 +25,7 @@ Optional env `REQUIRE_ADMIN_2FA=1` blocks login until 2FA is enrolled.
 
 ## Enrollment (admin UI)
 
-`/admin/settings/security` — stub UI:
+`/admin/settings/security` — live enrollment UI:
 
 - `enrollAdminTotpAction` — generates secret + recovery codes (stored encrypted, `totpEnabledAt` cleared until confirm).
 - `confirmAdminTotpAction` — verifies live TOTP, sets `totpEnabledAt`.

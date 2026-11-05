@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition, type ReactNode } from "react";
+import { toastErr, toastOk } from "@/lib/portal/toast";
 import { traderActionMessage, type TraderDict } from "@/lib/ui/trader-labels";
 
 const fieldClass =
@@ -77,7 +78,7 @@ export function NegotiationForm({
   const confirmBody =
     action === "accept"
       ? (labels?.negConfirmAcceptBody ??
-        "Accepting locks negotiation and records agreement to the current terms.")
+        "Accepting locks the agreed price and opens WhatsApp payment — admin must confirm receipt.")
       : action === "close"
         ? (labels?.negConfirmCloseBody ??
           "Closing ends negotiation without accepting.")
@@ -107,9 +108,13 @@ export function NegotiationForm({
               | { conflictWarnings?: ConflictWarning[] }
               | undefined;
             setWarnings(data?.conflictWarnings ?? []);
+            toastOk(labels?.negRecorded ?? "Negotiation entry recorded.");
             router.refresh();
           } else {
             setWarnings([]);
+            toastErr(
+              labels ? traderActionMessage(labels, res.error) : res.error
+            );
           }
         });
       }}
@@ -171,31 +176,14 @@ export function NegotiationForm({
         />
       </label>
       {action === "counter" ? (
-        <div className="grid gap-3 sm:grid-cols-3">
-          <label className="block space-y-1.5 text-sm font-semibold">
-            <span className="text-ro-muted">
-              {labels?.negPrice ?? "Proposed price"}
-            </span>
-            <input
-              name="proposedPrice"
-              type="number"
-              step="0.01"
-              min="0"
-              className={fieldClass}
-            />
-          </label>
-          <label className="block space-y-1.5 text-sm font-semibold">
-            <span className="text-ro-muted">
-              {labels?.negCurrency ?? "Currency"}
-            </span>
-            <input
-              name="currency"
-              placeholder={currency || undefined}
-              defaultValue={currency ?? ""}
-              dir="ltr"
-              className={fieldClass}
-            />
-          </label>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <p className="sm:col-span-2 text-xs leading-snug text-ro-muted">
+            {labels?.negCounterPriceLocked ??
+              "Price stays fixed after the trader’s proposal — counter can adjust quantity or notes only."}
+          </p>
+          {currency ? (
+            <input type="hidden" name="currency" value={currency} />
+          ) : null}
           <label className="block space-y-1.5 text-sm font-semibold">
             <span className="text-ro-muted">{labels?.negQty ?? "Quantity"}</span>
             <input
@@ -205,7 +193,7 @@ export function NegotiationForm({
               className={fieldClass}
             />
           </label>
-          <label className="block space-y-1.5 text-sm font-semibold sm:col-span-3">
+          <label className="block space-y-1.5 text-sm font-semibold sm:col-span-2">
             <span className="text-ro-muted">
               {labels?.negConditions ?? "Conditions / notes"}
             </span>

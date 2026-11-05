@@ -81,10 +81,10 @@ export default async function TraderNotificationsPage({
               role="tab"
               aria-selected={active}
               className={cn(
-                "shrink-0 rounded-full border px-3 py-2 text-xs font-semibold transition-colors",
+                "min-h-11 shrink-0 rounded-full border px-3 py-2 text-xs font-semibold transition-[color,background-color,border-color] duration-[var(--ro-dur-fast)]",
                 active
-                  ? "border-[var(--ro-plum-900)] bg-[var(--ro-plum-100)] text-[var(--ro-plum-900)]"
-                  : "border-ro-line text-ro-muted hover:bg-ro-sunken"
+                  ? "border-[color:var(--ro-link)] bg-[color-mix(in_srgb,var(--ro-plum-900)_14%,var(--ro-bg-elevated))] text-[color:var(--ro-link)]"
+                  : "border-[color:var(--ro-border-subtle)] text-[color:var(--ro-text-muted)] hover:bg-[color:var(--ro-bg-sunken)]"
               )}
             >
               {filterLabels[key]}
@@ -101,7 +101,7 @@ export default async function TraderNotificationsPage({
           actionLabel={t.overview}
         />
       ) : (
-        <ul className="ro-portal-card divide-y divide-ro-border overflow-hidden border">
+        <ul className="ro-portal-card divide-y divide-[color:var(--ro-border-subtle)] overflow-hidden border">
           {filtered.map((n) => {
             const title = localizedName(locale, n.titleAr, n.titleEn);
             const body = localizedName(locale, n.bodyAr, n.bodyEn);
@@ -110,25 +110,27 @@ export default async function TraderNotificationsPage({
               <li key={n.id}>
                 <div
                   className={cn(
-                    "flex flex-wrap items-start gap-3 px-4 py-3.5",
+                    "flex min-h-11 flex-wrap items-start gap-3 px-4 py-3.5 transition-[background-color] duration-[var(--ro-dur-fast)]",
                     unreadRow &&
-                      "ro-s10-flash bg-[color-mix(in_srgb,var(--ro-plum-50)_70%,transparent)]"
+                      "ro-row-flash bg-[color-mix(in_srgb,var(--ro-plum-900)_10%,transparent)]"
                   )}
                 >
                   <div className="min-w-0 flex-1 space-y-1">
                     <p
                       className={
                         unreadRow
-                          ? "font-bold text-ro-ink"
-                          : "font-semibold text-ro-ink"
+                          ? "font-bold text-[color:var(--ro-text)]"
+                          : "font-semibold text-[color:var(--ro-text)]"
                       }
                     >
                       {title}
                     </p>
                     {body ? (
-                      <p className="text-sm text-ro-muted">{body}</p>
+                      <p className="text-sm text-[color:var(--ro-text-muted)]">
+                        {body}
+                      </p>
                     ) : null}
-                    <p className="text-xs text-ro-muted">
+                    <p className="text-xs text-[color:var(--ro-text-muted)]">
                       {formatRelative(n.createdAt, locale)}
                     </p>
                   </div>

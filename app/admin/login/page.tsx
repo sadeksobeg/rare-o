@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { adminLoginAction } from "@/app/actions";
 import { LoginForm } from "@/components/auth/login-form";
-import { AdminLocaleToggle } from "@/components/admin/locale-toggle";
 import { whatsAppGreetingLink } from "@/lib/config/contact";
 import { getRequestDictionary } from "@/lib/i18n/server";
 
@@ -14,7 +13,7 @@ export default async function AdminLoginPage({
 }: {
   searchParams: Promise<{ returnTo?: string; notice?: string }>;
 }) {
-  const { locale, dict } = await getRequestDictionary();
+  const { dict } = await getRequestDictionary();
   const { returnTo, notice } = await searchParams;
   const a = dict.auth;
 
@@ -54,12 +53,6 @@ export default async function AdminLoginPage({
           ? a.sessionInvalidatedNotice
           : undefined
       }
-    >
-      <AdminLocaleToggle
-        locale={locale}
-        label={dict.common.language}
-        tone="on-dark"
-      />
-    </LoginForm>
+    />
   );
 }

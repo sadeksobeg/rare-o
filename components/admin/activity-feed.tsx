@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import {
   ArrowUpLeft,
@@ -5,13 +8,16 @@ import {
   Package,
   ShoppingBag,
   Activity,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
-import { Timeline, type TimelineEvent } from "@/components/ui/timeline";
 import type { ActivityFeedItem } from "@/lib/admin/dashboard";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { formatDate, formatRelative } from "@/lib/i18n/format";
 import type { Locale } from "@/lib/i18n/config";
 import { cn } from "@/lib/utils";
+
+const PREVIEW = 5;
 
 function domainActorLabel(
   dict: Dictionary,
@@ -45,7 +51,6 @@ function eventLabel(
   return dict.trader.wholesaleEvent[eventKey] ?? eventKey;
 }
 
-/** Safe text-only detail — never interpret as HTML. */
 function humanizeDetail(detail: string | null | undefined): string | null {
   if (!detail) return null;
   if (/^Mode:\s*/i.test(detail.trim())) return null;
@@ -62,13 +67,12 @@ function domainIcon(domain: ActivityFeedItem["domain"]) {
   return <Package className="size-4" strokeWidth={1.5} aria-hidden />;
 }
 
-function domainTone(
-  domain: ActivityFeedItem["domain"]
-): TimelineEvent["tone"] {
-  return domain;
+function isFresh(at: Date | string) {
+  const t = at instanceof Date ? at.getTime() : new Date(at).getTime();
+  return Date.now() - t < 5 * 60 * 1000;
 }
 
-/** A07 / D31 — Timeline of last 10 domain events, each linking to its record. */
+/** Dense activity rail — preview latest + expand in place (no page stretch). */
 export function ActivityFeed({
   items,
   dict,
@@ -81,42 +85,10 @@ export function ActivityFeed({
   className?: string;
 }) {
   const a = dict.admin;
-
-  const events: TimelineEvent[] = items.map((item) => {
-    const label = eventLabel(dict, item.domain, item.eventKey);
-    const detail = humanizeDetail(item.detail);
-    return {
-      id: item.id,
-      title: `${item.reference} · ${label}`,
-      actor: domainActorLabel(dict, item.domain, item.actor),
-      relativeTime: formatRelative(item.at, locale),
-      absoluteTime: formatDate(item.at, locale, {
-        dateStyle: "medium",
-        timeStyle: "short",
-      }),
-      icon: domainIcon(item.domain),
-      tone: domainTone(item.domain),
-      detail: (
-        <span className="inline-flex flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-          {detail ? (
-            <span className="ro-portal-message-panel mt-0 flex-1">{detail}</span>
-          ) : null}
-          <Link
-            href={item.href}
-            className="ro-icon-btn shrink-0 self-start"
-            aria-label={`${a.actionOpen} ${item.reference}`}
-          >
-            <ArrowUpLeft
-              className="size-3.5 rtl:-scale-x-100"
-              strokeWidth={1.5}
-              aria-hidden
-            />
-            {a.actionOpen}
-          </Link>
-        </span>
-      ),
-    };
-  });
+  const [expanded, setExpanded] = useState(false);
+  const pool = items.slice(0, 10);
+  const canToggle = pool.length > PREVIEW;
+  const shown = expanded ? pool : pool.slice(0, PREVIEW);
 
   return (
     <section className={cn("space-y-3", className)}>
@@ -126,13 +98,92 @@ export function ActivityFeed({
         </span>
         {a.activityFeed}
       </h2>
-      {events.length === 0 ? (
+      {pool.length === 0 ? (
         <p className="ro-portal-card border p-4 text-sm font-semibold text-ro-muted">
           {a.activityEmpty}
         </p>
       ) : (
-        <div className="ro-portal-card border p-3 md:p-4">
-          <Timeline label={a.activityFeed} events={events} />
+        <div className="ro-portal-card overflow-hidden border">
+          <div className="divide-y divide-[color:var(--ro-border-subtle)]">
+            {shown.map((item) => {
+              const label = eventLabel(dict, item.domain, item.eventKey);
+              const detail = humanizeDetail(item.detail);
+              const fresh = isFresh(item.at);
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  className={cn(
+                    "group grid min-h-11 grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 px-3 py-3 transition-[background-color] duration-[var(--ro-dur-fast)] hover:bg-[color:var(--ro-panel-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)] sm:px-4",
+                    fresh && "ro-row-flash"
+                  )}
+                >
+                  <span
+                    className="mt-0.5 inline-flex size-8 items-center justify-center rounded-[8px] bg-[color:var(--ro-accent-well)] text-[color:var(--ro-accent-fg)]"
+                    aria-hidden
+                  >
+                    {domainIcon(item.domain)}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-[13px] font-medium text-[color:var(--ro-text)]">
+                      {item.reference} · {label}
+                    </p>
+                    <p className="truncate text-[11px] text-[color:var(--ro-text-muted)]">
+                      {domainActorLabel(dict, item.domain, item.actor)}
+                      {" · "}
+                      <time
+                        dateTime={
+                          item.at instanceof Date
+                            ? item.at.toISOString()
+                            : String(item.at)
+                        }
+                        title={formatDate(item.at, locale, {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })}
+                      >
+                        {formatRelative(item.at, locale)}
+                      </time>
+                    </p>
+                    {detail ? (
+                      <p className="mt-1 line-clamp-1 text-[11px] text-[color:var(--ro-text-muted)]">
+                        {detail}
+                      </p>
+                    ) : null}
+                  </div>
+                  <span
+                    className="mt-1 inline-flex size-8 items-center justify-center text-[color:var(--ro-accent-fg)] transition-transform duration-[var(--ro-dur-fast)] group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5"
+                    aria-hidden
+                  >
+                    <ArrowUpLeft
+                      className="size-3.5 rtl:-scale-x-100"
+                      strokeWidth={1.5}
+                    />
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+          {canToggle ? (
+            <button
+              type="button"
+              className="flex min-h-11 w-full items-center justify-center gap-1.5 border-t border-[color:var(--ro-border-subtle)] px-3 text-[12px] font-semibold text-[color:var(--ro-accent-fg)] transition-[background-color] duration-[var(--ro-dur-fast)] hover:bg-[color:var(--ro-panel-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
+              aria-expanded={expanded}
+              onClick={() => setExpanded((v) => !v)}
+            >
+              {expanded ? (
+                <>
+                  {a.activityShowLess}
+                  <ChevronUp className="size-3.5" strokeWidth={1.5} aria-hidden />
+                </>
+              ) : (
+                <>
+                  {a.activityShowMore}
+                  <ChevronDown className="size-3.5" strokeWidth={1.5} aria-hidden />
+                </>
+              )}
+            </button>
+          ) : null}
         </div>
       )}
     </section>

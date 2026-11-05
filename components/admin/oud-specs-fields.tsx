@@ -2,6 +2,10 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import { OudSpecIconMark } from "@/components/catalog/oud-spec-icon";
+import {
+  SuggestEnTextPair,
+  type SuggestEnLabels,
+} from "@/components/admin/suggest-en";
 import { TextField } from "@/components/ui/text-field";
 import type { OudSpecIconKey, OudSpecsFormValues } from "@/lib/catalog/oud-specs";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -71,9 +75,11 @@ function FieldIconLabel({
 export function OudSpecsFields({
   labels,
   values,
+  translate,
 }: {
   labels: Dictionary["adminUi"]["form"];
   values: OudSpecsFormValues;
+  translate: SuggestEnLabels;
 }) {
   const wood: WoodRow[] = [
     {
@@ -154,8 +160,8 @@ export function OudSpecsFields({
   return (
     <fieldset
       className={cn(
-        "space-y-5 rounded-[var(--ro-r-sm)] border border-[color-mix(in_srgb,var(--ro-plum-900)_16%,transparent)]",
-        "bg-[linear-gradient(165deg,color-mix(in_srgb,var(--ro-sand-50)_92%,white),color-mix(in_srgb,var(--ro-plum-50)_55%,var(--ro-sand-50)))] p-4 sm:p-5"
+        "space-y-5 rounded-[var(--ro-r-sm)] border border-[color:var(--ro-border-subtle)]",
+        "bg-[color:var(--ro-bg-raised)] p-4 sm:p-5"
       )}
     >
       <legend className="flex items-center gap-2 px-1">
@@ -167,22 +173,17 @@ export function OudSpecsFields({
       <SpecSection title={labels.oudWoodTitle} icon="back" index={0}>
         {wood.map((row) => (
           <FieldIconLabel key={row.arName} icon={row.icon}>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <TextField
-                name={row.arName}
-                label={`${row.label} (${labels.oudAr})`}
-                defaultValue={row.arValue}
-                dir="rtl"
-                dense
-              />
-              <TextField
-                name={row.enName}
-                label={`${row.label} (${labels.oudEn})`}
-                defaultValue={row.enValue}
-                dir="ltr"
-                dense
-              />
-            </div>
+            <SuggestEnTextPair
+              key={`${row.arName}-pair`}
+              arName={row.arName}
+              enName={row.enName}
+              arLabel={`${row.label} (${labels.oudAr})`}
+              enLabel={`${row.label} (${labels.oudEn})`}
+              arDefault={row.arValue}
+              enDefault={row.enValue}
+              labels={translate}
+              dense
+            />
           </FieldIconLabel>
         ))}
       </SpecSection>
@@ -224,22 +225,16 @@ export function OudSpecsFields({
           </label>
         </FieldIconLabel>
         <FieldIconLabel icon="finish">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <TextField
-              name="oudFinishAr"
-              label={`${labels.oudFinish} (${labels.oudAr})`}
-              defaultValue={values.finishAr}
-              dir="rtl"
-              dense
-            />
-            <TextField
-              name="oudFinishEn"
-              label={`${labels.oudFinish} (${labels.oudEn})`}
-              defaultValue={values.finishEn}
-              dir="ltr"
-              dense
-            />
-          </div>
+          <SuggestEnTextPair
+            arName="oudFinishAr"
+            enName="oudFinishEn"
+            arLabel={`${labels.oudFinish} (${labels.oudAr})`}
+            enLabel={`${labels.oudFinish} (${labels.oudEn})`}
+            arDefault={values.finishAr}
+            enDefault={values.finishEn}
+            labels={translate}
+            dense
+          />
         </FieldIconLabel>
       </SpecSection>
     </fieldset>

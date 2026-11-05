@@ -153,8 +153,8 @@ export function LoginForm({
   return (
     <MotionProvider surface={role === "admin" ? "admin" : "trader"}>
     <main
-      data-theme="dark"
-      className="ro-portal grid min-h-[100dvh] grid-cols-1 md:grid-cols-[1.15fr_1fr]"
+      data-theme="light"
+      className="ro-portal grid min-h-[100dvh] grid-cols-1 bg-[var(--ro-sand-50,#fffcf8)] md:grid-cols-[1.15fr_1fr]"
     >
       {/* Living brand scene — VISION ceremony (stacked on small screens) */}
       <section className="relative flex min-h-[44vh] flex-col justify-between overflow-hidden bg-[var(--ro-ink-950)] p-6 text-[var(--ro-sand-100)] sm:p-8 md:min-h-[100dvh]">
@@ -205,9 +205,9 @@ export function LoginForm({
         </div>
       </section>
 
-      {/* Form panel — design-lab */}
-      <section className="relative flex items-center justify-center bg-[var(--ro-sand-100)] p-6 md:p-10">
-        <div className="w-full max-w-sm rounded-[14px] border border-white/50 bg-[var(--ro-sand-50)] p-8 shadow-[inset_0_1px_0_rgba(244,231,216,.08),0_1px_2px_rgba(11,8,13,.06),0_8px_24px_-12px_rgba(11,8,13,.18)]">
+      {/* Form panel — light default (never inherit portal dark remaps) */}
+      <section className="relative flex items-center justify-center bg-[var(--ro-sand-100,#f8f4ee)] p-6 md:p-10">
+        <div className="w-full max-w-sm rounded-[14px] border border-[color:rgba(50,16,79,0.08)] bg-[var(--ro-sand-50,#fffcf8)] p-8 shadow-[inset_0_1px_0_rgba(255,252,248,.9),0_1px_2px_rgba(11,8,13,.06),0_8px_24px_-12px_rgba(11,8,13,.14)]">
           <div
             role="tablist"
             aria-label={brand}

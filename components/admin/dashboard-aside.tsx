@@ -112,7 +112,7 @@ export function DashboardAside({
           <span
             className={cn(
               "absolute end-0.5 top-0.5 size-2 rounded-full",
-              health.state === "CONNECTED" && "ro-wa-live"
+              health.state === "CONNECTED" && "ro-wa-live ro-wa-live--pulse"
             )}
             style={{ background: stroke }}
             aria-hidden
@@ -141,7 +141,7 @@ export function DashboardAside({
         </div>
         <div className="flex h-2 overflow-hidden rounded bg-[color:var(--ro-bg-sunken)]">
           <span
-            className="h-full bg-[var(--ro-plum-700)]"
+            className="h-full bg-[color:var(--ro-accent-fg,var(--ro-plum-700))]"
             style={{ width: `${photoPct}%` }}
           />
         </div>
@@ -167,7 +167,7 @@ export function DashboardAside({
                 style={{ width: `${share(pipeline.ready_for_handoff)}%` }}
               />
               <span
-                className="h-full bg-[var(--ro-plum-700)]"
+                className="h-full bg-[color:var(--ro-accent-fg,var(--ro-plum-700))]"
                 style={{ width: `${share(pipeline.in_follow_up)}%` }}
               />
               <span

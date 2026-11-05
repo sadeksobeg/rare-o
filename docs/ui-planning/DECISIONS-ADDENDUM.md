@@ -488,3 +488,21 @@ adapter method wired through `markConversationRead` and an admin-action
 call site, left as a follow-up; moving the WhatsApp worker off the
 datacenter VPS onto a residential-style connection â€” an infrastructure
 decision, not a code change, flagged in the runbook for the owner.
+
+---
+
+## Owner ratification — 2026-11-03 — Payment-first Deals + Brokerage
+
+**Overrides** (commercial gate only; WhatsApp kill switches unchanged):
+
+- `VISION.md` §7 / `BROKERAGE-SPEC.md` quote-first path.
+- Deal negotiation ending at `accepted` with admin price counter as the close.
+
+**Locked behavior:**
+
+1. **Model number** replaces category on brokerage create UI (`category*` kept for legacy; new creates write `modelNumber`). Deals gain additive `modelNumber`.
+2. **Trader states the price** — no admin quote gate. Brokerage: `statedPriceUsd`. Deals: `proposedPrice` required; admin `counter` cannot change price.
+3. **Payment first via WhatsApp handoff** (deep link only): `AWAITING_PAYMENT` / `awaiting_payment` ? admin confirms ? `PAYMENT_CONFIRMED` / `payment_confirmed` ? remaining stages unlock.
+4. Legacy `QUOTE_SENT` / `APPROVED` / `BrokerageQuote` kept for historical rows.
+
+Additive Prisma only.

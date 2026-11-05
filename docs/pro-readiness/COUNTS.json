@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-10-20T14:44:02.963Z",
+  "generatedAt": "2026-11-05T09:22:39.172Z",
   "verification": {
     "PROVEN": 36,
     "UNPROVEN": 60,
     "BLOCKED": 16
   },
   "contract": {
-    "PASS": 26,
-    "PARTIAL": 5,
-    "OWNER-ACTION": 2
+    "PASS": 30,
+    "PARTIAL": 3,
+    "OWNER-ACTION": 0
   },
   "sources": {
     "verification": "docs/pro-readiness/ROUND-F-VERIFICATION.md",

@@ -139,37 +139,45 @@ export default async function AdminRequestsPage({
 
   const statusLabel = (status: string) => u.status.retail[status] ?? status;
 
+  const viewQs = `${tab !== "all" ? `&tab=${encodeURIComponent(tab)}` : ""}${q ? `&q=${encodeURIComponent(q)}` : ""}`;
+
   return (
-    <section className="space-y-6">
+    <section data-admin-requests="" className="space-y-5 pb-2">
       <PageHeader
         title={a.requests}
         description={u.requestsLead}
         icon={<ShoppingBag className="size-5" strokeWidth={1.5} />}
+        action={
+          <div
+            className="inline-flex items-center gap-1 rounded-[12px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-sunken)] p-1"
+            role="group"
+            aria-label={`${u.viewTable} / ${u.viewKanban}`}
+          >
+            <Link
+              href={`/admin/requests?view=table${viewQs}`}
+              className={cn(
+                "inline-flex h-9 items-center rounded-[10px] px-3.5 text-sm font-semibold transition-[background-color,color] duration-[var(--ro-dur-fast)]",
+                view === "table"
+                  ? "bg-[color:var(--ro-plum-700)] text-[var(--ro-sand-50)] shadow-[0_1px_0_color-mix(in_srgb,var(--ro-sand-50)_18%,transparent)_inset]"
+                  : "text-[color:var(--ro-text-2)] hover:bg-[color:var(--ro-panel-hover)] hover:text-[color:var(--ro-text)]"
+              )}
+            >
+              {u.viewTable}
+            </Link>
+            <Link
+              href={`/admin/requests?view=kanban${viewQs}`}
+              className={cn(
+                "inline-flex h-9 items-center rounded-[10px] px-3.5 text-sm font-semibold transition-[background-color,color] duration-[var(--ro-dur-fast)]",
+                view === "kanban"
+                  ? "bg-[color:var(--ro-plum-700)] text-[var(--ro-sand-50)] shadow-[0_1px_0_color-mix(in_srgb,var(--ro-sand-50)_18%,transparent)_inset]"
+                  : "text-[color:var(--ro-text-2)] hover:bg-[color:var(--ro-panel-hover)] hover:text-[color:var(--ro-text)]"
+              )}
+            >
+              {u.viewKanban}
+            </Link>
+          </div>
+        }
       />
-      <div className="flex flex-wrap items-center gap-2">
-        <Link
-          href={`/admin/requests?view=table${tab !== "all" ? `&tab=${encodeURIComponent(tab)}` : ""}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
-          className={cn(
-            "inline-flex h-10 items-center rounded-[var(--ro-r-sm)] px-3 text-sm font-semibold",
-            view === "table"
-              ? "bg-[var(--ro-plum-900)] text-[var(--ro-sand-50)]"
-              : "border border-ro-line text-ro-ink"
-          )}
-        >
-          {u.viewTable}
-        </Link>
-        <Link
-          href={`/admin/requests?view=kanban${tab !== "all" ? `&tab=${encodeURIComponent(tab)}` : ""}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
-          className={cn(
-            "inline-flex h-10 items-center rounded-[var(--ro-r-sm)] px-3 text-sm font-semibold",
-            view === "kanban"
-              ? "bg-[var(--ro-plum-900)] text-[var(--ro-sand-50)]"
-              : "border border-ro-line text-ro-ink"
-          )}
-        >
-          {u.viewKanban}
-        </Link>
-      </div>
       <Suspense fallback={null}>
         <AdminTableFilters
           tabsLabel={u.filterTabs}
@@ -257,19 +265,30 @@ export default async function AdminRequestsPage({
               {requests.map((r) => {
                 const last = r.handoffEvents[0];
                 return (
-                  <Tr key={r.id} flash={isFresh(r.updatedAt)}>
+                  <Tr
+                    key={r.id}
+                    href={`/admin/requests/${r.id}`}
+                    flash={isFresh(r.updatedAt)}
+                  >
                     <Td>
                       <RowHit href={`/admin/requests/${r.id}`}>
                         {r.reference}
                       </RowHit>
                     </Td>
                     <Td>
-                      {r.customerName}
-                      <div className="text-ro-muted" dir="ltr">
-                        {r.customerPhone}
+                      <span className="font-medium text-[color:var(--ro-text)]">
+                        {r.customerName}
+                      </span>
+                      <div
+                        className="text-xs text-[color:var(--ro-text-muted)]"
+                        dir="ltr"
+                      >
+                        <bdi>{r.customerPhone}</bdi>
                       </div>
                     </Td>
-                    <Td className="tabular-nums">{r._count.lines}</Td>
+                    <Td className="tabular-nums text-[color:var(--ro-text-2)]">
+                      {r._count.lines}
+                    </Td>
                     <Td>
                       <StatusChip
                         size="sm"
@@ -277,20 +296,22 @@ export default async function AdminRequestsPage({
                       />
                     </Td>
                     <Td>
-                      {handoffLabel(u, r.handoffOpenedAt, r.handoffPreparedAt)}
+                      <span className="inline-flex rounded-full border border-[color:var(--ro-border-subtle)] bg-[color:color-mix(in_srgb,var(--ro-text)_6%,transparent)] px-2.5 py-1 text-xs font-medium text-[color:var(--ro-text-2)]">
+                        {handoffLabel(u, r.handoffOpenedAt, r.handoffPreparedAt)}
+                      </span>
                     </Td>
-                    <Td className="text-ro-muted">
+                    <Td className="text-[color:var(--ro-text-muted)]">
                       {last
                         ? formatRelative(last.createdAt, locale)
                         : formatRelative(r.updatedAt, locale)}
                     </Td>
-                    <Td className="text-ro-muted">
+                    <Td className="text-[color:var(--ro-text-muted)]">
                       {formatRelative(r.createdAt, locale)}
                     </Td>
                     <Td>
                       <Link
                         href={`/admin/requests/${r.id}`}
-                        className="text-ro-plum hover:underline"
+                        className="relative z-[2] text-sm font-semibold text-[color:var(--ro-accent-fg,var(--ro-plum-700))] underline-offset-2 hover:underline"
                       >
                         {u.actionView}
                       </Link>
@@ -306,7 +327,7 @@ export default async function AdminRequestsPage({
               aria-label="Pagination"
               className="flex flex-wrap items-center justify-between gap-3 text-sm"
             >
-              <p className="text-ro-muted">
+              <p className="text-[color:var(--ro-text-muted)]">
                 {totalFiltered} · {page}/{pageCount}
               </p>
               <div className="flex gap-2">
@@ -314,7 +335,7 @@ export default async function AdminRequestsPage({
                   <Link
                     href={buildPageHref(tab, q, page - 1)}
                     aria-label={dict.common.paginationPrevious}
-                    className="inline-flex size-11 items-center justify-center rounded-[var(--ro-r-sm)] border border-ro-line hover:bg-ro-sunken"
+                    className="inline-flex size-11 items-center justify-center rounded-[12px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-panel)] text-[color:var(--ro-text)] hover:bg-[color:var(--ro-panel-hover)]"
                   >
                     <ChevronLeft
                       className="size-4 rtl:-scale-x-100"
@@ -327,7 +348,7 @@ export default async function AdminRequestsPage({
                   <Link
                     href={buildPageHref(tab, q, page + 1)}
                     aria-label={dict.common.paginationNext}
-                    className="inline-flex size-11 items-center justify-center rounded-[var(--ro-r-sm)] border border-ro-line hover:bg-ro-sunken"
+                    className="inline-flex size-11 items-center justify-center rounded-[12px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-panel)] text-[color:var(--ro-text)] hover:bg-[color:var(--ro-panel-hover)]"
                   >
                     <ChevronRight
                       className="size-4 rtl:-scale-x-100"

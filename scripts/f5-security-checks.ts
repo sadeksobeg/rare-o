@@ -92,6 +92,7 @@ async function main() {
     traderId: traderA.id,
     dealKind: "non_catalog",
     title: "F5 security deal",
+    modelNumber: "F5-MODEL",
     proposedPrice: 100,
     currency: "USD",
     quantity: 1,

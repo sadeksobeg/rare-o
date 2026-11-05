@@ -68,12 +68,14 @@ export default async function AdminWholesalePage({
     dict.trader.wholesaleStatus[status] ??
     status;
 
+  const filteredEmpty = tab !== "all" || Boolean(q);
+
   return (
-    <section className="space-y-6">
+    <section data-admin-wholesale="" className="space-y-5 pb-2">
       <PageHeader
         title={a.wholesale}
         description={u.wholesaleLead}
-        icon={<Package className="size-5" strokeWidth={2} />}
+        icon={<Package className="size-5" strokeWidth={1.5} />}
       />
       <Suspense fallback={null}>
         <AdminTableFilters
@@ -99,17 +101,19 @@ export default async function AdminWholesalePage({
       </Suspense>
       {filtered.length === 0 ? (
         <EmptyState
-          variant={tab !== "all" || q ? "no-results" : "first-use"}
-          title={u.emptyTitle}
-          body={u.emptyBody}
-          actionHref={
-            tab !== "all" || q ? "/admin/wholesale" : "/admin/traders"
+          variant={filteredEmpty ? "no-results" : "first-use"}
+          title={
+            filteredEmpty
+              ? u.wholesaleEmptyFilteredTitle
+              : u.wholesaleEmptyTitle
           }
-          actionLabel={
-            tab !== "all" || q
-              ? dict.catalog.clearFilters
-              : u.newTrader
+          body={
+            filteredEmpty
+              ? u.wholesaleEmptyFilteredBody
+              : u.wholesaleEmptyBody
           }
+          actionHref={filteredEmpty ? "/admin/wholesale" : "/admin/traders"}
+          actionLabel={filteredEmpty ? dict.catalog.clearFilters : u.newTrader}
         />
       ) : (
         <>
@@ -137,73 +141,89 @@ export default async function AdminWholesalePage({
             ))}
           </AdminRecordCardList>
           <div className="hidden md:block">
-        <DataTable>
-          <DataTableHead>
-            <Th>{u.colReference}</Th>
-            <Th>{u.colTrader}</Th>
-            <Th>{u.colMode}</Th>
-            <Th>{a.colStatus}</Th>
-            <Th>{u.colShipping}</Th>
-            <Th>{u.colLines}</Th>
-            <Th />
-          </DataTableHead>
-          <tbody>
-            {filtered.map(({ r, waiting }) => {
-              const shipping = [r.carrier, r.trackingReference]
-                .filter(Boolean)
-                .join(" · ");
-              return (
-              <Tr key={r.id} flash={isFresh(r.updatedAt)}>
-                <Td>
-                  <RowHit href={`/admin/wholesale/${r.id}`}>
-                    {r.reference}
-                  </RowHit>
-                </Td>
-                <Td>
-                  {r.trader.displayName}
-                  <div className="text-ro-muted" dir="ltr">
-                    {r.trader.email}
-                  </div>
-                </Td>
-                <Td>
-                  {r.requestMode === "request_quote"
-                    ? u.modeRequestQuote
-                    : r.requestMode === "propose_price"
-                      ? u.modeProposePrice
-                      : r.requestMode}
-                </Td>
-                <Td>
-                  <span className="flex flex-wrap items-center gap-2">
-                    <StatusChip
-                      size="sm"
-                      {...getStatusChipProps(dict, "wholesale", r.status)}
-                    />
-                    {waiting ? (
-                      <StatusChip
-                        size="sm"
-                        tone="attention"
-                        label={u.waitingOnYou}
-                      />
-                    ) : null}
-                  </span>
-                </Td>
-                <Td className="text-ro-muted" dir="ltr">
-                  {shipping || u.shippingPlaceholder}
-                </Td>
-                <Td className="tabular-nums">{r._count.lines}</Td>
-                <Td>
-                  <Link
-                    href={`/admin/wholesale/${r.id}`}
-                    className="text-ro-plum hover:underline"
-                  >
-                    {u.actionReview}
-                  </Link>
-                </Td>
-              </Tr>
-              );
-            })}
-          </tbody>
-        </DataTable>
+            <DataTable>
+              <DataTableHead>
+                <Th>{u.colReference}</Th>
+                <Th>{u.colTrader}</Th>
+                <Th>{u.colMode}</Th>
+                <Th>{a.colStatus}</Th>
+                <Th>{u.colShipping}</Th>
+                <Th>{u.colLines}</Th>
+                <Th />
+              </DataTableHead>
+              <tbody>
+                {filtered.map(({ r, waiting }) => {
+                  const shipping = [r.carrier, r.trackingReference]
+                    .filter(Boolean)
+                    .join(" · ");
+                  return (
+                    <Tr
+                      key={r.id}
+                      href={`/admin/wholesale/${r.id}`}
+                      flash={isFresh(r.updatedAt)}
+                    >
+                      <Td>
+                        <RowHit href={`/admin/wholesale/${r.id}`}>
+                          {r.reference}
+                        </RowHit>
+                      </Td>
+                      <Td>
+                        <span className="font-medium text-[color:var(--ro-text)]">
+                          {r.trader.displayName}
+                        </span>
+                        <div
+                          className="text-xs text-[color:var(--ro-text-muted)]"
+                          dir="ltr"
+                        >
+                          <bdi>{r.trader.email}</bdi>
+                        </div>
+                      </Td>
+                      <Td>
+                        <span className="inline-flex rounded-full border border-[color:var(--ro-border-subtle)] bg-[color:color-mix(in_srgb,var(--ro-text)_6%,transparent)] px-2.5 py-1 text-xs font-medium text-[color:var(--ro-text-2)]">
+                          {r.requestMode === "request_quote"
+                            ? u.modeRequestQuote
+                            : r.requestMode === "propose_price"
+                              ? u.modeProposePrice
+                              : r.requestMode}
+                        </span>
+                      </Td>
+                      <Td>
+                        <span className="flex flex-wrap items-center gap-2">
+                          <StatusChip
+                            size="sm"
+                            {...getStatusChipProps(dict, "wholesale", r.status)}
+                          />
+                          {waiting ? (
+                            <StatusChip
+                              size="sm"
+                              tone="attention"
+                              label={u.waitingOnYou}
+                            />
+                          ) : null}
+                        </span>
+                      </Td>
+                      <Td
+                        className="text-[color:var(--ro-text-muted)]"
+                        dir="ltr"
+                      >
+                        <bdi>{shipping || u.shippingPlaceholder}</bdi>
+                      </Td>
+                      <Td className="tabular-nums text-[color:var(--ro-text-2)]">
+                        {r._count.lines}
+                      </Td>
+                      <Td>
+                        <Link
+                          href={`/admin/wholesale/${r.id}`}
+                          className="relative z-[2] text-sm font-semibold text-[color:var(--ro-accent-fg,var(--ro-plum-700))] underline-offset-2 hover:underline"
+                        >
+                          {u.actionReview}
+                        </Link>
+                      </Td>
+                    </Tr>
+                  );
+                })}
+              </tbody>
+            </DataTable>
           </div>
         </>
       )}

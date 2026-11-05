@@ -83,6 +83,7 @@ export function StatusChip(props: (BoundProps | FreeProps) & Common) {
 
   return (
     <span
+      data-ro-status={resolved.tone}
       className={cn(
         "inline-flex items-center gap-1.5 rounded-[var(--ro-r-sm)] font-bold tracking-wide",
         size === "sm" ? "h-[22px] px-2 text-xs" : "h-7 px-2.5 text-xs",

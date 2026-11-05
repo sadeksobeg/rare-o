@@ -23,3 +23,12 @@ export { flyToTarget } from "./fly-to-target";
 export { CountUp } from "./count-up";
 export { useScrollSpy } from "./use-scroll-spy";
 export { useAmbientMotion } from "./use-ambient";
+export {
+  portalFadeUp,
+  portalDurations,
+  portalStagger,
+  portalPress,
+  enterTransition,
+  exitTransition,
+} from "./presets";
+export { PageEnter, PageEnterLiteAware } from "./page-enter";

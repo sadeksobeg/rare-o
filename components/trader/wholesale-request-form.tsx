@@ -9,7 +9,9 @@ import {
 } from "@/components/trader/product-picker";
 import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
+import { CurrencySelect } from "@/components/ui/currency-select";
 import { Dialog } from "@/components/ui/dialog";
+import { coercePlatformCurrency } from "@/lib/catalog/currency";
 import type { Locale } from "@/lib/i18n/config";
 import { WHOLESALE_QTY_TECHNICAL_MAX } from "@/lib/wholesale/constants";
 import { useUnsavedGuard } from "@/lib/ui/use-unsaved-guard";
@@ -166,7 +168,9 @@ export function WholesaleRequestForm({
           : null,
       currency:
         draft.mode === "propose_price"
-          ? draft.currencyById[p.id] || p.currency || null
+          ? coercePlatformCurrency(
+              draft.currencyById[p.id] || p.currency || "USD"
+            )
           : null,
     }));
   }, [selected, draft.mode, draft.priceById, draft.currencyById]);
@@ -274,25 +278,26 @@ export function WholesaleRequestForm({
                         className={control}
                       />
                     </label>
-                    <label className="block space-y-1">
-                      <span className="text-xs text-ro-muted">
-                        {t.wsColCurrency}
-                      </span>
-                      <input
-                        dir="ltr"
-                        value={draft.currencyById[p.id] ?? p.currency}
-                        onChange={(e) =>
-                          setDraft((prev) => ({
-                            ...prev,
-                            currencyById: {
-                              ...prev.currencyById,
-                              [p.id]: e.target.value.toUpperCase(),
-                            },
-                          }))
-                        }
-                        className={control}
-                      />
-                    </label>
+                    <CurrencySelect
+                      name={`currency-${p.id}`}
+                      value={coercePlatformCurrency(
+                        draft.currencyById[p.id] ?? p.currency
+                      )}
+                      onChange={(code) =>
+                        setDraft((prev) => ({
+                          ...prev,
+                          currencyById: {
+                            ...prev.currencyById,
+                            [p.id]: code,
+                          },
+                        }))
+                      }
+                      labels={{
+                        currency: t.wsColCurrency,
+                        currencyUsd: t.currencyUsd,
+                        currencySyp: t.currencySyp,
+                      }}
+                    />
                   </div>
                 ) : null}
               </li>

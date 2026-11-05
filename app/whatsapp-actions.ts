@@ -36,6 +36,7 @@ import {
 } from "@/lib/whatsapp/messaging/linking";
 import {
   mediaKindFromMime,
+  normalizeOutboundMime,
   WHATSAPP_MAX_MEDIA_BYTES,
   WHATSAPP_OUTBOUND_MIME,
 } from "@/lib/whatsapp/media-shared";
@@ -215,7 +216,7 @@ export async function adminSendWhatsAppMediaAction(
     return { ok: false, error: "MEDIA_TOO_LARGE" };
   }
 
-  const mime = (file.type || "").toLowerCase();
+  const mime = normalizeOutboundMime(file.type || "");
   if (!WHATSAPP_OUTBOUND_MIME[mime]) {
     return { ok: false, error: "BAD_MIME" };
   }

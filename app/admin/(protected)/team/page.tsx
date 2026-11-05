@@ -1,13 +1,50 @@
 import Link from "next/link";
 import { ShieldCheck, Users } from "lucide-react";
-import { PageHeader } from "@/components/admin/page-header";
+import { PortalHeroStrip } from "@/components/admin/portal-hero";
 import { ButtonLink } from "@/components/ui/button";
+import { StatusChip } from "@/components/ui/status-chip";
+import { getAdminSession } from "@/lib/auth/admin-session";
 import { prisma } from "@/lib/db/prisma";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { formatDate, formatRelative } from "@/lib/i18n/format";
+import {
+  controlClass,
+} from "@/lib/ui/form-classes";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+
+function summarizeMeta(metaJson: string): string | null {
+  try {
+    const parsed = JSON.parse(metaJson || "{}") as Record<string, unknown>;
+    const keys = Object.keys(parsed);
+    if (keys.length === 0) return null;
+    return keys
+      .slice(0, 4)
+      .map((k) => {
+        const v = parsed[k];
+        if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") {
+          return `${k}=${String(v)}`;
+        }
+        return k;
+      })
+      .join(" · ");
+  } catch {
+    return null;
+  }
+}
+
+function targetHref(target: string): string | null {
+  if (!target) return null;
+  if (target.startsWith("customer:")) {
+    return `/admin/customers/${target.slice("customer:".length)}`;
+  }
+  if (target.startsWith("trader:")) {
+    return `/admin/traders/${target.slice("trader:".length)}`;
+  }
+  if (target.startsWith("/admin/")) return target;
+  return null;
+}
 
 export default async function AdminTeamPage({
   searchParams,
@@ -17,7 +54,8 @@ export default async function AdminTeamPage({
   const { tab: tabRaw, action: actionFilter } = await searchParams;
   const tab = tabRaw === "audit" ? "audit" : "team";
   const { locale, dict } = await getRequestDictionary();
-  const ar = locale === "ar";
+  const u = dict.adminUi;
+  const session = await getAdminSession();
 
   const [admins, audits, auditTotal] = await Promise.all([
     prisma.adminUser.findMany({
@@ -45,37 +83,51 @@ export default async function AdminTeamPage({
   ]);
 
   const adminById = new Map(admins.map((a) => [a.id, a]));
+  const with2fa = admins.filter((a) => a.totpEnabledAt).length;
 
   return (
-    <section className="space-y-8">
-      <PageHeader
-        title={ar ? "الفريق والأمان" : "Team & security"}
-        description={
-          ar
-            ? "حسابات الإدارة الحقيقية — لا أدوار مالك/مدير/موظف في المخطط بعد. التحقق بخطوتين من صفحة الأمان."
-            : "Live admin accounts — Owner/Manager/Staff roles are not in the schema yet. Manage 2FA on the security page."
+    <section className="space-y-6 pb-16">
+      <PortalHeroStrip
+        eyebrow={u.teamTabTeam}
+        title={
+          <span className="inline-flex items-center gap-2.5">
+            <Users
+              className="size-7 shrink-0 text-[color:var(--ro-accent-fg,var(--ro-plum-800))]"
+              strokeWidth={1.5}
+            />
+            {u.teamTitle}
+          </span>
         }
-        icon={<Users className="size-5" strokeWidth={1.5} />}
-        action={
+        subtitle={u.teamLead}
+        actions={
           <ButtonLink
             href="/admin/settings/security"
             variant="secondary"
             size="sm"
           >
             <ShieldCheck className="size-4" strokeWidth={1.5} />
-            {dict.admin.settings}
+            {u.teamSecurityLink}
           </ButtonLink>
         }
+        stats={[
+          { label: u.teamTabTeam, value: admins.length },
+          { label: "2FA", value: with2fa },
+          {
+            label: u.teamTabAudit,
+            value: auditTotal,
+          },
+        ]}
       />
 
       <div
         role="tablist"
-        className="flex flex-wrap gap-1 border-b border-[color-mix(in_srgb,var(--ro-plum-900)_14%,transparent)]"
+        aria-label={u.teamTitle}
+        className="ro-portal-tablist inline-flex max-w-full"
       >
         {(
           [
-            { id: "team" as const, label: ar ? "الفريق" : "Team" },
-            { id: "audit" as const, label: ar ? "سجل الأمان" : "Audit log" },
+            { id: "team" as const, label: u.teamTabTeam },
+            { id: "audit" as const, label: u.teamTabAudit },
           ] as const
         ).map((item) => {
           const selected = tab === item.id;
@@ -90,10 +142,10 @@ export default async function AdminTeamPage({
               role="tab"
               aria-selected={selected}
               className={cn(
-                "min-h-11 px-4 text-sm font-semibold transition-colors",
+                "inline-flex h-10 min-h-11 items-center px-4 text-sm transition-[color,background-color] duration-[var(--ro-dur-fast)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]",
                 selected
-                  ? "border-b-2 border-[var(--ro-plum-900)] text-ro-ink"
-                  : "text-[var(--ro-ink-600)] hover:text-ro-ink"
+                  ? "font-semibold text-[color:var(--ro-text)]"
+                  : "text-[color:var(--ro-text-2)] hover:text-[color:var(--ro-text)]"
               )}
             >
               {item.label}
@@ -103,67 +155,77 @@ export default async function AdminTeamPage({
       </div>
 
       {tab === "team" ? (
-        <div className="overflow-x-auto rounded-[var(--ro-r-lg)] border border-[var(--ro-border-subtle)] bg-[var(--ro-sand-50)]">
+        <div className="overflow-x-auto rounded-[var(--ro-r-lg)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-panel)]">
           <table className="min-w-full text-sm">
-            <thead className="border-b border-[var(--ro-border-subtle)] text-xs text-[var(--ro-ink-600)]">
+            <thead className="border-b border-[color:var(--ro-border-subtle)] text-xs text-[color:var(--ro-text-muted)]">
               <tr>
                 <th className="px-4 py-3 text-start font-medium">
-                  {ar ? "الاسم" : "Name"}
+                  {u.teamColName}
                 </th>
                 <th className="px-4 py-3 text-start font-medium">
-                  {ar ? "البريد" : "Email"}
+                  {u.teamColEmail}
                 </th>
                 <th className="px-4 py-3 text-start font-medium">2FA</th>
                 <th className="px-4 py-3 text-start font-medium">
-                  {ar ? "منذ" : "Since"}
+                  {u.teamColSince}
                 </th>
+                <th className="px-4 py-3 text-start font-medium" />
               </tr>
             </thead>
             <tbody>
-              {admins.map((a) => {
-                const initial = a.name.trim().slice(0, 1) || "A";
+              {admins.map((member) => {
+                const initial = member.name.trim().slice(0, 1) || "A";
+                const isSelf = session?.sub === member.id;
                 return (
                   <tr
-                    key={a.id}
-                    className="border-t border-[var(--ro-border-subtle)]"
+                    key={member.id}
+                    className="border-t border-[color:var(--ro-border-subtle)]"
                   >
                     <td className="px-4 py-3">
-                      <span className="flex items-center gap-3 font-medium text-ro-ink">
+                      <span className="flex items-center gap-3 font-medium text-[color:var(--ro-text)]">
                         <span
                           aria-hidden
                           className="flex size-9 items-center justify-center rounded-full bg-[var(--ro-plum-100)] text-sm font-semibold text-[var(--ro-plum-900)]"
                         >
                           {initial}
                         </span>
-                        {a.name}
+                        {member.name}
                       </span>
                     </td>
                     <td className="px-4 py-3" dir="ltr">
-                      {a.email}
+                      {member.email}
                     </td>
                     <td className="px-4 py-3">
-                      {a.totpEnabledAt ? (
-                        <span className="rounded-md bg-[var(--ro-success-100)] px-2 py-0.5 text-xs font-medium text-[var(--ro-success-700)]">
-                          {dict.common.switchOn}
-                        </span>
-                      ) : (
-                        <span className="rounded-md bg-[var(--ro-amber-100)] px-2 py-0.5 text-xs font-medium text-[var(--ro-amber-800)]">
-                          {dict.common.switchOff}
-                        </span>
-                      )}
+                      <StatusChip
+                        size="sm"
+                        tone={member.totpEnabledAt ? "success" : "attention"}
+                        label={
+                          member.totpEnabledAt
+                            ? dict.common.switchOn
+                            : dict.common.switchOff
+                        }
+                      />
                     </td>
-                    <td className="px-4 py-3 text-[var(--ro-ink-600)]">
-                      {formatRelative(a.createdAt, locale)}
+                    <td className="px-4 py-3 text-[color:var(--ro-text-muted)]">
+                      {formatRelative(member.createdAt, locale)}
+                    </td>
+                    <td className="px-4 py-3">
+                      {isSelf ? (
+                        <Link
+                          href="/admin/settings/security"
+                          className="text-sm font-medium text-[color:var(--ro-accent-fg,var(--ro-plum-800))] underline-offset-4 hover:underline"
+                        >
+                          {u.teamSecurityLink}
+                        </Link>
+                      ) : null}
                     </td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
-          <p className="border-t border-[var(--ro-border-subtle)] px-4 py-3 text-xs text-ro-muted">
-            {ar
-              ? "دعوة أعضاء جدد ومصفوفة الصلاحيات تتطلب حقول أدوار في قاعدة البيانات — غير مُنفَّذة في هذه المرحلة."
-              : "Invites and a permission matrix need role fields in the database — not built in this phase."}
+          <p className="border-t border-[color:var(--ro-border-subtle)] px-4 py-3 text-xs text-[color:var(--ro-text-muted)]">
+            {u.teamInviteNote}
           </p>
         </div>
       ) : (
@@ -174,43 +236,49 @@ export default async function AdminTeamPage({
               <input
                 name="action"
                 defaultValue={actionFilter ?? ""}
-                placeholder={ar ? "تصفية حسب الإجراء…" : "Filter by action…"}
-                aria-label={ar ? "تصفية حسب الإجراء" : "Filter by action"}
-                className="h-10 w-full max-w-xs rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-paper px-3 text-sm outline-none focus:border-[var(--ro-plum-900)]"
+                placeholder={u.teamAuditFilter}
+                aria-label={u.teamAuditFilter}
+                className={cn(controlClass, "h-10 max-w-xs")}
                 dir="ltr"
               />
               <button
                 type="submit"
-                className="h-10 rounded-[var(--ro-r-sm)] bg-[var(--ro-plum-900)] px-4 text-sm font-semibold text-[var(--ro-sand-50)]"
+                className="h-10 rounded-[var(--ro-r-sm)] bg-[var(--ro-plum-900)] px-4 text-sm font-semibold text-[var(--ro-sand-50)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
               >
-                {dict.adminUi.search}
+                {u.search}
               </button>
             </form>
             <a
               href={`/api/admin/audit-export${actionFilter?.trim() ? `?action=${encodeURIComponent(actionFilter.trim())}` : ""}`}
-              className="inline-flex h-10 items-center rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] px-4 text-sm font-semibold text-ro-ink"
+              className="inline-flex h-10 items-center rounded-[var(--ro-r-sm)] border border-[color:var(--ro-border-control)] px-4 text-sm font-semibold text-[color:var(--ro-text)]"
             >
-              {ar ? "تصدير CSV" : "Export CSV"}
+              {u.teamAuditExport}
             </a>
           </div>
-          <p className="text-xs text-ro-muted">
-            {ar ? `${auditTotal} حدثاً` : `${auditTotal} events`}
+          <p className="text-xs text-[color:var(--ro-text-muted)]">
+            {u.teamAuditCount.replace("{n}", String(auditTotal))}
           </p>
-          <div className="overflow-x-auto rounded-[var(--ro-r-lg)] border border-[var(--ro-border-subtle)] bg-[var(--ro-sand-50)]">
+          <div className="overflow-x-auto rounded-[var(--ro-r-lg)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-panel)]">
             <table className="min-w-full text-sm">
-              <thead className="border-b border-[var(--ro-border-subtle)] text-xs text-[var(--ro-ink-600)]">
+              <thead className="border-b border-[color:var(--ro-border-subtle)] text-xs text-[color:var(--ro-text-muted)]">
                 <tr>
                   <th className="px-4 py-3 text-start font-medium">
-                    {ar ? "متى" : "When"}
+                    {locale === "ar" ? "متى" : "When"}
                   </th>
                   <th className="px-4 py-3 text-start font-medium">
-                    {ar ? "من" : "Who"}
+                    {locale === "ar" ? "من" : "Who"}
                   </th>
                   <th className="px-4 py-3 text-start font-medium">
-                    {ar ? "الإجراء" : "Action"}
+                    {locale === "ar" ? "الإجراء" : "Action"}
                   </th>
                   <th className="px-4 py-3 text-start font-medium">
-                    {ar ? "الهدف" : "Target"}
+                    {locale === "ar" ? "الهدف" : "Target"}
+                  </th>
+                  <th className="px-4 py-3 text-start font-medium">
+                    {u.teamAuditMeta}
+                  </th>
+                  <th className="px-4 py-3 text-start font-medium">
+                    {u.teamAuditIp}
                   </th>
                 </tr>
               </thead>
@@ -219,12 +287,14 @@ export default async function AdminTeamPage({
                   const who = row.adminId
                     ? adminById.get(row.adminId)?.email ?? row.adminId
                     : "—";
+                  const href = targetHref(row.target);
+                  const meta = summarizeMeta(row.metaJson);
                   return (
                     <tr
                       key={row.id}
-                      className="border-t border-[var(--ro-border-subtle)]"
+                      className="border-t border-[color:var(--ro-border-subtle)]"
                     >
-                      <td className="px-4 py-3 text-[var(--ro-ink-600)]">
+                      <td className="px-4 py-3 text-[color:var(--ro-text-muted)]">
                         {formatDate(row.createdAt, locale, {
                           dateStyle: "short",
                           timeStyle: "short",
@@ -237,7 +307,22 @@ export default async function AdminTeamPage({
                         {row.action}
                       </td>
                       <td className="px-4 py-3 font-mono text-xs" dir="ltr">
-                        {row.target || "—"}
+                        {href ? (
+                          <Link
+                            href={href}
+                            className="text-[color:var(--ro-accent-fg,var(--ro-plum-800))] underline-offset-2 hover:underline"
+                          >
+                            {row.target}
+                          </Link>
+                        ) : (
+                          row.target || "—"
+                        )}
+                      </td>
+                      <td className="max-w-[14rem] truncate px-4 py-3 text-xs text-[color:var(--ro-text-muted)]" dir="ltr" title={meta ?? undefined}>
+                        {meta || "—"}
+                      </td>
+                      <td className="px-4 py-3 font-mono text-xs text-[color:var(--ro-text-muted)]" dir="ltr">
+                        {row.ip || "—"}
                       </td>
                     </tr>
                   );

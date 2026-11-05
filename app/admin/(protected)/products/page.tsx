@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { Boxes, Plus } from "lucide-react";
+import { Boxes, LayoutGrid, List, Plus } from "lucide-react";
 import {
+  CellLink,
   DataTable,
   DataTableHead,
   RowHit,
@@ -13,7 +14,7 @@ import {
   AdminRecordCard,
   AdminRecordCardList,
 } from "@/components/admin/list-record-card";
-import { PageHeader } from "@/components/admin/page-header";
+import { PortalHeroStrip } from "@/components/admin/portal-hero";
 import { ProductPublishToggle } from "@/components/admin/product-publish-toggle";
 import { AdminTableFilters } from "@/components/admin/table-filters";
 import { ProductThumb } from "@/components/storefront/product-media";
@@ -43,6 +44,7 @@ export default async function AdminProductsPage({
 }) {
   const { tab: tabRaw, q: qRaw, view: viewRaw } = await searchParams;
   const { locale, dict } = await getRequestDictionary();
+  const ar = locale === "ar";
   const a = dict.admin;
   const u = dict.adminUi;
   const products = await listAdminProducts();
@@ -67,6 +69,9 @@ export default async function AdminProductsPage({
     return hay.includes(q);
   });
 
+  const available = products.filter((p) => p.availability === "available")
+    .length;
+
   const viewQs = (next: "table" | "gallery") => {
     const params = new URLSearchParams();
     params.set("view", next);
@@ -76,39 +81,82 @@ export default async function AdminProductsPage({
   };
 
   return (
-    <section className="space-y-6">
-      <PageHeader
-        title={a.products}
-        icon={<Boxes className="size-5" strokeWidth={2} />}
-        action={
+    <section data-admin-products="" className="space-y-5 pb-16">
+      <PortalHeroStrip
+        eyebrow={ar ? "كتالوج" : "Catalog"}
+        title={
+          <span className="inline-flex items-center gap-2.5">
+            <Boxes
+              className="size-7 shrink-0 text-[color:var(--ro-accent-fg,var(--ro-plum-800))]"
+              strokeWidth={1.5}
+            />
+            {a.products}
+          </span>
+        }
+        subtitle={
+          ar
+            ? "من المسودة إلى النشر — معرض فاخر وجدول تشغيل واضح لكل قطعة"
+            : "From draft to publish — a luxury gallery and a clear ops table for every piece"
+        }
+        actions={
           <ButtonLink href="/admin/products/new" variant="primary" size="sm">
-            <Plus className="size-3.5" strokeWidth={2.5} aria-hidden />
+            <Plus className="size-3.5" strokeWidth={1.5} aria-hidden />
             {a.newProduct}
           </ButtonLink>
         }
+        stats={[
+          {
+            label: ar ? "الكل" : "Total",
+            value: counts.all,
+            hint: ar ? "في الكتالوج" : "In catalog",
+          },
+          {
+            label: u.productStatus.published ?? (ar ? "منشور" : "Published"),
+            value: counts.published ?? 0,
+          },
+          {
+            label: u.productStatus.draft ?? (ar ? "مسودة" : "Draft"),
+            value: counts.draft ?? 0,
+          },
+          {
+            label: ar ? "متوفر" : "Available",
+            value: available,
+            hint: ar ? "جاهز للطلب" : "Ready to sell",
+          },
+        ]}
       />
 
-      <div className="flex flex-wrap gap-2">
+      <div
+        role="tablist"
+        aria-label={ar ? "طريقة العرض" : "View mode"}
+        className="ro-portal-tablist inline-flex max-w-full"
+      >
         <Link
           href={viewQs("table")}
+          role="tab"
+          aria-selected={view === "table"}
           className={cn(
-            "inline-flex h-10 items-center rounded-[var(--ro-r-sm)] px-3 text-sm font-semibold",
+            "inline-flex h-10 items-center gap-1.5 px-3 text-sm transition-[color,background-color,box-shadow,transform] duration-[var(--ro-dur-fast)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]",
             view === "table"
-              ? "bg-[var(--ro-plum-900)] text-[var(--ro-sand-50)]"
-              : "border border-ro-line text-ro-ink"
+              ? "font-semibold text-[color:var(--ro-text)]"
+              : "text-[color:var(--ro-text-2)] hover:text-[color:var(--ro-text)]"
           )}
         >
+          <List className="size-3.5" strokeWidth={1.5} aria-hidden />
           {u.viewTable}
         </Link>
         <Link
           href={viewQs("gallery")}
+          role="tab"
+          aria-selected={view === "gallery"}
           className={cn(
-            "inline-flex h-10 items-center rounded-[var(--ro-r-sm)] px-3 text-sm font-semibold",
+            "inline-flex h-10 items-center gap-1.5 px-3 text-sm transition-[color,background-color,box-shadow,transform] duration-[var(--ro-dur-fast)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]",
             view === "gallery"
-              ? "bg-[var(--ro-plum-900)] text-[var(--ro-sand-50)]"
-              : "border border-ro-line text-ro-ink"
+              ? "font-semibold text-[color:var(--ro-text)]"
+              : "text-[color:var(--ro-text-2)] hover:text-[color:var(--ro-text)]"
           )}
         >
+          <LayoutGrid className="size-3.5" strokeWidth={1.5} aria-hidden />
           {u.viewGallery}
         </Link>
       </div>
@@ -144,7 +192,7 @@ export default async function AdminProductsPage({
           }
         />
       ) : view === "gallery" ? (
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((p) => {
             const thumb = p.images[0];
             const name =
@@ -157,11 +205,14 @@ export default async function AdminProductsPage({
               <li
                 key={p.id}
                 className={cn(
-                  "ro-portal-card overflow-hidden border",
+                  "ro-catalog-tile",
                   isFresh(p.updatedAt) && "ro-s10-flash"
                 )}
               >
-                <Link href={`/admin/products/${p.id}`} className="block">
+                <Link
+                  href={`/admin/products/${p.id}`}
+                  className="ro-catalog-tile-media block"
+                >
                   <ProductThumb
                     path={thumb?.path}
                     alt={
@@ -172,39 +223,59 @@ export default async function AdminProductsPage({
                     plateCaption={plateCaption}
                     className="aspect-[4/5]"
                   />
-                </Link>
-                <div className="space-y-2 p-3">
-                  <Link
-                    href={`/admin/products/${p.id}`}
-                    className="font-display text-base font-semibold text-ro-ink hover:underline"
-                  >
-                    {name}
-                  </Link>
-                  <p className="text-xs text-ro-muted" dir="ltr">
-                    {p.slug}
-                  </p>
-                  <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="absolute start-3 top-3 z-[1]">
                     <StatusChip
                       tone={productStatusTone(p.status)}
                       label={u.productStatus[p.status] ?? p.status}
                       size="sm"
                     />
-                    {p.status !== "archived" ? (
-                      <ProductPublishToggle
-                        productId={p.id}
-                        published={p.status === "published"}
-                        publishLabel={u.publishNow}
-                        unpublishLabel={u.unpublish}
-                        disabledReason={
-                          canPublish
-                            ? null
-                            : !p.nameAr?.trim()
-                              ? u.form.publishNeedsNameAr
-                              : u.form.publishNeedsImage
-                        }
-                      />
-                    ) : null}
+                  </span>
+                  <div className="absolute inset-x-0 bottom-0 z-[1] space-y-1 p-3.5">
+                    <p className="font-display text-base font-semibold leading-snug text-[color:#faf6fc] drop-shadow-sm">
+                      {name}
+                    </p>
+                    <p className="text-sm font-semibold tabular-nums text-[color:#faf6fc]/90]">
+                      {formatCurrency(
+                        Number(p.retailPrice),
+                        p.currency,
+                        locale,
+                        dict.product.priceOnRequest
+                      )}
+                    </p>
                   </div>
+                </Link>
+                <div className="flex flex-wrap items-center justify-between gap-2 p-3">
+                  <div className="min-w-0">
+                    <p
+                      className="truncate text-[0.7rem] text-[color:var(--ro-text-muted)]"
+                      dir="ltr"
+                    >
+                      {p.slug}
+                    </p>
+                    <StatusChip
+                      tone={
+                        p.availability === "available" ? "success" : "closed"
+                      }
+                      label={u.availability[p.availability] ?? p.availability}
+                      size="sm"
+                      className="mt-1.5"
+                    />
+                  </div>
+                  {p.status !== "archived" ? (
+                    <ProductPublishToggle
+                      productId={p.id}
+                      published={p.status === "published"}
+                      publishLabel={u.publishNow}
+                      unpublishLabel={u.unpublish}
+                      disabledReason={
+                        canPublish
+                          ? null
+                          : !p.nameAr?.trim()
+                            ? u.form.publishNeedsNameAr
+                            : u.form.publishNeedsImage
+                      }
+                    />
+                  ) : null}
                 </div>
               </li>
             );
@@ -239,6 +310,15 @@ export default async function AdminProductsPage({
           </AdminRecordCardList>
           <div className="hidden md:block">
             <DataTable>
+              <colgroup>
+                <col style={{ width: "5.5rem" }} />
+                <col style={{ width: "18%" }} />
+                <col style={{ width: "12%" }} />
+                <col style={{ width: "22%" }} />
+                <col style={{ width: "10%" }} />
+                <col style={{ width: "12%" }} />
+                <col style={{ width: "16%" }} />
+              </colgroup>
               <DataTableHead>
                 <Th>{a.colThumb}</Th>
                 <Th>{a.colName}</Th>
@@ -247,7 +327,6 @@ export default async function AdminProductsPage({
                 <Th>{a.colAvailability}</Th>
                 <Th>{a.colPrice}</Th>
                 <Th>{a.colSlug}</Th>
-                <Th />
               </DataTableHead>
               <tbody>
                 {filtered.map((p) => {
@@ -263,25 +342,38 @@ export default async function AdminProductsPage({
                   const canPublish =
                     Boolean(p.nameAr?.trim()) && p.images.length > 0;
                   return (
-                    <Tr key={p.id} flash={isFresh(p.updatedAt)}>
+                    <Tr
+                      key={p.id}
+                      href={`/admin/products/${p.id}`}
+                      flash={isFresh(p.updatedAt)}
+                    >
                       <Td>
-                        <div className="w-14">
-                          <ProductThumb
-                            path={thumb?.path}
-                            alt={
-                              locale === "ar"
-                                ? thumb?.altAr || name
-                                : thumb?.altEn || name
-                            }
-                            plateCaption={plateCaption}
-                            className="aspect-square"
-                          />
-                        </div>
+                        <CellLink href={`/admin/products/${p.id}`}>
+                          <div className="w-14 overflow-hidden rounded-[10px] border border-[color:var(--ro-border-subtle)]">
+                            <ProductThumb
+                              path={thumb?.path}
+                              alt={
+                                locale === "ar"
+                                  ? thumb?.altAr || name
+                                  : thumb?.altEn || name
+                              }
+                              plateCaption={plateCaption}
+                              className="aspect-square"
+                            />
+                          </div>
+                        </CellLink>
                       </Td>
                       <Td>
                         <RowHit href={`/admin/products/${p.id}`}>{name}</RowHit>
                       </Td>
-                      <Td className="text-ro-muted">{categoryName}</Td>
+                      <Td className="text-[color:var(--ro-text-2)]">
+                        <CellLink
+                          href={`/admin/products/${p.id}`}
+                          className="text-[color:var(--ro-text-2)]"
+                        >
+                          {categoryName}
+                        </CellLink>
+                      </Td>
                       <Td>
                         <div className="flex flex-wrap items-center gap-2">
                           <StatusChip
@@ -307,34 +399,42 @@ export default async function AdminProductsPage({
                         </div>
                       </Td>
                       <Td>
-                        <StatusChip
-                          tone={
-                            p.availability === "available"
-                              ? "success"
-                              : "closed"
-                          }
-                          label={
-                            u.availability[p.availability] ?? p.availability
-                          }
-                          size="sm"
-                        />
+                        <CellLink href={`/admin/products/${p.id}`}>
+                          <StatusChip
+                            tone={
+                              p.availability === "available"
+                                ? "success"
+                                : "closed"
+                            }
+                            label={
+                              u.availability[p.availability] ?? p.availability
+                            }
+                            size="sm"
+                          />
+                        </CellLink>
                       </Td>
-                      <Td className="tabular-nums">
-                        {formatCurrency(
-                          Number(p.retailPrice),
-                          p.currency,
-                          locale,
-                          dict.product.priceOnRequest
-                        )}
-                      </Td>
-                      <Td className="text-ro-muted">{p.slug}</Td>
-                      <Td>
-                        <Link
+                      <Td className="font-semibold tabular-nums text-[color:var(--ro-text)]">
+                        <CellLink
                           href={`/admin/products/${p.id}`}
-                          className="text-ro-plum hover:underline"
+                          className="font-semibold tabular-nums text-[color:var(--ro-text)]"
                         >
-                          {a.edit}
-                        </Link>
+                          {formatCurrency(
+                            Number(p.retailPrice),
+                            p.currency,
+                            locale,
+                            dict.product.priceOnRequest
+                          )}
+                        </CellLink>
+                      </Td>
+                      <Td>
+                        <CellLink href={`/admin/products/${p.id}`}>
+                          <span
+                            className="text-xs text-[color:var(--ro-text-muted)]"
+                            dir="ltr"
+                          >
+                            {p.slug}
+                          </span>
+                        </CellLink>
                       </Td>
                     </Tr>
                   );

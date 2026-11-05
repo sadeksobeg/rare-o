@@ -2,6 +2,14 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Compass, LayoutGrid, List } from "lucide-react";
 import { BrokerageAdminFilters } from "@/components/admin/brokerage-filters";
+import {
+  DataTable,
+  DataTableHead,
+  RowHit,
+  Td,
+  Th,
+  Tr,
+} from "@/components/admin/data-table";
 import { BrokerageHeroStrip } from "@/components/brokerage/hero-strip";
 import {
   brokerageActorLabel,
@@ -18,12 +26,18 @@ import { localizedName } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 
 const COL_ACCENT: Record<string, string> = {
-  SUBMITTED: "border-t-[var(--ro-plum-700)]",
-  ACCEPTED: "border-t-[var(--ro-progress-700)]",
-  INSPECTION_SCHEDULED: "border-t-[var(--ro-progress-700)]",
-  INSPECTED: "border-t-[var(--ro-plum-700)]",
-  QUOTE_SENT: "border-t-[var(--ro-amber-500)]",
-  APPROVED: "border-t-[var(--ro-success-700)]",
+  SUBMITTED: "border-t-[color:var(--ro-plum-700)]",
+  AWAITING_PAYMENT: "border-t-[color:var(--ro-amber-500,#efb04a)]",
+  PAYMENT_CONFIRMED: "border-t-[color:var(--ro-success-700)]",
+  ACCEPTED: "border-t-[color:var(--ro-progress-700,#7eb6ff)]",
+  INSPECTION_SCHEDULED: "border-t-[color:var(--ro-progress-700,#7eb6ff)]",
+  INSPECTED: "border-t-[color:var(--ro-plum-700)]",
+  QUOTE_SENT: "border-t-[color:var(--ro-amber-500,#efb04a)]",
+  APPROVED: "border-t-[color:var(--ro-success-700)]",
+  PURCHASED: "border-t-[color:var(--ro-success-700)]",
+  SHIPPED: "border-t-[color:var(--ro-progress-700,#7eb6ff)]",
+  DELIVERED: "border-t-[color:var(--ro-success-700)]",
+  CLOSED: "border-t-[color:var(--ro-text-muted)]",
 };
 
 function isStaleRow(r: { createdAt: Date; status: string }) {
@@ -69,10 +83,24 @@ export default async function AdminBrokeragePage({
   });
 
   const rows = textFiltered.filter((r) => (staleOnly ? isStaleRow(r) : true));
-  const boardCols = BROKERAGE_LIFECYCLE.slice(0, 6);
+  const TERMINAL = new Set(["CANCELLED", "DECLINED", "REJECTED"]);
+  const occupied = new Set(rows.map((r) => r.status));
+  const orphanStatuses = [...occupied].filter(
+    (s) =>
+      !BROKERAGE_LIFECYCLE.includes(s as (typeof BROKERAGE_LIFECYCLE)[number]) &&
+      !TERMINAL.has(s)
+  );
+  /** Occupied work first (visible without scroll), then empty funnel stages. */
+  const boardCols = [
+    ...BROKERAGE_LIFECYCLE.filter((s) => occupied.has(s)),
+    ...orphanStatuses,
+    ...BROKERAGE_LIFECYCLE.filter((s) => !occupied.has(s)),
+  ];
 
-  const awaitingAdmin = rows.filter((r) => nextActor(r.status) === "admin").length;
-  const awaitingTrader = rows.filter((r) => nextActor(r.status) === "trader").length;
+  const awaitingAdmin = rows.filter((r) => nextActor(r.status) === "admin")
+    .length;
+  const awaitingTrader = rows.filter((r) => nextActor(r.status) === "trader")
+    .length;
   const active = rows.filter(
     (r) =>
       !["CLOSED", "DECLINED", "REJECTED", "CANCELLED"].includes(r.status)
@@ -80,13 +108,13 @@ export default async function AdminBrokeragePage({
   const stale = textFiltered.filter(isStaleRow).length;
 
   return (
-    <section className="space-y-6">
+    <section data-admin-brokerage="" className="space-y-5 pb-16">
       <BrokerageHeroStrip
         eyebrow={ar ? "عمليات" : "Operations"}
         title={
           <span className="inline-flex items-center gap-2.5">
             <Compass
-              className="size-7 shrink-0 text-[var(--ro-plum-800)]"
+              className="size-7 shrink-0 text-[color:var(--ro-accent-fg,var(--ro-plum-800))]"
               strokeWidth={1.5}
             />
             {dict.admin.brokerage}
@@ -135,13 +163,13 @@ export default async function AdminBrokeragePage({
         />
       </Suspense>
 
-      <div className="flex items-center gap-2 text-xs text-[var(--ro-ink-500)]">
-        <LayoutGrid className="size-3.5" strokeWidth={1.5} />
+      <div className="flex flex-wrap items-center gap-2 text-xs text-[color:var(--ro-text-muted)]">
+        <LayoutGrid className="size-3.5" strokeWidth={1.5} aria-hidden />
         <span>{ar ? "لوحة كانبان" : "Kanban board"}</span>
-        <span aria-hidden className="text-[var(--ro-border)]">
+        <span aria-hidden className="text-[color:var(--ro-border)]">
           ·
         </span>
-        <List className="size-3.5" strokeWidth={1.5} />
+        <List className="size-3.5" strokeWidth={1.5} aria-hidden />
         <span>{ar ? "جدول كامل أدناه" : "Full table below"}</span>
         <span className="tabular-nums">
           · {rows.length}/{allRows.length}
@@ -149,7 +177,7 @@ export default async function AdminBrokeragePage({
       </div>
 
       <div
-        className="flex gap-3 overflow-x-auto pb-2"
+        className="ro-brokerage-board"
         tabIndex={0}
         role="region"
         aria-label={ar ? "لوحة الوساطة" : "Brokerage board"}
@@ -160,15 +188,17 @@ export default async function AdminBrokeragePage({
           return (
             <div
               key={status}
-              className={`ro-brokerage-col w-[16.5rem] shrink-0 rounded-[var(--ro-r-lg)] border border-[var(--ro-border-subtle)] border-t-[3px] p-3 ${COL_ACCENT[status] ?? "border-t-[var(--ro-plum-300)]"}`}
+              className={`ro-brokerage-col w-[16.5rem] shrink-0 rounded-[14px] border border-t-[3px] p-3.5 ${COL_ACCENT[status] ?? "border-t-[color:var(--ro-plum-700)]"}`}
             >
-              <div className="mb-1 flex items-center justify-between gap-2">
-                <h2 className="text-sm font-semibold text-ro-ink">{label}</h2>
-                <span className="inline-flex min-w-6 items-center justify-center rounded-full bg-[var(--ro-sand-100)] px-1.5 py-0.5 text-xs font-semibold tabular-nums text-[var(--ro-ink-700)]">
+              <div className="mb-2 flex items-start justify-between gap-2">
+                <h2 className="text-sm font-semibold leading-snug text-[color:var(--ro-text)]">
+                  {label}
+                </h2>
+                <span className="inline-flex min-w-6 shrink-0 items-center justify-center rounded-full bg-[color:color-mix(in_srgb,var(--ro-text)_8%,transparent)] px-1.5 py-0.5 text-xs font-semibold tabular-nums text-[color:var(--ro-text-2)]">
                   {items.length}
                 </span>
               </div>
-              <p className="mb-3 line-clamp-2 text-[0.65rem] leading-snug text-[var(--ro-ink-500)]">
+              <p className="mb-3 line-clamp-3 min-h-[3.15rem] text-[0.72rem] leading-relaxed text-[color:var(--ro-text-muted)]">
                 {brokerageNextHint(status, locale, "admin")}
               </p>
               <ul className="space-y-2">
@@ -176,30 +206,31 @@ export default async function AdminBrokeragePage({
                   const age = daysSince(r.createdAt);
                   const actor = nextActor(r.status);
                   const hot = actor === "admin";
+                  const staleAge = age >= 3 && actor !== "none";
                   return (
                     <li key={r.id}>
                       <Link
                         href={`/admin/brokerage/${r.id}`}
-                        className={`ro-brokerage-card block rounded-[var(--ro-r-md)] border border-transparent bg-[var(--ro-sand-100)] p-3 ${hot ? "ro-brokerage-pulse" : ""} hover:border-[var(--ro-plum-300)] hover:bg-[color-mix(in_srgb,var(--ro-plum-50)_75%,var(--ro-sand-100))]`}
+                        className={`ro-brokerage-card block rounded-[12px] p-3 ${hot ? "ro-brokerage-pulse" : ""}`}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <p
-                            className="font-mono text-[0.7rem] text-[var(--ro-ink-500)]"
+                            className="font-mono text-[0.7rem] font-medium text-[color:var(--ro-text-2)]"
                             dir="ltr"
                           >
                             {r.reference}
                           </p>
                           <span
                             className={`shrink-0 rounded px-1.5 py-0.5 text-[0.65rem] tabular-nums ${
-                              age >= 3
-                                ? "bg-[var(--ro-amber-100)] text-[var(--ro-amber-800)]"
-                                : "text-[var(--ro-ink-500)]"
+                              staleAge
+                                ? "bg-[color:var(--ro-warn-bg,color-mix(in_srgb,#efb04a_18%,transparent))] text-[color:var(--ro-warn,#efb04a)]"
+                                : "text-[color:var(--ro-text-muted)]"
                             }`}
                           >
                             {age}d
                           </span>
                         </div>
-                        <p className="mt-1.5 line-clamp-2 text-sm font-medium leading-snug text-ro-ink">
+                        <p className="mt-1.5 line-clamp-2 text-sm font-medium leading-snug text-[color:var(--ro-text)]">
                           {localizedName(
                             locale,
                             r.descriptionAr,
@@ -207,16 +238,16 @@ export default async function AdminBrokeragePage({
                           )}
                         </p>
                         <div className="mt-2 flex items-center justify-between gap-2">
-                          <p className="truncate text-xs text-[var(--ro-ink-600)]">
+                          <p className="truncate text-xs text-[color:var(--ro-text-2)]">
                             {r.trader.displayName}
                           </p>
                           <span
                             className={`shrink-0 text-[0.65rem] font-semibold ${
                               actor === "admin"
-                                ? "text-[var(--ro-plum-900)]"
+                                ? "text-[color:var(--ro-accent-fg)]"
                                 : actor === "trader"
-                                  ? "text-[var(--ro-amber-800)]"
-                                  : "text-[var(--ro-ink-500)]"
+                                  ? "text-[color:var(--ro-warn,#efb04a)]"
+                                  : "text-[color:var(--ro-text-muted)]"
                             }`}
                           >
                             {ar ? "ينتظر: " : "Needs: "}
@@ -228,8 +259,8 @@ export default async function AdminBrokeragePage({
                   );
                 })}
                 {items.length === 0 ? (
-                  <li className="rounded-[var(--ro-r-md)] border border-dashed border-[var(--ro-border)] py-8 text-center text-xs text-[var(--ro-ink-500)]">
-                    —
+                  <li className="rounded-[12px] border border-dashed border-[color:var(--ro-border-subtle)] bg-[color:color-mix(in_srgb,var(--ro-bg-sunken)_40%,transparent)] py-5 text-center text-[0.7rem] text-[color:var(--ro-text-muted)]">
+                    {ar ? "فارغ" : "Empty"}
                   </li>
                 ) : null}
               </ul>
@@ -238,79 +269,96 @@ export default async function AdminBrokeragePage({
         })}
       </div>
 
-      <div className="overflow-hidden rounded-[var(--ro-r-lg)] border border-[var(--ro-border-subtle)] bg-[var(--ro-sand-50)]">
-        <div className="flex items-center justify-between gap-3 border-b border-[var(--ro-border-subtle)] px-4 py-3">
-          <h2 className="font-display text-base font-semibold text-ro-ink">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between gap-3 px-0.5">
+          <h2 className="font-display text-base font-semibold text-[color:var(--ro-text)]">
             {ar ? "كل الطلبات" : "All requests"}
           </h2>
-          <span className="text-xs tabular-nums text-[var(--ro-ink-500)]">
+          <span className="text-xs tabular-nums text-[color:var(--ro-text-muted)]">
             {rows.length}
           </span>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="bg-[color-mix(in_srgb,var(--ro-sand-100)_80%,transparent)] text-start text-xs text-[var(--ro-ink-600)]">
-              <tr>
-                <th className="px-4 py-3 font-medium">
-                  {ar ? "المرجع" : "Ref"}
-                </th>
-                <th className="px-4 py-3 font-medium">
-                  {ar ? "التاجر" : "Trader"}
-                </th>
-                <th className="px-4 py-3 font-medium">
-                  {ar ? "الوصف" : "Description"}
-                </th>
-                <th className="px-4 py-3 font-medium">{ar ? "العمر" : "Age"}</th>
-                <th className="px-4 py-3 font-medium">
-                  {ar ? "ينتظر" : "Waiting"}
-                </th>
-                <th className="px-4 py-3 font-medium">
-                  {ar ? "الحالة" : "Status"}
-                </th>
-                <th className="px-4 py-3 font-medium">
-                  {ar ? "الخطوة التالية" : "Next"}
-                </th>
-              </tr>
-            </thead>
+        <div className="hidden md:block">
+          <DataTable>
+            <DataTableHead>
+              <Th>{ar ? "المرجع" : "Ref"}</Th>
+              <Th>{ar ? "التاجر" : "Trader"}</Th>
+              <Th>{ar ? "الوصف" : "Description"}</Th>
+              <Th>{ar ? "العمر" : "Age"}</Th>
+              <Th>{ar ? "ينتظر" : "Waiting"}</Th>
+              <Th>{ar ? "الحالة" : "Status"}</Th>
+              <Th>{ar ? "الخطوة التالية" : "Next"}</Th>
+            </DataTableHead>
             <tbody>
               {rows.map((r) => (
-                <tr
-                  key={r.id}
-                  className="border-t border-[var(--ro-border-subtle)] transition-colors hover:bg-[color-mix(in_srgb,var(--ro-plum-50)_55%,transparent)]"
-                >
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/admin/brokerage/${r.id}`}
-                      className="font-mono text-xs font-medium text-[var(--ro-plum-900)] underline-offset-2 hover:underline"
-                      dir="ltr"
-                    >
-                      {r.reference}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3">{r.trader.displayName}</td>
-                  <td className="max-w-xs truncate px-4 py-3">
+                <Tr key={r.id} href={`/admin/brokerage/${r.id}`}>
+                  <Td>
+                    <RowHit href={`/admin/brokerage/${r.id}`}>
+                      <span dir="ltr">{r.reference}</span>
+                    </RowHit>
+                  </Td>
+                  <Td>
+                    <span className="font-semibold text-[color:var(--ro-text)]">
+                      {r.trader.displayName}
+                    </span>
+                  </Td>
+                  <Td className="max-w-[14rem] truncate text-[color:var(--ro-text)]">
                     {localizedName(locale, r.descriptionAr, r.descriptionEn)}
-                  </td>
-                  <td className="px-4 py-3 tabular-nums text-[var(--ro-ink-600)]">
+                  </Td>
+                  <Td className="tabular-nums text-[color:var(--ro-text-2)]">
                     {daysSince(r.createdAt)}d
-                  </td>
-                  <td className="px-4 py-3 text-xs font-medium">
+                  </Td>
+                  <Td className="text-xs font-semibold text-[color:var(--ro-text)]">
                     {brokerageActorLabel(r.status, locale)}
-                  </td>
-                  <td className="px-4 py-3">
+                  </Td>
+                  <Td>
                     <BrokerageStatusBadge
                       status={r.status}
                       label={brokerageStatusLabel(r.status, locale)}
                     />
-                  </td>
-                  <td className="max-w-[14rem] px-4 py-3 text-xs leading-snug text-[var(--ro-ink-600)]">
-                    {brokerageNextHint(r.status, locale, "admin")}
-                  </td>
-                </tr>
+                  </Td>
+                  <Td className="max-w-[15rem]">
+                    <p className="line-clamp-2 text-xs leading-snug text-[color:var(--ro-text-2)]">
+                      {brokerageNextHint(r.status, locale, "admin")}
+                    </p>
+                  </Td>
+                </Tr>
               ))}
             </tbody>
-          </table>
+          </DataTable>
         </div>
+        <ul className="divide-y divide-[color:var(--ro-border-subtle)] overflow-hidden rounded-[14px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] md:hidden">
+          {rows.map((r) => (
+            <li key={r.id}>
+              <Link
+                href={`/admin/brokerage/${r.id}`}
+                className="block space-y-2 p-4 transition-[background-color] hover:bg-[color:var(--ro-panel-hover)]"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <p
+                    className="font-mono text-xs font-semibold text-[color:var(--ro-accent-fg)]"
+                    dir="ltr"
+                  >
+                    {r.reference}
+                  </p>
+                  <span className="text-xs tabular-nums text-[color:var(--ro-text-muted)]">
+                    {daysSince(r.createdAt)}d
+                  </span>
+                </div>
+                <p className="text-sm font-medium text-[color:var(--ro-text)]">
+                  {r.trader.displayName}
+                </p>
+                <p className="line-clamp-2 text-xs text-[color:var(--ro-text-muted)]">
+                  {localizedName(locale, r.descriptionAr, r.descriptionEn)}
+                </p>
+                <BrokerageStatusBadge
+                  status={r.status}
+                  label={brokerageStatusLabel(r.status, locale)}
+                />
+              </Link>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

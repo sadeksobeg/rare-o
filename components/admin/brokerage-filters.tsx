@@ -2,9 +2,8 @@
 
 import { Suspense } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 import { ListFilterTabs } from "@/components/ui/list-filter-tabs";
-import { TextField } from "@/components/ui/text-field";
 import { cn } from "@/lib/utils";
 
 /**
@@ -41,7 +40,7 @@ export function BrokerageAdminFilters({
   return (
     <div
       className={cn(
-        "sticky top-16 z-20 space-y-3 border-b border-ro-line bg-ro-surface/95 py-3 backdrop-blur",
+        "sticky top-0 z-20 space-y-3 rounded-[14px] border border-[color:var(--ro-border-subtle)] bg-[color:color-mix(in_srgb,var(--ro-bg-raised)_92%,transparent)] p-3 shadow-[var(--ro-e2)] backdrop-blur-md sm:p-3.5",
         className
       )}
     >
@@ -67,6 +66,10 @@ export function BrokerageAdminFilters({
       </Suspense>
     </div>
   );
+}
+
+function fieldClass() {
+  return "h-11 w-full rounded-[12px] border border-[color:var(--ro-border)] bg-[color:var(--ro-bg-sunken)] px-3 text-sm text-[color:var(--ro-text)] shadow-[inset_0_1px_0_color-mix(in_srgb,var(--ro-text)_5%,transparent)] outline-none placeholder:text-[color:var(--ro-text-muted)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]";
 }
 
 function BrokerageSearchFields({
@@ -105,47 +108,54 @@ function BrokerageSearchFields({
         else next.delete("trader");
         if (cityValue) next.set("city", cityValue);
         else next.delete("city");
-        // Keep ListFilterTabs stale=all sentinel out of the URL.
         if (next.get("stale") === "all") next.delete("stale");
         const qs = next.toString();
         router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
       }}
     >
-      <TextField
-        name="trader"
-        label={traderLabel}
-        defaultValue={trader}
-        dense
-        className="min-w-[10rem] flex-1"
-      />
-      <TextField
-        name="city"
-        label={cityLabel}
-        defaultValue={city}
-        dense
-        className="min-w-[8rem] flex-1"
-      />
-      <Button type="submit" size="sm" variant="secondary" className="h-10">
+      <label className="flex min-w-[10rem] flex-1 flex-col gap-1 text-xs text-[color:var(--ro-text-muted)]">
+        <span>{traderLabel}</span>
+        <input
+          name="trader"
+          type="search"
+          defaultValue={trader}
+          className={fieldClass()}
+        />
+      </label>
+      <label className="flex min-w-[8rem] flex-1 flex-col gap-1 text-xs text-[color:var(--ro-text-muted)]">
+        <span>{cityLabel}</span>
+        <input
+          name="city"
+          type="search"
+          defaultValue={city}
+          className={fieldClass()}
+        />
+      </label>
+      <button
+        type="submit"
+        className="inline-flex h-11 items-center gap-1.5 rounded-[12px] border border-[color:color-mix(in_srgb,var(--ro-accent-fg,var(--ro-plum-700))_35%,var(--ro-border))] bg-[color:color-mix(in_srgb,var(--ro-accent-fg,var(--ro-plum-700))_14%,var(--ro-panel))] px-4 text-sm font-semibold text-[color:var(--ro-accent-fg,var(--ro-plum-800))] transition-[background-color,border-color] hover:bg-[color:color-mix(in_srgb,var(--ro-accent-fg,var(--ro-plum-700))_22%,var(--ro-panel))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
+      >
+        <Search className="size-4" strokeWidth={1.5} aria-hidden />
         {searchLabel}
-      </Button>
+      </button>
       {hasFilters ? (
-        <Button
+        <button
           type="button"
-          size="sm"
-          variant="text"
-          className="h-10"
+          className="h-11 rounded-[12px] px-3 text-sm font-medium text-[color:var(--ro-text-2)] underline-offset-2 hover:text-[color:var(--ro-text)] hover:underline"
           onClick={() => router.replace(pathname, { scroll: false })}
         >
           {clearLabel}
-        </Button>
+        </button>
       ) : null}
       {typeof resultCount === "number" ? (
         <p
           role="status"
           aria-live="polite"
-          className="flex h-10 items-center text-sm tabular-nums text-ro-muted"
+          className="flex h-11 items-center text-sm tabular-nums text-[color:var(--ro-text-muted)]"
         >
-          <span className="font-semibold text-ro-ink">{resultCount}</span>
+          <span className="font-semibold text-[color:var(--ro-text)]">
+            {resultCount}
+          </span>
           {resultLabel ? <span className="ms-1">{resultLabel}</span> : null}
         </p>
       ) : null}

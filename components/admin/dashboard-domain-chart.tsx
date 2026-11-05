@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { Cell, Pie, PieChart } from "recharts";
+import { Cell, Pie, PieChart, Tooltip } from "recharts";
 import { DrawIn, RosetteMark } from "@/components/motion/draw-in";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +20,7 @@ export function DashboardDomainChart({
   emptyBody,
   emptyActionHref,
   emptyActionLabel,
+  highlightDomain,
   className,
 }: {
   slices: DomainSlice[];
@@ -28,6 +29,7 @@ export function DashboardDomainChart({
   emptyBody?: string;
   emptyActionHref?: string;
   emptyActionLabel?: string;
+  highlightDomain?: string | null;
   className?: string;
 }) {
   const sum = slices.reduce((s, x) => s + x.value, 0);
@@ -37,13 +39,22 @@ export function DashboardDomainChart({
     pct: Math.round((s.value / total) * 100),
   }));
   const hasSignal = sum > 0;
+  const activeKey =
+    highlightDomain === "deal"
+      ? "deals"
+      : highlightDomain && highlightDomain !== "all"
+        ? highlightDomain
+        : null;
 
   return (
     <div
       className={cn(
-        "rounded-[var(--ro-r-lg)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] p-4 text-[color:var(--ro-text)]",
+        "rounded-[var(--ro-r-lg)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] p-4 text-[color:var(--ro-text)] transition-[border-color,background-color] duration-[var(--ro-dur-fast)]",
+        activeKey &&
+          "border-[color-mix(in_srgb,var(--ro-plum-700)_42%,var(--ro-border-subtle))]",
         className
       )}
+      data-chart-sync={highlightDomain ?? "all"}
     >
       <h2 className="mb-3 font-display text-lg font-semibold text-[color:var(--ro-text)]">
         {title}
@@ -61,27 +72,71 @@ export function DashboardDomainChart({
               isAnimationActive
               animationDuration={700}
             >
-              {data.map((entry) => (
-                <Cell key={entry.key} fill={entry.color} />
-              ))}
+              {data.map((entry) => {
+                const dimmed = Boolean(activeKey && entry.key !== activeKey);
+                return (
+                  <Cell
+                    key={entry.key}
+                    fill={entry.color}
+                    fillOpacity={dimmed ? 0.28 : 1}
+                    stroke={
+                      activeKey === entry.key
+                        ? "var(--ro-sand-50)"
+                        : "transparent"
+                    }
+                    strokeWidth={activeKey === entry.key ? 2 : 0}
+                  />
+                );
+              })}
             </Pie>
+            <Tooltip
+              contentStyle={{
+                background: "var(--ro-bg-elevated, var(--ro-bg-raised))",
+                border:
+                  "1px solid color-mix(in srgb, var(--ro-border-subtle) 90%, transparent)",
+                borderRadius: 8,
+                fontSize: 12,
+                color: "var(--ro-text)",
+              }}
+              formatter={(value, _name, item) => {
+                const pct = (item?.payload as { pct?: number } | undefined)?.pct;
+                return [
+                  <bdi key="v" dir="ltr">
+                    {String(value)}
+                    {pct != null ? ` · ${pct}%` : ""}
+                  </bdi>,
+                  String(item?.payload?.label ?? ""),
+                ];
+              }}
+            />
           </PieChart>
           <ul className="space-y-1.5 text-sm">
-            {data.map((d) => (
-              <li key={d.key} className="flex items-center gap-2">
-                <span
-                  className="size-2.5 rounded-sm"
-                  style={{ background: d.color }}
-                  aria-hidden
-                />
-                <span>{d.label}</span>
-                <span className="tabular-nums text-[color:var(--ro-text-muted)]">
-                  <bdi dir="ltr">
-                    {d.value} · {d.pct}%
-                  </bdi>
-                </span>
-              </li>
-            ))}
+            {data.map((d) => {
+              const on = activeKey === d.key;
+              const dimmed = Boolean(activeKey && !on);
+              return (
+                <li
+                  key={d.key}
+                  className={cn(
+                    "flex items-center gap-2 transition-opacity duration-[var(--ro-dur-fast)]",
+                    dimmed && "opacity-40",
+                    on && "font-semibold"
+                  )}
+                >
+                  <span
+                    className="size-2.5 rounded-sm"
+                    style={{ background: d.color }}
+                    aria-hidden
+                  />
+                  <span>{d.label}</span>
+                  <span className="tabular-nums text-[color:var(--ro-text-muted)]">
+                    <bdi dir="ltr">
+                      {d.value} · {d.pct}%
+                    </bdi>
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         </div>
       ) : (

@@ -49,11 +49,11 @@ export default async function AdminWhatsAppConversationPage({
   } as const;
 
   const thread = (
-    <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
-      <div className="mb-2 lg:hidden">
+    <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="shrink-0 border-b border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-panel)] px-3 py-2 lg:hidden">
         <Link
           href="/admin/inbox"
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-ro-plum hover:underline"
+          className="inline-flex min-h-9 items-center gap-1.5 text-sm font-semibold text-[color:var(--ro-accent-fg,var(--ro-plum-700))]"
         >
           <ArrowLeft
             className="size-4 rtl:-scale-x-100"

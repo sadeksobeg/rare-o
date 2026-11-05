@@ -142,7 +142,6 @@ export function AdminCommandPalette({
         onClick={() => setOpen(true)}
         className="ro-cmd-search-icon-only ro-icon-btn"
         aria-label={labels.search}
-        hidden
       >
         <Search className="size-4" strokeWidth={1.5} aria-hidden />
       </button>

@@ -94,6 +94,26 @@ export default async function AdminBrokerageDetailPage({
             </div>
             <dl className="space-y-2.5">
               <div className="flex justify-between gap-3">
+                <dt className="text-[var(--ro-ink-500)]">
+                  {ar ? "رقم الموديل" : "Model number"}
+                </dt>
+                <dd className="text-end font-medium text-ro-ink" dir="ltr">
+                  <bdi dir="ltr">{row.modelNumber || "—"}</bdi>
+                </dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-[var(--ro-ink-500)]">
+                  {ar ? "سعر التاجر" : "Trader price"}
+                </dt>
+                <dd className="font-medium tabular-nums text-ro-ink" dir="ltr">
+                  {row.statedPriceUsd != null ? (
+                    <bdi dir="ltr">${row.statedPriceUsd}</bdi>
+                  ) : (
+                    "—"
+                  )}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-3">
                 <dt className="text-[var(--ro-ink-500)]">{ar ? "المدينة" : "City"}</dt>
                 <dd className="text-end font-medium text-ro-ink">
                   {localizedName(locale, row.cityAr, row.cityEn) || "—"}

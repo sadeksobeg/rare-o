@@ -18,7 +18,7 @@ import type { InboxMessageItem } from "@/lib/whatsapp/messaging/inbox";
 import { cn } from "@/lib/utils";
 
 function DeliveryIcon({ status }: { status: string }) {
-  const cls = "size-3.5 shrink-0";
+  const cls = "size-3 shrink-0 opacity-80";
   switch (status) {
     case "pending":
       return <Clock className={cls} aria-hidden />;
@@ -27,9 +27,15 @@ function DeliveryIcon({ status }: { status: string }) {
     case "sent":
       return <Check className={cls} aria-hidden />;
     case "delivered":
+    case "read":
       return <CheckCheck className={cls} aria-hidden />;
     case "failed":
-      return <CircleAlert className={cn(cls, "text-[var(--ro-danger-700)]")} aria-hidden />;
+      return (
+        <CircleAlert
+          className={cn(cls, "text-[color:var(--ro-danger-700)] opacity-100")}
+          aria-hidden
+        />
+      );
     default:
       return null;
   }
@@ -44,18 +50,20 @@ function MediaBody({
   isOut: boolean;
   dict: Dictionary;
 }) {
-  const muted = isOut ? "text-[var(--ro-sand-200)]" : "text-ro-muted";
+  const muted = isOut
+    ? "text-[color-mix(in_srgb,var(--ro-sand-100)_72%,transparent)]"
+    : "text-[color:var(--ro-text-muted)]";
   const caption = message.caption?.trim() || null;
 
   if (message.messageType === "image" || message.messageType === "sticker") {
     return (
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         {message.mediaUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- private admin media URL
           <img
             src={message.mediaUrl}
             alt=""
-            className="max-h-64 max-w-full rounded-[var(--ro-r-sm)] object-contain"
+            className="max-h-64 max-w-full rounded-[12px] object-contain"
           />
         ) : (
           <p className={muted}>{dict.inbox.nonText}</p>
@@ -71,12 +79,12 @@ function MediaBody({
 
   if (message.messageType === "video") {
     return (
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         {message.mediaUrl ? (
           <video
             controls
             preload="metadata"
-            className="max-h-64 max-w-full rounded-[var(--ro-r-sm)]"
+            className="max-h-64 max-w-full rounded-[12px]"
             src={message.mediaUrl}
           />
         ) : (
@@ -93,7 +101,12 @@ function MediaBody({
 
   if (message.messageType === "audio") {
     return message.mediaUrl ? (
-      <audio controls preload="metadata" className="max-w-full" src={message.mediaUrl} />
+      <audio
+        controls
+        preload="metadata"
+        className="my-0.5 max-w-full min-w-[12rem] accent-[var(--ro-plum-700)]"
+        src={message.mediaUrl}
+      />
     ) : (
       <p className={muted}>{dict.inbox.nonText}</p>
     );
@@ -101,7 +114,7 @@ function MediaBody({
 
   if (message.messageType === "document") {
     return (
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         {message.mediaUrl ? (
           <a
             href={message.mediaUrl}
@@ -109,7 +122,9 @@ function MediaBody({
             rel="noopener noreferrer"
             className={cn(
               "inline-flex items-center gap-2 font-semibold underline-offset-2 hover:underline",
-              isOut ? "text-[var(--ro-sand-100)]" : "text-ro-plum"
+              isOut
+                ? "text-[var(--ro-sand-50)]"
+                : "text-[color:var(--ro-accent-fg,var(--ro-plum-700))]"
             )}
           >
             <FileText className="size-4 shrink-0" strokeWidth={1.5} aria-hidden />
@@ -156,7 +171,7 @@ function MediaBody({
   );
 }
 
-/** A14 — MessageBubble (RTL-correct start/end alignment). */
+/** A14 — MessageBubble: WhatsApp/Intercom density, theme-aware. */
 export function MessageBubble({
   message,
   dict,
@@ -185,18 +200,20 @@ export function MessageBubble({
     <article
       data-bubble={isOut ? "out" : "in"}
       className={cn(
-        "max-w-[min(34rem,92%)] space-y-1.5 rounded-[var(--ro-r-sm)] px-4 py-2.5 text-[0.9375rem] leading-relaxed shadow-[0_1px_0_color-mix(in_srgb,var(--ro-ink-950)_6%,transparent)]",
+        "group max-w-[min(28rem,85%)] px-3.5 py-2 text-[13.5px] leading-relaxed",
         isOut
-          ? "ms-auto bg-[var(--ro-plum-900)] text-[var(--ro-sand-100)]"
-          : "me-auto border border-ro-border bg-[var(--ro-sand-50)] text-ro-ink",
-        failed && "ring-1 ring-[var(--ro-danger-700)]"
+          ? "ms-auto rounded-[18px] rounded-ee-[6px] bg-[color:var(--ro-plum-700)] text-[var(--ro-sand-50)] shadow-[0_1px_2px_rgba(20,8,40,0.18)]"
+          : "me-auto rounded-[18px] rounded-es-[6px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-panel,var(--ro-bg-elevated))] text-[color:var(--ro-text)] shadow-[var(--ro-e2)]",
+        failed && "ring-1 ring-[color:var(--ro-danger-700)]"
       )}
     >
       <MediaBody message={message} isOut={isOut} dict={dict} />
       <footer
         className={cn(
-          "flex flex-wrap items-center gap-1.5 text-[11px]",
-          isOut ? "text-[var(--ro-sand-200)]" : "text-ro-muted"
+          "mt-1 flex flex-wrap items-center justify-end gap-1 text-[10.5px] tabular-nums",
+          isOut
+            ? "text-[color-mix(in_srgb,var(--ro-sand-100)_70%,transparent)]"
+            : "text-[color:var(--ro-text-muted)]"
         )}
       >
         <time dateTime={message.waTimestamp ?? message.createdAt}>
@@ -208,7 +225,7 @@ export function MessageBubble({
             type="button"
             onClick={retry}
             disabled={pending}
-            className="font-semibold text-[var(--ro-danger-700)] underline-offset-2 hover:underline disabled:opacity-60"
+            className="ms-1 font-semibold text-[color:var(--ro-danger-700)] underline-offset-2 hover:underline disabled:opacity-60"
           >
             {dict.inbox.retry}
           </button>
@@ -218,16 +235,13 @@ export function MessageBubble({
   );
 }
 
-/** Day separator between calendar days. */
+/** Day separator — compact chip. */
 export function MessageDaySeparator({ label }: { label: string }) {
   return (
-    <div
-      role="separator"
-      className="flex items-center gap-3 py-2 text-center text-xs text-ro-muted"
-    >
-      <span className="h-px flex-1 bg-ro-border" />
-      <span>{label}</span>
-      <span className="h-px flex-1 bg-ro-border" />
+    <div role="separator" className="flex justify-center py-3">
+      <span className="rounded-full border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-panel,var(--ro-bg-elevated))] px-3 py-1 text-[11px] font-medium text-[color:var(--ro-text-muted)] shadow-[var(--ro-e2)]">
+        {label}
+      </span>
     </div>
   );
 }

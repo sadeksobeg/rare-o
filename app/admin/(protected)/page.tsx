@@ -3,18 +3,28 @@ import {
   Boxes,
   Compass,
   Handshake,
+  Inbox,
   MessageSquare,
   Package,
   ShoppingBag,
   Store,
   Users,
 } from "lucide-react";
-import { ActionQueue } from "@/components/admin/action-queue";
+import {
+  ActionQueue,
+  type QueueFilter,
+} from "@/components/admin/action-queue";
 import { ActivityFeed } from "@/components/admin/activity-feed";
 import { DashboardAside } from "@/components/admin/dashboard-aside";
 import { DashboardDomainChartMount } from "@/components/admin/dashboard-domain-chart-mount";
+import { DashboardGreeting } from "@/components/admin/dashboard-greeting";
 import { DashboardRequestsChartMount } from "@/components/admin/dashboard-requests-chart-mount";
-import { KpiTile, type KpiTone } from "@/components/admin/kpi-tile";
+import {
+  DashboardSection,
+  DashboardStack,
+} from "@/components/admin/dashboard-section";
+import { type KpiTone } from "@/components/admin/kpi-tile";
+import { KpiStrip } from "@/components/admin/kpi-strip";
 import { ManageHub } from "@/components/admin/manage-hub";
 import { AdminQuickCreate } from "@/components/admin/quick-create";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -47,14 +57,33 @@ function whatsappPulseLabel(dict: Dictionary, state: string): string {
   }
 }
 
+function parseDomain(raw: string | undefined): QueueFilter | "brokerage" | null {
+  if (!raw) return null;
+  if (raw === "retail" || raw === "deal" || raw === "wholesale") return raw;
+  if (raw === "brokerage") return "brokerage";
+  if (raw === "all") return "all";
+  return null;
+}
+
+function queueFilterFromDomain(
+  domain: QueueFilter | "brokerage" | null
+): QueueFilter {
+  if (domain === "retail" || domain === "deal" || domain === "wholesale") {
+    return domain;
+  }
+  return "all";
+}
+
 async function AdminDashboardBody({
   locale,
   dict,
   greeting,
+  domainParam,
 }: {
   locale: Locale;
   dict: Dictionary;
   greeting: string;
+  domainParam: QueueFilter | "brokerage" | null;
 }) {
   const data = await getAdminHomeData();
   const a = dict.admin;
@@ -80,7 +109,11 @@ async function AdminDashboardBody({
     data.manageHub.customers === 0 &&
     data.actionQueue.length === 0;
 
-  const kpis: {
+  const activeId = domainParam ?? "waiting";
+  const queueFilter = queueFilterFromDomain(domainParam);
+
+  const pathKpis: {
+    id: string;
     label: string;
     value: number;
     href: string;
@@ -89,79 +122,63 @@ async function AdminDashboardBody({
     icon: ReactNode;
   }[] = [
     {
+      id: "retail",
       label: a.kpiRetail,
       value: data.kpis.retailAwaitingAdmin,
-      href: "/admin/requests?tab=waiting",
+      href: "/admin?domain=retail",
       series: data.series.retail,
       tone: "amber",
       icon: <ShoppingBag className="size-4" strokeWidth={1.5} aria-hidden />,
     },
     {
+      id: "deal",
       label: a.kpiDeals,
       value: data.kpis.dealsAwaitingAdmin,
-      href: "/admin/deals?tab=waiting",
+      href: "/admin?domain=deal",
       series: data.series.deals,
       tone: "plum",
       icon: <Handshake className="size-4" strokeWidth={1.5} aria-hidden />,
     },
     {
+      id: "wholesale",
       label: a.kpiWholesale,
       value: data.kpis.wholesaleAwaitingAdmin,
-      href: "/admin/wholesale?tab=waiting",
+      href: "/admin?domain=wholesale",
       series: data.series.wholesale,
       tone: "progress",
       icon: <Package className="size-4" strokeWidth={1.5} aria-hidden />,
     },
     {
+      id: "brokerage",
       label: a.kpiBrokerage,
       value: data.kpis.activeBrokerage,
-      href: "/admin/brokerage?status=active",
+      href: "/admin?domain=brokerage",
       tone: "success",
       icon: <Compass className="size-4" strokeWidth={1.5} aria-hidden />,
     },
   ];
 
   const waLive = data.health.state === "CONNECTED";
+  const chartDomain =
+    domainParam === "brokerage"
+      ? "brokerage"
+      : domainParam && domainParam !== "all"
+        ? domainParam
+        : null;
 
   return (
-    <div className="ro-admin-home-bleed relative flex w-full flex-col">
-      {/* 1. Full-bleed greeting ops bar */}
-      <div className="ro-admin-greeting">
-        <div className="ro-admin-home-pad relative flex flex-wrap items-end justify-between gap-3 py-4 sm:py-5">
-          <div className="min-w-0 space-y-1">
-            <p className="flex items-center gap-2 text-xs font-medium text-[color-mix(in_srgb,var(--ro-sand-100)_70%,transparent)] sm:text-sm">
-              <span className="relative inline-flex size-2 rounded-full bg-[var(--ro-success-700)]">
-                {waLive ? (
-                  <span className="absolute inset-0 animate-ping rounded-full bg-[var(--ro-success-700)] motion-reduce:animate-none" />
-                ) : null}
-              </span>
-              {whatsappPulseLabel(dict, data.health.state)}
-            </p>
-            <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[1.85rem]">
-              {greeting}
-            </h1>
-            <p className="text-sm text-[color-mix(in_srgb,var(--ro-sand-100)_68%,transparent)]">
-              {description}
-            </p>
-          </div>
-          <svg
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-6 w-full text-[color-mix(in_srgb,var(--ro-plum-300)_40%,transparent)]"
-            viewBox="0 0 1200 32"
-            preserveAspectRatio="none"
-            aria-hidden
-          >
-            <path
-              d="M0 20 C 200 4, 400 28, 600 14 S 1000 2, 1200 18"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.25"
-            />
-          </svg>
-        </div>
-      </div>
+    <DashboardStack className="ro-admin-home-bleed relative w-full">
+      <DashboardSection>
+        <DashboardGreeting
+          greeting={greeting}
+          description={description}
+          statusLabel={whatsappPulseLabel(dict, data.health.state)}
+          statusLive={waLive}
+        />
+      </DashboardSection>
 
       {isFirstUse ? (
-        <div className="ro-admin-home-pad py-3">
+        <DashboardSection className="ro-admin-home-pad py-3">
           <EmptyState
             variant="first-use"
             title={a.firstUseTitle}
@@ -169,28 +186,43 @@ async function AdminDashboardBody({
             actionHref="/admin/products/new"
             actionLabel={a.firstUseAction}
           />
-        </div>
+        </DashboardSection>
       ) : null}
 
-      {/* 2. Edge-to-edge KPI strip */}
-      <div className="ro-admin-kpi-strip">
-        {kpis.map((kpi) => (
-          <KpiTile
-            key={kpi.href + kpi.label}
-            label={kpi.label}
-            value={kpi.value}
-            href={kpi.href}
-            idleLabel={a.kpiIdle}
-            icon={kpi.icon}
-            series={kpi.series}
-            tone={kpi.tone}
-            className="rounded-none border-0 p-4 sm:p-5"
-          />
-        ))}
-      </div>
+      <DashboardSection>
+        <KpiStrip
+          activeId={activeId}
+          hero={{
+            id: "waiting",
+            label: a.kpiWaitingTotal,
+            value: waiting,
+            href: "/admin",
+            idleLabel: a.kpiIdle,
+            tone: "plum",
+            icon: <Inbox className="size-4" strokeWidth={1.5} aria-hidden />,
+            series:
+              data.requestsTrend.points.length >= 7
+                ? {
+                    points: data.requestsTrend.points,
+                    today:
+                      data.requestsTrend.points[
+                        data.requestsTrend.points.length - 1
+                      ] ?? 0,
+                    yesterday:
+                      data.requestsTrend.points[
+                        data.requestsTrend.points.length - 2
+                      ] ?? 0,
+                  }
+                : undefined,
+          }}
+          items={pathKpis.map((kpi) => ({
+            ...kpi,
+            idleLabel: a.kpiIdle,
+          }))}
+        />
+      </DashboardSection>
 
-      {/* 3. Hero queue + supporting charts */}
-      <div className="ro-admin-home-pad grid items-stretch gap-3 py-3 lg:grid-cols-12 lg:gap-4 lg:py-4">
+      <DashboardSection className="ro-admin-home-pad grid items-stretch gap-3 py-3 lg:grid-cols-12 lg:gap-4 lg:py-4">
         <ActionQueue
           rows={data.actionQueue}
           counts={{
@@ -198,6 +230,7 @@ async function AdminDashboardBody({
             deal: data.kpis.dealsAwaitingAdmin,
             wholesale: data.kpis.wholesaleAwaitingAdmin,
           }}
+          filter={queueFilter}
           dict={dict}
           locale={locale}
           className="min-h-[22rem] lg:col-span-8"
@@ -208,6 +241,7 @@ async function AdminDashboardBody({
             totalLabel={a.requestsOverDaysTotal}
             points={data.requestsTrend.points}
             total={data.requestsTrend.total}
+            highlightDomain={chartDomain}
             emptyTitle={a.firstUseTitle}
             emptyBody={a.firstUseBody}
             emptyActionHref="/admin/products/new"
@@ -215,6 +249,7 @@ async function AdminDashboardBody({
           />
           <DashboardDomainChartMount
             title={a.domainMixTitle}
+            highlightDomain={chartDomain}
             emptyTitle={a.firstUseTitle}
             emptyBody={a.firstUseBody}
             emptyActionHref="/admin/products/new"
@@ -247,7 +282,7 @@ async function AdminDashboardBody({
             ]}
           />
         </div>
-      </div>
+      </DashboardSection>
 
       <AdminQuickCreate
         label={a.quickCreate}
@@ -264,8 +299,7 @@ async function AdminDashboardBody({
         ]}
       />
 
-      {/* 4. Dense ops footer */}
-      <div className="ro-admin-home-pad space-y-3 border-t border-[color:var(--ro-border-subtle)] py-3 pb-24 lg:pb-4">
+      <DashboardSection className="ro-admin-home-pad space-y-3 border-t border-[color:var(--ro-border-subtle)] py-3 pb-24 lg:pb-4">
         <ManageHub
           title={a.manageHub}
           items={[
@@ -313,15 +347,54 @@ async function AdminDashboardBody({
             className="lg:col-span-7"
           />
         </div>
+      </DashboardSection>
+    </DashboardStack>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="ro-admin-home-bleed" aria-busy="true">
+      <div className="ro-admin-greeting h-[7.5rem] sm:h-[8.25rem]" />
+      <div className="ro-admin-kpi-stack">
+        <div className="ro-admin-kpi-hero">
+          <div className="h-[7.5rem] rounded-[1rem] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)]" />
+        </div>
+        <div className="ro-admin-kpi-strip">
+          <div className="ro-admin-kpi-cell h-[9.5rem] rounded-[1rem] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)]" />
+          <div className="ro-admin-kpi-cell h-[9.5rem] rounded-[1rem] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)]" />
+          <div className="ro-admin-kpi-cell h-[9.5rem] rounded-[1rem] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)]" />
+          <div className="ro-admin-kpi-cell h-[9.5rem] rounded-[1rem] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)]" />
+        </div>
+      </div>
+      <div className="ro-admin-home-pad grid gap-3 py-3 lg:grid-cols-12">
+        <div className="min-h-[22rem] rounded-[var(--ro-r-lg)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] lg:col-span-8" />
+        <div className="grid gap-3 lg:col-span-4">
+          <div className="h-[220px] rounded-[var(--ro-r-lg)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)]" />
+          <div className="h-[200px] rounded-[var(--ro-r-lg)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)]" />
+        </div>
+      </div>
+      <div className="ro-admin-home-pad space-y-3 border-t border-[color:var(--ro-border-subtle)] py-3">
+        <div className="h-16 rounded-[var(--ro-r-lg)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)]" />
+        <div className="grid gap-3 lg:grid-cols-12">
+          <div className="h-40 rounded-[var(--ro-r-lg)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] lg:col-span-5" />
+          <div className="h-56 rounded-[var(--ro-r-lg)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] lg:col-span-7" />
+        </div>
       </div>
     </div>
   );
 }
 
-export default async function AdminDashboardPage() {
+export default async function AdminDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ domain?: string }>;
+}) {
   const { locale, dict } = await getRequestDictionary();
   const session = await getAdminSessionChrome();
   const greeting = greetingHeadline(session?.name, dict.common);
+  const { domain: domainRaw } = await searchParams;
+  const domainParam = parseDomain(domainRaw);
 
   return (
     <section
@@ -329,20 +402,13 @@ export default async function AdminDashboardPage() {
       className="relative w-full min-w-0 max-w-none"
       style={{ width: "100%", maxWidth: "none" }}
     >
-      <Suspense
-        fallback={
-          <div className="ro-admin-home-bleed">
-            <div className="ro-admin-greeting h-24" />
-            <div className="ro-admin-kpi-strip">
-              <div className="h-[7.25rem]" />
-              <div className="h-[7.25rem]" />
-              <div className="h-[7.25rem]" />
-              <div className="h-[7.25rem]" />
-            </div>
-          </div>
-        }
-      >
-        <AdminDashboardBody locale={locale} dict={dict} greeting={greeting} />
+      <Suspense fallback={<DashboardSkeleton />}>
+        <AdminDashboardBody
+          locale={locale}
+          dict={dict}
+          greeting={greeting}
+          domainParam={domainParam}
+        />
       </Suspense>
     </section>
   );

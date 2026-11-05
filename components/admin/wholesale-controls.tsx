@@ -6,6 +6,7 @@ import {
   adminUpdateWholesaleShippingAction,
 } from "@/app/wholesale-actions";
 import { Button } from "@/components/ui/button";
+import { CurrencySelect } from "@/components/ui/currency-select";
 import { Select } from "@/components/ui/select";
 import { TextField, Textarea } from "@/components/ui/text-field";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -126,13 +127,15 @@ export function AdminWholesaleControls({
           <p className="text-sm text-ro-muted">{f.quoteHint}</p>
           <input type="hidden" name="requestId" value={requestId} />
           <input type="hidden" name="lineQuotesJson" value={lineQuotesJson} />
-          <TextField
+          <CurrencySelect
             name="quoteCurrency"
-            label={f.quoteCurrency}
             required
-            dir="ltr"
             defaultValue={quoteCurrencyDefault}
-            dense
+            labels={{
+              currency: f.quoteCurrency,
+              currencyUsd: f.currencyUsd,
+              currencySyp: f.currencySyp,
+            }}
             className="max-w-xs"
           />
           <div className="space-y-2">

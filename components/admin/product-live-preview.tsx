@@ -25,23 +25,27 @@ export function ProductLivePreview({
   return (
     <aside
       className={cn(
-        "sticky top-20 space-y-3 rounded-[var(--ro-r-lg)] border border-ro-line bg-ro-surface p-4",
+        "ro-catalog-tile sticky top-20 space-y-3 p-4",
         className
       )}
     >
-      <h2 className="font-display text-sm font-semibold text-ro-ink">{title}</h2>
-      <div className="overflow-hidden rounded-[var(--ro-r-md)] border border-[color-mix(in_srgb,var(--ro-plum-900)_12%,transparent)] bg-[var(--ro-sand-100)]">
-        <div className="flex aspect-[4/5] items-center justify-center bg-[linear-gradient(160deg,var(--ro-plum-100),var(--ro-sand-200))] text-xs text-ro-muted">
+      <h2 className="font-display text-sm font-semibold text-[color:var(--ro-text)]">
+        {title}
+      </h2>
+      <div className="overflow-hidden rounded-[12px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-sunken)]">
+        <div className="ro-catalog-tile-media flex aspect-[4/5] items-center justify-center text-xs text-[color:var(--ro-text-muted)]">
           {imageHint}
         </div>
-        <div className="space-y-1 p-3">
-          <p className="font-display text-base font-semibold text-ro-ink">
+        <div className="space-y-1.5 p-3">
+          <p className="font-display text-base font-semibold leading-snug text-[color:var(--ro-text)]">
             {name}
           </p>
-          <p className="text-sm tabular-nums text-[var(--ro-plum-900)]">
+          <p className="text-sm font-semibold tabular-nums text-[color:var(--ro-accent-fg,var(--ro-plum-800))]">
             {priceLabel}
           </p>
-          <p className="text-xs text-ro-muted">{statusLabel}</p>
+          <p className="text-xs text-[color:var(--ro-text-muted)]">
+            {statusLabel}
+          </p>
         </div>
       </div>
     </aside>

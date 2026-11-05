@@ -99,7 +99,15 @@ export function CategoriesManager({
 
   return (
     <div className="space-y-4">
-      <div id="category-create" className="flex scroll-mt-20 justify-end">
+      <div
+        id="category-create"
+        className="flex scroll-mt-20 flex-wrap items-center justify-between gap-3 rounded-[14px] border border-[color:var(--ro-border-subtle)] bg-[color:color-mix(in_srgb,var(--ro-bg-raised)_92%,transparent)] p-3 shadow-[var(--ro-e2)] backdrop-blur-md sm:p-3.5"
+      >
+        <p className="text-xs text-[color:var(--ro-text-muted)]">
+          {locale === "ar"
+            ? "اسحب البطاقات لإعادة الترتيب — يُحفظ تلقائياً"
+            : "Drag cards to reorder — saves automatically"}
+        </p>
         <Button
           type="button"
           size="sm"
@@ -120,7 +128,7 @@ export function CategoriesManager({
         />
       ) : (
         <>
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {ordered.map((r, index) => (
               <li
                 key={r.id}
@@ -145,27 +153,37 @@ export function CategoriesManager({
                   });
                 }}
                 className={cn(
-                  "ro-portal-card cursor-grab border p-4 active:cursor-grabbing",
+                  "ro-catalog-tile cursor-grab p-4 active:cursor-grabbing",
                   dragId === r.id && "opacity-60",
                   reordering && "pointer-events-none"
                 )}
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 space-y-1">
-                    <p className="font-display text-lg font-semibold text-ro-ink">
-                      {display(r)}
-                    </p>
-                    <p className="text-xs text-ro-muted" dir="ltr">
+                  <div className="min-w-0 space-y-1.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-display text-lg font-semibold text-[color:var(--ro-text)]">
+                        {display(r)}
+                      </p>
+                      {r.isLaunch ? (
+                        <span className="rounded-md bg-[color:color-mix(in_srgb,var(--ro-accent-fg,var(--ro-plum-700))_14%,transparent)] px-2 py-0.5 text-[0.65rem] font-semibold text-[color:var(--ro-accent-fg)]">
+                          {locale === "ar" ? "إطلاق" : "Launch"}
+                        </span>
+                      ) : null}
+                    </div>
+                    <p
+                      className="text-xs text-[color:var(--ro-text-muted)]"
+                      dir="ltr"
+                    >
                       {r.slug}
                     </p>
-                    <p className="text-xs text-ro-muted">
-                      {u.categoryProducts}: {r.productCount}
+                    <p className="text-xs font-medium text-[color:var(--ro-text-2)]">
+                      {u.categoryProducts}:{" "}
+                      <span className="tabular-nums text-[color:var(--ro-text)]">
+                        {r.productCount}
+                      </span>
                     </p>
                   </div>
-                  <span
-                    aria-hidden
-                    className="flex size-12 items-center justify-center rounded-full bg-[var(--ro-plum-100)] font-display text-lg font-semibold text-[var(--ro-plum-900)]"
-                  >
+                  <span aria-hidden className="ro-catalog-monogram shrink-0">
                     {(display(r) || "?").slice(0, 1)}
                   </span>
                 </div>
@@ -282,7 +300,10 @@ function CategoryForm({
           pattern="[a-z0-9]+(-[a-z0-9]+)*"
         />
       ) : (
-        <p className="text-xs text-ro-muted" dir="ltr">
+        <p
+          className="text-xs text-[color:var(--ro-text-muted)]"
+          dir="ltr"
+        >
           {u.categorySlug}: {row?.slug}
         </p>
       )}
