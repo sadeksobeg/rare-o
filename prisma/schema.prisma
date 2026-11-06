@@ -372,6 +372,14 @@ model WholesaleRequest {
   shippingCostAmount   Decimal?
   shippingCostCurrency String?
   shippingWeightKg     Decimal?
+  /// Stored/generated WhatsApp prefilled message text, built once the
+  /// request reaches "confirmed" (trader accepted a quote, or admin
+  /// confirmed a propose_price request)
+  handoffMessageText   String?
+  /// Built wa.me deep link — no WhatsApp Business API
+  whatsAppDeepLink     String?
+  handoffPreparedAt    DateTime?
+  handoffOpenedAt      DateTime?
   /// D37b / Appendix S 8.3 — shipping fulfillment (nullable until set)
   carrier              String?
   trackingReference    String?

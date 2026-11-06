@@ -14,6 +14,79 @@ import {
   type WholesaleStatus,
 } from "@/lib/wholesale/constants";
 
+/**
+ * Builds and persists the WhatsApp handoff for a just-confirmed wholesale
+ * request. Best-effort: a missing WHATSAPP_BUSINESS_E164 must not block the
+ * status transition that already committed — the request stays "confirmed"
+ * and an admin can still reach the trader directly; this only skips the
+ * prefilled deep link.
+ */
+async function prepareWholesaleHandoffForRequest(
+  requestId: string,
+  locale: "ar" | "en"
+): Promise<void> {
+  try {
+    const request = await prisma.wholesaleRequest.findUnique({
+      where: { id: requestId },
+      include: {
+        lines: true,
+        trader: { select: { displayName: true, companyName: true, phone: true } },
+      },
+    });
+    if (!request) return;
+
+    const { buildWholesaleHandoffMessage, prepareWholesaleHandoff } =
+      await import("@/lib/whatsapp/wholesale-handoff");
+
+    const messageText = buildWholesaleHandoffMessage({
+      locale,
+      reference: request.reference,
+      requestMode: request.requestMode as WholesaleRequestMode,
+      traderName: request.trader.displayName,
+      traderCompany: request.trader.companyName,
+      traderPhone: request.trader.phone,
+      lines: request.lines.map((l) => ({
+        nameAr: l.productNameAr,
+        nameEn: l.productNameEn,
+        quantity: l.quantity,
+        unitPrice:
+          l.quotedUnitPrice != null
+            ? Number(l.quotedUnitPrice)
+            : l.proposedUnitPrice != null
+              ? Number(l.proposedUnitPrice)
+              : null,
+        currency: l.currency,
+      })),
+      quoteMessage: request.quoteMessage,
+      destinationCountry: request.destinationCountry,
+      shippingMethodLabel: request.shippingMethodLabel,
+      shippingCost:
+        request.shippingCostAmount != null && request.shippingCostCurrency
+          ? {
+              amount: Number(request.shippingCostAmount),
+              currency: request.shippingCostCurrency,
+            }
+          : null,
+      traderNotes: request.traderNotes,
+    });
+
+    const prepared = prepareWholesaleHandoff(messageText);
+    await prisma.wholesaleRequest.update({
+      where: { id: request.id },
+      data: {
+        handoffMessageText: prepared.messageText,
+        whatsAppDeepLink: prepared.deepLink,
+        handoffPreparedAt: new Date(),
+      },
+    });
+  } catch (err) {
+    console.error(
+      "[wholesale] handoff preparation failed (status transition already committed):",
+      err instanceof Error ? err.message : err
+    );
+  }
+}
+
 function buildReference(now = new Date()): string {
   const y = now.getUTCFullYear();
   const n = Math.floor(Math.random() * 9000) + 1000;
@@ -207,6 +280,21 @@ export async function createWholesaleRequest(input: CreateWholesaleRequestInput)
   });
 }
 
+export async function markWholesaleHandoffOpened(input: {
+  requestId: string;
+  traderId: string;
+}) {
+  const request = await prisma.wholesaleRequest.findFirst({
+    where: { id: input.requestId, traderId: input.traderId },
+  });
+  if (!request) throw new Error("REQUEST_NOT_FOUND");
+  if (request.handoffOpenedAt) return request;
+  return prisma.wholesaleRequest.update({
+    where: { id: input.requestId },
+    data: { handoffOpenedAt: new Date() },
+  });
+}
+
 /** Ownership-scoped fetch — prevents IDOR */
 export async function getWholesaleRequestForTrader(
   requestId: string,
@@ -275,6 +363,7 @@ export async function adminTransitionWholesaleStatus(input: {
   toStatus: WholesaleStatus;
   actorAdminId: string;
   note?: string;
+  locale?: "ar" | "en";
 }) {
   const request = await prisma.wholesaleRequest.findUnique({
     where: { id: input.requestId },
@@ -323,6 +412,10 @@ export async function adminTransitionWholesaleStatus(input: {
     },
     include: { lines: true, events: { orderBy: { createdAt: "asc" } } },
   });
+
+  if (input.toStatus === "confirmed") {
+    await prepareWholesaleHandoffForRequest(updated.id, input.locale ?? "ar");
+  }
 
   const statusAr =
     getDictionary("ar").trader.wholesaleStatus[input.toStatus] ?? input.toStatus;
@@ -448,6 +541,7 @@ export async function traderRespondToWholesaleQuote(input: {
   traderId: string;
   accept: boolean;
   note?: string;
+  locale?: "ar" | "en";
 }) {
   const request = await prisma.wholesaleRequest.findFirst({
     where: { id: input.requestId, traderId: input.traderId },
@@ -460,7 +554,7 @@ export async function traderRespondToWholesaleQuote(input: {
   const to: WholesaleStatus = input.accept ? "confirmed" : "cancelled";
   const now = new Date();
 
-  return prisma.wholesaleRequest.update({
+  const updated = await prisma.wholesaleRequest.update({
     where: { id: request.id },
     data: {
       status: to,
@@ -480,6 +574,12 @@ export async function traderRespondToWholesaleQuote(input: {
     },
     include: { lines: true, events: { orderBy: { createdAt: "asc" } } },
   });
+
+  if (input.accept && updated.status === "confirmed") {
+    await prepareWholesaleHandoffForRequest(updated.id, input.locale ?? "ar");
+  }
+
+  return updated;
 }
 
 export async function traderCancelWholesaleRequest(input: {

@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { MessageCircle } from "lucide-react";
 import { traderOpenDealHandoffAction } from "@/app/deal-actions";
 import { traderOpenBrokerageHandoffAction } from "@/app/brokerage-actions";
+import { traderOpenWholesaleHandoffAction } from "@/app/wholesale-actions";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -20,7 +21,7 @@ export function PaymentHandoffCard({
   deepLink,
   messageText,
 }: {
-  kind: "deal" | "brokerage";
+  kind: "deal" | "brokerage" | "wholesale";
   recordId: string;
   title: string;
   body: string;
@@ -57,9 +58,12 @@ export function PaymentHandoffCard({
               if (kind === "deal") {
                 fd.set("dealId", recordId);
                 await traderOpenDealHandoffAction(fd);
-              } else {
+              } else if (kind === "brokerage") {
                 fd.set("id", recordId);
                 await traderOpenBrokerageHandoffAction(fd);
+              } else {
+                fd.set("requestId", recordId);
+                await traderOpenWholesaleHandoffAction(fd);
               }
             });
           }}

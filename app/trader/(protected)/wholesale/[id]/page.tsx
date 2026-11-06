@@ -1,3 +1,4 @@
+import { PaymentHandoffCard } from "@/components/trader/payment-handoff-card";
 import { QuoteCard } from "@/components/trader/quote-card";
 import { TraderPageHeader } from "@/components/trader/page-header";
 import { TraderWholesaleActions } from "@/components/trader/wholesale-actions";
@@ -41,11 +42,11 @@ export default async function TraderWholesaleDetailPage({
   const hasQuote = Boolean(request.quoteMessage || request.quotedAt);
 
   return (
-    <section className="ro-portal-stagger space-y-8">
+    <section className="ro-portal-stagger space-y-5 sm:space-y-6">
       <TraderPageHeader
         title={t.wsDetailTitle}
-        description={request.reference}
-        icon={<Package className="size-5" strokeWidth={2} />}
+        description={`${request.reference} · ${t.requestMode[request.requestMode] ?? request.requestMode}`}
+        icon={<Package className="size-5" strokeWidth={1.5} />}
         backHref="/trader/wholesale/requests"
         backLabel={t.wsMyRequests}
         action={
@@ -55,13 +56,25 @@ export default async function TraderWholesaleDetailPage({
           />
         }
       />
-      <p className="text-sm font-semibold text-ro-muted">
-        {t.requestMode[request.requestMode] ?? request.requestMode}
-      </p>
-      <StatusStepper domain="wholesale" current={request.status} dict={dict} />
+      <div className="ro-portal-card border p-3 sm:p-4">
+        <StatusStepper domain="wholesale" current={request.status} dict={dict} />
+      </div>
 
       {meta.nextActor === "trader" ? (
         <Banner tone="attention">{t.wsQuoteBanner}</Banner>
+      ) : null}
+
+      {request.status === "confirmed" ? (
+        <PaymentHandoffCard
+          kind="wholesale"
+          recordId={request.id}
+          title={t.wsHandoffTitle}
+          body={t.wsHandoffBody}
+          openLabel={t.wsHandoffOpenWa}
+          unavailableLabel={t.wsHandoffUnavailable}
+          deepLink={request.whatsAppDeepLink}
+          messageText={request.handoffMessageText}
+        />
       ) : null}
 
       {request.traderNotes ? (

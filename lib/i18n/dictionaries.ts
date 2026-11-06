@@ -978,6 +978,10 @@ type Dict = {
     dealPayOpenWa: string;
     dealPayUnavailable: string;
     dealPayConfirmed: string;
+    wsHandoffTitle: string;
+    wsHandoffBody: string;
+    wsHandoffOpenWa: string;
+    wsHandoffUnavailable: string;
     brokeragePayTitle: string;
     brokeragePayBody: string;
     negCounterPriceLocked: string;
@@ -2479,6 +2483,12 @@ const ar: Dict = {
     dealPayUnavailable:
       "رابط واتساب غير جاهز بعد — تواصل مع الإدارة أو أعد المحاولة لاحقاً.",
     dealPayConfirmed: "أكدت الإدارة استلام الدفع واكتمال الطلب.",
+    wsHandoffTitle: "أكمل طلب الجملة عبر واتساب",
+    wsHandoffBody:
+      "افتح واتساب وأرسل رسالة تأكيد الطلب المعدّة إلى فريق RARE OUD لإتمام تفاصيل الدفع والتسليم.",
+    wsHandoffOpenWa: "فتح واتساب لتأكيد الطلب",
+    wsHandoffUnavailable:
+      "رابط واتساب غير جاهز بعد — تواصل مع الإدارة أو أعد المحاولة لاحقاً.",
     brokeragePayTitle: "ادفع عبر واتساب لإكمال الوساطة",
     brokeragePayBody:
       "افتح واتساب وأتمّ التحويل. بعد تأكيد الإدارة تُفتح بقية مراحل الوساطة.",
@@ -4009,6 +4019,12 @@ const en: Dict = {
     dealPayUnavailable:
       "WhatsApp link is not ready yet — contact admin or try again later.",
     dealPayConfirmed: "Admin confirmed payment and completed the order.",
+    wsHandoffTitle: "Complete your wholesale order via WhatsApp",
+    wsHandoffBody:
+      "Open WhatsApp and send the prepared confirmation message to the RARE OUD team to finalize payment and delivery details.",
+    wsHandoffOpenWa: "Open WhatsApp to confirm",
+    wsHandoffUnavailable:
+      "WhatsApp link is not ready yet — contact admin or try again later.",
     brokeragePayTitle: "Pay via WhatsApp to continue brokerage",
     brokeragePayBody:
       "Open WhatsApp and complete the transfer. After admin confirmation, remaining brokerage stages unlock.",
