@@ -211,21 +211,19 @@ export function InboxComposer({
     if (discard) chunksRef.current = [];
   }
 
-  function disabledReason(): string | null {
-    if (
-      connectionState === "DISCONNECTED" ||
-      connectionState === "ERROR" ||
-      connectionState === "AUTHENTICATION_REQUIRED" ||
-      connectionState === "CONNECTING" ||
-      connectionState === "RECONNECTING"
-    ) {
-      return i.disconnected;
-    }
-    if (!outboundEnabled) return i.sendingPaused;
-    return null;
-  }
-
-  const blockReason = disabledReason();
+  // Real WhatsApp isn't reachable right now (no connection, or the outbound
+  // kill switch is off) — media/voice still has nowhere to go, but text
+  // falls back to the platform channel (same thread the trader already
+  // reads), so it stays enabled with an informational notice instead of a
+  // hard block.
+  const whatsappUnavailable =
+    connectionState === "DISCONNECTED" ||
+    connectionState === "ERROR" ||
+    connectionState === "AUTHENTICATION_REQUIRED" ||
+    connectionState === "CONNECTING" ||
+    connectionState === "RECONNECTING" ||
+    !outboundEnabled;
+  const mediaBlockReason = whatsappUnavailable ? i.sendingPaused : null;
 
   function ensureClientRequestId(): string {
     if (!clientRequestIdRef.current) {
@@ -238,7 +236,7 @@ export function InboxComposer({
   }
 
   function sendMediaFile(next: File, nextCaption?: string) {
-    if (blockReason || pending || submittingRef.current) return;
+    if (mediaBlockReason || pending || submittingRef.current) return;
     submittingRef.current = true;
     const fd = new FormData();
     fd.set("conversationId", conversationId);
@@ -267,7 +265,7 @@ export function InboxComposer({
   }
 
   function submit() {
-    if (blockReason || pending || submittingRef.current || recording) return;
+    if (pending || submittingRef.current || recording) return;
     if (file) {
       sendMediaFile(file, caption);
       return;
@@ -312,7 +310,7 @@ export function InboxComposer({
   }
 
   async function startRecording() {
-    if (blockReason || pending || recording || file) return;
+    if (mediaBlockReason || pending || recording || file) return;
     if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
       setError(i.voiceDenied);
       return;
@@ -391,17 +389,6 @@ export function InboxComposer({
     }
   }
 
-  if (blockReason) {
-    return (
-      <div
-        data-inbox-composer="disabled"
-        className="rounded-[12px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-sunken)] px-3 py-2.5 text-xs font-medium text-[color:var(--ro-text-muted)]"
-      >
-        {blockReason}
-      </div>
-    );
-  }
-
   const quickReplies = [
     { key: "g", full: i.quickReplyGreeting, short: i.quickReplyGreeting.slice(0, 18) },
     { key: "f", full: i.quickReplyFollowUp, short: i.quickReplyFollowUp.slice(0, 18) },
@@ -417,6 +404,15 @@ export function InboxComposer({
       style={keyboardInset ? { marginBottom: keyboardInset } : undefined}
       onSubmit={onSubmit}
     >
+      {mediaBlockReason ? (
+        <p
+          data-inbox-composer="platform-fallback-notice"
+          className="rounded-[10px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-sunken)] px-2.5 py-1.5 text-[11px] font-medium text-[color:var(--ro-text-muted)]"
+        >
+          {i.platformFallbackNotice}
+        </p>
+      ) : null}
+
       {!recording && !file ? (
         <div
           className="flex gap-1.5 overflow-x-auto pb-0.5"
@@ -522,7 +518,7 @@ export function InboxComposer({
           />
           <button
             type="button"
-            disabled={pending}
+            disabled={pending || !!mediaBlockReason}
             onClick={() => fileRef.current?.click()}
             className="inline-flex size-9 shrink-0 items-center justify-center rounded-full text-[color:var(--ro-text-muted)] transition-[background-color,color] hover:bg-[color:var(--ro-panel-hover)] hover:text-[color:var(--ro-text)] disabled:opacity-45"
             aria-label={i.attachFile}
@@ -567,7 +563,7 @@ export function InboxComposer({
             {micSupported && !file && !text.trim() ? (
               <button
                 type="button"
-                disabled={pending}
+                disabled={pending || !!mediaBlockReason}
                 onClick={() => void startRecording()}
                 className="inline-flex size-9 items-center justify-center rounded-full text-[color:var(--ro-text-muted)] transition-[background-color,color] hover:bg-[color:var(--ro-panel-hover)] hover:text-[color:var(--ro-accent-fg,var(--ro-plum-700))] disabled:opacity-45"
                 aria-label={i.voiceRecord}

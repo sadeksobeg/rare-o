@@ -18,6 +18,7 @@ import {
   enqueueOutboundMedia,
   enqueueOutboundText,
 } from "@/lib/whatsapp/messaging/service";
+import { sendAdminPlatformMessage } from "@/lib/whatsapp/messaging/trader-channel";
 import {
   applyFakeLogout,
   applyFakePairing,
@@ -160,7 +161,29 @@ export async function adminSendWhatsAppTextAction(
 
   if (!result.ok) {
     if (result.code === "OUTBOUND_DISABLED") {
-      return { ok: false, error: "OUTBOUND_DISABLED" };
+      // Real WhatsApp send is unavailable (kill switch or no connection) —
+      // fall back to the same platform channel the trader portal already
+      // writes into, so the admin can still reply. Same conversation, same
+      // thread the trader already reads; never a second inbox.
+      const platformResult = await sendAdminPlatformMessage({
+        conversationId: conversation.id,
+        adminId: session.sub,
+        text,
+      });
+      if (!platformResult.ok) {
+        return { ok: false, error: platformResult.error };
+      }
+      revalidatePath("/admin/inbox");
+      revalidatePath(`/admin/inbox/${conversationId}`);
+      return {
+        ok: true,
+        data: {
+          messageId: platformResult.messageId,
+          conversationId: platformResult.conversationId,
+          status: "sent",
+          duplicate: false,
+        },
+      };
     }
     if (
       result.code === "RATE_LIMITED" ||

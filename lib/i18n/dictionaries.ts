@@ -1196,6 +1196,7 @@ type Dict = {
     authRequired: string;
     error: string;
     sendingPaused: string;
+    platformFallbackNotice: string;
     rateLimited: string;
     linkAccount: string;
     reconnect: string;
@@ -2722,6 +2723,8 @@ const ar: Dict = {
     authRequired: "يتطلب ربط الحساب",
     error: "خطأ في الاتصال",
     sendingPaused: "الإرسال عبر واتساب متوقف مؤقتاً",
+    platformFallbackNotice:
+      "واتساب غير متصل — ستصل رسالتك للتاجر فوراً عبر رسائل المنصة (يظهر له إشعار ضمن حسابه).",
     rateLimited: "تم بلوغ حد الإرسال، حاول بعد قليل",
     linkAccount: "ربط الحساب",
     reconnect: "إعادة الاتصال",
@@ -4280,6 +4283,8 @@ const en: Dict = {
     authRequired: "Account linking required",
     error: "Connection error",
     sendingPaused: "WhatsApp sending is temporarily paused",
+    platformFallbackNotice:
+      "WhatsApp isn't connected — your message reaches the trader right away through platform messages (shown in their account).",
     rateLimited: "Sending limit reached, try again shortly",
     linkAccount: "Link account",
     reconnect: "Reconnect",

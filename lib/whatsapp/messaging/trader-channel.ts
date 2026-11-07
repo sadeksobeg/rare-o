@@ -177,3 +177,82 @@ export async function sendTraderPlatformMessage(
 
   return { ok: true, messageId: result.id };
 }
+
+export type SendAdminPlatformMessageResult =
+  | { ok: true; messageId: string; conversationId: string }
+  | { ok: false; error: "EMPTY_TEXT" | "TEXT_TOO_LONG" | "NOT_FOUND" };
+
+/**
+ * Admin → trader, in-app — the mirror of sendTraderPlatformMessage. Used as
+ * the automatic fallback when real WhatsApp outbound is unavailable
+ * (WHATSAPP_OUTBOUND_ENABLED=false or the adapter isn't connected), so the
+ * admin can still reply instead of hitting a dead end. Writes into the same
+ * conversation the admin was already looking at — never creates a second
+ * thread — and bumps traderUnreadCount so the trader portal can surface it.
+ */
+export async function sendAdminPlatformMessage(
+  input: { conversationId: string; adminId: string; text: string },
+  db: DbClient = defaultPrisma
+): Promise<SendAdminPlatformMessageResult> {
+  const text = input.text.trim();
+  if (!text) return { ok: false, error: "EMPTY_TEXT" };
+  if (text.length > MAX_OUTBOUND_TEXT_LENGTH) {
+    return { ok: false, error: "TEXT_TOO_LONG" };
+  }
+
+  const conversation = await db.whatsAppConversation.findUnique({
+    where: { id: input.conversationId },
+    select: { id: true },
+  });
+  if (!conversation) return { ok: false, error: "NOT_FOUND" };
+
+  const now = new Date();
+  const result = await db.$transaction(async (tx) => {
+    const message = await tx.whatsAppMessage.create({
+      data: {
+        conversationId: conversation.id,
+        direction: "outbound",
+        channel: "platform",
+        messageType: "text",
+        body: text,
+        status: "sent",
+        waTimestamp: now,
+        adminId: input.adminId,
+      },
+    });
+    await tx.whatsAppConversation.update({
+      where: { id: conversation.id },
+      data: {
+        lastMessageAt: now,
+        lastMessagePreview: previewOf(text),
+        traderUnreadCount: { increment: 1 },
+      },
+    });
+    return message;
+  });
+
+  return { ok: true, messageId: result.id, conversationId: conversation.id };
+}
+
+/** Clears the trader-facing unread counter — called when the trader opens the thread. */
+export async function markTraderMessagesRead(
+  traderId: string,
+  db: DbClient = defaultPrisma
+): Promise<void> {
+  await db.whatsAppConversation.updateMany({
+    where: { traderId, traderUnreadCount: { gt: 0 } },
+    data: { traderUnreadCount: 0 },
+  });
+}
+
+/** Trader-nav badge count — 0 if the trader has no conversation yet. */
+export async function getTraderUnreadCount(
+  traderId: string,
+  db: DbClient = defaultPrisma
+): Promise<number> {
+  const row = await db.whatsAppConversation.findFirst({
+    where: { traderId },
+    select: { traderUnreadCount: true },
+  });
+  return row?.traderUnreadCount ?? 0;
+}

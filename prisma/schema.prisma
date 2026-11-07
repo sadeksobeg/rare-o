@@ -445,6 +445,9 @@ model WhatsAppConversation {
   lastMessageAt      DateTime?
   lastMessagePreview String              @default("")
   unreadCount        Int                 @default(0)
+  /// Unread-for-trader counter — mirrors unreadCount (unread-for-admin) for
+  /// outbound platform-channel messages the trader hasn't opened yet.
+  traderUnreadCount  Int                 @default(0)
   /// none | retail_request | deal_proposal | wholesale_request | brokerage_request
   linkType           String              @default("none")
   /// Domain record id when linked; null when linkType=none

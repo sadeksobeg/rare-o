@@ -23,6 +23,7 @@ import { getTraderSession } from "@/lib/auth/trader-session";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { countUnreadTraderNotifications } from "@/lib/trader/notifications";
 import { getTraderWaitingCounts } from "@/lib/trader/waiting-counts";
+import { getTraderUnreadCount } from "@/lib/whatsapp/messaging/trader-channel";
 import { redirect } from "next/navigation";
 
 export async function TraderShell({ children }: { children: React.ReactNode }) {
@@ -30,9 +31,10 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
   if (!session) redirect("/trader/login");
 
   const { locale, dict } = await getRequestDictionary();
-  const [unreadNotifications, waiting] = await Promise.all([
+  const [unreadNotifications, waiting, unreadMessages] = await Promise.all([
     countUnreadTraderNotifications(session.sub),
     getTraderWaitingCounts(session.sub),
+    getTraderUnreadCount(session.sub),
   ]);
 
   /** VISION program: 5 tabs — Home · Deals · Wholesale · Brokerage · Account */
@@ -123,6 +125,10 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
                       aria-hidden
                     />
                   </span>
+                  <ChromeBadge
+                    value={unreadMessages}
+                    className="absolute end-0.5 top-0.5 flex min-w-[1.05rem] items-center justify-center rounded-full bg-[var(--ro-plum-900)] px-1 text-[0.6rem] font-bold text-[var(--ro-sand-50)]"
+                  />
                 </ChromeIconButton>
                 <ChromeIconButton
                   href="/trader/notifications"
