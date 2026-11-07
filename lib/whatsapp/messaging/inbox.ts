@@ -41,6 +41,8 @@ export type InboxConversationListItem = {
 export type InboxMessageItem = {
   id: string;
   direction: "inbound" | "outbound";
+  /** whatsapp | platform — see WhatsAppMessage.channel */
+  channel: string;
   messageType: string;
   body: string;
   caption: string | null;
@@ -243,6 +245,7 @@ export async function getInboxConversation(
       return {
         id: m.id,
         direction: m.direction as "inbound" | "outbound",
+        channel: m.channel,
         messageType: m.messageType,
         body: m.body,
         caption: m.caption,

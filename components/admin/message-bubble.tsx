@@ -235,6 +235,18 @@ export function MessageBubble({
         failed && "ring-1 ring-[color:var(--ro-danger-700)]"
       )}
     >
+      {message.channel === "platform" ? (
+        <p
+          className={cn(
+            "mb-1 text-[10px] font-medium",
+            isOut
+              ? "text-[color-mix(in_srgb,var(--ro-sand-100)_70%,transparent)]"
+              : "text-[color:var(--ro-text-muted)]"
+          )}
+        >
+          {dict.inbox.channelPlatform}
+        </p>
+      ) : null}
       <MediaBody message={message} isOut={isOut} dict={dict} />
       <footer
         className={cn(

@@ -474,6 +474,9 @@ model WhatsAppMessage {
   conversation     WhatsAppConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   /// inbound | outbound
   direction        String
+  /// whatsapp | platform — platform = trader-portal in-app message, stored
+  /// in the same conversation so WhatsApp + platform history stay unified
+  channel          String               @default("whatsapp")
   /// text | image | video | audio | document | sticker | location | contact | unsupported
   messageType      String               @default("text")
   body             String               @default("")

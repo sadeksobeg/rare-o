@@ -1077,6 +1077,18 @@ type Dict = {
     notificationsMarkAll: string;
     notificationsMarkRead: string;
     notificationsOpen: string;
+    messagesTitle: string;
+    messagesLead: string;
+    messagesEmpty: string;
+    messagesEmptyBody: string;
+    messagesPlaceholder: string;
+    messagesSend: string;
+    messagesSending: string;
+    messagesChannelWhatsapp: string;
+    messagesChannelPlatform: string;
+    messagesErrorEmpty: string;
+    messagesErrorTooLong: string;
+    messagesErrorGeneric: string;
     offersTitle: string;
     offersLead: string;
     offersEmpty: string;
@@ -1191,6 +1203,7 @@ type Dict = {
     retry: string;
     statusDelivered: string;
     statusRead: string;
+    channelPlatform: string;
     newMessages: string;
     linkRecord: string;
     unlinkConfirm: string;
@@ -2591,6 +2604,19 @@ const ar: Dict = {
     notificationsMarkAll: "تعليم الكل كمقروء",
     notificationsMarkRead: "مقروء",
     notificationsOpen: "فتح",
+    messagesTitle: "الرسائل",
+    messagesLead:
+      "محادثة واحدة موحّدة مع فريق RARE OUD — سواء كتبت هنا أو عبر واتساب، تبقى كل الرسائل في نفس السياق. إن توقف واتساب لأي سبب، تقدر تستمر بالتواصل من هنا مباشرة.",
+    messagesEmpty: "لا رسائل بعد",
+    messagesEmptyBody: "ابدأ المحادثة مع فريق RARE OUD برسالة من الأسفل.",
+    messagesPlaceholder: "اكتب رسالتك…",
+    messagesSend: "إرسال",
+    messagesSending: "جارٍ الإرسال…",
+    messagesChannelWhatsapp: "عبر واتساب",
+    messagesChannelPlatform: "عبر المنصة",
+    messagesErrorEmpty: "اكتب رسالة أولاً",
+    messagesErrorTooLong: "الرسالة أطول من الحد المسموح",
+    messagesErrorGeneric: "تعذّر إرسال الرسالة — حاول مرة أخرى",
     offersTitle: "العروض العامة المختارة",
     offersLead: "عروض RARE OUD المنشورة فقط — وليست متاجر للتجّار.",
     offersEmpty: "لا توجد عروض منشورة بعد.",
@@ -2703,6 +2729,7 @@ const ar: Dict = {
     retry: "إعادة المحاولة",
     statusDelivered: "تم التسليم",
     statusRead: "تمت القراءة",
+    channelPlatform: "عبر منصة التاجر",
     newMessages: "رسائل جديدة ↓",
     linkRecord: "ربط بسجل",
     unlinkConfirm: "إزالة الربط؟",
@@ -4129,6 +4156,19 @@ const en: Dict = {
     notificationsMarkAll: "Mark all read",
     notificationsMarkRead: "Read",
     notificationsOpen: "Open",
+    messagesTitle: "Messages",
+    messagesLead:
+      "One unified conversation with the RARE OUD team — whether you write here or on WhatsApp, every message stays in the same context. If WhatsApp is ever unavailable, you can keep talking directly from here.",
+    messagesEmpty: "No messages yet",
+    messagesEmptyBody: "Start the conversation with the RARE OUD team below.",
+    messagesPlaceholder: "Write your message…",
+    messagesSend: "Send",
+    messagesSending: "Sending…",
+    messagesChannelWhatsapp: "via WhatsApp",
+    messagesChannelPlatform: "via platform",
+    messagesErrorEmpty: "Write a message first",
+    messagesErrorTooLong: "Message exceeds the limit",
+    messagesErrorGeneric: "Couldn't send the message — try again",
     offersTitle: "Public curated offers",
     offersLead: "Published RARE OUD presentations only — not trader storefronts.",
     offersEmpty: "No published offers yet.",
@@ -4247,6 +4287,7 @@ const en: Dict = {
     retry: "Retry",
     statusDelivered: "Delivered",
     statusRead: "Read",
+    channelPlatform: "via trader portal",
     newMessages: "New messages ↓",
     linkRecord: "Link to record",
     unlinkConfirm: "Remove link?",

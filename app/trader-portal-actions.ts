@@ -65,3 +65,29 @@ export async function traderMarkAllNotificationsReadAction(): Promise<void> {
   revalidatePath("/trader/notifications");
   revalidatePath("/trader");
 }
+
+export async function traderSendMessageAction(
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireTraderSession();
+  } catch (e) {
+    return handleTraderSessionError(e);
+  }
+
+  const text = String(formData.get("text") || "");
+  const { sendTraderPlatformMessage } = await import(
+    "@/lib/whatsapp/messaging/trader-channel"
+  );
+  const result = await sendTraderPlatformMessage({
+    traderId: session.sub,
+    text,
+  });
+  if (!result.ok) {
+    return { ok: false, error: result.error };
+  }
+  revalidatePath("/trader/messages");
+  return { ok: true };
+}
