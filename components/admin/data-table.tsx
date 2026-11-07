@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { type MouseEvent, type ReactNode } from "react";
 import { spawnPressRipple } from "@/components/motion/press-ripple";
 import { cn } from "@/lib/utils";
@@ -43,6 +44,49 @@ export function Th({
       )}
     >
       {children}
+    </th>
+  );
+}
+
+/**
+ * Server-driven sortable column header: a link that toggles sort direction
+ * in the URL (sort state lives in searchParams, not client state — matches
+ * the project's existing filter/tab pattern). The page supplies `href` for
+ * the next click (asc if inactive/desc, desc if currently asc) and tells us
+ * the active field/direction so we can render the right indicator.
+ */
+export function SortableTh({
+  children,
+  href,
+  active,
+  direction,
+  className,
+}: {
+  children: ReactNode;
+  href: string;
+  active: boolean;
+  direction?: "asc" | "desc";
+  className?: string;
+}) {
+  const Icon = !active ? ArrowUpDown : direction === "asc" ? ArrowUp : ArrowDown;
+  return (
+    <th
+      className={cn(
+        "p-0 text-start text-[11px] font-semibold uppercase tracking-wide text-[color:var(--ro-text-muted)]",
+        className
+      )}
+    >
+      <Link
+        href={href}
+        className={cn(
+          "flex w-full items-center gap-1 p-3.5 text-start no-underline hover:text-[color:var(--ro-text)]",
+          active && "text-[color:var(--ro-text)]"
+        )}
+        aria-current={active ? "true" : undefined}
+      >
+        {children}
+        <Icon className="size-3.5 shrink-0" strokeWidth={1.5} aria-hidden />
+      </Link>
     </th>
   );
 }

@@ -5,6 +5,7 @@ import {
   DataTable,
   DataTableHead,
   RowHit,
+  SortableTh,
   Td,
   Th,
   Tr,
@@ -35,6 +36,16 @@ import type { Prisma } from "@prisma/client";
 
 const PAGE_SIZE = 40;
 
+const SORTABLE_FIELDS = {
+  reference: "reference",
+  status: "status",
+  created: "createdAt",
+} as const;
+type SortField = keyof typeof SORTABLE_FIELDS;
+function isSortField(v: string | undefined): v is SortField {
+  return !!v && v in SORTABLE_FIELDS;
+}
+
 function handoffLabel(
   u: {
     handoffOpened: string;
@@ -59,11 +70,21 @@ export default async function AdminRequestsPage({
     q?: string;
     page?: string;
     view?: string;
+    sort?: string;
+    dir?: string;
   }>;
 }) {
-  const { tab: tabRaw, q: qRaw, page: pageRaw, view: viewRaw } =
-    await searchParams;
+  const {
+    tab: tabRaw,
+    q: qRaw,
+    page: pageRaw,
+    view: viewRaw,
+    sort: sortRaw,
+    dir: dirRaw,
+  } = await searchParams;
   const view = viewRaw === "kanban" ? "kanban" : "table";
+  const sortField = isSortField(sortRaw) ? sortRaw : undefined;
+  const sortDir = dirRaw === "asc" ? "asc" : "desc";
   const { locale, dict } = await getRequestDictionary();
   const a = dict.admin;
   const u = dict.adminUi;
@@ -112,9 +133,13 @@ export default async function AdminRequestsPage({
   const pageCount = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
   const page = Math.min(pageRequested, pageCount);
 
+  const orderBy: Prisma.RetailRequestFindManyArgs["orderBy"] = sortField
+    ? { [SORTABLE_FIELDS[sortField]]: sortDir }
+    : { updatedAt: "desc" };
+
   const requests = await prisma.retailRequest.findMany({
     where,
-    orderBy: { updatedAt: "desc" },
+    orderBy,
     skip: view === "kanban" ? 0 : (page - 1) * PAGE_SIZE,
     take: view === "kanban" ? 200 : PAGE_SIZE,
     include: {
@@ -130,6 +155,17 @@ export default async function AdminRequestsPage({
       },
     },
   });
+
+  function sortHref(field: SortField) {
+    const nextDir = sortField === field && sortDir === "desc" ? "asc" : "desc";
+    const params = new URLSearchParams();
+    if (tab !== "all") params.set("tab", tab);
+    if (q) params.set("q", q);
+    if (view !== "table") params.set("view", view);
+    params.set("sort", field);
+    params.set("dir", nextDir);
+    return `/admin/requests?${params.toString()}`;
+  }
 
   const allCount = statusGroups.reduce((n, g) => n + g._count._all, 0);
   const counts: Record<string, number> = { all: allCount };
@@ -252,13 +288,31 @@ export default async function AdminRequestsPage({
           <div className="hidden md:block">
           <DataTable>
             <DataTableHead>
-              <Th>{u.colReference}</Th>
+              <SortableTh
+                href={sortHref("reference")}
+                active={sortField === "reference"}
+                direction={sortField === "reference" ? sortDir : undefined}
+              >
+                {u.colReference}
+              </SortableTh>
               <Th>{u.colCustomer}</Th>
               <Th>{u.colItems}</Th>
-              <Th>{a.colStatus}</Th>
+              <SortableTh
+                href={sortHref("status")}
+                active={sortField === "status"}
+                direction={sortField === "status" ? sortDir : undefined}
+              >
+                {a.colStatus}
+              </SortableTh>
               <Th>{u.colHandoff}</Th>
               <Th>{u.colLastEvent}</Th>
-              <Th>{u.colCreated}</Th>
+              <SortableTh
+                href={sortHref("created")}
+                active={sortField === "created"}
+                direction={sortField === "created" ? sortDir : undefined}
+              >
+                {u.colCreated}
+              </SortableTh>
               <Th />
             </DataTableHead>
             <tbody>
