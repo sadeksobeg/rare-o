@@ -78,7 +78,7 @@ export default async function AdminDealDetailPage({
         </p>
         <div className="flex flex-wrap items-center gap-3">
           <span className="ro-portal-icon-well size-11 [&>svg]:size-5" aria-hidden>
-            <Handshake className="size-5" strokeWidth={2} />
+            <Handshake className="size-5" strokeWidth={1.5} />
           </span>
           <h1 className="ro-portal-page-title text-2xl tracking-tight sm:text-[28px]">
             {deal.title}
@@ -112,7 +112,7 @@ export default async function AdminDealDetailPage({
       <DetailList>
         <DetailItem
           label={u.colTrader}
-          icon={<Store className="size-3.5" strokeWidth={2} />}
+          icon={<Store className="size-3.5" strokeWidth={1.5} />}
         >
           {deal.trader.displayName}
           <span className="text-ro-muted"> · </span>
@@ -123,7 +123,7 @@ export default async function AdminDealDetailPage({
         </DetailItem>
         <DetailItem
           label={d.productReference}
-          icon={<Package className="size-3.5" strokeWidth={2} />}
+          icon={<Package className="size-3.5" strokeWidth={1.5} />}
         >
           {deal.product && productName ? (
             <>
@@ -138,7 +138,7 @@ export default async function AdminDealDetailPage({
         </DetailItem>
         <DetailItem
           label={locale === "ar" ? "رقم الموديل" : "Model number"}
-          icon={<Hash className="size-3.5" strokeWidth={2} />}
+          icon={<Hash className="size-3.5" strokeWidth={1.5} />}
         >
           <span dir="ltr">
             <bdi dir="ltr">{deal.modelNumber || "—"}</bdi>
@@ -146,7 +146,7 @@ export default async function AdminDealDetailPage({
         </DetailItem>
         <DetailItem
           label={d.commercialSnapshot}
-          icon={<Tags className="size-3.5" strokeWidth={2} />}
+          icon={<Tags className="size-3.5" strokeWidth={1.5} />}
         >
           {deal.proposedPrice != null
             ? money(deal.proposedPrice, deal.currency)
@@ -192,7 +192,7 @@ export default async function AdminDealDetailPage({
       <div className="ro-portal-card space-y-3 border p-4 md:p-5">
         <h2 className="ro-portal-section-title flex items-center gap-2 text-lg">
           <span className="ro-portal-icon-well size-8 [&>svg]:size-4" aria-hidden>
-            <FilePlus2 className="size-4" strokeWidth={2} />
+            <FilePlus2 className="size-4" strokeWidth={1.5} />
           </span>
           {d.publicOfferTitle}
         </h2>
@@ -219,7 +219,7 @@ export default async function AdminDealDetailPage({
         <form action={adminCreateOfferDraftFromDealAction}>
           <input type="hidden" name="dealId" value={deal.id} />
           <Button type="submit" variant="secondary" size="sm">
-            <FilePlus2 className="size-3.5" strokeWidth={2} aria-hidden />
+            <FilePlus2 className="size-3.5" strokeWidth={1.5} aria-hidden />
             {d.createDraftOffer}
           </Button>
         </form>

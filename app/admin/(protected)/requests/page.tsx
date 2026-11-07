@@ -142,7 +142,7 @@ export default async function AdminRequestsPage({
   const viewQs = `${tab !== "all" ? `&tab=${encodeURIComponent(tab)}` : ""}${q ? `&q=${encodeURIComponent(q)}` : ""}`;
 
   return (
-    <section data-admin-requests="" className="space-y-5 pb-2">
+    <section data-admin-requests="" className="ro-portal-stagger space-y-5 pb-2">
       <PageHeader
         title={a.requests}
         description={u.requestsLead}

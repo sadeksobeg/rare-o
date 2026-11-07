@@ -81,7 +81,7 @@ export default async function AdminProductsPage({
   };
 
   return (
-    <section data-admin-products="" className="space-y-5 pb-16">
+    <section data-admin-products="" className="ro-portal-stagger space-y-5 pb-16">
       <PortalHeroStrip
         eyebrow={ar ? "كتالوج" : "Catalog"}
         title={

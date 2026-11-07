@@ -14,7 +14,7 @@ export default async function AdminNewPromoPage() {
       <PageHeader
         title={dict.adminUi.newPromo}
         description={dict.adminUi.promosLead}
-        icon={<Megaphone className="size-5" strokeWidth={2} />}
+        icon={<Megaphone className="size-5" strokeWidth={1.5} />}
       />
       <PromoBandForm labels={dict.adminUi} />
     </section>

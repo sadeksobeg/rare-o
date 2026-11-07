@@ -25,7 +25,7 @@ export default async function EditProductPage({
     <section className="space-y-8">
       <PageHeader
         title={`${dict.admin.edit}: ${product.nameAr || product.nameEn || product.slug}`}
-        icon={<Boxes className="size-5" strokeWidth={2} />}
+        icon={<Boxes className="size-5" strokeWidth={1.5} />}
       />
 
       <ImageUploader

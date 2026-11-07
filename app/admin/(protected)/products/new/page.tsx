@@ -13,7 +13,7 @@ export default async function NewProductPage() {
     <section className="space-y-6">
       <PageHeader
         title={dict.adminUi.detail.newProductTitle}
-        icon={<Plus className="size-5" strokeWidth={2} />}
+        icon={<Plus className="size-5" strokeWidth={1.5} />}
       />
       <Banner tone="info">{dict.admin.imagesAfterSaveHint}</Banner>
       <ProductForm

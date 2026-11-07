@@ -75,7 +75,7 @@ export default async function AdminSettingsHubPage() {
   ] as const;
 
   return (
-    <section className="space-y-6 pb-16">
+    <section className="ro-portal-stagger space-y-6 pb-16">
       <PortalHeroStrip
         eyebrow={ar ? "أشخاص" : "People"}
         title={
@@ -96,7 +96,7 @@ export default async function AdminSettingsHubPage() {
             <li key={card.href}>
               <Link
                 href={card.href}
-                className="ro-portal-card flex h-full flex-col gap-3 border p-5 transition-opacity hover:opacity-95"
+                className="ro-portal-card flex h-full flex-col gap-3 border p-5"
               >
                 <span className="ro-portal-icon-well size-10 [&>svg]:size-5">
                   <Icon className="size-5" strokeWidth={1.5} aria-hidden />

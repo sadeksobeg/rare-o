@@ -34,7 +34,7 @@ export default async function AdminPromosPage() {
       <PageHeader
         title={a.promos}
         description={u.promosLead}
-        icon={<Megaphone className="size-5" strokeWidth={2} />}
+        icon={<Megaphone className="size-5" strokeWidth={1.5} />}
         action={
           <ButtonLink href="/admin/promos/new" variant="primary" size="sm">
             {u.newPromo}

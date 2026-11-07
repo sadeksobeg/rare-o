@@ -26,7 +26,7 @@ export default async function AdminNewOfferPage() {
       <PageHeader
         title={dict.adminUi.detail.newOfferTitle}
         description={dict.adminUi.detail.newOfferLead}
-        icon={<Percent className="size-5" strokeWidth={2} />}
+        icon={<Percent className="size-5" strokeWidth={1.5} />}
       />
       <PublicOfferForm
         deals={deals}
