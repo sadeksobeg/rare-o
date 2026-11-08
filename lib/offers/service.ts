@@ -93,9 +93,16 @@ export async function setPublicOfferStatus(
     if (!offer.productId && !opts?.plateAck) {
       throw new Error("PUBLISH_NEEDS_PRODUCT_OR_PLATE");
     }
-    // 3.7 — linked trader deal must be accepted before storefront publish
+    // 3.7 — linked trader deal must be accepted before storefront publish.
+    // The payment-first flow moves a deal accepted → awaiting_payment →
+    // payment_confirmed in one step (it no longer rests at a literal
+    // "accepted" status), so every post-acceptance state is allowed here.
     if (offer.dealProposalId) {
-      if (!offer.dealProposal || offer.dealProposal.status !== "accepted") {
+      const okStatuses = ["accepted", "awaiting_payment", "payment_confirmed"];
+      if (
+        !offer.dealProposal ||
+        !okStatuses.includes(offer.dealProposal.status)
+      ) {
         throw new Error("PUBLISH_NEEDS_ACCEPTED_DEAL");
       }
     }
