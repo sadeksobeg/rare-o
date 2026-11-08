@@ -5,12 +5,20 @@ alwaysApply: true
 
 # RARE OUD UI
 
+> **تجاوز بصري من المالك 2026-11-08 (نطاق: `[data-portal="admin"]` و`[data-portal="trader"]`
+> فقط):** كل القيود البصرية أدناه (الألوان، الخطوط عدا خطوط العلامة، مكتبة الأيقونات،
+> حدود الحركة بالأرقام) **ملغاة** لبوابتي الإدارة والتاجر لصالح
+> `docs/ui/PILOT-DIRECTION.md` وقرارات `PLAN.md` D27+. راجع قسم «تجاوز بصري من المالك
+> 2026-11-08» أعلى `CLAUDE.md` قبل أي قرار. القواعد غير البصرية أدناه (الأمان، i18n،
+> حدود النطاق، الجودة التقنية) **تبقى سارية بلا تغيير**. `docs/ui/01_DESIGN_SYSTEM.md`
+> أُرشِف إلى `docs/ui/_archive_superseded/` ولم يعد مرجعاً.
+
 Visual/motion authority for **admin + trader + login**: `docs/ui-planning/VISION.md`
 (owner-approved). Business boundaries, routes, i18n mechanics, and domain isolation
 remain `docs/ui-planning/plan/PLAN.md`. Hex colors live only in `styles/tokens.css`.
 
-Admin token/component bible: `docs/ui/01_DESIGN_SYSTEM.md` — defer to VISION when
-they conflict on theme intensity, charts, or allowed motion libraries.
+Admin token/component bible: `docs/ui/01_DESIGN_SYSTEM.md` (archived — see override above)
+— defer to VISION when they conflict on theme intensity, charts, or allowed motion libraries.
 
 ## Stack
 
