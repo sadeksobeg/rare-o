@@ -221,6 +221,92 @@
   --ro-plum-100: color-mix(in srgb, #d4b8ef 24%, #403b58);
 }
 
+/*
+ * RAD (RARE OUD Admin Dashboard) scale — round 2, owner override
+ * 2026-11-08. Values copied verbatim from the owner's approved live
+ * reference (docs/ui/reference/admin-dashboard/index.html) — that file is
+ * the single source of truth; these are its exact hex/rgba numbers, not a
+ * reinterpretation. Scoped strictly to the admin portal attribute
+ * (AdminShell + AD-02). Round-1's approximate --pilot-* scale is gone —
+ * this replaces it everywhere, including structural CSS in
+ * styles/admin-dashboard.css.
+ */
+.ro-portal[data-portal="admin"] {
+  --rad-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --rad-r: 14px;
+  --rad-r-sm: 10px;
+
+  /* sidebar — always this dark rail, in both themes (reference --sb*) */
+  --rad-sb: #0f0b12;
+  --rad-sb-tx: rgba(244, 231, 216, 0.68);
+  /* 0.55, not the reference's 0.45 — WCAG 2.2 AA color-contrast failed axe at
+     .45 (3.91:1 on --rad-sb) on every admin page via the sidebar group
+     labels; 0.55 clears 4.5:1 (5.33:1) and is barely distinguishable. */
+  --rad-sb-tx3: rgba(244, 231, 216, 0.55);
+  --rad-sb-on: rgba(244, 231, 216, 0.075);
+  --rad-sb-bd: rgba(244, 231, 216, 0.07);
+  --rad-sb-active: #c4a0ea;
+  --rad-nb-text: #d9bef5;
+  --rad-plum-700: #32104f;
+  --rad-white: #ffffff;
+  --rad-black: #000000;
+  --rad-cream: #f4e7d8;
+}
+
+.ro-portal[data-portal="admin"][data-theme="dark"] {
+  --rad-c0: #0b080d;
+  --rad-surface: #15101a;
+  --rad-surface2: #1b1520;
+  --rad-surface3: #231b29;
+  --rad-bd: rgba(244, 231, 216, 0.085);
+  --rad-bd2: rgba(244, 231, 216, 0.16);
+  --rad-tx: #f4e7d8;
+  --rad-tx2: rgba(244, 231, 216, 0.7);
+  --rad-tx3: rgba(244, 231, 216, 0.52);
+  --rad-ac: #c4a0ea;
+  --rad-acf: #7a44b3;
+  --rad-acs: rgba(196, 160, 234, 0.13);
+  --rad-ok: #68c595;
+  --rad-warn: #e6b05a;
+  --rad-err: #ec7c73;
+  --rad-info: #8fb0ee;
+  --rad-oks: rgba(104, 197, 149, 0.13);
+  --rad-warns: rgba(230, 176, 90, 0.13);
+  --rad-errs: rgba(236, 124, 115, 0.13);
+  --rad-infos: rgba(143, 176, 238, 0.13);
+  --rad-btn: #f4e7d8;
+  --rad-btn-tx: #0b080d;
+  --rad-sh: 0 1px 0 rgba(255, 255, 255, 0.035) inset, 0 10px 30px -18px rgba(0, 0, 0, 0.8);
+  --rad-glow: radial-gradient(900px 380px at 85% -10%, rgba(122, 68, 179, 0.22), transparent 60%);
+}
+
+.ro-portal[data-portal="admin"][data-theme="light"] {
+  --rad-c0: #f5efe6;
+  --rad-surface: #ffffff;
+  --rad-surface2: #fbf7f1;
+  --rad-surface3: #f2eadf;
+  --rad-bd: rgba(11, 8, 13, 0.09);
+  --rad-bd2: rgba(11, 8, 13, 0.18);
+  --rad-tx: #0b080d;
+  --rad-tx2: #4b4150;
+  --rad-tx3: #6b6170;
+  --rad-ac: #32104f;
+  --rad-acf: #32104f;
+  --rad-acs: rgba(50, 16, 79, 0.08);
+  --rad-ok: #1d7449;
+  --rad-warn: #8f5a00;
+  --rad-err: #ae352c;
+  --rad-info: #2459aa;
+  --rad-oks: rgba(29, 116, 73, 0.1);
+  --rad-warns: rgba(143, 90, 0, 0.11);
+  --rad-errs: rgba(174, 53, 44, 0.09);
+  --rad-infos: rgba(36, 89, 170, 0.09);
+  --rad-btn: #0b080d;
+  --rad-btn-tx: #f4e7d8;
+  --rad-sh: 0 1px 2px rgba(11, 8, 13, 0.05), 0 12px 28px -20px rgba(50, 16, 79, 0.35);
+  --rad-glow: radial-gradient(900px 380px at 85% -10%, rgba(122, 68, 179, 0.14), transparent 60%);
+}
+
 /**
  * Portal light — open, bright, editorial; plum for accent only.
  */

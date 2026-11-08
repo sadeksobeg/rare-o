@@ -1,4 +1,5 @@
 @import "../styles/tokens.css";
+@import "../styles/admin-dashboard.css";
 @import "tailwindcss";
 
 :root {
@@ -2658,11 +2659,11 @@ body:has(.ro-portal-admin) {
   height: 100%;
   padding: 0 !important;
   overflow: hidden;
-  border: 1px solid var(--ro-border-subtle) !important;
+  border: 1px solid var(--pilot-border-subtle, var(--ro-border-subtle)) !important;
   border-radius: 1rem !important;
-  background: var(--ro-panel, var(--ro-bg-elevated, var(--ro-bg-raised))) !important;
+  background: var(--pilot-bg-raised, var(--ro-panel, var(--ro-bg-elevated, var(--ro-bg-raised)))) !important;
   box-shadow:
-    0 1px 0 color-mix(in srgb, var(--ro-text) 6%, transparent) inset,
+    0 1px 0 color-mix(in srgb, var(--pilot-text, var(--ro-text)) 6%, transparent) inset,
     var(--ro-e2) !important;
   transition:
     transform var(--ro-dur-fast, 140ms) var(--ro-ease-out, ease),
@@ -2676,26 +2677,26 @@ body:has(.ro-portal-admin) {
 }
 .ro-admin-kpi-stack .ro-portal-kpi:hover {
   transform: translateY(-2px) !important;
-  border-color: color-mix(in srgb, var(--ro-plum-500, var(--ro-plum-700)) 42%, var(--ro-border-subtle)) !important;
-  background: var(--ro-panel-hover, var(--ro-panel)) !important;
+  border-color: color-mix(in srgb, var(--pilot-plum-500, var(--ro-plum-500, var(--ro-plum-700))) 42%, var(--pilot-border-subtle, var(--ro-border-subtle))) !important;
+  background: var(--pilot-bg-hover, var(--ro-panel-hover, var(--ro-panel))) !important;
   box-shadow:
-    0 1px 0 color-mix(in srgb, var(--ro-text) 8%, transparent) inset,
+    0 1px 0 color-mix(in srgb, var(--pilot-text, var(--ro-text)) 8%, transparent) inset,
     var(--ro-e3) !important;
 }
 .ro-admin-kpi-stack .ro-portal-kpi[data-active="true"] {
-  border-color: color-mix(in srgb, var(--ro-plum-500, var(--ro-plum-700)) 55%, var(--ro-border-subtle)) !important;
+  border-color: color-mix(in srgb, var(--pilot-plum-500, var(--ro-plum-500, var(--ro-plum-700))) 55%, var(--pilot-border-subtle, var(--ro-border-subtle))) !important;
   background: color-mix(
     in srgb,
-    var(--ro-plum-700) 12%,
-    var(--ro-panel, var(--ro-bg-elevated))
+    var(--pilot-plum-700, var(--ro-plum-700)) 14%,
+    var(--pilot-bg-raised, var(--ro-panel, var(--ro-bg-elevated)))
   ) !important;
 }
 .ro-portal[data-theme="dark"] .ro-admin-kpi-stack .ro-portal-kpi:hover {
-  border-color: color-mix(in srgb, var(--ro-plum-300) 40%, var(--ro-border-subtle)) !important;
+  border-color: color-mix(in srgb, var(--pilot-plum-300, var(--ro-plum-300)) 40%, var(--pilot-border-subtle, var(--ro-border-subtle))) !important;
 }
 .ro-portal[data-theme="dark"] .ro-admin-kpi-stack .ro-portal-kpi[data-active="true"] {
-  border-color: color-mix(in srgb, var(--ro-plum-300) 50%, var(--ro-border-subtle)) !important;
-  background: color-mix(in srgb, var(--ro-plum-400) 14%, var(--ro-panel)) !important;
+  border-color: color-mix(in srgb, var(--pilot-plum-300, var(--ro-plum-300)) 50%, var(--pilot-border-subtle, var(--ro-border-subtle))) !important;
+  background: color-mix(in srgb, var(--pilot-plum-400, var(--ro-plum-400)) 16%, var(--pilot-bg-raised, var(--ro-panel))) !important;
 }
 .ro-kpi-sheen::before {
   content: "";

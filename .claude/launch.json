@@ -8,6 +8,12 @@
       "port": 3000
     },
     {
+      "name": "rare-oud-prod",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start"],
+      "port": 3000
+    },
+    {
       "name": "ui-mockups",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "-l", "4600", "docs/ui/design/mockups"],

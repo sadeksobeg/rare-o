@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-31T11:01:50.455Z",
+  "at": "2026-11-08T19:15:28.587Z",
   "base": "http://127.0.0.1:3000",
   "gate": "critical|serious → exit 1",
   "widths": [
@@ -10,9 +10,9 @@
     "ar",
     "en"
   ],
-  "routeCount": 23,
-  "pageCount": 92,
-  "failed": false,
+  "routeCount": 31,
+  "pageCount": 96,
+  "failed": true,
   "results": [
     {
       "route": "/",
@@ -35,6 +35,16 @@
       "seriousOrCritical": []
     },
     {
+      "route": "/product/oud-classic-21",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3000/product/oud-classic-21?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
       "route": "/cart",
       "locale": "ar",
       "width": 390,
@@ -185,60 +195,73 @@
       "seriousOrCritical": []
     },
     {
+      "route": "/admin/brokerage",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3000/admin/brokerage?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/notifications",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3000/admin/notifications?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/settings",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3000/admin/settings?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/team",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3000/admin/team?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/profile",
+      "locale": "ar",
+      "width": 390,
+      "url": "http://127.0.0.1:3000/admin/profile?lang=ar",
+      "status": 200,
+      "violationCount": 2,
+      "failed": true,
+      "seriousOrCritical": [
+        {
+          "id": "definition-list",
+          "impact": "serious",
+          "help": "<dl> elements must only directly contain properly-ordered <dt> and <dd> groups, <script>, <template> or <div> elements",
+          "nodes": 1
+        },
+        {
+          "id": "dlitem",
+          "impact": "serious",
+          "help": "<dt> and <dd> elements must be contained by a <dl>",
+          "nodes": 6
+        }
+      ]
+    },
+    {
       "route": "/trader/login",
       "locale": "ar",
       "width": 390,
       "url": "http://127.0.0.1:3000/trader/login?lang=ar",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
-    },
-    {
-      "route": "/trader",
-      "locale": "ar",
-      "width": 390,
-      "url": "http://127.0.0.1:3000/trader?lang=ar",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
-    },
-    {
-      "route": "/trader/deals",
-      "locale": "ar",
-      "width": 390,
-      "url": "http://127.0.0.1:3000/trader/deals?lang=ar",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
-    },
-    {
-      "route": "/trader/wholesale",
-      "locale": "ar",
-      "width": 390,
-      "url": "http://127.0.0.1:3000/trader/wholesale?lang=ar",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
-    },
-    {
-      "route": "/trader/offers",
-      "locale": "ar",
-      "width": 390,
-      "url": "http://127.0.0.1:3000/trader/offers?lang=ar",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
-    },
-    {
-      "route": "/trader/profile",
-      "locale": "ar",
-      "width": 390,
-      "url": "http://127.0.0.1:3000/trader/profile?lang=ar",
       "status": 200,
       "violationCount": 0,
       "failed": false,
@@ -265,6 +288,16 @@
       "seriousOrCritical": []
     },
     {
+      "route": "/product/oud-classic-21",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3000/product/oud-classic-21?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
       "route": "/cart",
       "locale": "ar",
       "width": 1440,
@@ -415,6 +448,69 @@
       "seriousOrCritical": []
     },
     {
+      "route": "/admin/brokerage",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3000/admin/brokerage?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/notifications",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3000/admin/notifications?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/settings",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3000/admin/settings?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/team",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3000/admin/team?lang=ar",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/profile",
+      "locale": "ar",
+      "width": 1440,
+      "url": "http://127.0.0.1:3000/admin/profile?lang=ar",
+      "status": 200,
+      "violationCount": 2,
+      "failed": true,
+      "seriousOrCritical": [
+        {
+          "id": "definition-list",
+          "impact": "serious",
+          "help": "<dl> elements must only directly contain properly-ordered <dt> and <dd> groups, <script>, <template> or <div> elements",
+          "nodes": 1
+        },
+        {
+          "id": "dlitem",
+          "impact": "serious",
+          "help": "<dt> and <dd> elements must be contained by a <dl>",
+          "nodes": 6
+        }
+      ]
+    },
+    {
       "route": "/trader/login",
       "locale": "ar",
       "width": 1440,
@@ -425,56 +521,6 @@
       "seriousOrCritical": []
     },
     {
-      "route": "/trader",
-      "locale": "ar",
-      "width": 1440,
-      "url": "http://127.0.0.1:3000/trader?lang=ar",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
-    },
-    {
-      "route": "/trader/deals",
-      "locale": "ar",
-      "width": 1440,
-      "url": "http://127.0.0.1:3000/trader/deals?lang=ar",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
-    },
-    {
-      "route": "/trader/wholesale",
-      "locale": "ar",
-      "width": 1440,
-      "url": "http://127.0.0.1:3000/trader/wholesale?lang=ar",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
-    },
-    {
-      "route": "/trader/offers",
-      "locale": "ar",
-      "width": 1440,
-      "url": "http://127.0.0.1:3000/trader/offers?lang=ar",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
-    },
-    {
-      "route": "/trader/profile",
-      "locale": "ar",
-      "width": 1440,
-      "url": "http://127.0.0.1:3000/trader/profile?lang=ar",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
-    },
-    {
       "route": "/",
       "locale": "en",
       "width": 390,
@@ -489,6 +535,16 @@
       "locale": "en",
       "width": 390,
       "url": "http://127.0.0.1:3000/en/catalog?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/product/oud-classic-21",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3000/en/product/oud-classic-21?lang=en",
       "status": 200,
       "violationCount": 0,
       "failed": false,
@@ -645,60 +701,73 @@
       "seriousOrCritical": []
     },
     {
+      "route": "/admin/brokerage",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3000/admin/brokerage?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/notifications",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3000/admin/notifications?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/settings",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3000/admin/settings?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/team",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3000/admin/team?lang=en",
+      "status": 200,
+      "violationCount": 0,
+      "failed": false,
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/admin/profile",
+      "locale": "en",
+      "width": 390,
+      "url": "http://127.0.0.1:3000/admin/profile?lang=en",
+      "status": 200,
+      "violationCount": 2,
+      "failed": true,
+      "seriousOrCritical": [
+        {
+          "id": "definition-list",
+          "impact": "serious",
+          "help": "<dl> elements must only directly contain properly-ordered <dt> and <dd> groups, <script>, <template> or <div> elements",
+          "nodes": 1
+        },
+        {
+          "id": "dlitem",
+          "impact": "serious",
+          "help": "<dt> and <dd> elements must be contained by a <dl>",
+          "nodes": 6
+        }
+      ]
+    },
+    {
       "route": "/trader/login",
       "locale": "en",
       "width": 390,
       "url": "http://127.0.0.1:3000/trader/login?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
-    },
-    {
-      "route": "/trader",
-      "locale": "en",
-      "width": 390,
-      "url": "http://127.0.0.1:3000/trader?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
-    },
-    {
-      "route": "/trader/deals",
-      "locale": "en",
-      "width": 390,
-      "url": "http://127.0.0.1:3000/trader/deals?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
-    },
-    {
-      "route": "/trader/wholesale",
-      "locale": "en",
-      "width": 390,
-      "url": "http://127.0.0.1:3000/trader/wholesale?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
-    },
-    {
-      "route": "/trader/offers",
-      "locale": "en",
-      "width": 390,
-      "url": "http://127.0.0.1:3000/trader/offers?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
-    },
-    {
-      "route": "/trader/profile",
-      "locale": "en",
-      "width": 390,
-      "url": "http://127.0.0.1:3000/trader/profile?lang=en",
       "status": 200,
       "violationCount": 0,
       "failed": false,
@@ -719,220 +788,184 @@
       "locale": "en",
       "width": 1440,
       "url": "http://127.0.0.1:3000/en/catalog?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/en/catalog?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/en/catalog?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
+    },
+    {
+      "route": "/product/oud-classic-21",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3000/en/product/oud-classic-21?lang=en",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/en/product/oud-classic-21?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/en/product/oud-classic-21?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
     },
     {
       "route": "/cart",
       "locale": "en",
       "width": 1440,
       "url": "http://127.0.0.1:3000/en/cart?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/en/cart?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/en/cart?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
     },
     {
       "route": "/request",
       "locale": "en",
       "width": 1440,
       "url": "http://127.0.0.1:3000/en/request?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/en/request?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/en/request?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
     },
     {
       "route": "/offers",
       "locale": "en",
       "width": 1440,
       "url": "http://127.0.0.1:3000/en/offers?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/en/offers?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/en/offers?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
     },
     {
       "route": "/contact",
       "locale": "en",
       "width": 1440,
       "url": "http://127.0.0.1:3000/en/contact?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/en/contact?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/en/contact?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
     },
     {
       "route": "/privacy",
       "locale": "en",
       "width": 1440,
       "url": "http://127.0.0.1:3000/en/privacy?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/en/privacy?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/en/privacy?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
     },
     {
       "route": "/admin/login",
       "locale": "en",
       "width": 1440,
       "url": "http://127.0.0.1:3000/admin/login?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/admin/login?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/admin/login?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
     },
     {
       "route": "/admin",
       "locale": "en",
       "width": 1440,
       "url": "http://127.0.0.1:3000/admin?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/admin?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/admin?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
     },
     {
       "route": "/admin/requests",
       "locale": "en",
       "width": 1440,
       "url": "http://127.0.0.1:3000/admin/requests?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/admin/requests?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/admin/requests?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
     },
     {
       "route": "/admin/deals",
       "locale": "en",
       "width": 1440,
       "url": "http://127.0.0.1:3000/admin/deals?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/admin/deals?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/admin/deals?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
     },
     {
       "route": "/admin/wholesale",
       "locale": "en",
       "width": 1440,
       "url": "http://127.0.0.1:3000/admin/wholesale?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/admin/wholesale?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/admin/wholesale?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
     },
     {
       "route": "/admin/customers",
       "locale": "en",
       "width": 1440,
       "url": "http://127.0.0.1:3000/admin/customers?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/admin/customers?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/admin/customers?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
     },
     {
       "route": "/admin/inbox",
       "locale": "en",
       "width": 1440,
       "url": "http://127.0.0.1:3000/admin/inbox?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/admin/inbox?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/admin/inbox?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
     },
     {
       "route": "/admin/traders",
       "locale": "en",
       "width": 1440,
       "url": "http://127.0.0.1:3000/admin/traders?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/admin/traders?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/admin/traders?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
     },
     {
       "route": "/admin/products",
       "locale": "en",
       "width": 1440,
       "url": "http://127.0.0.1:3000/admin/products?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/admin/products?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/admin/products?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
     },
     {
       "route": "/admin/categories",
       "locale": "en",
       "width": 1440,
       "url": "http://127.0.0.1:3000/admin/categories?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/admin/categories?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/admin/categories?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
+    },
+    {
+      "route": "/admin/brokerage",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3000/admin/brokerage?lang=en",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/admin/brokerage?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/admin/brokerage?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
+    },
+    {
+      "route": "/admin/notifications",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3000/admin/notifications?lang=en",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/admin/notifications?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/admin/notifications?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
+    },
+    {
+      "route": "/admin/settings",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3000/admin/settings?lang=en",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/admin/settings?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/admin/settings?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
+    },
+    {
+      "route": "/admin/team",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3000/admin/team?lang=en",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/admin/team?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/admin/team?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
+    },
+    {
+      "route": "/admin/profile",
+      "locale": "en",
+      "width": 1440,
+      "url": "http://127.0.0.1:3000/admin/profile?lang=en",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/admin/profile?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/admin/profile?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
     },
     {
       "route": "/trader/login",
       "locale": "en",
       "width": 1440,
       "url": "http://127.0.0.1:3000/trader/login?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
-    },
-    {
-      "route": "/trader",
-      "locale": "en",
-      "width": 1440,
-      "url": "http://127.0.0.1:3000/trader?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
-    },
-    {
-      "route": "/trader/deals",
-      "locale": "en",
-      "width": 1440,
-      "url": "http://127.0.0.1:3000/trader/deals?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
-    },
-    {
-      "route": "/trader/wholesale",
-      "locale": "en",
-      "width": 1440,
-      "url": "http://127.0.0.1:3000/trader/wholesale?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
-    },
-    {
-      "route": "/trader/offers",
-      "locale": "en",
-      "width": 1440,
-      "url": "http://127.0.0.1:3000/trader/offers?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
-    },
-    {
-      "route": "/trader/profile",
-      "locale": "en",
-      "width": 1440,
-      "url": "http://127.0.0.1:3000/trader/profile?lang=en",
-      "status": 200,
-      "violationCount": 0,
-      "failed": false,
-      "seriousOrCritical": []
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3000/trader/login?lang=en\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/trader/login?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "failed": true
     }
   ]
 }

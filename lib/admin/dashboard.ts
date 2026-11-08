@@ -150,7 +150,7 @@ export async function getAdminHomeData() {
   const [series, requestsTrend, catalogHealth, pipeline, lastWhatsAppAt] =
     await Promise.all([
       getKpiSeries(sevenDaysAgo()),
-      getRequestsTrend(14),
+      getRequestsTrend(30),
       getCatalogHealth(),
       getRetailPipeline(),
       latestWhatsAppAt(),

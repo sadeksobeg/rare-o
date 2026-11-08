@@ -1,414 +1,323 @@
-import { Suspense, type ReactNode } from "react";
+import { Suspense } from "react";
+import Link from "next/link";
+import { Compass, FileDown, Handshake, Package, Plus, ShoppingBag } from "lucide-react";
+import { RadKpiCard } from "@/components/admin/rad/kpi-card";
 import {
-  Boxes,
-  Compass,
-  Handshake,
-  Inbox,
-  MessageSquare,
-  Package,
-  ShoppingBag,
-  Store,
-  Users,
-} from "lucide-react";
+  RadActionQueue,
+  type RadQueueRow,
+  type RadQueueStatus,
+} from "@/components/admin/rad/action-queue";
+import { RadOrdersChart, type RadChartRange } from "@/components/admin/rad/orders-chart";
+import { RadWhatsAppCard } from "@/components/admin/rad/whatsapp-card";
+import { RadActivityTimeline } from "@/components/admin/rad/activity-timeline";
 import {
-  ActionQueue,
-  type QueueFilter,
-} from "@/components/admin/action-queue";
-import { ActivityFeed } from "@/components/admin/activity-feed";
-import { DashboardAside } from "@/components/admin/dashboard-aside";
-import { DashboardDomainChartMount } from "@/components/admin/dashboard-domain-chart-mount";
-import { DashboardGreeting } from "@/components/admin/dashboard-greeting";
-import { DashboardRequestsChartMount } from "@/components/admin/dashboard-requests-chart-mount";
-import {
-  DashboardSection,
-  DashboardStack,
-} from "@/components/admin/dashboard-section";
-import { type KpiTone } from "@/components/admin/kpi-tile";
-import { KpiStrip } from "@/components/admin/kpi-strip";
-import { ManageHub } from "@/components/admin/manage-hub";
-import { AdminQuickCreate } from "@/components/admin/quick-create";
-import { EmptyState } from "@/components/ui/empty-state";
-import { getAdminHomeData, type KpiSeries } from "@/lib/admin/dashboard";
+  getAdminHomeData,
+  type ActionQueueDomain,
+} from "@/lib/admin/dashboard";
 import { getAdminSessionChrome } from "@/lib/auth/admin-session";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
-import { formatDate } from "@/lib/i18n/format";
+import { formatDate, lastCalendarDayKeys } from "@/lib/i18n/format";
 import { greetingHeadline } from "@/lib/i18n/greeting";
+import { plural } from "@/lib/i18n/plural";
 import { getRequestDictionary } from "@/lib/i18n/server";
-import { fmt } from "@/lib/ui/trader-labels";
 
 export const dynamic = "force-dynamic";
 
-function whatsappPulseLabel(dict: Dictionary, state: string): string {
+function waStatus(dict: Dictionary, state: string) {
   switch (state) {
     case "CONNECTED":
-      return dict.inbox.healthConnected;
+      return { label: dict.inbox.healthConnected, connected: true };
     case "CONNECTING":
-      return dict.inbox.healthConnecting;
+      return { label: dict.inbox.healthConnecting, connected: false };
     case "RECONNECTING":
-      return dict.inbox.healthReconnecting;
+      return { label: dict.inbox.healthReconnecting, connected: false };
     case "AUTHENTICATION_REQUIRED":
-      return dict.inbox.healthAuthRequired;
+      return { label: dict.inbox.healthAuthRequired, connected: false };
     case "ERROR":
-      return dict.inbox.healthError;
+      return { label: dict.inbox.healthError, connected: false };
     case "DISCONNECTED":
     default:
-      return dict.inbox.healthDisconnected;
+      return { label: dict.inbox.healthDisconnected, connected: false };
   }
 }
 
-function parseDomain(raw: string | undefined): QueueFilter | "brokerage" | null {
-  if (!raw) return null;
-  if (raw === "retail" || raw === "deal" || raw === "wholesale") return raw;
-  if (raw === "brokerage") return "brokerage";
-  if (raw === "all") return "all";
-  return null;
-}
-
-function queueFilterFromDomain(
-  domain: QueueFilter | "brokerage" | null
-): QueueFilter {
-  if (domain === "retail" || domain === "deal" || domain === "wholesale") {
-    return domain;
-  }
-  return "all";
-}
+const QUEUE_STATUS: Record<ActionQueueDomain, RadQueueStatus> = {
+  retail: "new",
+  deal: "warn",
+  wholesale: "info",
+};
 
 async function AdminDashboardBody({
   locale,
   dict,
   greeting,
-  domainParam,
 }: {
   locale: Locale;
   dict: Dictionary;
   greeting: string;
-  domainParam: QueueFilter | "brokerage" | null;
 }) {
   const data = await getAdminHomeData();
+  const ad2 = dict.ad2;
   const a = dict.admin;
-  const waiting =
-    data.kpis.retailAwaitingAdmin +
-    data.kpis.dealsAwaitingAdmin +
-    data.kpis.wholesaleAwaitingAdmin;
   const today = formatDate(new Date(), locale, {
     weekday: "long",
     day: "numeric",
     month: "long",
   });
-  const description =
-    waiting === 0
-      ? fmt(a.waitingTodayZero, { date: today })
-      : fmt(a.waitingToday, { n: waiting, date: today });
+  const waiting =
+    data.kpis.retailAwaitingAdmin +
+    data.kpis.dealsAwaitingAdmin +
+    data.kpis.wholesaleAwaitingAdmin;
+  const pendingPhrase = plural(waiting, locale, {
+    zero: ad2.pendingZero,
+    one: ad2.pendingOne,
+    two: ad2.pendingTwo,
+    few: ad2.pendingFew,
+    many: ad2.pendingMany,
+    other: ad2.pendingOther,
+  });
 
-  const isFirstUse =
-    waiting === 0 &&
-    data.kpis.activeBrokerage === 0 &&
-    data.manageHub.publishedProducts === 0 &&
-    data.manageHub.traders === 0 &&
-    data.manageHub.customers === 0 &&
-    data.actionQueue.length === 0;
+  const wa = waStatus(dict, data.health.state);
+  const waUnreadPhrase = plural(data.manageHub.unreadConversations, locale, {
+    zero: ad2.waUnreadZero,
+    one: ad2.waUnreadOne,
+    two: ad2.waUnreadTwo,
+    few: ad2.waUnreadFew,
+    many: ad2.waUnreadMany,
+    other: ad2.waUnreadOther,
+  });
+  const waDescription = wa.connected
+    ? waUnreadPhrase
+    : `${ad2.waDescriptionZero} ${waUnreadPhrase}`;
 
-  const activeId = domainParam ?? "waiting";
-  const queueFilter = queueFilterFromDomain(domainParam);
+  const queueRows: RadQueueRow[] = data.actionQueue.map((row) => ({
+    id: row.id,
+    domain: row.domain,
+    title: row.domain === "retail" ? row.reference : row.title,
+    subtitle:
+      row.domain === "retail" && row.lineCount != null
+        ? plural(row.lineCount, locale, {
+            zero: ad2.rowRequestZero,
+            one: ad2.rowRequestOne,
+            two: ad2.rowRequestTwo,
+            few: ad2.rowRequestFew,
+            many: ad2.rowRequestMany,
+            other: ad2.rowRequestOther,
+          })
+        : row.subtitle,
+    href: row.href,
+    ageAt: row.ageAt,
+    status: QUEUE_STATUS[row.domain],
+  }));
 
-  const pathKpis: {
-    id: string;
-    label: string;
-    value: number;
-    href: string;
-    series?: KpiSeries;
-    tone: KpiTone;
-    icon: ReactNode;
-  }[] = [
-    {
-      id: "retail",
-      label: a.kpiRetail,
-      value: data.kpis.retailAwaitingAdmin,
-      href: "/admin?domain=retail",
-      series: data.series.retail,
-      tone: "amber",
-      icon: <ShoppingBag className="size-4" strokeWidth={1.5} aria-hidden />,
-    },
-    {
-      id: "deal",
-      label: a.kpiDeals,
-      value: data.kpis.dealsAwaitingAdmin,
-      href: "/admin?domain=deal",
-      series: data.series.deals,
-      tone: "plum",
-      icon: <Handshake className="size-4" strokeWidth={1.5} aria-hidden />,
-    },
-    {
-      id: "wholesale",
-      label: a.kpiWholesale,
-      value: data.kpis.wholesaleAwaitingAdmin,
-      href: "/admin?domain=wholesale",
-      series: data.series.wholesale,
-      tone: "progress",
-      icon: <Package className="size-4" strokeWidth={1.5} aria-hidden />,
-    },
-    {
-      id: "brokerage",
-      label: a.kpiBrokerage,
-      value: data.kpis.activeBrokerage,
-      href: "/admin?domain=brokerage",
-      tone: "success",
-      icon: <Compass className="size-4" strokeWidth={1.5} aria-hidden />,
-    },
-  ];
-
-  const waLive = data.health.state === "CONNECTED";
-  const chartDomain =
-    domainParam === "brokerage"
-      ? "brokerage"
-      : domainParam && domainParam !== "all"
-        ? domainParam
-        : null;
+  const dateLabels = lastCalendarDayKeys(30);
+  const statusLabels: Record<RadQueueStatus, string> = {
+    new: ad2.statusNew,
+    warn: ad2.statusAwaitingReply,
+    info: ad2.statusInProgress,
+    ok: ad2.statusReady,
+  };
 
   return (
-    <DashboardStack className="ro-admin-home-bleed relative w-full">
-      <DashboardSection>
-        <DashboardGreeting
-          greeting={greeting}
-          description={description}
-          statusLabel={whatsappPulseLabel(dict, data.health.state)}
-          statusLive={waLive}
+    <>
+      <svg className="rad-rings" viewBox="0 0 400 400" aria-hidden="true">
+        <g fill="none" stroke="currentColor" strokeWidth={1}>
+          <circle cx={200} cy={200} r={60} />
+          <circle cx={200} cy={200} r={100} />
+          <circle cx={200} cy={200} r={140} />
+          <circle cx={200} cy={200} r={180} />
+        </g>
+      </svg>
+      <div className="rad-phead rad-rise" style={{ "--rad-s": 0 } as React.CSSProperties}>
+        <div>
+          <h1>{greeting}</h1>
+          <p>
+            {today} · <b className="rad-num">{pendingPhrase}</b> {ad2.awaitingYouSuffix}
+          </p>
+        </div>
+        <div className="rad-pact">
+          <button type="button" className="rad-btn rad-gh">
+            <FileDown width={16} height={16} strokeWidth={1.5} aria-hidden />
+            {ad2.export}
+          </button>
+          <Link href="/admin/products/new" className="rad-btn rad-pri">
+            <Plus width={16} height={16} strokeWidth={1.5} aria-hidden />
+            {ad2.create}
+          </Link>
+        </div>
+      </div>
+
+      <section className="rad-kpis" aria-label={ad2.chartTitle}>
+        <RadKpiCard
+          icon={<ShoppingBag width={17} height={17} strokeWidth={1.5} aria-hidden />}
+          tone="ac"
+          label={ad2.kpiRetailNew}
+          value={data.kpis.retailAwaitingAdmin}
+          delta={
+            data.series.retail.today !== data.series.retail.yesterday
+              ? {
+                  direction: data.series.retail.today > data.series.retail.yesterday ? "up" : "down",
+                  label: `${data.series.retail.today > data.series.retail.yesterday ? "+" : ""}${data.series.retail.today - data.series.retail.yesterday}`,
+                }
+              : { direction: "flat", label: "0" }
+          }
+          deltaCaption={ad2.deltaVsLastWeek}
+          idleLabel={a.kpiIdle}
+          sparkline={data.series.retail.points}
+          style={{ "--rad-s": 1 } as React.CSSProperties}
         />
-      </DashboardSection>
-
-      {isFirstUse ? (
-        <DashboardSection className="ro-admin-home-pad py-3">
-          <EmptyState
-            variant="first-use"
-            title={a.firstUseTitle}
-            body={a.firstUseBody}
-            actionHref="/admin/products/new"
-            actionLabel={a.firstUseAction}
-          />
-        </DashboardSection>
-      ) : null}
-
-      <DashboardSection>
-        <KpiStrip
-          activeId={activeId}
-          hero={{
-            id: "waiting",
-            label: a.kpiWaitingTotal,
-            value: waiting,
-            href: "/admin",
-            idleLabel: a.kpiIdle,
-            tone: "plum",
-            icon: <Inbox className="size-4" strokeWidth={1.5} aria-hidden />,
-            series:
-              data.requestsTrend.points.length >= 7
-                ? {
-                    points: data.requestsTrend.points,
-                    today:
-                      data.requestsTrend.points[
-                        data.requestsTrend.points.length - 1
-                      ] ?? 0,
-                    yesterday:
-                      data.requestsTrend.points[
-                        data.requestsTrend.points.length - 2
-                      ] ?? 0,
-                  }
-                : undefined,
-          }}
-          items={pathKpis.map((kpi) => ({
-            ...kpi,
-            idleLabel: a.kpiIdle,
-          }))}
+        <RadKpiCard
+          icon={<Handshake width={17} height={17} strokeWidth={1.5} aria-hidden />}
+          tone="warn"
+          label={a.kpiDeals}
+          value={data.kpis.dealsAwaitingAdmin}
+          delta={
+            data.series.deals.today !== data.series.deals.yesterday
+              ? {
+                  direction: data.series.deals.today > data.series.deals.yesterday ? "up" : "down",
+                  label: `${data.series.deals.today > data.series.deals.yesterday ? "+" : ""}${data.series.deals.today - data.series.deals.yesterday}`,
+                }
+              : { direction: "flat", label: "0" }
+          }
+          deltaCaption={ad2.deltaVsLastWeek}
+          idleLabel={a.kpiIdle}
+          sparkline={data.series.deals.points}
+          style={{ "--rad-s": 2 } as React.CSSProperties}
         />
-      </DashboardSection>
+        <RadKpiCard
+          icon={<Package width={17} height={17} strokeWidth={1.5} aria-hidden />}
+          tone="info"
+          label={ad2.kpiWholesale}
+          value={data.kpis.wholesaleAwaitingAdmin}
+          delta={
+            data.series.wholesale.today !== data.series.wholesale.yesterday
+              ? {
+                  direction: data.series.wholesale.today > data.series.wholesale.yesterday ? "up" : "down",
+                  label: `${data.series.wholesale.today > data.series.wholesale.yesterday ? "+" : ""}${data.series.wholesale.today - data.series.wholesale.yesterday}`,
+                }
+              : { direction: "flat", label: "0" }
+          }
+          deltaCaption={ad2.deltaVsLastWeek}
+          idleLabel={a.kpiIdle}
+          sparkline={data.series.wholesale.points}
+          style={{ "--rad-s": 3 } as React.CSSProperties}
+        />
+        <RadKpiCard
+          icon={<Compass width={17} height={17} strokeWidth={1.5} aria-hidden />}
+          tone="ok"
+          label={a.kpiBrokerage}
+          value={data.kpis.activeBrokerage}
+          delta={{ direction: "flat", label: "0" }}
+          deltaCaption={ad2.deltaFlat}
+          idleLabel={a.kpiIdle}
+          style={{ "--rad-s": 4 } as React.CSSProperties}
+        />
+      </section>
 
-      <DashboardSection className="ro-admin-home-pad grid items-stretch gap-3 py-3 lg:grid-cols-12 lg:gap-4 lg:py-4">
-        <ActionQueue
-          rows={data.actionQueue}
+      <div className="rad-grid">
+        <RadActionQueue
+          rows={queueRows}
           counts={{
             retail: data.kpis.retailAwaitingAdmin,
             deal: data.kpis.dealsAwaitingAdmin,
             wholesale: data.kpis.wholesaleAwaitingAdmin,
           }}
-          filter={queueFilter}
-          dict={dict}
+          title={ad2.needsAction}
+          tabAllLabel={ad2.tabAll}
+          tabLabels={{ retail: a.filterRetail, deal: a.filterDeals, wholesale: a.filterWholesale }}
+          footerTemplate={ad2.listFooter}
+          viewAllLabel={ad2.viewAll}
+          viewAllHref="/admin/requests"
+          emptyTitle={ad2.emptyQueueTitle}
+          emptyBody={ad2.emptyQueueBody}
+          openLabel={ad2.openRow}
+          statusLabels={statusLabels}
           locale={locale}
-          className="min-h-[22rem] lg:col-span-8"
-        />
-        <div className="grid gap-3 lg:col-span-4">
-          <DashboardRequestsChartMount
-            title={a.requestsOverDays}
-            totalLabel={a.requestsOverDaysTotal}
-            points={data.requestsTrend.points}
-            total={data.requestsTrend.total}
-            highlightDomain={chartDomain}
-            emptyTitle={a.firstUseTitle}
-            emptyBody={a.firstUseBody}
-            emptyActionHref="/admin/products/new"
-            emptyActionLabel={a.firstUseAction}
-          />
-          <DashboardDomainChartMount
-            title={a.domainMixTitle}
-            highlightDomain={chartDomain}
-            emptyTitle={a.firstUseTitle}
-            emptyBody={a.firstUseBody}
-            emptyActionHref="/admin/products/new"
-            emptyActionLabel={a.firstUseAction}
-            slices={[
-              {
-                key: "retail",
-                label: a.kpiRetail,
-                value: data.kpis.retailAwaitingAdmin,
-                color: "var(--ro-plum-700)",
-              },
-              {
-                key: "deals",
-                label: a.kpiDeals,
-                value: data.kpis.dealsAwaitingAdmin,
-                color: "var(--ro-plum-300)",
-              },
-              {
-                key: "wholesale",
-                label: a.kpiWholesale,
-                value: data.kpis.wholesaleAwaitingAdmin,
-                color: "var(--ro-amber-500)",
-              },
-              {
-                key: "brokerage",
-                label: a.kpiBrokerage,
-                value: data.kpis.activeBrokerage,
-                color: "var(--ro-progress-700)",
-              },
-            ]}
-          />
-        </div>
-      </DashboardSection>
-
-      <AdminQuickCreate
-        label={a.quickCreate}
-        closeLabel={dict.common.close}
-        items={[
-          { href: "/admin/products/new", label: a.newProduct, icon: "product" },
-          { href: "/admin/offers/new", label: dict.adminUi.newOffer, icon: "offer" },
-          { href: "/admin/traders", label: dict.adminUi.newTrader, icon: "trader" },
-          {
-            href: "/admin/brokerage",
-            label: dict.trader.newBrokerage,
-            icon: "brokerage",
-          },
-        ]}
-      />
-
-      <DashboardSection className="ro-admin-home-pad space-y-3 border-t border-[color:var(--ro-border-subtle)] py-3 pb-24 lg:pb-4">
-        <ManageHub
-          title={a.manageHub}
-          items={[
-            {
-              href: "/admin/products",
-              label: a.publishedCount,
-              value: data.manageHub.publishedProducts,
-              icon: <Boxes strokeWidth={1.5} />,
-            },
-            {
-              href: "/admin/traders",
-              label: a.traders,
-              value: data.manageHub.traders,
-              icon: <Store strokeWidth={1.5} />,
-            },
-            {
-              href: "/admin/customers",
-              label: a.customers,
-              value: data.manageHub.customers,
-              icon: <Users strokeWidth={1.5} />,
-            },
-            {
-              href: "/admin/inbox",
-              label: a.inbox,
-              value: data.manageHub.unreadConversations,
-              icon: <MessageSquare strokeWidth={1.5} />,
-            },
-          ]}
         />
 
-        <div className="grid items-start gap-3 lg:grid-cols-12">
-          <DashboardAside
-            health={data.health}
-            lastWhatsAppAt={data.lastWhatsAppAt}
-            catalogHealth={data.catalogHealth}
-            pipeline={data.pipeline}
-            dict={dict}
+        <div className="rad-rail">
+          <RadOrdersChart
+            title={ad2.chartTitle}
+            points30={data.requestsTrend.points}
+            dateLabels={dateLabels}
+            defaultRange={14 as RadChartRange}
+            rangeDaysTemplate={ad2.rangeDays}
+            captionForms={{
+              zero: ad2.chartCaptionZero,
+              one: ad2.chartCaptionOne,
+              two: ad2.chartCaptionTwo,
+              few: ad2.chartCaptionFew,
+              many: ad2.chartCaptionMany,
+              other: ad2.chartCaptionOther,
+            }}
             locale={locale}
-            className="lg:col-span-5"
+            tableCaption={ad2.chartTitle}
           />
-          <ActivityFeed
+
+          <RadWhatsAppCard
+            title={ad2.waTitle}
+            connected={wa.connected}
+            statusLabel={wa.label}
+            description={waDescription}
+            openLabel={ad2.waOpenInbox}
+            openHref="/admin/inbox"
+          />
+
+          <RadActivityTimeline
+            title={ad2.activityTitle}
             items={data.activityFeed}
             dict={dict}
             locale={locale}
-            className="lg:col-span-7"
+            emptyLabel={ad2.emptyQueueTitle}
           />
         </div>
-      </DashboardSection>
-    </DashboardStack>
+      </div>
+    </>
   );
 }
 
 function DashboardSkeleton() {
   return (
-    <div className="ro-admin-home-bleed" aria-busy="true">
-      <div className="ro-admin-greeting h-[7.5rem] sm:h-[8.25rem]" />
-      <div className="ro-admin-kpi-stack">
-        <div className="ro-admin-kpi-hero">
-          <div className="h-[7.5rem] rounded-[1rem] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)]" />
-        </div>
-        <div className="ro-admin-kpi-strip">
-          <div className="ro-admin-kpi-cell h-[9.5rem] rounded-[1rem] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)]" />
-          <div className="ro-admin-kpi-cell h-[9.5rem] rounded-[1rem] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)]" />
-          <div className="ro-admin-kpi-cell h-[9.5rem] rounded-[1rem] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)]" />
-          <div className="ro-admin-kpi-cell h-[9.5rem] rounded-[1rem] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)]" />
-        </div>
-      </div>
-      <div className="ro-admin-home-pad grid gap-3 py-3 lg:grid-cols-12">
-        <div className="min-h-[22rem] rounded-[var(--ro-r-lg)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] lg:col-span-8" />
-        <div className="grid gap-3 lg:col-span-4">
-          <div className="h-[220px] rounded-[var(--ro-r-lg)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)]" />
-          <div className="h-[200px] rounded-[var(--ro-r-lg)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)]" />
+    <div aria-busy="true">
+      <div className="rad-phead">
+        <div>
+          <div
+            style={{
+              height: 28,
+              width: 180,
+              borderRadius: 8,
+              background: "var(--rad-surface3)",
+            }}
+          />
         </div>
       </div>
-      <div className="ro-admin-home-pad space-y-3 border-t border-[color:var(--ro-border-subtle)] py-3">
-        <div className="h-16 rounded-[var(--ro-r-lg)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)]" />
-        <div className="grid gap-3 lg:grid-cols-12">
-          <div className="h-40 rounded-[var(--ro-r-lg)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] lg:col-span-5" />
-          <div className="h-56 rounded-[var(--ro-r-lg)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] lg:col-span-7" />
+      <section className="rad-kpis">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="rad-card rad-kpi" style={{ background: "var(--rad-surface)" }} />
+        ))}
+      </section>
+      <div className="rad-grid">
+        <div className="rad-card" style={{ minHeight: 420 }} />
+        <div className="rad-rail">
+          <div className="rad-card" style={{ height: 240 }} />
+          <div className="rad-card" style={{ height: 160 }} />
+          <div className="rad-card" style={{ height: 200 }} />
         </div>
       </div>
     </div>
   );
 }
 
-export default async function AdminDashboardPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ domain?: string }>;
-}) {
+export default async function AdminDashboardPage() {
   const { locale, dict } = await getRequestDictionary();
   const session = await getAdminSessionChrome();
   const greeting = greetingHeadline(session?.name, dict.common);
-  const { domain: domainRaw } = await searchParams;
-  const domainParam = parseDomain(domainRaw);
 
   return (
-    <section
-      data-admin-home
-      className="relative w-full min-w-0 max-w-none"
-      style={{ width: "100%", maxWidth: "none" }}
-    >
+    <section data-admin-home className="relative w-full min-w-0 max-w-none rad-root">
       <Suspense fallback={<DashboardSkeleton />}>
-        <AdminDashboardBody
-          locale={locale}
-          dict={dict}
-          greeting={greeting}
-          domainParam={domainParam}
-        />
+        <AdminDashboardBody locale={locale} dict={dict} greeting={greeting} />
       </Suspense>
     </section>
   );

@@ -1,12 +1,12 @@
 {
   "ok": true,
-  "at": "2026-10-31T10:57:28.922Z",
+  "at": "2026-11-08T19:01:35.276Z",
   "tools": "docker",
-  "backupDir": "backups\\restore-drill-pg-1793444248922",
+  "backupDir": "backups\\restore-drill-pg-1794164495276",
   "dump": {
     "file": "db.dump",
-    "bytes": 113416,
-    "sha256": "15cf484b62516d5979088a9d81af167a4d542416d661c371942281beb9370b1e"
+    "bytes": 157942,
+    "sha256": "61314fe1e692699b67505ead893b678dedf06cf2ee7930c76977812faf989116"
   },
   "uploads": {
     "source": "public/uploads",
@@ -14,15 +14,15 @@
     "mismatches": []
   },
   "waAuth": {
-    "source": ".wa-auth",
-    "files": 0,
+    "source": "./.wa-auth",
+    "files": 32,
     "mismatches": []
   },
   "tables": [
     {
       "table": "AdminAuditLog",
-      "source": 60,
-      "restored": 60,
+      "source": 117,
+      "restored": 117,
       "ok": true
     },
     {
@@ -63,32 +63,32 @@
     },
     {
       "table": "Customer",
-      "source": 51,
-      "restored": 51,
+      "source": 76,
+      "restored": 76,
       "ok": true
     },
     {
       "table": "DealProposal",
-      "source": 60,
-      "restored": 60,
+      "source": 104,
+      "restored": 104,
       "ok": true
     },
     {
       "table": "NegotiationEntry",
-      "source": 149,
-      "restored": 149,
+      "source": 259,
+      "restored": 259,
       "ok": true
     },
     {
       "table": "Product",
-      "source": 50,
-      "restored": 50,
+      "source": 69,
+      "restored": 69,
       "ok": true
     },
     {
       "table": "ProductImage",
-      "source": 17,
-      "restored": 17,
+      "source": 25,
+      "restored": 25,
       "ok": true
     },
     {
@@ -99,26 +99,26 @@
     },
     {
       "table": "PublicCuratedOffer",
-      "source": 30,
-      "restored": 30,
+      "source": 52,
+      "restored": 52,
       "ok": true
     },
     {
       "table": "RetailHandoffEvent",
-      "source": 141,
-      "restored": 141,
+      "source": 232,
+      "restored": 232,
       "ok": true
     },
     {
       "table": "RetailRequest",
-      "source": 50,
-      "restored": 50,
+      "source": 74,
+      "restored": 74,
       "ok": true
     },
     {
       "table": "RetailRequestLine",
-      "source": 50,
-      "restored": 50,
+      "source": 74,
+      "restored": 74,
       "ok": true
     },
     {
@@ -129,8 +129,8 @@
     },
     {
       "table": "TraderNotification",
-      "source": 208,
-      "restored": 208,
+      "source": 299,
+      "restored": 299,
       "ok": true
     },
     {
@@ -141,8 +141,8 @@
     },
     {
       "table": "WhatsAppConversation",
-      "source": 1,
-      "restored": 1,
+      "source": 12,
+      "restored": 12,
       "ok": true
     },
     {
@@ -153,32 +153,38 @@
     },
     {
       "table": "WhatsAppMessage",
-      "source": 3,
-      "restored": 3,
+      "source": 236,
+      "restored": 236,
+      "ok": true
+    },
+    {
+      "table": "WhatsAppOutboundSafetyState",
+      "source": 0,
+      "restored": 0,
       "ok": true
     },
     {
       "table": "WholesaleRequest",
-      "source": 29,
-      "restored": 29,
+      "source": 48,
+      "restored": 48,
       "ok": true
     },
     {
       "table": "WholesaleRequestEvent",
-      "source": 111,
-      "restored": 111,
+      "source": 187,
+      "restored": 187,
       "ok": true
     },
     {
       "table": "WholesaleRequestLine",
-      "source": 29,
-      "restored": 29,
+      "source": 48,
+      "restored": 48,
       "ok": true
     },
     {
       "table": "_prisma_migrations",
-      "source": 6,
-      "restored": 6,
+      "source": 13,
+      "restored": 13,
       "ok": true
     }
   ]

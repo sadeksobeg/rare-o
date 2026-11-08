@@ -21,7 +21,11 @@ export function PortalShellFrame({
   defaultTheme?: PortalThemeMode;
 }) {
   return (
-    <PortalThemeProvider defaultTheme={defaultTheme} className={className}>
+    <PortalThemeProvider
+      defaultTheme={defaultTheme}
+      className={className}
+      dataPortal={surface}
+    >
       <MotionProvider surface={surface}>{children}</MotionProvider>
     </PortalThemeProvider>
   );

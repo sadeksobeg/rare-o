@@ -378,6 +378,7 @@ type Dict = {
     domainMixTitle: string;
     requestsOverDays: string;
     requestsOverDaysTotal: string;
+    requestsOverDaysDay: string;
     firstUseTitle: string;
     firstUseBody: string;
     firstUseAction: string;
@@ -389,11 +390,91 @@ type Dict = {
     commandPlaceholder: string;
     commandEmpty: string;
     commandSearching: string;
+    commandQuickActions: string;
+    commandNavigate: string;
     quickCreate: string;
     manageHub: string;
     settings: string;
     team: string;
     savedToast: string;
+  };
+  /** AD-02 dashboard, round 2 (owner reference-driven rebuild, 2026-11-08). */
+  ad2: {
+    breadcrumbAdmin: string;
+    searchPlaceholder: string;
+    export: string;
+    create: string;
+    newProduct: string;
+    newOffer: string;
+    newTrader: string;
+    exportCsv: string;
+    notifications: string;
+    collapseMenu: string;
+    expandMenu: string;
+    needsAction: string;
+    awaitingYouSuffix: string;
+    kpiRetailNew: string;
+    kpiWholesale: string;
+    deltaVsLastWeek: string;
+    deltaFlat: string;
+    tabAll: string;
+    listFooter: string;
+    viewAll: string;
+    emptyQueueTitle: string;
+    emptyQueueBody: string;
+    openRow: string;
+    chartTitle: string;
+    rangeDays: string;
+    waTitle: string;
+    waConnected: string;
+    waConnecting: string;
+    waReconnecting: string;
+    waDisconnected: string;
+    waAuthRequired: string;
+    waError: string;
+    waDescriptionZero: string;
+    waOpenInbox: string;
+    activityTitle: string;
+    userRole: string;
+    paletteSearchPlaceholder: string;
+    paletteEmpty: string;
+    paletteNavGroup: string;
+    paletteActionsGroup: string;
+    paletteNav: string;
+    paletteOpen: string;
+    paletteClose: string;
+    pendingZero: string;
+    pendingOne: string;
+    pendingTwo: string;
+    pendingFew: string;
+    pendingMany: string;
+    pendingOther: string;
+    waUnreadZero: string;
+    waUnreadOne: string;
+    waUnreadTwo: string;
+    waUnreadFew: string;
+    waUnreadMany: string;
+    waUnreadOther: string;
+    chartCaptionZero: string;
+    chartCaptionOne: string;
+    chartCaptionTwo: string;
+    chartCaptionFew: string;
+    chartCaptionMany: string;
+    chartCaptionOther: string;
+    rowRequestZero: string;
+    rowRequestOne: string;
+    rowRequestTwo: string;
+    rowRequestFew: string;
+    rowRequestMany: string;
+    rowRequestOther: string;
+    menuLabel: string;
+    moreTab: string;
+    skipToContent: string;
+    statusNew: string;
+    statusAwaitingReply: string;
+    statusInProgress: string;
+    statusReady: string;
+    pieceSuffixRetail: string;
   };
   adminUi: {
     colReference: string;
@@ -1279,6 +1360,8 @@ type Dict = {
     navOps: string;
     navCatalog: string;
     navPeople: string;
+    navSystem: string;
+    adminBrandSub: string;
     switchOn: string;
     switchOff: string;
     paginationPrevious: string;
@@ -1790,6 +1873,7 @@ const ar: Dict = {
     domainMixTitle: "توزيع المسارات",
     requestsOverDays: "الطلبات خلال 14 يوماً",
     requestsOverDaysTotal: "المجموع",
+    requestsOverDaysDay: "اليوم {n}",
     firstUseTitle: "ابدأ من هنا",
     firstUseBody:
       "أضف منتجاً منشوراً، أو أنشئ تاجراً، أو انتظر أول طلب — لوحة التحكم تمتلئ تلقائياً.",
@@ -1802,11 +1886,90 @@ const ar: Dict = {
     commandPlaceholder: "ابحث عن طلب أو منتج أو تاجر…",
     commandEmpty: "لا نتائج",
     commandSearching: "جاري البحث…",
+    commandQuickActions: "إجراءات سريعة",
+    commandNavigate: "الانتقال إلى",
     quickCreate: "إنشاء سريع",
     manageHub: "إدارة",
     settings: "الأمان",
     team: "الفريق",
     savedToast: "تم الحفظ.",
+  },
+  ad2: {
+    breadcrumbAdmin: "الإدارة",
+    searchPlaceholder: "بحث أو أمر…",
+    export: "تصدير",
+    create: "إنشاء",
+    newProduct: "إنشاء منتج جديد",
+    newOffer: "إنشاء عرض",
+    newTrader: "إضافة تاجر",
+    exportCsv: "تصدير الطلبات (CSV)",
+    notifications: "الإشعارات",
+    collapseMenu: "طيّ القائمة",
+    expandMenu: "توسعة القائمة",
+    needsAction: "يحتاج إجراءً",
+    awaitingYouSuffix: "بانتظارك",
+    kpiRetailNew: "طلبات التجزئة الجديدة",
+    kpiWholesale: "طلبات الجملة",
+    deltaVsLastWeek: "عن الأسبوع الماضي",
+    deltaFlat: "دون تغيّر",
+    tabAll: "الكل",
+    listFooter: "يُعرض {shown} من {total}",
+    viewAll: "عرض الكل",
+    emptyQueueTitle: "لا شيء بانتظارك هنا",
+    emptyQueueBody: "كل شيء في هذا القسم تمّت متابعته.",
+    openRow: "فتح",
+    chartTitle: "الطلبات",
+    rangeDays: "{n} يوماً",
+    waTitle: "اتصال واتساب",
+    waConnected: "متصل",
+    waConnecting: "جاري الاتصال",
+    waReconnecting: "إعادة الاتصال",
+    waDisconnected: "غير متصل",
+    waAuthRequired: "يحتاج توثيقاً",
+    waError: "خطأ في الاتصال",
+    waDescriptionZero: "الإرسال غير مفعّل حالياً.",
+    waOpenInbox: "فتح الصندوق",
+    activityTitle: "آخر النشاط",
+    userRole: "مدير النظام",
+    paletteSearchPlaceholder: "ابحث عن طلب أو عميل أو منتج، أو اكتب أمراً…",
+    paletteEmpty: "لا نتائج لـ «{q}»",
+    paletteNavGroup: "الانتقال إلى",
+    paletteActionsGroup: "إجراءات سريعة",
+    paletteNav: "تنقّل",
+    paletteOpen: "فتح",
+    paletteClose: "إغلاق",
+    pendingZero: "لا شيء",
+    pendingOne: "أمر واحد",
+    pendingTwo: "أمران",
+    pendingFew: "{n} أمور",
+    pendingMany: "{n} أمراً",
+    pendingOther: "{n} أمر",
+    waUnreadZero: "لا محادثات غير مقروءة بانتظارك في الصندوق.",
+    waUnreadOne: "لديك محادثة واحدة غير مقروءة بانتظارك في الصندوق.",
+    waUnreadTwo: "لديك محادثتان غير مقروءتان بانتظارك في الصندوق.",
+    waUnreadFew: "لديك {n} محادثات غير مقروءة بانتظارك في الصندوق.",
+    waUnreadMany: "لديك {n} محادثة غير مقروءة بانتظارك في الصندوق.",
+    waUnreadOther: "لديك {n} محادثة غير مقروءة بانتظارك في الصندوق.",
+    chartCaptionZero: "لا طلبات",
+    chartCaptionOne: "طلب واحد",
+    chartCaptionTwo: "طلبان",
+    chartCaptionFew: "{n} طلبات",
+    chartCaptionMany: "{n} طلباً",
+    chartCaptionOther: "{n} طلب",
+    rowRequestZero: "لا قطع",
+    rowRequestOne: "قطعة واحدة",
+    rowRequestTwo: "قطعتان",
+    rowRequestFew: "{n} قطع",
+    rowRequestMany: "{n} قطعة",
+    rowRequestOther: "{n} قطعة",
+    menuLabel: "القائمة",
+    moreTab: "المزيد",
+    skipToContent: "تخطَّ إلى المحتوى",
+    statusNew: "جديد",
+    statusAwaitingReply: "بانتظار ردّك",
+    statusInProgress: "قيد المتابعة",
+    statusReady: "جاهز",
+    pieceSuffixRetail: "طلب تجزئة",
   },
   adminUi: {
     colReference: "المرجع",
@@ -2808,6 +2971,8 @@ const ar: Dict = {
     navOps: "التشغيل",
     navCatalog: "الكتالوج",
     navPeople: "الأشخاص",
+    navSystem: "النظام",
+    adminBrandSub: "لوحة الإدارة",
     switchOn: "مفعّل",
     switchOff: "متوقف",
     paginationPrevious: "السابق",
@@ -3336,6 +3501,7 @@ const en: Dict = {
     domainMixTitle: "Domain mix",
     requestsOverDays: "Requests over 14 days",
     requestsOverDaysTotal: "Total",
+    requestsOverDaysDay: "Day {n}",
     firstUseTitle: "Start here",
     firstUseBody:
       "Publish a product, create a trader, or wait for the first request — the dashboard fills itself.",
@@ -3348,11 +3514,90 @@ const en: Dict = {
     commandPlaceholder: "Search a request, product, or trader…",
     commandEmpty: "No results",
     commandSearching: "Searching…",
+    commandQuickActions: "Quick actions",
+    commandNavigate: "Go to",
     quickCreate: "Quick create",
     manageHub: "Manage",
     settings: "Security",
     team: "Team",
     savedToast: "Saved.",
+  },
+  ad2: {
+    breadcrumbAdmin: "Admin",
+    searchPlaceholder: "Search or command…",
+    export: "Export",
+    create: "Create",
+    newProduct: "Create new product",
+    newOffer: "Create offer",
+    newTrader: "Add trader",
+    exportCsv: "Export requests (CSV)",
+    notifications: "Notifications",
+    collapseMenu: "Collapse menu",
+    expandMenu: "Expand menu",
+    needsAction: "Needs your action",
+    awaitingYouSuffix: "awaiting you",
+    kpiRetailNew: "New retail requests",
+    kpiWholesale: "Wholesale requests",
+    deltaVsLastWeek: "vs. last week",
+    deltaFlat: "No change",
+    tabAll: "All",
+    listFooter: "Showing {shown} of {total}",
+    viewAll: "View all",
+    emptyQueueTitle: "Nothing waiting here",
+    emptyQueueBody: "Everything in this section has been handled.",
+    openRow: "Open",
+    chartTitle: "Requests",
+    rangeDays: "{n} days",
+    waTitle: "WhatsApp connection",
+    waConnected: "Connected",
+    waConnecting: "Connecting",
+    waReconnecting: "Reconnecting",
+    waDisconnected: "Disconnected",
+    waAuthRequired: "Needs authentication",
+    waError: "Connection error",
+    waDescriptionZero: "Sending is currently disabled.",
+    waOpenInbox: "Open inbox",
+    activityTitle: "Recent activity",
+    userRole: "System admin",
+    paletteSearchPlaceholder: "Search a request, customer, or product, or type a command…",
+    paletteEmpty: "No results for “{q}”",
+    paletteNavGroup: "Go to",
+    paletteActionsGroup: "Quick actions",
+    paletteNav: "Navigate",
+    paletteOpen: "Open",
+    paletteClose: "Close",
+    pendingZero: "Nothing",
+    pendingOne: "1 item",
+    pendingTwo: "2 items",
+    pendingFew: "{n} items",
+    pendingMany: "{n} items",
+    pendingOther: "{n} items",
+    waUnreadZero: "No unread conversations waiting in the inbox.",
+    waUnreadOne: "You have 1 unread conversation waiting in the inbox.",
+    waUnreadTwo: "You have 2 unread conversations waiting in the inbox.",
+    waUnreadFew: "You have {n} unread conversations waiting in the inbox.",
+    waUnreadMany: "You have {n} unread conversations waiting in the inbox.",
+    waUnreadOther: "You have {n} unread conversations waiting in the inbox.",
+    chartCaptionZero: "No requests",
+    chartCaptionOne: "1 request",
+    chartCaptionTwo: "2 requests",
+    chartCaptionFew: "{n} requests",
+    chartCaptionMany: "{n} requests",
+    chartCaptionOther: "{n} requests",
+    rowRequestZero: "No pieces",
+    rowRequestOne: "1 piece",
+    rowRequestTwo: "2 pieces",
+    rowRequestFew: "{n} pieces",
+    rowRequestMany: "{n} pieces",
+    rowRequestOther: "{n} pieces",
+    menuLabel: "Menu",
+    moreTab: "More",
+    skipToContent: "Skip to content",
+    statusNew: "New",
+    statusAwaitingReply: "Awaiting your reply",
+    statusInProgress: "In progress",
+    statusReady: "Ready",
+    pieceSuffixRetail: "Retail request",
   },
   adminUi: {
     colReference: "Reference",
@@ -4368,6 +4613,8 @@ const en: Dict = {
     navOps: "Operations",
     navCatalog: "Catalog",
     navPeople: "People",
+    navSystem: "System",
+    adminBrandSub: "Admin panel",
     switchOn: "On",
     switchOff: "Off",
     paginationPrevious: "Previous",

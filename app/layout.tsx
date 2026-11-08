@@ -26,14 +26,14 @@ const cormorant = Cormorant_Garamond({
 
 const source = Source_Sans_3({
   subsets: ["latin"],
-  weight: ["400", "600"],
+  weight: ["400", "600", "700"],
   variable: "--font-source",
   display: "swap",
 });
 
 const plexAr = IBM_Plex_Sans_Arabic({
   subsets: ["arabic"],
-  weight: ["400", "600"],
+  weight: ["400", "500", "600"],
   variable: "--font-plex-ar",
   display: "swap",
 });
