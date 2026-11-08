@@ -426,6 +426,41 @@ html[lang="ar"] .ro-type-overline {
   will-change: transform;
 }
 
+/* Catalog product card — diagonal sheen sweep on hover, mirrors .ro-kpi-sheen. */
+.ro-catalog-sheen {
+  isolation: isolate;
+}
+.ro-catalog-sheen::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: -45%;
+  width: 40%;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    color-mix(in srgb, var(--ro-sand-50) 55%, transparent) 50%,
+    transparent 100%
+  );
+  transform: translateX(-120%);
+  opacity: 0;
+}
+.group:hover .ro-catalog-sheen::after,
+.group:focus-within .ro-catalog-sheen::after {
+  opacity: 1;
+  transform: translateX(280%);
+  transition:
+    transform 620ms var(--ro-ease-out, ease),
+    opacity 240ms ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ro-catalog-sheen::after {
+    display: none;
+  }
+}
+
 .ro-anim-reveal-mask {
   clip-path: inset(0 0 100% 0);
   transform: translateY(0.75rem);
@@ -4046,4 +4081,98 @@ body:has(.ro-portal-admin) {
   .ro-admin-mobile-drawer-panel {
     animation: none;
   }
+}
+
+/* -- Trader mobile bottom tabs + main inset ----------------------------- */
+.ro-trader-main {
+  padding-bottom: 1.5rem;
+}
+@media (max-width: 1023px) {
+  .ro-trader-main {
+    padding-bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+.ro-trader-bottom-tabs {
+  display: none;
+}
+@media (max-width: 1023px) {
+  .ro-trader-bottom-tabs {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 90;
+    display: block;
+    border-top: 1px solid var(--ro-border-subtle, rgba(50, 16, 79, 0.1));
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--ro-bg-raised, #fff) 92%, transparent),
+        var(--ro-bg-raised, #ffffff)
+      );
+    box-shadow: 0 -12px 32px -24px rgba(20, 10, 40, 0.35);
+    backdrop-filter: blur(16px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .ro-portal[data-theme="dark"] .ro-trader-bottom-tabs {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--ro-bg-raised) 88%, transparent),
+        var(--ro-bg-raised)
+      );
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+}
+@media (min-width: 1024px) {
+  .ro-trader-bottom-tabs {
+    display: none !important;
+  }
+}
+
+.ro-trader-greeting {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 1rem;
+  border: 1px solid var(--ro-border-subtle);
+  background:
+    radial-gradient(
+      70% 140% at 100% -10%,
+      color-mix(in srgb, var(--ro-plum-300) 55%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      50% 110% at 0% 120%,
+      color-mix(in srgb, var(--ro-plum-100) 80%, transparent),
+      transparent 58%
+    ),
+    linear-gradient(108deg, #fbf8ff 0%, #f3eef8 48%, #ebe4f4 100%);
+  box-shadow:
+    inset 0 -1px 0 var(--ro-border-subtle),
+    0 18px 40px -32px rgba(50, 16, 79, 0.18);
+  color: var(--ro-text);
+}
+.ro-portal[data-theme="dark"] .ro-trader-greeting {
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--ro-sand-100);
+  background:
+    radial-gradient(
+      55% 120% at 100% 0%,
+      color-mix(in srgb, var(--ro-plum-700) 52%, transparent),
+      transparent 62%
+    ),
+    linear-gradient(108deg, #241832 0%, #2a1c40 48%, #1e1530 100%);
+}
+.ro-trader-greeting-title {
+  color: var(--ro-text);
+}
+.ro-portal[data-theme="dark"] .ro-trader-greeting-title {
+  color: var(--ro-sand-50);
+}
+.ro-trader-greeting-lead {
+  color: var(--ro-text-muted);
+}
+.ro-portal[data-theme="dark"] .ro-trader-greeting-lead {
+  color: color-mix(in srgb, var(--ro-sand-100) 72%, transparent);
 }

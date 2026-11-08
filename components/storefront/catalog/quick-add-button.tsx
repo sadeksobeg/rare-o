@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { Check, Plus } from "lucide-react";
 import { useCart } from "@/components/storefront/cart-provider";
 import { useCartToast } from "@/components/storefront/use-cart-toast";
@@ -40,41 +41,62 @@ export function QuickAddButton({
     []
   );
 
+  const reduce = useReducedMotion();
+
   return (
-    <>
-      <button
-        type="button"
-        aria-label={label}
-        title={label}
-        onClick={() => {
-          addItem({
-            productId,
-            slug,
-            name,
-            price,
-            currency,
-            quantity: 1,
-            imagePath: imagePath ?? null,
-          });
-          notifyAdded(name, addedLabel);
-          setAdded(true);
-          if (timer.current) clearTimeout(timer.current);
-          timer.current = setTimeout(() => setAdded(false), 1500);
-        }}
-        className={cn(
-          "hidden size-11 items-center justify-center rounded-[var(--ro-r-full)] bg-ro-ink text-ro-canvas shadow-[var(--ro-e2)]",
-          "transition-[opacity,background-color] duration-[var(--ro-dur-fast)] ease-[var(--ro-ease-standard)] hover:bg-ro-plum",
-          "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]",
-          "md:inline-flex md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100",
-          className
-        )}
-      >
+    <m.button
+      type="button"
+      aria-label={label}
+      title={label}
+      whileTap={reduce ? undefined : { scale: 0.88 }}
+      onClick={() => {
+        addItem({
+          productId,
+          slug,
+          name,
+          price,
+          currency,
+          quantity: 1,
+          imagePath: imagePath ?? null,
+        });
+        notifyAdded(name, addedLabel);
+        setAdded(true);
+        if (timer.current) clearTimeout(timer.current);
+        timer.current = setTimeout(() => setAdded(false), 1500);
+      }}
+      className={cn(
+        "hidden size-11 items-center justify-center rounded-[var(--ro-r-full)] bg-ro-ink text-ro-canvas shadow-[var(--ro-e2)]",
+        "transition-[opacity,background-color] duration-[var(--ro-dur-fast)] ease-[var(--ro-ease-standard)] hover:bg-ro-plum",
+        "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]",
+        "md:inline-flex md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100",
+        className
+      )}
+    >
+      <AnimatePresence initial={false} mode="wait">
         {added ? (
-          <Check className="size-5" aria-hidden />
+          <m.span
+            key="check"
+            initial={reduce ? false : { scale: 0.3, opacity: 0, rotate: -45 }}
+            animate={{ scale: 1, opacity: 1, rotate: 0 }}
+            exit={reduce ? undefined : { scale: 0.3, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 500, damping: 26 }}
+            className="flex items-center justify-center"
+          >
+            <Check className="size-5" aria-hidden />
+          </m.span>
         ) : (
-          <Plus className="size-5" aria-hidden />
+          <m.span
+            key="plus"
+            initial={reduce ? false : { scale: 0.3, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={reduce ? undefined : { scale: 0.3, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 500, damping: 26 }}
+            className="flex items-center justify-center"
+          >
+            <Plus className="size-5" aria-hidden />
+          </m.span>
         )}
-      </button>
-    </>
+      </AnimatePresence>
+    </m.button>
   );
 }

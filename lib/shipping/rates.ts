@@ -264,13 +264,25 @@ export function quoteInternationalShipping(
 }
 
 /**
- * Billable weight for a shipment of `oudCount` oud instruments (boxed
- * together). Owner-supplied data points: 1 oud → 20 kg, 2 ouds → 25 kg —
- * a flat +5 kg per additional unit after the first, i.e. 15 + 5·n.
+ * Billable weight for a shipment of `oudCount` oud instruments. Ouds are
+ * boxed in pairs: every 2 ouds share one 25 kg box, and a leftover single
+ * oud gets its own 20 kg box. E.g. 1→20, 2→25, 3→25+20=45, 4→50, 5→70.
  */
 export function calculateOudShipmentWeightKg(oudCount: number): number {
   if (oudCount <= 0) return 0;
-  return 15 + 5 * oudCount;
+  const pairs = Math.floor(oudCount / 2);
+  const remainder = oudCount % 2;
+  return pairs * 25 + remainder * 20;
+}
+
+/** Breakdown of the box grouping behind calculateOudShipmentWeightKg. */
+export function describeOudShipmentBoxes(
+  oudCount: number
+): { pairs: number; remainder: number; totalKg: number } {
+  if (oudCount <= 0) return { pairs: 0, remainder: 0, totalKg: 0 };
+  const pairs = Math.floor(oudCount / 2);
+  const remainder = oudCount % 2;
+  return { pairs, remainder, totalKg: pairs * 25 + remainder * 20 };
 }
 
 // ---------------------------------------------------------------------------

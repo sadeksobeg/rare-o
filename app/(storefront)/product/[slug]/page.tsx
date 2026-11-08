@@ -117,6 +117,8 @@ export default async function ProductPage({
   }));
 
   const priceNumber = Number(product.retailPrice);
+  const compareAtPriceNumber =
+    product.compareAtPrice != null ? Number(product.compareAtPrice) : null;
   const jsonLd = productJsonLd({
     name: name || product.slug,
     description: description || undefined,
@@ -235,7 +237,11 @@ export default async function ProductPage({
         <div className="relative min-w-0 lg:col-span-7">
           <ProductBadges
             product={{
-              ...product,
+              badgeNew: product.badgeNew,
+              badgeFeatured: product.badgeFeatured,
+              badgeSale: product.badgeSale,
+              retailPrice: priceNumber,
+              compareAtPrice: compareAtPriceNumber,
               categorySlug: product.category?.slug,
             }}
             locale={locale}

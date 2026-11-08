@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, MapPin, Truck } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
+import { Check, MapPin, Package, Truck } from "lucide-react";
+import { useMotion } from "@/components/motion/provider";
+import { AnimatedValue } from "@/components/portal/animated-value";
 import {
   calculateOudShipmentWeightKg,
+  describeOudShipmentBoxes,
   INTERNATIONAL_ZONES,
   SYRIA_GOVERNORATES,
 } from "@/lib/shipping/rates";
@@ -53,9 +57,15 @@ export function ShippingCostSelector({
   const [destinationCode, setDestinationCode] = useState("");
   const [methodCode, setMethodCode] = useState<string | null>(null);
 
+  const { lite } = useMotion();
+  const safeOudCount = Math.max(1, oudUnitCount);
   const weightKg = useMemo(
-    () => calculateOudShipmentWeightKg(Math.max(1, oudUnitCount)),
-    [oudUnitCount]
+    () => calculateOudShipmentWeightKg(safeOudCount),
+    [safeOudCount]
+  );
+  const boxes = useMemo(
+    () => describeOudShipmentBoxes(safeOudCount),
+    [safeOudCount]
   );
 
   const options = useMemo(
@@ -150,6 +160,59 @@ export function ShippingCostSelector({
         </span>
       </label>
 
+      <div className="rounded-[var(--ro-r-md)] border border-[var(--ro-border-control)] bg-ro-paper p-3.5">
+        <div className="flex items-center justify-between gap-2">
+          <span className="flex items-center gap-1.5 text-xs font-medium text-ro-muted">
+            <Package className="size-3.5" strokeWidth={1.5} aria-hidden />
+            {t(locale, "وزن الشحنة التقديري", "Estimated shipment weight")}
+          </span>
+          <span className="font-display text-xl font-semibold tabular-nums text-ro-ink">
+            <bdi dir="ltr">
+              <AnimatedValue value={weightKg} durationMs={lite ? 1 : 550} />{" "}
+              {t(locale, "كغ", "kg")}
+            </bdi>
+          </span>
+        </div>
+        <div className="mt-2.5 flex flex-wrap items-center gap-1.5" aria-hidden>
+          <AnimatePresence initial={false}>
+            {Array.from({ length: boxes.pairs }).map((_, i) => (
+              <m.span
+                key={`pair-${i}`}
+                layout={!lite}
+                initial={lite ? false : { opacity: 0, scale: 0.85 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={lite ? undefined : { opacity: 0, scale: 0.85 }}
+                transition={{
+                  duration: lite ? 0 : 0.22,
+                  delay: lite ? 0 : i * 0.05,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                className="inline-flex items-center gap-1 rounded-[var(--ro-r-full)] border border-[var(--ro-border-control)] bg-ro-sunken px-2.5 py-1 text-[11px] font-medium text-ro-ink"
+              >
+                <bdi dir="ltr">٢ × {t(locale, "عود", "oud")} = ٢٥ {t(locale, "كغ", "kg")}</bdi>
+              </m.span>
+            ))}
+            {boxes.remainder ? (
+              <m.span
+                key="single"
+                layout={!lite}
+                initial={lite ? false : { opacity: 0, scale: 0.85 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={lite ? undefined : { opacity: 0, scale: 0.85 }}
+                transition={{
+                  duration: lite ? 0 : 0.22,
+                  delay: lite ? 0 : boxes.pairs * 0.05,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                className="inline-flex items-center gap-1 rounded-[var(--ro-r-full)] border border-dashed border-[var(--ro-border-control)] px-2.5 py-1 text-[11px] font-medium text-ro-muted"
+              >
+                <bdi dir="ltr">١ × {t(locale, "عود", "oud")} = ٢٠ {t(locale, "كغ", "kg")}</bdi>
+              </m.span>
+            ) : null}
+          </AnimatePresence>
+        </div>
+      </div>
+
       {destinationCode && options.length === 0 ? (
         <p className="rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-sunken px-3 py-2.5 text-xs text-ro-muted">
           {t(
@@ -162,15 +225,23 @@ export function ShippingCostSelector({
 
       {options.length > 0 ? (
         <div role="radiogroup" aria-label={t(locale, "طريقة الشحن", "Shipping method")} className="grid gap-2 sm:grid-cols-2">
-          {options.map((opt) => {
+          {options.map((opt, i) => {
             const active = (methodCode ?? options[0]?.code) === opt.code;
             return (
-              <button
+              <m.button
                 key={opt.code}
                 type="button"
                 role="radio"
                 aria-checked={active}
                 onClick={() => selectMethod(opt.code)}
+                initial={lite ? false : { opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: lite ? 0 : 0.22,
+                  delay: lite ? 0 : i * 0.04,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                whileTap={lite ? undefined : { scale: 0.98 }}
                 className={cn(
                   "flex items-start gap-2.5 rounded-[var(--ro-r-sm)] border px-3.5 py-3 text-start transition-colors duration-[var(--ro-dur-fast)]",
                   active
@@ -187,17 +258,41 @@ export function ShippingCostSelector({
                   )}
                   aria-hidden
                 >
-                  <Check className="size-3" strokeWidth={2} />
+                  <AnimatePresence initial={false} mode="wait">
+                    {active ? (
+                      <m.span
+                        key="on"
+                        initial={lite ? false : { scale: 0.4, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={lite ? undefined : { scale: 0.4, opacity: 0 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 28 }}
+                        className="flex items-center justify-center"
+                      >
+                        <Check className="size-3" strokeWidth={2} />
+                      </m.span>
+                    ) : null}
+                  </AnimatePresence>
                 </span>
                 <span className="min-w-0 flex-1 space-y-0.5">
                   <span className="flex items-center gap-1.5 text-sm font-medium text-ro-ink">
                     <Truck className="size-3.5 shrink-0 text-ro-muted" strokeWidth={1.5} aria-hidden />
                     {t(locale, opt.labelAr, opt.labelEn)}
                   </span>
-                  <span className="block text-base font-semibold tabular-nums text-ro-ink">
-                    <bdi dir="ltr">
-                      {opt.amount} {opt.currency}
-                    </bdi>
+                  <span className="relative block h-[1.375rem] overflow-hidden text-base font-semibold tabular-nums text-ro-ink">
+                    <AnimatePresence initial={false} mode="popLayout">
+                      <m.span
+                        key={`${opt.amount}-${opt.currency}`}
+                        initial={lite ? false : { opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={lite ? undefined : { opacity: 0, y: -8 }}
+                        transition={{ duration: lite ? 0 : 0.2, ease: [0.22, 1, 0.36, 1] }}
+                        className="absolute inset-0"
+                      >
+                        <bdi dir="ltr">
+                          {opt.amount} {opt.currency}
+                        </bdi>
+                      </m.span>
+                    </AnimatePresence>
                   </span>
                   {opt.alternate ? (
                     <span className="block text-[11px] text-ro-muted">
@@ -209,20 +304,10 @@ export function ShippingCostSelector({
                     </span>
                   ) : null}
                 </span>
-              </button>
+              </m.button>
             );
           })}
         </div>
-      ) : null}
-
-      {selectedOption ? (
-        <p className="text-xs text-ro-muted">
-          {t(
-            locale,
-            `الوزن التقديري للشحنة: ${weightKg} كغ`,
-            `Estimated shipment weight: ${weightKg} kg`
-          )}
-        </p>
       ) : null}
 
       <input type="hidden" name="destinationCountry" value={destinationEntry ? t(locale, destinationEntry.nameAr, destinationEntry.nameEn) : ""} />

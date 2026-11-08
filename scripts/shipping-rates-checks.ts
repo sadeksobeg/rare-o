@@ -12,11 +12,12 @@ import {
 } from "../lib/shipping/rates";
 
 function main() {
-  // --- oud shipment weight ---
+  // --- oud shipment weight: paired boxing (every 2 ouds share a 25kg box) ---
   assert.equal(calculateOudShipmentWeightKg(1), 20, "1 oud = 20kg");
   assert.equal(calculateOudShipmentWeightKg(2), 25, "2 ouds = 25kg");
-  assert.equal(calculateOudShipmentWeightKg(3), 30, "3 ouds = 30kg");
-  assert.equal(calculateOudShipmentWeightKg(5), 40, "5 ouds = 40kg");
+  assert.equal(calculateOudShipmentWeightKg(3), 45, "3 ouds = 25+20=45kg");
+  assert.equal(calculateOudShipmentWeightKg(4), 50, "4 ouds = 25+25=50kg");
+  assert.equal(calculateOudShipmentWeightKg(5), 70, "5 ouds = 25+25+20=70kg");
   assert.equal(calculateOudShipmentWeightKg(0), 0, "0 ouds = 0kg");
 
   // --- zone lookup ---
