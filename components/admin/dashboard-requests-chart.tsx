@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 export function DashboardRequestsChart({
   title,
   totalLabel,
+  dayLabel,
   points,
   total,
   emptyTitle,
@@ -27,6 +28,8 @@ export function DashboardRequestsChart({
 }: {
   title: string;
   totalLabel: string;
+  /** e.g. "اليوم {n}" — {n} is replaced with the 1-based day index. */
+  dayLabel: string;
   points: number[];
   total: number;
   emptyTitle?: string;
@@ -47,18 +50,18 @@ export function DashboardRequestsChart({
   return (
     <div
       className={cn(
-        "rounded-[var(--ro-r-lg)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] p-4 text-[color:var(--ro-text)] transition-[border-color,background-color] duration-[var(--ro-dur-fast)]",
+        "rounded-[var(--ro-r-lg)] border border-[color:var(--pilot-border-subtle,var(--ro-border-subtle))] bg-[color:var(--pilot-bg-raised,var(--ro-bg-raised))] p-4 text-[color:var(--pilot-text,var(--ro-text))] transition-[border-color,background-color] duration-[var(--ro-dur-fast)]",
         accented &&
-          "border-[color-mix(in_srgb,var(--ro-plum-700)_42%,var(--ro-border-subtle))] bg-[color-mix(in_srgb,var(--ro-plum-700)_6%,var(--ro-bg-raised))]",
+          "border-[color-mix(in_srgb,var(--pilot-plum-700,var(--ro-plum-700))_42%,var(--pilot-border-subtle,var(--ro-border-subtle)))] bg-[color-mix(in_srgb,var(--pilot-plum-700,var(--ro-plum-700))_6%,var(--pilot-bg-raised,var(--ro-bg-raised)))]",
         className
       )}
       data-chart-sync={highlightDomain ?? "all"}
     >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="font-display text-lg font-semibold text-[color:var(--ro-text)]">
+        <h2 className="font-display text-lg font-semibold text-[color:var(--pilot-text,var(--ro-text))]">
           {title}
         </h2>
-        <span className="text-xs tabular-nums text-[color:var(--ro-text-muted)]">
+        <span className="text-xs tabular-nums text-[color:var(--pilot-text-muted,var(--ro-text-muted))]">
           {totalLabel} <bdi dir="ltr">{total}</bdi>
         </span>
       </div>
@@ -73,43 +76,45 @@ export function DashboardRequestsChart({
                 <linearGradient id="roFillRequests" x1="0" y1="0" x2="0" y2="1">
                   <stop
                     offset="5%"
-                    stopColor="var(--ro-plum-300)"
+                    stopColor="var(--pilot-plum-300,var(--ro-plum-300))"
                     stopOpacity={0.55}
                   />
                   <stop
                     offset="95%"
-                    stopColor="var(--ro-plum-300)"
+                    stopColor="var(--pilot-plum-300,var(--ro-plum-300))"
                     stopOpacity={0.04}
                   />
                 </linearGradient>
               </defs>
               <CartesianGrid
                 vertical={false}
-                stroke="var(--ro-border)"
+                stroke="var(--pilot-border,var(--ro-border))"
                 strokeOpacity={0.55}
               />
               <XAxis
                 dataKey="day"
                 tickLine={false}
                 axisLine={false}
-                tick={{ fontSize: 10, fill: "var(--ro-text-muted)" }}
+                tick={{ fontSize: 10, fill: "var(--pilot-text-muted,var(--ro-text-muted))" }}
                 hide
               />
               <Tooltip
                 cursor={{
-                  stroke: "var(--ro-plum-400)",
+                  stroke: "var(--pilot-plum-400,var(--ro-plum-400))",
                   strokeOpacity: 0.35,
                   strokeWidth: 1,
                 }}
                 contentStyle={{
-                  background: "var(--ro-bg-elevated, var(--ro-bg-raised))",
+                  background: "var(--ro-bg-elevated, var(--pilot-bg-raised,var(--ro-bg-raised)))",
                   border:
-                    "1px solid color-mix(in srgb, var(--ro-border-subtle) 90%, transparent)",
+                    "1px solid color-mix(in srgb, var(--pilot-border-subtle,var(--ro-border-subtle)) 90%, transparent)",
                   borderRadius: 8,
                   fontSize: 12,
-                  color: "var(--ro-text)",
+                  color: "var(--pilot-text,var(--ro-text))",
                 }}
-                labelFormatter={(d) => `D${d}`}
+                labelFormatter={(d) =>
+                  (dayLabel ?? "{n}").replace("{n}", String(d))
+                }
                 formatter={(value) => [
                   <bdi key="v" dir="ltr">
                     {String(value)}
@@ -120,7 +125,7 @@ export function DashboardRequestsChart({
               <Area
                 dataKey="requests"
                 type="monotone"
-                stroke="var(--ro-plum-400)"
+                stroke="var(--pilot-plum-400,var(--ro-plum-400))"
                 fill="url(#roFillRequests)"
                 strokeWidth={2}
                 isAnimationActive
@@ -131,15 +136,15 @@ export function DashboardRequestsChart({
         </div>
       ) : (
         <div className="flex h-[140px] flex-col items-center justify-center gap-2.5 text-center">
-          <DrawIn className="size-10 text-[var(--ro-plum-400)]">
+          <DrawIn className="size-10 text-[var(--pilot-plum-400,var(--ro-plum-400))]">
             <RosetteMark className="size-10" />
           </DrawIn>
           <div className="space-y-1">
-            <p className="text-sm font-semibold text-[color:var(--ro-text)]">
+            <p className="text-sm font-semibold text-[color:var(--pilot-text,var(--ro-text))]">
               {emptyTitle ?? "—"}
             </p>
             {emptyBody ? (
-              <p className="max-w-[16rem] text-xs text-[color:var(--ro-text-muted)]">
+              <p className="max-w-[16rem] text-xs text-[color:var(--pilot-text-muted,var(--ro-text-muted))]">
                 {emptyBody}
               </p>
             ) : null}
@@ -147,7 +152,7 @@ export function DashboardRequestsChart({
           {emptyActionHref && emptyActionLabel ? (
             <Link
               href={emptyActionHref}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-[var(--ro-r-sm)] border border-[color:var(--ro-border)] px-3 text-sm font-semibold text-[color:var(--ro-text)] transition-opacity hover:opacity-90"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-[var(--ro-r-sm)] border border-[color:var(--pilot-border,var(--ro-border))] px-3 text-sm font-semibold text-[color:var(--pilot-text,var(--ro-text))] transition-opacity hover:opacity-90"
             >
               <Plus className="size-4" strokeWidth={1.5} aria-hidden />
               {emptyActionLabel}

@@ -13,6 +13,8 @@ export type CommandPaletteLabels = {
   empty: string;
   searching: string;
   close: string;
+  quickActions: string;
+  navigate: string;
   pages: Record<string, string>;
 };
 
@@ -23,6 +25,11 @@ type Hit = {
   kind: string;
 };
 
+export type CommandPaletteAction = {
+  href: string;
+  title: string;
+};
+
 function shortcutLabel() {
   if (typeof navigator === "undefined") return "Ctrl K";
   return /Mac|iPhone|iPad/i.test(navigator.platform) ? "⌘K" : "Ctrl K";
@@ -30,8 +37,10 @@ function shortcutLabel() {
 
 export function AdminCommandPalette({
   labels,
+  actions = [],
 }: {
   labels: CommandPaletteLabels;
+  actions?: CommandPaletteAction[];
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -44,7 +53,14 @@ export function AdminCommandPalette({
   const titleId = useId();
   const listId = useId();
   const pages = adminCommandPages(labels.pages ?? {});
-  const shown = query.trim().length < 2 ? pages : hits;
+  const actionHits: Hit[] = actions.map((item) => ({
+    href: item.href,
+    title: item.title,
+    subtitle: "",
+    kind: "action",
+  }));
+  const showingDefault = query.trim().length < 2;
+  const shown = showingDefault ? [...actionHits, ...pages] : hits;
   const activeHref = shown[active]?.href;
 
   useEffect(() => {
@@ -129,11 +145,11 @@ export function AdminCommandPalette({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="ro-cmd-search-trigger flex h-11 w-full min-w-0 flex-1 items-center gap-2 rounded-[var(--ro-r-sm)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] px-3 text-xs text-[color:var(--ro-text-muted)] transition-[border-color,background-color] duration-[var(--ro-dur-fast)] hover:border-[color:var(--ro-border)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
+        className="ro-cmd-search-trigger flex h-11 w-full min-w-0 flex-1 items-center gap-2 rounded-[var(--ro-r-sm)] border border-[color:var(--pilot-border-subtle,var(--ro-border-subtle))] bg-[color:var(--pilot-bg-raised,var(--ro-bg-raised))] px-3 text-xs text-[color:var(--pilot-text-muted,var(--ro-text-muted))] transition-[border-color,background-color] duration-[var(--ro-dur-fast)] hover:border-[color:var(--pilot-border,var(--ro-border))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pilot-focus,var(--ro-focus))]"
       >
         <Search className="size-3.5 shrink-0" strokeWidth={1.5} aria-hidden />
         <span className="min-w-0 truncate">{labels.search}</span>
-        <kbd className="ms-auto hidden rounded bg-[color-mix(in_srgb,var(--ro-text)_10%,transparent)] px-1.5 py-0.5 font-medium text-[11px] text-[color:var(--ro-text)] sm:inline-block">
+        <kbd className="ms-auto hidden rounded bg-[color-mix(in_srgb,var(--pilot-text,var(--ro-text))_10%,transparent)] px-1.5 py-0.5 font-medium text-[11px] text-[color:var(--pilot-text,var(--ro-text))] sm:inline-block">
           <bdi dir="ltr">{kbd}</bdi>
         </kbd>
       </button>
@@ -155,15 +171,15 @@ export function AdminCommandPalette({
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className="w-full max-w-lg overflow-hidden rounded-[12px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] text-[color:var(--ro-text)] shadow-[var(--shadow-3)]"
+            className="w-full max-w-lg overflow-hidden rounded-[12px] border border-[color:var(--pilot-border-subtle,var(--ro-border-subtle))] bg-[color:var(--pilot-bg-raised,var(--ro-bg-raised))] text-[color:var(--pilot-text,var(--ro-text))] shadow-[var(--shadow-3)]"
             onClick={(event) => event.stopPropagation()}
           >
             <h2 id={titleId} className="sr-only">
               {labels.search}
             </h2>
-            <div className="flex items-center gap-2 border-b border-[color:var(--ro-border-subtle)] px-3">
+            <div className="flex items-center gap-2 border-b border-[color:var(--pilot-border-subtle,var(--ro-border-subtle))] px-3">
               <Search
-                className="size-4 text-[color:var(--ro-text-muted)]"
+                className="size-4 text-[color:var(--pilot-text-muted,var(--ro-text-muted))]"
                 strokeWidth={1.5}
                 aria-hidden
               />
@@ -179,12 +195,12 @@ export function AdminCommandPalette({
                 aria-activedescendant={
                   activeHref ? `${listId}-${active}` : undefined
                 }
-                className="h-12 w-full bg-transparent text-sm text-[color:var(--ro-text)] outline-none placeholder:text-[color:var(--ro-text-muted)]"
+                className="h-12 w-full bg-transparent text-sm text-[color:var(--pilot-text,var(--ro-text))] outline-none placeholder:text-[color:var(--pilot-text-muted,var(--ro-text-muted))]"
               />
             </div>
             <ul id={listId} role="listbox" className="max-h-[min(52vh,22rem)] overflow-auto p-1.5">
               {shown.length === 0 ? (
-                <li className="px-3 py-4 text-sm text-[color:var(--ro-text-muted)]">
+                <li className="px-3 py-4 text-sm text-[color:var(--pilot-text-muted,var(--ro-text-muted))]">
                   {pending ? labels.searching : labels.empty}
                 </li>
               ) : (
@@ -195,6 +211,26 @@ export function AdminCommandPalette({
                     role="option"
                     aria-selected={index === active}
                   >
+                    {showingDefault &&
+                    hit.kind === "action" &&
+                    index === 0 ? (
+                      <p
+                        role="presentation"
+                        className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wide text-[color:var(--pilot-text-muted,var(--ro-text-muted))]"
+                      >
+                        {labels.quickActions}
+                      </p>
+                    ) : null}
+                    {showingDefault &&
+                    hit.kind === "page" &&
+                    shown[index - 1]?.kind === "action" ? (
+                      <p
+                        role="presentation"
+                        className="mt-1 border-t border-[color:var(--pilot-border-subtle,var(--ro-border-subtle))] px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wide text-[color:var(--pilot-text-muted,var(--ro-text-muted))]"
+                      >
+                        {labels.navigate}
+                      </p>
+                    ) : null}
                     <button
                       type="button"
                       onClick={() => go(hit.href)}
@@ -202,17 +238,17 @@ export function AdminCommandPalette({
                       className={cn(
                         "flex w-full flex-col items-start rounded-[8px] px-3 py-2 text-start",
                         index === active
-                          ? "bg-[color-mix(in_srgb,var(--ro-plum-700)_16%,transparent)]"
-                          : "hover:bg-[color-mix(in_srgb,var(--ro-text)_6%,transparent)]"
+                          ? "bg-[color-mix(in_srgb,var(--pilot-plum-700,var(--ro-plum-700))_16%,transparent)]"
+                          : "hover:bg-[color-mix(in_srgb,var(--pilot-text,var(--ro-text))_6%,transparent)]"
                       )}
                     >
-                      <span className="text-sm font-medium text-[color:var(--ro-text)]">
+                      <span className="text-sm font-medium text-[color:var(--pilot-text,var(--ro-text))]">
                         {query.trim().length >= 2
                           ? highlightMatch(hit.title, query)
                           : hit.title}
                       </span>
                       {hit.subtitle ? (
-                        <span className="text-[11px] text-[color:var(--ro-text-muted)]">
+                        <span className="text-[11px] text-[color:var(--pilot-text-muted,var(--ro-text-muted))]">
                           {query.trim().length >= 2
                             ? highlightMatch(hit.subtitle, query)
                             : hit.subtitle}

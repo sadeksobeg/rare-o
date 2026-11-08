@@ -104,7 +104,7 @@ export function ActivityFeed({
         </p>
       ) : (
         <div className="ro-portal-card overflow-hidden border">
-          <div className="divide-y divide-[color:var(--ro-border-subtle)]">
+          <div className="divide-y divide-[color:var(--pilot-border-subtle,var(--ro-border-subtle))]">
             {shown.map((item) => {
               const label = eventLabel(dict, item.domain, item.eventKey);
               const detail = humanizeDetail(item.detail);
@@ -114,21 +114,21 @@ export function ActivityFeed({
                   key={item.id}
                   href={item.href}
                   className={cn(
-                    "group grid min-h-11 grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 px-3 py-3 transition-[background-color] duration-[var(--ro-dur-fast)] hover:bg-[color:var(--ro-panel-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)] sm:px-4",
+                    "group grid min-h-11 grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 px-3 py-3 transition-[background-color] duration-[var(--ro-dur-fast)] hover:bg-[color:var(--ro-panel-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pilot-focus,var(--ro-focus))] sm:px-4",
                     fresh && "ro-row-flash"
                   )}
                 >
                   <span
-                    className="mt-0.5 inline-flex size-8 items-center justify-center rounded-[8px] bg-[color:var(--ro-accent-well)] text-[color:var(--ro-accent-fg)]"
+                    className="mt-0.5 inline-flex size-8 items-center justify-center rounded-[8px] bg-[color:var(--pilot-accent-bg,var(--ro-accent-well))] text-[color:var(--pilot-accent,var(--ro-accent-fg))]"
                     aria-hidden
                   >
                     {domainIcon(item.domain)}
                   </span>
                   <div className="min-w-0">
-                    <p className="truncate text-[13px] font-medium text-[color:var(--ro-text)]">
+                    <p className="truncate text-[13px] font-medium text-[color:var(--pilot-text,var(--ro-text))]">
                       {item.reference} · {label}
                     </p>
-                    <p className="truncate text-[11px] text-[color:var(--ro-text-muted)]">
+                    <p className="truncate text-[11px] text-[color:var(--pilot-text-muted,var(--ro-text-muted))]">
                       {domainActorLabel(dict, item.domain, item.actor)}
                       {" · "}
                       <time
@@ -146,13 +146,13 @@ export function ActivityFeed({
                       </time>
                     </p>
                     {detail ? (
-                      <p className="mt-1 line-clamp-1 text-[11px] text-[color:var(--ro-text-muted)]">
+                      <p className="mt-1 line-clamp-1 text-[11px] text-[color:var(--pilot-text-muted,var(--ro-text-muted))]">
                         {detail}
                       </p>
                     ) : null}
                   </div>
                   <span
-                    className="mt-1 inline-flex size-8 items-center justify-center text-[color:var(--ro-accent-fg)] transition-transform duration-[var(--ro-dur-fast)] group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5"
+                    className="mt-1 inline-flex size-8 items-center justify-center text-[color:var(--pilot-accent,var(--ro-accent-fg))] transition-transform duration-[var(--ro-dur-fast)] group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5"
                     aria-hidden
                   >
                     <ArrowUpLeft
@@ -167,7 +167,7 @@ export function ActivityFeed({
           {canToggle ? (
             <button
               type="button"
-              className="flex min-h-11 w-full items-center justify-center gap-1.5 border-t border-[color:var(--ro-border-subtle)] px-3 text-[12px] font-semibold text-[color:var(--ro-accent-fg)] transition-[background-color] duration-[var(--ro-dur-fast)] hover:bg-[color:var(--ro-panel-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
+              className="flex min-h-11 w-full items-center justify-center gap-1.5 border-t border-[color:var(--pilot-border-subtle,var(--ro-border-subtle))] px-3 text-[12px] font-semibold text-[color:var(--pilot-accent,var(--ro-accent-fg))] transition-[background-color] duration-[var(--ro-dur-fast)] hover:bg-[color:var(--ro-panel-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pilot-focus,var(--ro-focus))]"
               aria-expanded={expanded}
               onClick={() => setExpanded((v) => !v)}
             >

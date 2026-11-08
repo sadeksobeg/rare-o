@@ -221,6 +221,106 @@
   --ro-plum-100: color-mix(in srgb, #d4b8ef 24%, #403b58);
 }
 
+/*
+ * PILOT scale, owner override 2026-11-08. Scoped strictly to the admin
+ * portal attribute (AdminShell chrome plus AD-02 dashboard only, see
+ * docs/ui/PILOT-DIRECTION.md). Does NOT touch --ro-*, --bg-*, --text-* used by
+ * every other admin page, so untouched routes keep rendering exactly as
+ * before inside the new shell, as the owner brief expects.
+ * 11-step ramps from the three owner-specified anchors: warm black 0B080D,
+ * cream F4E7D8, plum 32104F. No grey-lilac.
+ */
+.ro-portal[data-portal="admin"] {
+  --pilot-ink-950: #0b080d;
+  --pilot-ink-900: #130f17;
+  --pilot-ink-800: #1b1621;
+  --pilot-ink-700: #241d2b;
+  --pilot-ink-600: #342b3d;
+  --pilot-ink-500: #4a3f57;
+  --pilot-ink-400: #6b5e79;
+  --pilot-ink-300: #8f8299;
+  --pilot-ink-200: #b5aabe;
+  --pilot-ink-100: #d8d0de;
+  --pilot-ink-50: #f1eef4;
+
+  --pilot-cream-950: #2a2016;
+  --pilot-cream-900: #3c2f20;
+  --pilot-cream-800: #52412b;
+  --pilot-cream-700: #6e5739;
+  --pilot-cream-600: #8d7049;
+  --pilot-cream-500: #ad8f63;
+  --pilot-cream-400: #c7ac83;
+  --pilot-cream-300: #ddc9a6;
+  --pilot-cream-200: #ecdcc2;
+  --pilot-cream-100: #f4e7d8;
+  --pilot-cream-50: #fbf6ee;
+
+  --pilot-plum-950: #15071f;
+  --pilot-plum-900: #1f0a32;
+  --pilot-plum-800: #2a0d44;
+  --pilot-plum-700: #32104f;
+  --pilot-plum-600: #3f1760;
+  --pilot-plum-500: #522176;
+  --pilot-plum-400: #7a4c9c;
+  --pilot-plum-300: #9d74bc;
+  --pilot-plum-200: #c3a6da;
+  --pilot-plum-100: #e2d2ee;
+  --pilot-plum-50: #f3ebf8;
+
+  --pilot-good: #3fbf78;
+  --pilot-warn: #e3a33e;
+  --pilot-danger: #e8667a;
+  --pilot-info: #7a9fd1;
+
+  --pilot-amber: #c4a574;
+}
+
+.ro-portal[data-portal="admin"][data-theme="dark"] {
+  --pilot-bg: var(--pilot-ink-950);
+  --pilot-bg-raised: var(--pilot-ink-900);
+  --pilot-bg-elevated: var(--pilot-ink-800);
+  --pilot-bg-hover: var(--pilot-ink-700);
+  --pilot-border-subtle: color-mix(in srgb, var(--pilot-ink-50) 8%, transparent);
+  --pilot-border: color-mix(in srgb, var(--pilot-ink-50) 14%, transparent);
+  --pilot-border-strong: color-mix(in srgb, var(--pilot-ink-50) 22%, transparent);
+  --pilot-text: var(--pilot-cream-100);
+  --pilot-text-2: var(--pilot-ink-100);
+  --pilot-text-muted: var(--pilot-ink-300);
+  --pilot-text-faint: var(--pilot-ink-400);
+  --pilot-accent: var(--pilot-plum-300);
+  --pilot-accent-strong: var(--pilot-plum-200);
+  --pilot-accent-bg: color-mix(in srgb, var(--pilot-plum-500) 22%, transparent);
+  --pilot-focus: var(--pilot-plum-200);
+  --pilot-good-bg: color-mix(in srgb, var(--pilot-good) 18%, var(--pilot-ink-900));
+  --pilot-warn-bg: color-mix(in srgb, var(--pilot-warn) 18%, var(--pilot-ink-900));
+  --pilot-danger-bg: color-mix(in srgb, var(--pilot-danger) 18%, var(--pilot-ink-900));
+  --pilot-shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 0 0 1px var(--pilot-border-subtle);
+  --pilot-shadow-pop: 0 24px 48px -20px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--pilot-border);
+}
+
+.ro-portal[data-portal="admin"][data-theme="light"] {
+  --pilot-bg: var(--pilot-cream-50);
+  --pilot-bg-raised: #ffffff;
+  --pilot-bg-elevated: #ffffff;
+  --pilot-bg-hover: var(--pilot-cream-100);
+  --pilot-border-subtle: color-mix(in srgb, var(--pilot-cream-900) 8%, transparent);
+  --pilot-border: color-mix(in srgb, var(--pilot-cream-900) 14%, transparent);
+  --pilot-border-strong: color-mix(in srgb, var(--pilot-cream-900) 24%, transparent);
+  --pilot-text: var(--pilot-cream-950);
+  --pilot-text-2: var(--pilot-cream-800);
+  --pilot-text-muted: var(--pilot-cream-600);
+  --pilot-text-faint: var(--pilot-cream-500);
+  --pilot-accent: var(--pilot-plum-700);
+  --pilot-accent-strong: var(--pilot-plum-800);
+  --pilot-accent-bg: color-mix(in srgb, var(--pilot-plum-700) 10%, transparent);
+  --pilot-focus: var(--pilot-plum-500);
+  --pilot-good-bg: color-mix(in srgb, var(--pilot-good) 14%, #ffffff);
+  --pilot-warn-bg: color-mix(in srgb, var(--pilot-warn) 16%, #ffffff);
+  --pilot-danger-bg: color-mix(in srgb, var(--pilot-danger) 12%, #ffffff);
+  --pilot-shadow-card: 0 1px 2px rgba(42, 32, 22, 0.04), 0 0 0 1px var(--pilot-border-subtle);
+  --pilot-shadow-pop: 0 24px 48px -20px rgba(42, 32, 22, 0.22), 0 0 0 1px var(--pilot-border);
+}
+
 /**
  * Portal light — open, bright, editorial; plum for accent only.
  */

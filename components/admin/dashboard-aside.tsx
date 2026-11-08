@@ -83,7 +83,7 @@ export function DashboardAside({
     <aside className={cn("grid gap-3 content-start", className)}>
       <Link
         href="/admin/inbox"
-        className="ro-portal-card flex items-center gap-3 border p-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
+        className="ro-portal-card flex items-center gap-3 border p-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pilot-focus,var(--ro-focus))]"
       >
         <span className="relative inline-flex">
           <svg width="52" height="52" viewBox="0 0 52 52" aria-hidden>
@@ -92,7 +92,7 @@ export function DashboardAside({
               cy="26"
               r="21"
               fill="none"
-              stroke="var(--ro-border)"
+              stroke="var(--pilot-border,var(--ro-border))"
               strokeWidth="5"
             />
             <circle
@@ -119,20 +119,20 @@ export function DashboardAside({
           />
         </span>
         <div className="min-w-0">
-          <p className="font-medium text-[color:var(--ro-text)]">
+          <p className="font-medium text-[color:var(--pilot-text,var(--ro-text))]">
             {a.whatsappNoun} {healthLabel(dict, health.state)}
           </p>
-          <p className="text-[11px] text-[color:var(--ro-text-muted)]">{lastMessage}</p>
+          <p className="text-[11px] text-[color:var(--pilot-text-muted,var(--ro-text-muted))]">{lastMessage}</p>
         </div>
       </Link>
 
       <Link
         href="/admin/products"
-        className="ro-portal-card space-y-1.5 border p-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
+        className="ro-portal-card space-y-1.5 border p-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pilot-focus,var(--ro-focus))]"
       >
         <div className="flex items-center justify-between gap-2">
-          <p className="font-medium text-[color:var(--ro-text)]">{a.contentHealth}</p>
-          <p className="text-[11px] text-[color:var(--ro-text-muted)]">
+          <p className="font-medium text-[color:var(--pilot-text,var(--ro-text))]">{a.contentHealth}</p>
+          <p className="text-[11px] text-[color:var(--pilot-text-muted,var(--ro-text-muted))]">
             {fmt(a.contentHealthRatio, {
               have: catalogHealth.withPhoto,
               total: catalogHealth.published,
@@ -141,11 +141,11 @@ export function DashboardAside({
         </div>
         <div className="flex h-2 overflow-hidden rounded bg-[color:var(--ro-bg-sunken)]">
           <span
-            className="h-full bg-[color:var(--ro-accent-fg,var(--ro-plum-700))]"
+            className="h-full bg-[color:var(--pilot-plum-400,var(--ro-accent-fg,var(--ro-plum-700)))]"
             style={{ width: `${photoPct}%` }}
           />
         </div>
-        <p className="text-[11px] text-[color:var(--ro-text-muted)]">
+        <p className="text-[11px] text-[color:var(--pilot-text-muted,var(--ro-text-muted))]">
           {catalogHealth.missingPhoto === 0
             ? a.contentHealthComplete
             : fmt(a.contentHealthMissing, { n: catalogHealth.missingPhoto })}
@@ -154,12 +154,12 @@ export function DashboardAside({
 
       <Link
         href="/admin/requests"
-        className="ro-portal-card space-y-1.5 border p-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
+        className="ro-portal-card space-y-1.5 border p-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pilot-focus,var(--ro-focus))]"
       >
-        <p className="font-medium text-[color:var(--ro-text)]">{a.pipeline}</p>
+        <p className="font-medium text-[color:var(--pilot-text,var(--ro-text))]">{a.pipeline}</p>
         <div className="flex h-2 overflow-hidden rounded bg-[color:var(--ro-bg-sunken)]">
           {pipelineTotal === 0 ? (
-            <span className="h-full w-full bg-[color:var(--ro-border-subtle)]" />
+            <span className="h-full w-full bg-[color:var(--pilot-border-subtle,var(--ro-border-subtle))]" />
           ) : (
             <>
               <span
@@ -167,7 +167,7 @@ export function DashboardAside({
                 style={{ width: `${share(pipeline.ready_for_handoff)}%` }}
               />
               <span
-                className="h-full bg-[color:var(--ro-accent-fg,var(--ro-plum-700))]"
+                className="h-full bg-[color:var(--pilot-plum-400,var(--ro-accent-fg,var(--ro-plum-700)))]"
                 style={{ width: `${share(pipeline.in_follow_up)}%` }}
               />
               <span
@@ -181,7 +181,7 @@ export function DashboardAside({
             </>
           )}
         </div>
-        <p className="text-[11px] text-[color:var(--ro-text-muted)]">{a.pipelineLegend}</p>
+        <p className="text-[11px] text-[color:var(--pilot-text-muted,var(--ro-text-muted))]">{a.pipelineLegend}</p>
       </Link>
     </aside>
   );

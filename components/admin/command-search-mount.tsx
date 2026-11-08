@@ -8,17 +8,24 @@ export type CommandPaletteLabels = {
   empty: string;
   searching: string;
   close: string;
+  quickActions: string;
+  navigate: string;
   pages: Record<string, string>;
 };
 
-type SlotProps = { labels: CommandPaletteLabels };
+export type CommandPaletteAction = { href: string; title: string };
+
+type SlotProps = {
+  labels: CommandPaletteLabels;
+  actions?: CommandPaletteAction[];
+};
 
 /**
  * Isolates command-search from AdminShell so a poisoned webpack chunk
  * cannot make the whole admin shell crash with `undefined.call`.
  * Types live here — do not import the slot module at top level.
  */
-export function AdminCommandSearchMount({ labels }: SlotProps) {
+export function AdminCommandSearchMount({ labels, actions }: SlotProps) {
   const [Slot, setSlot] = useState<ComponentType<SlotProps> | null>(null);
 
   useEffect(() => {
@@ -49,5 +56,5 @@ export function AdminCommandSearchMount({ labels }: SlotProps) {
     );
   }
 
-  return <Slot labels={labels} />;
+  return <Slot labels={labels} actions={actions} />;
 }

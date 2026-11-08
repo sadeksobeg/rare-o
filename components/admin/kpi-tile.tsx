@@ -24,9 +24,9 @@ const TONE: Record<
     stroke: "var(--ro-amber-500)",
   },
   plum: {
-    well: "bg-[color-mix(in_srgb,var(--ro-plum-700)_20%,transparent)]",
-    icon: "text-[var(--ro-plum-300)]",
-    stroke: "var(--ro-plum-400)",
+    well: "bg-[color-mix(in_srgb,var(--pilot-plum-700,var(--ro-plum-700))_20%,transparent)]",
+    icon: "text-[var(--pilot-plum-300,var(--ro-plum-300))]",
+    stroke: "var(--pilot-plum-400,var(--ro-plum-400))",
   },
   progress: {
     well: "bg-[color-mix(in_srgb,var(--ro-progress-700)_18%,transparent)]",
@@ -118,7 +118,7 @@ export function KpiTile({
           data-hero={hero ? "true" : undefined}
           aria-current={active ? "true" : undefined}
           className={cn(
-            "ro-portal-kpi ro-kpi-sheen group relative flex h-full min-w-0 w-full flex-col overflow-hidden border focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]",
+            "ro-portal-kpi ro-kpi-sheen group relative flex h-full min-w-0 w-full flex-col overflow-hidden border focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pilot-focus,var(--ro-focus))]",
             className
           )}
         >
@@ -129,12 +129,12 @@ export function KpiTile({
             )}
           >
             <div className="min-w-0">
-              <p className="truncate text-[0.75rem] font-medium text-[color:var(--ro-text-muted)]">
+              <p className="truncate text-[0.75rem] font-medium text-[color:var(--pilot-text-muted,var(--ro-text-muted))]">
                 {label}
               </p>
               <p
                 className={cn(
-                  "mt-1.5 font-display font-semibold leading-none tracking-tight tabular-nums text-[color:var(--ro-text)]",
+                  "mt-1.5 font-display font-semibold leading-none tracking-tight tabular-nums text-[color:var(--pilot-text,var(--ro-text))]",
                   hero
                     ? "text-[2.35rem] sm:text-[2.75rem]"
                     : "text-[1.85rem] sm:text-[2.1rem]"
@@ -162,7 +162,7 @@ export function KpiTile({
                     "ro-kpi-delta inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[0.68rem] font-semibold tabular-nums",
                     direction === "up"
                       ? "bg-[color-mix(in_srgb,var(--ro-success-700)_16%,transparent)] text-[var(--ro-success-700)]"
-                      : "bg-[color-mix(in_srgb,var(--ro-text-muted)_14%,transparent)] text-[color:var(--ro-text-muted)]"
+                      : "bg-[color-mix(in_srgb,var(--pilot-text-muted,var(--ro-text-muted))_14%,transparent)] text-[color:var(--pilot-text-muted,var(--ro-text-muted))]"
                   )}
                   aria-label={direction === "up" ? `+${delta}` : `${delta}`}
                 >
@@ -175,7 +175,7 @@ export function KpiTile({
                     strokeWidth={1.5}
                     aria-hidden
                   />
-                  {direction === "up" ? `+${delta}` : delta}
+                  <bdi dir="ltr">{direction === "up" ? `+${delta}` : delta}</bdi>
                 </span>
               ) : null}
             </div>
@@ -208,7 +208,7 @@ export function KpiTile({
                     "text-[0.7rem] leading-snug",
                     value === 0
                       ? "font-semibold text-[var(--ro-success-700)]"
-                      : "text-[color:var(--ro-text-muted)]"
+                      : "text-[color:var(--pilot-text-muted,var(--ro-text-muted))]"
                   )}
                 >
                   {footer}
@@ -226,7 +226,7 @@ export function KpiTile({
                 hero ? "px-4 pb-3 sm:px-5" : "px-3.5 pb-2.5 sm:px-4",
                 value === 0
                   ? "font-semibold text-[var(--ro-success-700)]"
-                  : "text-[color:var(--ro-text-muted)]"
+                  : "text-[color:var(--pilot-text-muted,var(--ro-text-muted))]"
               )}
             >
               {footer}

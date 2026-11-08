@@ -122,7 +122,7 @@ export function NavList({
               className={cn(
                 "px-3 text-[11px] font-bold",
                 surface === "sheet"
-                  ? "text-[color:var(--ro-text-muted)]"
+                  ? "text-[color:var(--pilot-text-muted,var(--ro-text-muted))]"
                   : "text-[var(--ro-ink-200)]"
               )}
             >
@@ -156,15 +156,15 @@ export function NavList({
                       active ? "font-bold" : null,
                       surface === "sheet"
                         ? active
-                          ? "bg-[color-mix(in_srgb,var(--ro-plum-700)_12%,transparent)] text-[color:var(--ro-plum-800)]"
-                          : "text-[color:var(--ro-text-2)] hover:bg-[color-mix(in_srgb,var(--ro-plum-700)_8%,transparent)] hover:text-[color:var(--ro-text)]"
+                          ? "bg-[color-mix(in_srgb,var(--pilot-plum-700,var(--ro-plum-700))_12%,transparent)] text-[color:var(--pilot-plum-800,var(--ro-plum-800))]"
+                          : "text-[color:var(--pilot-text-2,var(--ro-text-2))] hover:bg-[color-mix(in_srgb,var(--pilot-plum-700,var(--ro-plum-700))_8%,transparent)] hover:text-[color:var(--pilot-text,var(--ro-text))]"
                         : active
                           ? null
                           : "text-[var(--ro-ink-300)] hover:bg-white/8 hover:text-[var(--ro-sand-100)]",
                       collapsed &&
                         active &&
                         surface === "sidebar" &&
-                        "bg-[color-mix(in_srgb,var(--ro-sand-100)_16%,transparent)] text-[var(--ro-sand-50)]"
+                        "bg-[color-mix(in_srgb,var(--ro-sand-100)_16%,transparent)] text-[var(--pilot-cream-50,var(--ro-sand-50))]"
                     )}
                   >
                     {active && !collapsed ? (
@@ -187,12 +187,12 @@ export function NavList({
                         {item.badge && item.badge > 0 ? (
                           <ChromeBadge
                             value={item.badge}
-                            className="inline-flex min-w-[1.15rem] shrink-0 items-center justify-center rounded-full bg-[var(--ro-plum-300)] px-1.5 text-[0.65rem] font-bold text-[var(--ro-ink-950)]"
+                            className="inline-flex min-w-[1.15rem] shrink-0 items-center justify-center rounded-full bg-[var(--pilot-plum-300,var(--ro-plum-300))] px-1.5 text-[0.65rem] font-bold text-[var(--ro-ink-950)]"
                           />
                         ) : null}
                       </span>
                     ) : item.badge && item.badge > 0 ? (
-                      <span className="absolute end-1 top-1 size-1.5 rounded-full bg-[var(--ro-plum-300)]" />
+                      <span className="absolute end-1 top-1 size-1.5 rounded-full bg-[var(--pilot-plum-300,var(--ro-plum-300))]" />
                     ) : null}
                   </PendingNavLink>
                 </li>

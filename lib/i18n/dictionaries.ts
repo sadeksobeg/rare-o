@@ -378,6 +378,7 @@ type Dict = {
     domainMixTitle: string;
     requestsOverDays: string;
     requestsOverDaysTotal: string;
+    requestsOverDaysDay: string;
     firstUseTitle: string;
     firstUseBody: string;
     firstUseAction: string;
@@ -389,6 +390,8 @@ type Dict = {
     commandPlaceholder: string;
     commandEmpty: string;
     commandSearching: string;
+    commandQuickActions: string;
+    commandNavigate: string;
     quickCreate: string;
     manageHub: string;
     settings: string;
@@ -1790,6 +1793,7 @@ const ar: Dict = {
     domainMixTitle: "توزيع المسارات",
     requestsOverDays: "الطلبات خلال 14 يوماً",
     requestsOverDaysTotal: "المجموع",
+    requestsOverDaysDay: "اليوم {n}",
     firstUseTitle: "ابدأ من هنا",
     firstUseBody:
       "أضف منتجاً منشوراً، أو أنشئ تاجراً، أو انتظر أول طلب — لوحة التحكم تمتلئ تلقائياً.",
@@ -1802,6 +1806,8 @@ const ar: Dict = {
     commandPlaceholder: "ابحث عن طلب أو منتج أو تاجر…",
     commandEmpty: "لا نتائج",
     commandSearching: "جاري البحث…",
+    commandQuickActions: "إجراءات سريعة",
+    commandNavigate: "الانتقال إلى",
     quickCreate: "إنشاء سريع",
     manageHub: "إدارة",
     settings: "الأمان",
@@ -3336,6 +3342,7 @@ const en: Dict = {
     domainMixTitle: "Domain mix",
     requestsOverDays: "Requests over 14 days",
     requestsOverDaysTotal: "Total",
+    requestsOverDaysDay: "Day {n}",
     firstUseTitle: "Start here",
     firstUseBody:
       "Publish a product, create a trader, or wait for the first request — the dashboard fills itself.",
@@ -3348,6 +3355,8 @@ const en: Dict = {
     commandPlaceholder: "Search a request, product, or trader…",
     commandEmpty: "No results",
     commandSearching: "Searching…",
+    commandQuickActions: "Quick actions",
+    commandNavigate: "Go to",
     quickCreate: "Quick create",
     manageHub: "Manage",
     settings: "Security",

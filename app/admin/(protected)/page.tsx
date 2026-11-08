@@ -26,7 +26,6 @@ import {
 import { type KpiTone } from "@/components/admin/kpi-tile";
 import { KpiStrip } from "@/components/admin/kpi-strip";
 import { ManageHub } from "@/components/admin/manage-hub";
-import { AdminQuickCreate } from "@/components/admin/quick-create";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getAdminHomeData, type KpiSeries } from "@/lib/admin/dashboard";
 import { getAdminSessionChrome } from "@/lib/auth/admin-session";
@@ -222,7 +221,7 @@ async function AdminDashboardBody({
         />
       </DashboardSection>
 
-      <DashboardSection className="ro-admin-home-pad grid items-stretch gap-3 py-3 lg:grid-cols-12 lg:gap-4 lg:py-4">
+      <DashboardSection className="ro-admin-home-pad grid items-stretch gap-4 py-3 lg:grid-cols-12 lg:gap-6 lg:py-4">
         <ActionQueue
           rows={data.actionQueue}
           counts={{
@@ -239,6 +238,7 @@ async function AdminDashboardBody({
           <DashboardRequestsChartMount
             title={a.requestsOverDays}
             totalLabel={a.requestsOverDaysTotal}
+            dayLabel={a.requestsOverDaysDay}
             points={data.requestsTrend.points}
             total={data.requestsTrend.total}
             highlightDomain={chartDomain}
@@ -283,21 +283,6 @@ async function AdminDashboardBody({
           />
         </div>
       </DashboardSection>
-
-      <AdminQuickCreate
-        label={a.quickCreate}
-        closeLabel={dict.common.close}
-        items={[
-          { href: "/admin/products/new", label: a.newProduct, icon: "product" },
-          { href: "/admin/offers/new", label: dict.adminUi.newOffer, icon: "offer" },
-          { href: "/admin/traders", label: dict.adminUi.newTrader, icon: "trader" },
-          {
-            href: "/admin/brokerage",
-            label: dict.trader.newBrokerage,
-            icon: "brokerage",
-          },
-        ]}
-      />
 
       <DashboardSection className="ro-admin-home-pad space-y-3 border-t border-[color:var(--ro-border-subtle)] py-3 pb-24 lg:pb-4">
         <ManageHub

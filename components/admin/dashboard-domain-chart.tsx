@@ -49,14 +49,14 @@ export function DashboardDomainChart({
   return (
     <div
       className={cn(
-        "rounded-[var(--ro-r-lg)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] p-4 text-[color:var(--ro-text)] transition-[border-color,background-color] duration-[var(--ro-dur-fast)]",
+        "rounded-[var(--ro-r-lg)] border border-[color:var(--pilot-border-subtle,var(--ro-border-subtle))] bg-[color:var(--pilot-bg-raised,var(--ro-bg-raised))] p-4 text-[color:var(--pilot-text,var(--ro-text))] transition-[border-color,background-color] duration-[var(--ro-dur-fast)]",
         activeKey &&
-          "border-[color-mix(in_srgb,var(--ro-plum-700)_42%,var(--ro-border-subtle))]",
+          "border-[color-mix(in_srgb,var(--pilot-plum-700,var(--ro-plum-700))_42%,var(--pilot-border-subtle,var(--ro-border-subtle)))]",
         className
       )}
       data-chart-sync={highlightDomain ?? "all"}
     >
-      <h2 className="mb-3 font-display text-lg font-semibold text-[color:var(--ro-text)]">
+      <h2 className="mb-3 font-display text-lg font-semibold text-[color:var(--pilot-text,var(--ro-text))]">
         {title}
       </h2>
       {hasSignal ? (
@@ -81,7 +81,7 @@ export function DashboardDomainChart({
                     fillOpacity={dimmed ? 0.28 : 1}
                     stroke={
                       activeKey === entry.key
-                        ? "var(--ro-sand-50)"
+                        ? "var(--pilot-cream-50,var(--ro-sand-50))"
                         : "transparent"
                     }
                     strokeWidth={activeKey === entry.key ? 2 : 0}
@@ -91,12 +91,12 @@ export function DashboardDomainChart({
             </Pie>
             <Tooltip
               contentStyle={{
-                background: "var(--ro-bg-elevated, var(--ro-bg-raised))",
+                background: "var(--ro-bg-elevated, var(--pilot-bg-raised,var(--ro-bg-raised)))",
                 border:
-                  "1px solid color-mix(in srgb, var(--ro-border-subtle) 90%, transparent)",
+                  "1px solid color-mix(in srgb, var(--pilot-border-subtle,var(--ro-border-subtle)) 90%, transparent)",
                 borderRadius: 8,
                 fontSize: 12,
-                color: "var(--ro-text)",
+                color: "var(--pilot-text,var(--ro-text))",
               }}
               formatter={(value, _name, item) => {
                 const pct = (item?.payload as { pct?: number } | undefined)?.pct;
@@ -129,7 +129,7 @@ export function DashboardDomainChart({
                     aria-hidden
                   />
                   <span>{d.label}</span>
-                  <span className="tabular-nums text-[color:var(--ro-text-muted)]">
+                  <span className="tabular-nums text-[color:var(--pilot-text-muted,var(--ro-text-muted))]">
                     <bdi dir="ltr">
                       {d.value} · {d.pct}%
                     </bdi>
@@ -141,13 +141,13 @@ export function DashboardDomainChart({
         </div>
       ) : (
         <div className="flex h-[140px] flex-col items-center justify-center gap-2.5 text-center">
-          <DrawIn className="size-10 text-[var(--ro-plum-400)]">
+          <DrawIn className="size-10 text-[var(--pilot-plum-400,var(--ro-plum-400))]">
             <RosetteMark className="size-10" />
           </DrawIn>
           <div className="space-y-1">
             <p className="text-sm font-semibold">{emptyTitle ?? "—"}</p>
             {emptyBody ? (
-              <p className="max-w-[16rem] text-xs text-[color:var(--ro-text-muted)]">
+              <p className="max-w-[16rem] text-xs text-[color:var(--pilot-text-muted,var(--ro-text-muted))]">
                 {emptyBody}
               </p>
             ) : null}
@@ -155,7 +155,7 @@ export function DashboardDomainChart({
           {emptyActionHref && emptyActionLabel ? (
             <Link
               href={emptyActionHref}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-[var(--ro-r-sm)] border border-[color:var(--ro-border)] px-3 text-sm font-semibold text-[color:var(--ro-text)] transition-opacity hover:opacity-90"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-[var(--ro-r-sm)] border border-[color:var(--pilot-border,var(--ro-border))] px-3 text-sm font-semibold text-[color:var(--pilot-text,var(--ro-text))] transition-opacity hover:opacity-90"
             >
               <Plus className="size-4" strokeWidth={1.5} aria-hidden />
               {emptyActionLabel}

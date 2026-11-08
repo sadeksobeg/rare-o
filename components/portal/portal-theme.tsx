@@ -40,11 +40,14 @@ export function PortalThemeProvider({
   children,
   defaultTheme = "light",
   className,
+  dataPortal,
 }: {
   children: ReactNode;
   /** Product default: open light surfaces; user can still switch to dark. */
   defaultTheme?: PortalThemeMode;
   className?: string;
+  /** Scopes pilot-only token overrides, e.g. `[data-portal="admin"]`. */
+  dataPortal?: string;
 }) {
   const [theme, setThemeState] = useState<PortalThemeMode>(defaultTheme);
   const [ready, setReady] = useState(false);
@@ -86,6 +89,7 @@ export function PortalThemeProvider({
       <div
         className={className}
         data-theme={theme}
+        data-portal={dataPortal}
         data-theme-ready={ready ? "true" : "false"}
         /* Theme may flip after mount from localStorage; avoid noisy mismatch. */
         suppressHydrationWarning

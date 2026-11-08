@@ -133,24 +133,24 @@ export function AdminMobileChrome({
                   "ro-admin-mobile-drawer-panel absolute inset-y-0 start-0 flex w-[min(20.5rem,88vw)] max-w-full flex-col"
                 )}
               >
-                <div className="flex items-center justify-between gap-3 border-b border-[color:var(--ro-border-subtle)] px-4 py-3.5">
+                <div className="flex items-center justify-between gap-3 border-b border-[color:var(--pilot-border-subtle,var(--ro-border-subtle))] px-4 py-3.5">
                   <div className="flex min-w-0 items-center gap-2.5">
                     <Emblem variant="small" className="size-8 shrink-0" />
                     <div className="min-w-0">
                       <p
                         id={titleId}
-                        className="truncate text-xs font-semibold tracking-wide text-[color:var(--ro-text)]"
+                        className="truncate text-xs font-semibold tracking-wide text-[color:var(--pilot-text,var(--ro-text))]"
                       >
                         <bdi dir="ltr">{brand}</bdi>
                       </p>
-                      <p className="text-[0.65rem] text-[color:var(--ro-text-muted)]">
+                      <p className="text-[0.65rem] text-[color:var(--pilot-text-muted,var(--ro-text-muted))]">
                         {menuLabel}
                       </p>
                     </div>
                   </div>
                   <button
                     type="button"
-                    className="inline-flex size-11 items-center justify-center rounded-full border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] text-[color:var(--ro-text)]"
+                    className="inline-flex size-11 items-center justify-center rounded-full border border-[color:var(--pilot-border-subtle,var(--ro-border-subtle))] bg-[color:var(--pilot-bg-raised,var(--ro-bg-raised))] text-[color:var(--pilot-text,var(--ro-text))]"
                     aria-label={closeLabel}
                     onClick={() => setOpen(false)}
                   >
@@ -168,7 +168,7 @@ export function AdminMobileChrome({
                   />
                 </nav>
                 {footer ? (
-                  <div className="shrink-0 border-t border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-sunken)] px-3 py-3 pb-[max(0.85rem,env(safe-area-inset-bottom))]">
+                  <div className="shrink-0 border-t border-[color:var(--pilot-border-subtle,var(--ro-border-subtle))] bg-[color:var(--ro-bg-sunken)] px-3 py-3 pb-[max(0.85rem,env(safe-area-inset-bottom))]">
                     {footer}
                   </div>
                 ) : null}

@@ -8,16 +8,23 @@ export type CommandPaletteLabels = {
   empty: string;
   searching: string;
   close: string;
+  quickActions: string;
+  navigate: string;
   pages: Record<string, string>;
 };
 
-type PaletteProps = { labels: CommandPaletteLabels };
+export type CommandPaletteAction = { href: string; title: string };
+
+type PaletteProps = {
+  labels: CommandPaletteLabels;
+  actions?: CommandPaletteAction[];
+};
 
 /**
  * Loads the command palette only after mount.
  * A broken palette chunk must never make this export undefined.
  */
-export function AdminCommandSearchSlot({ labels }: PaletteProps) {
+export function AdminCommandSearchSlot({ labels, actions }: PaletteProps) {
   const [Comp, setComp] = useState<ComponentType<PaletteProps> | null>(null);
 
   useEffect(() => {
@@ -48,5 +55,5 @@ export function AdminCommandSearchSlot({ labels }: PaletteProps) {
     );
   }
 
-  return <Comp labels={labels} />;
+  return <Comp labels={labels} actions={actions} />;
 }

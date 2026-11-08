@@ -1677,6 +1677,46 @@ html[lang="en"] .ro-portal {
     linear-gradient(180deg, #f6f3fa 0%, #f0ecf5 100%);
 }
 
+/*
+ * PILOT override, owner 2026-11-08: warm black / cream / plum, admin portal
+ * only (AdminShell + AD-02). More specific than the grouped admin+trader
+ * rules above, so it wins without touching trader. No grey-lilac glow.
+ */
+.ro-portal-admin[data-theme="dark"] {
+  background-color: var(--pilot-bg, var(--bg-page, #35314a));
+  background-image:
+    radial-gradient(
+      60% 42% at 8% -10%,
+      color-mix(in srgb, var(--pilot-plum-700, #32104f) 20%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      44% 32% at 100% 0%,
+      color-mix(in srgb, var(--pilot-amber, #c4a574) 7%, transparent),
+      transparent 58%
+    ),
+    linear-gradient(
+      180deg,
+      var(--pilot-bg, #0b080d) 0%,
+      var(--pilot-bg, #0b080d) 100%
+    );
+}
+
+.ro-portal-admin[data-theme="light"] {
+  background-color: var(--pilot-bg, var(--bg-page, #f3f0f7));
+  background-image:
+    radial-gradient(
+      50% 34% at 10% -10%,
+      color-mix(in srgb, var(--pilot-plum-700, #32104f) 6%, transparent),
+      transparent 58%
+    ),
+    linear-gradient(
+      180deg,
+      var(--pilot-bg, #fbf6ee) 0%,
+      var(--pilot-bg, #fbf6ee) 100%
+    );
+}
+
 .ro-portal[data-theme="dark"] .ro-portal-header {
   --ro-portal-header-bg: color-mix(in srgb, var(--ro-bg-raised) 82%, transparent);
   background-color: var(--ro-portal-header-bg);
@@ -2018,6 +2058,40 @@ html[lang="en"] .ro-portal {
   background: transparent;
   border-bottom: 1px solid color-mix(in srgb, var(--ro-sand-100) 14%, transparent);
   box-shadow: none;
+}
+
+/* PILOT override, owner 2026-11-08: admin-only, warm black chrome. */
+.ro-portal-admin[data-theme="dark"] .ro-portal-sidebar {
+  background: linear-gradient(
+    195deg,
+    var(--pilot-ink-900, #130f17) 0%,
+    var(--pilot-ink-950, #0b080d) 60%,
+    #060407 100%
+  );
+  box-shadow:
+    inset -1px 0 0 color-mix(in srgb, var(--pilot-cream-100, #f4e7d8) 8%, transparent),
+    12px 0 40px -28px rgba(0, 0, 0, 0.6);
+}
+
+.ro-portal-admin[data-theme="light"] .ro-portal-sidebar {
+  background: linear-gradient(
+    195deg,
+    var(--pilot-ink-900, #130f17) 0%,
+    var(--pilot-ink-950, #0b080d) 100%
+  );
+  box-shadow:
+    inset -1px 0 0 color-mix(in srgb, var(--pilot-cream-100, #f4e7d8) 8%, transparent),
+    12px 0 40px -28px rgba(0, 0, 0, 0.5);
+}
+
+.ro-portal-admin[data-theme="dark"] .ro-portal-header,
+.ro-portal-admin[data-theme="light"] .ro-portal-header {
+  background-color: var(--pilot-bg-elevated, var(--ro-portal-header-bg));
+  border-bottom-color: color-mix(
+    in srgb,
+    var(--pilot-border, var(--ro-plum-900)) 60%,
+    transparent
+  );
 }
 
 .ro-portal-nav-link {
@@ -2658,11 +2732,11 @@ body:has(.ro-portal-admin) {
   height: 100%;
   padding: 0 !important;
   overflow: hidden;
-  border: 1px solid var(--ro-border-subtle) !important;
+  border: 1px solid var(--pilot-border-subtle, var(--ro-border-subtle)) !important;
   border-radius: 1rem !important;
-  background: var(--ro-panel, var(--ro-bg-elevated, var(--ro-bg-raised))) !important;
+  background: var(--pilot-bg-raised, var(--ro-panel, var(--ro-bg-elevated, var(--ro-bg-raised)))) !important;
   box-shadow:
-    0 1px 0 color-mix(in srgb, var(--ro-text) 6%, transparent) inset,
+    0 1px 0 color-mix(in srgb, var(--pilot-text, var(--ro-text)) 6%, transparent) inset,
     var(--ro-e2) !important;
   transition:
     transform var(--ro-dur-fast, 140ms) var(--ro-ease-out, ease),
@@ -2676,26 +2750,26 @@ body:has(.ro-portal-admin) {
 }
 .ro-admin-kpi-stack .ro-portal-kpi:hover {
   transform: translateY(-2px) !important;
-  border-color: color-mix(in srgb, var(--ro-plum-500, var(--ro-plum-700)) 42%, var(--ro-border-subtle)) !important;
-  background: var(--ro-panel-hover, var(--ro-panel)) !important;
+  border-color: color-mix(in srgb, var(--pilot-plum-500, var(--ro-plum-500, var(--ro-plum-700))) 42%, var(--pilot-border-subtle, var(--ro-border-subtle))) !important;
+  background: var(--pilot-bg-hover, var(--ro-panel-hover, var(--ro-panel))) !important;
   box-shadow:
-    0 1px 0 color-mix(in srgb, var(--ro-text) 8%, transparent) inset,
+    0 1px 0 color-mix(in srgb, var(--pilot-text, var(--ro-text)) 8%, transparent) inset,
     var(--ro-e3) !important;
 }
 .ro-admin-kpi-stack .ro-portal-kpi[data-active="true"] {
-  border-color: color-mix(in srgb, var(--ro-plum-500, var(--ro-plum-700)) 55%, var(--ro-border-subtle)) !important;
+  border-color: color-mix(in srgb, var(--pilot-plum-500, var(--ro-plum-500, var(--ro-plum-700))) 55%, var(--pilot-border-subtle, var(--ro-border-subtle))) !important;
   background: color-mix(
     in srgb,
-    var(--ro-plum-700) 12%,
-    var(--ro-panel, var(--ro-bg-elevated))
+    var(--pilot-plum-700, var(--ro-plum-700)) 14%,
+    var(--pilot-bg-raised, var(--ro-panel, var(--ro-bg-elevated)))
   ) !important;
 }
 .ro-portal[data-theme="dark"] .ro-admin-kpi-stack .ro-portal-kpi:hover {
-  border-color: color-mix(in srgb, var(--ro-plum-300) 40%, var(--ro-border-subtle)) !important;
+  border-color: color-mix(in srgb, var(--pilot-plum-300, var(--ro-plum-300)) 40%, var(--pilot-border-subtle, var(--ro-border-subtle))) !important;
 }
 .ro-portal[data-theme="dark"] .ro-admin-kpi-stack .ro-portal-kpi[data-active="true"] {
-  border-color: color-mix(in srgb, var(--ro-plum-300) 50%, var(--ro-border-subtle)) !important;
-  background: color-mix(in srgb, var(--ro-plum-400) 14%, var(--ro-panel)) !important;
+  border-color: color-mix(in srgb, var(--pilot-plum-300, var(--ro-plum-300)) 50%, var(--pilot-border-subtle, var(--ro-border-subtle))) !important;
+  background: color-mix(in srgb, var(--pilot-plum-400, var(--ro-plum-400)) 16%, var(--pilot-bg-raised, var(--ro-panel))) !important;
 }
 .ro-kpi-sheen::before {
   content: "";
@@ -2804,6 +2878,27 @@ body:has(.ro-portal-admin) {
       #2e2144 0%,
       #352650 45%,
       #2a1c40 100%
+    );
+}
+
+/* PILOT override, owner 2026-11-08: admin-only, warm black + plum echo. */
+.ro-portal-admin[data-theme="dark"] .ro-admin-greeting {
+  background:
+    radial-gradient(
+      55% 120% at 100% 0%,
+      color-mix(in srgb, var(--pilot-plum-500, #522176) 30%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      40% 90% at 0% 100%,
+      color-mix(in srgb, var(--pilot-plum-700, #32104f) 26%, transparent),
+      transparent 55%
+    ),
+    linear-gradient(
+      108deg,
+      var(--pilot-ink-900, #130f17) 0%,
+      var(--pilot-ink-800, #1b1621) 50%,
+      var(--pilot-ink-900, #130f17) 100%
     );
 }
 
@@ -3346,6 +3441,25 @@ body:has(.ro-portal-admin) {
     border-color var(--ro-dur-fast) var(--ro-ease-standard),
     box-shadow var(--ro-dur-fast) var(--ro-ease-standard),
     background-color var(--ro-dur-fast) var(--ro-ease-standard);
+}
+
+/* PILOT override, owner 2026-11-08: admin-only card/KPI surfaces. */
+.ro-portal-admin[data-theme="dark"] .ro-portal-card,
+.ro-portal-admin[data-theme="light"] .ro-portal-card {
+  border-color: var(--pilot-border-subtle, var(--ro-border-subtle)) !important;
+  background: var(--pilot-bg-elevated, var(--ro-panel, var(--ro-bg-elevated))) !important;
+  color: var(--pilot-text, var(--ro-text)) !important;
+  box-shadow: var(--pilot-shadow-card, var(--ro-e2)) !important;
+}
+
+.ro-portal-admin[data-theme="dark"] .ro-portal-kpi,
+.ro-portal-admin[data-theme="light"] .ro-portal-kpi,
+.ro-portal-admin[data-theme="dark"] .ro-portal-kpi[data-kpi],
+.ro-portal-admin[data-theme="light"] .ro-portal-kpi[data-kpi] {
+  color: var(--pilot-text, var(--ro-text)) !important;
+  border-color: var(--pilot-border-subtle, var(--ro-border-subtle)) !important;
+  background: var(--pilot-bg-raised, var(--ro-bg-raised)) !important;
+  box-shadow: var(--pilot-shadow-card, var(--ro-e2)) !important;
 }
 
 .ro-portal .ro-portal-card:hover {

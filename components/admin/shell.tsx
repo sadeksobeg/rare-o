@@ -2,10 +2,12 @@ import Link from "next/link";
 import { LogOut, MessageSquare, UserRound } from "lucide-react";
 import { adminLogoutAction } from "@/app/admin-logout-action";
 import { AdminCommandSearchMount } from "@/components/admin/command-search-mount";
+import { HeaderQuickCreate } from "@/components/admin/header-quick-create";
 import { AdminLocaleToggle } from "@/components/admin/locale-toggle";
 import { AdminMainEnter } from "@/components/admin/main-enter";
 import { AdminMobileChrome } from "@/components/admin/mobile-nav";
 import { AdminSidebar, type AdminNavGroup } from "@/components/admin/nav";
+import type { QuickCreateItem } from "@/components/admin/quick-create";
 import { Emblem } from "@/components/brand";
 import { ChromeBadge } from "@/components/portal/chrome-badge";
 import {
@@ -82,6 +84,8 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
     empty: a.commandEmpty,
     searching: a.commandSearching,
     close: dict.common.close,
+    quickActions: a.commandQuickActions,
+    navigate: a.commandNavigate,
     pages: {
       "/admin": a.dashboard,
       "/admin/inbox": a.inbox,
@@ -105,12 +109,24 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
     },
   };
 
+  const quickCreateItems: QuickCreateItem[] = [
+    { href: "/admin/products/new", label: a.newProduct, icon: "product" },
+    { href: "/admin/offers/new", label: dict.adminUi.newOffer, icon: "offer" },
+    { href: "/admin/traders", label: dict.adminUi.newTrader, icon: "trader" },
+    {
+      href: "/admin/brokerage",
+      label: dict.trader.newBrokerage,
+      icon: "brokerage",
+    },
+  ];
+
   return (
     <>
       <SonnerToaster />
       <PortalShellFrame
         surface="admin"
-        className="ro-portal ro-portal-admin relative h-dvh max-h-dvh overflow-hidden"
+        defaultTheme="dark"
+        className="ro-portal ro-portal-admin relative h-dvh max-h-dvh overflow-hidden bg-[var(--pilot-bg,var(--ro-bg))] text-[color:var(--pilot-text,var(--ro-text))]"
       >
         <div className="ro-portal-atmosphere" aria-hidden />
         <div className="ro-portal-shell relative z-10">
@@ -140,8 +156,8 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
                   }}
                   footer={
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between gap-2 rounded-[12px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] px-2 py-1.5">
-                        <span className="text-[0.7rem] font-medium text-[color:var(--ro-text-muted)]">
+                      <div className="flex items-center justify-between gap-2 rounded-[12px] border border-[color:var(--pilot-border-subtle,var(--ro-border-subtle))] bg-[color:var(--pilot-bg-raised,var(--ro-bg-raised))] px-2 py-1.5">
+                        <span className="text-[0.7rem] font-medium text-[color:var(--pilot-text-muted,var(--ro-text-muted))]">
                           {dict.common.language} · {dict.common.themeLight}/
                           {dict.common.themeDark}
                         </span>
@@ -159,7 +175,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
                       </div>
                       <Link
                         href="/admin/profile"
-                        className="flex items-center gap-2 rounded-[12px] px-3 py-2.5 text-sm font-medium text-[color:var(--ro-text)] hover:bg-[color-mix(in_srgb,var(--ro-plum-700)_8%,transparent)]"
+                        className="flex items-center gap-2 rounded-[12px] px-3 py-2.5 text-sm font-medium text-[color:var(--pilot-text,var(--ro-text))] hover:bg-[color-mix(in_srgb,var(--pilot-plum-700,var(--ro-plum-700))_8%,transparent)]"
                       >
                         <UserRound className="size-4" strokeWidth={1.5} />
                         {dict.auth.profileTitle}
@@ -167,7 +183,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
                       <form action={adminLogoutAction}>
                         <button
                           type="submit"
-                          className="flex w-full items-center gap-2 rounded-[12px] px-3 py-2.5 text-sm font-medium text-[color:var(--ro-text)] hover:bg-[color-mix(in_srgb,var(--ro-plum-700)_8%,transparent)]"
+                          className="flex w-full items-center gap-2 rounded-[12px] px-3 py-2.5 text-sm font-medium text-[color:var(--pilot-text,var(--ro-text))] hover:bg-[color-mix(in_srgb,var(--pilot-plum-700,var(--ro-plum-700))_8%,transparent)]"
                         >
                           <LogOut className="size-4" strokeWidth={1.5} />
                           {a.logout}
@@ -186,10 +202,17 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
                   </span>
                 </Link>
                 <div className="ro-portal-header-search">
-                  <AdminCommandSearchMount labels={commandLabels} />
+                  <AdminCommandSearchMount
+                    labels={commandLabels}
+                    actions={quickCreateItems.map((item) => ({
+                      href: item.href,
+                      title: item.label,
+                    }))}
+                  />
                 </div>
               </div>
               <div className="ro-portal-header-actions flex shrink-0 items-center gap-1.5 sm:gap-2">
+                <HeaderQuickCreate label={a.quickCreate} items={quickCreateItems} />
                 <ChromeActionCluster>
                   <ChromeIconButton
                     href="/admin/inbox"
@@ -205,7 +228,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
                     </span>
                     <ChromeBadge
                       value={unreadInbox}
-                      className="absolute end-0.5 top-0.5 flex min-w-[1.05rem] items-center justify-center rounded-full bg-[var(--ro-plum-900)] px-1 text-[0.6rem] font-bold text-[var(--ro-sand-50)]"
+                      className="absolute end-0.5 top-0.5 flex min-w-[1.05rem] items-center justify-center rounded-full bg-[var(--pilot-plum-900,var(--ro-plum-900))] px-1 text-[0.6rem] font-bold text-[var(--pilot-cream-50,var(--ro-sand-50))]"
                     />
                   </ChromeIconButton>
                   <NotificationBell

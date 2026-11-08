@@ -28,7 +28,7 @@ function DomainIcon({ domain }: { domain: ActionQueueDomain }) {
 
 function barClass(domain: ActionQueueDomain) {
   if (domain === "wholesale") return "bg-[var(--ro-amber-500)]";
-  if (domain === "deal") return "bg-[var(--ro-plum-900)]";
+  if (domain === "deal") return "bg-[var(--pilot-plum-900,var(--ro-plum-900))]";
   return "bg-[var(--ro-ink-950)]";
 }
 
@@ -37,9 +37,9 @@ function chipClass(domain: ActionQueueDomain) {
     return "bg-[color-mix(in_srgb,var(--ro-amber-500)_22%,transparent)] text-[var(--ro-amber-500)]";
   }
   if (domain === "deal") {
-    return "bg-[color-mix(in_srgb,var(--ro-plum-700)_22%,transparent)] text-[var(--ro-plum-300)]";
+    return "bg-[color-mix(in_srgb,var(--pilot-plum-700,var(--ro-plum-700))_22%,transparent)] text-[var(--pilot-plum-300,var(--ro-plum-300))]";
   }
-  return "bg-[color-mix(in_srgb,var(--ro-text)_10%,transparent)] text-[color:var(--ro-text-muted)]";
+  return "bg-[color-mix(in_srgb,var(--pilot-text,var(--ro-text))_10%,transparent)] text-[color:var(--pilot-text-muted,var(--ro-text-muted))]";
 }
 
 function asDate(value: Date | string) {
@@ -141,7 +141,7 @@ export function ActionQueue({
     >
       <div className="ro-portal-card border p-3 sm:p-4">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="font-display text-lg font-semibold text-[color:var(--ro-text)]">
+          <h2 className="font-display text-lg font-semibold text-[color:var(--pilot-text,var(--ro-text))]">
             {a.actionQueue}
           </h2>
           <div
@@ -161,8 +161,8 @@ export function ActionQueue({
                   className={cn(
                     "inline-flex min-h-9 items-center rounded-[var(--ro-r-sm)] px-2.5 py-1 transition-[background-color,color,transform] duration-[var(--ro-dur-fast)]",
                     on
-                      ? "bg-[var(--ro-plum-700)] text-[var(--ro-sand-50)]"
-                      : "text-[color:var(--ro-text-muted)] hover:bg-[color-mix(in_srgb,var(--ro-text)_8%,transparent)]"
+                      ? "bg-[var(--pilot-plum-700,var(--ro-plum-700))] text-[var(--pilot-cream-50,var(--ro-sand-50))]"
+                      : "text-[color:var(--pilot-text-muted,var(--ro-text-muted))] hover:bg-[color-mix(in_srgb,var(--pilot-text,var(--ro-text))_8%,transparent)]"
                   )}
                 >
                   {tab.label}
@@ -173,8 +173,8 @@ export function ActionQueue({
         </div>
 
         {visible.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 border-t border-[color:var(--ro-border-subtle)] py-8 text-center">
-            <DrawIn className="size-10 text-[var(--ro-plum-400)]">
+          <div className="flex flex-col items-center justify-center gap-3 border-t border-[color:var(--pilot-border-subtle,var(--ro-border-subtle))] py-8 text-center">
+            <DrawIn className="size-10 text-[var(--pilot-plum-400,var(--ro-plum-400))]">
               <RosetteMark className="size-10" />
             </DrawIn>
             <p className="text-sm font-semibold text-[var(--ro-success-700)]">
@@ -182,7 +182,7 @@ export function ActionQueue({
             </p>
             <Link
               href="/admin/products/new"
-              className="inline-flex min-h-11 items-center rounded-[var(--ro-r-sm)] bg-[var(--ro-plum-700)] px-4 text-sm font-medium text-[var(--ro-sand-50)] transition-transform duration-[var(--ro-dur-fast)] hover:bg-[var(--ro-plum-900)] active:scale-[0.97]"
+              className="inline-flex min-h-11 items-center rounded-[var(--ro-r-sm)] bg-[var(--pilot-plum-700,var(--ro-plum-700))] px-4 text-sm font-medium text-[var(--pilot-cream-50,var(--ro-sand-50))] transition-transform duration-[var(--ro-dur-fast)] hover:bg-[var(--pilot-plum-900,var(--ro-plum-900))] active:scale-[0.97]"
             >
               {a.firstUseAction}
             </Link>
@@ -223,10 +223,10 @@ export function ActionQueue({
                       href={row.href}
                       data-queue-index={index}
                       className={cn(
-                        "group grid min-h-11 grid-cols-[3px_auto_minmax(0,1fr)_auto] items-center gap-2.5 border-t border-[color:var(--ro-border-subtle)] py-2.5 transition-[background-color,transform] duration-[var(--ro-dur-fast)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]",
-                        "hover:bg-[color-mix(in_srgb,var(--ro-plum-700)_10%,transparent)]",
+                        "group grid min-h-11 grid-cols-[3px_auto_minmax(0,1fr)_auto] items-center gap-2.5 border-t border-[color:var(--pilot-border-subtle,var(--ro-border-subtle))] py-2.5 transition-[background-color,transform] duration-[var(--ro-dur-fast)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pilot-focus,var(--ro-focus))]",
+                        "hover:bg-[color-mix(in_srgb,var(--pilot-plum-700,var(--ro-plum-700))_10%,transparent)]",
                         focusIndex === index &&
-                          "bg-[color-mix(in_srgb,var(--ro-plum-700)_12%,transparent)]",
+                          "bg-[color-mix(in_srgb,var(--pilot-plum-700,var(--ro-plum-700))_12%,transparent)]",
                         fresh && "ro-row-flash"
                       )}
                     >
@@ -248,15 +248,15 @@ export function ActionQueue({
                             : a.filterWholesale}
                       </span>
                       <div className="min-w-0">
-                        <p className="truncate text-[13px] font-medium text-[color:var(--ro-text)]">
+                        <p className="truncate text-[13px] font-medium text-[color:var(--pilot-text,var(--ro-text))]">
                           {heading}
                         </p>
-                        <p className="truncate text-[11px] text-[color:var(--ro-text-muted)]">
+                        <p className="truncate text-[11px] text-[color:var(--pilot-text-muted,var(--ro-text-muted))]">
                           {meta}
                         </p>
                       </div>
                       <span
-                        className="inline-flex size-8 items-center justify-center text-[var(--ro-plum-300)] transition-transform duration-[var(--ro-dur-fast)] group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5"
+                        className="inline-flex size-8 items-center justify-center text-[var(--pilot-plum-300,var(--ro-plum-300))] transition-transform duration-[var(--ro-dur-fast)] group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5"
                         aria-hidden
                       >
                         <svg
