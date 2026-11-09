@@ -716,7 +716,13 @@
   background: var(--rad-surface);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35), 0 0 0 1px var(--rad-bd);
   transition: transform 0.32s var(--rad-ease), width 0.32s var(--rad-ease);
-  inset-inline-start: 0;
+  /* Physical left, not inset-inline-start: the JS below measures offsetLeft,
+     which is always distance-from-physical-left regardless of dir. Anchoring
+     this element with a logical inset while translating it with a physical
+     offsetLeft double-counted the RTL flip and sent the pill ~210px off to
+     the side of the active tab (round 3 owner report, confirmed against
+     this component's own reference markup). */
+  left: 0;
 }
 [data-theme="light"] .rad-seg .rad-ind {
   box-shadow: 0 1px 3px rgba(11, 8, 13, 0.12), 0 0 0 1px var(--rad-bd);

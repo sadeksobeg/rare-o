@@ -770,6 +770,21 @@ export async function upsertConnectionHealth(
 }
 
 /**
+ * Liveness ping only — no state read or write beyond the timestamp. Called
+ * by the worker on an interval while the socket reports CONNECTED, so the
+ * admin UI can tell a genuinely live connection from a stale DB row left
+ * behind by a worker that died without a clean disconnect event.
+ */
+export async function touchConnectionHeartbeat(
+  db: DbClient = defaultPrisma
+): Promise<void> {
+  await db.whatsAppConnectionHealth.updateMany({
+    where: { id: WHATSAPP_CONNECTION_HEALTH_ID },
+    data: { lastHeartbeatAt: new Date() },
+  });
+}
+
+/**
  * Application-layer outbound enqueue.
  * Creates/updates conversation and a pending message.
  * Does not call Baileys — worker (or sendOutboundText) dispatches.

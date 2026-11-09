@@ -69,8 +69,10 @@ function buildRichFixture(): AdminHomeData {
     lastWhatsAppAt: hoursAgo(1),
     health: {
       state: "CONNECTED",
+      rawState: "CONNECTED",
       detailSafe: null,
       lastConnectedAt: hoursAgo(1).toISOString(),
+      lastHeartbeatAt: hoursAgo(0.01).toISOString(),
       updatedAt: hoursAgo(0.2).toISOString(),
       outboundEnabled: false,
       pairingPhone: null,

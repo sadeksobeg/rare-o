@@ -545,6 +545,12 @@ model WhatsAppConnectionHealth {
   state            String    @default("DISCONNECTED")
   detailSafe       String?
   lastConnectedAt  DateTime?
+  /// Liveness ping the worker writes on an interval while CONNECTED — distinct
+  /// from updatedAt, which only moves on an actual state transition and can
+  /// otherwise sit unchanged for a healthy, long-running connection. Admin UI
+  /// uses staleness of this field (not updatedAt) to catch a worker that died
+  /// without a clean disconnect event leaving a stale "CONNECTED" row behind.
+  lastHeartbeatAt  DateTime?
   updatedAt        DateTime  @updatedAt
   /// Admin pairing — E.164 digits of the phone being linked (no +)
   pairingPhone     String?

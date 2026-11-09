@@ -1,12 +1,12 @@
 {
   "ok": true,
-  "at": "2026-11-08T19:01:35.276Z",
+  "at": "2026-11-09T06:32:59.479Z",
   "tools": "docker",
-  "backupDir": "backups\\restore-drill-pg-1794164495276",
+  "backupDir": "backups\\restore-drill-pg-1794205979478",
   "dump": {
     "file": "db.dump",
-    "bytes": 157942,
-    "sha256": "61314fe1e692699b67505ead893b678dedf06cf2ee7930c76977812faf989116"
+    "bytes": 164926,
+    "sha256": "83e9e6fa6564ebbbcdb6db549fc6ffa585393894d84edac4c3ee8ef55dc2fa8b"
   },
   "uploads": {
     "source": "public/uploads",
@@ -21,8 +21,8 @@
   "tables": [
     {
       "table": "AdminAuditLog",
-      "source": 117,
-      "restored": 117,
+      "source": 149,
+      "restored": 149,
       "ok": true
     },
     {
@@ -63,26 +63,26 @@
     },
     {
       "table": "Customer",
-      "source": 76,
-      "restored": 76,
+      "source": 81,
+      "restored": 81,
       "ok": true
     },
     {
       "table": "DealProposal",
-      "source": 104,
-      "restored": 104,
+      "source": 119,
+      "restored": 119,
       "ok": true
     },
     {
       "table": "NegotiationEntry",
-      "source": 259,
-      "restored": 259,
+      "source": 289,
+      "restored": 289,
       "ok": true
     },
     {
       "table": "Product",
-      "source": 69,
-      "restored": 69,
+      "source": 74,
+      "restored": 74,
       "ok": true
     },
     {
@@ -99,26 +99,26 @@
     },
     {
       "table": "PublicCuratedOffer",
-      "source": 52,
-      "restored": 52,
+      "source": 67,
+      "restored": 67,
       "ok": true
     },
     {
       "table": "RetailHandoffEvent",
-      "source": 232,
-      "restored": 232,
+      "source": 252,
+      "restored": 252,
       "ok": true
     },
     {
       "table": "RetailRequest",
-      "source": 74,
-      "restored": 74,
+      "source": 79,
+      "restored": 79,
       "ok": true
     },
     {
       "table": "RetailRequestLine",
-      "source": 74,
-      "restored": 74,
+      "source": 79,
+      "restored": 79,
       "ok": true
     },
     {
@@ -129,8 +129,8 @@
     },
     {
       "table": "TraderNotification",
-      "source": 299,
-      "restored": 299,
+      "source": 324,
+      "restored": 324,
       "ok": true
     },
     {
@@ -165,26 +165,26 @@
     },
     {
       "table": "WholesaleRequest",
-      "source": 48,
-      "restored": 48,
+      "source": 53,
+      "restored": 53,
       "ok": true
     },
     {
       "table": "WholesaleRequestEvent",
-      "source": 187,
-      "restored": 187,
+      "source": 207,
+      "restored": 207,
       "ok": true
     },
     {
       "table": "WholesaleRequestLine",
-      "source": 48,
-      "restored": 48,
+      "source": 53,
+      "restored": 53,
       "ok": true
     },
     {
       "table": "_prisma_migrations",
-      "source": 13,
-      "restored": 13,
+      "source": 15,
+      "restored": 15,
       "ok": true
     }
   ]

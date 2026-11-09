@@ -2558,10 +2558,6 @@ body:has(.ro-portal-admin) {
   }
 }
 
-#main-content:has([data-admin-home]) {
-  padding: 0 !important;
-}
-
 /* Non-home admin pages keep comfortable inset + room under last row */
 #main-content:not(:has([data-admin-home])):not(:has([data-admin-inbox])) {
   padding-inline: 0.75rem;

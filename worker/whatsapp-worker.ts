@@ -48,6 +48,7 @@ import {
   recordOutboundStatusUpdate,
   recoverInterruptedOutbound,
   seedConversationFromChat,
+  touchConnectionHeartbeat,
   upsertConnectionHealth,
 } from "@/lib/whatsapp/messaging/service";
 import {
@@ -69,6 +70,7 @@ import {
 
 const OUTBOUND_POLL_MS = 5_000;
 const LINK_COMMAND_POLL_MS = 2_000;
+const HEARTBEAT_MS = 45_000;
 /** Retry connect while ERROR and a session exists (Baileys exhausted its own backoff). */
 const SUPERVISE_RETRY_MS = 60_000;
 
@@ -125,6 +127,7 @@ async function main(): Promise<void> {
 
   let outboundTimer: ReturnType<typeof setInterval> | null = null;
   let linkTimer: ReturnType<typeof setInterval> | null = null;
+  let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
   let lastSupervisedAt = 0;
   let pollingLinkCommands = false;
   const adapterRef: { current: WhatsAppAdapter | null } = { current: null };
@@ -137,6 +140,12 @@ async function main(): Promise<void> {
       );
       try {
         await upsertConnectionHealth(health);
+        if (health.state === "CONNECTED") {
+          // Seed the heartbeat immediately on connect, not 45s later —
+          // otherwise the admin UI's staleness check sees a null
+          // lastHeartbeatAt right after a real, fresh connection.
+          await touchConnectionHeartbeat();
+        }
         // Linked — pairing material is no longer needed
         if (health.state === "CONNECTED") {
           await clearPairingDisplay();
@@ -425,10 +434,19 @@ async function main(): Promise<void> {
     void pollLinkCommands();
   }, LINK_COMMAND_POLL_MS);
 
+  heartbeatTimer = setInterval(() => {
+    if (adapter.getHealth().state !== "CONNECTED") return;
+    void touchConnectionHeartbeat().catch((err) => {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`[whatsapp-worker] heartbeat persist failed: ${message.slice(0, 160)}`);
+    });
+  }, HEARTBEAT_MS);
+
   const shutdown = async (signal: string) => {
     console.log(`[whatsapp-worker] ${signal} - stopping`);
     if (outboundTimer) clearInterval(outboundTimer);
     if (linkTimer) clearInterval(linkTimer);
+    if (heartbeatTimer) clearInterval(heartbeatTimer);
     await adapter.stop();
     process.exit(0);
   };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -73,7 +73,7 @@ export function RadActionQueue({
   ];
   const visible = rows.filter((r) => tab === "all" || r.domain === tab).slice(0, 8);
 
-  useLayoutEffect(() => {
+  const measureIndicator = useCallback(() => {
     const root = segRef.current;
     if (!root) return;
     const on = root.querySelector<HTMLElement>("button[data-on='true']");
@@ -81,7 +81,29 @@ export function RadActionQueue({
     if (!on || !ind) return;
     ind.style.width = `${on.offsetWidth}px`;
     ind.style.transform = `translateX(${on.offsetLeft}px)`;
-  }, [tab]);
+  }, []);
+
+  useLayoutEffect(() => {
+    measureIndicator();
+  }, [measureIndicator, tab]);
+
+  useLayoutEffect(() => {
+    const root = segRef.current;
+    if (!root) return;
+    // Re-measure on anything that can shift the tabs' physical offsets:
+    // a viewport resize, the sidebar collapsing/expanding (which animates
+    // the grid column width, caught here as a resize of this element's own
+    // box), and web fonts finishing their swap (changes glyph metrics, so
+    // button widths change after first paint).
+    const ro = new ResizeObserver(() => measureIndicator());
+    ro.observe(root);
+    window.addEventListener("resize", measureIndicator);
+    document.fonts?.ready?.then(measureIndicator).catch(() => {});
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measureIndicator);
+    };
+  }, [measureIndicator]);
 
   return (
     <section className="rad-card rad-rise" style={{ "--rad-s": 5 } as React.CSSProperties}>

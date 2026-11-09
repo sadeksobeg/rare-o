@@ -77,9 +77,16 @@ export type InboxConversationDetail = {
 };
 
 export type InboxHealthView = {
+  /** Staleness-checked for display — see getInboxHealthView. Never raw-trust
+   *  a persisted "CONNECTED" with no recent heartbeat. */
   state: string;
+  /** The raw, unadjusted state column, before the staleness check below. */
+  rawState: string;
   detailSafe: string | null;
   lastConnectedAt: string | null;
+  /** Last worker liveness ping while connected — null if never connected
+   *  since this field was introduced, or genuinely stale. */
+  lastHeartbeatAt: string | null;
   updatedAt: string | null;
   outboundEnabled: boolean;
   /** Admin-only pairing display (ephemeral; null once expired / cleared) */
@@ -282,6 +289,19 @@ export async function markConversationRead(
 }
 
 /**
+ * A CONNECTED row is only trusted while the worker's heartbeat is recent.
+ * The worker pings every 45s (HEARTBEAT_MS in worker/whatsapp-worker.ts)
+ * while its socket reports CONNECTED; a worker that dies without a clean
+ * disconnect event (killed process, crashed host) never gets the chance to
+ * flip the row to DISCONNECTED, so without this check the admin UI would
+ * show "connected" indefinitely against a dead connection. 2.5x the
+ * heartbeat interval tolerates one missed tick before downgrading the
+ * DISPLAYED state — the raw DB row (state column) is never overwritten by
+ * this check, only the value returned to callers.
+ */
+const HEARTBEAT_STALE_AFTER_MS = 45_000 * 2.5;
+
+/**
  * Safe connection health for admin UI. Never returns session material;
  * pairing code / QR are ephemeral and hidden once expired.
  */
@@ -295,10 +315,24 @@ async function getInboxHealthViewImpl(
   const pairingExpired =
     !!row?.pairingExpiresAt && row.pairingExpiresAt.getTime() < Date.now();
 
+  const rawState = row?.state ?? "DISCONNECTED";
+  const heartbeatAgeMs = row?.lastHeartbeatAt
+    ? Date.now() - row.lastHeartbeatAt.getTime()
+    : null;
+  const heartbeatStale =
+    heartbeatAgeMs === null || heartbeatAgeMs > HEARTBEAT_STALE_AFTER_MS;
+  // A claimed CONNECTED with no recent heartbeat is displayed as
+  // RECONNECTING, not CONNECTED and not DISCONNECTED: the worker may still
+  // be alive and about to catch up (don't scare the admin into re-pairing),
+  // but it must not say "connected" while unconfirmed.
+  const state = rawState === "CONNECTED" && heartbeatStale ? "RECONNECTING" : rawState;
+
   return {
-    state: row?.state ?? "DISCONNECTED",
+    state,
+    rawState,
     detailSafe: row?.detailSafe ?? null,
     lastConnectedAt: toIso(row?.lastConnectedAt ?? null),
+    lastHeartbeatAt: toIso(row?.lastHeartbeatAt ?? null),
     updatedAt: toIso(row?.updatedAt ?? null),
     outboundEnabled: isOutboundEnabled(),
     pairingPhone: row?.pairingPhone ?? null,
