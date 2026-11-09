@@ -30,6 +30,10 @@ export type InboxConversationListItem = {
   id: string;
   /** Privacy-conscious display label (E.164 or masked chat id) */
   displayLabel: string;
+  /** Persisted name, when known — separate from displayLabel so the UI can
+   *  show a masked phone alongside it rather than the full number. */
+  name: string | null;
+  participantE164: string | null;
   lastMessagePreview: string;
   lastMessageAt: string | null;
   unreadCount: number;
@@ -65,15 +69,25 @@ export type InboxCrmParty = {
   } | null;
 };
 
+export type InboxNoteItem = {
+  id: string;
+  body: string;
+  authorName: string;
+  createdAt: string;
+};
+
 export type InboxConversationDetail = {
   id: string;
   displayLabel: string;
+  name: string | null;
   waChatId: string;
   participantE164: string | null;
   unreadCount: number;
   link: InboxLinkSummary;
   crm: InboxCrmParty;
   messages: InboxMessageItem[];
+  notes: InboxNoteItem[];
+  tags: string[];
 };
 
 export type InboxHealthView = {
@@ -130,6 +144,8 @@ export function formatConversationDisplayLabel(input: {
   return masked;
 }
 
+export { formatMaskedPhone } from "@/lib/whatsapp/messaging/phone-format";
+
 function toIso(d: Date | null | undefined): string | null {
   return d ? d.toISOString() : null;
 }
@@ -180,6 +196,8 @@ async function listInboxConversationsImpl(
         displayName: r.displayName,
         waChatId: r.waChatId,
       }),
+      name: r.displayName?.trim() || null,
+      participantE164: r.participantE164,
       lastMessagePreview:
         r.lastMessagePreview === "[unsupported:unknown]" ||
         r.lastMessagePreview === "[unsupported]"
@@ -228,6 +246,7 @@ export async function getInboxConversation(
           { id: "asc" },
         ],
       },
+      notes: { orderBy: { createdAt: "asc" } },
     },
   });
   if (!row) return null;
@@ -239,6 +258,7 @@ export async function getInboxConversation(
       displayName: row.displayName,
       waChatId: row.waChatId,
     }),
+    name: row.displayName?.trim() || null,
     waChatId: row.waChatId,
     participantE164: row.participantE164,
     unreadCount: row.unreadCount,
@@ -267,7 +287,86 @@ export async function getInboxConversation(
         createdAt: m.createdAt.toISOString(),
       };
     }),
+    notes: row.notes.map((n) => ({
+      id: n.id,
+      body: n.body,
+      authorName: n.authorName,
+      createdAt: n.createdAt.toISOString(),
+    })),
+    tags: row.tags,
   };
+}
+
+/** Append-only — no edit/delete yet, matching the reference's own minimal note UI. */
+export async function addInboxNote(
+  input: { conversationId: string; adminId: string; adminName: string; body: string },
+  db: DbClient = defaultPrisma
+): Promise<InboxNoteItem | null> {
+  const body = input.body.trim().slice(0, 2000);
+  if (!body) return null;
+  const row = await db.whatsAppConversationNote.create({
+    data: {
+      conversationId: input.conversationId,
+      authorAdminId: input.adminId,
+      authorName: input.adminName,
+      body,
+    },
+  });
+  return {
+    id: row.id,
+    body: row.body,
+    authorName: row.authorName,
+    createdAt: row.createdAt.toISOString(),
+  };
+}
+
+const MAX_TAG_LENGTH = 30;
+const MAX_TAGS_PER_CONVERSATION = 12;
+
+export async function addInboxTag(
+  input: { conversationId: string; tag: string },
+  db: DbClient = defaultPrisma
+): Promise<string[]> {
+  const tag = input.tag.trim().slice(0, MAX_TAG_LENGTH);
+  if (!tag) {
+    const row = await db.whatsAppConversation.findUnique({
+      where: { id: input.conversationId },
+      select: { tags: true },
+    });
+    return row?.tags ?? [];
+  }
+  const row = await db.whatsAppConversation.findUnique({
+    where: { id: input.conversationId },
+    select: { tags: true },
+  });
+  if (!row) return [];
+  if (row.tags.includes(tag) || row.tags.length >= MAX_TAGS_PER_CONVERSATION) {
+    return row.tags;
+  }
+  const updated = await db.whatsAppConversation.update({
+    where: { id: input.conversationId },
+    data: { tags: { push: tag } },
+    select: { tags: true },
+  });
+  return updated.tags;
+}
+
+export async function removeInboxTag(
+  input: { conversationId: string; tag: string },
+  db: DbClient = defaultPrisma
+): Promise<string[]> {
+  const row = await db.whatsAppConversation.findUnique({
+    where: { id: input.conversationId },
+    select: { tags: true },
+  });
+  if (!row) return [];
+  const next = row.tags.filter((t) => t !== input.tag);
+  const updated = await db.whatsAppConversation.update({
+    where: { id: input.conversationId },
+    data: { tags: next },
+    select: { tags: true },
+  });
+  return updated.tags;
 }
 
 export async function markConversationRead(

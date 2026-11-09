@@ -1,0 +1,14 @@
+{
+  "at": "2026-11-09T07:27:10.747Z",
+  "searchSlashFocusesInput": true,
+  "jKeyOpensConversation": true,
+  "tabStops": 18,
+  "stopsWithoutVisibleFocusRing": 0,
+  "connectionSheetFocusMovesInside": true,
+  "focusReturnsToConnButtonAfterEscape": true,
+  "unreadClearedServerSideAfterOpen": true,
+  "outboundWhatsAppNetworkRequests": [],
+  "debugBeforeJUrl": "http://127.0.0.1:3000/admin/inbox",
+  "debugAfterJUrl": "http://127.0.0.1:3000/admin/inbox/cmvwj0wl0000gepcg800pj0s2",
+  "consoleErrors": []
+}

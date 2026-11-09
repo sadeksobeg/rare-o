@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-09T06:29:45.344Z",
+  "at": "2026-11-09T07:25:30.609Z",
   "rows": [
     {
       "fg": "--rad-tx",
@@ -162,6 +162,46 @@
       "theme": "dark"
     },
     {
+      "fg": "--rad-cream",
+      "bg": "--rad-out",
+      "desc": "inbox: outgoing bubble text",
+      "size": "normal",
+      "ratio": 11.56,
+      "min": 4.5,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-c0",
+      "bg": "--rad-tx",
+      "desc": "inbox: active filter chip text",
+      "size": "normal",
+      "ratio": 16.37,
+      "min": 4.5,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-tx2",
+      "bg": "--rad-surface2",
+      "desc": "inbox: conversation preview text",
+      "size": "normal",
+      "ratio": 7.69,
+      "min": 4.5,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-ac",
+      "bg": "--rad-surface",
+      "desc": "inbox: unread time / unread marker",
+      "size": "normal",
+      "ratio": 8.53,
+      "min": 4.5,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
       "fg": "--rad-tx",
       "bg": "--rad-c0",
       "desc": "page text on page bg",
@@ -317,6 +357,46 @@
       "desc": "primary button text",
       "size": "normal",
       "ratio": 16.37,
+      "min": 4.5,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-cream",
+      "bg": "--rad-out",
+      "desc": "inbox: outgoing bubble text",
+      "size": "normal",
+      "ratio": 13.06,
+      "min": 4.5,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-c0",
+      "bg": "--rad-tx",
+      "desc": "inbox: active filter chip text",
+      "size": "normal",
+      "ratio": 17.42,
+      "min": 4.5,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-tx2",
+      "bg": "--rad-surface2",
+      "desc": "inbox: conversation preview text",
+      "size": "normal",
+      "ratio": 9.06,
+      "min": 4.5,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-ac",
+      "bg": "--rad-surface",
+      "desc": "inbox: unread time / unread marker",
+      "size": "normal",
+      "ratio": 15.88,
       "min": 4.5,
       "pass": true,
       "theme": "light"

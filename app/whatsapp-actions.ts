@@ -9,10 +9,13 @@ import {
   requireAdminSession,
 } from "@/lib/auth/admin-session";
 import {
+  addInboxNote,
+  addInboxTag,
   getInboxConversation,
   getInboxHealthView,
   listInboxConversations,
   markConversationRead,
+  removeInboxTag,
 } from "@/lib/whatsapp/messaging/inbox";
 import {
   enqueueOutboundMedia,
@@ -672,4 +675,64 @@ export async function adminWhatsAppLogoutAction(): Promise<ActionResult> {
 
   revalidatePath("/admin/inbox");
   return { ok: true };
+}
+
+/** Internal note — never sent to the customer. Round 3 inbox context panel. */
+export async function adminAddInboxNoteAction(
+  formData: FormData
+): Promise<ActionResult & { data?: { id: string; body: string; authorName: string; createdAt: string } }> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const conversationId = String(formData.get("conversationId") || "").trim();
+  const body = String(formData.get("body") || "").trim();
+  if (!conversationId) return { ok: false, error: "INVALID_INPUT" };
+  if (!body) return { ok: false, error: "EMPTY_TEXT" };
+
+  const note = await addInboxNote({
+    conversationId,
+    adminId: session.sub,
+    adminName: session.name,
+    body,
+  });
+  if (!note) return { ok: false, error: "EMPTY_TEXT" };
+  revalidatePath(`/admin/inbox/${conversationId}`);
+  return { ok: true, data: note };
+}
+
+export async function adminAddInboxTagAction(
+  formData: FormData
+): Promise<ActionResult & { data?: { tags: string[] } }> {
+  try {
+    await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const conversationId = String(formData.get("conversationId") || "").trim();
+  const tag = String(formData.get("tag") || "").trim();
+  if (!conversationId || !tag) return { ok: false, error: "INVALID_INPUT" };
+
+  const tags = await addInboxTag({ conversationId, tag });
+  revalidatePath(`/admin/inbox/${conversationId}`);
+  return { ok: true, data: { tags } };
+}
+
+export async function adminRemoveInboxTagAction(
+  formData: FormData
+): Promise<ActionResult & { data?: { tags: string[] } }> {
+  try {
+    await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const conversationId = String(formData.get("conversationId") || "").trim();
+  const tag = String(formData.get("tag") || "").trim();
+  if (!conversationId || !tag) return { ok: false, error: "INVALID_INPUT" };
+
+  const tags = await removeInboxTag({ conversationId, tag });
+  revalidatePath(`/admin/inbox/${conversationId}`);
+  return { ok: true, data: { tags } };
 }

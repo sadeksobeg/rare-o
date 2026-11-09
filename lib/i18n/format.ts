@@ -81,6 +81,30 @@ export function formatDate(
   }).format(date);
 }
 
+/**
+ * Compact chat-list timestamp (round 3 inbox): today → HH:mm, yesterday →
+ * "Yesterday", within the last 6 days → weekday name, older → short date
+ * ("5 Nov"). All computed against APP_TIMEZONE so "today"/"yesterday" match
+ * the business's own calendar day, not the server's UTC day.
+ */
+export function formatCompactChatTime(value: Date | string, locale: Locale) {
+  const date = typeof value === "string" ? new Date(value) : value;
+  const dayKey = formatDayKey(date);
+  const todayKey = formatDayKey(new Date());
+  const yesterdayKey = formatDayKey(new Date(Date.now() - 86_400_000));
+  if (dayKey === todayKey) {
+    return formatDate(date, locale, { hour: "2-digit", minute: "2-digit", hour12: false });
+  }
+  if (dayKey === yesterdayKey) {
+    return locale === "ar" ? "أمس" : "Yesterday";
+  }
+  const daysAgo = Math.round((new Date(todayKey).getTime() - new Date(dayKey).getTime()) / 86_400_000);
+  if (daysAgo >= 0 && daysAgo < 6) {
+    return formatDate(date, locale, { weekday: "long" });
+  }
+  return formatDate(date, locale, { day: "numeric", month: "short" });
+}
+
 export function formatRelative(value: Date | string, locale: Locale) {
   const date = typeof value === "string" ? new Date(value) : value;
   const diffSec = Math.round((date.getTime() - Date.now()) / 1000);

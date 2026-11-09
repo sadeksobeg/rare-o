@@ -476,6 +476,95 @@ type Dict = {
     statusReady: string;
     pieceSuffixRetail: string;
   };
+  /** Admin inbox, round 3 (owner reference-driven rebuild, 2026-11-09). */
+  ib: {
+    searchPlaceholder: string;
+    searchLabel: string;
+    filterAll: string;
+    filterUnread: string;
+    filterLinked: string;
+    filterUnlinked: string;
+    connConnected: string;
+    connOutboundOff: string;
+    connDisconnected: string;
+    connReconnecting: string;
+    emptyListTitle: string;
+    emptyListBody: string;
+    noResultsTitle: string;
+    noResultsBody: string;
+    selectConvTitle: string;
+    selectConvBody: string;
+    newMessagesZero: string;
+    newMessagesOne: string;
+    newMessagesTwo: string;
+    newMessagesFew: string;
+    newMessagesMany: string;
+    newMessagesOther: string;
+    bannerOutboundOff: string;
+    bannerReconnecting: string;
+    bannerDisconnected: string;
+    bannerPairAction: string;
+    composerReplyTab: string;
+    composerNoteTab: string;
+    composerReplyPlaceholder: string;
+    composerNotePlaceholder: string;
+    composerDisabledOutboundOff: string;
+    composerDisabledDisconnected: string;
+    composerSendHint: string;
+    sendButton: string;
+    saveNoteButton: string;
+    attachLabel: string;
+    quickRepliesLabel: string;
+    noteSystemLabel: string;
+    contextUnlinkLabel: string;
+    contextLinkLabel: string;
+    linkedRecordsHeading: string;
+    noLinkedRecords: string;
+    quickActionsHeading: string;
+    createRequestFromConv: string;
+    openNewDeal: string;
+    pinConversation: string;
+    notesHeading: string;
+    notesEmpty: string;
+    addNotePlaceholder: string;
+    addNoteButton: string;
+    tagsHeading: string;
+    noTags: string;
+    addTagLabel: string;
+    addTagPlaceholder: string;
+    backToList: string;
+    connSheetTitle: string;
+    connSheetClose: string;
+    connSheetConnectedBody: string;
+    connSheetOutboundOffBody: string;
+    connSheetReconnectingBody: string;
+    connSheetDisconnectedBody: string;
+    connSheetHeartbeatLabel: string;
+    connSheetLinkedNumberLabel: string;
+    connSheetDisconnectButton: string;
+    connSheetStep1: string;
+    connSheetStep2: string;
+    connSheetStep3: string;
+    connSheetPhoneLabel: string;
+    connSheetShowQrButton: string;
+    connSheetNoSendNotice: string;
+    navHint: string;
+    searchHint: string;
+    escHint: string;
+    searchInThread: string;
+    moreInfo: string;
+    moreActions: string;
+    readSent: string;
+    readDelivered: string;
+    readRead: string;
+    profileTab: string;
+    qr1Title: string;
+    qr1Body: string;
+    qr2Title: string;
+    qr2Body: string;
+    qr3Title: string;
+    qr3Body: string;
+  };
   adminUi: {
     colReference: string;
     colCustomer: string;
@@ -1970,6 +2059,96 @@ const ar: Dict = {
     statusInProgress: "قيد المتابعة",
     statusReady: "جاهز",
     pieceSuffixRetail: "طلب تجزئة",
+  },
+  ib: {
+    searchPlaceholder: "ابحث بالاسم أو رقم الطلب أو النص…",
+    searchLabel: "بحث في المحادثات",
+    filterAll: "الكل",
+    filterUnread: "غير مقروء",
+    filterLinked: "مرتبط",
+    filterUnlinked: "غير مرتبط",
+    connConnected: "متصل",
+    connOutboundOff: "الإرسال متوقف",
+    connDisconnected: "غير متصل",
+    connReconnecting: "جارٍ إعادة الاتصال",
+    emptyListTitle: "لا محادثات بعد",
+    emptyListBody: "ستظهر هنا رسائل العملاء الواردة عبر واتساب فور وصولها.",
+    noResultsTitle: "لا نتائج",
+    noResultsBody: "جرّب كلمة أخرى أو غيّر التصفية.",
+    selectConvTitle: "اختر محادثة",
+    selectConvBody: "اختر محادثة من القائمة لعرض الرسائل. استخدم J وK للتنقل بين المحادثات.",
+    newMessagesZero: "لا رسائل جديدة",
+    newMessagesOne: "رسالة جديدة واحدة",
+    newMessagesTwo: "رسالتان جديدتان",
+    newMessagesFew: "{n} رسائل جديدة",
+    newMessagesMany: "{n} رسالة جديدة",
+    newMessagesOther: "{n} رسالة جديدة",
+    bannerOutboundOff:
+      "الإرسال من الصندوق متوقف حالياً. تصلك الرسائل وتستطيع إضافة ملاحظات داخلية، لكن الرد يُحفظ هنا وقد يحتاج متابعة من هاتفك.",
+    bannerReconnecting: "جارٍ إعادة الاتصال بواتساب… قد تتأخر الرسائل الجديدة.",
+    bannerDisconnected: "واتساب غير متصل. لن تصل رسائل جديدة قبل إعادة الربط.",
+    bannerPairAction: "ربط الحساب",
+    composerReplyTab: "رد",
+    composerNoteTab: "ملاحظة داخلية",
+    composerReplyPlaceholder: "اكتب رداً…",
+    composerNotePlaceholder: "اكتب ملاحظة داخلية لفريقك…",
+    composerDisabledOutboundOff: "الرد متوقف حالياً — استخدم ملاحظة داخلية",
+    composerDisabledDisconnected: "غير متاح أثناء انقطاع الاتصال",
+    composerSendHint: "Enter إرسال · Shift+Enter سطر جديد",
+    sendButton: "إرسال",
+    saveNoteButton: "حفظ الملاحظة",
+    attachLabel: "إرفاق",
+    quickRepliesLabel: "ردود جاهزة",
+    noteSystemLabel: "ملاحظة داخلية · لا يراها العميل",
+    contextUnlinkLabel: "فك الربط",
+    contextLinkLabel: "ربط بعميل",
+    linkedRecordsHeading: "السجلات المرتبطة",
+    noLinkedRecords: "لا توجد سجلات مرتبطة بهذا الرقم بعد.",
+    quickActionsHeading: "إجراءات سريعة",
+    createRequestFromConv: "إنشاء طلب من المحادثة",
+    openNewDeal: "فتح صفقة جديدة",
+    pinConversation: "تثبيت المحادثة",
+    notesHeading: "ملاحظات",
+    notesEmpty: "لا توجد ملاحظات بعد.",
+    addNotePlaceholder: "أضف ملاحظة داخلية…",
+    addNoteButton: "إضافة",
+    tagsHeading: "الوسوم",
+    noTags: "لا وسوم",
+    addTagLabel: "+ وسم",
+    addTagPlaceholder: "اسم الوسم…",
+    backToList: "رجوع",
+    connSheetTitle: "اتصال واتساب",
+    connSheetClose: "إغلاق",
+    connSheetConnectedBody: "الحساب مرتبط ويستقبل الرسائل. الإرسال من الصندوق مفعّل.",
+    connSheetOutboundOffBody:
+      "الحساب مرتبط ويستقبل الرسائل، لكن الإرسال من الصندوق غير مفعّل من إعدادات الخادم.",
+    connSheetReconnectingBody: "جلسة الربط موجودة، ويجري استعادة الاتصال تلقائياً. لا حاجة لإجراء الآن.",
+    connSheetDisconnectedBody: "لا توجد جلسة ربط نشطة. اربط رقم المؤسسة لاستقبال الرسائل.",
+    connSheetHeartbeatLabel: "آخر نبضة اتصال قبل {s} ثانية",
+    connSheetLinkedNumberLabel: "الرقم المرتبط",
+    connSheetDisconnectButton: "فصل الحساب",
+    connSheetStep1: "افتح واتساب على هاتف المؤسسة",
+    connSheetStep2: "الأجهزة المرتبطة ← ربط جهاز",
+    connSheetStep3: "امسح الرمز الذي سيظهر هنا",
+    connSheetPhoneLabel: "رقم الهاتف (اختياري، للربط بالرمز)",
+    connSheetShowQrButton: "إظهار رمز الربط",
+    connSheetNoSendNotice: "لن يُرسل أي شيء إلى عملائك أثناء الربط.",
+    navHint: "تنقّل",
+    searchHint: "بحث",
+    escHint: "إغلاق/رجوع",
+    searchInThread: "بحث في المحادثة",
+    moreInfo: "معلومات العميل",
+    moreActions: "المزيد",
+    readSent: "أُرسلت",
+    readDelivered: "وصلت",
+    readRead: "قُرئت",
+    profileTab: "الملف",
+    qr1Title: "تفاصيل التوصيل",
+    qr1Body: "التوصيل إلى المحافظات خلال ٣–٥ أيام عمل، والكلفة تُحدد حسب الوجهة.",
+    qr2Title: "طريقة الدفع",
+    qr2Body: "الدفع بالتحويل، وسنرسل لك بيانات الحساب بعد تأكيد الطلب.",
+    qr3Title: "تأكيد الاستلام",
+    qr3Body: "وصلتنا رسالتك، سيتابع معك أحد فريقنا خلال دقائق.",
   },
   adminUi: {
     colReference: "المرجع",
@@ -3598,6 +3777,96 @@ const en: Dict = {
     statusInProgress: "In progress",
     statusReady: "Ready",
     pieceSuffixRetail: "Retail request",
+  },
+  ib: {
+    searchPlaceholder: "Search by name, request number, or text…",
+    searchLabel: "Search conversations",
+    filterAll: "All",
+    filterUnread: "Unread",
+    filterLinked: "Linked",
+    filterUnlinked: "Unlinked",
+    connConnected: "Connected",
+    connOutboundOff: "Sending paused",
+    connDisconnected: "Disconnected",
+    connReconnecting: "Reconnecting",
+    emptyListTitle: "No conversations yet",
+    emptyListBody: "Customer messages arriving over WhatsApp will appear here as soon as they come in.",
+    noResultsTitle: "No results",
+    noResultsBody: "Try a different word or change the filter.",
+    selectConvTitle: "Select a conversation",
+    selectConvBody: "Pick a conversation from the list to see its messages. Use J and K to move between conversations.",
+    newMessagesZero: "No new messages",
+    newMessagesOne: "1 new message",
+    newMessagesTwo: "2 new messages",
+    newMessagesFew: "{n} new messages",
+    newMessagesMany: "{n} new messages",
+    newMessagesOther: "{n} new messages",
+    bannerOutboundOff:
+      "Sending from the inbox is currently paused. Messages still arrive and you can add internal notes, but a reply is saved here and may need following up from your phone.",
+    bannerReconnecting: "Reconnecting to WhatsApp… new messages may be delayed.",
+    bannerDisconnected: "WhatsApp is disconnected. New messages won't arrive until it's reconnected.",
+    bannerPairAction: "Link account",
+    composerReplyTab: "Reply",
+    composerNoteTab: "Internal note",
+    composerReplyPlaceholder: "Write a reply…",
+    composerNotePlaceholder: "Write an internal note for your team…",
+    composerDisabledOutboundOff: "Replies are paused right now — use an internal note",
+    composerDisabledDisconnected: "Unavailable while disconnected",
+    composerSendHint: "Enter to send · Shift+Enter for a new line",
+    sendButton: "Send",
+    saveNoteButton: "Save note",
+    attachLabel: "Attach",
+    quickRepliesLabel: "Quick replies",
+    noteSystemLabel: "Internal note · not visible to the customer",
+    contextUnlinkLabel: "Unlink",
+    contextLinkLabel: "Link to customer",
+    linkedRecordsHeading: "Linked records",
+    noLinkedRecords: "No records linked to this number yet.",
+    quickActionsHeading: "Quick actions",
+    createRequestFromConv: "Create a request from this conversation",
+    openNewDeal: "Open a new deal",
+    pinConversation: "Pin conversation",
+    notesHeading: "Notes",
+    notesEmpty: "No notes yet.",
+    addNotePlaceholder: "Add an internal note…",
+    addNoteButton: "Add",
+    tagsHeading: "Tags",
+    noTags: "No tags",
+    addTagLabel: "+ Tag",
+    addTagPlaceholder: "Tag name…",
+    backToList: "Back",
+    connSheetTitle: "WhatsApp connection",
+    connSheetClose: "Close",
+    connSheetConnectedBody: "The account is linked and receiving messages. Sending from the inbox is enabled.",
+    connSheetOutboundOffBody:
+      "The account is linked and receiving messages, but sending from the inbox is disabled in server settings.",
+    connSheetReconnectingBody: "A linked session exists and the connection is being restored automatically. No action needed right now.",
+    connSheetDisconnectedBody: "No active linked session. Link the business number to start receiving messages.",
+    connSheetHeartbeatLabel: "Last connection heartbeat {s} seconds ago",
+    connSheetLinkedNumberLabel: "Linked number",
+    connSheetDisconnectButton: "Disconnect account",
+    connSheetStep1: "Open WhatsApp on the business phone",
+    connSheetStep2: "Linked devices → Link a device",
+    connSheetStep3: "Scan the code that will appear here",
+    connSheetPhoneLabel: "Phone number (optional, for code pairing)",
+    connSheetShowQrButton: "Show pairing code",
+    connSheetNoSendNotice: "Nothing is sent to your customers while pairing.",
+    navHint: "Navigate",
+    searchHint: "Search",
+    escHint: "Close/back",
+    searchInThread: "Search in conversation",
+    moreInfo: "Customer info",
+    moreActions: "More",
+    readSent: "Sent",
+    readDelivered: "Delivered",
+    readRead: "Read",
+    profileTab: "Profile",
+    qr1Title: "Delivery details",
+    qr1Body: "Delivery to other governorates takes 3–5 business days; cost depends on destination.",
+    qr2Title: "Payment method",
+    qr2Body: "Payment is by bank transfer — we'll send the account details once the order is confirmed.",
+    qr3Title: "Confirming receipt",
+    qr3Body: "Your message has arrived — someone from our team will follow up within minutes.",
   },
   adminUi: {
     colReference: "Reference",

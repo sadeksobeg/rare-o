@@ -29,6 +29,17 @@ const FILES = [
   "components/admin/shell.tsx",
   "app/admin/(protected)/page.tsx",
   "app/dev/pilot/page.tsx",
+  "components/admin/rad/inbox/avatar-color.ts",
+  "components/admin/rad/inbox/connection-sheet.tsx",
+  "components/admin/rad/inbox/context-panel.tsx",
+  "components/admin/rad/inbox/conversation-list.tsx",
+  "components/admin/rad/inbox/inbox-shell.tsx",
+  "components/admin/rad/inbox/notes-section.tsx",
+  "components/admin/rad/inbox/tags-section.tsx",
+  "components/admin/rad/inbox/thread.tsx",
+  "app/admin/(protected)/inbox/layout.tsx",
+  "app/admin/(protected)/inbox/page.tsx",
+  "app/admin/(protected)/inbox/[id]/page.tsx",
 ];
 
 const BANNED = [
@@ -46,8 +57,8 @@ const BANNED = [
   { re: /\blipsum\b/i, label: "lipsum" },
 ];
 
-function extractAd2Block(src) {
-  const idx = src.indexOf("ad2: {");
+function extractNamedBlock(src, name) {
+  const idx = src.indexOf(`${name}: {`);
   if (idx === -1) return "";
   let depth = 0;
   let start = -1;
@@ -71,14 +82,16 @@ for (const rel of FILES) {
   if (!fs.existsSync(full)) continue;
   let src = fs.readFileSync(full, "utf8");
   if (rel === "lib/i18n/dictionaries.ts") {
-    // Only scan the ad2 blocks (ar + en values + type) — the rest of this
-    // file is thousands of pre-existing, out-of-scope strings.
+    // Only scan the ad2/ib blocks (ar + en values + type) — the rest of
+    // this file is thousands of pre-existing, out-of-scope strings.
     const blocks = [];
-    let rest = src;
-    let marker;
-    while ((marker = extractAd2Block(rest))) {
-      blocks.push(marker);
-      rest = rest.slice(rest.indexOf(marker) + marker.length);
+    for (const name of ["ad2", "ib"]) {
+      let rest = src;
+      let marker;
+      while ((marker = extractNamedBlock(rest, name))) {
+        blocks.push(marker);
+        rest = rest.slice(rest.indexOf(marker) + marker.length);
+      }
     }
     src = blocks.join("\n");
   }
@@ -92,7 +105,7 @@ for (const rel of FILES) {
   });
 }
 
-console.log(`Scanned ${FILES.length} files (dictionaries.ts restricted to its ad2 block).`);
+console.log(`Scanned ${FILES.length} files (dictionaries.ts restricted to its ad2/ib blocks).`);
 if (hits.length === 0) {
   console.log("PASS — no dev-language phrases found.");
 } else {

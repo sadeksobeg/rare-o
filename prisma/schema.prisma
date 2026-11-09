@@ -461,6 +461,9 @@ model WhatsAppConversation {
   trader             TraderAccount?      @relation(fields: [traderId], references: [id], onDelete: SetNull)
   messages           WhatsAppMessage[]
   linkAudits         WhatsAppLinkAudit[]
+  notes              WhatsAppConversationNote[]
+  /// Free-form labels an admin attaches to the conversation (round 3 inbox).
+  tags               String[]            @default([])
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
 
@@ -580,6 +583,22 @@ model WhatsAppLinkAudit {
 
   @@index([conversationId, createdAt])
   @@index([adminId])
+}
+
+/// Internal admin note on an inbox conversation (round 3) — never sent to the
+/// customer, append-only (no edit/delete yet — matches the reference's own
+/// minimal note display, which only ever shows existing notes).
+model WhatsAppConversationNote {
+  id             String               @id @default(cuid())
+  conversationId String
+  conversation   WhatsAppConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  authorAdminId  String
+  /// Snapshot of the admin's display name at write time (survives a rename).
+  authorName     String
+  body           String
+  createdAt      DateTime             @default(now())
+
+  @@index([conversationId, createdAt])
 }
 
 /// Fourth commercial domain — trader asks RARE OUD to inspect/source goods (VISION §7).

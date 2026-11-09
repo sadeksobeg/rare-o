@@ -152,6 +152,10 @@ const PAIRS = [
   ["--rad-info", "--rad-infos", "large", "kpi icon chip (info)"],
   ["--rad-err", "--rad-errs", "large", "kpi icon chip (err)"],
   ["--rad-btn-tx", "--rad-btn", "normal", "primary button text"],
+  ["--rad-cream", "--rad-out", "normal", "inbox: outgoing bubble text"],
+  ["--rad-c0", "--rad-tx", "normal", "inbox: active filter chip text"],
+  ["--rad-tx2", "--rad-surface2", "normal", "inbox: conversation preview text"],
+  ["--rad-ac", "--rad-surface", "normal", "inbox: unread time / unread marker"],
 ];
 
 function auditTheme(name, vars) {

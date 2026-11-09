@@ -14,11 +14,14 @@ import { createIsolatedDb } from "./lib/isolated-db";
 import { SignJWT } from "jose";
 
 import {
+  addInboxNote,
+  addInboxTag,
   formatConversationDisplayLabel,
   getInboxConversation,
   getInboxHealthView,
   listInboxConversations,
   markConversationRead,
+  removeInboxTag,
 } from "../lib/whatsapp/messaging/inbox";
 import {
   enqueueOutboundText,
@@ -257,6 +260,33 @@ async function main(): Promise<void> {
       diedHealth.rawState === "CONNECTED" && diedHealth.state === "RECONNECTING",
       "a dead worker's stale heartbeat is not shown as connected"
     );
+
+    // --- inbox notes (round 3 Part B, additive) ---
+    const note = await addInboxNote(
+      { conversationId: first.conversationId, adminId: "admin-pc", adminName: "QA Admin", body: "العميل جاد" },
+      db
+    );
+    assert(!!note && note.body === "العميل جاد", "note is created with the given body");
+    const withNote = await getInboxConversation(first.conversationId, db);
+    assert(
+      !!withNote && withNote.notes.length === 1 && withNote.notes[0]!.authorName === "QA Admin",
+      "note shows up on the conversation, author attributed"
+    );
+    const emptyNote = await addInboxNote(
+      { conversationId: first.conversationId, adminId: "admin-pc", adminName: "QA Admin", body: "   " },
+      db
+    );
+    assert(emptyNote === null, "whitespace-only note is rejected, not silently saved");
+    const noteJson = JSON.stringify(withNote);
+    assert(!noteJson.includes("creds"), "note payload has no creds");
+
+    // --- inbox tags (round 3 Part B, additive) ---
+    const tagged = await addInboxTag({ conversationId: first.conversationId, tag: "عميل دائم" }, db);
+    assert(tagged.includes("عميل دائم"), "tag is added");
+    const taggedAgain = await addInboxTag({ conversationId: first.conversationId, tag: "عميل دائم" }, db);
+    assert(taggedAgain.length === tagged.length, "duplicate tag is not added twice");
+    const untagged = await removeInboxTag({ conversationId: first.conversationId, tag: "عميل دائم" }, db);
+    assert(!untagged.includes("عميل دائم"), "tag is removed");
 
     // --- display label privacy ---
     const masked = formatConversationDisplayLabel({

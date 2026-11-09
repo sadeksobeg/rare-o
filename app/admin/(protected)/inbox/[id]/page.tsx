@@ -1,9 +1,6 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { InboxContextShell } from "@/components/admin/inbox-context-shell";
-import { InboxThreadContextSplit } from "@/components/admin/inbox-split";
-import { LinkedRecordPanel } from "@/components/admin/linked-record-panel";
-import { MessageThread } from "@/components/admin/message-thread";
+import { notFound } from "next/navigation";
+import { RadContextPanel } from "@/components/admin/rad/inbox/context-panel";
+import { RadThread } from "@/components/admin/rad/inbox/thread";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import {
   getInboxConversation,
@@ -15,7 +12,6 @@ import {
   listRecentLinkAudits,
   suggestCrmPartiesForConversation,
 } from "@/lib/whatsapp/messaging/linking";
-import { notFound } from "next/navigation";
 
 export default async function AdminWhatsAppConversationPage({
   params,
@@ -37,67 +33,24 @@ export default async function AdminWhatsAppConversationPage({
     await markConversationRead(conversation.id);
   }
 
-  const panelProps = {
-    conversationId: conversation.id,
-    link: conversation.link,
-    context,
-    crm: conversation.crm,
-    suggestions,
-    audits,
-    dict,
-    locale,
-  } as const;
-
-  const thread = (
-    <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-      <div className="shrink-0 border-b border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-panel)] px-3 py-2 lg:hidden">
-        <Link
-          href="/admin/inbox"
-          className="inline-flex min-h-9 items-center gap-1.5 text-sm font-semibold text-[color:var(--ro-accent-fg,var(--ro-plum-700))]"
-        >
-          <ArrowLeft
-            className="size-4 rtl:-scale-x-100"
-            strokeWidth={1.5}
-            aria-hidden
-          />
-          {dict.inbox.backToList}
-        </Link>
-      </div>
-      <MessageThread
-        conversationId={conversation.id}
-        displayLabel={conversation.displayLabel}
-        phoneHint={
-          conversation.participantE164
-            ? `+${conversation.participantE164}`
-            : null
-        }
-        messages={conversation.messages.filter((m) => {
-          if (m.messageType !== "unsupported") return true;
-          const body = (m.body || "").trim();
-          return (
-            body !== "" &&
-            body !== "[unsupported:unknown]" &&
-            body !== "[unsupported]"
-          );
-        })}
-        health={health}
-        dict={dict}
-        locale={locale}
-        headerExtra={
-          <div className="flex items-center gap-2 xl:hidden">
-            <InboxContextShell dict={dict}>
-              <LinkedRecordPanel {...panelProps} />
-            </InboxContextShell>
-          </div>
-        }
-      />
-    </div>
-  );
+  const ib = dict.ib;
+  const quickReplies = [
+    { title: ib.qr1Title, body: ib.qr1Body },
+    { title: ib.qr2Title, body: ib.qr2Body },
+    { title: ib.qr3Title, body: ib.qr3Body },
+  ];
 
   return (
-    <InboxThreadContextSplit
-      thread={thread}
-      context={<LinkedRecordPanel {...panelProps} />}
-    />
+    <>
+      <RadThread conversation={conversation} health={health} dict={dict} locale={locale} quickReplies={quickReplies} />
+      <RadContextPanel
+        conversation={conversation}
+        context={context}
+        suggestions={suggestions}
+        audits={audits}
+        dict={dict}
+        locale={locale}
+      />
+    </>
   );
 }

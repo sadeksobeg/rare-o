@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-09T06:29:45.891Z",
+  "at": "2026-11-09T07:25:05.556Z",
   "filesScanned": [
     "lib/i18n/dictionaries.ts",
     "components/admin/rad/sidebar.tsx",
@@ -14,7 +14,18 @@
     "components/admin/rad/dashboard-content.tsx",
     "components/admin/shell.tsx",
     "app/admin/(protected)/page.tsx",
-    "app/dev/pilot/page.tsx"
+    "app/dev/pilot/page.tsx",
+    "components/admin/rad/inbox/avatar-color.ts",
+    "components/admin/rad/inbox/connection-sheet.tsx",
+    "components/admin/rad/inbox/context-panel.tsx",
+    "components/admin/rad/inbox/conversation-list.tsx",
+    "components/admin/rad/inbox/inbox-shell.tsx",
+    "components/admin/rad/inbox/notes-section.tsx",
+    "components/admin/rad/inbox/tags-section.tsx",
+    "components/admin/rad/inbox/thread.tsx",
+    "app/admin/(protected)/inbox/layout.tsx",
+    "app/admin/(protected)/inbox/page.tsx",
+    "app/admin/(protected)/inbox/[id]/page.tsx"
   ],
   "hits": []
 }
