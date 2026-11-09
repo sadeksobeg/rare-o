@@ -69,10 +69,14 @@
     "test:f3-2fa": "node node_modules/tsx/dist/cli.mjs scripts/f3-2fa-checks.ts",
     "test:f3-upload": "node node_modules/tsx/dist/cli.mjs scripts/f3-upload-checks.ts",
     "test:security-storage": "node scripts/security-storage-gate.mjs",
-
     "sbom": "node scripts/generate-sbom.mjs",
     "test:docs-as-tests": "node scripts/docs-as-tests.mjs",
-    "check:site-env": "node scripts/check-site-env.mjs"
+    "check:site-env": "node scripts/check-site-env.mjs",
+    "pilot:matching-gate": "node scripts/pilot-r2-matching-gate.mjs",
+    "pilot:contrast-audit": "node scripts/pilot-r2-contrast-audit.mjs",
+    "pilot:dev-language-scan": "node scripts/pilot-r2-dev-language-scan.mjs",
+    "pilot:keyboard-nav": "node scripts/pilot-r2-keyboard-nav.mjs",
+    "pilot:lighthouse": "node scripts/pilot-r2-lighthouse.mjs"
   },
   "dependencies": {
     "@prisma/client": "6.19.3",
@@ -127,6 +131,7 @@
     "eslint": "^9",
     "eslint-config-next": "^15.5.28",
     "lighthouse": "^12.2.1",
+    "pixelmatch": "^5.3.0",
     "prisma": "6.19.3",
     "puppeteer-core": "^23.11.1",
     "tailwindcss": "^4",

@@ -42,6 +42,7 @@ export function RadCommandPalette({
   const [active, setActive] = useState(0);
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
+  const triggerRef = useRef<Element | null>(null);
   const titleId = useId();
   const listId = useId();
 
@@ -61,12 +62,21 @@ export function RadCommandPalette({
 
   useEffect(() => {
     if (open) {
+      // Remember what had focus before opening (the header's search
+      // button, almost always) so Escape/close can put it back instead of
+      // dropping focus to <body> — a real failure the round 2.1 keyboard
+      // nav check caught.
+      triggerRef.current = document.activeElement;
       setQuery("");
       setHits([]);
       setActive(0);
       const id = window.setTimeout(() => inputRef.current?.focus(), 20);
       return () => window.clearTimeout(id);
     }
+    if (triggerRef.current instanceof HTMLElement) {
+      triggerRef.current.focus();
+    }
+    triggerRef.current = null;
   }, [open]);
 
   useEffect(() => {

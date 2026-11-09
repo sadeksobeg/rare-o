@@ -1,0 +1,20 @@
+{
+  "at": "2026-11-08T19:40:37.904Z",
+  "filesScanned": [
+    "lib/i18n/dictionaries.ts",
+    "components/admin/rad/sidebar.tsx",
+    "components/admin/rad/topbar.tsx",
+    "components/admin/rad/command-palette.tsx",
+    "components/admin/rad/kpi-card.tsx",
+    "components/admin/rad/action-queue.tsx",
+    "components/admin/rad/orders-chart.tsx",
+    "components/admin/rad/whatsapp-card.tsx",
+    "components/admin/rad/activity-timeline.tsx",
+    "components/admin/rad/mobile-tabbar.tsx",
+    "components/admin/rad/dashboard-content.tsx",
+    "components/admin/shell.tsx",
+    "app/admin/(protected)/page.tsx",
+    "app/dev/pilot/page.tsx"
+  ],
+  "hits": []
+}
