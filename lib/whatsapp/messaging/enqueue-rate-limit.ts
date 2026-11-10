@@ -1,13 +1,15 @@
 /**
  * W1 enqueue rate limits (application layer, on top of outbound-safety):
  * - ≤1 message / second / conversation
- * - ≤20 messages / minute global
+ * - ≤N messages / minute global (configurable; default 20)
  * Small jitter is applied by the worker anti-ban slot, not here.
  */
 
 const PER_CONV_MIN_GAP_MS = 1_000;
 const GLOBAL_WINDOW_MS = 60_000;
-const GLOBAL_MAX_PER_WINDOW = 20;
+const DEFAULT_GLOBAL_MAX_PER_WINDOW = 20;
+
+let globalMaxPerWindow = DEFAULT_GLOBAL_MAX_PER_WINDOW;
 
 const perConversationLast = new Map<string, number>();
 const globalStamps: number[] = [];
@@ -15,6 +17,34 @@ const globalStamps: number[] = [];
 export type EnqueueRateLimitResult =
   | { ok: true }
   | { ok: false; code: "RATE_LIMITED"; error: string };
+
+function envGlobalMax(): number | null {
+  const raw = process.env.WHATSAPP_OUTBOUND_GLOBAL_RATE_PER_MIN?.trim();
+  if (!raw) return null;
+  const n = Number.parseInt(raw, 10);
+  if (!Number.isFinite(n) || n < 1) return null;
+  return Math.min(n, 120);
+}
+
+/** Apply DB/settings value (env override wins when set). */
+export function configureGlobalEnqueueRateLimit(perMin: number): void {
+  const env = envGlobalMax();
+  if (env !== null) {
+    globalMaxPerWindow = env;
+    return;
+  }
+  const n = Math.floor(perMin);
+  if (!Number.isFinite(n) || n < 1) {
+    globalMaxPerWindow = DEFAULT_GLOBAL_MAX_PER_WINDOW;
+    return;
+  }
+  globalMaxPerWindow = Math.min(n, 120);
+}
+
+export function getGlobalEnqueueRateLimit(): number {
+  const env = envGlobalMax();
+  return env ?? globalMaxPerWindow;
+}
 
 function pruneGlobal(now: number) {
   while (globalStamps.length > 0 && now - globalStamps[0]! >= GLOBAL_WINDOW_MS) {
@@ -41,11 +71,12 @@ export function assessEnqueueRateLimit(
   }
 
   pruneGlobal(now);
-  if (globalStamps.length >= GLOBAL_MAX_PER_WINDOW) {
+  const max = getGlobalEnqueueRateLimit();
+  if (globalStamps.length >= max) {
     return {
       ok: false,
       code: "RATE_LIMITED",
-      error: "Global send rate exceeded (max 20/min)",
+      error: `Global send rate exceeded (max ${max}/min)`,
     };
   }
 
@@ -66,4 +97,5 @@ export function recordEnqueueAccepted(conversationKey: string): void {
 export function clearEnqueueRateLimitForTests(): void {
   perConversationLast.clear();
   globalStamps.length = 0;
+  globalMaxPerWindow = DEFAULT_GLOBAL_MAX_PER_WINDOW;
 }

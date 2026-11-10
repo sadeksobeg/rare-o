@@ -1,4 +1,4 @@
-# WA-W1 Realtime — evidence report
+# WA-W1 Realtime — evidence report (review pass)
 
 Branch: `wa/w1-realtime`  
 Deploy: **not deployed** (owner review required)
@@ -6,35 +6,21 @@ Deploy: **not deployed** (owner review required)
 ## Decision
 Postgres `LISTEN/NOTIFY` on channel `rareoud_wa_inbox` + durable `WhatsAppInboxEvent` for `Last-Event-ID` resume. No Redis.
 
-## Additive migration
-`20261110143000_wa_w1_realtime_outbox`
-- `WhatsAppInboxEvent` (id, type, payloadJson, createdAt)
-- `WhatsAppMessage.nextRetryAt`
-- `WhatsAppConnectionHealth.outboundKillSwitch`
+## Additive migrations
+1. `20261110143000_wa_w1_realtime_outbox` — events table, `nextRetryAt`, kill flag  
+2. `20261110190000_wa_w1_review_hardening` — kill who/when/reason + `outboundGlobalRatePerMin`
 
-## Sequence (send → ticks live)
-
-| Step | UI | Source |
-|------|-----|--------|
-| 1 | Composer clears; bubble appears with clock/`sending` | Optimistic client `clientRequestId` |
-| 2 | Tick → pending/sending | SSE `message.status` / action reconcile |
-| 3 | Tick → single ✓ `sent` | Worker dispatch + SSE |
-| 4 | Tick → ✓✓ `delivered` | Baileys ack → `recordOutboundStatusUpdate` + SSE |
-| 5 | No full-page poll every 2.5s | Polling removed; EventSource `/api/admin/inbox/events` |
-
-See `SEQUENCE.md` for the annotated frame list (screenshot stand-in until browser capture on review).
+## Review fixes (this pass)
+1. **Real screenshots** — `docs/ui/wa-w1/shots/frame-*.png` from `/dev/wa-w1-evidence` (simulated worker, no real send). See `SEQUENCE.md`.
+2. **Emergency-stop UI** — connection sheet button + confirm + reason; thread banner «الإرسال موقوف طارئاً» with who/when/reason; reversible resume confirm. Admin session only.
+3. **SSE hardening** — `X-Accel-Buffering: no`, `Cache-Control: no-cache`, `: ping` every 25s, client reconnect with `?after=` / Last-Event-ID, per-session connection cap (default 3), 401/403 mapping tests.
+4. **Ops** — cleanup job deletes `WhatsAppInboxEvent` &gt;48h; sending watchdog every 60s recovers `sending` &gt;2min → pending(+nextRetryAt)/failed + SSE; global rate configurable (DB + env `WHATSAPP_OUTBOUND_GLOBAL_RATE_PER_MIN`, default 20).
 
 ## Tests
 ```
 npm run test:whatsapp-w1
 ```
-Results (local): rate limit, kill switch, cold-number block, dedupe, backoff delays, delivered status, SSE resume list — **OK**.
-
-## Safety
-- Enqueue: ≤1/s per chat, ≤20/min global (after idempotency check)
-- Existing anti-ban slot (~8s) unchanged
-- Admin `allowCreateConversation: false`
-- Emergency stop: `adminSetOutboundKillSwitchAction` (DB flag, no restart)
+Result: **OK** — sse auth 401/403, session cap, configurable rate, per-chat rate, kill switch + actor, cold block, dedupe, backoff, status+resume, stuck-sending watchdog, event cleanup 48h.
 
 ## Stop
-Await owner OK before merge/deploy. WhatsApp session store untouched.
+Await owner OK before merge/deploy. WhatsApp session store untouched. No production deploy from this pass.

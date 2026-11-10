@@ -752,26 +752,67 @@ export async function adminRemoveInboxTagAction(
 /** W1 runtime outbound kill — no .env edit, no session touch, no restart. */
 export async function adminSetOutboundKillSwitchAction(
   formData: FormData
-): Promise<ActionResult & { data?: { outboundEnabled: boolean; killSwitch: boolean } }> {
+): Promise<
+  ActionResult & {
+    data?: {
+      outboundEnabled: boolean;
+      killSwitch: boolean;
+      killSwitchAt: string | null;
+      killSwitchBy: string | null;
+      killSwitchReason: string | null;
+    };
+  }
+> {
+  let session;
   try {
-    await requireAdminSession();
+    session = await requireAdminSession();
   } catch (e) {
     return handleAdminSessionError(e, "UNAUTHORIZED");
   }
   const raw = String(formData.get("enabled") || "").trim().toLowerCase();
   const enabled = raw === "1" || raw === "true" || raw === "yes" || raw === "on";
+  const reason = String(formData.get("reason") || "").trim().slice(0, 240);
   const { setOutboundKillSwitch } = await import(
     "@/lib/whatsapp/messaging/outbound-kill-switch"
   );
-  const result = await setOutboundKillSwitch(enabled);
+  const result = await setOutboundKillSwitch(enabled, undefined, {
+    by: session.email || session.name || session.sub,
+    reason: enabled ? reason || null : null,
+  });
   if (!result.ok) return { ok: false, error: result.error };
   revalidatePath("/admin/inbox");
   return {
     ok: true,
     data: {
       outboundEnabled: result.outboundEnabled,
-      killSwitch: enabled,
+      killSwitch: result.killSwitch,
+      killSwitchAt: result.killSwitchAt,
+      killSwitchBy: result.killSwitchBy,
+      killSwitchReason: result.killSwitchReason,
     },
   };
+}
+
+/** W1 — configure global outbound enqueue rate (messages / rolling minute). */
+export async function adminSetOutboundGlobalRateAction(
+  formData: FormData
+): Promise<ActionResult & { data?: { perMin: number } }> {
+  try {
+    await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const raw = String(formData.get("perMin") || "").trim();
+  const perMin = Number.parseInt(raw, 10);
+  if (!Number.isFinite(perMin) || perMin < 1 || perMin > 120) {
+    return { ok: false, error: "INVALID_INPUT" };
+  }
+  const { setOutboundGlobalRatePerMin } = await import(
+    "@/lib/whatsapp/messaging/outbound-kill-switch"
+  );
+  const result = await setOutboundGlobalRatePerMin(perMin);
+  if (!result.ok) return { ok: false, error: result.error };
+  revalidatePath("/admin/inbox");
+  return { ok: true, data: { perMin: result.perMin } };
 }
 

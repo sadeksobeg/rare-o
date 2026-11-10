@@ -13,7 +13,7 @@ export type InboxLiveHandlers = {
 
 /**
  * Subscribe to admin inbox SSE. Soft-fails if EventSource unavailable.
- * Uses Last-Event-ID resume via the browser EventSource API.
+ * Tracks last event id and reconnects with `?after=` (Last-Event-ID resume).
  */
 export function useInboxEvents(handlers: InboxLiveHandlers, enabled = true) {
   const router = useRouter();
@@ -28,10 +28,19 @@ export function useInboxEvents(handlers: InboxLiveHandlers, enabled = true) {
     let es: EventSource | null = null;
     let closed = false;
     let retryTimer: ReturnType<typeof setTimeout> | null = null;
+    let lastEventId: string | null = null;
+    let attempt = 0;
+
+    const rememberId = (id: string | undefined) => {
+      if (id && id.trim()) lastEventId = id.trim();
+    };
 
     const connect = () => {
       if (closed) return;
-      es = new EventSource("/api/admin/inbox/events");
+      const qs = lastEventId
+        ? `?after=${encodeURIComponent(lastEventId)}`
+        : "";
+      es = new EventSource(`/api/admin/inbox/events${qs}`);
 
       const wrap =
         (fn: ((p: InboxEventPayload & { eventId: string }) => void) | undefined) =>
@@ -41,6 +50,7 @@ export function useInboxEvents(handlers: InboxLiveHandlers, enabled = true) {
               id: string;
               payload: InboxEventPayload;
             };
+            rememberId(data.id);
             fn?.({ ...data.payload, eventId: data.id });
           } catch {
             /* ignore malformed */
@@ -59,7 +69,6 @@ export function useInboxEvents(handlers: InboxLiveHandlers, enabled = true) {
         "conversation.updated",
         wrap((p) => {
           handlersRef.current.onConversationUpdated?.(p);
-          // List order/preview lives on the server RSC tree — light refresh.
           router.refresh();
         })
       );
@@ -71,11 +80,17 @@ export function useInboxEvents(handlers: InboxLiveHandlers, enabled = true) {
         })
       );
 
+      es.onopen = () => {
+        attempt = 0;
+      };
+
       es.onerror = () => {
         es?.close();
         es = null;
         if (closed) return;
-        retryTimer = setTimeout(connect, 3_000);
+        attempt += 1;
+        const delay = Math.min(3_000 * 2 ** Math.min(attempt - 1, 3), 30_000);
+        retryTimer = setTimeout(connect, delay);
       };
     };
 

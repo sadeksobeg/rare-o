@@ -15,6 +15,7 @@ import {
   Info,
   LoaderCircle,
   MessageSquareText,
+  OctagonX,
   Paperclip,
   Search,
   Send,
@@ -35,6 +36,7 @@ import { inboxPreviewLabels } from "@/lib/whatsapp/messaging/preview-labels-from
 import { RadAvatar } from "@/components/admin/rad/inbox/rad-avatar";
 import { useInboxUi } from "@/components/admin/rad/inbox/inbox-shell";
 import { useInboxEvents } from "@/components/admin/rad/inbox/use-inbox-events";
+import { KillSwitchBannerText } from "@/components/admin/rad/inbox/kill-switch-banner-text";
 import {
   adminAddInboxNoteAction,
   adminRetryWhatsAppMessageAction,
@@ -342,7 +344,18 @@ export function RadThread({
           </div>
         </div>
 
-        {sendingPaused && !whatsappDown ? (
+        {health.outboundKillSwitch ? (
+          <div className="rad-bn rad-err" role="alert">
+            <OctagonX width={18} height={18} strokeWidth={1.5} aria-hidden />
+            <KillSwitchBannerText
+              ib={ib}
+              locale={locale}
+              by={health.outboundKillSwitchBy}
+              at={health.outboundKillSwitchAt}
+              reason={health.outboundKillSwitchReason}
+            />
+          </div>
+        ) : sendingPaused && !whatsappDown ? (
           <div className="rad-bn rad-warn" role="status">
             <Info width={18} height={18} strokeWidth={1.5} aria-hidden />
             <span>{ib.bannerOutboundOff}</span>
@@ -439,7 +452,10 @@ export function RadThread({
               <span className="rad-hint">{ib.composerSendHint}</span>
               <button
                 type="button"
-                className="rad-sendb"
+                className={cn(
+                  "rad-sendb",
+                  text.trim() && !pending && "rad-sendb-ready"
+                )}
                 disabled={!text.trim() || pending}
                 onClick={mode === "reply" ? sendReply : saveNote}
               >
@@ -556,18 +572,24 @@ function Bubble({
       ) : null}
       <div className="rad-bm">
         {timeOf(m, locale)}
-        {isOut ? <DeliveryTick status={m.status} inbox={inbox} /> : null}
         {isOut && m.status === "failed" && onRetry ? (
           <button
             type="button"
-            className="rad-ib"
-            style={{ marginInlineStart: 4 }}
+            className="rad-retry"
             onClick={onRetry}
-            aria-label={inbox.statusFailed}
-            title={inbox.statusFailed}
+            aria-label={ib.retrySend}
           >
-            <LoaderCircle width={14} height={14} strokeWidth={1.5} aria-hidden />
+            <CircleAlert
+              width={14}
+              height={14}
+              strokeWidth={1.5}
+              aria-hidden
+              className="rad-retry-ic"
+            />
+            <span>{ib.retrySend}</span>
           </button>
+        ) : isOut ? (
+          <DeliveryTick status={m.status} inbox={inbox} />
         ) : null}
       </div>
     </div>

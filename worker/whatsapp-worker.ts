@@ -38,6 +38,8 @@ import {
   processLinkCommands,
   upsertPairingDisplay,
 } from "@/lib/whatsapp/messaging/pairing";
+import { cleanupInboxEventsOlderThan } from "@/lib/whatsapp/messaging/inbox-event-cleanup";
+import { refreshOutboundKillSwitchFromDb } from "@/lib/whatsapp/messaging/outbound-kill-switch";
 import {
   dispatchPendingOutbound,
   persistInboundMedia,
@@ -71,6 +73,10 @@ import {
 const OUTBOUND_POLL_MS = 5_000;
 const LINK_COMMAND_POLL_MS = 2_000;
 const HEARTBEAT_MS = 45_000;
+/** Stuck `sending` watchdog — same 2min threshold as STALE_SENDING_MS. */
+const SENDING_WATCHDOG_MS = 60_000;
+/** Prune WhatsAppInboxEvent rows older than 48h. */
+const INBOX_EVENT_CLEANUP_MS = 30 * 60_000;
 /** Retry connect while ERROR and a session exists (Baileys exhausted its own backoff). */
 const SUPERVISE_RETRY_MS = 60_000;
 
@@ -128,6 +134,8 @@ async function main(): Promise<void> {
   let outboundTimer: ReturnType<typeof setInterval> | null = null;
   let linkTimer: ReturnType<typeof setInterval> | null = null;
   let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+  let watchdogTimer: ReturnType<typeof setInterval> | null = null;
+  let cleanupTimer: ReturnType<typeof setInterval> | null = null;
   let lastSupervisedAt = 0;
   let pollingLinkCommands = false;
   const adapterRef: { current: WhatsAppAdapter | null } = { current: null };
@@ -442,11 +450,52 @@ async function main(): Promise<void> {
     });
   }, HEARTBEAT_MS);
 
+  watchdogTimer = setInterval(() => {
+    void (async () => {
+      try {
+        await refreshOutboundKillSwitchFromDb();
+        const recovered = await recoverInterruptedOutbound();
+        if (
+          recovered.recoveredToPending +
+            recovered.markedFailed +
+            recovered.markedSent >
+          0
+        ) {
+          console.log(
+            `[whatsapp-worker] sending watchdog pending=${recovered.recoveredToPending} failed=${recovered.markedFailed} sent=${recovered.markedSent}`
+          );
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(
+          `[whatsapp-worker] sending watchdog error: ${message.slice(0, 160)}`
+        );
+      }
+    })();
+  }, SENDING_WATCHDOG_MS);
+
+  cleanupTimer = setInterval(() => {
+    void cleanupInboxEventsOlderThan()
+      .then(({ deleted }) => {
+        if (deleted > 0) {
+          console.log(`[whatsapp-worker] inbox events pruned deleted=${deleted}`);
+        }
+      })
+      .catch((err) => {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(
+          `[whatsapp-worker] inbox event cleanup error: ${message.slice(0, 160)}`
+        );
+      });
+  }, INBOX_EVENT_CLEANUP_MS);
+
   const shutdown = async (signal: string) => {
     console.log(`[whatsapp-worker] ${signal} - stopping`);
     if (outboundTimer) clearInterval(outboundTimer);
     if (linkTimer) clearInterval(linkTimer);
     if (heartbeatTimer) clearInterval(heartbeatTimer);
+    if (watchdogTimer) clearInterval(watchdogTimer);
+    if (cleanupTimer) clearInterval(cleanupTimer);
     await adapter.stop();
     process.exit(0);
   };

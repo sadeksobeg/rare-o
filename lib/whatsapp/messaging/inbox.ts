@@ -20,6 +20,7 @@ import {
   isOutboundEnvEnabled,
   primeOutboundKillSwitch,
 } from "@/lib/whatsapp/types";
+import { configureGlobalEnqueueRateLimit } from "@/lib/whatsapp/messaging/enqueue-rate-limit";
 
 export type DbClient = PrismaClient;
 
@@ -110,6 +111,11 @@ export type InboxHealthView = {
   outboundEnabled: boolean;
   /** Runtime DB kill switch (W1) — independent of env flag */
   outboundKillSwitch: boolean;
+  outboundKillSwitchAt: string | null;
+  outboundKillSwitchBy: string | null;
+  outboundKillSwitchReason: string | null;
+  /** Global enqueue cap (messages / rolling minute) from settings */
+  outboundGlobalRatePerMin: number;
   /** Admin-only pairing display (ephemeral; null once expired / cleared) */
   pairingPhone: string | null;
   pairingCode: string | null;
@@ -458,6 +464,8 @@ async function getInboxHealthViewImpl(
 
   const kill = row?.outboundKillSwitch === true;
   primeOutboundKillSwitch(kill);
+  const ratePerMin = row?.outboundGlobalRatePerMin ?? 20;
+  configureGlobalEnqueueRateLimit(ratePerMin);
 
   return {
     state,
@@ -468,6 +476,10 @@ async function getInboxHealthViewImpl(
     updatedAt: toIso(row?.updatedAt ?? null),
     outboundEnabled: isOutboundEnvEnabled() && !kill,
     outboundKillSwitch: kill,
+    outboundKillSwitchAt: toIso(row?.outboundKillSwitchAt ?? null),
+    outboundKillSwitchBy: row?.outboundKillSwitchBy ?? null,
+    outboundKillSwitchReason: row?.outboundKillSwitchReason ?? null,
+    outboundGlobalRatePerMin: ratePerMin,
     pairingPhone: row?.pairingPhone ?? null,
     pairingCode: pairingExpired ? null : (row?.pairingCode ?? null),
     qrDataUrl: pairingExpired ? null : (row?.qrDataUrl ?? null),

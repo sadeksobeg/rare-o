@@ -12,9 +12,17 @@ import {
   loadInboxEventById,
   type PublishedInboxEvent,
 } from "@/lib/whatsapp/messaging/inbox-events";
+import { mapAdminSessionErrorToSseStatus } from "@/lib/whatsapp/messaging/inbox-sse-auth";
+import {
+  releaseInboxSseSlot,
+  tryAcquireInboxSseSlot,
+} from "@/lib/whatsapp/messaging/sse-session-cap";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+/** nginx / reverse-proxy idle; keep comment heartbeats under typical 60s timeouts. */
+const HEARTBEAT_MS = 25_000;
 
 function sseFormat(event: PublishedInboxEvent): string {
   return `id: ${event.id}\nevent: ${event.type}\ndata: ${JSON.stringify({
@@ -26,10 +34,20 @@ function sseFormat(event: PublishedInboxEvent): string {
 }
 
 export async function GET(req: Request): Promise<Response> {
+  let sessionSub: string;
   try {
-    await requireAdminSession();
-  } catch {
-    return new Response("Unauthorized", { status: 401 });
+    const session = await requireAdminSession();
+    sessionSub = session.sub;
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "";
+    const status = mapAdminSessionErrorToSseStatus(msg);
+    return new Response(status === 403 ? "Forbidden" : "Unauthorized", {
+      status,
+    });
+  }
+
+  if (!tryAcquireInboxSseSlot(sessionSub)) {
+    return new Response("Too Many Connections", { status: 429 });
   }
 
   const url = new URL(req.url);
@@ -40,6 +58,7 @@ export async function GET(req: Request): Promise<Response> {
 
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
+    releaseInboxSseSlot(sessionSub);
     return new Response("Database unavailable", { status: 503 });
   }
 
@@ -47,6 +66,13 @@ export async function GET(req: Request): Promise<Response> {
   let closed = false;
   let heartbeat: ReturnType<typeof setInterval> | null = null;
   let client: Client | null = null;
+  let slotReleased = false;
+
+  const releaseSlotOnce = () => {
+    if (slotReleased) return;
+    slotReleased = true;
+    releaseInboxSseSlot(sessionSub);
+  };
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -82,7 +108,6 @@ export async function GET(req: Request): Promise<Response> {
         });
 
         client.on("error", () => {
-          // Connection drop ends the stream; client reconnects via EventSource.
           if (!closed) {
             closed = true;
             try {
@@ -91,11 +116,12 @@ export async function GET(req: Request): Promise<Response> {
               /* ignore */
             }
           }
+          releaseSlotOnce();
         });
 
         heartbeat = setInterval(() => {
           send(`: ping ${Date.now()}\n\n`);
-        }, 15_000);
+        }, HEARTBEAT_MS);
 
         send(`: connected\n\n`);
       } catch {
@@ -112,6 +138,7 @@ export async function GET(req: Request): Promise<Response> {
             /* ignore */
           }
         }
+        releaseSlotOnce();
       }
     },
     async cancel() {
@@ -124,6 +151,7 @@ export async function GET(req: Request): Promise<Response> {
           /* ignore */
         }
       }
+      releaseSlotOnce();
     },
   });
 
@@ -131,6 +159,7 @@ export async function GET(req: Request): Promise<Response> {
     closed = true;
     if (heartbeat) clearInterval(heartbeat);
     void client?.end().catch(() => undefined);
+    releaseSlotOnce();
   });
 
   return new Response(stream, {

@@ -1160,6 +1160,8 @@ export async function recoverInterruptedOutbound(
     },
     select: {
       id: true,
+      conversationId: true,
+      clientRequestId: true,
       waMessageId: true,
       attemptCount: true,
     },
@@ -1176,7 +1178,15 @@ export async function recoverInterruptedOutbound(
         data: {
           status: "sent",
           errorSafe: null,
+          nextRetryAt: null,
         },
+      });
+      void publishInboxEvent("message.status", {
+        conversationId: row.conversationId,
+        messageId: row.id,
+        clientRequestId: row.clientRequestId,
+        status: "sent",
+        direction: "outbound",
       });
       markedSent += 1;
       continue;
@@ -1189,18 +1199,35 @@ export async function recoverInterruptedOutbound(
           status: "failed",
           errorSafe:
             "Interrupted during send; max attempts reached — manual review required",
+          nextRetryAt: null,
         },
+      });
+      void publishInboxEvent("message.status", {
+        conversationId: row.conversationId,
+        messageId: row.id,
+        clientRequestId: row.clientRequestId,
+        status: "failed",
+        direction: "outbound",
       });
       markedFailed += 1;
       continue;
     }
 
+    const delay = outboundRetryDelayMs(Math.max(1, row.attemptCount));
     await db.whatsAppMessage.update({
       where: { id: row.id },
       data: {
         status: "pending",
         errorSafe: "Recovered after interrupted send — awaiting retry",
+        nextRetryAt: new Date(now.getTime() + delay),
       },
+    });
+    void publishInboxEvent("message.status", {
+      conversationId: row.conversationId,
+      messageId: row.id,
+      clientRequestId: row.clientRequestId,
+      status: "pending",
+      direction: "outbound",
     });
     recoveredToPending += 1;
   }

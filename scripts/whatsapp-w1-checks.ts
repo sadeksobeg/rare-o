@@ -1,5 +1,6 @@
 /**
- * WA-W1 checks — dedupe, backoff retry, SSE resume, rate limit, kill switch.
+ * WA-W1 checks — dedupe, backoff retry, SSE resume, rate limit, kill switch,
+ * cleanup, sending watchdog, SSE auth mapping, per-session SSE cap.
  * No real WhatsApp sends. Requires DATABASE_URL. Uses fake/env-off patterns.
  *
  * Run: npx tsx scripts/whatsapp-w1-checks.ts
@@ -11,14 +12,26 @@ import {
   clearEnqueueRateLimitForTests,
   assessEnqueueRateLimit,
   recordEnqueueAccepted,
+  configureGlobalEnqueueRateLimit,
+  getGlobalEnqueueRateLimit,
 } from "@/lib/whatsapp/messaging/enqueue-rate-limit";
 import {
   listInboxEventsAfter,
   publishInboxEvent,
 } from "@/lib/whatsapp/messaging/inbox-events";
+import { cleanupInboxEventsOlderThan } from "@/lib/whatsapp/messaging/inbox-event-cleanup";
+import { authorizeInboxSseFromSession } from "@/lib/whatsapp/messaging/inbox-sse-auth";
+import {
+  clearInboxSseSlotsForTests,
+  countInboxSseSlotsForTests,
+  getInboxSseMaxPerSession,
+  tryAcquireInboxSseSlot,
+  releaseInboxSseSlot,
+} from "@/lib/whatsapp/messaging/sse-session-cap";
 import {
   enqueueOutboundText,
   recordOutboundStatusUpdate,
+  recoverInterruptedOutbound,
 } from "@/lib/whatsapp/messaging/service";
 import { outboundRetryDelayMs } from "@/lib/whatsapp/messaging/reliability";
 import {
@@ -29,6 +42,7 @@ import {
 import {
   refreshOutboundKillSwitchFromDb,
   setOutboundKillSwitch,
+  setOutboundGlobalRatePerMin,
 } from "@/lib/whatsapp/messaging/outbound-kill-switch";
 
 function assert(cond: unknown, msg: string): asserts cond {
@@ -37,9 +51,12 @@ function assert(cond: unknown, msg: string): asserts cond {
 
 async function main() {
   const prevOutbound = process.env.WHATSAPP_OUTBOUND_ENABLED;
+  const prevRate = process.env.WHATSAPP_OUTBOUND_GLOBAL_RATE_PER_MIN;
+  delete process.env.WHATSAPP_OUTBOUND_GLOBAL_RATE_PER_MIN;
   process.env.WHATSAPP_OUTBOUND_ENABLED = "true";
   primeOutboundKillSwitch(false);
   clearEnqueueRateLimitForTests();
+  clearInboxSseSlotsForTests();
 
   const suffix = randomUUID().slice(0, 8);
   const waChatId = `9647000${suffix.slice(0, 6)}@s.whatsapp.net`;
@@ -58,22 +75,84 @@ async function main() {
   });
 
   try {
-    // --- rate limit ---
-    console.log("[w1] rate limit");
+    // --- SSE auth mapping (401/403) ---
+    console.log("[w1] sse auth 401/403");
+    const noSession = authorizeInboxSseFromSession(null);
+    assert(!noSession.ok && noSession.status === 401, "no session → 401");
+    const unauth = authorizeInboxSseFromSession(undefined, "UNAUTHORIZED");
+    assert(!unauth.ok && unauth.status === 401, "UNAUTHORIZED → 401");
+    const mustPw = authorizeInboxSseFromSession(
+      undefined,
+      "MUST_CHANGE_PASSWORD"
+    );
+    assert(!mustPw.ok && mustPw.status === 403, "MUST_CHANGE_PASSWORD → 403");
+    const mustPwSession = authorizeInboxSseFromSession({
+      sub: "a",
+      mustChangePassword: true,
+    });
+    assert(
+      !mustPwSession.ok && mustPwSession.status === 403,
+      "mustChangePassword session → 403"
+    );
+    const okAuth = authorizeInboxSseFromSession({ sub: "admin-1" });
+    assert(okAuth.ok && okAuth.sub === "admin-1", "admin session ok");
+
+    // --- SSE per-session cap ---
+    console.log("[w1] sse session cap");
+    clearInboxSseSlotsForTests();
+    const max = getInboxSseMaxPerSession();
+    for (let i = 0; i < max; i++) {
+      assert(tryAcquireInboxSseSlot("sess-a"), `acquire ${i}`);
+    }
+    assert(!tryAcquireInboxSseSlot("sess-a"), "cap blocks");
+    assert(tryAcquireInboxSseSlot("sess-b"), "other session ok");
+    releaseInboxSseSlot("sess-a");
+    assert(tryAcquireInboxSseSlot("sess-a"), "slot freed");
+    assert(countInboxSseSlotsForTests("sess-a") === max, "count after refill");
+    clearInboxSseSlotsForTests();
+
+    // --- configurable global rate ---
+    console.log("[w1] configurable global rate");
+    clearEnqueueRateLimitForTests();
+    configureGlobalEnqueueRateLimit(2);
+    assert(getGlobalEnqueueRateLimit() === 2, "rate=2");
+    const rateChat = `${waChatId}-rate`;
+    assert(assessEnqueueRateLimit(`${rateChat}-1`).ok, "g1");
+    recordEnqueueAccepted(`${rateChat}-1`);
+    // bypass per-chat 1/s by using different keys
+    assert(assessEnqueueRateLimit(`${rateChat}-2`).ok, "g2");
+    recordEnqueueAccepted(`${rateChat}-2`);
+    const limitedGlobal = assessEnqueueRateLimit(`${rateChat}-3`);
+    assert(
+      !limitedGlobal.ok && limitedGlobal.code === "RATE_LIMITED",
+      "global 2/min"
+    );
+    const saved = await setOutboundGlobalRatePerMin(20);
+    assert(saved.ok && saved.perMin === 20, "persist rate 20");
+    clearEnqueueRateLimitForTests();
+    configureGlobalEnqueueRateLimit(20);
+
+    // --- rate limit per chat ---
+    console.log("[w1] rate limit per chat");
     clearEnqueueRateLimitForTests();
     assert(assessEnqueueRateLimit(waChatId).ok, "first rate ok");
     recordEnqueueAccepted(waChatId);
     const limited = assessEnqueueRateLimit(waChatId);
     assert(!limited.ok && limited.code === "RATE_LIMITED", "per-chat 1/s");
 
-    // --- kill switch ---
+    // --- kill switch with actor ---
     console.log("[w1] kill switch");
     process.env.WHATSAPP_OUTBOUND_ENABLED = "true";
     primeOutboundKillSwitch(false);
     assert(isOutboundEnvEnabled(), "env on");
     assert(isOutboundEnabled(), "enabled before kill");
-    const killed = await setOutboundKillSwitch(true, "CONNECTED");
+    const killed = await setOutboundKillSwitch(true, "CONNECTED", {
+      by: "admin@test.local",
+      reason: "review evidence",
+    });
     assert(killed.ok, "set kill");
+    assert(killed.ok && killed.killSwitchBy === "admin@test.local", "kill by");
+    assert(killed.ok && killed.killSwitchReason === "review evidence", "reason");
     assert(!isOutboundEnabled(), "disabled by kill");
     const blocked = await enqueueOutboundText({
       waChatId,
@@ -83,7 +162,9 @@ async function main() {
       allowCreateConversation: false,
     });
     assert(!blocked.ok && blocked.code === "OUTBOUND_DISABLED", "enqueue blocked");
-    const resumed = await setOutboundKillSwitch(false, "CONNECTED");
+    const resumed = await setOutboundKillSwitch(false, "CONNECTED", {
+      by: "admin@test.local",
+    });
     assert(resumed.ok, "clear kill");
     await refreshOutboundKillSwitchFromDb();
     assert(isOutboundEnabled(), "enabled after clear");
@@ -152,6 +233,51 @@ async function main() {
     const resume = await listInboxEventsAfter(published!.id, 50);
     assert(!resume.some((e) => e.id === published!.id), "resume skips anchor");
 
+    // --- stuck sending watchdog ---
+    console.log("[w1] stuck sending watchdog");
+    const stuckId = randomUUID();
+    await prisma.whatsAppMessage.create({
+      data: {
+        id: stuckId,
+        conversationId: conversation.id,
+        direction: "outbound",
+        messageType: "text",
+        body: "stuck",
+        status: "sending",
+        clientRequestId: randomUUID(),
+        adminId,
+        attemptCount: 1,
+        lastAttemptAt: new Date(Date.now() - 3 * 60_000),
+      },
+    });
+    const recovered = await recoverInterruptedOutbound(prisma, {
+      now: new Date(),
+    });
+    assert(recovered.recoveredToPending >= 1, "watchdog → pending");
+    const stuckRow = await prisma.whatsAppMessage.findUnique({
+      where: { id: stuckId },
+    });
+    assert(stuckRow?.status === "pending", "stuck is pending");
+    assert(stuckRow?.nextRetryAt != null, "nextRetryAt set");
+
+    // --- event cleanup >48h ---
+    console.log("[w1] event cleanup 48h");
+    const oldId = `old-${suffix}`;
+    await prisma.whatsAppInboxEvent.create({
+      data: {
+        id: oldId,
+        type: "connection.state",
+        payloadJson: "{}",
+        createdAt: new Date(Date.now() - 49 * 60 * 60 * 1000),
+      },
+    });
+    const pruned = await cleanupInboxEventsOlderThan();
+    assert(pruned.deleted >= 1, "deleted old events");
+    const gone = await prisma.whatsAppInboxEvent.findUnique({
+      where: { id: oldId },
+    });
+    assert(!gone, "old event removed");
+
     console.log("[w1] OK");
   } finally {
     await prisma.whatsAppMessage.deleteMany({
@@ -161,6 +287,9 @@ async function main() {
     await setOutboundKillSwitch(false).catch(() => undefined);
     if (prevOutbound === undefined) delete process.env.WHATSAPP_OUTBOUND_ENABLED;
     else process.env.WHATSAPP_OUTBOUND_ENABLED = prevOutbound;
+    if (prevRate === undefined) delete process.env.WHATSAPP_OUTBOUND_GLOBAL_RATE_PER_MIN;
+    else process.env.WHATSAPP_OUTBOUND_GLOBAL_RATE_PER_MIN = prevRate;
+    clearInboxSseSlotsForTests();
     await prisma.$disconnect();
   }
 }

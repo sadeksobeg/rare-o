@@ -29,6 +29,9 @@ export type InboxEventPayload = {
   connectionState?: string;
   outboundEnabled?: boolean;
   outboundKillSwitch?: boolean;
+  outboundKillSwitchAt?: string | null;
+  outboundKillSwitchBy?: string | null;
+  outboundKillSwitchReason?: string | null;
 };
 
 type DbLike = {
@@ -96,6 +99,15 @@ export async function publishInboxEvent(
         : {}),
       ...(typeof payload.outboundKillSwitch === "boolean"
         ? { outboundKillSwitch: payload.outboundKillSwitch }
+        : {}),
+      ...(payload.outboundKillSwitchAt !== undefined
+        ? { outboundKillSwitchAt: payload.outboundKillSwitchAt }
+        : {}),
+      ...(payload.outboundKillSwitchBy !== undefined
+        ? { outboundKillSwitchBy: payload.outboundKillSwitchBy }
+        : {}),
+      ...(payload.outboundKillSwitchReason !== undefined
+        ? { outboundKillSwitchReason: payload.outboundKillSwitchReason }
         : {}),
     };
 

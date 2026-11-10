@@ -570,6 +570,14 @@ model WhatsAppConnectionHealth {
   /// Runtime outbound kill (W1) — ANDed with WHATSAPP_OUTBOUND_ENABLED env.
   /// Flip from admin UI without restarting web/worker processes.
   outboundKillSwitch Boolean @default(false)
+  /// When the kill switch was last engaged (null when clear / never set).
+  outboundKillSwitchAt DateTime?
+  /// Admin email/name who engaged or cleared (never a phone).
+  outboundKillSwitchBy String?
+  /// Short operator reason for the emergency stop (optional).
+  outboundKillSwitchReason String?
+  /// Configurable global outbound enqueue cap (messages / rolling minute).
+  outboundGlobalRatePerMin Int @default(20)
 }
 
 /// Durable inbox realtime log for SSE resume (Last-Event-ID) + LISTEN/NOTIFY.
