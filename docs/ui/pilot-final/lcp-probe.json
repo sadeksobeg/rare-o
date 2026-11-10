@@ -1,0 +1,172 @@
+{
+  "lcpHint": null,
+  "paint": [
+    {
+      "name": "first-paint",
+      "startTime": 228
+    },
+    {
+      "name": "first-contentful-paint",
+      "startTime": 228
+    }
+  ],
+  "nav": {
+    "domContentLoaded": 132.69999999995343,
+    "load": 146.5,
+    "responseStart": 47,
+    "transferSize": 43576
+  },
+  "resources": [
+    {
+      "name": "/admin/requests?_rsc=Y2ihggAIGOmVawb2",
+      "type": "fetch",
+      "dur": 101,
+      "size": 1781,
+      "start": 195
+    },
+    {
+      "name": "/admin/products?_rsc=Y2ihggAIGOmVawb2",
+      "type": "fetch",
+      "dur": 81,
+      "size": 1835,
+      "start": 252
+    },
+    {
+      "name": "/admin/brokerage?_rsc=Y2ihggAIGOmVawb2",
+      "type": "fetch",
+      "dur": 59,
+      "size": 453,
+      "start": 195
+    },
+    {
+      "name": "/admin/products/new?_rsc=Y2ihggAIGOmVawb2",
+      "type": "fetch",
+      "dur": 59,
+      "size": 1840,
+      "start": 292
+    },
+    {
+      "name": "/admin/requests/cmvdvapa60002epj420m7itpm?_rsc=Y2ihggAIGOmVawb2",
+      "type": "fetch",
+      "dur": 59,
+      "size": 1816,
+      "start": 293
+    },
+    {
+      "name": "/admin/requests/cmvdvb4e60009epj42nodl82d?_rsc=Y2ihggAIGOmVawb2",
+      "type": "fetch",
+      "dur": 59,
+      "size": 1813,
+      "start": 295
+    },
+    {
+      "name": "/admin/requests/cmvdvf441000fepj4fsljudxc?_rsc=Y2ihggAIGOmVawb2",
+      "type": "fetch",
+      "dur": 59,
+      "size": 1817,
+      "start": 295
+    },
+    {
+      "name": "/admin/deals?_rsc=Y2ihggAIGOmVawb2",
+      "type": "fetch",
+      "dur": 58,
+      "size": 449,
+      "start": 195
+    },
+    {
+      "name": "/admin/wholesale?_rsc=Y2ihggAIGOmVawb2",
+      "type": "fetch",
+      "dur": 58,
+      "size": 453,
+      "start": 195
+    },
+    {
+      "name": "/admin/inbox?_rsc=Y2ihggAIGOmVawb2",
+      "type": "fetch",
+      "dur": 57,
+      "size": 460,
+      "start": 195
+    },
+    {
+      "name": "/admin/traders?_rsc=Y2ihggAIGOmVawb2",
+      "type": "fetch",
+      "dur": 41,
+      "size": 450,
+      "start": 255
+    },
+    {
+      "name": "/admin/notifications?_rsc=Y2ihggAIGOmVawb2",
+      "type": "fetch",
+      "dur": 41,
+      "size": 455,
+      "start": 292
+    },
+    {
+      "name": "/admin/requests/cmvdvfvh0000mepj4eccc26mo?_rsc=Y2ihggAIGOmVawb2",
+      "type": "fetch",
+      "dur": 41,
+      "size": 1818,
+      "start": 332
+    },
+    {
+      "name": "/admin/requests/cmvevqlqi0002ep0guarf1x12?_rsc=Y2ihggAIGOmVawb2",
+      "type": "fetch",
+      "dur": 41,
+      "size": 1816,
+      "start": 334
+    },
+    {
+      "name": "/admin/categories?_rsc=Y2ihggAIGOmVawb2",
+      "type": "fetch",
+      "dur": 40,
+      "size": 453,
+      "start": 253
+    },
+    {
+      "name": "/admin/offers?_rsc=Y2ihggAIGOmVawb2",
+      "type": "fetch",
+      "dur": 40,
+      "size": 449,
+      "start": 253
+    },
+    {
+      "name": "/admin/customers?_rsc=Y2ihggAIGOmVawb2",
+      "type": "fetch",
+      "dur": 40,
+      "size": 452,
+      "start": 253
+    },
+    {
+      "name": "/admin/requests/cmvdvg5hy000tepj4tg9ty9ep?_rsc=Y2ihggAIGOmVawb2",
+      "type": "fetch",
+      "dur": 40,
+      "size": 1816,
+      "start": 334
+    },
+    {
+      "name": "/admin/requests/cmvevqsh4000cep0ge93x8ibn?_rsc=Y2ihggAIGOmVawb2",
+      "type": "fetch",
+      "dur": 40,
+      "size": 1814,
+      "start": 335
+    },
+    {
+      "name": "/admin/requests/cmvevscqn000iep0genlkv152?_rsc=Y2ihggAIGOmVawb2",
+      "type": "fetch",
+      "dur": 39,
+      "size": 1814,
+      "start": 336
+    }
+  ],
+  "imgs": [
+    {
+      "src": "/brand/logo-cream.png",
+      "w": 694,
+      "h": 900,
+      "attrW": "32",
+      "attrH": "32",
+      "complete": true
+    }
+  ],
+  "fontCount": 50
+}

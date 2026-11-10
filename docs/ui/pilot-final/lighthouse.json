@@ -1,0 +1,74 @@
+{
+  "at": "2026-11-10T12:04:42.764Z",
+  "mode": "next start (prebuilt)",
+  "base": "http://127.0.0.1:3001",
+  "admin": {
+    "url": "http://127.0.0.1:3001/admin",
+    "performance": 0.49,
+    "accessibility": 0.99,
+    "bestPractices": 0.93,
+    "seo": 0.66,
+    "finalUrl": "http://127.0.0.1:3001/admin",
+    "metrics": {
+      "LCP": 4671.844500000001,
+      "TBT": 313.00000000000045,
+      "CLS": 0.01052631578947368,
+      "FCP": 2707.2815,
+      "SI": 2707.2815
+    },
+    "topOpportunities": [
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "score": 0,
+        "displayValue": "Potential savings of 24 KiB",
+        "numericValue": 160
+      },
+      {
+        "id": "server-response-time",
+        "title": "Initial server response time was short",
+        "score": 1,
+        "displayValue": "Root document took 20 ms",
+        "numericValue": 19.558000000000003
+      },
+      {
+        "id": "uses-responsive-images",
+        "title": "Properly size images",
+        "score": 0.5,
+        "displayValue": "Potential savings of 13 KiB",
+        "numericValue": 10
+      }
+    ]
+  },
+  "trader": {
+    "url": "http://127.0.0.1:3001/trader",
+    "performance": 0.63,
+    "accessibility": 1,
+    "bestPractices": 0.93,
+    "seo": 0.66,
+    "finalUrl": "http://127.0.0.1:3001/trader",
+    "metrics": {
+      "LCP": 4679.200725000001,
+      "TBT": 127,
+      "CLS": 0.05343737784490729,
+      "FCP": 2112.9781,
+      "SI": 2112.9781
+    },
+    "topOpportunities": [
+      {
+        "id": "unused-javascript",
+        "title": "Reduce unused JavaScript",
+        "score": 0,
+        "displayValue": "Potential savings of 24 KiB",
+        "numericValue": 140
+      },
+      {
+        "id": "server-response-time",
+        "title": "Initial server response time was short",
+        "score": 1,
+        "displayValue": "Root document took 30 ms",
+        "numericValue": 25.251
+      }
+    ]
+  }
+}

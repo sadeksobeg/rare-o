@@ -1,0 +1,173 @@
+{
+  "totalViolations": 0,
+  "results": [
+    {
+      "route": "/admin/profile",
+      "locale": "ar",
+      "viewport": "1440x900",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/admin/traders",
+      "locale": "ar",
+      "viewport": "1440x900",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/admin/settings",
+      "locale": "ar",
+      "viewport": "1440x900",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/admin/profile",
+      "locale": "ar",
+      "viewport": "390x844",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/admin/traders",
+      "locale": "ar",
+      "viewport": "390x844",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/admin/settings",
+      "locale": "ar",
+      "viewport": "390x844",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/admin/profile",
+      "locale": "en",
+      "viewport": "1440x900",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/admin/traders",
+      "locale": "en",
+      "viewport": "1440x900",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/admin/settings",
+      "locale": "en",
+      "viewport": "1440x900",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/admin/profile",
+      "locale": "en",
+      "viewport": "390x844",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/admin/traders",
+      "locale": "en",
+      "viewport": "390x844",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/admin/settings",
+      "locale": "en",
+      "viewport": "390x844",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/trader",
+      "locale": "ar",
+      "viewport": "1440x900",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/trader/deals",
+      "locale": "ar",
+      "viewport": "1440x900",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/trader/profile",
+      "locale": "ar",
+      "viewport": "1440x900",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/trader",
+      "locale": "ar",
+      "viewport": "390x844",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/trader/deals",
+      "locale": "ar",
+      "viewport": "390x844",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/trader/profile",
+      "locale": "ar",
+      "viewport": "390x844",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/trader",
+      "locale": "en",
+      "viewport": "1440x900",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/trader/deals",
+      "locale": "en",
+      "viewport": "1440x900",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/trader/profile",
+      "locale": "en",
+      "viewport": "1440x900",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/trader",
+      "locale": "en",
+      "viewport": "390x844",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/trader/deals",
+      "locale": "en",
+      "viewport": "390x844",
+      "count": 0,
+      "violations": []
+    },
+    {
+      "route": "/trader/profile",
+      "locale": "en",
+      "viewport": "390x844",
+      "count": 0,
+      "violations": []
+    }
+  ]
+}

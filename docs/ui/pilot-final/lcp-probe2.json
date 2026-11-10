@@ -1,0 +1,112 @@
+{
+  "paints": [
+    {
+      "name": "first-paint",
+      "t": 308
+    },
+    {
+      "name": "first-contentful-paint",
+      "t": 308
+    }
+  ],
+  "nav": {
+    "dcl": 229,
+    "load": 264,
+    "ttfb": 45
+  },
+  "fontCount": 8,
+  "fontNames": [
+    "5aae3a1c1074c5e1-s.woff2",
+    "8c2fd50d66d22a18-s.woff2",
+    "9da48a48bf6500f8-s.p.woff2",
+    "17efc7caebbb6a73-s.woff2",
+    "f022b1629605b85c-s.p.woff2",
+    "b729ad8c86c7d641-s.woff2",
+    "e4efb0298547fad0-s.p.woff2",
+    "79d9077e4fd7eddc-s.woff2"
+  ],
+  "scripts": [
+    {
+      "name": "4bd1b696-100b9d70ed4e49c1.js",
+      "dur": 0,
+      "size": 0
+    },
+    {
+      "name": "1255-60d8dc7c8c9309a1.js",
+      "dur": 0,
+      "size": 0
+    },
+    {
+      "name": "main-app-8e3abacc49b0494c.js",
+      "dur": 0,
+      "size": 0
+    },
+    {
+      "name": "8201-04415fb25a241abb.js",
+      "dur": 0,
+      "size": 0
+    },
+    {
+      "name": "layout-d70e834051a0bf74.js",
+      "dur": 0,
+      "size": 0
+    },
+    {
+      "name": "1375-8da9d1a109a3021b.js",
+      "dur": 0,
+      "size": 0
+    },
+    {
+      "name": "5239-716b70e148e99ea9.js",
+      "dur": 0,
+      "size": 0
+    },
+    {
+      "name": "2007-6a76c80e4ac73e0d.js",
+      "dur": 0,
+      "size": 0
+    },
+    {
+      "name": "3259-0bd9953994c0886e.js",
+      "dur": 0,
+      "size": 0
+    },
+    {
+      "name": "4887-bcbca06fb33d74ce.js",
+      "dur": 0,
+      "size": 0
+    },
+    {
+      "name": "4023-8801eb749dca3162.js",
+      "dur": 0,
+      "size": 0
+    },
+    {
+      "name": "page-0273ebccf0edfec9.js",
+      "dur": 0,
+      "size": 0
+    },
+    {
+      "name": "8793-9c2ac2e0ec0488e3.js",
+      "dur": 0,
+      "size": 0
+    },
+    {
+      "name": "9871-5f551f9920a9d812.js",
+      "dur": 0,
+      "size": 0
+    },
+    {
+      "name": "2852-261dad841db1053b.js",
+      "dur": 0,
+      "size": 0
+    }
+  ],
+  "img": [
+    {
+      "name": "mark-small.webp",
+      "size": 0,
+      "dur": 0
+    }
+  ]
+}
