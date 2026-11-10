@@ -1,5 +1,4 @@
-import { Megaphone } from "lucide-react";
-import { PageHeader } from "@/components/admin/page-header";
+import { Card, DetailBack, DetailHeader } from "@/components/ui-kit";
 import { PromoBandForm } from "@/components/admin/promo-band-form";
 import { isPromoFeaturesEnabled } from "@/lib/config/feature-flags";
 import { getRequestDictionary } from "@/lib/i18n/server";
@@ -10,13 +9,18 @@ export default async function AdminNewPromoPage() {
   const { dict } = await getRequestDictionary();
 
   return (
-    <section className="space-y-6">
-      <PageHeader
-        title={dict.adminUi.newPromo}
-        description={dict.adminUi.promosLead}
-        icon={<Megaphone className="size-5" strokeWidth={1.5} />}
+    <section data-admin-promo-new="" className="space-y-5 pb-8">
+      <DetailBack href="/admin/promos">{dict.admin.promos}</DetailBack>
+      <DetailHeader
+        reference={dict.adminUi.newPromo}
+        mono={false}
+        meta={dict.adminUi.promosLead}
       />
-      <PromoBandForm labels={dict.adminUi} />
+      <Card aria-label={dict.adminUi.newPromo}>
+        <div className="px-4 py-5 sm:px-5 sm:py-6">
+          <PromoBandForm labels={dict.adminUi} />
+        </div>
+      </Card>
     </section>
   );
 }

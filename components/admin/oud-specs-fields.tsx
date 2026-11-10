@@ -7,13 +7,10 @@ import {
   type SuggestEnLabels,
 } from "@/components/admin/suggest-en";
 import { TextField } from "@/components/ui/text-field";
+import { Field, Select } from "@/components/ui-kit/field";
 import type { OudSpecIconKey, OudSpecsFormValues } from "@/lib/catalog/oud-specs";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
-import {
-  controlClass,
-  controlLabelClass,
-  controlLabelTextClass,
-} from "@/lib/ui/form-classes";
+import { controlLabelTextClass } from "@/lib/ui/form-classes";
 import { cn } from "@/lib/utils";
 
 type WoodRow = {
@@ -211,18 +208,16 @@ export function OudSpecsFields({
 
       <SpecSection title={labels.oudDetailsTitle} icon="finish" index={2}>
         <FieldIconLabel icon="standardNeck">
-          <label className={controlLabelClass}>
-            <span className={controlLabelTextClass}>{labels.oudStandardNeck}</span>
-            <select
+          <Field label={labels.oudStandardNeck}>
+            <Select
               name="oudStandardNeck"
               defaultValue={values.standardNeck}
-              className={controlClass}
             >
               <option value="">{labels.oudStandardNeckUnset}</option>
               <option value="yes">{labels.oudStandardNeckYes}</option>
               <option value="no">{labels.oudStandardNeckNo}</option>
-            </select>
-          </label>
+            </Select>
+          </Field>
         </FieldIconLabel>
         <FieldIconLabel icon="finish">
           <SuggestEnTextPair

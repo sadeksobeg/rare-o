@@ -69,9 +69,18 @@
   padding: 18px 20px 14px;
   height: 68px;
 }
-.rad-brand img {
+.rad-brand img,
+.rad-brand .rad-brand-mark {
   height: 32px;
-  width: auto;
+  width: 32px;
+  object-fit: contain;
+  flex: none;
+  border-radius: 8px;
+  background: transparent;
+  /* Cream mark must stay visible on the always-dark sidebar (no theme filter). */
+  filter: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 .rad-brand b {
   font-family: var(--font-source), sans-serif;
@@ -655,6 +664,11 @@
   justify-content: space-between;
   gap: 12px;
   padding: 16px 18px 0;
+  min-width: 0;
+  max-width: 100%;
+}
+.rad-ch > * {
+  min-width: 0;
 }
 .rad-ch h2 {
   font-size: 15px;
@@ -684,7 +698,8 @@
   background: var(--rad-surface3);
   gap: 0;
 }
-.rad-seg button {
+.rad-seg button,
+.rad-seg a {
   position: relative;
   z-index: 1;
   height: 28px;
@@ -697,6 +712,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
+  flex: none;
 }
 .rad-seg button.rad-on {
   color: var(--rad-tx);
@@ -814,6 +831,14 @@
 .rad-p-ok {
   background: var(--rad-oks);
   color: var(--rad-ok);
+}
+.rad-p-no {
+  background: var(--rad-surface3);
+  color: var(--rad-tx2);
+}
+.rad-p-err {
+  background: var(--rad-errs);
+  color: var(--rad-err);
 }
 .rad-row .rad-go {
   opacity: 0;
@@ -1037,13 +1062,18 @@
 }
 
 .rad-rise {
-  animation: rad-rise 0.6s var(--rad-ease) both;
-  animation-delay: calc(var(--rad-s, 0) * 70ms);
+  /* Transform-only enter — opacity:0 delayed LCP on dashboard KPIs. */
+  animation: rad-rise 0.45s var(--rad-ease) both;
+  animation-delay: calc(var(--rad-s, 0) * 40ms);
 }
 @keyframes rad-rise {
   from {
-    opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(8px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rad-rise {
+    animation: none;
   }
 }
 
@@ -1153,7 +1183,7 @@
 }
 
 .rad-tabbar {
-  display: none;
+  display: none !important;
 }
 .rad-scrim {
   display: none;
@@ -1241,7 +1271,8 @@
     display: none;
   }
   .rad-page {
-    padding: 20px 16px 110px;
+    /* Match trader: tab rail 68 + safe-area + 16px above submit CTAs */
+    padding: 20px 16px calc(68px + env(safe-area-inset-bottom, 0px) + 16px);
   }
   .rad-rings {
     width: 300px;
@@ -1292,7 +1323,7 @@
     width: auto;
   }
   .rad-tabbar {
-    display: grid;
+    display: grid !important;
     grid-template-columns: repeat(5, 1fr);
     position: fixed;
     bottom: 0;
@@ -1300,8 +1331,8 @@
     z-index: 40;
     height: 68px;
     padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
-    background: color-mix(in srgb, var(--rad-sb) 92%, transparent);
-    backdrop-filter: blur(16px);
+    /* Opaque rail — translucent mix failed contrast against the cream page. */
+    background: var(--rad-sb);
     border-top: 1px solid var(--rad-sb-bd);
   }
   .rad-tabbar a,

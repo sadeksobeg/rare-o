@@ -1,14 +1,8 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { Bell, LogOut, MessageCircle, UserRound } from "lucide-react";
+import { Bell, LogOut, MessageCircle } from "lucide-react";
 import { traderLogoutAction } from "@/app/deal-actions";
 import { AdminLocaleToggle } from "@/components/admin/locale-toggle";
-import { Emblem } from "@/components/brand";
-import { ChromeBadge } from "@/components/portal/chrome-badge";
-import {
-  ChromeActionCluster,
-  ChromeIconButton,
-} from "@/components/portal/chrome-icon-button";
 import { PortalRouteProgressMount } from "@/components/portal/route-progress-mount";
 import { PortalShellFrame } from "@/components/portal/portal-shell-frame";
 import { PortalThemeToggle } from "@/components/portal/portal-theme";
@@ -37,7 +31,6 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
     getTraderUnreadCount(session.sub),
   ]);
 
-  /** VISION program: 5 tabs — Home · Deals · Wholesale · Brokerage · Account */
   const tabs: TraderTab[] = [
     {
       href: "/trader",
@@ -74,121 +67,95 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
     },
   ];
 
+  const initial = session.displayName.trim().slice(0, 1) || "ت";
+
   return (
     <>
       <SonnerToaster />
       <PortalShellFrame
         surface="trader"
-        defaultTheme="light"
-        className="ro-portal ro-portal-trader relative min-h-dvh overflow-x-clip"
+        defaultTheme="dark"
+        className="ro-portal ro-portal-trader rad-tapp relative min-h-dvh overflow-x-clip"
       >
-        <div className="ro-portal-atmosphere" aria-hidden />
         <Suspense fallback={null}>
           <PortalRouteProgressMount />
         </Suspense>
         <div className="relative z-10 flex min-h-dvh flex-col">
           <OfflineBanner />
-          <header className="ro-portal-header sticky top-0 z-30 border-b border-[color:var(--ro-border-subtle)] backdrop-blur-md">
-            <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between gap-3 px-3 sm:h-16 sm:px-5 lg:px-6">
-              <Link
-                href="/trader"
-                className="group flex min-w-0 shrink-0 items-center gap-2.5"
-              >
-                <Emblem
-                  variant="small"
-                  className="size-8 transition-transform duration-[var(--ro-dur-fast)] group-hover:scale-105"
-                />
-                <span className="min-w-0 font-display text-sm font-bold text-[color:var(--ro-text)]">
-                  <bdi dir="ltr">RARE OUD</bdi>
-                  <span className="mt-0.5 block truncate text-[0.65rem] font-semibold text-[color:var(--ro-accent-fg,var(--ro-plum-800))]">
-                    {dict.trader.brand}
-                  </span>
-                </span>
-              </Link>
-
-              <TraderDesktopNav
-                tabs={tabs}
-                tone="on-light"
-                navLabel={dict.common.navLabelTrader}
+          <header className="rad-th2">
+            <Link
+              href="/trader"
+              className="rad-th2-logo"
+              aria-label="RARE OUD"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/mark-small.webp"
+                alt=""
+                width={30}
+                height={30}
+                className="rad-th2-mark"
               />
+              <b aria-hidden="true">
+                <bdi dir="ltr">RARE OUD</bdi>
+              </b>
+            </Link>
 
-              <ChromeActionCluster className="shrink-0">
-                <ChromeIconButton
-                  href="/trader/messages"
-                  aria-label={dict.trader.messagesTitle}
-                  wrapGlyph={false}
-                >
-                  <span className="ro-chrome-icon-glyph">
-                    <MessageCircle
-                      className="size-[1.05rem]"
-                      strokeWidth={1.5}
-                      aria-hidden
-                    />
-                  </span>
-                  <ChromeBadge
-                    value={unreadMessages}
-                    className="absolute end-0.5 top-0.5 flex min-w-[1.05rem] items-center justify-center rounded-full bg-[var(--ro-plum-900)] px-1 text-[0.6rem] font-bold text-[var(--ro-sand-50)]"
-                  />
-                </ChromeIconButton>
-                <ChromeIconButton
-                  href="/trader/notifications"
-                  aria-label={dict.trader.notifications}
-                  wrapGlyph={false}
-                >
-                  <span className="ro-chrome-icon-glyph">
-                    <Bell
-                      className="size-[1.05rem]"
-                      strokeWidth={1.5}
-                      aria-hidden
-                    />
-                  </span>
-                  <ChromeBadge
-                    value={unreadNotifications}
-                    className="absolute end-0.5 top-0.5 flex min-w-[1.05rem] items-center justify-center rounded-full bg-[var(--ro-plum-900)] px-1 text-[0.6rem] font-bold text-[var(--ro-sand-50)]"
-                  />
-                </ChromeIconButton>
-                <span className="hidden sm:contents">
-                  <PortalThemeToggle
-                    lightLabel={dict.common.themeLight}
-                    darkLabel={dict.common.themeDark}
-                    chrome
-                  />
-                  <AdminLocaleToggle
-                    locale={locale}
-                    label={dict.common.language}
-                    tone="auto"
-                    chrome
-                  />
+            <TraderDesktopNav tabs={tabs} navLabel={dict.common.navLabelTrader} />
+
+            <span className="rad-th2-sp" aria-hidden />
+
+            <div className="rad-th2-tools">
+              <Link
+                href="/trader/messages"
+                className="rad-ib"
+                aria-label={dict.trader.messagesTitle}
+              >
+                <MessageCircle width={18} height={18} strokeWidth={1.5} aria-hidden />
+                {unreadMessages > 0 ? (
+                  <i className="rad-ib-dot">{unreadMessages > 99 ? "99+" : unreadMessages}</i>
+                ) : null}
+              </Link>
+              <Link
+                href="/trader/notifications"
+                className="rad-ib"
+                aria-label={dict.trader.notifications}
+              >
+                <Bell width={18} height={18} strokeWidth={1.5} aria-hidden />
+                {unreadNotifications > 0 ? (
+                  <i className="rad-ib-dot">
+                    {unreadNotifications > 99 ? "99+" : unreadNotifications}
+                  </i>
+                ) : null}
+              </Link>
+              <span className="hidden sm:contents">
+                <PortalThemeToggle
+                  lightLabel={dict.common.themeLight}
+                  darkLabel={dict.common.themeDark}
+                  chrome
+                />
+                <AdminLocaleToggle
+                  locale={locale}
+                  label={dict.common.language}
+                  tone="auto"
+                  chrome
+                />
+              </span>
+              <Link href="/trader/profile" className="rad-tme" aria-label={dict.trader.profile}>
+                <span className="rad-tme-av" aria-hidden>
+                  {initial}
                 </span>
-                <ChromeIconButton
-                  href="/trader/profile"
-                  aria-label={dict.trader.profile}
-                  className="hidden lg:inline-flex"
-                >
-                  <UserRound
-                    className="size-[1.05rem]"
-                    strokeWidth={1.5}
-                    aria-hidden
-                  />
-                  <span className="sr-only">{session.displayName}</span>
-                </ChromeIconButton>
-                <form action={traderLogoutAction} className="contents">
-                  <ChromeIconButton type="submit" aria-label={dict.trader.logout}>
-                    <LogOut
-                      className="size-[1.05rem]"
-                      strokeWidth={1.5}
-                      aria-hidden
-                    />
-                  </ChromeIconButton>
-                </form>
-              </ChromeActionCluster>
+                <span className="rad-tme-name">{session.displayName}</span>
+              </Link>
+              <form action={traderLogoutAction} className="contents">
+                <button type="submit" className="rad-ib" aria-label={dict.trader.logout}>
+                  <LogOut width={18} height={18} strokeWidth={1.5} aria-hidden />
+                </button>
+              </form>
             </div>
           </header>
 
-          <main
-            id="main-content"
-            className="ro-portal-main-enter ro-trader-main mx-auto w-full max-w-[1200px] flex-1 px-4 py-5 sm:px-6 sm:py-6"
-          >
+          <main id="main-content" className="rad-tpage flex-1">
             {children}
           </main>
 

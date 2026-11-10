@@ -494,6 +494,11 @@ type Dict = {
     noResultsBody: string;
     selectConvTitle: string;
     selectConvBody: string;
+    selectConvHintBefore: string;
+    selectConvHintAfter: string;
+    previewNoText: string;
+    threadEmptyTitle: string;
+    threadEmptyBody: string;
     newMessagesZero: string;
     newMessagesOne: string;
     newMessagesTwo: string;
@@ -564,6 +569,16 @@ type Dict = {
     qr2Body: string;
     qr3Title: string;
     qr3Body: string;
+    previewSticker: string;
+    previewImage: string;
+    previewVideo: string;
+    previewAudio: string;
+    previewDocument: string;
+    previewLocation: string;
+    previewContact: string;
+    previewReaction: string;
+    previewUnsupported: string;
+    previewEmpty: string;
   };
   adminUi: {
     colReference: string;
@@ -659,6 +674,17 @@ type Dict = {
     negotiationThread: string;
     emptyTitle: string;
     emptyBody: string;
+    sortNewestFirst: string;
+    sortOldestFirst: string;
+    moreProducts: string;
+    listPaginationSummary: string;
+    noResultsForQuery: string;
+    noResultsHint: string;
+    onRequestPrice: string;
+    requestsEmptyTitle: string;
+    requestsEmptyBody: string;
+    showPhone: string;
+    hidePhone: string;
     dealsEmptyTitle: string;
     dealsEmptyBody: string;
     dealsEmptyFilteredTitle: string;
@@ -761,6 +787,8 @@ type Dict = {
     settingsWaDisconnected: string;
     settingsWaOther: string;
     settings2faOn: string;
+    /** Short pill label when 2FA is off (settings/security). */
+    settings2faOffShort: string;
     settings2faOff: string;
     teamTitle: string;
     teamLead: string;
@@ -1519,6 +1547,8 @@ type Dict = {
     sessionInvalidatedNotice: string;
     profileTitle: string;
     profileSubtitle: string;
+    /** Appearance section lead — distinct from profileSubtitle. */
+    appearanceLead: string;
     profileTab: string;
     securityTab: string;
     profileName: string;
@@ -1567,6 +1597,8 @@ type Dict = {
   changePassword: {
     sectionTitle: string;
     sectionLead: string;
+    /** Label for voluntary password change (not the forced-temp flow). */
+    currentPassword: string;
     submit: string;
     success: string;
   };
@@ -2077,6 +2109,11 @@ const ar: Dict = {
     noResultsBody: "جرّب كلمة أخرى أو غيّر التصفية.",
     selectConvTitle: "اختر محادثة",
     selectConvBody: "اختر محادثة من القائمة لعرض الرسائل. استخدم J وK للتنقل بين المحادثات.",
+    selectConvHintBefore: "اختر محادثة من القائمة لعرض الرسائل. استخدم",
+    selectConvHintAfter: "للتنقل بين المحادثات.",
+    previewNoText: "لا رسائل نصية",
+    threadEmptyTitle: "لا رسائل في هذه المحادثة بعد",
+    threadEmptyBody: "عندما تصل رسالة أو تُرسل رداً، ستظهر هنا.",
     newMessagesZero: "لا رسائل جديدة",
     newMessagesOne: "رسالة جديدة واحدة",
     newMessagesTwo: "رسالتان جديدتان",
@@ -2149,6 +2186,16 @@ const ar: Dict = {
     qr2Body: "الدفع بالتحويل، وسنرسل لك بيانات الحساب بعد تأكيد الطلب.",
     qr3Title: "تأكيد الاستلام",
     qr3Body: "وصلتنا رسالتك، سيتابع معك أحد فريقنا خلال دقائق.",
+    previewSticker: "ملصق",
+    previewImage: "صورة",
+    previewVideo: "فيديو",
+    previewAudio: "مقطع صوتي",
+    previewDocument: "ملف",
+    previewLocation: "موقع",
+    previewContact: "جهة اتصال",
+    previewReaction: "تفاعل",
+    previewUnsupported: "رسالة غير مدعومة",
+    previewEmpty: "—",
   },
   adminUi: {
     colReference: "المرجع",
@@ -2256,6 +2303,18 @@ const ar: Dict = {
     negotiationThread: "سجل التفاوض",
     emptyTitle: "لا يوجد شيء هنا بعد",
     emptyBody: "ستظهر السجلات هنا عند إنشائها.",
+    sortNewestFirst: "الأحدث أولاً",
+    sortOldestFirst: "الأقدم أولاً",
+    moreProducts: "+{n} منتجات أخرى",
+    listPaginationSummary: "عرض {from}–{to} من {total}",
+    noResultsForQuery: "لا نتائج لـ «{q}»",
+    noResultsHint: "تحقق من الإملاء أو أزل بعض عوامل التصفية.",
+    onRequestPrice: "عند الطلب",
+    requestsEmptyTitle: "لا طلبات بعد",
+    requestsEmptyBody:
+      "ستظهر هنا طلبات العملاء القادمة من الموقع وواتساب فور وصولها.",
+    showPhone: "إظهار",
+    hidePhone: "إخفاء",
     dealsEmptyTitle: "لا صفقات بعد",
     dealsEmptyBody:
       "عندما يقترح تاجر صفقة تظهر هنا لمتابعة التفاوض والقبول والإغلاق — بمعزل تام عن طلبات التجزئة.",
@@ -2367,6 +2426,7 @@ const ar: Dict = {
     settingsWaOther: "حالة أخرى",
     settings2faOn: "التحقق بخطوتين مفعّل",
     settings2faOff: "التحقق بخطوتين غير مفعّل",
+    settings2faOffShort: "غير مفعّل",
     teamTitle: "الفريق والأمان",
     teamLead:
       "حسابات الإدارة الحقيقية — لا أدوار مالك/مدير/موظف في المخطط بعد. التحقق بخطوتين من صفحة الأمان.",
@@ -3230,6 +3290,7 @@ const ar: Dict = {
       "تم تغيير كلمة المرور من جهاز آخر. سجّل الدخول من جديد.",
     profileTitle: "حسابي",
     profileSubtitle: "بياناتك الشخصية وإعدادات الأمان لهذا الحساب.",
+    appearanceLead: "اختر الوضع الداكن أو الفاتح لواجهة الإدارة على هذا الجهاز.",
     profileTab: "الملف",
     securityTab: "الأمان",
     profileName: "الاسم",
@@ -3283,6 +3344,7 @@ const ar: Dict = {
   changePassword: {
     sectionTitle: "تغيير كلمة المرور",
     sectionLead: "استخدم كلمة مرور قوية خاصة بهذا الحساب فقط.",
+    currentPassword: "كلمة المرور الحالية",
     submit: "تحديث كلمة المرور",
     success: "تم تحديث كلمة المرور.",
   },
@@ -3795,6 +3857,11 @@ const en: Dict = {
     noResultsBody: "Try a different word or change the filter.",
     selectConvTitle: "Select a conversation",
     selectConvBody: "Pick a conversation from the list to see its messages. Use J and K to move between conversations.",
+    selectConvHintBefore: "Pick a conversation from the list to see its messages. Use",
+    selectConvHintAfter: "to move between conversations.",
+    previewNoText: "No text messages",
+    threadEmptyTitle: "No messages in this conversation yet",
+    threadEmptyBody: "When a message arrives or you send a reply, it will show up here.",
     newMessagesZero: "No new messages",
     newMessagesOne: "1 new message",
     newMessagesTwo: "2 new messages",
@@ -3867,6 +3934,16 @@ const en: Dict = {
     qr2Body: "Payment is by bank transfer — we'll send the account details once the order is confirmed.",
     qr3Title: "Confirming receipt",
     qr3Body: "Your message has arrived — someone from our team will follow up within minutes.",
+    previewSticker: "Sticker",
+    previewImage: "Image",
+    previewVideo: "Video",
+    previewAudio: "Audio",
+    previewDocument: "File",
+    previewLocation: "Location",
+    previewContact: "Contact",
+    previewReaction: "Reaction",
+    previewUnsupported: "Unsupported message",
+    previewEmpty: "—",
   },
   adminUi: {
     colReference: "Reference",
@@ -3974,6 +4051,18 @@ const en: Dict = {
     negotiationThread: "Negotiation history",
     emptyTitle: "Nothing here yet",
     emptyBody: "Records will appear here once they are created.",
+    sortNewestFirst: "Newest first",
+    sortOldestFirst: "Oldest first",
+    moreProducts: "+{n} more products",
+    listPaginationSummary: "Showing {from}–{to} of {total}",
+    noResultsForQuery: "No results for “{q}”",
+    noResultsHint: "Check spelling or clear some filters.",
+    onRequestPrice: "On request",
+    requestsEmptyTitle: "No requests yet",
+    requestsEmptyBody:
+      "Customer requests from the storefront and WhatsApp will appear here as they arrive.",
+    showPhone: "Show",
+    hidePhone: "Hide",
     dealsEmptyTitle: "No deals yet",
     dealsEmptyBody:
       "When a trader proposes a deal it appears here for negotiation, acceptance, and close — fully separate from retail requests.",
@@ -4086,6 +4175,7 @@ const en: Dict = {
     settingsWaDisconnected: "Disconnected",
     settingsWaOther: "Other status",
     settings2faOn: "Two-factor is on",
+    settings2faOffShort: "Off",
     settings2faOff: "Two-factor is off",
     teamTitle: "Team & security",
     teamLead:
@@ -4962,6 +5052,7 @@ const en: Dict = {
       "Your password was changed on another device. Please sign in again.",
     profileTitle: "My account",
     profileSubtitle: "Your personal details and security settings for this account.",
+    appearanceLead: "Choose dark or light for the admin interface on this device.",
     profileTab: "Profile",
     securityTab: "Security",
     profileName: "Name",
@@ -5015,6 +5106,7 @@ const en: Dict = {
   changePassword: {
     sectionTitle: "Change password",
     sectionLead: "Use a strong password unique to this account.",
+    currentPassword: "Current password",
     submit: "Update password",
     success: "Password updated.",
   },

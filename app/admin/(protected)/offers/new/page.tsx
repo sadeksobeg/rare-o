@@ -1,12 +1,13 @@
-import { Percent } from "lucide-react";
-import { PageHeader } from "@/components/admin/page-header";
 import { PublicOfferForm } from "@/components/admin/public-offer-form";
+import { Card, DetailBack, DetailHeader } from "@/components/ui-kit";
 import { uiVisibleDealWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
 import { getRequestDictionary } from "@/lib/i18n/server";
 
 export default async function AdminNewOfferPage() {
   const { locale, dict } = await getRequestDictionary();
+  const a = dict.admin;
+  const u = dict.adminUi;
   const [deals, products] = await Promise.all([
     prisma.dealProposal.findMany({
       where: uiVisibleDealWhere(),
@@ -22,18 +23,19 @@ export default async function AdminNewOfferPage() {
   ]);
 
   return (
-    <section className="space-y-6">
-      <PageHeader
-        title={dict.adminUi.detail.newOfferTitle}
-        description={dict.adminUi.detail.newOfferLead}
-        icon={<Percent className="size-5" strokeWidth={1.5} />}
-      />
-      <PublicOfferForm
-        deals={deals}
-        products={products}
-        labels={dict.adminUi}
-        locale={locale}
-      />
+    <section data-admin-offer-new="" className="space-y-5 pb-8">
+      <DetailBack href="/admin/offers">{a.offers}</DetailBack>
+      <DetailHeader reference={u.detail.newOfferTitle} mono={false} />
+      <Card aria-label={u.detail.newOfferTitle}>
+        <div className="px-4 py-5 sm:px-5 sm:py-6">
+          <PublicOfferForm
+            deals={deals}
+            products={products}
+            labels={dict.adminUi}
+            locale={locale}
+          />
+        </div>
+      </Card>
     </section>
   );
 }

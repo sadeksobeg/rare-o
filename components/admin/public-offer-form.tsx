@@ -6,16 +6,13 @@ import {
 } from "@/app/deal-actions";
 import type { ActionResult } from "@/app/actions";
 import { Button } from "@/components/ui/button";
-import { StatusChip } from "@/components/ui/status-chip";
-import { TextField } from "@/components/ui/text-field";
+import { Field, Input, Select, Textarea } from "@/components/ui-kit/field";
+import { Pill, type PillTone } from "@/components/ui-kit/pill";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
-import {
-  controlClass,
-  controlLabelClass,
-  controlLabelTextClass,
-  formErrorClass,
-} from "@/lib/ui/form-classes";
+import { formErrorClass } from "@/lib/ui/form-classes";
+import { statusToneToPill } from "@/lib/ui/pill-tone";
+import type { StatusTone } from "@/lib/ui/status";
 import { fmt } from "@/lib/ui/trader-labels";
 import { useUnsavedGuard } from "@/lib/ui/use-unsaved-guard";
 import { useRouter } from "next/navigation";
@@ -23,12 +20,14 @@ import { useActionState, useState, useTransition } from "react";
 
 const initial: ActionResult | null = null;
 
-function offerTone(status: string) {
-  return status === "published"
-    ? "success"
-    : status === "unpublished"
-      ? "closed"
-      : "neutral";
+function offerPillTone(status: string): PillTone {
+  const tone: StatusTone =
+    status === "published"
+      ? "success"
+      : status === "unpublished"
+        ? "closed"
+        : "neutral";
+  return statusToneToPill(tone);
 }
 
 function publishErrorLabel(
@@ -106,41 +105,40 @@ export function PublicOfferForm({
           onChange={() => setDirty(true)}
         >
           {offer ? <input type="hidden" name="id" value={offer.id} /> : null}
-          <TextField
-            name="slug"
-            label={f.slug}
-            required
-            dir="ltr"
-            defaultValue={offer?.slug}
-            dense
-          />
-          <div className="grid gap-3 sm:grid-cols-2">
-            <TextField
-              name="titleAr"
-              label={f.titleAr}
-              dir="rtl"
-              value={titleAr}
-              onChange={(e) => {
-                setDirty(true);
-                setTitleAr(e.target.value);
-              }}
-              dense
-            />
-            <TextField
-              name="titleEn"
-              label={f.titleEn}
+          <Field label={f.slug}>
+            <Input
+              name="slug"
+              required
               dir="ltr"
-              value={titleEn}
-              onChange={(e) => {
-                setDirty(true);
-                setTitleEn(e.target.value);
-              }}
-              dense
+              defaultValue={offer?.slug}
             />
+          </Field>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label={f.titleAr}>
+              <Input
+                name="titleAr"
+                dir="rtl"
+                value={titleAr}
+                onChange={(e) => {
+                  setDirty(true);
+                  setTitleAr(e.target.value);
+                }}
+              />
+            </Field>
+            <Field label={f.titleEn}>
+              <Input
+                name="titleEn"
+                dir="ltr"
+                value={titleEn}
+                onChange={(e) => {
+                  setDirty(true);
+                  setTitleEn(e.target.value);
+                }}
+              />
+            </Field>
           </div>
-          <label className={controlLabelClass}>
-            <span className={controlLabelTextClass}>{f.summaryAr}</span>
-            <textarea
+          <Field label={f.summaryAr}>
+            <Textarea
               name="summaryAr"
               rows={4}
               dir="rtl"
@@ -149,12 +147,10 @@ export function PublicOfferForm({
                 setDirty(true);
                 setSummaryAr(e.target.value);
               }}
-              className={controlClass}
             />
-          </label>
-          <label className={controlLabelClass}>
-            <span className={controlLabelTextClass}>{f.summaryEn}</span>
-            <textarea
+          </Field>
+          <Field label={f.summaryEn}>
+            <Textarea
               name="summaryEn"
               rows={4}
               dir="ltr"
@@ -163,15 +159,12 @@ export function PublicOfferForm({
                 setDirty(true);
                 setSummaryEn(e.target.value);
               }}
-              className={controlClass}
             />
-          </label>
-          <label className={controlLabelClass}>
-            <span className={controlLabelTextClass}>{f.linkedDeal}</span>
-            <select
+          </Field>
+          <Field label={f.linkedDeal}>
+            <Select
               name="dealProposalId"
               defaultValue={offer?.dealProposalId ?? ""}
-              className={controlClass}
             >
               <option value="">{f.none}</option>
               {deals.map((d) => (
@@ -179,18 +172,16 @@ export function PublicOfferForm({
                   {d.reference} — {d.title}
                 </option>
               ))}
-            </select>
-          </label>
-          <label className={controlLabelClass}>
-            <span className={controlLabelTextClass}>{f.linkedProduct}</span>
-            <select
+            </Select>
+          </Field>
+          <Field label={f.linkedProduct}>
+            <Select
               name="productId"
               value={productId}
               onChange={(e) => {
                 setDirty(true);
                 setProductId(e.target.value);
               }}
-              className={controlClass}
             >
               <option value="">{f.none}</option>
               {products.map((p) => (
@@ -198,16 +189,16 @@ export function PublicOfferForm({
                   {productName(p)} ({p.slug})
                 </option>
               ))}
-            </select>
-          </label>
-          <TextField
-            name="sortOrder"
-            label={f.sortOrder}
-            type="number"
-            dir="ltr"
-            defaultValue={String(offer?.sortOrder ?? 0)}
-            dense
-          />
+            </Select>
+          </Field>
+          <Field label={f.sortOrder}>
+            <Input
+              name="sortOrder"
+              type="number"
+              dir="ltr"
+              defaultValue={String(offer?.sortOrder ?? 0)}
+            />
+          </Field>
           {state && !state.ok ? (
             <p role="alert" className={formErrorClass}>
               {state.error}
@@ -219,14 +210,12 @@ export function PublicOfferForm({
         </form>
 
         {offer ? (
-          <div className="space-y-3 border border-ro-line p-4">
-            <p className="flex w-full flex-wrap items-center gap-2 text-sm text-ro-muted">
+          <div className="space-y-3 rounded-[14px] border border-[color:var(--rad-bd)] bg-[color:var(--rad-surface)] p-4">
+            <p className="flex w-full flex-wrap items-center gap-2 text-sm text-[color:var(--rad-tx2)]">
               <span>{f.offerCurrentStatus}:</span>
-              <StatusChip
-                size="sm"
-                tone={offerTone(offer.status)}
-                label={labels.status.offer[offer.status] ?? offer.status}
-              />
+              <Pill tone={offerPillTone(offer.status)}>
+                {labels.status.offer[offer.status] ?? offer.status}
+              </Pill>
               <span>{f.offerPublishNote}</span>
             </p>
             {statusError ? (
@@ -234,76 +223,88 @@ export function PublicOfferForm({
                 {publishErrorLabel(f, statusError)}
               </p>
             ) : null}
-            <div className="flex flex-wrap items-end gap-3">
-              {(["published", "unpublished", "draft"] as const).map((status) => (
-                <form
-                  key={status}
-                  className="space-y-2"
-                  action={(fd) => {
-                    startStatus(async () => {
-                      setStatusError(null);
-                      const result = await adminSetPublicOfferStatusAction(fd);
-                      if (!result.ok) {
-                        setStatusError(result.error);
-                        return;
-                      }
-                      router.refresh();
-                    });
-                  }}
-                >
-                  <input type="hidden" name="id" value={offer.id} />
-                  <input type="hidden" name="status" value={status} />
-                  {status === "published" && !offer.productId ? (
-                    <label className="flex max-w-xs items-start gap-2 text-xs text-ro-muted">
-                      <input
-                        type="checkbox"
-                        name="plateAck"
-                        className="mt-0.5"
-                      />
-                      <span>
-                        <span className="font-medium text-ro-ink">
-                          {f.plateAck}
-                        </span>
-                        <span className="mt-0.5 block">{f.plateAckHelp}</span>
-                      </span>
-                    </label>
-                  ) : null}
-                  <Button
-                    type="submit"
-                    variant="secondary"
-                    size="sm"
-                    disabled={statusPending || offer.status === status}
+            <div className="flex flex-wrap items-center gap-2">
+              {(["published", "unpublished", "draft"] as const).map((status) => {
+                const isCurrent = offer.status === status;
+                if (isCurrent) {
+                  return (
+                    <Pill key={status} tone={offerPillTone(status)}>
+                      {labels.status.offer[status] ?? status}
+                    </Pill>
+                  );
+                }
+                return (
+                  <form
+                    key={status}
+                    className="space-y-2"
+                    action={(fd) => {
+                      startStatus(async () => {
+                        setStatusError(null);
+                        const result = await adminSetPublicOfferStatusAction(fd);
+                        if (!result.ok) {
+                          setStatusError(result.error);
+                          return;
+                        }
+                        router.refresh();
+                      });
+                    }}
                   >
-                    {fmt(f.setStatusTo, {
-                      status: labels.status.offer[status] ?? status,
-                    })}
-                  </Button>
-                </form>
-              ))}
+                    <input type="hidden" name="id" value={offer.id} />
+                    <input type="hidden" name="status" value={status} />
+                    {status === "published" && !offer.productId ? (
+                      <label className="mb-2 flex max-w-xs items-start gap-2 text-xs text-[color:var(--rad-tx3)]">
+                        <input
+                          type="checkbox"
+                          name="plateAck"
+                          className="mt-0.5"
+                        />
+                        <span>
+                          <span className="font-medium text-[color:var(--rad-tx)]">
+                            {f.plateAck}
+                          </span>
+                          <span className="mt-0.5 block">{f.plateAckHelp}</span>
+                        </span>
+                      </label>
+                    ) : null}
+                    <button
+                      type="submit"
+                      className="rad-btn rad-gh rad-sm"
+                      disabled={statusPending}
+                    >
+                      {fmt(f.setStatusTo, {
+                        status: labels.status.offer[status] ?? status,
+                      })}
+                    </button>
+                  </form>
+                );
+              })}
             </div>
           </div>
         ) : null}
       </div>
 
-      <aside className="sticky top-20 h-fit space-y-3 rounded-[var(--ro-r-lg)] border border-ro-line bg-ro-surface p-4">
-        <h2 className="font-display text-sm font-semibold text-ro-ink">
+      <aside className="sticky top-24 h-fit self-start space-y-3 rounded-[14px] border border-[color:var(--rad-bd)] bg-[color:var(--rad-surface)] p-4 shadow-[var(--rad-sh)]">
+        <h2
+          className="text-sm font-semibold"
+          style={{ color: "var(--rad-tx)", fontFamily: "var(--rad-font, inherit)" }}
+        >
           {labels.livePreview}
         </h2>
-        <div className="overflow-hidden rounded-[var(--ro-r-md)] border border-[color-mix(in_srgb,var(--ro-plum-900)_12%,transparent)]">
-          <div className="flex aspect-[16/9] items-center justify-center bg-[linear-gradient(160deg,var(--ro-plum-100),var(--ro-sand-200))] text-xs text-ro-muted">
+        <div className="overflow-hidden rounded-[12px] border border-[color:var(--rad-bd)] bg-[color:var(--rad-surface)]">
+          <div className="flex aspect-[16/9] items-center justify-center bg-[color:var(--rad-surface3)] text-xs text-[color:var(--rad-tx3)]">
             {linked ? productName(linked) : previewTitle}
           </div>
-          <div className="space-y-2 p-3">
-            <p className="font-display text-lg font-semibold text-ro-ink">
+          <div className="space-y-2 bg-[color:var(--rad-surface)] p-3">
+            <p className="font-display text-lg font-semibold text-[color:var(--rad-tx)]">
               {previewTitle}
             </p>
-            <p className="line-clamp-3 text-sm text-ro-muted">{previewSummary}</p>
+            <p className="line-clamp-3 text-sm text-[color:var(--rad-tx2)]">
+              {previewSummary}
+            </p>
             {offer ? (
-              <StatusChip
-                size="sm"
-                tone={offerTone(offer.status)}
-                label={labels.status.offer[offer.status] ?? offer.status}
-              />
+              <Pill tone={offerPillTone(offer.status)}>
+                {labels.status.offer[offer.status] ?? offer.status}
+              </Pill>
             ) : null}
           </div>
         </div>

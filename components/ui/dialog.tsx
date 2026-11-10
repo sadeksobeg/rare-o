@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui-kit/modal";
 
 export type DialogSize = "sm" | "md" | "lg";
 
@@ -76,7 +76,7 @@ export function Dialog({
       ref={ref}
       aria-labelledby={titleId}
       className={cn(
-        "ro-dialog m-0 max-h-[min(90vh,100%)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] p-0 text-[color:var(--ro-text)] shadow-[var(--ro-e3)] backdrop:bg-[color-mix(in_srgb,var(--ro-ink-950)_60%,transparent)] open:flex open:flex-col",
+        "ro-dialog m-0 max-h-[min(90vh,100%)] border border-[color:var(--rad-bd,var(--ro-border-subtle))] bg-[color:var(--rad-surface2,var(--ro-bg-raised))] p-0 text-[color:var(--rad-tx,var(--ro-text))] shadow-[var(--ro-e3)] backdrop:bg-[color-mix(in_srgb,var(--rad-c0,var(--ro-ink-950))_60%,transparent)] open:flex open:flex-col",
         "max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:top-auto max-md:w-full max-md:max-w-none max-md:rounded-t-[var(--ro-r-lg)] max-md:rounded-b-none",
         "md:fixed md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-[14px]",
         sizeClass[size],
@@ -96,15 +96,15 @@ export function Dialog({
     >
       <div className="flex max-h-[inherit] flex-col overflow-hidden">
         {!hideHeader ? (
-          <div className="shrink-0 border-b border-[color:var(--ro-border-subtle)] px-5 pb-3 pt-5">
+          <div className="shrink-0 border-b border-[color:var(--rad-bd,var(--ro-border-subtle))] px-5 pb-3 pt-5">
             <h2
               id={titleId}
-              className="font-display text-lg font-semibold text-[color:var(--ro-text)]"
+              className="font-display text-lg font-semibold text-[color:var(--rad-tx,var(--ro-text))]"
             >
               {title}
             </h2>
             {description ? (
-              <p className="mt-1.5 text-sm leading-relaxed text-[color:var(--ro-text-muted)]">
+              <p className="mt-1.5 text-sm leading-relaxed text-[color:var(--rad-tx3,var(--ro-text-muted))]">
                 {description}
               </p>
             ) : null}
@@ -145,23 +145,29 @@ export function ConfirmDialog({
   destructive?: boolean;
 }) {
   return (
-    <Dialog open={open} onClose={onClose} title={title} size="sm">
-      <p className="text-sm text-[color:var(--ro-text-muted)]">{body}</p>
-      {/* Destructive: cancel start-side, danger end-side (logical). */}
-      <div className="flex flex-wrap justify-end gap-2 pt-2">
-        <Button type="button" variant="secondary" size="sm" onClick={onClose}>
-          {cancelLabel}
-        </Button>
-        <Button
-          type="button"
-          variant={destructive ? "danger" : "primary"}
-          size="sm"
-          loading={pending}
-          onClick={onConfirm}
-        >
-          {confirmLabel}
-        </Button>
-      </div>
-    </Dialog>
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={title}
+      actions={
+        <>
+          <button type="button" className="rad-btn rad-gh" onClick={onClose}>
+            {cancelLabel}
+          </button>
+          <button
+            type="button"
+            className={destructive ? "rad-btn rad-dng" : "rad-btn rad-pri"}
+            disabled={pending}
+            onClick={onConfirm}
+          >
+            {pending ? "…" : confirmLabel}
+          </button>
+        </>
+      }
+    >
+      <p className="text-sm text-[color:var(--rad-tx2,var(--ro-text-muted))]">
+        {body}
+      </p>
+    </Modal>
   );
 }

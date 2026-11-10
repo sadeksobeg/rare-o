@@ -7,7 +7,6 @@ import {
 } from "@/components/brokerage/labels";
 import { BrokerageStatusBadge } from "@/components/brokerage/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { ButtonLink } from "@/components/ui/button";
 import { listTraderBrokerage } from "@/lib/brokerage/service";
 import { nextActor } from "@/lib/brokerage/status";
 import { getTraderSession } from "@/lib/auth/trader-session";
@@ -38,7 +37,7 @@ export default async function TraderBrokeragePage() {
         title={
           <span className="inline-flex items-center gap-2.5">
             <Compass
-              className="size-7 shrink-0 text-[var(--ro-plum-800)]"
+              className="size-7 shrink-0 text-[color:var(--rad-ac)]"
               strokeWidth={1.5}
             />
             {t.brokerageListTitle}
@@ -46,10 +45,10 @@ export default async function TraderBrokeragePage() {
         }
         subtitle={t.brokerageListSubtitle}
         actions={
-          <ButtonLink href="/trader/brokerage/new" className="min-h-11">
+          <Link href="/trader/brokerage/new" className="rad-btn rad-pri min-h-11">
             <Plus className="size-4" strokeWidth={1.5} />
             {t.brokerageNewCta}
-          </ButtonLink>
+          </Link>
         }
         stats={[
           { label: t.brokerageStatTotal, value: rows.length },
@@ -84,29 +83,29 @@ export default async function TraderBrokeragePage() {
               >
                 <Link
                   href={`/trader/brokerage/${r.id}`}
-                  className={`ro-brokerage-card group flex min-h-14 flex-wrap items-center justify-between gap-3 rounded-[var(--ro-r-lg)] border border-[var(--ro-border-subtle)] bg-[var(--ro-sand-50)] p-4 pe-5 ${
+                  className={`rad-card group flex min-h-14 flex-wrap items-center justify-between gap-3 p-4 pe-5 ${
                     waiting
-                      ? "ro-brokerage-pulse border-[color-mix(in_srgb,var(--ro-amber-500)_45%,var(--ro-border-subtle))] bg-[color-mix(in_srgb,var(--ro-amber-100)_35%,var(--ro-sand-50))]"
-                      : "hover:border-[var(--ro-plum-300)] hover:bg-[color-mix(in_srgb,var(--ro-plum-50)_50%,var(--ro-sand-50))]"
+                      ? "ro-brokerage-pulse border-[color-mix(in_srgb,var(--ro-amber-500)_45%,var(--rad-bd))] bg-[color-mix(in_srgb,var(--ro-amber-100)_20%,var(--rad-surface))]"
+                      : "hover:border-[color:var(--rad-ac)]"
                   }`}
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <p
-                        className="font-mono text-[0.7rem] text-[var(--ro-ink-500)]"
+                        className="font-mono text-[0.7rem] text-[color:var(--rad-tx3)]"
                         dir="ltr"
                       >
                         <bdi dir="ltr">{r.reference}</bdi>
                       </p>
-                      <span className="text-[0.65rem] tabular-nums text-[var(--ro-ink-500)]">
+                      <span className="text-[0.65rem] tabular-nums text-[color:var(--rad-tx3)]">
                         <bdi dir="ltr">{age}d</bdi>
                       </span>
                     </div>
-                    <p className="mt-1 truncate text-base font-medium text-ro-ink">
+                    <p className="mt-1 truncate text-base font-medium text-[color:var(--rad-tx)]">
                       {localizedName(locale, r.descriptionAr, r.descriptionEn)}
                     </p>
                     {(r.cityAr || r.cityEn) && (
-                      <p className="mt-0.5 text-xs text-[var(--ro-ink-500)]">
+                      <p className="mt-0.5 text-xs text-[color:var(--rad-tx3)]">
                         {localizedName(locale, r.cityAr, r.cityEn)}
                       </p>
                     )}

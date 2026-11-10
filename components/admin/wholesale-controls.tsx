@@ -5,7 +5,6 @@ import {
   adminTransitionWholesaleAction,
   adminUpdateWholesaleShippingAction,
 } from "@/app/wholesale-actions";
-import { Button } from "@/components/ui/button";
 import { CurrencySelect } from "@/components/ui/currency-select";
 import { Select } from "@/components/ui/select";
 import { TextField, Textarea } from "@/components/ui/text-field";
@@ -22,6 +21,7 @@ export function AdminWholesaleControls({
   lines,
   quoteCurrencyDefault,
   labels,
+  bare = false,
 }: {
   requestId: string;
   status: string;
@@ -30,6 +30,8 @@ export function AdminWholesaleControls({
   lines: Array<{ id: string; productName: string; quantity: number }>;
   quoteCurrencyDefault: string;
   labels: Dictionary["adminUi"];
+  /** Skip outer border + heading when wrapped in ui-kit Card. */
+  bare?: boolean;
 }) {
   const f = labels.form;
   const router = useRouter();
@@ -56,8 +58,14 @@ export function AdminWholesaleControls({
     status === "quote_provided";
 
   return (
-    <div className="space-y-6 border border-ro-line p-4">
-      <h2 className="text-lg font-semibold">{f.adminOperations}</h2>
+    <div
+      className={
+        bare ? "space-y-6" : "space-y-6 border border-ro-line p-4"
+      }
+    >
+      {bare ? null : (
+        <h2 className="text-lg font-semibold">{f.adminOperations}</h2>
+      )}
 
       {nextStatuses.length > 0 ? (
         <form
@@ -99,12 +107,18 @@ export function AdminWholesaleControls({
             dense
             className="min-w-[12rem] flex-1"
           />
-          <Button type="submit" size="sm" loading={pending}>
+          <button
+            type="submit"
+            className="rad-btn rad-pri rad-sm"
+            disabled={pending}
+          >
             {f.apply}
-          </Button>
+          </button>
         </form>
       ) : (
-        <p className="text-sm text-ro-muted">{f.terminalStatus}</p>
+        <p className="text-sm" style={{ color: "var(--rad-tx3)" }}>
+          {f.terminalStatus}
+        </p>
       )}
 
       {canQuote ? (
@@ -165,14 +179,13 @@ export function AdminWholesaleControls({
             rows={3}
             dense
           />
-          <Button
+          <button
             type="submit"
-            variant="secondary"
-            size="sm"
-            loading={pending}
+            className="rad-btn rad-pri rad-sm"
+            disabled={pending}
           >
             {f.saveQuote}
-          </Button>
+          </button>
         </form>
       ) : null}
 
@@ -202,9 +215,13 @@ export function AdminWholesaleControls({
             dir="ltr"
             dense
           />
-          <Button type="submit" variant="secondary" size="sm" loading={pending}>
+          <button
+            type="submit"
+            className="rad-btn rad-pri rad-sm"
+            disabled={pending}
+          >
             {f.saveShipping}
-          </Button>
+          </button>
         </form>
       ) : null}
 

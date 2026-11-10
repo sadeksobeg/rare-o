@@ -382,3 +382,64 @@ export function daysSince(date: Date | string, now = Date.now()) {
   const t = typeof date === "string" ? new Date(date).getTime() : date.getTime();
   return Math.max(0, Math.floor((now - t) / 86400000));
 }
+
+/** Admin age chip — Arabic for ar, compact English otherwise (never bare "11d" in ar). */
+export function formatBrokerageAge(date: Date | string, locale: string) {
+  const age = daysSince(date);
+  if (locale === "ar") {
+    if (age === 0) return "اليوم";
+    if (age === 1) return "يوم واحد";
+    if (age === 2) return "يومان";
+    if (age >= 3 && age <= 10) return `${age} أيام`;
+    return `${age} يوماً`;
+  }
+  if (age === 0) return "today";
+  if (age === 1) return "1 day";
+  return `${age} days`;
+}
+
+const ENUM_TOKEN_RE = /\b[A-Z]{2,}(_[A-Z0-9]+)+\b/g;
+const BARE_STATUS_RE = new RegExp(
+  `\\b(${Object.keys(BROKERAGE_STATUS_META).join("|")})\\b`,
+  "g"
+);
+
+function isRawStatusToken(raw: string) {
+  if (!raw) return false;
+  if (raw in BROKERAGE_STATUS_META) return true;
+  return /^[A-Z]{2,}(_[A-Z0-9]+)+$/.test(raw);
+}
+
+/** Replace SCREAMING_SNAKE / known status tokens inside a free-text event message. */
+export function translateStatusTokensInText(text: string, locale: string) {
+  return text
+    .replace(ENUM_TOKEN_RE, (token) =>
+      token in BROKERAGE_STATUS_META
+        ? brokerageStatusLabel(token, locale)
+        : token
+    )
+    .replace(BARE_STATUS_RE, (token) =>
+      token in BROKERAGE_STATUS_META
+        ? brokerageStatusLabel(token, locale)
+        : token
+    );
+}
+
+/** Prefer dictionary label when message is a raw status enum (or embeds one). */
+export function brokerageEventMessage(
+  locale: string,
+  messageAr: string,
+  messageEn: string,
+  toStatus: string | null
+) {
+  const raw =
+    (locale === "ar" ? messageAr || messageEn : messageEn || messageAr).trim();
+  if (toStatus && (!raw || isRawStatusToken(raw) || raw === toStatus)) {
+    return brokerageStatusLabel(toStatus, locale);
+  }
+  if (isRawStatusToken(raw)) {
+    return brokerageStatusLabel(raw, locale);
+  }
+  if (raw) return translateStatusTokensInText(raw, locale);
+  return toStatus ? brokerageStatusLabel(toStatus, locale) : "";
+}

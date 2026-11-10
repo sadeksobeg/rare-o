@@ -40,7 +40,7 @@ export default async function TraderLoginPage({
           href={accountRequestHref}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-medium text-[var(--ro-plum-900)] underline-offset-4 hover:underline"
+          className="font-medium text-[color:var(--rad-ac,var(--ro-plum-900))] underline-offset-4 hover:underline"
         >
           {dict.trader.accountRequestHelp}
         </a>

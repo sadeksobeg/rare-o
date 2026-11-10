@@ -1,27 +1,13 @@
-import { Suspense } from "react";
-import { Percent, Plus } from "lucide-react";
 import {
-  DataTable,
-  DataTableHead,
-  RowHit,
-  Td,
-  Th,
-  Tr,
-} from "@/components/admin/data-table";
-import {
-  AdminRecordCard,
-  AdminRecordCardList,
-} from "@/components/admin/list-record-card";
-import { PortalHeroStrip } from "@/components/admin/portal-hero";
-import { AdminTableFilters } from "@/components/admin/table-filters";
-import { ButtonLink } from "@/components/ui/button";
-import { EmptyState } from "@/components/ui/empty-state";
-import { StatusChip } from "@/components/ui/status-chip";
+  OffersListView,
+  type OffersListRow,
+} from "@/components/admin/rad/offers-list-view";
 import { PUBLIC_OFFER_STATUSES } from "@/lib/deals/constants";
+import { formatAdminDate } from "@/lib/i18n/admin-format";
 import { getRequestDictionary } from "@/lib/i18n/server";
-import { isFresh } from "@/lib/ui/fresh";
-import { getStatusChipProps } from "@/lib/ui/status-labels";
 import { listPublicOffersForAdmin } from "@/lib/offers/service";
+import { statusToneToPill } from "@/lib/ui/pill-tone";
+import { getStatusChipProps } from "@/lib/ui/status-labels";
 
 export default async function AdminOffersPage({
   searchParams,
@@ -53,153 +39,61 @@ export default async function AdminOffersPage({
     return hay.includes(q);
   });
 
-  const filteredEmpty = tab !== "all" || Boolean(q);
+  const rows: OffersListRow[] = filtered.map((o) => {
+    const chip = getStatusChipProps(dict, "offer", o.status);
+    const title =
+      locale === "ar"
+        ? o.titleAr || o.titleEn || o.slug
+        : o.titleEn || o.titleAr || o.slug;
+    return {
+      id: o.id,
+      href: `/admin/offers/${o.id}`,
+      title,
+      slug: o.slug,
+      statusLabel: chip.label,
+      pillTone: statusToneToPill(chip.tone),
+      dealRef: o.dealProposal?.reference ?? null,
+      updatedLabel: formatAdminDate(o.updatedAt, locale),
+    };
+  });
 
   return (
-    <section data-admin-offers="" className="space-y-5 pb-16">
-      <PortalHeroStrip
-        eyebrow={ar ? "كتالوج" : "Catalog"}
-        title={
-          <span className="inline-flex items-center gap-2.5">
-            <Percent
-              className="size-7 shrink-0 text-[color:var(--ro-accent-fg,var(--ro-plum-800))]"
-              strokeWidth={1.5}
-            />
-            {a.offers}
-          </span>
-        }
-        subtitle={u.offersLead}
-        actions={
-          <ButtonLink href="/admin/offers/new" variant="primary" size="sm">
-            <Plus className="size-3.5" strokeWidth={1.5} aria-hidden />
-            {u.newOffer}
-          </ButtonLink>
-        }
-        stats={[
-          {
-            label: ar ? "الكل" : "Total",
-            value: counts.all,
-          },
-          {
-            label: u.status.offer.published,
-            value: counts.published ?? 0,
-            hint: ar ? "على المتجر" : "On storefront",
-          },
-          {
-            label: u.status.offer.draft,
-            value: counts.draft ?? 0,
-          },
-          {
-            label: u.status.offer.unpublished,
-            value: counts.unpublished ?? 0,
-          },
-        ]}
-      />
-
-      <Suspense fallback={null}>
-        <AdminTableFilters
-          tabsLabel={u.filterTabs}
-          searchLabel={u.search}
-          searchPlaceholder={ar ? "ابحث بالعنوان أو المرجع…" : "Search title or ref…"}
-          resultCount={filtered.length}
-          resultLabel={u.resultsLabel}
-          tabs={[
-            { id: "all", label: u.filterAll, count: counts.all },
-            ...PUBLIC_OFFER_STATUSES.map((s) => ({
-              id: s,
-              label: u.status.offer[s] ?? s,
-              count: counts[s] ?? 0,
-            })),
-          ]}
-        />
-      </Suspense>
-
-      {filtered.length === 0 ? (
-        <EmptyState
-          variant={filteredEmpty ? "no-results" : "first-use"}
-          title={u.emptyTitle}
-          body={u.emptyBody}
-          actionHref={filteredEmpty ? "/admin/offers" : "/admin/offers/new"}
-          actionLabel={filteredEmpty ? dict.catalog.clearFilters : u.newOffer}
-        />
-      ) : (
-        <>
-          <AdminRecordCardList>
-            {filtered.map((o) => {
-              const title =
-                locale === "ar"
-                  ? o.titleAr || o.titleEn
-                  : o.titleEn || o.titleAr;
-              return (
-                <AdminRecordCard
-                  key={o.id}
-                  href={`/admin/offers/${o.id}`}
-                  flash={isFresh(o.updatedAt)}
-                  title={title}
-                  meta={o.slug}
-                  trailing={
-                    <StatusChip
-                      size="sm"
-                      {...getStatusChipProps(dict, "offer", o.status)}
-                    />
-                  }
-                  actionLabel={a.edit}
-                />
-              );
-            })}
-          </AdminRecordCardList>
-          <div className="hidden md:block">
-            <DataTable>
-              <DataTableHead>
-                <Th>{u.colTitle}</Th>
-                <Th>{a.colSlug}</Th>
-                <Th>{a.colStatus}</Th>
-                <Th>{u.colDeal}</Th>
-              </DataTableHead>
-              <tbody>
-                {filtered.map((o) => {
-                  const title =
-                    locale === "ar"
-                      ? o.titleAr || o.titleEn
-                      : o.titleEn || o.titleAr;
-                  return (
-                    <Tr
-                      key={o.id}
-                      href={`/admin/offers/${o.id}`}
-                      flash={isFresh(o.updatedAt)}
-                    >
-                      <Td>
-                        <RowHit href={`/admin/offers/${o.id}`}>{title}</RowHit>
-                      </Td>
-                      <Td>
-                        <span
-                          className="text-xs text-[color:var(--ro-text-muted)]"
-                          dir="ltr"
-                        >
-                          {o.slug}
-                        </span>
-                      </Td>
-                      <Td>
-                        <StatusChip
-                          size="sm"
-                          {...getStatusChipProps(dict, "offer", o.status)}
-                        />
-                      </Td>
-                      <Td className="font-medium text-[color:var(--ro-text-2)]">
-                        {o.dealProposal?.reference ? (
-                          <bdi dir="ltr">{o.dealProposal.reference}</bdi>
-                        ) : (
-                          "—"
-                        )}
-                      </Td>
-                    </Tr>
-                  );
-                })}
-              </tbody>
-            </DataTable>
-          </div>
-        </>
-      )}
-    </section>
+    <OffersListView
+      title={a.offers}
+      lead={u.offersLead}
+      query={{ tab, q: qRaw?.trim() ?? "" }}
+      tabs={[
+        { value: "all", label: u.filterAll, count: counts.all },
+        ...PUBLIC_OFFER_STATUSES.map((s) => ({
+          value: s,
+          label: getStatusChipProps(dict, "offer", s).label,
+          count: counts[s] ?? 0,
+        })),
+      ]}
+      rows={rows}
+      totalFiltered={filtered.length}
+      labels={{
+        listAria: a.offers,
+        statusFilterAria: u.filterTabs,
+        searchLabel: u.search,
+        searchPlaceholder: ar
+          ? "ابحث بالعنوان أو المرجع…"
+          : "Search title or reference…",
+        colTitle: ar ? "العنوان" : "Title",
+        colStatus: a.colStatus,
+        colDeal: ar ? "الصفقة" : "Deal",
+        colUpdated: ar ? "آخر تحديث" : "Updated",
+        colActions: ar ? "إجراءات" : "Actions",
+        emptyTitle: u.emptyTitle,
+        emptyBody: u.emptyBody,
+        noResultsTitle: u.emptyTitle,
+        noResultsBody: u.emptyBody,
+        clearFilters: dict.catalog.clearFilters,
+        resultsSummary: ar
+          ? "عرض {n} عرضاً"
+          : "Showing {n}",
+        newOffer: u.newOffer,
+      }}
+    />
   );
 }

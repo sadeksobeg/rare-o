@@ -79,6 +79,7 @@ export function NegotiationThread({
   termsLabel,
   qtyLabel,
   currency,
+  bare = false,
 }: {
   entries: readonly NegotiationEntryView[];
   dealId: string;
@@ -91,6 +92,8 @@ export function NegotiationThread({
   termsLabel: string;
   qtyLabel: string;
   currency?: string | null;
+  /** Skip outer heading + card chrome when wrapped in ui-kit Card. */
+  bare?: boolean;
 }) {
   const events: TimelineEvent[] = entries.map((e) => {
     const textBits: string[] = [];
@@ -114,8 +117,12 @@ export function NegotiationThread({
       actor: labels.actorRole[e.actorRole] ?? e.actorRole,
       relativeTime: formatRelative(e.createdAt, locale),
       absoluteTime: formatDate(e.createdAt, locale, {
-        dateStyle: "medium",
-        timeStyle: "short",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
       }),
       icon: e.actorRole === "admin" || e.actorRole === "trader"
         ? actorLeading(e.actorRole)
@@ -125,7 +132,7 @@ export function NegotiationThread({
         textBits.length || termsLine ? (
           <div className="space-y-2">
             {termsLine ? (
-              <p className="text-xs font-bold tracking-wide text-[var(--ro-plum-800)]">
+              <p className="text-xs font-medium tracking-wide text-[color:var(--rad-tx2)]">
                 {termsLine}
               </p>
             ) : null}
@@ -140,24 +147,41 @@ export function NegotiationThread({
     };
   });
 
+  const body =
+    events.length === 0 ? (
+      <p
+        className={
+          bare
+            ? "text-sm"
+            : "ro-portal-card border p-4 text-sm font-semibold text-ro-muted"
+        }
+        style={bare ? { color: "var(--rad-tx3)" } : undefined}
+      >
+        —
+      </p>
+    ) : bare ? (
+      <Timeline label={title} events={events} />
+    ) : (
+      <div className="ro-portal-card border p-3 md:p-4">
+        <Timeline label={title} events={events} />
+      </div>
+    );
+
   return (
     <div className="space-y-6" data-component="negotiation-thread">
       <div className="space-y-3">
-        <h2 className="ro-portal-section-title flex items-center gap-2">
-          <span className="ro-portal-icon-well size-8 [&>svg]:size-4" aria-hidden>
-            <MessagesSquare className="size-4" strokeWidth={2} />
-          </span>
-          {title}
-        </h2>
-        {events.length === 0 ? (
-          <p className="ro-portal-card border p-4 text-sm font-semibold text-ro-muted">
-            —
-          </p>
-        ) : (
-          <div className="ro-portal-card border p-3 md:p-4">
-            <Timeline label={title} events={events} />
-          </div>
+        {bare ? null : (
+          <h2 className="ro-portal-section-title flex items-center gap-2">
+            <span
+              className="ro-portal-icon-well size-8 [&>svg]:size-4"
+              aria-hidden
+            >
+              <MessagesSquare className="size-4" strokeWidth={2} />
+            </span>
+            {title}
+          </h2>
         )}
+        {body}
       </div>
       {open ? (
         <NegotiationForm

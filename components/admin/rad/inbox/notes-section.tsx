@@ -44,7 +44,7 @@ export function RadNotesSection({
   return (
     <>
       {notes.length === 0 ? (
-        <p style={{ color: "var(--rad-tx3)", fontSize: 13 }}>{ib.notesEmpty}</p>
+        <p className="rad-notes-empty">{ib.notesEmpty}</p>
       ) : (
         notes.map((n) => (
           <div className="rad-nt" key={n.id}>
@@ -55,7 +55,7 @@ export function RadNotesSection({
           </div>
         ))
       )}
-      <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+      <div className="rad-note-compose">
         <input
           type="text"
           value={draft}
@@ -69,17 +69,7 @@ export function RadNotesSection({
           placeholder={ib.addNotePlaceholder}
           disabled={pending}
           className="rad-fld-input"
-          style={{
-            flex: 1,
-            height: 34,
-            borderRadius: 9,
-            border: "1px solid var(--rad-bd2)",
-            background: "var(--rad-surface2)",
-            color: "var(--rad-tx)",
-            padding: "0 10px",
-            font: "inherit",
-            fontSize: 13,
-          }}
+          autoComplete="off"
         />
         <button
           type="button"

@@ -1,23 +1,16 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { Compass, LayoutGrid, List } from "lucide-react";
+import { LayoutGrid, List } from "lucide-react";
 import { BrokerageAdminFilters } from "@/components/admin/brokerage-filters";
-import {
-  DataTable,
-  DataTableHead,
-  RowHit,
-  Td,
-  Th,
-  Tr,
-} from "@/components/admin/data-table";
-import { BrokerageHeroStrip } from "@/components/brokerage/hero-strip";
+import { BrokerageTable } from "@/components/admin/rad/brokerage-table";
 import {
   brokerageActorLabel,
   brokerageNextHint,
   brokerageStatusLabel,
   daysSince,
+  formatBrokerageAge,
 } from "@/components/brokerage/labels";
-import { BrokerageStatusBadge } from "@/components/brokerage/status-badge";
+import { Card, CardHeader } from "@/components/ui-kit";
 import { listAdminBrokerage } from "@/lib/brokerage/service";
 import { BROKERAGE_LIFECYCLE, nextActor } from "@/lib/brokerage/status";
 import { getRequestDictionary } from "@/lib/i18n/server";
@@ -26,18 +19,18 @@ import { localizedName } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 
 const COL_ACCENT: Record<string, string> = {
-  SUBMITTED: "border-t-[color:var(--ro-plum-700)]",
-  AWAITING_PAYMENT: "border-t-[color:var(--ro-amber-500,#efb04a)]",
-  PAYMENT_CONFIRMED: "border-t-[color:var(--ro-success-700)]",
-  ACCEPTED: "border-t-[color:var(--ro-progress-700,#7eb6ff)]",
-  INSPECTION_SCHEDULED: "border-t-[color:var(--ro-progress-700,#7eb6ff)]",
-  INSPECTED: "border-t-[color:var(--ro-plum-700)]",
-  QUOTE_SENT: "border-t-[color:var(--ro-amber-500,#efb04a)]",
-  APPROVED: "border-t-[color:var(--ro-success-700)]",
-  PURCHASED: "border-t-[color:var(--ro-success-700)]",
-  SHIPPED: "border-t-[color:var(--ro-progress-700,#7eb6ff)]",
-  DELIVERED: "border-t-[color:var(--ro-success-700)]",
-  CLOSED: "border-t-[color:var(--ro-text-muted)]",
+  SUBMITTED: "border-t-[color:var(--rad-acf)]",
+  AWAITING_PAYMENT: "border-t-[color:var(--rad-warn)]",
+  PAYMENT_CONFIRMED: "border-t-[color:var(--rad-ok)]",
+  ACCEPTED: "border-t-[color:var(--rad-info)]",
+  INSPECTION_SCHEDULED: "border-t-[color:var(--rad-info)]",
+  INSPECTED: "border-t-[color:var(--rad-acf)]",
+  QUOTE_SENT: "border-t-[color:var(--rad-warn)]",
+  APPROVED: "border-t-[color:var(--rad-ok)]",
+  PURCHASED: "border-t-[color:var(--rad-ok)]",
+  SHIPPED: "border-t-[color:var(--rad-info)]",
+  DELIVERED: "border-t-[color:var(--rad-ok)]",
+  CLOSED: "border-t-[color:var(--rad-tx3)]",
 };
 
 function isStaleRow(r: { createdAt: Date; status: string }) {
@@ -109,43 +102,25 @@ export default async function AdminBrokeragePage({
 
   return (
     <section data-admin-brokerage="" className="space-y-5 pb-16">
-      <BrokerageHeroStrip
-        eyebrow={ar ? "عمليات" : "Operations"}
-        title={
-          <span className="inline-flex items-center gap-2.5">
-            <Compass
-              className="size-7 shrink-0 text-[color:var(--ro-accent-fg,var(--ro-plum-800))]"
-              strokeWidth={1.5}
-            />
-            {dict.admin.brokerage}
-          </span>
-        }
-        subtitle={
-          ar
-            ? "من استقبال الطلب حتى الإغلاق — كل عمود مرحلة واضحة مع من ينتظر"
-            : "From intake to close — each column is a clear stage with who acts next"
-        }
-        stats={[
-          {
-            label: ar ? "نشط" : "Active",
-            value: active,
-            hint: ar ? "طلبات مفتوحة" : "Open requests",
-          },
-          {
-            label: ar ? "ينتظر الإدارة" : "Needs admin",
-            value: awaitingAdmin,
-          },
-          {
-            label: ar ? "ينتظر التاجر" : "Needs trader",
-            value: awaitingTrader,
-          },
-          {
-            label: ar ? "متأخر ≥3 أيام" : "Stale ≥3d",
-            value: stale,
-            hint: stale > 0 ? (ar ? "راجع الآن" : "Review now") : undefined,
-          },
-        ]}
-      />
+      <header className="rad-phead">
+        <div>
+          <h1>{dict.admin.brokerage}</h1>
+          <p>
+            {ar
+              ? "من استقبال الطلب حتى الإغلاق — كل عمود مرحلة واضحة مع من ينتظر"
+              : "From intake to close — each column is a clear stage with who acts next"}
+            {" · "}
+            <span className="tabular-nums">
+              {active} {ar ? "نشط" : "active"} · {awaitingAdmin}{" "}
+              {ar ? "للإدارة" : "admin"} · {awaitingTrader}{" "}
+              {ar ? "للتاجر" : "trader"}
+              {stale > 0
+                ? ` · ${stale} ${ar ? "متأخر" : "stale"}`
+                : ""}
+            </span>
+          </p>
+        </div>
+      </header>
 
       <Suspense fallback={null}>
         <BrokerageAdminFilters
@@ -163,12 +138,13 @@ export default async function AdminBrokeragePage({
         />
       </Suspense>
 
-      <div className="flex flex-wrap items-center gap-2 text-xs text-[color:var(--ro-text-muted)]">
+      <div
+        className="flex flex-wrap items-center gap-2 text-xs"
+        style={{ color: "var(--rad-tx3)" }}
+      >
         <LayoutGrid className="size-3.5" strokeWidth={1.5} aria-hidden />
         <span>{ar ? "لوحة كانبان" : "Kanban board"}</span>
-        <span aria-hidden className="text-[color:var(--ro-border)]">
-          ·
-        </span>
+        <span aria-hidden>·</span>
         <List className="size-3.5" strokeWidth={1.5} aria-hidden />
         <span>{ar ? "جدول كامل أدناه" : "Full table below"}</span>
         <span className="tabular-nums">
@@ -188,17 +164,33 @@ export default async function AdminBrokeragePage({
           return (
             <div
               key={status}
-              className={`ro-brokerage-col w-[16.5rem] shrink-0 rounded-[14px] border border-t-[3px] p-3.5 ${COL_ACCENT[status] ?? "border-t-[color:var(--ro-plum-700)]"}`}
+              className={`ro-brokerage-col w-[16.5rem] shrink-0 rounded-[14px] border border-t-[3px] p-3.5 ${COL_ACCENT[status] ?? "border-t-[color:var(--rad-acf)]"}`}
+              style={{
+                borderColor: "var(--rad-bd)",
+                background: "var(--rad-surface)",
+              }}
             >
               <div className="mb-2 flex items-start justify-between gap-2">
-                <h2 className="text-sm font-semibold leading-snug text-[color:var(--ro-text)]">
+                <h2
+                  className="text-sm font-semibold leading-snug"
+                  style={{ color: "var(--rad-tx)" }}
+                >
                   {label}
                 </h2>
-                <span className="inline-flex min-w-6 shrink-0 items-center justify-center rounded-full bg-[color:color-mix(in_srgb,var(--ro-text)_8%,transparent)] px-1.5 py-0.5 text-xs font-semibold tabular-nums text-[color:var(--ro-text-2)]">
+                <span
+                  className="inline-flex min-w-6 shrink-0 items-center justify-center rounded-full px-1.5 py-0.5 text-xs font-semibold tabular-nums"
+                  style={{
+                    background: "var(--rad-surface3)",
+                    color: "var(--rad-tx2)",
+                  }}
+                >
                   {items.length}
                 </span>
               </div>
-              <p className="mb-3 line-clamp-3 min-h-[3.15rem] text-[0.72rem] leading-relaxed text-[color:var(--ro-text-muted)]">
+              <p
+                className="mb-3 line-clamp-3 min-h-[3.15rem] text-[0.72rem] leading-relaxed"
+                style={{ color: "var(--rad-tx3)" }}
+              >
                 {brokerageNextHint(status, locale, "admin")}
               </p>
               <ul className="space-y-2">
@@ -212,25 +204,37 @@ export default async function AdminBrokeragePage({
                       <Link
                         href={`/admin/brokerage/${r.id}`}
                         className={`ro-brokerage-card block rounded-[12px] p-3 ${hot ? "ro-brokerage-pulse" : ""}`}
+                        style={{
+                          background: "var(--rad-surface2)",
+                          border: "1px solid var(--rad-bd)",
+                        }}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <p
-                            className="font-mono text-[0.7rem] font-medium text-[color:var(--ro-text-2)]"
+                            className="font-mono text-[0.7rem] font-medium"
+                            style={{ color: "var(--rad-tx2)" }}
                             dir="ltr"
                           >
                             {r.reference}
                           </p>
                           <span
-                            className={`shrink-0 rounded px-1.5 py-0.5 text-[0.65rem] tabular-nums ${
+                            className="shrink-0 rounded px-1.5 py-0.5 text-[0.65rem] tabular-nums"
+                            style={
                               staleAge
-                                ? "bg-[color:var(--ro-warn-bg,color-mix(in_srgb,#efb04a_18%,transparent))] text-[color:var(--ro-warn,#efb04a)]"
-                                : "text-[color:var(--ro-text-muted)]"
-                            }`}
+                                ? {
+                                    background: "var(--rad-warns)",
+                                    color: "var(--rad-warn)",
+                                  }
+                                : { color: "var(--rad-tx3)" }
+                            }
                           >
-                            {age}d
+                            {formatBrokerageAge(r.createdAt, locale)}
                           </span>
                         </div>
-                        <p className="mt-1.5 line-clamp-2 text-sm font-medium leading-snug text-[color:var(--ro-text)]">
+                        <p
+                          className="mt-1.5 line-clamp-2 text-sm font-medium leading-snug"
+                          style={{ color: "var(--rad-tx)" }}
+                        >
                           {localizedName(
                             locale,
                             r.descriptionAr,
@@ -238,17 +242,22 @@ export default async function AdminBrokeragePage({
                           )}
                         </p>
                         <div className="mt-2 flex items-center justify-between gap-2">
-                          <p className="truncate text-xs text-[color:var(--ro-text-2)]">
+                          <p
+                            className="truncate text-xs"
+                            style={{ color: "var(--rad-tx2)" }}
+                          >
                             {r.trader.displayName}
                           </p>
                           <span
-                            className={`shrink-0 text-[0.65rem] font-semibold ${
-                              actor === "admin"
-                                ? "text-[color:var(--ro-accent-fg)]"
-                                : actor === "trader"
-                                  ? "text-[color:var(--ro-warn,#efb04a)]"
-                                  : "text-[color:var(--ro-text-muted)]"
-                            }`}
+                            className="shrink-0 text-[0.65rem] font-semibold"
+                            style={{
+                              color:
+                                actor === "admin"
+                                  ? "var(--rad-ac)"
+                                  : actor === "trader"
+                                    ? "var(--rad-warn)"
+                                    : "var(--rad-tx3)",
+                            }}
                           >
                             {ar ? "ينتظر: " : "Needs: "}
                             {brokerageActorLabel(r.status, locale)}
@@ -259,7 +268,14 @@ export default async function AdminBrokeragePage({
                   );
                 })}
                 {items.length === 0 ? (
-                  <li className="rounded-[12px] border border-dashed border-[color:var(--ro-border-subtle)] bg-[color:color-mix(in_srgb,var(--ro-bg-sunken)_40%,transparent)] py-5 text-center text-[0.7rem] text-[color:var(--ro-text-muted)]">
+                  <li
+                    className="rounded-[12px] border border-dashed py-5 text-center text-[0.7rem]"
+                    style={{
+                      borderColor: "var(--rad-bd)",
+                      background: "var(--rad-surface3)",
+                      color: "var(--rad-tx3)",
+                    }}
+                  >
                     {ar ? "فارغ" : "Empty"}
                   </li>
                 ) : null}
@@ -269,97 +285,37 @@ export default async function AdminBrokeragePage({
         })}
       </div>
 
-      <div className="space-y-3">
-        <div className="flex items-center justify-between gap-3 px-0.5">
-          <h2 className="font-display text-base font-semibold text-[color:var(--ro-text)]">
-            {ar ? "كل الطلبات" : "All requests"}
-          </h2>
-          <span className="text-xs tabular-nums text-[color:var(--ro-text-muted)]">
-            {rows.length}
-          </span>
-        </div>
-        <div className="hidden md:block">
-          <DataTable>
-            <DataTableHead>
-              <Th>{ar ? "المرجع" : "Ref"}</Th>
-              <Th>{ar ? "التاجر" : "Trader"}</Th>
-              <Th>{ar ? "الوصف" : "Description"}</Th>
-              <Th>{ar ? "العمر" : "Age"}</Th>
-              <Th>{ar ? "ينتظر" : "Waiting"}</Th>
-              <Th>{ar ? "الحالة" : "Status"}</Th>
-              <Th>{ar ? "الخطوة التالية" : "Next"}</Th>
-            </DataTableHead>
-            <tbody>
-              {rows.map((r) => (
-                <Tr key={r.id} href={`/admin/brokerage/${r.id}`}>
-                  <Td>
-                    <RowHit href={`/admin/brokerage/${r.id}`}>
-                      <span dir="ltr">{r.reference}</span>
-                    </RowHit>
-                  </Td>
-                  <Td>
-                    <span className="font-semibold text-[color:var(--ro-text)]">
-                      {r.trader.displayName}
-                    </span>
-                  </Td>
-                  <Td className="max-w-[14rem] truncate text-[color:var(--ro-text)]">
-                    {localizedName(locale, r.descriptionAr, r.descriptionEn)}
-                  </Td>
-                  <Td className="tabular-nums text-[color:var(--ro-text-2)]">
-                    {daysSince(r.createdAt)}d
-                  </Td>
-                  <Td className="text-xs font-semibold text-[color:var(--ro-text)]">
-                    {brokerageActorLabel(r.status, locale)}
-                  </Td>
-                  <Td>
-                    <BrokerageStatusBadge
-                      status={r.status}
-                      label={brokerageStatusLabel(r.status, locale)}
-                    />
-                  </Td>
-                  <Td className="max-w-[15rem]">
-                    <p className="line-clamp-2 text-xs leading-snug text-[color:var(--ro-text-2)]">
-                      {brokerageNextHint(r.status, locale, "admin")}
-                    </p>
-                  </Td>
-                </Tr>
-              ))}
-            </tbody>
-          </DataTable>
-        </div>
-        <ul className="divide-y divide-[color:var(--ro-border-subtle)] overflow-hidden rounded-[14px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-raised)] md:hidden">
-          {rows.map((r) => (
-            <li key={r.id}>
-              <Link
-                href={`/admin/brokerage/${r.id}`}
-                className="block space-y-2 p-4 transition-[background-color] hover:bg-[color:var(--ro-panel-hover)]"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <p
-                    className="font-mono text-xs font-semibold text-[color:var(--ro-accent-fg)]"
-                    dir="ltr"
-                  >
-                    {r.reference}
-                  </p>
-                  <span className="text-xs tabular-nums text-[color:var(--ro-text-muted)]">
-                    {daysSince(r.createdAt)}d
-                  </span>
-                </div>
-                <p className="text-sm font-medium text-[color:var(--ro-text)]">
-                  {r.trader.displayName}
-                </p>
-                <p className="line-clamp-2 text-xs text-[color:var(--ro-text-muted)]">
-                  {localizedName(locale, r.descriptionAr, r.descriptionEn)}
-                </p>
-                <BrokerageStatusBadge
-                  status={r.status}
-                  label={brokerageStatusLabel(r.status, locale)}
-                />
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <Card padded={false} className="overflow-hidden">
+        <CardHeader
+          title={ar ? "كل الطلبات" : "All requests"}
+          count={rows.length}
+        />
+        <BrokerageTable
+          locale={locale}
+          rows={rows.map((r) => ({
+            id: r.id,
+            reference: r.reference,
+            traderName: r.trader.displayName,
+            description: localizedName(
+              locale,
+              r.descriptionAr,
+              r.descriptionEn
+            ),
+            createdAt: r.createdAt,
+            status: r.status,
+            href: `/admin/brokerage/${r.id}`,
+          }))}
+          labels={{
+            colReference: ar ? "المرجع" : "Ref",
+            colTrader: ar ? "التاجر" : "Trader",
+            colDescription: ar ? "الوصف" : "Description",
+            colAge: ar ? "العمر" : "Age",
+            colWaiting: ar ? "ينتظر" : "Waiting",
+            colStatus: ar ? "الحالة" : "Status",
+            colNext: ar ? "الخطوة التالية" : "Next",
+          }}
+        />
+      </Card>
     </section>
   );
 }

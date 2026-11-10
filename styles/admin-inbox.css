@@ -13,14 +13,18 @@
    instead (list/thread/context each scroll internally), so this scopes the
    override to exactly the page that renders .rad-ibx — no other page is
    touched. */
+/* Full-bleed under topbar — beat .rad-page { padding: 28px 32px 64px } */
+.rad-main:has(.rad-ibx) > .rad-page,
 .rad-page:has(.rad-ibx) {
-  max-width: none;
-  padding: 0;
-  margin: 0;
-  height: calc(100vh - 60px);
+  max-width: none !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: calc(100dvh - 60px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  overflow-x: hidden;
 }
 @media (max-width: 900px) {
   .rad-page:has(.rad-ibx) {
@@ -31,11 +35,27 @@
 .rad-ibx {
   position: relative;
   overflow: hidden;
+  overflow-x: hidden;
   flex: 1;
   min-height: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
   display: grid;
-  grid-template-columns: 372px minmax(0, 1fr) 332px;
+  /* List-only: 2 columns. Open thread: optional third (context) column. */
+  grid-template-columns: minmax(0, 372px) minmax(0, 1fr);
   border-top: 0;
+}
+.rad-ibx.rad-tv {
+  grid-template-columns: minmax(0, 372px) minmax(0, 1fr) minmax(0, 332px);
+}
+/* Keyed slots must not create extra grid items */
+.rad-ib-list-slot,
+.rad-ib-thread-slot {
+  display: contents;
+}
+.rad-ibx:not(.rad-tv) .rad-xp {
+  display: none;
 }
 
 /* ---------- list column ---------- */
@@ -43,11 +63,19 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
   border-inline-end: 1px solid var(--rad-bd);
   background: var(--rad-surface);
 }
 .rad-lc-h {
-  padding: 16px 16px 10px;
+  padding: 16px;
+  padding-block-end: 10px;
+  padding-inline: 16px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -133,31 +161,50 @@
   padding: 0 12px;
   border-radius: 11px;
   border: 1px solid var(--rad-bd);
-  background: var(--rad-surface2);
+  /* Match list chrome — avoid plum-tinted "selection" look from accent bleed */
+  background: var(--rad-c0);
   color: var(--rad-tx3);
   transition: border-color 0.16s, background-color 0.16s;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 .rad-sb2:focus-within {
   border-color: var(--rad-ac);
-  background: var(--rad-surface);
+  background: var(--rad-c0);
 }
 .rad-sb2 input {
   flex: 1;
-  background: none;
+  min-width: 0;
   border: 0;
   outline: 0;
   color: var(--rad-tx);
   font: inherit;
-  min-width: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
 }
 .rad-sb2 input::placeholder {
   color: var(--rad-tx3);
 }
+.rad-sb2 input:-webkit-autofill,
+.rad-sb2 input:-webkit-autofill:hover,
+.rad-sb2 input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--rad-tx);
+  caret-color: var(--rad-tx);
+  box-shadow: 0 0 0 1000px var(--rad-c0) inset;
+  transition: background-color 99999s ease-out;
+}
 .rad-fl {
   display: flex;
   gap: 6px;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 .rad-fl button {
   display: inline-flex;
@@ -312,8 +359,17 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.rad-cp span.rad-cp-empty {
+  color: var(--rad-tx3);
+  font-style: italic;
+  opacity: 0.85;
+}
 .rad-cv.rad-un .rad-cp span {
   color: var(--rad-tx2);
+}
+.rad-cv.rad-un .rad-cp span.rad-cp-empty {
+  color: var(--rad-tx3);
+  font-weight: 400;
 }
 .rad-ub {
   min-width: 20px;
@@ -561,16 +617,17 @@
 }
 .rad-cbx {
   border: 1px solid var(--rad-bd2);
-  background: var(--rad-surface);
+  background: var(--rad-c0);
   border-radius: 16px;
   box-shadow: var(--rad-sh);
-  transition: border-color 0.16s;
+  transition: border-color 0.16s, background-color 0.16s;
 }
 .rad-cbx:focus-within {
   border-color: var(--rad-ac);
+  background: var(--rad-c0);
 }
 .rad-cbx.rad-isnote {
-  background: color-mix(in srgb, var(--rad-warn) 7%, var(--rad-surface));
+  background: color-mix(in srgb, var(--rad-warn) 7%, var(--rad-c0));
   border-color: color-mix(in srgb, var(--rad-warn) 40%, transparent);
 }
 .rad-ctabs {
@@ -598,7 +655,6 @@
 .rad-cbx textarea {
   width: 100%;
   resize: none;
-  background: none;
   border: 0;
   outline: 0;
   color: var(--rad-tx);
@@ -609,6 +665,24 @@
   min-height: 44px;
   max-height: 140px;
   display: block;
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
+}
+.rad-cbx textarea:-webkit-autofill,
+.rad-cbx textarea:-webkit-autofill:hover,
+.rad-cbx textarea:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--rad-tx);
+  caret-color: var(--rad-tx);
+  box-shadow: 0 0 0 1000px var(--rad-c0) inset;
+  transition: background-color 99999s ease-out;
+}
+.rad-cbx.rad-isnote textarea:-webkit-autofill,
+.rad-cbx.rad-isnote textarea:-webkit-autofill:hover,
+.rad-cbx.rad-isnote textarea:-webkit-autofill:focus {
+  box-shadow: 0 0 0 1000px color-mix(in srgb, var(--rad-warn) 7%, var(--rad-c0)) inset;
 }
 .rad-cbx textarea:disabled {
   cursor: not-allowed;
@@ -795,6 +869,50 @@
   color: var(--rad-tx3);
   font-size: 11.5px;
   margin-top: 3px;
+}
+.rad-notes-empty {
+  color: var(--rad-tx3);
+  font-size: 13px;
+  margin: 0 0 8px;
+}
+.rad-note-compose {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+.rad-note-compose .rad-fld-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+  height: 34px;
+  border-radius: 9px;
+  border: 1px solid var(--rad-bd2);
+  background-color: var(--rad-surface2);
+  color: var(--rad-tx);
+  padding: 0 10px;
+  font: inherit;
+  font-size: 13px;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: 0;
+}
+.rad-note-compose .rad-fld-input:focus {
+  border-color: var(--rad-ac);
+}
+.rad-note-compose .rad-fld-input:-webkit-autofill,
+.rad-note-compose .rad-fld-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--rad-tx);
+  box-shadow: 0 0 0 1000px var(--rad-surface2) inset;
+  transition: background-color 99999s ease-out;
+}
+.rad-note-compose .rad-btn {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 .rad-tg {
   display: flex;
@@ -1077,12 +1195,15 @@
     transform: translateX(102%);
     transition: transform 0.34s var(--rad-ease);
     box-shadow: 0 0 60px rgba(0, 0, 0, 0.45);
+    /* Off-canvas / empty placeholder must not steal clicks from the list */
+    pointer-events: none;
   }
   [dir="ltr"] .rad-xp {
     transform: translateX(-102%);
   }
   .rad-ibx.rad-xo .rad-xp {
     transform: none;
+    pointer-events: auto;
   }
   .rad-ctxbtn {
     display: grid;
@@ -1092,17 +1213,25 @@
   .rad-ibmain {
     height: auto;
     min-height: 100vh;
-    overflow: visible;
+    overflow: hidden;
+    max-width: 100%;
   }
   .rad-ibx {
     display: block;
     height: calc(100vh - 60px - 68px);
     min-height: 520px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
   }
   .rad-lc,
   .rad-ct {
     position: absolute;
     inset: 0;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
   }
   .rad-ct {
     transform: translateX(102%);
@@ -1120,21 +1249,196 @@
   }
   .rad-msgs {
     padding: 16px 14px 8px;
+    padding-inline: 14px;
   }
   .rad-cmp {
     padding: 8px 12px 12px;
+    padding-inline: 12px;
   }
   .rad-th {
-    padding: 0 12px;
+    padding: 0;
+    padding-inline: 12px;
     height: 62px;
+  }
+  .rad-lc-h {
+    padding-inline: 14px;
   }
   .rad-bb {
     max-width: 86%;
   }
   .rad-xp {
     width: min(340px, 92vw);
+    max-width: 92vw;
   }
 }
+/* ---------- linked-record panel (visual skin only) ---------- */
+.rad-link-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  max-width: 100%;
+}
+.rad-rec.rad-rec-static {
+  cursor: default;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.rad-rec.rad-rec-static:hover {
+  background: var(--rad-surface2);
+  border-color: var(--rad-bd);
+}
+.rad-link-panel .rad-rec {
+  margin-bottom: 0;
+}
+.rad-link-panel .rad-tt {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.rad-link-panel .rad-tt b {
+  margin-bottom: 2px;
+}
+.rad-link-panel .rad-tt a {
+  color: var(--rad-ac);
+  text-decoration: none;
+  font-weight: 600;
+}
+.rad-link-panel .rad-tt a:hover {
+  text-decoration: underline;
+}
+.rad-link-suggest {
+  width: 100%;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--rad-bd);
+}
+.rad-link-suggest > p {
+  font-size: 12px;
+  color: var(--rad-tx3);
+  margin: 0 0 6px;
+}
+.rad-link-suggest ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rad-link-suggest li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.rad-link-actions {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+.rad-link-actions .rad-btn {
+  justify-content: center;
+  width: 100%;
+}
+.rad-link-hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--rad-tx3);
+  line-height: 1.5;
+}
+.rad-link-err {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--rad-err);
+}
+.rad-link-audit {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rad-link-audit li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--rad-tx2);
+}
+.rad-link-audit time {
+  flex: none;
+  color: var(--rad-tx3);
+  font-variant-numeric: tabular-nums;
+  font-size: 11.5px;
+}
+.rad-link-context {
+  min-width: 0;
+}
+.rad-link-context :is(.rounded-\[14px\], [class*="rounded"]) {
+  /* Keep nested legacy cards from exploding width inside the rail */
+  max-width: 100%;
+}
+.rad-link-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px;
+}
+.rad-biz-ctx .rad-tt {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+.rad-biz-ctx .rad-tt > span {
+  display: block;
+  line-height: 1.45;
+}
+.rad-biz-status {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.rad-mono {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-source), ui-monospace, monospace;
+  font-size: 12px;
+}
+.rad-ept-thread {
+  min-height: 100%;
+  padding: 40px 20px;
+}
+.rad-msgs:has(.rad-ept-thread) {
+  display: flex;
+}
+.rad-sb2 input::selection,
+.rad-cbx textarea::selection,
+.rad-note-compose .rad-fld-input::selection {
+  background: color-mix(in srgb, var(--rad-ac) 28%, transparent);
+  color: var(--rad-tx);
+}
+
+/* Beat globals.css ".ro-portal[data-theme=dark] input/textarea" plum elevated fill.
+   That rule is a single-class attribute selector on every input — scoped
+   !important here is intentional and limited to inbox chrome only. */
+.ro-portal .rad-sb2 input,
+.ro-portal .rad-cbx textarea {
+  background-color: transparent !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  color: var(--rad-tx) !important;
+  box-shadow: none !important;
+}
+.ro-portal .rad-note-compose .rad-fld-input {
+  background-color: var(--rad-c0) !important;
+  background-image: none !important;
+  border-color: var(--rad-bd2) !important;
+  color: var(--rad-tx) !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .rad-cv,
   .rad-bb,

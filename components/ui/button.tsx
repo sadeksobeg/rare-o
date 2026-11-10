@@ -18,17 +18,19 @@ export type ButtonSize = "sm" | "md" | "lg";
 
 /* Semantic surfaces — work in portal dark + light via tokens. */
 const variantClass: Record<ButtonVariant, string> = {
+  /* Colors for primary/inverse-primary/danger come from [data-ro-variant] in tokens.css
+     (Tailwind arbitrary bg-[var(--rad-btn)] was not emitted in this build). */
   primary:
-    "bg-[var(--ro-plum-900)] !text-[var(--ro-sand-100)] tracking-[0.06em] shadow-[0_1px_0_color-mix(in_srgb,var(--ro-sand-100)_18%,transparent)_inset,0_12px_28px_-14px_color-mix(in_srgb,var(--ro-plum-900)_55%,transparent)] hover:bg-[var(--ro-plum-800)] hover:-translate-y-px active:translate-y-0 active:bg-[var(--ro-ink-950)] focus-visible:outline-[var(--ro-focus)]",
+    "tracking-[0.06em] hover:brightness-110 hover:-translate-y-px active:translate-y-0 active:brightness-95 focus-visible:outline-[var(--ro-focus)]",
   secondary:
-    "border-[1.5px] border-[color:var(--ro-border)] bg-[color:var(--ro-bg-elevated)] !text-[color:var(--ro-link)] tracking-[0.04em] shadow-[inset_0_1px_0_color-mix(in_srgb,var(--ro-text)_6%,transparent)] hover:border-[var(--ro-plum-900)] hover:bg-[color:var(--ro-bg-raised)] hover:-translate-y-px active:translate-y-0 active:bg-[color:var(--ro-bg-sunken)] focus-visible:outline-[var(--ro-focus)]",
+    "border-[1.5px] border-[color:var(--ro-border)] bg-[color:var(--ro-bg-elevated)] !text-[color:var(--ro-link)] tracking-[0.04em] shadow-[inset_0_1px_0_color-mix(in_srgb,var(--ro-text)_6%,transparent)] hover:border-[color:var(--rad-ac)] hover:bg-[color:var(--ro-bg-raised)] hover:-translate-y-px active:translate-y-0 active:bg-[color:var(--ro-bg-sunken)] focus-visible:outline-[var(--ro-focus)]",
   text: "bg-transparent !text-[color:var(--ro-text-2)] tracking-[0.03em] underline-offset-[6px] hover:!text-[color:var(--ro-text)] hover:underline focus-visible:outline-[var(--ro-focus)]",
   "inverse-primary":
-    "bg-[var(--ro-sand-100)] !text-[var(--ro-ink-950)] tracking-[0.05em] shadow-[0_2px_10px_color-mix(in_srgb,var(--ro-ink-950)_28%,transparent)] hover:bg-white hover:-translate-y-px active:translate-y-0 active:bg-[var(--ro-sand-200)] focus-visible:outline-[var(--ro-sand-100)] focus-visible:outline-offset-[3px]",
+    "tracking-[0.05em] hover:brightness-105 hover:-translate-y-px active:translate-y-0 active:brightness-95 focus-visible:outline-[color:var(--rad-btn)] focus-visible:outline-offset-[3px]",
   "inverse-secondary":
-    "border-[1.5px] border-[color-mix(in_srgb,var(--ro-sand-100)_72%,transparent)] bg-[color-mix(in_srgb,var(--ro-sand-100)_10%,transparent)] !text-[var(--ro-sand-100)] tracking-[0.04em] backdrop-blur-[2px] hover:border-[var(--ro-sand-100)] hover:bg-[color-mix(in_srgb,var(--ro-sand-100)_18%,transparent)] hover:-translate-y-px active:translate-y-0 focus-visible:outline-[var(--ro-sand-100)] focus-visible:outline-offset-[3px]",
+    "border-[1.5px] border-[color:color-mix(in_srgb,var(--rad-tx)_72%,transparent)] bg-[color:color-mix(in_srgb,var(--rad-tx)_10%,transparent)] !text-[color:var(--rad-tx)] tracking-[0.04em] backdrop-blur-[2px] hover:border-[color:var(--rad-tx)] hover:bg-[color:color-mix(in_srgb,var(--rad-tx)_18%,transparent)] hover:-translate-y-px active:translate-y-0 focus-visible:outline-[color:var(--rad-tx)] focus-visible:outline-offset-[3px]",
   danger:
-    "bg-[var(--ro-danger-700)] !text-[var(--ro-sand-100)] tracking-[0.03em] shadow-[0_1px_2px_color-mix(in_srgb,var(--ro-ink-950)_16%,transparent)] hover:opacity-92 active:opacity-85 focus-visible:outline-[var(--ro-danger-700)]",
+    "tracking-[0.03em] hover:opacity-92 active:opacity-85 focus-visible:outline-[var(--ro-danger-700)]",
   quiet:
     "border-0 bg-transparent !text-[color:var(--ro-text-2)] tracking-[0.02em] hover:!text-[color:var(--ro-text)] focus-visible:outline-[var(--ro-focus)]",
 };
@@ -85,6 +87,7 @@ export function Button({
   loading,
   ripple,
   onPointerDown,
+  style,
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
@@ -98,12 +101,21 @@ export function Button({
   const rippleTone =
     variant === "inverse-primary" || variant === "secondary" ? "ink" : "cream";
 
+  const toneStyle =
+    variant === "primary" || variant === "inverse-primary"
+      ? {
+          background: "var(--rad-btn)",
+          color: "var(--rad-btn-tx)",
+        }
+      : undefined;
+
   return (
     <button
       ref={ref}
       type={type}
       data-ro-variant={variant}
       className={cn(base, variantClass[variant], sizeClass[size], className)}
+      style={{ ...toneStyle, ...style }}
       aria-busy={loading || undefined}
       disabled={props.disabled || loading}
       onPointerDown={(e) => {

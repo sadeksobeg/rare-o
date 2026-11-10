@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import { LogOut } from "lucide-react";
 import { traderInvalidateOtherSessionsAction } from "@/app/deal-actions";
-import { Button } from "@/components/ui/button";
 import { Banner } from "@/components/ui/banner";
 import { ConfirmDialog } from "@/components/ui/dialog";
 
@@ -31,10 +30,10 @@ export function TraderSignOutOthers({
     <div className="space-y-3">
       {done ? <Banner tone="success">{successLabel}</Banner> : null}
       {error ? <Banner tone="danger">{error}</Banner> : null}
-      <Button
+      <button
         type="button"
-        variant="secondary"
-        loading={pending}
+        className="rad-btn rad-gh"
+        disabled={pending}
         onClick={() => {
           setError(null);
           setOpen(true);
@@ -42,7 +41,7 @@ export function TraderSignOutOthers({
       >
         <LogOut className="size-4" strokeWidth={1.5} aria-hidden />
         {label}
-      </Button>
+      </button>
       <ConfirmDialog
         open={open}
         onClose={() => setOpen(false)}

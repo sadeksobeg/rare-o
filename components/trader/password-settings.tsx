@@ -16,12 +16,14 @@ export function TraderPasswordSettings({
   const [done, setDone] = useState(false);
 
   return (
-    <div className="ro-portal-card space-y-4 border p-5 sm:p-6">
+    <div className="rad-card space-y-4 p-5 sm:p-6">
       <div>
-        <h2 className="font-display text-base font-semibold text-ro-ink">
+        <h2 className="text-base font-semibold text-[color:var(--rad-tx)]">
           {sectionDict.sectionTitle}
         </h2>
-        <p className="text-sm text-ro-muted">{sectionDict.sectionLead}</p>
+        <p className="text-sm text-[color:var(--rad-tx3)]">
+          {sectionDict.sectionLead}
+        </p>
       </div>
       {done ? <Banner tone="success">{sectionDict.success}</Banner> : null}
       <ChangePasswordForm

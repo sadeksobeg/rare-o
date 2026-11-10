@@ -1,13 +1,12 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { Bell } from "lucide-react";
-import { PortalHeroStrip } from "@/components/admin/portal-hero";
 import { AdminTableFilters } from "@/components/admin/table-filters";
-import { EmptyState } from "@/components/ui/empty-state";
-import { StatusChip } from "@/components/ui/status-chip";
+import { Card, EmptyState, Pill } from "@/components/ui-kit";
 import { getAdminHomeData } from "@/lib/admin/dashboard";
 import { formatRelative } from "@/lib/i18n/format";
 import { getRequestDictionary } from "@/lib/i18n/server";
+import { statusToneToPill } from "@/lib/ui/pill-tone";
 import { getStatusChipProps } from "@/lib/ui/status-labels";
 import type { StatusTone } from "@/lib/ui/status";
 
@@ -37,7 +36,6 @@ export default async function AdminNotificationsPage({
   const tab = (tabRaw?.trim() || "all") as AlertTab;
   const q = qRaw?.trim().toLowerCase() ?? "";
   const { locale, dict } = await getRequestDictionary();
-  const ar = locale === "ar";
   const u = dict.adminUi;
   const data = await getAdminHomeData();
 
@@ -156,27 +154,27 @@ export default async function AdminNotificationsPage({
     return { tone: "attention", label: u.notificationsAwaiting };
   }
 
+  const filteredEmpty = tab !== "all" || Boolean(q);
+
   return (
-    <section className="space-y-5 pb-16">
-      <PortalHeroStrip
-        eyebrow={ar ? "أشخاص" : "People"}
-        title={
-          <span className="inline-flex items-center gap-2.5">
-            <Bell
-              className="size-7 shrink-0 text-[color:var(--ro-accent-fg,var(--ro-plum-800))]"
-              strokeWidth={1.5}
-            />
+    <section data-admin-notifications="" className="space-y-5 pb-16">
+      <header className="rad-phead">
+        <div className="min-w-0">
+          <h1 style={{ fontFamily: "var(--rad-font, inherit)" }}>
             {u.notificationsTitle}
-          </span>
-        }
-        subtitle={u.notificationsLead}
-        stats={[
-          { label: u.filterAll, value: counts.all },
-          { label: u.notificationsFilterAction, value: counts.action },
-          { label: u.notificationsFilterInbox, value: counts.inbox },
-          { label: u.notificationsFilterTrade, value: counts.trade },
-        ]}
-      />
+          </h1>
+          <p>
+            {u.notificationsLead}
+            {" · "}
+            <span className="tabular-nums">
+              {counts.all} {u.filterAll} · {counts.action}{" "}
+              {u.notificationsFilterAction} · {counts.inbox}{" "}
+              {u.notificationsFilterInbox} · {counts.trade}{" "}
+              {u.notificationsFilterTrade}
+            </span>
+          </p>
+        </div>
+      </header>
 
       <Suspense fallback={null}>
         <AdminTableFilters
@@ -208,15 +206,15 @@ export default async function AdminNotificationsPage({
 
       {filtered.length === 0 ? (
         <EmptyState
-          variant={tab !== "all" || q ? "no-results" : "first-use"}
           title={u.notificationsEmpty}
-          actionHref={
-            tab !== "all" || q ? "/admin/notifications" : "/admin/inbox"
-          }
-          actionLabel={
-            tab !== "all" || q
-              ? dict.catalog.clearFilters
-              : dict.admin.openInbox
+          icon={<Bell width={26} height={26} strokeWidth={1.5} aria-hidden />}
+          action={
+            <Link
+              href={filteredEmpty ? "/admin/notifications" : "/admin/inbox"}
+              className="rad-btn rad-gh rad-sm"
+            >
+              {filteredEmpty ? dict.catalog.clearFilters : dict.admin.openInbox}
+            </Link>
           }
         />
       ) : (
@@ -224,46 +222,68 @@ export default async function AdminNotificationsPage({
           {sections.map((section) => (
             <div key={section.id} className="space-y-2">
               {section.title ? (
-                <h2 className="font-display text-base font-semibold text-[color:var(--ro-text)]">
+                <h2
+                  className="text-base font-semibold"
+                  style={{
+                    color: "var(--rad-tx)",
+                    fontFamily: "var(--rad-font, inherit)",
+                  }}
+                >
                   {section.title}
                 </h2>
               ) : null}
-              <ul className="ro-portal-card divide-y divide-[color:var(--ro-border-subtle)] overflow-hidden border">
-                {section.items.map((item) => {
-                  const chip = chipFor(item);
-                  return (
-                    <li key={item.id}>
-                      <Link
-                        href={item.href}
-                        className="ro-row-flash flex min-h-11 flex-wrap items-center justify-between gap-3 px-4 py-3.5 transition-[background-color,opacity] duration-[var(--ro-dur-fast)] hover:bg-[color:var(--ro-bg-sunken)]"
-                      >
-                        <div className="min-w-0 space-y-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-[0.65rem] font-semibold uppercase tracking-wide text-[color:var(--ro-text-muted)]">
-                              {domainLabel(item.domain)}
-                            </span>
-                            {item.ageAt ? (
-                              <span className="text-xs text-[color:var(--ro-text-muted)]">
-                                {formatRelative(item.ageAt, locale)}
+              <Card padded={false} className="overflow-hidden">
+                <ul className="divide-y divide-[color:var(--rad-bd)]">
+                  {section.items.map((item) => {
+                    const chip = chipFor(item);
+                    return (
+                      <li key={item.id}>
+                        <Link
+                          href={item.href}
+                          className="flex min-h-11 flex-wrap items-center justify-between gap-3 px-4 py-3.5 transition-[background-color,opacity] hover:bg-[color:var(--rad-surface3)]"
+                        >
+                          <div className="min-w-0 space-y-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span
+                                className="text-[0.65rem] font-semibold uppercase"
+                                style={{ color: "var(--rad-tx3)" }}
+                              >
+                                {domainLabel(item.domain)}
                               </span>
-                            ) : null}
+                              {item.ageAt ? (
+                                <span
+                                  className="text-xs"
+                                  style={{ color: "var(--rad-tx3)" }}
+                                >
+                                  {formatRelative(item.ageAt, locale)}
+                                </span>
+                              ) : null}
+                            </div>
+                            <p
+                              className="font-medium"
+                              style={{ color: "var(--rad-tx)" }}
+                            >
+                              {item.title}
+                            </p>
+                            <p
+                              className="truncate text-sm"
+                              style={{ color: "var(--rad-tx3)" }}
+                            >
+                              {item.body}
+                              {item.subtitle && item.subtitle !== item.body
+                                ? ` · ${item.subtitle}`
+                                : ""}
+                            </p>
                           </div>
-                          <p className="font-medium text-[color:var(--ro-text)]">
-                            {item.title}
-                          </p>
-                          <p className="truncate text-sm text-[color:var(--ro-text-muted)]">
-                            {item.body}
-                            {item.subtitle && item.subtitle !== item.body
-                              ? ` · ${item.subtitle}`
-                              : ""}
-                          </p>
-                        </div>
-                        <StatusChip size="sm" {...chip} />
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
+                          <Pill tone={statusToneToPill(chip.tone)}>
+                            {chip.label}
+                          </Pill>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </Card>
             </div>
           ))}
         </div>

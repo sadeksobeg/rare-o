@@ -15,6 +15,7 @@ import { getBrokerageForTrader } from "@/lib/brokerage/service";
 import { parsePhotoPaths } from "@/lib/brokerage/media-shared";
 import { getTraderSession } from "@/lib/auth/trader-session";
 import { getRequestDictionary } from "@/lib/i18n/server";
+import { formatMoney } from "@/lib/ui/trader-labels";
 import { localizedName } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -40,7 +41,7 @@ export default async function TraderBrokerageDetailPage({
     <section className="space-y-6">
       <Link
         href="/trader/brokerage"
-        className="inline-flex min-h-11 items-center gap-1.5 text-sm text-[var(--ro-plum-900)] underline-offset-2 hover:underline"
+        className="inline-flex min-h-11 items-center gap-1.5 text-sm text-[color:var(--rad-ac)] underline-offset-2 hover:underline"
       >
         <ArrowLeft className="size-4 rtl:-scale-x-100" strokeWidth={1.5} />
         {t.brokerageMyRequests}
@@ -69,35 +70,38 @@ export default async function TraderBrokerageDetailPage({
         audience="trader"
       />
 
-      <div className="rounded-[var(--ro-r-lg)] border border-[var(--ro-border-subtle)] bg-[var(--ro-sand-50)] px-4 py-5 sm:px-6">
-        <p className="mb-3 text-[0.65rem] font-medium text-[var(--ro-ink-500)]">
+      <div className="rad-card px-4 py-5 sm:px-6">
+        <p className="mb-3 text-[0.65rem] font-medium text-[color:var(--rad-tx3)]">
           {t.brokeragePath}
         </p>
         <BrokerageLifecycleRail status={row.status} locale={locale} />
       </div>
 
-      <dl className="grid gap-3 rounded-[var(--ro-r-lg)] border border-[var(--ro-border-subtle)] bg-[var(--ro-sand-50)] p-5 text-sm sm:grid-cols-2">
+      <div className="rad-card grid gap-3 p-5 text-sm sm:grid-cols-2">
         <div>
-          <dt className="text-[0.65rem] text-[var(--ro-ink-500)]">
+          <p className="text-[0.65rem] text-[color:var(--rad-tx3)]">
             {t.modelNumberLabel}
-          </dt>
-          <dd className="mt-1 font-semibold text-ro-ink" dir="ltr">
+          </p>
+          <p className="mt-1 font-semibold text-[color:var(--rad-tx)]" dir="ltr">
             <bdi dir="ltr">{row.modelNumber || "—"}</bdi>
-          </dd>
+          </p>
         </div>
         <div>
-          <dt className="text-[0.65rem] text-[var(--ro-ink-500)]">
+          <p className="text-[0.65rem] text-[color:var(--rad-tx3)]">
             {t.brokerageFieldBudgetMin}
-          </dt>
-          <dd className="mt-1 font-semibold tabular-nums text-ro-ink" dir="ltr">
+          </p>
+          <p
+            className="mt-1 font-semibold tabular-nums text-[color:var(--rad-tx)]"
+            dir="ltr"
+          >
             {row.statedPriceUsd != null ? (
-              <bdi dir="ltr">{row.statedPriceUsd} USD</bdi>
+              <bdi dir="ltr">{formatMoney(row.statedPriceUsd, "USD", locale)}</bdi>
             ) : (
               "—"
             )}
-          </dd>
+          </p>
         </div>
-      </dl>
+      </div>
 
       {row.status === "AWAITING_PAYMENT" ? (
         <PaymentHandoffCard
@@ -119,8 +123,8 @@ export default async function TraderBrokerageDetailPage({
       />
 
       {row.status === "NEEDS_INFO" ? (
-        <div className="rounded-[var(--ro-r-lg)] border border-[color-mix(in_srgb,var(--ro-amber-500)_40%,transparent)] bg-[color-mix(in_srgb,var(--ro-amber-100)_45%,var(--ro-sand-50))] p-5">
-          <h2 className="mb-3 font-display text-lg font-semibold text-ro-ink">
+        <div className="rad-card border-[color-mix(in_srgb,var(--rad-warn)_40%,var(--rad-bd))] bg-[color:var(--rad-warns)] p-5">
+          <h2 className="mb-3 text-lg font-semibold text-[color:var(--rad-tx)]">
             {t.brokerageInfoNeeded}
           </h2>
           <BrokerageNeedsInfoActions
@@ -132,65 +136,59 @@ export default async function TraderBrokerageDetailPage({
       ) : null}
 
       {row.status === "QUOTE_SENT" && quote ? (
-        <div className="overflow-hidden rounded-[var(--ro-r-lg)] border border-[color-mix(in_srgb,var(--ro-plum-700)_35%,transparent)] bg-[var(--ro-sand-50)]">
-          <div className="border-b border-[var(--ro-border-subtle)] bg-[color-mix(in_srgb,var(--ro-plum-50)_55%,transparent)] px-5 py-4">
-            <h2 className="font-display text-lg font-semibold text-ro-ink">
+        <div className="rad-card overflow-hidden border-[color-mix(in_srgb,var(--rad-ac)_35%,var(--rad-bd))]">
+          <div className="border-b border-[color:var(--rad-bd)] bg-[color-mix(in_srgb,var(--rad-ac)_8%,var(--rad-surface))] px-5 py-4">
+            <h2 className="text-lg font-semibold text-[color:var(--rad-tx)]">
               {t.brokerageQuoteTitle}
             </h2>
-            <p className="mt-1 text-sm text-[var(--ro-ink-600)]">
+            <p className="mt-1 text-sm text-[color:var(--rad-tx2)]">
               {t.brokerageQuoteAwaiting}
             </p>
           </div>
           <div className="grid gap-4 p-5 sm:grid-cols-3">
             <div>
-              <p className="text-[0.65rem] text-[var(--ro-ink-500)]">
+              <p className="text-[0.65rem] text-[color:var(--rad-tx3)]">
                 {t.brokerageGoodsValue}
               </p>
-              <p
-                className="mt-1 font-display text-xl font-semibold tabular-nums"
-                dir="ltr"
-              >
-                <bdi dir="ltr">{quote.goodsValueUsd.toFixed(2)}</bdi>
+              <p className="mt-1 text-xl font-semibold tabular-nums text-[color:var(--rad-tx)]">
+                <bdi dir="ltr">
+                  {formatMoney(quote.goodsValueUsd, "USD", locale)}
+                </bdi>
               </p>
             </div>
             <div>
-              <p className="text-[0.65rem] text-[var(--ro-ink-500)]">
+              <p className="text-[0.65rem] text-[color:var(--rad-tx3)]">
                 {t.brokerageCommission}
               </p>
-              <p
-                className="mt-1 font-display text-xl font-semibold tabular-nums"
-                dir="ltr"
-              >
+              <p className="mt-1 text-xl font-semibold tabular-nums text-[color:var(--rad-tx)]">
                 <bdi dir="ltr">{quote.commissionRate}%</bdi>
               </p>
             </div>
             <div>
-              <p className="text-[0.65rem] text-[var(--ro-ink-500)]">
+              <p className="text-[0.65rem] text-[color:var(--rad-tx3)]">
                 {t.brokerageShipping}
               </p>
-              <p
-                className="mt-1 font-display text-xl font-semibold tabular-nums"
-                dir="ltr"
-              >
-                <bdi dir="ltr">{quote.shippingUsd.toFixed(2)}</bdi>
+              <p className="mt-1 text-xl font-semibold tabular-nums text-[color:var(--rad-tx)]">
+                <bdi dir="ltr">
+                  {formatMoney(quote.shippingUsd, "USD", locale)}
+                </bdi>
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--ro-border-subtle)] bg-[color-mix(in_srgb,var(--ro-ink-950)_4%,var(--ro-sand-50))] px-5 py-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[color:var(--rad-bd)] bg-[color:var(--rad-surface3)] px-5 py-4">
             <div>
-              <p className="text-[0.65rem] text-[var(--ro-ink-500)]">
+              <p className="text-[0.65rem] text-[color:var(--rad-tx3)]">
                 {t.brokerageQuoteTotal}
               </p>
-              <p
-                className="font-display text-2xl font-semibold tabular-nums text-[var(--ro-plum-900)]"
-                dir="ltr"
-              >
+              <p className="text-2xl font-semibold tabular-nums text-[color:var(--rad-ac)]">
                 <bdi dir="ltr">
-                  {(
+                  {formatMoney(
                     quote.goodsValueUsd +
-                    quote.goodsValueUsd * (quote.commissionRate / 100) +
-                    quote.shippingUsd
-                  ).toFixed(2)}
+                      quote.goodsValueUsd * (quote.commissionRate / 100) +
+                      quote.shippingUsd,
+                    "USD",
+                    locale
+                  )}
                 </bdi>
               </p>
             </div>
@@ -200,21 +198,21 @@ export default async function TraderBrokerageDetailPage({
       ) : null}
 
       {row.inspection ? (
-        <div className="rounded-[var(--ro-r-lg)] border border-[var(--ro-border-subtle)] bg-[var(--ro-sand-50)] p-5">
-          <h2 className="font-display text-lg font-semibold text-ro-ink">
+        <div className="rad-card p-5">
+          <h2 className="text-lg font-semibold text-[color:var(--rad-tx)]">
             {t.brokerageInspectionReport}
           </h2>
-          <p className="mt-3 inline-flex rounded-md bg-[var(--ro-plum-100)] px-2.5 py-1 text-sm font-semibold text-[var(--ro-plum-900)]">
+          <p className="mt-3 inline-flex rounded-md bg-[color-mix(in_srgb,var(--rad-ac)_14%,var(--rad-surface3))] px-2.5 py-1 text-sm font-semibold text-[color:var(--rad-ac)]">
             {t.brokerageGrade}: {row.inspection.grade}
           </p>
-          <p className="mt-3 text-sm text-ro-ink">
+          <p className="mt-3 text-sm text-[color:var(--rad-tx)]">
             {localizedName(
               locale,
               row.inspection.verdictAr,
               row.inspection.verdictEn
             )}
           </p>
-          <p className="mt-1 text-sm text-[var(--ro-ink-600)]">
+          <p className="mt-1 text-sm text-[color:var(--rad-tx2)]">
             {localizedName(
               locale,
               row.inspection.notesAr,
@@ -234,11 +232,11 @@ export default async function TraderBrokerageDetailPage({
 
       {(row.carrier || row.trackingRef) && (
         <div
-          className="flex items-center gap-3 rounded-[var(--ro-r-lg)] border border-[var(--ro-border-subtle)] bg-[var(--ro-sand-50)] px-5 py-4 text-sm"
+          className="rad-card flex items-center gap-3 px-5 py-4 text-sm"
           dir="ltr"
         >
           <Package
-            className="size-4 shrink-0 text-[var(--ro-plum-700)]"
+            className="size-4 shrink-0 text-[color:var(--rad-ac)]"
             strokeWidth={1.5}
           />
           <span className="font-mono">

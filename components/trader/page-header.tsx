@@ -26,7 +26,7 @@ export function TraderPageHeader({
   return (
     <header
       className={cn(
-        "ro-portal-main-enter flex flex-wrap items-end justify-between gap-4 border-b border-[color-mix(in_srgb,var(--ro-plum-900)_18%,transparent)] pb-6",
+        "ro-portal-main-enter flex flex-wrap items-end justify-between gap-4 border-b border-[color:var(--rad-bd,var(--ro-border-subtle))] pb-6",
         className
       )}
     >
@@ -40,7 +40,7 @@ export function TraderPageHeader({
           {backHref && backLabel ? (
             <Link
               href={backHref}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--ro-plum-900)] hover:underline"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[color:var(--rad-ac,var(--ro-plum-900))] hover:underline"
             >
               <ArrowLeft
                 className="size-4 rtl:-scale-x-100"
@@ -51,15 +51,15 @@ export function TraderPageHeader({
             </Link>
           ) : null}
           {overline ? (
-            <p className="ro-type-overline font-bold text-[var(--ro-plum-800)]">
+            <p className="ro-type-overline font-bold text-[color:var(--rad-ac,var(--ro-plum-800))]">
               {overline}
             </p>
           ) : null}
-          <h1 className="ro-portal-page-title text-3xl tracking-tight sm:text-[2.15rem]">
+          <h1 className="ro-portal-page-title text-3xl tracking-tight text-[color:var(--rad-tx,var(--ro-text))] sm:text-[2.15rem]">
             {title}
           </h1>
           {description ? (
-            <p className="ro-portal-muted max-w-2xl leading-relaxed">
+            <p className="ro-portal-muted max-w-2xl leading-relaxed text-[color:var(--rad-tx2,var(--ro-text-muted))]">
               {description}
             </p>
           ) : null}

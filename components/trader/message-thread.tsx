@@ -66,21 +66,25 @@ export function TraderMessageThread({
   }
 
   return (
-    <div className="ro-portal-card flex h-[min(70vh,42rem)] flex-col overflow-hidden border">
+    <div className="rad-card flex h-[min(70vh,42rem)] flex-col overflow-hidden">
       <div
         ref={scrollerRef}
         className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain px-3 py-3 sm:px-5"
       >
         {messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
-            <p className="font-semibold text-ro-ink">{t.messagesEmpty}</p>
-            <p className="max-w-xs text-sm text-ro-muted">{t.messagesEmptyBody}</p>
+            <p className="font-semibold text-[color:var(--rad-tx)]">
+              {t.messagesEmpty}
+            </p>
+            <p className="max-w-xs text-sm text-[color:var(--rad-tx3)]">
+              {t.messagesEmptyBody}
+            </p>
           </div>
         ) : (
           items
         )}
       </div>
-      <div className="shrink-0 border-t border-ro-border bg-ro-sunken/40 p-2.5">
+      <div className="shrink-0 border-t border-[color:var(--rad-bd)] bg-[color:var(--rad-surface3)] p-2.5">
         <TraderMessageComposer t={t} />
       </div>
     </div>

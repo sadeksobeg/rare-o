@@ -11,7 +11,6 @@ import {
 } from "@/app/whatsapp-actions";
 import { BusinessContextPanel } from "@/components/admin/business-context-panel";
 import { RecordPicker } from "@/components/admin/record-picker";
-import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
@@ -42,12 +41,9 @@ function adminHref(link: InboxLinkSummary): string | null {
   }
 }
 
-const cardClass =
-  "space-y-2.5 rounded-[14px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-panel)] p-3.5 text-sm text-[color:var(--ro-text)] shadow-[inset_0_1px_0_color-mix(in_srgb,var(--ro-text)_4%,transparent)]";
-
 /**
  * A16 — LinkedRecordPanel + confirm link/unlink via A17 picker.
- * Linking never changes the business record status.
+ * Round 3.1: visual skin only (rad-rec / rad-btn) — linking logic unchanged.
  */
 export function LinkedRecordPanel({
   conversationId,
@@ -138,83 +134,58 @@ export function LinkedRecordPanel({
   }
 
   return (
-    <div
-      data-inbox-pane="context"
-      className="space-y-3 bg-[color:var(--ro-bg-raised)] p-3 text-[color:var(--ro-text)]"
-    >
-      <section aria-label={i.crmParty} className={cardClass}>
-        <h3 className="text-[11px] font-semibold uppercase tracking-wide text-[color:var(--ro-text-muted)]">
-          {i.crmParty}
-        </h3>
-        {crm.customer ? (
-          <p>
-            <Link
-              href={`/admin/customers`}
-              className="font-semibold text-[color:var(--ro-accent-fg,var(--ro-plum-700))] underline-offset-2 hover:underline"
-            >
-              {crm.customer.name}
-            </Link>
-            <span className="text-[color:var(--ro-text-muted)]">
-              {" "}
-              · <bdi dir="ltr">+{crm.customer.phone.replace(/^\+/, "")}</bdi>
+    <div data-inbox-pane="context" className="rad-link-panel">
+      <section aria-label={i.crmParty} className="rad-rec rad-rec-static">
+        <div className="rad-tt">
+          <b>{i.crmParty}</b>
+          {crm.customer ? (
+            <span>
+              <Link href="/admin/customers">{crm.customer.name}</Link>
+              {" · "}
+              <bdi dir="ltr">+{crm.customer.phone.replace(/^\+/, "")}</bdi>
             </span>
-          </p>
-        ) : null}
-        {crm.trader ? (
-          <p>
-            <Link
-              href={`/admin/traders`}
-              className="font-semibold text-[color:var(--ro-accent-fg,var(--ro-plum-700))] underline-offset-2 hover:underline"
-            >
-              {crm.trader.displayName}
-            </Link>
-            <span className="text-[color:var(--ro-text-muted)]">
-              {" "}
-              · <bdi dir="ltr">{crm.trader.phone || crm.trader.companyName}</bdi>
+          ) : null}
+          {crm.trader ? (
+            <span>
+              <Link href="/admin/traders">{crm.trader.displayName}</Link>
+              {" · "}
+              <bdi dir="ltr">{crm.trader.phone || crm.trader.companyName}</bdi>
             </span>
-          </p>
-        ) : null}
-        {!crm.customer && !crm.trader ? (
-          <p className="text-[color:var(--ro-text-2)]">{i.crmNone}</p>
-        ) : (
-          <Button
+          ) : null}
+          {!crm.customer && !crm.trader ? <span>{i.crmNone}</span> : null}
+        </div>
+        {crm.customer || crm.trader ? (
+          <button
             type="button"
-            variant="text"
-            size="sm"
+            className="rad-btn rad-gh rad-sm"
             disabled={pending}
             onClick={() => setCrm("clear")}
           >
             {i.crmClear}
-          </Button>
-        )}
+          </button>
+        ) : null}
         {suggestions.length > 0 ? (
-          <div className="space-y-1.5 border-t border-[color:var(--ro-border-subtle)] pt-2">
-            <p className="text-xs text-[color:var(--ro-text-muted)]">
-              {i.crmSuggest}
-            </p>
-            <ul className="space-y-1">
+          <div className="rad-link-suggest">
+            <p>{i.crmSuggest}</p>
+            <ul>
               {suggestions.map((s) => (
-                <li
-                  key={`${s.kind}-${s.id}`}
-                  className="flex flex-wrap items-center gap-2"
-                >
-                  <span className="min-w-0 flex-1 truncate">
-                    {s.label}{" "}
-                    <bdi dir="ltr" className="text-[color:var(--ro-text-muted)]">
-                      {s.phone}
-                    </bdi>
+                <li key={`${s.kind}-${s.id}`}>
+                  <span className="rad-tt">
+                    <b>{s.label}</b>
+                    <span>
+                      <bdi dir="ltr">{s.phone}</bdi>
+                    </span>
                   </span>
-                  <Button
+                  <button
                     type="button"
-                    variant="secondary"
-                    size="sm"
+                    className="rad-btn rad-gh rad-sm"
                     disabled={pending}
                     onClick={() =>
                       setCrm(s.kind === "customer" ? "customer" : "trader", s.id)
                     }
                   >
                     {s.kind === "customer" ? i.crmLinkCustomer : i.crmLinkTrader}
-                  </Button>
+                  </button>
                 </li>
               ))}
             </ul>
@@ -222,77 +193,70 @@ export function LinkedRecordPanel({
         ) : null}
       </section>
 
-      <BusinessContextPanel context={context} dict={dict} locale={locale} />
+      <div className="rad-link-context">
+        <BusinessContextPanel context={context} dict={dict} locale={locale} />
+      </div>
 
-      <div className={cardClass}>
+      <div className="rad-rec rad-rec-static rad-link-actions">
         {link.linked ? (
           <>
-            {href ? <ButtonLinkish href={href} label={i.openLinkedRecord} /> : null}
-            <Button
+            {href ? (
+              <Link href={href} className="rad-btn rad-gh rad-sm">
+                {i.openLinkedRecord}
+              </Link>
+            ) : null}
+            <button
               type="button"
-              variant="secondary"
-              size="sm"
+              className="rad-btn rad-gh rad-sm"
               disabled={pending}
               onClick={() => setUnlinkOpen(true)}
             >
               {i.linkClear}
-            </Button>
-            <Button
+            </button>
+            <button
               type="button"
-              variant="text"
-              size="sm"
+              className="rad-btn rad-gh rad-sm"
               disabled={pending}
               onClick={() => setPickerOpen(true)}
             >
               {i.linkChange}
-            </Button>
+            </button>
           </>
         ) : (
-          <Button
+          <button
             type="button"
-            variant="secondary"
-            size="sm"
+            className="rad-btn rad-gh rad-sm"
             disabled={pending}
             onClick={() => setPickerOpen(true)}
           >
             {i.linkRecord}
-          </Button>
+          </button>
         )}
-        <p className="text-xs text-[color:var(--ro-text-muted)]">
-          {i.linkConfirmHint}
-        </p>
+        <p className="rad-link-hint">{i.linkConfirmHint}</p>
         {error ? (
-          <p className="text-[color:var(--ro-danger-700)]" role="alert">
+          <p className="rad-link-err" role="alert">
             {error}
           </p>
         ) : null}
       </div>
 
       {audits.length > 0 ? (
-        <section aria-label={i.linkHistory} className={cardClass}>
-          <h3 className="text-[11px] font-semibold uppercase tracking-wide text-[color:var(--ro-text-muted)]">
-            {i.linkHistory}
-          </h3>
-          <ul className="space-y-1.5">
+        <section aria-label={i.linkHistory} className="rad-rec rad-rec-static">
+          <div className="rad-tt">
+            <b>{i.linkHistory}</b>
+          </div>
+          <ul className="rad-link-audit">
             {audits.map((a) => (
-              <li
-                key={a.id}
-                className="flex flex-wrap items-baseline justify-between gap-2"
-              >
+              <li key={a.id}>
                 <span>
                   {a.action === "clear"
                     ? i.linkAuditClear
                     : a.action === "change"
                       ? i.linkAuditChange
                       : i.linkAuditSet}
-                  {a.action !== "clear"
-                    ? ` · ${linkTypeLabel(a.newLinkType)}`
-                    : ""}
+                  {a.action !== "clear" ? ` · ${linkTypeLabel(a.newLinkType)}` : ""}
                 </span>
-                <time
-                  dateTime={a.createdAt}
-                  className="text-xs tabular-nums text-[color:var(--ro-text-muted)]"
-                >
+                <time dateTime={a.createdAt}>
                   {formatDate(a.createdAt, locale, {
                     dateStyle: "short",
                     timeStyle: "short",
@@ -317,37 +281,24 @@ export function LinkedRecordPanel({
         title={i.unlinkConfirm}
         size="sm"
       >
-        <div className="flex justify-end gap-2 p-4">
-          <Button
+        <div className="rad-link-dialog-actions">
+          <button
             type="button"
-            variant="secondary"
-            size="sm"
+            className="rad-btn rad-gh rad-sm"
             onClick={() => setUnlinkOpen(false)}
           >
             {dict.common.cancel}
-          </Button>
-          <Button
+          </button>
+          <button
             type="button"
-            variant="danger"
-            size="sm"
+            className="rad-btn rad-pri rad-sm"
             disabled={pending}
             onClick={onConfirmUnlink}
           >
             {i.confirmUnlink}
-          </Button>
+          </button>
         </div>
       </Dialog>
     </div>
-  );
-}
-
-function ButtonLinkish({ href, label }: { href: string; label: string }) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex h-9 items-center justify-center rounded-[10px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-sunken)] px-4 text-xs font-semibold text-[color:var(--ro-text)] transition-[background-color] hover:bg-[color:var(--ro-panel-hover)]"
-    >
-      {label}
-    </Link>
   );
 }

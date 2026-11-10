@@ -6,12 +6,13 @@ import { getRequestDictionary } from "@/lib/i18n/server";
  * mobile shows the list instead (CSS-driven, see .rad-ibx.rad-tv).
  */
 export default async function AdminWhatsAppInboxPage() {
-  const { dict } = await getRequestDictionary();
+  const { locale, dict } = await getRequestDictionary();
   const ib = dict.ib;
+  const keyJoin = locale === "ar" ? " و " : " and ";
 
   return (
     <>
-      <section className="rad-ct" aria-label={dict.inbox.title}>
+      <section key="select" className="rad-ct" aria-label={dict.inbox.title}>
         <div className="rad-ept">
           <div>
             <div className="rad-rg">
@@ -25,11 +26,16 @@ export default async function AdminWhatsAppInboxPage() {
               </i>
             </div>
             <b>{ib.selectConvTitle}</b>
-            <p>{ib.selectConvBody}</p>
+            <p>
+              {ib.selectConvHintBefore}{" "}
+              <bdi dir="ltr">J</bdi>
+              {keyJoin}
+              <bdi dir="ltr">K</bdi> {ib.selectConvHintAfter}
+            </p>
           </div>
         </div>
       </section>
-      <aside className="rad-xp" aria-hidden />
+      <aside key="ctx-placeholder" className="rad-xp" aria-hidden="true" />
     </>
   );
 }

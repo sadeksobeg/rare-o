@@ -10,6 +10,7 @@ import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
 import { CurrencySelect } from "@/components/ui/currency-select";
 import { Wizard } from "@/components/ui/wizard";
+import { Field, Input, Select, Textarea } from "@/components/ui-kit/field";
 import { coercePlatformCurrency } from "@/lib/catalog/currency";
 import type { Locale } from "@/lib/i18n/config";
 import { fmt, traderActionMessage, type TraderDict } from "@/lib/ui/trader-labels";
@@ -18,9 +19,6 @@ import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 
 const initial: ActionResult | null = null;
 const DRAFT_KEY = "ro-trader-deal-draft";
-
-const control =
-  "min-h-11 w-full rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-paper px-3 py-2 text-ro-ink outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]";
 
 type Draft = {
   step: number;
@@ -230,7 +228,7 @@ export function NewDealForm({
           /* ignore */
         }
       }}
-      className="space-y-4"
+      className="max-w-full space-y-4 overflow-x-clip"
     >
       <input type="hidden" name="dealKind" value={draft.dealKind} />
       <input type="hidden" name="title" value={draft.title} />
@@ -271,11 +269,10 @@ export function NewDealForm({
         }
       >
         {draft.step === 0 ? (
-          <fieldset className="space-y-4 border border-ro-line bg-ro-surface p-4 sm:p-5">
+          <fieldset className="min-w-0 space-y-4 p-1 sm:p-0">
             <legend className="sr-only">{t.sectionType}</legend>
-            <label className="block space-y-1.5 text-sm">
-              <span className="font-medium">{t.dealTypeLabel}</span>
-              <select
+            <Field label={t.dealTypeLabel}>
+              <Select
                 value={draft.dealKind}
                 onChange={(e) =>
                   patch({
@@ -283,22 +280,19 @@ export function NewDealForm({
                     productId: "",
                   })
                 }
-                className={control}
               >
                 <option value="catalog">{t.dealKind.catalog}</option>
                 <option value="non_catalog">{t.dealKind.non_catalog}</option>
-              </select>
-            </label>
-            <label className="block space-y-1.5 text-sm">
-              <span className="font-medium">{t.dealTitleLabel}</span>
-              <input
+              </Select>
+            </Field>
+            <Field label={t.dealTitleLabel}>
+              <Input
                 required
                 maxLength={200}
                 value={draft.title}
                 onChange={(e) => patch({ title: e.target.value })}
-                className={control}
               />
-            </label>
+            </Field>
             {draft.dealKind === "catalog" ? (
               <div className="space-y-1.5">
                 <p className="text-sm font-medium">{t.productLabel}</p>
@@ -326,37 +320,32 @@ export function NewDealForm({
             ) : (
               <p className="text-sm text-ro-muted">{t.nonCatalogNote}</p>
             )}
-            <label className="block space-y-1.5 text-sm">
-              <span className="font-medium">{t.initialMessageLabel}</span>
-              <textarea
+            <Field label={t.initialMessageLabel}>
+              <Textarea
                 rows={3}
                 value={draft.message}
                 onChange={(e) => patch({ message: e.target.value })}
-                className={control}
               />
-            </label>
+            </Field>
           </fieldset>
         ) : null}
 
         {draft.step === 1 ? (
-          <fieldset className="space-y-4 border border-ro-line bg-ro-surface p-4 sm:p-5">
+          <fieldset className="min-w-0 space-y-4 p-1 sm:p-0">
             <legend className="sr-only">{t.sectionTerms}</legend>
-            <label className="block space-y-1.5 text-sm">
-              <span className="font-medium">{t.modelNumberLabel}</span>
-              <input
+            <Field label={t.modelNumberLabel}>
+              <Input
                 type="text"
                 required
                 maxLength={120}
                 dir="ltr"
                 value={draft.modelNumber}
                 onChange={(e) => patch({ modelNumber: e.target.value })}
-                className={control}
               />
-            </label>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <label className="block space-y-1.5 text-sm">
-                <span className="font-medium">{t.priceOptional}</span>
-                <input
+            </Field>
+            <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-3">
+              <Field label={t.priceOptional}>
+                <Input
                   type="number"
                   step="0.01"
                   min="0"
@@ -364,9 +353,8 @@ export function NewDealForm({
                   dir="ltr"
                   value={draft.proposedPrice}
                   onChange={(e) => patch({ proposedPrice: e.target.value })}
-                  className={control}
                 />
-              </label>
+              </Field>
               <CurrencySelect
                 name="currencyUi"
                 required
@@ -382,49 +370,47 @@ export function NewDealForm({
                   currencySyp: t.currencySyp,
                 }}
               />
-              <label className="block space-y-1.5 text-sm">
-                <span className="font-medium">{t.quantityLabel}</span>
-                <input
+              <Field label={t.quantityLabel}>
+                <Input
                   type="number"
                   min="1"
                   dir="ltr"
                   value={draft.quantity}
                   onChange={(e) => patch({ quantity: e.target.value })}
-                  className={control}
                 />
-              </label>
+              </Field>
             </div>
-            <label className="block space-y-1.5 text-sm">
-              <span className="font-medium">{t.conditionsLabel}</span>
-              <textarea
+            <Field label={t.conditionsLabel}>
+              <Textarea
                 rows={3}
                 value={draft.conditionsNotes}
                 onChange={(e) => patch({ conditionsNotes: e.target.value })}
-                className={control}
               />
-            </label>
+            </Field>
           </fieldset>
         ) : null}
 
         {draft.step === 2 ? (
-          <div className="space-y-4 border border-ro-line bg-ro-surface p-4 sm:p-5">
+          <div className="min-w-0 space-y-4 p-1 sm:p-0">
             <ReviewRow
               label={t.sectionType}
               onEdit={() => patch({ step: 0 })}
               editLabel={t.wizardEdit}
             >
-              <p>
+              <p className="break-words">
                 {t.dealKind[draft.dealKind] ?? draft.dealKind}
                 {" · "}
                 {draft.title || "—"}
               </p>
               {draft.dealKind === "catalog" && draft.productId ? (
-                <p className="text-sm text-ro-muted">
+                <p className="text-sm text-[color:var(--rad-tx3)]">
                   {productName(draft.productId)}
                 </p>
               ) : null}
               {draft.message ? (
-                <p className="mt-2 text-sm text-ro-muted">{draft.message}</p>
+                <p className="mt-2 break-words text-sm text-[color:var(--rad-tx3)]">
+                  {draft.message}
+                </p>
               ) : null}
             </ReviewRow>
             <ReviewRow
@@ -439,15 +425,21 @@ export function NewDealForm({
                 </li>
                 <li>
                   {t.priceOptional}:{" "}
-                  {draft.proposedPrice
-                    ? `${draft.proposedPrice}${draft.currency ? ` ${draft.currency}` : ""}`
-                    : "—"}
+                  {draft.proposedPrice ? (
+                    <bdi dir="ltr">
+                      {draft.proposedPrice}
+                      {draft.currency ? ` ${draft.currency}` : ""}
+                    </bdi>
+                  ) : (
+                    "—"
+                  )}
                 </li>
                 <li>
-                  {t.quantityLabel}: {draft.quantity || "—"}
+                  {t.quantityLabel}:{" "}
+                  <bdi dir="ltr">{draft.quantity || "—"}</bdi>
                 </li>
                 {draft.conditionsNotes ? (
-                  <li>
+                  <li className="break-words">
                     {t.conditionsLabel}: {draft.conditionsNotes}
                   </li>
                 ) : null}
@@ -473,11 +465,13 @@ export function NewDealForm({
           role="status"
           className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--ro-ink-950)_45%,transparent)] p-6"
         >
-          <div className="ro-portal-card max-w-sm space-y-3 border p-6 text-center shadow-[0_24px_60px_-28px_rgba(11,8,13,0.55)]">
-            <p className="font-display text-2xl font-semibold text-ro-ink">
+          <div className="rad-card max-w-sm space-y-3 p-6 text-center">
+            <p className="text-2xl font-semibold text-[color:var(--rad-tx)]">
               {t.dealSuccessTitle}
             </p>
-            <p className="text-sm text-ro-muted">{t.dealSuccessBody}</p>
+            <p className="text-sm text-[color:var(--rad-tx3)]">
+              {t.dealSuccessBody}
+            </p>
             <Button
               type="button"
               onClick={() => {
@@ -506,13 +500,13 @@ function ReviewRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-2 border-b border-ro-line pb-4 last:border-0 last:pb-0">
-      <div className="flex items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold">{label}</h3>
+    <div className="min-w-0 space-y-2 border-b border-[color:var(--rad-bd)] pb-4 last:border-0 last:pb-0">
+      <div className="flex min-w-0 items-center justify-between gap-2">
+        <h3 className="min-w-0 text-sm font-semibold">{label}</h3>
         <button
           type="button"
           onClick={onEdit}
-          className="text-sm text-ro-plum hover:underline"
+          className="text-sm text-[color:var(--rad-ac)] hover:underline"
         >
           {editLabel}
         </button>

@@ -25,27 +25,58 @@ export function RouteError({
     href === "/admin" || href === "/trader"
       ? dict.common.goToPortal
       : dict.nav.contact;
+  const isPortal = href === "/admin" || href === "/trader";
 
   return (
-    <div className="relative mx-auto flex min-h-[50vh] max-w-lg flex-col items-center justify-center px-6 py-16 text-center">
+    <div
+      data-portal={href === "/trader" ? "trader" : "admin"}
+      data-theme="dark"
+      className="ro-portal relative flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[color:var(--rad-c0,#0B080D)] px-6 py-16 text-center"
+      style={{ color: "var(--rad-tx, #F4E7D8)" }}
+    >
       <div
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--ro-plum-900)_10%,transparent),transparent_55%)]"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse at top, color-mix(in srgb, var(--rad-ac, #C4A0EA) 14%, transparent), transparent 55%)",
+        }}
         aria-hidden
       />
-      <h1 className="font-display text-2xl font-semibold text-ro-ink">
-        {dict.common.errorTitle}
-      </h1>
-      <p className="mt-3 text-sm text-ro-muted">{dict.common.errorBody}</p>
-      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-        <Button type="button" variant="primary" onClick={reset}>
-          {dict.common.errorRetry}
-        </Button>
-        <Link
-          href={href}
-          className="inline-flex min-h-11 items-center border border-ro-line px-4 text-sm font-medium text-ro-plum hover:bg-ro-sunken"
+      <div className="relative z-10 mx-auto flex w-full max-w-lg flex-col items-center">
+        <h1
+          className="text-2xl font-semibold sm:text-3xl"
+          style={{ fontFamily: "var(--rad-font, inherit)" }}
         >
-          {homeLabel}
-        </Link>
+          {dict.common.errorTitle}
+        </h1>
+        <p className="mt-3 text-sm" style={{ color: "var(--rad-tx2)" }}>
+          {dict.common.errorBody}
+        </p>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <Button type="button" variant="primary" onClick={reset}>
+            {dict.common.errorRetry}
+          </Button>
+          <Link
+            href={href}
+            className="inline-flex min-h-11 items-center rounded-[11px] border px-4 text-sm font-medium"
+            style={{
+              borderColor: "var(--rad-bd2)",
+              color: "var(--rad-tx)",
+              background: "var(--rad-surface3)",
+            }}
+          >
+            {homeLabel}
+          </Link>
+          {!isPortal ? (
+            <Link
+              href="/"
+              className="inline-flex min-h-11 items-center rounded-[11px] px-4 text-sm font-medium"
+              style={{ color: "var(--rad-ac)" }}
+            >
+              {dict.nav.home}
+            </Link>
+          ) : null}
+        </div>
       </div>
     </div>
   );

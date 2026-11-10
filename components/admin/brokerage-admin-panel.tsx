@@ -11,8 +11,10 @@ import type { ActionResult } from "@/app/actions";
 import { brokerageNextHint } from "@/components/brokerage/labels";
 import { BrokeragePhotoField } from "@/components/brokerage/photo-field";
 import { Button } from "@/components/ui/button";
-import { TextField } from "@/components/ui/text-field";
+import { Field, Input, Select, Textarea } from "@/components/ui-kit/field";
 import { canAdminTransition } from "@/lib/brokerage/status";
+import { formatAdminMoney, formatAdminNumber } from "@/lib/i18n/admin-format";
+import type { Locale } from "@/lib/i18n/config";
 
 const initial: ActionResult | null = null;
 
@@ -98,6 +100,8 @@ export function BrokerageAdminPanel({
   );
 
   const ar = locale === "ar";
+  const loc = (locale === "en" ? "en" : "ar") as Locale;
+  const money = (n: number) => formatAdminMoney(n, "USD", loc);
   const err = (s: ActionResult | null) =>
     s && !s.ok ? (
       <p className="text-sm text-[var(--ro-danger-700)]">{s.error}</p>
@@ -279,35 +283,30 @@ export function BrokerageAdminPanel({
           encType="multipart/form-data"
           className="space-y-3 rounded-[var(--ro-r-md)] border border-[var(--ro-border-subtle)] bg-[var(--ro-sand-50)] p-4"
         >
-          <h3 className="font-display text-base font-semibold text-ro-ink">
+          <h3 className="text-base font-semibold text-[color:var(--rad-tx,var(--ro-ink))]">
             {ar ? "تقرير المعاينة" : "Inspection report"}
           </h3>
-          <p className="text-xs text-[var(--ro-ink-600)]">
+          <p className="text-xs text-[color:var(--rad-tx3,var(--ro-ink-600))]">
             {ar
               ? "حفظ التقرير ينقل الطلب تلقائياً إلى «اكتملت المعاينة» ثم بناء العرض. أرفق صور المعاينة."
               : "Saving the report advances to “Inspected”, then you build the quote. Attach inspection photos."}
           </p>
           <input type="hidden" name="requestId" value={requestId} />
-          <label className="block text-sm">
-            {ar ? "التقدير" : "Grade"}
-            <select
-              name="grade"
-              defaultValue="B"
-              className="mt-1 w-full rounded-md border border-[var(--ro-border-control)] bg-[var(--ro-sand-50)] px-3 py-2"
-            >
+          <Field label={ar ? "التقدير" : "Grade"}>
+            <Select name="grade" defaultValue="B">
               {["A", "B", "C", "D"].map((g) => (
                 <option key={g} value={g}>
                   {g}
                 </option>
               ))}
-            </select>
-          </label>
-          <TextField name="notesAr" label={ar ? "ملاحظات" : "Notes"} required />
-          <TextField
-            name="verdictAr"
-            label={ar ? "التوصية" : "Verdict"}
-            required
-          />
+            </Select>
+          </Field>
+          <Field label={ar ? "ملاحظات" : "Notes"}>
+            <Textarea name="notesAr" required rows={3} />
+          </Field>
+          <Field label={ar ? "التوصية" : "Verdict"}>
+            <Input name="verdictAr" required />
+          </Field>
           <BrokeragePhotoField
             locale={locale}
             alreadyCount={inspectionPhotoCount}
@@ -325,28 +324,32 @@ export function BrokerageAdminPanel({
             action={qAction}
             className="space-y-3 rounded-[var(--ro-r-md)] border border-[color-mix(in_srgb,var(--ro-plum-700)_30%,transparent)] bg-[color-mix(in_srgb,var(--ro-plum-50)_45%,var(--ro-sand-50))] p-4"
           >
-            <h3 className="font-display text-base font-semibold text-ro-ink">
+            <h3 className="text-base font-semibold text-[color:var(--rad-tx,var(--ro-ink))]">
               {ar ? "بناء وإرسال عرض السعر" : "Build & send quote"}
             </h3>
-            <p className="text-xs text-[var(--ro-ink-600)]">
+            <p className="text-xs text-[color:var(--rad-tx3,var(--ro-ink-600))]">
               {ar
                 ? "هذه الخطوة الأساسية بعد المعاينة. إرسال العرض ينقل الطلب لانتظار التاجر."
                 : "This is the primary post-inspection step. Sending moves the request to the trader."}
             </p>
             <input type="hidden" name="requestId" value={requestId} />
-            <label className="block text-sm">
-              {ar ? "قيمة البضاعة (USD)" : "Goods value (USD)"}
-              <input
+            <Field label={ar ? "قيمة البضاعة (USD)" : "Goods value (USD)"}>
+              <Input
                 type="number"
                 name="goodsValueUsd"
                 value={goods}
                 onChange={(e) => setGoods(Number(e.target.value))}
-                className="mt-1 w-full rounded-md border border-[var(--ro-border-control)] bg-[var(--ro-sand-50)] px-3 py-2 tabular-nums"
                 dir="ltr"
+                className="tabular-nums"
               />
-            </label>
-            <label className="block text-sm">
-              {ar ? `العمولة ${rate}%` : `Commission ${rate}%`}
+            </Field>
+            <Field
+              label={
+                ar
+                  ? `العمولة ${formatAdminNumber(rate, loc, { maximumFractionDigits: 1 })}%`
+                  : `Commission ${formatAdminNumber(rate, loc, { maximumFractionDigits: 1 })}%`
+              }
+            >
               <input
                 type="range"
                 name="commissionRate"
@@ -355,25 +358,24 @@ export function BrokerageAdminPanel({
                 step={0.1}
                 value={rate}
                 onChange={(e) => setRate(Number(e.target.value))}
-                className="mt-2 w-full"
+                className="mt-1 w-full accent-[color:var(--rad-ac,var(--ro-plum-900))]"
               />
-            </label>
-            <label className="block text-sm">
-              {ar ? "الشحن (USD)" : "Shipping (USD)"}
-              <input
+            </Field>
+            <Field label={ar ? "الشحن (USD)" : "Shipping (USD)"}>
+              <Input
                 type="number"
                 name="shippingUsd"
                 value={shipping}
                 onChange={(e) => setShipping(Number(e.target.value))}
-                className="mt-1 w-full rounded-md border border-[var(--ro-border-control)] bg-[var(--ro-sand-50)] px-3 py-2 tabular-nums"
                 dir="ltr"
+                className="tabular-nums"
               />
-            </label>
-            <p className="text-sm text-[var(--ro-ink-600)]">
+            </Field>
+            <p className="text-sm text-[color:var(--rad-tx3,var(--ro-ink-600))]">
               {ar ? "العمولة" : "Commission"}:{" "}
-              <bdi dir="ltr">${commission.toFixed(2)}</bdi> ·{" "}
+              <bdi dir="ltr">{money(commission)}</bdi> ·{" "}
               {ar ? "الإجمالي للتاجر" : "Trader total"}:{" "}
-              <bdi dir="ltr">${total.toFixed(2)}</bdi>
+              <bdi dir="ltr">{money(total)}</bdi>
             </p>
             <Button type="submit" disabled={qPending} className="min-h-11">
               {ar ? "إرسال العرض للتاجر" : "Send quote to trader"}
@@ -401,11 +403,23 @@ export function BrokerageAdminPanel({
       ) : null}
 
       {status === "QUOTE_SENT" ? (
-        <div className="rounded-[var(--ro-r-md)] border border-[color-mix(in_srgb,var(--ro-amber-500)_40%,transparent)] bg-[color-mix(in_srgb,var(--ro-amber-100)_40%,var(--ro-sand-50))] p-4">
-          <h3 className="font-display text-base font-semibold text-ro-ink">
+        <div
+          className="rounded-[14px] border p-4"
+          style={{
+            borderColor: "var(--rad-warn)",
+            background: "var(--rad-warns)",
+          }}
+        >
+          <h3
+            className="font-display text-base font-semibold"
+            style={{ color: "var(--rad-tx)" }}
+          >
             {ar ? "بانتظار قرار التاجر" : "Waiting on trader"}
           </h3>
-          <p className="mt-2 text-sm leading-relaxed text-[var(--ro-ink-700)]">
+          <p
+            className="mt-2 text-sm leading-relaxed"
+            style={{ color: "var(--rad-tx2)" }}
+          >
             {ar
               ? "العرض أُرسل. لا تعدّل العرض من هنا — انتظر موافقة التاجر أو رفضه. بعدها تظهر خطوات الشراء والشحن."
               : "The quote is out. Do not rebuild it here — wait for approval or rejection. Purchase and shipping steps appear after."}
@@ -426,11 +440,23 @@ export function BrokerageAdminPanel({
       ) : null}
 
       {status === "APPROVED" ? (
-        <div className="rounded-[var(--ro-r-md)] border border-[color-mix(in_srgb,var(--ro-success-700)_25%,transparent)] bg-[color-mix(in_srgb,var(--ro-success-100)_45%,var(--ro-sand-50))] p-4">
-          <h3 className="font-display text-base font-semibold text-ro-ink">
+        <div
+          className="rounded-[14px] border p-4"
+          style={{
+            borderColor: "var(--rad-ok)",
+            background: "var(--rad-oks)",
+          }}
+        >
+          <h3
+            className="font-display text-base font-semibold"
+            style={{ color: "var(--rad-tx)" }}
+          >
             {ar ? "تنفيذ الشراء" : "Execute purchase"}
           </h3>
-          <p className="mt-1 mb-3 text-xs text-[var(--ro-ink-600)]">
+          <p
+            className="mt-1 mb-3 text-xs"
+            style={{ color: "var(--rad-tx2)" }}
+          >
             {ar
               ? "التاجر وافق. اشترِ القطعة ثم سجّل إتمام الشراء."
               : "Trader approved. Buy the piece, then mark purchased."}
@@ -458,29 +484,26 @@ export function BrokerageAdminPanel({
       ) : null}
 
       {status === "PURCHASED" ? (
-        <div className="rounded-[var(--ro-r-md)] border border-[var(--ro-border-subtle)] bg-[var(--ro-sand-50)] p-4 space-y-3">
-          <h3 className="font-display text-base font-semibold text-ro-ink">
+        <div className="space-y-3 rounded-[var(--rad-r,14px)] border border-[color:var(--rad-bd,var(--ro-border-subtle))] bg-[color:var(--rad-surface2,var(--ro-sand-50))] p-4">
+          <h3 className="text-base font-semibold text-[color:var(--rad-tx,var(--ro-ink))]">
             {ar ? "تسجيل الشحن" : "Record shipment"}
           </h3>
-          <label className="block text-sm">
-            {ar ? "الناقل" : "Carrier"}
-            <input
+          <Field label={ar ? "الناقل" : "Carrier"}>
+            <Input
               value={carrier}
               onChange={(e) => setCarrier(e.target.value)}
-              className="mt-1 w-full rounded-md border border-[var(--ro-border-control)] bg-[var(--ro-sand-50)] px-3 py-2"
               dir="ltr"
             />
-          </label>
-          <label className="block text-sm">
-            {ar ? "رقم التتبع" : "Tracking ref"}
-            <input
+          </Field>
+          <Field label={ar ? "رقم التتبع" : "Tracking ref"}>
+            <Input
               value={tracking}
               onChange={(e) => setTracking(e.target.value)}
               placeholder="TRK-…"
-              className="mt-1 w-full rounded-md border border-[var(--ro-border-control)] bg-[var(--ro-sand-50)] px-3 py-2 font-mono text-sm"
               dir="ltr"
+              className="rad-mono"
             />
-          </label>
+          </Field>
           <TransitionButton
             action={tAction}
             requestId={requestId}
@@ -502,11 +525,11 @@ export function BrokerageAdminPanel({
       ) : null}
 
       {status === "SHIPPED" ? (
-        <div className="rounded-[var(--ro-r-md)] border border-[var(--ro-border-subtle)] bg-[var(--ro-sand-50)] p-4">
-          <h3 className="font-display text-base font-semibold text-ro-ink">
+        <div className="rounded-[var(--rad-r,14px)] border border-[color:var(--rad-bd,var(--ro-border-subtle))] bg-[color:var(--rad-surface2,var(--ro-sand-50))] p-4">
+          <h3 className="text-base font-semibold text-[color:var(--rad-tx,var(--ro-ink))]">
             {ar ? "تأكيد التسليم" : "Confirm delivery"}
           </h3>
-          <p className="mt-1 mb-3 text-xs text-[var(--ro-ink-600)]">
+          <p className="mt-1 mb-3 text-xs text-[color:var(--rad-tx3,var(--ro-ink-600))]">
             {ar
               ? "عند وصول الشحنة للتاجر سجّل التسليم."
               : "When the trader receives the parcel, mark delivered."}

@@ -81,8 +81,13 @@ export function RadInboxShell({
   return (
     <InboxUiContext.Provider value={{ ctxOpen, setCtxOpen, searchRef }}>
       <div className={`rad-ibx${threadVisible ? " rad-tv" : ""}${ctxOpen ? " rad-xo" : ""}`}>
-        {list}
-        {children}
+        {/* Single keyed slots — page fragments used to pass 2 unkeyed siblings and trip the Next.js "1 Issue" badge */}
+        <div key="inbox-list" className="rad-ib-list-slot">
+          {list}
+        </div>
+        <div key="inbox-thread" className="rad-ib-thread-slot">
+          {children}
+        </div>
       </div>
     </InboxUiContext.Provider>
   );

@@ -4,7 +4,6 @@ import {
   traderCancelWholesaleRequestAction,
   traderRespondWholesaleQuoteAction,
 } from "@/app/wholesale-actions";
-import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { traderActionMessage, type TraderDict } from "@/lib/ui/trader-labels";
 import { useRouter } from "next/navigation";
@@ -87,63 +86,60 @@ export function TraderWholesaleActions({
           : null;
 
   return (
-    <div className="ro-portal-card space-y-4 border p-4">
-      <h2 className="text-lg font-semibold">{t.wsActions}</h2>
+    <div className="rad-card space-y-4 p-4">
+      <h2 className="text-lg font-semibold text-[color:var(--rad-tx)]">
+        {t.wsActions}
+      </h2>
       {status === "quote_provided" ? (
         <div className="space-y-3">
-          <p className="text-sm text-ro-muted">{t.wsReviewQuote}</p>
-          <label className="block space-y-1 text-sm">
+          <p className="text-sm text-[color:var(--rad-tx3)]">{t.wsReviewQuote}</p>
+          <label className="block space-y-1 text-sm text-[color:var(--rad-tx)]">
             <span>{t.wsNoteOptional}</span>
-            <input
-              ref={noteRef}
-              name="note"
-              className="w-full border border-ro-line bg-transparent px-3 py-2"
-            />
+            <input ref={noteRef} name="note" className="rad-inp w-full" />
           </label>
           <div className="flex flex-wrap gap-3">
-            <Button
+            <button
               type="button"
-              variant="primary"
-              size="md"
+              className="rad-btn rad-pri"
               disabled={pending}
               onClick={() => setConfirm("accept")}
             >
               {t.wsAccept}
-            </Button>
-            <Button
+            </button>
+            <button
               type="button"
-              variant="secondary"
-              size="md"
+              className="rad-btn rad-gh"
               disabled={pending}
               onClick={() => setConfirm("decline")}
             >
               {t.wsDecline}
-            </Button>
+            </button>
           </div>
         </div>
       ) : null}
 
       {status === "submitted" || status === "under_review" ? (
-        <Button
+        <button
           type="button"
-          variant="secondary"
-          size="md"
+          className="rad-btn rad-gh"
           disabled={pending}
           onClick={() => setConfirm("cancel")}
         >
           {t.wsCancel}
-        </Button>
+        </button>
       ) : null}
 
       {status !== "quote_provided" &&
       status !== "submitted" &&
       status !== "under_review" ? (
-        <p className="text-sm text-ro-muted">{t.wsNoActions}</p>
+        <p className="text-sm text-[color:var(--rad-tx3)]">{t.wsNoActions}</p>
       ) : null}
 
-      {message ? <p className="text-sm text-ro-muted">{message}</p> : null}
+      {message ? (
+        <p className="text-sm text-[color:var(--rad-tx3)]">{message}</p>
+      ) : null}
       {error ? (
-        <p className="text-sm text-red-800" role="alert">
+        <p className="text-sm text-[var(--ro-danger-700)]" role="alert">
           {error}
         </p>
       ) : null}

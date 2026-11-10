@@ -1,37 +1,26 @@
 import Link from "next/link";
-import { Suspense } from "react";
-import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import {
-  DataTable,
-  DataTableHead,
-  RowHit,
-  SortableTh,
-  Td,
-  Th,
-  Tr,
-} from "@/components/admin/data-table";
-import {
-  AdminRecordCard,
-  AdminRecordCardList,
-} from "@/components/admin/list-record-card";
-import { PageHeader } from "@/components/admin/page-header";
+  RequestsListView,
+  type RequestsListRow,
+} from "@/components/admin/rad/requests-list-view";
 import { RetailKanbanBoard } from "@/components/admin/retail-kanban";
-import { AdminTableFilters } from "@/components/admin/table-filters";
-import { EmptyState } from "@/components/ui/empty-state";
-import { StatusChip } from "@/components/ui/status-chip";
-import { cn } from "@/lib/utils";
 import { uiVisibleRetailRequestWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
 import { containsCI } from "@/lib/db/search";
-import { formatRelative } from "@/lib/i18n/format";
+import {
+  formatAdminListCreated,
+  formatAdminMoneyOrNull,
+} from "@/lib/i18n/admin-format";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import {
   RETAIL_REQUEST_STATUSES,
   isRetailRequestStatus,
 } from "@/lib/retail-request/constants";
-import { statusesAwaitingAdmin } from "@/lib/ui/status";
 import { isFresh } from "@/lib/ui/fresh";
-import { getStatusChipProps } from "@/lib/ui/status-labels";
+import { statusesAwaitingAdmin } from "@/lib/ui/status";
+import { adminPillToneForStatus } from "@/lib/ui/status-tone";
+import { getStatusLabel } from "@/lib/ui/status-labels";
+import { formatMaskedPhone } from "@/lib/whatsapp/messaging/phone-format";
 import type { Prisma } from "@prisma/client";
 
 const PAGE_SIZE = 40;
@@ -83,7 +72,7 @@ export default async function AdminRequestsPage({
     dir: dirRaw,
   } = await searchParams;
   const view = viewRaw === "kanban" ? "kanban" : "table";
-  const sortField = isSortField(sortRaw) ? sortRaw : undefined;
+  const sortField = isSortField(sortRaw) ? sortRaw : "created";
   const sortDir = dirRaw === "asc" ? "asc" : "desc";
   const { locale, dict } = await getRequestDictionary();
   const a = dict.admin;
@@ -114,6 +103,16 @@ export default async function AdminRequestsPage({
                 { reference: containsCI(q) },
                 { customerName: containsCI(q) },
                 { customerPhone: containsCI(q) },
+                {
+                  lines: {
+                    some: {
+                      OR: [
+                        { productNameAr: containsCI(q) },
+                        { productNameEn: containsCI(q) },
+                      ],
+                    },
+                  },
+                },
               ],
             },
           ]
@@ -133,9 +132,9 @@ export default async function AdminRequestsPage({
   const pageCount = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
   const page = Math.min(pageRequested, pageCount);
 
-  const orderBy: Prisma.RetailRequestFindManyArgs["orderBy"] = sortField
-    ? { [SORTABLE_FIELDS[sortField]]: sortDir }
-    : { updatedAt: "desc" };
+  const orderBy: Prisma.RetailRequestFindManyArgs["orderBy"] = {
+    [SORTABLE_FIELDS[sortField]]: sortDir,
+  };
 
   const requests = await prisma.retailRequest.findMany({
     where,
@@ -143,112 +142,66 @@ export default async function AdminRequestsPage({
     skip: view === "kanban" ? 0 : (page - 1) * PAGE_SIZE,
     take: view === "kanban" ? 200 : PAGE_SIZE,
     include: {
-      _count: { select: { lines: true } },
-      handoffEvents: {
-        orderBy: { createdAt: "desc" },
-        take: 1,
+      lines: {
+        orderBy: { id: "asc" },
+        take: 3,
         select: {
-          createdAt: true,
-          eventType: true,
-          actor: true,
+          productNameAr: true,
+          productNameEn: true,
+          quantity: true,
         },
       },
+      _count: { select: { lines: true } },
     },
   });
-
-  function sortHref(field: SortField) {
-    const nextDir = sortField === field && sortDir === "desc" ? "asc" : "desc";
-    const params = new URLSearchParams();
-    if (tab !== "all") params.set("tab", tab);
-    if (q) params.set("q", q);
-    if (view !== "table") params.set("view", view);
-    params.set("sort", field);
-    params.set("dir", nextDir);
-    return `/admin/requests?${params.toString()}`;
-  }
 
   const allCount = statusGroups.reduce((n, g) => n + g._count._all, 0);
   const counts: Record<string, number> = { all: allCount };
   for (const s of RETAIL_REQUEST_STATUSES) {
     counts[s] = statusGroups.find((g) => g.status === s)?._count._all ?? 0;
   }
+  counts.waiting = waitingStatuses.reduce((n, s) => n + (counts[s] ?? 0), 0);
 
-  const statusLabel = (status: string) => u.status.retail[status] ?? status;
+  const statusLabelFn = (status: string) =>
+    getStatusLabel(dict, "retail", status);
 
-  const viewQs = `${tab !== "all" ? `&tab=${encodeURIComponent(tab)}` : ""}${q ? `&q=${encodeURIComponent(q)}` : ""}`;
+  const tableQs = new URLSearchParams();
+  if (tab !== "all") tableQs.set("tab", tab);
+  if (q) tableQs.set("q", q);
+  const tableHref = tableQs.toString()
+    ? `/admin/requests?${tableQs.toString()}`
+    : "/admin/requests";
 
-  return (
-    <section data-admin-requests="" className="ro-portal-stagger space-y-5 pb-2">
-      <PageHeader
-        title={a.requests}
-        description={u.requestsLead}
-        icon={<ShoppingBag className="size-5" strokeWidth={1.5} />}
-        action={
-          <div
-            className="inline-flex items-center gap-1 rounded-[12px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-sunken)] p-1"
-            role="group"
-            aria-label={`${u.viewTable} / ${u.viewKanban}`}
-          >
-            <Link
-              href={`/admin/requests?view=table${viewQs}`}
-              className={cn(
-                "inline-flex h-9 items-center rounded-[10px] px-3.5 text-sm font-semibold transition-[background-color,color] duration-[var(--ro-dur-fast)]",
-                view === "table"
-                  ? "bg-[color:var(--ro-plum-700)] text-[var(--ro-sand-50)] shadow-[0_1px_0_color-mix(in_srgb,var(--ro-sand-50)_18%,transparent)_inset]"
-                  : "text-[color:var(--ro-text-2)] hover:bg-[color:var(--ro-panel-hover)] hover:text-[color:var(--ro-text)]"
-              )}
+  if (view === "kanban") {
+    const kanbanHref = `/admin/requests?${new URLSearchParams({
+      ...(tab !== "all" ? { tab } : {}),
+      ...(q ? { q } : {}),
+      view: "kanban",
+    }).toString()}`;
+    return (
+      <section data-admin-requests="" className="space-y-5 pb-2">
+        <header className="rad-phead">
+          <div className="flex min-w-0 flex-wrap items-end gap-3">
+            <div className="min-w-0">
+              <h1>{a.requests}</h1>
+              <p>
+                <b className="rad-num">{allCount}</b>
+                {" · "}
+                {u.requestsLead}
+              </p>
+            </div>
+            <div
+              className="rad-seg rad-view-toggle"
+              role="group"
+              aria-label={`${u.viewTable} / ${u.viewKanban}`}
             >
-              {u.viewTable}
-            </Link>
-            <Link
-              href={`/admin/requests?view=kanban${viewQs}`}
-              className={cn(
-                "inline-flex h-9 items-center rounded-[10px] px-3.5 text-sm font-semibold transition-[background-color,color] duration-[var(--ro-dur-fast)]",
-                view === "kanban"
-                  ? "bg-[color:var(--ro-plum-700)] text-[var(--ro-sand-50)] shadow-[0_1px_0_color-mix(in_srgb,var(--ro-sand-50)_18%,transparent)_inset]"
-                  : "text-[color:var(--ro-text-2)] hover:bg-[color:var(--ro-panel-hover)] hover:text-[color:var(--ro-text)]"
-              )}
-            >
-              {u.viewKanban}
-            </Link>
+              <Link href={tableHref}>{u.viewTable}</Link>
+              <Link href={kanbanHref} className="rad-on" aria-current="page">
+                {u.viewKanban}
+              </Link>
+            </div>
           </div>
-        }
-      />
-      <Suspense fallback={null}>
-        <AdminTableFilters
-          tabsLabel={u.filterTabs}
-          searchLabel={u.search}
-          searchPlaceholder={u.searchRequests}
-          resultCount={totalFiltered}
-          resultLabel={u.resultsLabel}
-          tabs={[
-            { id: "all", label: u.filterAll, count: counts.all },
-            {
-              id: "waiting",
-              label: u.filterWaiting,
-              count: waitingStatuses.reduce((n, s) => n + (counts[s] ?? 0), 0),
-            },
-            ...RETAIL_REQUEST_STATUSES.map((s) => ({
-              id: s,
-              label: statusLabel(s),
-              count: counts[s] ?? 0,
-            })),
-          ]}
-        />
-      </Suspense>
-      {requests.length === 0 ? (
-        <EmptyState
-          variant={tab !== "all" || q ? "no-results" : "first-use"}
-          title={u.emptyTitle}
-          body={a.noRequests}
-          actionHref={
-            tab !== "all" || q ? "/admin/requests" : "/admin/products/new"
-          }
-          actionLabel={
-            tab !== "all" || q ? dict.catalog.clearFilters : a.newProduct
-          }
-        />
-      ) : view === "kanban" ? (
+        </header>
         <RetailKanbanBoard
           dict={dict}
           cards={requests.map((r) => ({
@@ -258,173 +211,104 @@ export default async function AdminRequestsPage({
             status: r.status,
           }))}
         />
-      ) : (
-        <>
-          <AdminRecordCardList>
-            {requests.map((r) => (
-              <AdminRecordCard
-                key={r.id}
-                href={`/admin/requests/${r.id}`}
-                flash={isFresh(r.updatedAt)}
-                title={r.reference}
-                trailing={
-                  <StatusChip
-                    size="sm"
-                    {...getStatusChipProps(dict, "retail", r.status)}
-                  />
-                }
-                meta={
-                  <>
-                    {r.customerName}
-                    <span className="ms-2" dir="ltr">
-                      {r.customerPhone}
-                    </span>
-                  </>
-                }
-                actionLabel={u.actionView}
-              />
-            ))}
-          </AdminRecordCardList>
-          <div className="hidden md:block">
-          <DataTable>
-            <DataTableHead>
-              <SortableTh
-                href={sortHref("reference")}
-                active={sortField === "reference"}
-                direction={sortField === "reference" ? sortDir : undefined}
-              >
-                {u.colReference}
-              </SortableTh>
-              <Th>{u.colCustomer}</Th>
-              <Th>{u.colItems}</Th>
-              <SortableTh
-                href={sortHref("status")}
-                active={sortField === "status"}
-                direction={sortField === "status" ? sortDir : undefined}
-              >
-                {a.colStatus}
-              </SortableTh>
-              <Th>{u.colHandoff}</Th>
-              <Th>{u.colLastEvent}</Th>
-              <SortableTh
-                href={sortHref("created")}
-                active={sortField === "created"}
-                direction={sortField === "created" ? sortDir : undefined}
-              >
-                {u.colCreated}
-              </SortableTh>
-              <Th />
-            </DataTableHead>
-            <tbody>
-              {requests.map((r) => {
-                const last = r.handoffEvents[0];
-                return (
-                  <Tr
-                    key={r.id}
-                    href={`/admin/requests/${r.id}`}
-                    flash={isFresh(r.updatedAt)}
-                  >
-                    <Td>
-                      <RowHit href={`/admin/requests/${r.id}`}>
-                        {r.reference}
-                      </RowHit>
-                    </Td>
-                    <Td>
-                      <span className="font-medium text-[color:var(--ro-text)]">
-                        {r.customerName}
-                      </span>
-                      <div
-                        className="text-xs text-[color:var(--ro-text-muted)]"
-                        dir="ltr"
-                      >
-                        <bdi>{r.customerPhone}</bdi>
-                      </div>
-                    </Td>
-                    <Td className="tabular-nums text-[color:var(--ro-text-2)]">
-                      {r._count.lines}
-                    </Td>
-                    <Td>
-                      <StatusChip
-                        size="sm"
-                        {...getStatusChipProps(dict, "retail", r.status)}
-                      />
-                    </Td>
-                    <Td>
-                      <span className="inline-flex rounded-full border border-[color:var(--ro-border-subtle)] bg-[color:color-mix(in_srgb,var(--ro-text)_6%,transparent)] px-2.5 py-1 text-xs font-medium text-[color:var(--ro-text-2)]">
-                        {handoffLabel(u, r.handoffOpenedAt, r.handoffPreparedAt)}
-                      </span>
-                    </Td>
-                    <Td className="text-[color:var(--ro-text-muted)]">
-                      {last
-                        ? formatRelative(last.createdAt, locale)
-                        : formatRelative(r.updatedAt, locale)}
-                    </Td>
-                    <Td className="text-[color:var(--ro-text-muted)]">
-                      {formatRelative(r.createdAt, locale)}
-                    </Td>
-                    <Td>
-                      <Link
-                        href={`/admin/requests/${r.id}`}
-                        className="relative z-[2] text-sm font-semibold text-[color:var(--ro-accent-fg,var(--ro-plum-700))] underline-offset-2 hover:underline"
-                      >
-                        {u.actionView}
-                      </Link>
-                    </Td>
-                  </Tr>
-                );
-              })}
-            </tbody>
-          </DataTable>
-          </div>
-          {pageCount > 1 ? (
-            <nav
-              aria-label="Pagination"
-              className="flex flex-wrap items-center justify-between gap-3 text-sm"
-            >
-              <p className="text-[color:var(--ro-text-muted)]">
-                {totalFiltered} · {page}/{pageCount}
-              </p>
-              <div className="flex gap-2">
-                {page > 1 ? (
-                  <Link
-                    href={buildPageHref(tab, q, page - 1)}
-                    aria-label={dict.common.paginationPrevious}
-                    className="inline-flex size-11 items-center justify-center rounded-[12px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-panel)] text-[color:var(--ro-text)] hover:bg-[color:var(--ro-panel-hover)]"
-                  >
-                    <ChevronLeft
-                      className="size-4 rtl:-scale-x-100"
-                      strokeWidth={1.5}
-                      aria-hidden
-                    />
-                  </Link>
-                ) : null}
-                {page < pageCount ? (
-                  <Link
-                    href={buildPageHref(tab, q, page + 1)}
-                    aria-label={dict.common.paginationNext}
-                    className="inline-flex size-11 items-center justify-center rounded-[12px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-panel)] text-[color:var(--ro-text)] hover:bg-[color:var(--ro-panel-hover)]"
-                  >
-                    <ChevronRight
-                      className="size-4 rtl:-scale-x-100"
-                      strokeWidth={1.5}
-                      aria-hidden
-                    />
-                  </Link>
-                ) : null}
-              </div>
-            </nav>
-          ) : null}
-        </>
-      )}
-    </section>
-  );
-}
+      </section>
+    );
+  }
 
-function buildPageHref(tab: string, q: string, page: number) {
-  const params = new URLSearchParams();
-  if (tab && tab !== "all") params.set("tab", tab);
-  if (q) params.set("q", q);
-  if (page > 1) params.set("page", String(page));
-  const qs = params.toString();
-  return qs ? `/admin/requests?${qs}` : "/admin/requests";
+  const rows: RequestsListRow[] = requests.map((r) => {
+    const first = r.lines[0];
+    const productLabel = first
+      ? locale === "ar"
+        ? first.productNameAr || first.productNameEn
+        : first.productNameEn || first.productNameAr
+      : "—";
+    const moreCount = Math.max(0, r._count.lines - 1);
+    const onRequest = Number(r.subtotal) <= 0;
+    const created = formatAdminListCreated(r.createdAt, locale);
+    const money = formatAdminMoneyOrNull(Number(r.subtotal), r.currency, locale);
+    return {
+      id: r.id,
+      reference: r.reference,
+      customerName: r.customerName,
+      customerPhone:
+        formatMaskedPhone(r.customerPhone) || r.customerPhone,
+      status: r.status,
+      statusLabel: statusLabelFn(r.status),
+      pillTone: adminPillToneForStatus("retail", r.status),
+      itemCount: r._count.lines,
+      productLabel,
+      moreCount,
+      valueLabel: onRequest ? u.onRequestPrice : money ?? u.onRequestPrice,
+      valueOnRequest: onRequest,
+      handoffLabel: handoffLabel(u, r.handoffOpenedAt, r.handoffPreparedAt),
+      createdLabel: created.primary,
+      createdSecondary: created.secondary,
+      href: `/admin/requests/${r.id}`,
+      fresh: isFresh(r.updatedAt),
+    };
+  });
+
+  const tabs = [
+    { value: "all", label: u.filterAll, count: counts.all },
+    { value: "waiting", label: u.filterWaiting, count: counts.waiting },
+    ...RETAIL_REQUEST_STATUSES.map((s) => ({
+      value: s,
+      label: statusLabelFn(s),
+      count: counts[s] ?? 0,
+    })),
+  ];
+
+  return (
+    <RequestsListView
+      title={a.requests}
+      lead={
+        <>
+          <b className="rad-num">{allCount}</b>
+          {" · "}
+          {u.requestsLead}
+        </>
+      }
+      tabs={tabs}
+      query={{
+        tab,
+        q,
+        page,
+        sort: sortField,
+        dir: sortDir,
+        view: "table",
+      }}
+      rows={rows}
+      totalFiltered={totalFiltered}
+      pageCount={pageCount}
+      pageSize={PAGE_SIZE}
+      locale={locale}
+      labels={{
+        listAria: a.requests,
+        statusFilterAria: u.filterTabs,
+        searchLabel: u.search,
+        searchPlaceholder: u.searchRequests,
+        sortNewest: u.sortNewestFirst,
+        sortOldest: u.sortOldestFirst,
+        colReference: u.colReference,
+        colCustomer: u.colCustomer,
+        colProducts: u.colItems,
+        colValue: u.colTotal,
+        colStatus: a.colStatus,
+        colHandoff: u.colHandoff,
+        colCreated: u.colCreated,
+        colActions: u.actionView,
+        moreProducts: u.moreProducts,
+        emptyTitle: u.requestsEmptyTitle,
+        emptyBody: u.requestsEmptyBody,
+        noResultsTitle: u.noResultsForQuery,
+        noResultsBody: u.noResultsHint,
+        clearFilters: dict.catalog.clearFilters,
+        paginationSummary: u.listPaginationSummary,
+        paginationPrevious: dict.common.paginationPrevious,
+        paginationNext: dict.common.paginationNext,
+        viewTable: u.viewTable,
+        viewKanban: u.viewKanban,
+      }}
+    />
+  );
 }

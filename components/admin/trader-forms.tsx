@@ -5,7 +5,8 @@ import {
   adminSetTraderStatusAction,
 } from "@/app/deal-actions";
 import { Button } from "@/components/ui/button";
-import { ConfirmDialog, Dialog } from "@/components/ui/dialog";
+import { Modal } from "@/components/ui-kit/modal";
+import { Check, Copy } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -88,71 +89,95 @@ export function TraderResetPasswordButton({
         variant="secondary"
         size="sm"
         loading={pending}
-        className="h-8 px-3"
+        className="!min-w-0 rounded-[11px] px-3"
         onClick={() => setConfirmOpen(true)}
       >
         {label}
       </Button>
-      <ConfirmDialog
+      <Modal
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
-        onConfirm={run}
         title={confirmTitle}
-        body={confirmBody}
-        confirmLabel={confirmLabel}
-        cancelLabel={cancelLabel}
-        pending={pending}
-      />
-      <Dialog
+        actions={
+          <>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setConfirmOpen(false)}
+            >
+              {cancelLabel}
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              loading={pending}
+              onClick={run}
+            >
+              {confirmLabel}
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm leading-relaxed text-[color:var(--rad-tx2)]">
+          {confirmBody}
+        </p>
+      </Modal>
+      <Modal
         open={!!revealed}
         onClose={closeReveal}
         title={tempPasswordTitle}
-        preventDismiss={!acked}
+        actions={
+          <Button
+            type="button"
+            size="sm"
+            disabled={!acked}
+            onClick={closeReveal}
+          >
+            {tempPasswordClose}
+          </Button>
+        }
       >
         {revealed ? (
           <div className="space-y-4">
-            <p className="text-sm text-[color:var(--ro-text-muted)]">
+            <p className="text-sm leading-relaxed text-[color:var(--rad-tx2)]">
               {tempPasswordLead}
             </p>
             <p className="text-sm" dir="ltr">
               {revealed.email}
             </p>
             <p
-              className="rounded-[var(--ro-r-sm)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-sunken)] px-3 py-2 font-mono text-sm tracking-wide text-[color:var(--ro-text)]"
+              className="rounded-[11px] border border-[color:var(--rad-bd)] bg-[color:var(--rad-surface3)] px-3 py-2 font-mono text-sm tracking-wide text-[color:var(--rad-tx)]"
               dir="ltr"
             >
               {revealed.tempPassword}
             </p>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                size="sm"
-                variant="secondary"
-                onClick={copyPassword}
-              >
-                {copied ? tempPasswordCopied : tempPasswordCopy}
-              </Button>
-            </div>
-            <label className="flex items-start gap-2 text-sm text-[color:var(--ro-text)]">
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={copyPassword}
+            >
+              {copied ? (
+                <Check className="size-3.5" strokeWidth={1.5} aria-hidden />
+              ) : (
+                <Copy className="size-3.5" strokeWidth={1.5} aria-hidden />
+              )}
+              {copied ? tempPasswordCopied : tempPasswordCopy}
+            </Button>
+            <label className="flex items-start gap-2 text-sm text-[color:var(--rad-tx)]">
               <input
                 type="checkbox"
                 checked={acked}
                 onChange={(e) => setAcked(e.target.checked)}
-                className="mt-1"
+                className="mt-1 accent-[var(--rad-ac)]"
               />
               <span>{tempPasswordAck}</span>
             </label>
-            <Button
-              type="button"
-              size="sm"
-              disabled={!acked}
-              onClick={closeReveal}
-            >
-              {tempPasswordClose}
-            </Button>
           </div>
         ) : null}
-      </Dialog>
+      </Modal>
     </>
   );
 }
@@ -199,21 +224,41 @@ export function TraderStatusButton({
             variant="secondary"
             size="sm"
             loading={pending}
-            className="h-8 px-3"
+            className="!min-w-0 rounded-[11px] px-3"
             onClick={() => setConfirmOpen(true)}
           >
             {label}
           </Button>
-          <ConfirmDialog
+          <Modal
             open={confirmOpen}
             onClose={() => setConfirmOpen(false)}
-            onConfirm={run}
             title={confirmTitle ?? label}
-            body={confirmBody ?? label}
-            confirmLabel={confirmLabel ?? label}
-            cancelLabel={cancelLabel ?? "Cancel"}
-            pending={pending}
-          />
+            actions={
+              <>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setConfirmOpen(false)}
+                >
+                  {cancelLabel ?? "Cancel"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="danger"
+                  size="sm"
+                  loading={pending}
+                  onClick={run}
+                >
+                  {confirmLabel ?? label}
+                </Button>
+              </>
+            }
+          >
+            <p className="text-sm leading-relaxed text-[color:var(--rad-tx2)]">
+              {confirmBody ?? label}
+            </p>
+          </Modal>
         </>
       ) : (
         <form
@@ -231,7 +276,7 @@ export function TraderStatusButton({
             variant="secondary"
             size="sm"
             loading={pending}
-            className="h-8 px-3"
+            className="!min-w-0 rounded-[11px] px-3"
           >
             {label}
           </Button>

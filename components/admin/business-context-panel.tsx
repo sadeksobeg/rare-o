@@ -42,9 +42,9 @@ function statusDomain(linkType: string): StatusDomain | null {
   }
 }
 
-const cardClass =
-  "space-y-3 rounded-[14px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-panel)] p-3.5 text-sm text-[color:var(--ro-text)] shadow-[inset_0_1px_0_color-mix(in_srgb,var(--ro-text)_4%,transparent)]";
-
+/**
+ * Visual-only rad skin (3.1 carry into round 4). Fields/logic unchanged.
+ */
 export function BusinessContextPanel({
   context,
   dict,
@@ -56,11 +56,11 @@ export function BusinessContextPanel({
 }) {
   if (!context.linked) {
     return (
-      <aside className={cardClass} aria-label={dict.inbox.businessContext}>
-        <h2 className="text-[11px] font-semibold uppercase tracking-wide text-[color:var(--ro-text-muted)]">
-          {dict.inbox.businessContext}
-        </h2>
-        <p className="text-[color:var(--ro-text-2)]">{dict.inbox.notLinked}</p>
+      <aside className="rad-rec rad-rec-static" aria-label={dict.inbox.businessContext}>
+        <div className="rad-tt">
+          <b>{dict.inbox.businessContext}</b>
+          <span>{dict.inbox.notLinked}</span>
+        </div>
       </aside>
     );
   }
@@ -78,115 +78,70 @@ export function BusinessContextPanel({
     : null;
 
   return (
-    <aside className={cardClass} aria-label={dict.inbox.businessContext}>
-      <h2 className="text-[11px] font-semibold uppercase tracking-wide text-[color:var(--ro-text-muted)]">
-        {dict.inbox.businessContext}
-      </h2>
-      <p>
-        <span className="text-[color:var(--ro-text-muted)]">
-          {dict.inbox.linkedAs}:{" "}
+    <aside className="rad-rec rad-rec-static rad-biz-ctx" aria-label={dict.inbox.businessContext}>
+      <div className="rad-tt">
+        <b>{dict.inbox.businessContext}</b>
+        <span>
+          {dict.inbox.linkedAs}: {typeLabel(dict, context.linkType)}
         </span>
-        {typeLabel(dict, context.linkType)}
-      </p>
-      <p>
-        <span className="text-[color:var(--ro-text-muted)]">
+        <span>
           {dict.inbox.contextReference}:{" "}
+          <bdi dir="ltr" className="rad-mono">
+            {context.reference} · {context.recordId}
+          </bdi>
         </span>
-        <span className="font-mono text-xs" dir="ltr">
-          {context.reference} · {context.recordId}
-        </span>
-      </p>
-      <p className="flex flex-wrap items-center gap-2">
-        <span className="text-[color:var(--ro-text-muted)]">
+        <span className="rad-biz-status">
           {dict.inbox.contextStatus}:{" "}
+          {domain ? (
+            <StatusChip size="sm" {...getStatusChipProps(dict, domain, context.status)} />
+          ) : (
+            <em>{context.status}</em>
+          )}
         </span>
-        {domain ? (
-          <StatusChip
-            size="sm"
-            {...getStatusChipProps(dict, domain, context.status)}
-          />
-        ) : (
-          <span className="font-medium">{context.status}</span>
-        )}
-      </p>
-      <p>
-        <span className="text-[color:var(--ro-text-muted)]">
-          {dict.inbox.contextUpdated}:{" "}
+        <span>
+          {dict.inbox.contextUpdated}: {formatWhen(context.updatedAt, locale)}
         </span>
-        {formatWhen(context.updatedAt, locale)}
-      </p>
-      <p>
-        <span className="text-[color:var(--ro-text-muted)]">
-          {dict.inbox.contextIdentity}:{" "}
+        <span>
+          {dict.inbox.contextIdentity}: {context.identityLabel}
+          {context.identityDetail ? ` · ${context.identityDetail}` : ""}
         </span>
-        {context.identityLabel}
-        {context.identityDetail ? (
-          <span className="text-[color:var(--ro-text-muted)]">
-            {" "}
-            · {context.identityDetail}
+        {context.title ? (
+          <span>
+            {dict.inbox.contextTitle}: {context.title}
           </span>
         ) : null}
-      </p>
-      {context.title ? (
-        <p>
-          <span className="text-[color:var(--ro-text-muted)]">
-            {dict.inbox.contextTitle}:{" "}
+        {dealKind ? (
+          <span>
+            {dict.inbox.contextDealKind}: {dealKind}
           </span>
-          {context.title}
-        </p>
-      ) : null}
-      {dealKind ? (
-        <p>
-          <span className="text-[color:var(--ro-text-muted)]">
-            {dict.inbox.contextDealKind}:{" "}
+        ) : null}
+        {requestMode ? (
+          <span>
+            {dict.inbox.contextRequestMode}: {requestMode}
           </span>
-          {dealKind}
-        </p>
-      ) : null}
-      {requestMode ? (
-        <p>
-          <span className="text-[color:var(--ro-text-muted)]">
-            {dict.inbox.contextRequestMode}:{" "}
+        ) : null}
+        {context.productLabel ? (
+          <span>
+            {dict.inbox.contextProduct}: {context.productLabel}
           </span>
-          {requestMode}
-        </p>
-      ) : null}
-      {context.productLabel ? (
-        <p>
-          <span className="text-[color:var(--ro-text-muted)]">
-            {dict.inbox.contextProduct}:{" "}
+        ) : null}
+        {context.latestNegotiation ? (
+          <span>
+            {dict.inbox.contextLatestNegotiation}: {context.latestNegotiation}
           </span>
-          {context.productLabel}
-        </p>
-      ) : null}
-      {context.latestNegotiation ? (
-        <p>
-          <span className="text-[color:var(--ro-text-muted)]">
-            {dict.inbox.contextLatestNegotiation}:{" "}
+        ) : null}
+        {context.lines.length > 0 ? (
+          <span>
+            {dict.inbox.contextLines}:{" "}
+            {context.lines
+              .map((l) => `${lineName(l)} × ${l.quantity}`)
+              .join(" · ")}
           </span>
-          {context.latestNegotiation}
-        </p>
-      ) : null}
-      {context.lines.length > 0 ? (
-        <div>
-          <p className="mb-1 text-[color:var(--ro-text-muted)]">
-            {dict.inbox.contextLines}
-          </p>
-          <ul className="list-inside list-disc space-y-1 text-[color:var(--ro-text-2)]">
-            {context.lines.map((l, i) => (
-              <li key={`${lineName(l)}-${i}`}>
-                {lineName(l)} × {l.quantity}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-      <Link
-        href={context.adminHref}
-        className="inline-flex min-h-9 items-center text-sm font-semibold text-[color:var(--ro-accent-fg,var(--ro-plum-700))] underline-offset-2 hover:underline"
-      >
-        {dict.inbox.openLinkedRecord}
-      </Link>
+        ) : null}
+        <Link href={context.adminHref} className="rad-btn rad-gh rad-sm">
+          {dict.inbox.openLinkedRecord}
+        </Link>
+      </div>
     </aside>
   );
 }

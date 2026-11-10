@@ -3,14 +3,16 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Link2, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import type { InboxConversationListItem } from "@/lib/whatsapp/messaging/inbox";
 import type { InboxHealthView } from "@/lib/whatsapp/messaging/inbox";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 import { formatCompactChatTime } from "@/lib/i18n/format";
 import { formatMaskedPhone } from "@/lib/whatsapp/messaging/phone-format";
-import { avatarGradientClass, avatarInitial } from "@/components/admin/rad/inbox/avatar-color";
+import { humanizeInboxPreview } from "@/lib/whatsapp/messaging/preview-label";
+import { inboxPreviewLabels } from "@/lib/whatsapp/messaging/preview-labels-from-dict";
+import { RadAvatar } from "@/components/admin/rad/inbox/rad-avatar";
 import { RadConnectionSheet } from "@/components/admin/rad/inbox/connection-sheet";
 import { useInboxUi } from "@/components/admin/rad/inbox/inbox-shell";
 import { cn } from "@/lib/utils";
@@ -29,6 +31,7 @@ export function RadConversationList({
   locale: Locale;
 }) {
   const ib = dict.ib;
+  const previewLabels = useMemo(() => inboxPreviewLabels(ib), [ib]);
   const { searchRef } = useInboxUi();
   const pathname = usePathname();
   const activeId = pathname.match(/\/admin\/inbox\/([^/]+)/)?.[1] ?? null;
@@ -49,12 +52,13 @@ export function RadConversationList({
       if (filter === "lk" && !r.link.linked) return false;
       if (filter === "nl" && r.link.linked) return false;
       if (needle) {
-        const haystack = `${r.name ?? ""} ${r.displayLabel} ${r.lastMessagePreview}`.toLowerCase();
+        const preview = humanizeInboxPreview(r.lastMessagePreview, previewLabels);
+        const haystack = `${r.name ?? ""} ${r.displayLabel} ${preview}`.toLowerCase();
         if (!haystack.includes(needle)) return false;
       }
       return true;
     });
-  }, [rows, filter, q]);
+  }, [rows, filter, q, previewLabels]);
 
   return (
     <section className="rad-lc" aria-label={ib.searchLabel}>
@@ -71,6 +75,8 @@ export function RadConversationList({
             onChange={(e) => setQ(e.target.value)}
             placeholder={ib.searchPlaceholder}
             aria-label={ib.searchLabel}
+            autoComplete="off"
+            spellCheck={false}
           />
           <kbd>/</kbd>
         </label>
@@ -102,6 +108,14 @@ export function RadConversationList({
         ) : (
           filtered.map((r, i) => {
             const title = r.name || formatMaskedPhone(r.participantE164) || r.displayLabel;
+            const previewRaw = humanizeInboxPreview(r.lastMessagePreview, previewLabels);
+            const hasPreview =
+              Boolean(r.lastMessagePreview?.trim()) &&
+              previewRaw !== previewLabels.empty;
+            const preview = hasPreview ? previewRaw : ib.previewNoText;
+            const timeLabel = r.lastMessageAt
+              ? formatCompactChatTime(r.lastMessageAt, locale)
+              : null;
             return (
               <Link
                 key={r.id}
@@ -111,21 +125,21 @@ export function RadConversationList({
                 className={cn("rad-cv", r.id === activeId && "rad-sel", r.hasUnread && "rad-un")}
                 style={{ "--rad-i": i } as React.CSSProperties}
               >
-                <span className={cn("rad-avt", avatarGradientClass(r.id))}>
-                  {avatarInitial(title)}
-                  {r.link.linked ? (
-                    <span className="rad-lk" aria-label={ib.filterLinked}>
-                      <Link2 width={10} height={10} strokeWidth={2} aria-hidden />
-                    </span>
-                  ) : null}
-                </span>
+                <RadAvatar
+                  id={r.id}
+                  name={r.name}
+                  linked={r.link.linked}
+                  linkedLabel={ib.filterLinked}
+                />
                 <div className="rad-cb">
                   <div className="rad-cr">
                     <b>{r.name ? title : <bdi dir="ltr">{title}</bdi>}</b>
-                    <time>{r.lastMessageAt ? formatCompactChatTime(r.lastMessageAt, locale) : ""}</time>
+                    {timeLabel ? (
+                      <time dateTime={r.lastMessageAt ?? undefined}>{timeLabel}</time>
+                    ) : null}
                   </div>
                   <div className="rad-cp">
-                    <span>{r.lastMessagePreview}</span>
+                    <span className={cn(!hasPreview && "rad-cp-empty")}>{preview}</span>
                     {r.hasUnread ? (
                       <i className="rad-ub" aria-label={`${r.unreadCount}`}>
                         {r.unreadCount}

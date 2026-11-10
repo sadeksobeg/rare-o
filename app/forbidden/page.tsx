@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Rings } from "@/components/brand";
 import { adminLogoutAction } from "@/app/admin-logout-action";
 import { traderLogoutAction } from "@/app/deal-actions";
@@ -22,37 +21,54 @@ export default async function ForbiddenPage({
         : null;
 
   return (
-    <main className="relative mx-auto flex min-h-[70vh] max-w-lg flex-col items-center justify-center px-6 text-center">
+    <main
+      data-portal={role === "admin" ? "admin" : role === "trader" ? "trader" : "admin"}
+      data-theme="dark"
+      className="ro-portal flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[color:var(--rad-c0,#0B080D)] px-6 py-16 text-center"
+      style={{ color: "var(--rad-tx, #F4E7D8)" }}
+    >
       <div
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--ro-plum-900)_12%,transparent),transparent_55%)]"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse at top, color-mix(in srgb, var(--rad-ac, #C4A0EA) 14%, transparent), transparent 55%)",
+        }}
         aria-hidden
       />
-      <Rings className="mb-6 h-24 w-24 text-ro-ink opacity-30" />
-      <h1 className="ro-type-h1">{dict.common.errorForbidden}</h1>
-      <p className="mt-3 text-ro-text-2">{dict.common.errorBody}</p>
-      <div className="mt-8 flex flex-wrap justify-center gap-3">
-        {role ? (
-          <ButtonLink href={portalHref} variant="primary">
-            {dict.common.goToPortal}
-          </ButtonLink>
-        ) : (
-          <ButtonLink href="/" variant="primary">
+      <div className="relative z-10 mx-auto flex w-full max-w-lg flex-col items-center">
+        <div className="rad-rg mb-8 opacity-70" aria-hidden>
+          <Rings className="h-28 w-28 text-[color:var(--rad-ac,#C4A0EA)]" />
+        </div>
+        <h1
+          className="text-3xl font-semibold"
+          style={{ fontFamily: "var(--rad-font, inherit)" }}
+        >
+          {dict.common.errorForbidden}
+        </h1>
+        <p className="mt-3" style={{ color: "var(--rad-tx2)" }}>
+          {dict.common.errorBody}
+        </p>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          {role ? (
+            <ButtonLink href={portalHref} variant="primary">
+              {dict.common.goToPortal}
+            </ButtonLink>
+          ) : (
+            <ButtonLink href="/" variant="primary">
+              {dict.nav.home}
+            </ButtonLink>
+          )}
+          {logoutAction ? (
+            <form action={logoutAction}>
+              <Button type="submit" variant="secondary">
+                {dict.common.signOut}
+              </Button>
+            </form>
+          ) : null}
+          <ButtonLink href="/" variant="secondary">
             {dict.nav.home}
           </ButtonLink>
-        )}
-        {logoutAction ? (
-          <form action={logoutAction}>
-            <Button type="submit" variant="secondary">
-              {dict.common.signOut}
-            </Button>
-          </form>
-        ) : null}
-        <Link
-          href="/"
-          className="inline-flex h-11 items-center px-4 text-sm text-ro-plum hover:underline"
-        >
-          {dict.nav.home}
-        </Link>
+        </div>
       </div>
     </main>
   );

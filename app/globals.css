@@ -1,6 +1,7 @@
 @import "../styles/tokens.css";
 @import "../styles/admin-dashboard.css";
 @import "../styles/admin-inbox.css";
+@import "../styles/ui-kit.css";
 @import "tailwindcss";
 
 :root {
@@ -974,29 +975,22 @@ html[lang="ar"] .ro-type-overline {
   margin-bottom: 0.2rem;
   padding: 0;
   overflow: visible;
-  border: 1px solid color-mix(in srgb, var(--ro-plum-700) 22%, transparent);
+  border: 1px solid color-mix(in srgb, var(--rad-bd2, var(--ro-plum-700)) 55%, transparent);
   border-radius: 999px;
-  color: var(--ro-plum-900);
-  background:
-    radial-gradient(
-      circle at 32% 28%,
-      color-mix(in srgb, var(--ro-sand-50) 78%, transparent),
-      transparent 52%
-    ),
-    linear-gradient(
-      148deg,
-      color-mix(in srgb, var(--ro-plum-50) 90%, white),
-      color-mix(in srgb, var(--ro-plum-200) 62%, var(--ro-sand-100))
-    );
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, white 60%, transparent),
-    0 8px 18px -14px rgba(50, 16, 79, 0.45);
+  color: var(--rad-tx2, var(--ro-plum-900));
+  background: var(--rad-surface3, var(--ro-bg-sunken));
+  box-shadow: none;
   cursor: default;
   transition:
     transform var(--ro-dur-fast) var(--ro-ease-enter),
     border-color var(--ro-dur-fast) var(--ro-ease-enter),
     box-shadow var(--ro-dur-fast) var(--ro-ease-enter),
     color var(--ro-dur-fast) var(--ro-ease-enter);
+}
+.ro-portal[data-portal="admin"] .ro-oud-spec-icon {
+  color: var(--rad-tx2);
+  border-color: var(--rad-bd2);
+  background: var(--rad-surface3);
 }
 
 .ro-oud-spec-icon__ring {
@@ -1401,7 +1395,7 @@ html[lang="ar"] .ro-type-overline {
   }
 }
 
-/* P12 Skeleton shimmer */
+/* P12 Skeleton shimmer — admin/trader follow rad surfaces (no lavender sand). */
 .ro-skeleton {
   background-color: var(--ro-sand-300);
   background-image: linear-gradient(
@@ -1412,6 +1406,19 @@ html[lang="ar"] .ro-type-overline {
   );
   background-size: 200% 100%;
   animation: ro-skeleton-shimmer 1.4s linear infinite;
+}
+.ro-portal[data-portal="admin"] .ro-skeleton,
+.ro-portal[data-portal="trader"] .ro-skeleton,
+.ro-portal[data-portal="admin"] .rad-sk,
+.ro-portal[data-portal="trader"] .rad-sk {
+  background-color: var(--rad-surface3);
+  background-image: linear-gradient(
+    90deg,
+    var(--rad-surface3) 25%,
+    var(--rad-surface2) 50%,
+    var(--rad-surface3) 75%
+  );
+  background-size: 200% 100%;
 }
 @keyframes ro-skeleton-shimmer {
   from {
@@ -1607,76 +1614,60 @@ html[lang="en"] .ro-portal {
   --ro-portal-title-weight: 650;
 }
 
-/* Portal canvas — soft atmosphere; theme tokens drive the plane */
+/* Portal canvas — solid plane (no lavender radial page tint). */
 .ro-portal-admin,
 .ro-portal-trader {
   color: var(--text, var(--ro-text));
-  background-color: var(--bg-page, var(--ro-bg));
-  background-image:
-    radial-gradient(
-      70% 48% at 8% -12%,
-      color-mix(in srgb, var(--ro-plum-400, var(--plum-400)) 18%, transparent),
-      transparent 62%
-    ),
-    radial-gradient(
-      55% 40% at 100% -4%,
-      color-mix(in srgb, var(--ro-plum-700) 8%, transparent),
-      transparent 58%
-    ),
-    linear-gradient(
-      180deg,
-      var(--bg-page, var(--ro-bg)) 0%,
-      var(--bg-page, var(--ro-bg)) 100%
-    );
+  background-color: var(--rad-c0, var(--bg-page, var(--ro-bg)));
+  background-image: none;
 }
 
-/* Dark — open lilac studio (admin + trader), warm and bright */
 .ro-portal-admin[data-theme="dark"],
 .ro-portal-trader[data-theme="dark"] {
   color-scheme: dark;
-  color: var(--text);
-  background-color: var(--bg-page, #35314a);
-  background-image:
-    radial-gradient(
-      78% 52% at 6% -12%,
-      color-mix(in srgb, #e0c8f5 42%, transparent),
-      transparent 60%
-    ),
-    radial-gradient(
-      58% 42% at 100% -4%,
-      color-mix(in srgb, #c4a574 16%, transparent),
-      transparent 58%
-    ),
-    radial-gradient(
-      48% 36% at 70% 100%,
-      color-mix(in srgb, #b794d4 22%, transparent),
-      transparent 62%
-    ),
-    linear-gradient(
-      180deg,
-      #3d3854 0%,
-      #35314a 48%,
-      #302c44 100%
-    );
+  color: var(--text, var(--rad-tx));
+  background-color: var(--rad-c0, var(--bg-page, #0b080d));
+  background-image: none;
 }
 
-/* Light — open lilac-grey plane, clean white cards */
 .ro-portal-admin[data-theme="light"],
 .ro-portal-trader[data-theme="light"] {
   color-scheme: light;
-  background-color: var(--bg-page, #f3f0f7);
-  background-image:
-    radial-gradient(
-      70% 45% at 10% -10%,
-      color-mix(in srgb, var(--plum-300) 22%, transparent),
-      transparent 58%
-    ),
-    radial-gradient(
-      50% 35% at 100% 0%,
-      color-mix(in srgb, var(--plum-100) 55%, transparent),
-      transparent 55%
-    ),
-    linear-gradient(180deg, #f6f3fa 0%, #f0ecf5 100%);
+  background-color: var(--rad-c0, var(--bg-page, #f5efe6));
+  background-image: none;
+}
+
+/* Trader shell: solid canvas only — never inherit purple page glows. */
+.ro-portal[data-portal="trader"].rad-tapp,
+.ro-portal-trader.rad-tapp,
+.ro-portal[data-portal="trader"] {
+  background: var(--rad-c0) !important;
+  background-image: none !important;
+}
+.ro-portal[data-portal="trader"] .ro-portal-atmosphere,
+.ro-portal[data-portal="trader"] .ro-portal-atmosphere::before,
+.ro-portal[data-portal="trader"] .ro-portal-atmosphere::after,
+.ro-portal[data-portal="trader"]::before {
+  display: none !important;
+  content: none !important;
+  background: none !important;
+  box-shadow: none !important;
+  opacity: 0 !important;
+}
+/* UI chrome: never decorative display fonts on trader headings. */
+.ro-portal[data-portal="trader"] h1,
+.ro-portal[data-portal="trader"] h2,
+.ro-portal[data-portal="trader"] h3,
+.ro-portal[data-portal="trader"] .font-display,
+.ro-portal[data-portal="trader"] .ro-portal-page-title,
+.ro-portal[data-portal="trader"] .ro-portal-section-title {
+  font-family: var(--rad-font, var(--ro-font-ui, sans-serif)) !important;
+  letter-spacing: 0;
+}
+.ro-portal[data-portal="trader"] .rad-tpage,
+.ro-portal[data-portal="trader"] main {
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 .ro-portal[data-theme="dark"] .ro-portal-header {
@@ -1929,7 +1920,7 @@ html[lang="en"] .ro-portal {
   width: 2.25rem;
   height: 2.25rem;
   flex-shrink: 0;
-  border-radius: var(--ro-r-sm);
+  border-radius: 11px;
   background: color-mix(in srgb, var(--ro-plum-100) 80%, var(--ro-sand-50));
   color: var(--ro-plum-900);
   border: 1px solid color-mix(in srgb, var(--ro-plum-900) 14%, transparent);
@@ -1939,6 +1930,13 @@ html[lang="en"] .ro-portal {
   background: var(--ro-accent-well);
   color: var(--ro-accent-fg);
   border-color: color-mix(in srgb, var(--ro-plum-400) 28%, transparent);
+}
+.ro-portal[data-portal="admin"] .ro-portal-icon-well,
+.ro-portal[data-portal="trader"] .ro-portal-icon-well {
+  background: var(--rad-surface3);
+  color: var(--rad-tx2);
+  border-color: var(--rad-bd2);
+  border-radius: 11px;
 }
 
 /* Luxury empty canvas — depth without flat void */
@@ -2559,21 +2557,23 @@ body:has(.ro-portal-admin) {
   }
 }
 
-/* Non-home admin pages keep comfortable inset + room under last row */
-#main-content:not(:has([data-admin-home])):not(:has([data-admin-inbox])) {
+/* Non-home pages keep comfortable inset + room under last row.
+   Skip `.rad-page` (admin rad shell): its padding lives in admin-dashboard.css
+   (28/32/64 desktop). An ID rule here used to win and force 20px inline. */
+#main-content:not(.rad-page):not(:has([data-admin-home])):not(:has([data-admin-inbox])) {
   padding-inline: 0.75rem;
   padding-block: 0.75rem;
   padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px) + 1.25rem);
 }
 @media (min-width: 640px) {
-  #main-content:not(:has([data-admin-home])):not(:has([data-admin-inbox])) {
+  #main-content:not(.rad-page):not(:has([data-admin-home])):not(:has([data-admin-inbox])) {
     padding-inline: 1rem;
     padding-block: 1rem;
     padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px) + 1.5rem);
   }
 }
 @media (min-width: 1024px) {
-  #main-content:not(:has([data-admin-home])):not(:has([data-admin-inbox])) {
+  #main-content:not(.rad-page):not(:has([data-admin-home])):not(:has([data-admin-inbox])) {
     padding-inline: 1.25rem;
   }
 }
@@ -3132,6 +3132,14 @@ body:has(.ro-portal-admin) {
   color: var(--ro-ink-950);
   text-wrap: balance;
 }
+.ro-portal[data-portal="admin"] .ro-portal-page-title,
+.ro-portal[data-portal="admin"] .ro-portal-section-title,
+.ro-portal[data-portal="trader"] .ro-portal-page-title,
+.ro-portal[data-portal="trader"] .ro-portal-section-title {
+  font-family: var(--rad-font, var(--ro-font-ui, inherit));
+  letter-spacing: 0;
+  color: var(--rad-tx);
+}
 
 .ro-portal .ro-portal-section-title {
   font-family: var(--ro-font-display);
@@ -3168,48 +3176,38 @@ body:has(.ro-portal-admin) {
   word-break: break-word;
   overflow-wrap: anywhere;
 }
+.ro-portal[data-portal="admin"] .ro-portal-message-panel {
+  border-color: var(--rad-bd2);
+  background: var(--rad-surface3);
+  color: var(--rad-tx);
+}
 
-/* Portal buttons — plum primary, tactile secondary */
-.ro-portal [data-ro-variant="primary"] {
+/* Admin/trader primary — solid ui-kit fill only (no plum→cream gradient). */
+.ro-portal[data-portal="admin"] [data-ro-variant="primary"],
+.ro-portal[data-portal="trader"] [data-ro-variant="primary"] {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(
-    165deg,
-    var(--ro-plum-700) 0%,
-    var(--ro-plum-900) 52%,
-    var(--ro-ink-950) 100%
-  ) !important;
-  color: var(--ro-sand-100) !important;
+  background: var(--rad-btn) !important;
+  background-image: none !important;
+  color: var(--rad-btn-tx) !important;
   box-shadow:
-    0 1px 0 color-mix(in srgb, var(--ro-sand-100) 22%, transparent) inset,
-    0 12px 30px -14px color-mix(in srgb, var(--ro-plum-900) 72%, transparent) !important;
+    0 1px 0 color-mix(in srgb, var(--rad-btn-tx) 18%, transparent) inset,
+    0 10px 24px -16px color-mix(in srgb, var(--rad-btn) 55%, transparent) !important;
 }
-
-.ro-portal [data-ro-variant="primary"]::after {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 -40%;
-  width: 40%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in srgb, var(--ro-sand-100) 28%, transparent),
-    transparent
-  );
-  opacity: 0;
+.ro-portal[data-portal="admin"] [data-ro-variant="primary"]::after,
+.ro-portal[data-portal="trader"] [data-ro-variant="primary"]::after {
+  content: none !important;
+  display: none !important;
 }
-
-.ro-portal [data-ro-variant="primary"]:hover {
-  filter: brightness(1.07);
-  transform: translateY(-2px);
+.ro-portal[data-portal="admin"] [data-ro-variant="primary"]:hover,
+.ro-portal[data-portal="trader"] [data-ro-variant="primary"]:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  background: var(--rad-btn) !important;
+  background-image: none !important;
   box-shadow:
-    0 1px 0 color-mix(in srgb, var(--ro-sand-100) 30%, transparent) inset,
-    0 18px 40px -14px color-mix(in srgb, var(--ro-plum-800) 80%, transparent) !important;
-}
-
-.ro-portal [data-ro-variant="primary"]:hover::after {
-  opacity: 1;
-  animation: ro-portal-btn-shine 0.7s var(--ro-ease-enter) both;
+    0 1px 0 color-mix(in srgb, var(--rad-btn-tx) 22%, transparent) inset,
+    0 14px 28px -16px color-mix(in srgb, var(--rad-btn) 65%, transparent) !important;
 }
 
 .ro-portal [data-ro-variant="secondary"] {
@@ -3362,18 +3360,75 @@ body:has(.ro-portal-admin) {
   animation: ro-portal-underline 0.35s var(--ro-ease-enter) both;
 }
 
-/* Portal dark — native controls follow dusk tokens (not browser light scheme) */
+/* Portal dark — native controls follow dusk tokens (not browser light scheme).
+   Prefer --rad-surface2 under admin/trader so fields never pick up the legacy
+   lavender elevated fill (#4c4666 / --ro-bg-elevated). */
 .ro-portal[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
 .ro-portal[data-theme="dark"] textarea,
-.ro-portal[data-theme="dark"] select {
+.ro-portal[data-theme="dark"] select,
+[data-portal="admin"][data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+[data-portal="admin"][data-theme="dark"] textarea,
+[data-portal="admin"][data-theme="dark"] select,
+[data-portal="trader"][data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+[data-portal="trader"][data-theme="dark"] textarea,
+[data-portal="trader"][data-theme="dark"] select {
   color-scheme: dark;
-  background-color: var(--ro-bg-elevated);
-  color: var(--ro-text);
-  border-color: var(--ro-border-control);
+  background-color: var(--rad-surface2, var(--ro-bg-sunken, #1b1520));
+  color: var(--rad-tx, var(--ro-text));
+  border-color: var(--rad-bd2, var(--ro-border-control));
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Admin/trader + login: one radius system (ui-kit 11px) — kill square --ro-r-sm fields. */
+.ro-portal[data-portal="admin"] input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+.ro-portal[data-portal="admin"] textarea,
+.ro-portal[data-portal="admin"] select,
+.ro-portal[data-portal="trader"] input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+.ro-portal[data-portal="trader"] textarea,
+.ro-portal[data-portal="trader"] select {
+  border-radius: 11px !important;
+}
+
+/* Keep select chevron visible even when appearance:none strips the native arrow.
+   Includes .rad-slc — ui-kit + legacy selects must show a chevron in both themes. */
+.ro-portal[data-portal="admin"] select,
+.ro-portal[data-portal="trader"] select {
+  padding-inline-end: 2.25rem;
+  background-repeat: no-repeat !important;
+  background-position: left 0.75rem center !important;
+  background-size: 1rem !important;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238a8090' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>") !important;
+}
+[dir="rtl"] .ro-portal[data-portal="admin"] select,
+[dir="rtl"] .ro-portal[data-portal="trader"] select {
+  background-position: right 0.75rem center !important;
+}
+.ro-portal[data-portal="admin"][data-theme="dark"] select,
+.ro-portal[data-portal="trader"][data-theme="dark"] select {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23c9b8a8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>") !important;
 }
 .ro-portal[data-theme="dark"] input::placeholder,
-.ro-portal[data-theme="dark"] textarea::placeholder {
-  color: var(--ro-text-muted);
+.ro-portal[data-theme="dark"] textarea::placeholder,
+[data-portal="admin"][data-theme="dark"] input::placeholder,
+[data-portal="admin"][data-theme="dark"] textarea::placeholder,
+[data-portal="trader"][data-theme="dark"] input::placeholder,
+[data-portal="trader"][data-theme="dark"] textarea::placeholder {
+  color: var(--rad-tx3, var(--ro-text-muted));
+}
+.ro-portal[data-theme="dark"] input:-webkit-autofill,
+.ro-portal[data-theme="dark"] input:-webkit-autofill:hover,
+.ro-portal[data-theme="dark"] input:-webkit-autofill:focus,
+.ro-portal[data-theme="dark"] textarea:-webkit-autofill,
+.ro-portal[data-theme="dark"] textarea:-webkit-autofill:hover,
+.ro-portal[data-theme="dark"] textarea:-webkit-autofill:focus,
+[data-portal="admin"][data-theme="dark"] input:-webkit-autofill,
+[data-portal="admin"][data-theme="dark"] textarea:-webkit-autofill,
+[data-portal="trader"][data-theme="dark"] input:-webkit-autofill,
+[data-portal="trader"][data-theme="dark"] textarea:-webkit-autofill {
+  -webkit-text-fill-color: var(--rad-tx, var(--ro-text));
+  box-shadow: 0 0 0 1000px var(--rad-surface2, #1b1520) inset;
+  transition: background-color 99999s ease-out;
 }
 
 /* Interaction layer — feel alive without white stage / dark hero */
@@ -3502,10 +3557,16 @@ body:has(.ro-portal-admin) {
   color: #b9d6ff;
   border-color: color-mix(in srgb, #7eb6ff 28%, transparent);
 }
-.ro-portal[data-theme="dark"] [data-ro-status="attention"] {
-  background: var(--ro-warn-bg, color-mix(in srgb, #efb04a 18%, transparent));
-  color: var(--ro-warn, #efb04a);
-  border-color: color-mix(in srgb, #efb04a 28%, transparent);
+.ro-portal[data-theme="dark"] [data-ro-status="attention"],
+.ro-portal[data-theme="dark"] [data-ro-banner="attention"] {
+  background: var(--rad-warns, color-mix(in srgb, var(--rad-warn, #e6b05a) 18%, transparent)) !important;
+  color: var(--rad-warn, #e6b05a) !important;
+  border-color: color-mix(in srgb, var(--rad-warn, #e6b05a) 32%, transparent) !important;
+}
+.ro-portal[data-theme="light"] [data-ro-banner="attention"] {
+  background: var(--rad-warns) !important;
+  color: var(--rad-warn) !important;
+  border-color: color-mix(in srgb, var(--rad-warn) 32%, transparent) !important;
 }
 .ro-portal[data-theme="dark"] [data-ro-status="success"] {
   background: var(--ro-success-100, var(--ro-ok-bg));
@@ -3798,19 +3859,16 @@ body:has(.ro-portal-admin) {
 .ro-catalog-tile-media {
   position: relative;
   overflow: hidden;
-  background: var(--ro-bg-sunken);
+  background: var(--rad-surface3, var(--ro-bg-sunken));
 }
 .ro-catalog-tile-media::after {
-  content: "";
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    transparent 55%,
-    color-mix(in srgb, var(--ro-ink-950, #120c1c) 55%, transparent) 100%
-  );
-  opacity: 0.55;
+  content: none;
+  display: none;
+}
+.ro-portal[data-portal="admin"] .ro-catalog-tile {
+  background: var(--rad-surface2);
+  border-color: var(--rad-bd);
+  color: var(--rad-tx);
 }
 .ro-catalog-tile:hover .ro-catalog-tile-media::after {
   opacity: 0.72;
@@ -3833,32 +3891,35 @@ body:has(.ro-portal-admin) {
 @media (prefers-reduced-motion: reduce) {
   .ro-catalog-tile:hover { transform: none; }
 }
+.ro-portal[data-portal="admin"] .ro-brokerage-col,
 .ro-brokerage-col {
-  background: var(--ro-bg-raised) !important;
-  border-color: var(--ro-border-subtle) !important;
-  color: var(--ro-text);
+  background: var(--rad-surface, var(--ro-bg-raised)) !important;
+  border-color: var(--rad-bd, var(--ro-border-subtle)) !important;
+  color: var(--rad-tx, var(--ro-text));
   min-height: 15rem;
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ro-text) 4%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--rad-tx, var(--ro-text)) 4%, transparent);
 }
+.ro-portal[data-portal="admin"] .ro-brokerage-card,
 .ro-brokerage-card {
-  background: color-mix(in srgb, var(--ro-panel) 82%, var(--ro-text) 4%) !important;
-  border: 1px solid var(--ro-border) !important;
-  color: var(--ro-text) !important;
+  background: var(--rad-surface2, color-mix(in srgb, var(--ro-panel) 82%, var(--ro-text) 4%)) !important;
+  border: 1px solid var(--rad-bd, var(--ro-border)) !important;
+  color: var(--rad-tx, var(--ro-text)) !important;
   text-align: start;
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ro-text) 6%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--rad-tx, var(--ro-text)) 6%, transparent);
   transition:
-    transform var(--ro-dur-fast) var(--ro-ease-standard),
-    border-color var(--ro-dur-fast) var(--ro-ease-standard),
-    background-color var(--ro-dur-fast) var(--ro-ease-standard);
+    transform var(--ro-dur-fast, 0.16s) var(--ro-ease-standard, ease),
+    border-color var(--ro-dur-fast, 0.16s) var(--ro-ease-standard, ease),
+    background-color var(--ro-dur-fast, 0.16s) var(--ro-ease-standard, ease);
 }
+.ro-portal[data-portal="admin"] .ro-brokerage-card:hover,
 .ro-brokerage-card:hover {
   transform: translateY(-1px);
   border-color: color-mix(
     in srgb,
-    var(--ro-accent-fg, var(--ro-plum-700)) 36%,
-    var(--ro-border)
+    var(--rad-ac, var(--ro-accent-fg, var(--ro-plum-700))) 36%,
+    var(--rad-bd, var(--ro-border))
   ) !important;
-  background: var(--ro-panel-hover) !important;
+  background: var(--rad-surface3, var(--ro-panel-hover)) !important;
 }
 .ro-brokerage-board {
   display: flex;
@@ -4173,4 +4234,17 @@ body:has(.ro-portal-admin) {
 }
 .ro-portal[data-theme="dark"] .ro-trader-greeting-lead {
   color: color-mix(in srgb, var(--ro-sand-100) 72%, transparent);
+}
+
+/* Trader product picker: hard 2-col below md — no horizontal overflow at 390. */
+@media (max-width: 767px) {
+  .ro-picker-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .ro-picker-grid > li {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
 }

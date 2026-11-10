@@ -32,7 +32,7 @@ const toneClass: Record<StatusTone, string> = {
   progress:
     "border border-[color-mix(in_srgb,var(--ro-progress-700)_14%,transparent)] bg-[var(--ro-progress-100)] text-[var(--ro-progress-700)]",
   attention:
-    "border border-[color-mix(in_srgb,var(--ro-amber-800)_16%,transparent)] bg-[var(--ro-amber-100)] text-[var(--ro-amber-800)]",
+    "border border-[color-mix(in_srgb,var(--rad-warn,var(--ro-amber-800))_28%,transparent)] bg-[color:var(--rad-warns,var(--ro-amber-100))] text-[color:var(--rad-warn,var(--ro-amber-800))]",
   success:
     "border border-[color-mix(in_srgb,var(--ro-success-700)_14%,transparent)] bg-[var(--ro-success-100)] text-[var(--ro-success-700)]",
   danger:

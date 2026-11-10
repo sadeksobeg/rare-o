@@ -87,7 +87,7 @@ export function NegotiationForm({
   return (
     <form
       ref={formRef}
-      className="ro-portal-card space-y-4 border p-4 md:p-5"
+      className="ro-portal-card space-y-4 border p-4 pb-6 md:p-5 max-[900px]:mb-[calc(12px+env(safe-area-inset-bottom,0px))]"
       data-component="negotiation-action-bar"
       onSubmit={(e) => {
         if (needsConfirm && !skipConfirm.current) {

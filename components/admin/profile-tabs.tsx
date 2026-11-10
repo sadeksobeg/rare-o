@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { useState, type ReactNode } from "react";
+import { SegControl } from "@/components/ui-kit/seg-control";
 
 export function AdminProfileTabs({
   profileLabel,
@@ -14,50 +14,30 @@ export function AdminProfileTabs({
   profileLabel: string;
   securityLabel: string;
   sessionsLabel: string;
-  profile: React.ReactNode;
-  security: React.ReactNode;
-  sessions: React.ReactNode;
+  profile: ReactNode;
+  security: ReactNode;
+  sessions: ReactNode;
 }) {
   const [tab, setTab] = useState<"profile" | "security" | "sessions">(
     "profile"
   );
 
-  const items = [
-    { id: "profile" as const, label: profileLabel },
-    { id: "security" as const, label: securityLabel },
-    { id: "sessions" as const, label: sessionsLabel },
-  ];
-
   return (
-    <div className="space-y-6">
-      <div
-        role="tablist"
+    <div className="space-y-5">
+      <SegControl
         aria-label={profileLabel}
-        className="flex flex-wrap gap-1 border-b border-[color-mix(in_srgb,var(--ro-plum-900)_14%,transparent)]"
-      >
-        {items.map((item) => {
-          const selected = tab === item.id;
-          return (
-            <button
-              key={item.id}
-              type="button"
-              role="tab"
-              aria-selected={selected}
-              id={`admin-profile-tab-${item.id}`}
-              aria-controls={`admin-profile-panel-${item.id}`}
-              onClick={() => setTab(item.id)}
-              className={cn(
-                "min-h-11 px-4 text-sm font-semibold transition-colors",
-                selected
-                  ? "border-b-2 border-[var(--ro-plum-900)] text-ro-ink"
-                  : "text-[var(--ro-ink-600)] hover:text-ro-ink"
-              )}
-            >
-              {item.label}
-            </button>
-          );
-        })}
-      </div>
+        value={tab}
+        onChange={(v) =>
+          setTab(
+            v === "security" || v === "sessions" || v === "profile" ? v : "profile"
+          )
+        }
+        items={[
+          { value: "profile", label: profileLabel },
+          { value: "security", label: securityLabel },
+          { value: "sessions", label: sessionsLabel },
+        ]}
+      />
       <div
         role="tabpanel"
         id={`admin-profile-panel-${tab}`}

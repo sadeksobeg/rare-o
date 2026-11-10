@@ -25,7 +25,6 @@ import {
   type LucideProps,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { Emblem } from "@/components/brand";
 import { PendingNavLink } from "@/components/ui/pending-nav-link";
 import { cn } from "@/lib/utils";
 
@@ -92,7 +91,16 @@ export function RadSidebar({
       data-mobile-open={mobileOpen ? "true" : undefined}
     >
       <div className="rad-brand">
-        <Emblem variant="small" className="size-8" />
+        {/* Cream mark — visible on the dark sidebar (reference logo_cream.png) */}
+        <img
+          src="/brand/mark-small.webp"
+          alt=""
+          width={32}
+          height={32}
+          className="rad-brand-mark"
+          decoding="async"
+          fetchPriority="high"
+        />
         <div>
           <b>
             <bdi dir="ltr">{brand}</bdi>

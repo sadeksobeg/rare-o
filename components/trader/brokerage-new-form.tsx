@@ -10,7 +10,7 @@ import {
   type BrokeragePhotoMeta,
 } from "@/components/brokerage/photo-field";
 import { Button } from "@/components/ui/button";
-import { TextField } from "@/components/ui/text-field";
+import { Field, Input, Textarea } from "@/components/ui-kit/field";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { useUnsavedGuard } from "@/lib/ui/use-unsaved-guard";
 import { cn } from "@/lib/utils";
@@ -210,15 +210,15 @@ export function BrokerageNewForm({
 
   return (
     <div className="space-y-5">
-      <div className="flex items-start gap-3 rounded-[var(--ro-r-md)] border border-[color-mix(in_srgb,var(--ro-plum-900)_18%,transparent)] bg-[color-mix(in_srgb,var(--ro-plum-100)_55%,transparent)] p-4 text-sm text-ro-ink">
+      <div className="flex items-start gap-3 rounded-[var(--rad-r,14px)] border border-[color-mix(in_srgb,var(--rad-ac)_28%,transparent)] bg-[color-mix(in_srgb,var(--rad-ac)_12%,var(--rad-surface2))] p-4 text-sm text-[color:var(--rad-tx)]">
         <Info
-          className="mt-0.5 size-4 shrink-0 text-[var(--ro-plum-900)]"
+          className="mt-0.5 size-4 shrink-0 text-[color:var(--rad-ac)]"
           strokeWidth={1.5}
           aria-hidden
         />
-        <div>
+        <div className="min-w-0">
           <p className="mb-1 font-semibold">{t.brokerageExplainerTitle}</p>
-          <p className="text-ro-muted">{t.brokerageExplainerBody}</p>
+          <p className="text-[color:var(--rad-tx3)]">{t.brokerageExplainerBody}</p>
         </div>
       </div>
 
@@ -259,7 +259,7 @@ export function BrokerageNewForm({
       <form
         action={action}
         encType="multipart/form-data"
-        className="space-y-4 rounded-[var(--ro-r-lg)] border border-[var(--ro-border-subtle)] bg-[var(--ro-sand-50)] p-5"
+        className="rad-card space-y-4 p-5"
         onSubmit={(e) => {
           if (step < 3) {
             e.preventDefault();
@@ -287,14 +287,16 @@ export function BrokerageNewForm({
         <input type="hidden" name="traderNotes" value={form.traderNotes} />
 
         <div className={cn(step !== 0 && "hidden")}>
-          <TextField
-            name="descriptionArVisible"
-            label={t.brokerageFieldDescription}
-            required
-            minLength={8}
-            value={form.descriptionAr}
-            onChange={(e) => update("descriptionAr", e.target.value)}
-          />
+          <Field label={t.brokerageFieldDescription}>
+            <Textarea
+              name="descriptionArVisible"
+              required
+              minLength={8}
+              rows={4}
+              value={form.descriptionAr}
+              onChange={(e) => update("descriptionAr", e.target.value)}
+            />
+          </Field>
           {/* Keep mounted so file inputs survive later steps */}
           <div className="mt-4">
             <BrokeragePhotoField
@@ -305,98 +307,111 @@ export function BrokerageNewForm({
               }}
             />
             {photosNeedReattach ? (
-              <p className="mt-2 text-xs text-[var(--ro-amber-800)]">
+              <p className="mt-2 text-xs text-[color:var(--rad-warn,var(--ro-amber-800))]">
                 {locale === "ar"
                   ? "كانت هناك صور في المسودة — أعد إرفاقها قبل الإرسال."
                   : "Draft had photos — please re-attach them before sending."}
               </p>
             ) : null}
           </div>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <TextField
-              name="modelNumberVisible"
-              label={t.brokerageFieldCategory}
-              required
-              value={form.modelNumber}
-              onChange={(e) => update("modelNumber", e.target.value)}
-            />
-            <TextField
-              name="statedPriceUsdVisible"
-              type="number"
-              label={t.brokerageFieldBudgetMin}
-              required
-              min={1}
-              value={form.statedPriceUsd}
-              onChange={(e) => update("statedPriceUsd", e.target.value)}
-            />
-            <TextField
-              name="quantityVisible"
-              type="number"
-              label={t.brokerageFieldQuantity}
-              value={form.quantity}
-              onChange={(e) => update("quantity", e.target.value)}
-            />
+          <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
+            <Field label={t.brokerageFieldCategory}>
+              <Input
+                name="modelNumberVisible"
+                required
+                value={form.modelNumber}
+                onChange={(e) => update("modelNumber", e.target.value)}
+              />
+            </Field>
+            <Field label={t.brokerageFieldBudgetMin}>
+              <Input
+                name="statedPriceUsdVisible"
+                type="number"
+                required
+                min={1}
+                dir="ltr"
+                value={form.statedPriceUsd}
+                onChange={(e) => update("statedPriceUsd", e.target.value)}
+              />
+            </Field>
+            <Field label={t.brokerageFieldQuantity}>
+              <Input
+                name="quantityVisible"
+                type="number"
+                dir="ltr"
+                value={form.quantity}
+                onChange={(e) => update("quantity", e.target.value)}
+              />
+            </Field>
           </div>
         </div>
 
         {step === 1 ? (
           <>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <TextField
-                name="cityArVisible"
-                label={t.brokerageFieldCity}
-                value={form.cityAr}
-                onChange={(e) => update("cityAr", e.target.value)}
-              />
-              <TextField
-                name="placeNameArVisible"
-                label={t.brokerageFieldPlace}
-                value={form.placeNameAr}
-                onChange={(e) => update("placeNameAr", e.target.value)}
-              />
+            <div className="grid min-w-0 gap-3 sm:grid-cols-2">
+              <Field label={t.brokerageFieldCity}>
+                <Input
+                  name="cityArVisible"
+                  value={form.cityAr}
+                  onChange={(e) => update("cityAr", e.target.value)}
+                />
+              </Field>
+              <Field label={t.brokerageFieldPlace}>
+                <Input
+                  name="placeNameArVisible"
+                  value={form.placeNameAr}
+                  onChange={(e) => update("placeNameAr", e.target.value)}
+                />
+              </Field>
             </div>
-            <TextField
-              name="sellerContactVisible"
-              label={t.brokerageFieldSeller}
-              value={form.sellerContact}
-              onChange={(e) => update("sellerContact", e.target.value)}
-            />
-            <TextField
-              name="sourceUrlVisible"
-              label={t.brokerageFieldSource}
-              dir="ltr"
-              value={form.sourceUrl}
-              onChange={(e) => update("sourceUrl", e.target.value)}
-            />
+            <Field label={t.brokerageFieldSeller}>
+              <Input
+                name="sellerContactVisible"
+                value={form.sellerContact}
+                onChange={(e) => update("sellerContact", e.target.value)}
+              />
+            </Field>
+            <Field label={t.brokerageFieldSource}>
+              <Input
+                name="sourceUrlVisible"
+                dir="ltr"
+                value={form.sourceUrl}
+                onChange={(e) => update("sourceUrl", e.target.value)}
+              />
+            </Field>
           </>
         ) : null}
 
         {step === 2 ? (
           <>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <TextField
-                name="budgetMinUsdVisible"
-                type="number"
-                label={t.brokerageFieldBudgetMin}
-                dir="ltr"
-                value={form.budgetMinUsd}
-                onChange={(e) => update("budgetMinUsd", e.target.value)}
-              />
-              <TextField
-                name="budgetMaxUsdVisible"
-                type="number"
-                label={t.brokerageFieldBudgetMax}
-                dir="ltr"
-                value={form.budgetMaxUsd}
-                onChange={(e) => update("budgetMaxUsd", e.target.value)}
-              />
+            <div className="grid min-w-0 gap-3 sm:grid-cols-2">
+              <Field label={t.brokerageFieldBudgetMin}>
+                <Input
+                  name="budgetMinUsdVisible"
+                  type="number"
+                  dir="ltr"
+                  value={form.budgetMinUsd}
+                  onChange={(e) => update("budgetMinUsd", e.target.value)}
+                />
+              </Field>
+              <Field label={t.brokerageFieldBudgetMax}>
+                <Input
+                  name="budgetMaxUsdVisible"
+                  type="number"
+                  dir="ltr"
+                  value={form.budgetMaxUsd}
+                  onChange={(e) => update("budgetMaxUsd", e.target.value)}
+                />
+              </Field>
             </div>
-            <TextField
-              name="traderNotesVisible"
-              label={t.brokerageFieldNotes}
-              value={form.traderNotes}
-              onChange={(e) => update("traderNotes", e.target.value)}
-            />
+            <Field label={t.brokerageFieldNotes}>
+              <Textarea
+                name="traderNotesVisible"
+                rows={3}
+                value={form.traderNotes}
+                onChange={(e) => update("traderNotes", e.target.value)}
+              />
+            </Field>
           </>
         ) : null}
 
@@ -445,7 +460,7 @@ export function BrokerageNewForm({
           <p className="text-sm text-[var(--ro-danger-700)]">{state.error}</p>
         ) : null}
 
-        <div className="flex flex-wrap gap-2 pt-1">
+        <div className="rad-above-tab sticky z-[5] -mx-1 mt-2 flex flex-wrap gap-2 border-t border-[color:var(--rad-bd)] bg-[color:var(--rad-c0)] px-1 pt-3 pb-2">
           {step > 0 ? (
             <Button
               type="button"
@@ -482,8 +497,8 @@ export function BrokerageNewForm({
           role="status"
           className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--ro-ink-950)_45%,transparent)] p-6"
         >
-          <div className="ro-portal-card max-w-sm space-y-3 border p-6 text-center shadow-[0_24px_60px_-28px_rgba(11,8,13,0.55)]">
-            <p className="font-display text-2xl font-semibold text-ro-ink">
+          <div className="rad-card max-w-sm space-y-3 p-6 text-center">
+            <p className="text-2xl font-semibold text-ro-ink">
               {t.brokerageSuccessTitle}
             </p>
             <p className="text-sm text-ro-muted">{t.brokerageSuccessBody}</p>

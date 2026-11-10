@@ -10,6 +10,7 @@ export function ProductLivePreview({
   priceLabel,
   statusLabel,
   imageHint,
+  imageSrc,
   className,
 }: {
   title: string;
@@ -18,6 +19,7 @@ export function ProductLivePreview({
   priceLabel: string;
   statusLabel: string;
   imageHint: string;
+  imageSrc?: string | null;
   className?: string;
 }) {
   const name = nameAr.trim() || nameEn.trim() || "—";
@@ -25,27 +27,37 @@ export function ProductLivePreview({
   return (
     <aside
       className={cn(
-        "ro-catalog-tile sticky top-20 space-y-3 p-4",
+        "sticky top-24 self-start rounded-[14px] border border-[color:var(--rad-bd)] bg-[color:var(--rad-surface2)] p-4 shadow-[var(--rad-sh,none)]",
         className
       )}
     >
-      <h2 className="font-display text-sm font-semibold text-[color:var(--ro-text)]">
+      <h2
+        className="text-sm font-semibold"
+        style={{ color: "var(--rad-tx)", fontFamily: "var(--rad-font, inherit)" }}
+      >
         {title}
       </h2>
-      <div className="overflow-hidden rounded-[12px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-sunken)]">
-        <div className="ro-catalog-tile-media flex aspect-[4/5] items-center justify-center text-xs text-[color:var(--ro-text-muted)]">
-          {imageHint}
+      <div className="mt-3 overflow-hidden rounded-[12px] border border-[color:var(--rad-bd)] bg-[color:var(--rad-surface3)]">
+        <div className="relative flex aspect-[4/5] items-center justify-center overflow-hidden bg-[color:var(--rad-surface3)] text-xs text-[color:var(--rad-tx3)]">
+          {imageSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={imageSrc}
+              alt=""
+              className="size-full object-cover"
+            />
+          ) : (
+            <span className="px-3 text-center">{imageHint}</span>
+          )}
         </div>
         <div className="space-y-1.5 p-3">
-          <p className="font-display text-base font-semibold leading-snug text-[color:var(--ro-text)]">
+          <p className="font-display text-base font-semibold leading-snug text-[color:var(--rad-tx)]">
             {name}
           </p>
-          <p className="text-sm font-semibold tabular-nums text-[color:var(--ro-accent-fg,var(--ro-plum-800))]">
-            {priceLabel}
+          <p className="text-sm font-semibold tabular-nums text-[color:var(--rad-tx)]">
+            <bdi dir="ltr">{priceLabel}</bdi>
           </p>
-          <p className="text-xs text-[color:var(--ro-text-muted)]">
-            {statusLabel}
-          </p>
+          <p className="text-xs text-[color:var(--rad-tx3)]">{statusLabel}</p>
         </div>
       </div>
     </aside>

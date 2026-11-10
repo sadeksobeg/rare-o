@@ -181,6 +181,18 @@ async function listInboxConversationsImpl(
       unreadCount: true,
       linkType: true,
       linkId: true,
+      // Fallback when denormalized preview/time are empty — latest message only.
+      messages: {
+        orderBy: [{ waTimestamp: "desc" }, { createdAt: "desc" }],
+        take: 1,
+        select: {
+          body: true,
+          caption: true,
+          messageType: true,
+          waTimestamp: true,
+          createdAt: true,
+        },
+      },
     },
   });
 
@@ -189,25 +201,35 @@ async function listInboxConversationsImpl(
       (r) =>
         r.waChatId !== "0@s.whatsapp.net" && !r.waChatId.startsWith("0@")
     )
-    .map((r) => ({
-      id: r.id,
-      displayLabel: formatConversationDisplayLabel({
+    .map((r) => {
+      const latest = r.messages[0];
+      const storedPreview = (r.lastMessagePreview ?? "").trim();
+      const derivedPreview =
+        storedPreview ||
+        (latest?.caption?.trim() ||
+          latest?.body?.trim() ||
+          (latest?.messageType && latest.messageType !== "text"
+            ? `[${latest.messageType}]`
+            : "")) ||
+        "";
+      const lastAt = r.lastMessageAt ?? latest?.waTimestamp ?? latest?.createdAt ?? null;
+      return {
+        id: r.id,
+        displayLabel: formatConversationDisplayLabel({
+          participantE164: r.participantE164,
+          displayName: r.displayName,
+          waChatId: r.waChatId,
+        }),
+        name: r.displayName?.trim() || null,
         participantE164: r.participantE164,
-        displayName: r.displayName,
-        waChatId: r.waChatId,
-      }),
-      name: r.displayName?.trim() || null,
-      participantE164: r.participantE164,
-      lastMessagePreview:
-        r.lastMessagePreview === "[unsupported:unknown]" ||
-        r.lastMessagePreview === "[unsupported]"
-          ? "—"
-          : r.lastMessagePreview,
-      lastMessageAt: toIso(r.lastMessageAt),
-      unreadCount: r.unreadCount,
-      hasUnread: r.unreadCount > 0,
-      link: toLinkSummary(r),
-    }));
+        // Raw tags — UI humanizes via humanizeInboxPreview.
+        lastMessagePreview: derivedPreview,
+        lastMessageAt: toIso(lastAt),
+        unreadCount: r.unreadCount,
+        hasUnread: r.unreadCount > 0,
+        link: toLinkSummary(r),
+      };
+    });
 }
 
 /** Per-request cache for default inbox list (layout + children share one query). */

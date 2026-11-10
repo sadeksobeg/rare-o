@@ -38,9 +38,12 @@ export function BrokeragePhotoGallery({
         className
       )}
     >
-      <h2 className="mb-3 font-display text-base font-semibold text-ro-ink">
+      <h2
+        className="mb-3 text-base font-semibold"
+        style={{ color: "var(--rad-tx)", fontFamily: "var(--rad-font, inherit)" }}
+      >
         {title}
-        <span className="ms-2 text-xs font-sans font-normal tabular-nums text-[var(--ro-ink-500)]">
+        <span className="ms-2 text-xs font-normal tabular-nums text-[color:var(--rad-tx3)]">
           {list.length}
         </span>
       </h2>

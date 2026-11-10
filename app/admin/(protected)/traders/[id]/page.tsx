@@ -13,14 +13,17 @@ import {
   DetailSection,
 } from "@/components/admin/detail-list";
 import { PortalHeroStrip } from "@/components/admin/portal-hero";
-import { StatusChip } from "@/components/ui/status-chip";
+import { RevealPhone } from "@/components/admin/reveal-phone";
+import { brokerageStatusLabel } from "@/components/brokerage/labels";
+import { brokeragePillTone } from "@/components/brokerage/status-badge";
+import { Pill } from "@/components/ui-kit/pill";
 import { findWhatsAppConversationsForPhone } from "@/lib/admin/wa-phone-match";
 import { uiVisibleTraderWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
 import { formatDate, formatRelative } from "@/lib/i18n/format";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { parseInterestSlugs } from "@/lib/offers/rank-by-interest";
-import { brokerageStatusLabel } from "@/components/brokerage/labels";
+import { statusToneToPill } from "@/lib/ui/pill-tone";
 import { getStatusChipProps } from "@/lib/ui/status-labels";
 import { localizedName } from "@/lib/utils";
 
@@ -176,32 +179,40 @@ export default async function AdminTraderDetailPage({
       />
 
       <div className="overflow-hidden rounded-[var(--ro-r-sm)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-panel)]">
-        <div className="flex flex-wrap items-center gap-4 border-b border-[color-mix(in_srgb,var(--ro-plum-900)_12%,transparent)] bg-[linear-gradient(135deg,var(--ro-plum-900)_0%,var(--ro-ink-950)_100%)] px-5 py-6 text-[var(--ro-sand-100)]">
+        <div className="flex flex-wrap items-center gap-4 border-b border-[color:var(--rad-bd)] bg-[color:var(--rad-surface3)] px-5 py-6 text-[color:var(--rad-tx)]">
           <span
             aria-hidden
-            className="flex size-14 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--ro-sand-100)_16%,transparent)] font-display text-xl font-semibold"
+            className="flex size-14 items-center justify-center rounded-full bg-[color:var(--rad-acs)] text-xl font-semibold text-[color:var(--rad-ac)]"
           >
             {trader.displayName.trim().slice(0, 1) || "T"}
           </span>
           <div className="min-w-0 flex-1 space-y-1">
-            <p className="font-display text-xl font-semibold">
-              {trader.displayName}
-            </p>
-            <p dir="ltr" className="text-sm opacity-80">
-              {trader.email}
+            <p className="text-xl font-semibold">{trader.displayName}</p>
+            <p className="text-sm opacity-80">
+              <bdi dir="ltr">{trader.email}</bdi>
             </p>
           </div>
-          <StatusChip
-            size="sm"
-            {...getStatusChipProps(dict, "trader", trader.status)}
-          />
+          {(() => {
+            const chip = getStatusChipProps(dict, "trader", trader.status);
+            return (
+              <Pill tone={statusToneToPill(chip.tone)}>{chip.label}</Pill>
+            );
+          })()}
         </div>
         <DetailList>
           <DetailItem label={u.traderCompany}>
             {trader.companyName || "—"}
           </DetailItem>
           <DetailItem label={u.traderPhone}>
-            <span dir="ltr">{trader.phone || "—"}</span>
+            {trader.phone ? (
+              <RevealPhone
+                phone={trader.phone}
+                showLabel={u.showPhone}
+                hideLabel={u.hidePhone}
+              />
+            ) : (
+              "—"
+            )}
           </DetailItem>
           <DetailItem label={u.colCreated}>
             {formatDate(trader.createdAt, locale, { dateStyle: "medium" })}
@@ -225,7 +236,7 @@ export default async function AdminTraderDetailPage({
       />
 
       <div>
-        <h2 className="mb-3 font-display text-lg font-semibold text-[color:var(--ro-text)]">
+        <h2 className="mb-3 text-lg font-semibold text-[color:var(--rad-tx,var(--ro-text))]">
           {u.traderActivity}
         </h2>
         <div className="grid gap-2.5 sm:grid-cols-3">
@@ -249,12 +260,12 @@ export default async function AdminTraderDetailPage({
             <Link
               key={card.href + card.label}
               href={card.href}
-              className="ro-portal-card border p-4 transition-opacity hover:opacity-95"
+              className="rad-card p-4 transition-opacity hover:opacity-95"
             >
-              <p className="text-xs font-medium text-[color:var(--ro-text-muted)]">
+              <p className="text-xs font-medium text-[color:var(--rad-tx3,var(--ro-text-muted))]">
                 {card.label}
               </p>
-              <p className="mt-1 font-display text-2xl font-semibold tabular-nums text-[color:var(--ro-text)]">
+              <p className="mt-1 text-2xl font-semibold tabular-nums text-[color:var(--rad-tx,var(--ro-text))]">
                 {card.value}
               </p>
             </Link>
@@ -311,12 +322,12 @@ export default async function AdminTraderDetailPage({
           href: `/admin/deals/${d.id}`,
           title: d.title || d.reference,
           meta: d.reference,
-          status: (
-            <StatusChip
-              size="sm"
-              {...getStatusChipProps(dict, "deal", d.status)}
-            />
-          ),
+          status: (() => {
+            const chip = getStatusChipProps(dict, "deal", d.status);
+            return (
+              <Pill tone={statusToneToPill(chip.tone)}>{chip.label}</Pill>
+            );
+          })(),
           when: formatRelative(d.updatedAt, locale),
         }))}
       />
@@ -328,12 +339,12 @@ export default async function AdminTraderDetailPage({
           href: `/admin/wholesale/${w.id}`,
           title: w.reference,
           meta: w.reference,
-          status: (
-            <StatusChip
-              size="sm"
-              {...getStatusChipProps(dict, "wholesale", w.status)}
-            />
-          ),
+          status: (() => {
+            const chip = getStatusChipProps(dict, "wholesale", w.status);
+            return (
+              <Pill tone={statusToneToPill(chip.tone)}>{chip.label}</Pill>
+            );
+          })(),
           when: formatRelative(w.updatedAt, locale),
         }))}
       />
@@ -350,11 +361,9 @@ export default async function AdminTraderDetailPage({
             b.cityEn ||
             b.reference,
           status: (
-            <StatusChip
-              size="sm"
-              tone="info"
-              label={brokerageStatusLabel(b.status, locale)}
-            />
+            <Pill tone={brokeragePillTone(b.status)}>
+              {brokerageStatusLabel(b.status, locale)}
+            </Pill>
           ),
           when: formatRelative(b.updatedAt, locale),
         }))}
@@ -381,13 +390,15 @@ function ActivityBlock({
 }) {
   return (
     <div className="space-y-3">
-      <h2 className="font-display text-base font-semibold text-[color:var(--ro-text)]">
+      <h2 className="text-base font-semibold text-[color:var(--rad-tx,var(--ro-text))]">
         {title}
       </h2>
       {rows.length === 0 ? (
-        <p className="text-sm text-[color:var(--ro-text-muted)]">{empty}</p>
+        <p className="text-sm text-[color:var(--rad-tx3,var(--ro-text-muted))]">
+          {empty}
+        </p>
       ) : (
-        <ul className="divide-y divide-[color:var(--ro-border-subtle)] overflow-hidden rounded-[var(--ro-r-sm)] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-panel)]">
+        <ul className="divide-y divide-[color:var(--rad-bd,var(--ro-border-subtle))] overflow-hidden rounded-[var(--rad-r-sm,10px)] border border-[color:var(--rad-bd,var(--ro-border-subtle))] bg-[color:var(--rad-surface2,var(--ro-panel))]">
           {rows.map((row) => (
             <li key={row.id}>
               <Link
@@ -395,11 +406,11 @@ function ActivityBlock({
                 className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 transition-opacity hover:opacity-90"
               >
                 <div className="min-w-0">
-                  <p className="truncate font-medium text-[color:var(--ro-text)]">
+                  <p className="truncate font-medium text-[color:var(--rad-tx,var(--ro-text))]">
                     {row.title}
                   </p>
-                  <p className="text-xs text-[color:var(--ro-text-muted)]" dir="ltr">
-                    {row.meta}
+                  <p className="text-xs text-[color:var(--rad-tx3,var(--ro-text-muted))]">
+                    <bdi dir="ltr">{row.meta}</bdi>
                   </p>
                 </div>
                 <div className="flex items-center gap-3">

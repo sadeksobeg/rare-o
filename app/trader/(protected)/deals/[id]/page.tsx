@@ -2,12 +2,13 @@ import { NegotiationThread } from "@/components/deals/negotiation-thread";
 import { TraderPageHeader } from "@/components/trader/page-header";
 import { PaymentHandoffCard } from "@/components/trader/payment-handoff-card";
 import { Banner } from "@/components/ui/banner";
-import { StatusChip } from "@/components/ui/status-chip";
+import { Pill } from "@/components/ui-kit/pill";
 import { StatusStepper } from "@/components/ui/status-stepper";
 import { requireTraderSession } from "@/lib/auth/trader-session";
 import { getDealForTrader } from "@/lib/deals/service";
 import { isOpenDealStatus, isDealStatus } from "@/lib/deals/constants";
 import { getRequestDictionary } from "@/lib/i18n/server";
+import { statusToneToPill } from "@/lib/ui/pill-tone";
 import { dealNextActor, getStatusMeta } from "@/lib/ui/status";
 import {
   dealStatusLabel,
@@ -55,10 +56,9 @@ export default async function TraderDealDetailPage({
         backHref="/trader/deals"
         backLabel={t.deals}
         action={
-          <StatusChip
-            tone={getStatusMeta("deal", deal.status).tone}
-            label={statusText}
-          />
+          <Pill tone={statusToneToPill(getStatusMeta("deal", deal.status).tone)}>
+            {statusText}
+          </Pill>
         }
       />
       <p className="text-sm font-semibold text-ro-muted">
@@ -90,16 +90,18 @@ export default async function TraderDealDetailPage({
           })()
         : null}
 
-      <dl className="ro-portal-card grid gap-4 border p-4 text-sm md:grid-cols-2 md:p-5">
+      <div className="rad-card grid gap-4 p-4 text-sm md:grid-cols-2 md:p-5">
         <div className="flex items-start gap-2.5">
           <span className="ro-portal-icon-well size-8 [&>svg]:size-3.5" aria-hidden>
             <Package className="size-3.5" strokeWidth={2} />
           </span>
           <div>
-            <dt className="text-xs font-bold text-ro-muted">{t.dealProduct}</dt>
-            <dd className="mt-0.5 font-semibold">
+            <p className="text-xs font-bold text-[color:var(--rad-tx3)]">
+              {t.dealProduct}
+            </p>
+            <p className="mt-0.5 font-semibold text-[color:var(--rad-tx)]">
               {deal.product ? productName : t.dealNonCatalog}
-            </dd>
+            </p>
           </div>
         </div>
         <div className="flex items-start gap-2.5">
@@ -107,10 +109,12 @@ export default async function TraderDealDetailPage({
             <Hash className="size-3.5" strokeWidth={2} />
           </span>
           <div>
-            <dt className="text-xs font-bold text-ro-muted">{t.modelNumberLabel}</dt>
-            <dd className="mt-0.5 font-semibold" dir="ltr">
+            <p className="text-xs font-bold text-[color:var(--rad-tx3)]">
+              {t.modelNumberLabel}
+            </p>
+            <p className="mt-0.5 font-semibold text-[color:var(--rad-tx)]" dir="ltr">
               <bdi dir="ltr">{deal.modelNumber || "—"}</bdi>
-            </dd>
+            </p>
           </div>
         </div>
         <div className="flex items-start gap-2.5">
@@ -118,24 +122,28 @@ export default async function TraderDealDetailPage({
             <Tags className="size-3.5" strokeWidth={2} />
           </span>
           <div>
-            <dt className="text-xs font-bold text-ro-muted">{t.dealSnapshot}</dt>
-            <dd className="mt-0.5 font-semibold">
+            <p className="text-xs font-bold text-[color:var(--rad-tx3)]">
+              {t.dealSnapshot}
+            </p>
+            <p className="mt-0.5 font-semibold text-[color:var(--rad-tx)]">
               {deal.proposedPrice != null
-                ? formatMoney(deal.proposedPrice, deal.currency)
+                ? formatMoney(deal.proposedPrice, deal.currency, locale)
                 : "—"}
               {deal.quantity != null
                 ? ` · ${t.dealQtyShort} ${deal.quantity}`
                 : ""}
-            </dd>
+            </p>
           </div>
         </div>
         <div className="md:col-span-2">
-          <dt className="text-xs font-bold text-ro-muted">{t.dealConditions}</dt>
-          <dd className="ro-portal-message-panel mt-1">
+          <p className="text-xs font-bold text-[color:var(--rad-tx3)]">
+            {t.dealConditions}
+          </p>
+          <div className="ro-portal-message-panel mt-1">
             {deal.conditionsNotes || "—"}
-          </dd>
+          </div>
         </div>
-      </dl>
+      </div>
 
       {deal.status === "awaiting_payment" ? (
         <PaymentHandoffCard
@@ -162,7 +170,7 @@ export default async function TraderDealDetailPage({
         locale={locale}
         labels={t}
         title={t.dealHistory}
-        money={(v, c) => formatMoney(v as number, c)}
+        money={(v, c) => formatMoney(v as number, c, locale)}
         termsLabel={t.dealTerms}
         qtyLabel={t.dealQtyShort}
         currency={deal.currency}

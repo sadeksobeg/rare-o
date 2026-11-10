@@ -5,7 +5,6 @@ import { MessageCircle } from "lucide-react";
 import { traderOpenDealHandoffAction } from "@/app/deal-actions";
 import { traderOpenBrokerageHandoffAction } from "@/app/brokerage-actions";
 import { traderOpenWholesaleHandoffAction } from "@/app/wholesale-actions";
-import { Button } from "@/components/ui/button";
 
 /**
  * Trader-facing WhatsApp payment deep-link card (deals + brokerage).
@@ -33,14 +32,16 @@ export function PaymentHandoffCard({
   const [pending, startTransition] = useTransition();
 
   return (
-    <div className="space-y-4 rounded-[var(--ro-r-lg)] border border-[color-mix(in_srgb,var(--ro-plum-700)_35%,transparent)] bg-[color-mix(in_srgb,var(--ro-plum-50)_55%,var(--ro-sand-50))] p-5">
+    <div className="rad-card space-y-4 border-[color-mix(in_srgb,var(--rad-ac)_35%,var(--rad-bd))] bg-[color-mix(in_srgb,var(--rad-ac)_6%,var(--rad-surface))] p-5">
       <div>
-        <h2 className="font-display text-lg font-semibold text-ro-ink">{title}</h2>
-        <p className="mt-1 text-sm text-[var(--ro-ink-600)]">{body}</p>
+        <h2 className="text-lg font-semibold text-[color:var(--rad-tx)]">
+          {title}
+        </h2>
+        <p className="mt-1 text-sm text-[color:var(--rad-tx2)]">{body}</p>
       </div>
       {messageText ? (
         <pre
-          className="max-h-40 overflow-auto whitespace-pre-wrap rounded-[var(--ro-r-sm)] border border-[var(--ro-border-subtle)] bg-ro-paper p-3 text-xs leading-relaxed text-ro-ink"
+          className="max-h-40 overflow-auto whitespace-pre-wrap rounded-[var(--rad-r-sm)] border border-[color:var(--rad-bd)] bg-[color:var(--rad-surface2)] p-3 text-xs leading-relaxed text-[color:var(--rad-tx)]"
           dir="auto"
         >
           {messageText}
@@ -51,7 +52,7 @@ export function PaymentHandoffCard({
           href={deepLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--ro-r-sm)] bg-[var(--ro-plum-900)] px-6 text-sm font-semibold !text-[var(--ro-sand-100)] transition-[transform,opacity] duration-150 hover:-translate-y-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
+          className="rad-btn rad-pri"
           onClick={() => {
             startTransition(async () => {
               const fd = new FormData();
@@ -76,9 +77,9 @@ export function PaymentHandoffCard({
           <p className="text-sm font-medium text-[var(--ro-amber-800)]">
             {unavailableLabel}
           </p>
-          <Button type="button" variant="secondary" size="sm" disabled>
+          <button type="button" className="rad-btn rad-gh rad-sm" disabled>
             {openLabel}
-          </Button>
+          </button>
         </div>
       )}
     </div>

@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import {
   brokeragePhaseLabel,
   brokerageStatusLabel,
@@ -53,17 +56,29 @@ export function BrokerageLifecycleRail({
     status === "REJECTED" ||
     status === "CANCELLED";
   const terminalDone = status === "CLOSED";
+  const scrollerRef = useRef<HTMLOListElement>(null);
+
+  useEffect(() => {
+    const root = scrollerRef.current;
+    if (!root) return;
+    const cur = root.querySelector<HTMLElement>("[data-rail-current]");
+    cur?.scrollIntoView({
+      inline: "center",
+      block: "nearest",
+      behavior: "smooth",
+    });
+  }, [status]);
 
   return (
     <div className={cn("space-y-4", className)}>
       {side ? (
         <div
-          className={cn(
-            "rounded-[var(--ro-r-md)] border px-3 py-2.5 text-sm",
-            status === "NEEDS_INFO"
-              ? "border-[color-mix(in_srgb,var(--ro-amber-500)_45%,transparent)] bg-[color-mix(in_srgb,var(--ro-amber-100)_45%,transparent)] text-[var(--ro-amber-800)]"
-              : "border-[color-mix(in_srgb,var(--ro-danger-700)_30%,transparent)] bg-[color-mix(in_srgb,var(--ro-danger-100)_55%,transparent)] text-[var(--ro-danger-700)]"
-          )}
+          className="rounded-[14px] border px-3 py-2.5 text-sm"
+          style={{
+            borderColor: "var(--rad-warn)",
+            background: "var(--rad-warns)",
+            color: "var(--rad-warn)",
+          }}
         >
           <span className="font-semibold">
             {status === "NEEDS_INFO"
@@ -75,21 +90,18 @@ export function BrokerageLifecycleRail({
                 : "Ended — "}
           </span>
           {brokerageStatusLabel(status, locale)}
-          {status === "REJECTED" ? (
-            <span className="ms-1 text-[0.8em] opacity-90">
-              {ar
-                ? "(توقف عند مرحلة العرض)"
-                : "(stopped at quote stage)"}
-            </span>
-          ) : null}
         </div>
       ) : null}
 
       {terminalDone ? (
-        <div className="rounded-[var(--ro-r-md)] border border-[color-mix(in_srgb,var(--ro-success-700)_30%,transparent)] bg-[color-mix(in_srgb,var(--ro-success-100)_60%,transparent)] px-3 py-2.5 text-sm text-[var(--ro-success-700)]">
-          <span className="font-semibold">
-            {ar ? "مكتمل — " : "Complete — "}
-          </span>
+        <div
+          className="rounded-[14px] border px-3 py-2.5 text-sm font-semibold"
+          style={{
+            borderColor: "var(--rad-ok)",
+            background: "var(--rad-oks)",
+            color: "var(--rad-ok)",
+          }}
+        >
           {brokerageStatusLabel(status, locale)}
         </div>
       ) : null}
@@ -106,14 +118,23 @@ export function BrokerageLifecycleRail({
           return (
             <span
               key={g.phase}
-              className={cn(
-                "rounded-full px-2.5 py-1 text-[0.65rem] font-medium",
+              className="rounded-full px-2.5 py-1 text-[0.65rem] font-medium"
+              style={
                 active
-                  ? "bg-[var(--ro-plum-900)] text-[var(--ro-sand-100)]"
+                  ? {
+                      background: "var(--rad-acf)",
+                      color: "#fff",
+                    }
                   : groupDone
-                    ? "bg-[var(--ro-plum-100)] text-[var(--ro-plum-900)]"
-                    : "bg-[var(--ro-sand-200)] text-[var(--ro-ink-500)]"
-              )}
+                    ? {
+                        background: "var(--rad-acs)",
+                        color: "var(--rad-ac)",
+                      }
+                    : {
+                        background: "var(--rad-surface3)",
+                        color: "var(--rad-tx2)",
+                      }
+              }
             >
               {brokeragePhaseLabel(g.phase, locale)}
             </span>
@@ -121,67 +142,93 @@ export function BrokerageLifecycleRail({
         })}
       </div>
 
-      <ol className="relative flex items-start gap-0 overflow-x-auto pb-1">
-        {RAIL.map((s, i) => {
-          const done = stepIdx >= 0 && i <= stepIdx && !side;
-          const current =
-            (!side && stepIdx === i) ||
-            (status === "REJECTED" && s === "QUOTE_SENT") ||
-            (status === "NEEDS_INFO" && s === "SUBMITTED");
-          const upcoming = stepIdx >= 0 && i === stepIdx + 1 && !side;
-          return (
-            <li
-              key={s}
-              className="relative flex min-w-[4.25rem] flex-1 flex-col items-center gap-2 px-0.5"
-            >
-              {i < RAIL.length - 1 ? (
-                <span
-                  aria-hidden
-                  className={cn(
-                    "absolute top-[0.55rem] start-1/2 h-px w-full",
-                    done && i < stepIdx && !side
-                      ? "bg-[var(--ro-plum-700)]"
-                      : "bg-[var(--ro-border-subtle)]"
-                  )}
-                />
-              ) : null}
-              <span
-                className={cn(
-                  "relative z-[1] grid size-5 place-items-center rounded-full border text-[0.55rem] font-semibold tabular-nums",
-                  current
-                    ? "border-[var(--ro-plum-700)] bg-[var(--ro-plum-900)] text-[var(--ro-sand-100)] shadow-[0_0_0_4px_color-mix(in_srgb,var(--ro-plum-300)_45%,transparent)]"
-                    : upcoming
-                      ? "border-[var(--ro-amber-500)] bg-[var(--ro-amber-100)] text-[var(--ro-amber-800)]"
-                      : done
-                        ? "border-[var(--ro-plum-700)] bg-[var(--ro-plum-300)] text-[var(--ro-plum-900)]"
-                        : "border-[var(--ro-border)] bg-[var(--ro-sand-100)] text-[var(--ro-ink-500)]"
-                )}
+      <div className="rad-stp-scroll">
+        <ol
+          ref={scrollerRef}
+          className="relative flex items-start gap-0 overflow-x-auto pb-1"
+          style={{ scrollbarWidth: "none" }}
+        >
+          {RAIL.map((s, i) => {
+            const done = stepIdx >= 0 && i <= stepIdx && !side;
+            const current =
+              (!side && stepIdx === i) ||
+              (status === "REJECTED" && s === "QUOTE_SENT") ||
+              (status === "NEEDS_INFO" && s === "SUBMITTED");
+            const upcoming = stepIdx >= 0 && i === stepIdx + 1 && !side;
+            return (
+              <li
+                key={s}
+                data-rail-current={current ? "" : undefined}
+                className="relative flex min-w-[4.25rem] flex-1 flex-col items-center gap-2 px-0.5"
               >
-                {i + 1}
-              </span>
-              <span
-                className={cn(
-                  "max-w-[5.25rem] text-center text-[0.62rem] leading-tight",
-                  current
-                    ? "font-semibold text-ro-ink"
-                    : upcoming
-                      ? "font-medium text-[var(--ro-amber-800)]"
-                      : done
-                        ? "text-[var(--ro-ink-700)]"
-                        : "text-[var(--ro-ink-500)]"
-                )}
-              >
-                {brokerageStatusLabel(s, locale)}
-                {upcoming ? (
-                  <span className="mt-0.5 block text-[0.55rem] font-normal opacity-80">
-                    {ar ? "التالي" : "Next"}
-                  </span>
+                {i < RAIL.length - 1 ? (
+                  <span
+                    aria-hidden
+                    className="absolute top-[0.55rem] start-1/2 h-px w-full"
+                    style={{
+                      background:
+                        done && i < stepIdx && !side
+                          ? "var(--rad-acf)"
+                          : "var(--rad-bd2)",
+                    }}
+                  />
                 ) : null}
-              </span>
-            </li>
-          );
-        })}
-      </ol>
+                <span
+                  className="relative z-[1] grid size-5 place-items-center rounded-full border text-[0.55rem] font-semibold tabular-nums"
+                  style={
+                    current
+                      ? {
+                          borderColor: "var(--rad-ac)",
+                          background: "var(--rad-acf)",
+                          color: "#fff",
+                          boxShadow: "0 0 0 4px var(--rad-acs)",
+                        }
+                      : upcoming
+                        ? {
+                            borderColor: "var(--rad-warn)",
+                            background: "var(--rad-warns)",
+                            color: "var(--rad-warn)",
+                          }
+                        : done
+                          ? {
+                              borderColor: "var(--rad-acf)",
+                              background: "var(--rad-acs)",
+                              color: "var(--rad-ac)",
+                            }
+                          : {
+                              borderColor: "var(--rad-bd2)",
+                              background: "var(--rad-surface)",
+                              color: "var(--rad-tx2)",
+                            }
+                  }
+                >
+                  {i + 1}
+                </span>
+                <span
+                  className="max-w-[5.25rem] text-center text-[0.62rem] leading-tight"
+                  style={{
+                    color: current
+                      ? "var(--rad-tx)"
+                      : upcoming
+                        ? "var(--rad-warn)"
+                        : done
+                          ? "var(--rad-tx2)"
+                          : "var(--rad-tx3)",
+                    fontWeight: current || upcoming ? 600 : 500,
+                  }}
+                >
+                  {brokerageStatusLabel(s, locale)}
+                  {upcoming ? (
+                    <span className="mt-0.5 block text-[0.55rem] font-normal opacity-80">
+                      {ar ? "التالي" : "Next"}
+                    </span>
+                  ) : null}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
     </div>
   );
 }

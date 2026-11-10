@@ -5,7 +5,6 @@ import {
   traderMarkNotificationReadAction,
 } from "@/app/trader-portal-actions";
 import { TraderPageHeader } from "@/components/trader/page-header";
-import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requireTraderSession } from "@/lib/auth/trader-session";
 import { formatRelative } from "@/lib/i18n/format";
@@ -55,9 +54,9 @@ export default async function TraderNotificationsPage({
         action={
           unread > 0 ? (
             <form action={traderMarkAllNotificationsReadAction}>
-              <Button type="submit" variant="secondary" size="sm">
+              <button type="submit" className="rad-btn rad-gh rad-sm">
                 {t.notificationsMarkAll}
-              </Button>
+              </button>
             </form>
           ) : null
         }
@@ -83,8 +82,8 @@ export default async function TraderNotificationsPage({
               className={cn(
                 "min-h-11 shrink-0 rounded-full border px-3 py-2 text-xs font-semibold transition-[color,background-color,border-color] duration-[var(--ro-dur-fast)]",
                 active
-                  ? "border-[color:var(--ro-link)] bg-[color-mix(in_srgb,var(--ro-plum-900)_14%,var(--ro-bg-elevated))] text-[color:var(--ro-link)]"
-                  : "border-[color:var(--ro-border-subtle)] text-[color:var(--ro-text-muted)] hover:bg-[color:var(--ro-bg-sunken)]"
+                  ? "border-[color:var(--rad-ac)] bg-[color-mix(in_srgb,var(--rad-ac)_14%,var(--rad-surface2))] text-[color:var(--rad-ac)]"
+                  : "border-[color:var(--rad-bd)] text-[color:var(--rad-tx3)] hover:bg-[color:var(--rad-surface3)]"
               )}
             >
               {filterLabels[key]}
@@ -101,7 +100,7 @@ export default async function TraderNotificationsPage({
           actionLabel={t.overview}
         />
       ) : (
-        <ul className="ro-portal-card divide-y divide-[color:var(--ro-border-subtle)] overflow-hidden border">
+        <ul className="rad-card divide-y divide-[color:var(--rad-bd)] overflow-hidden">
           {filtered.map((n) => {
             const title = localizedName(locale, n.titleAr, n.titleEn);
             const body = localizedName(locale, n.bodyAr, n.bodyEn);
@@ -112,32 +111,32 @@ export default async function TraderNotificationsPage({
                   className={cn(
                     "flex min-h-11 flex-wrap items-start gap-3 px-4 py-3.5 transition-[background-color] duration-[var(--ro-dur-fast)]",
                     unreadRow &&
-                      "ro-row-flash bg-[color-mix(in_srgb,var(--ro-plum-900)_10%,transparent)]"
+                      "ro-row-flash bg-[color-mix(in_srgb,var(--rad-ac)_10%,transparent)]"
                   )}
                 >
                   <div className="min-w-0 flex-1 space-y-1">
                     <p
                       className={
                         unreadRow
-                          ? "font-bold text-[color:var(--ro-text)]"
-                          : "font-semibold text-[color:var(--ro-text)]"
+                          ? "font-bold text-[color:var(--rad-tx)]"
+                          : "font-semibold text-[color:var(--rad-tx)]"
                       }
                     >
                       {title}
                     </p>
                     {body ? (
-                      <p className="text-sm text-[color:var(--ro-text-muted)]">
+                      <p className="text-sm text-[color:var(--rad-tx3)]">
                         {body}
                       </p>
                     ) : null}
-                    <p className="text-xs text-[color:var(--ro-text-muted)]">
+                    <p className="text-xs text-[color:var(--rad-tx3)]">
                       {formatRelative(n.createdAt, locale)}
                     </p>
                   </div>
                   <div className="flex shrink-0 flex-wrap items-center gap-2">
                     <Link
                       href={n.href}
-                      className="text-sm font-semibold text-ro-plum hover:underline"
+                      className="text-sm font-semibold text-[color:var(--rad-ac)] hover:underline"
                     >
                       {t.notificationsOpen}
                     </Link>
@@ -148,9 +147,12 @@ export default async function TraderNotificationsPage({
                           name="notificationId"
                           value={n.id}
                         />
-                        <Button type="submit" variant="quiet" size="sm">
+                        <button
+                          type="submit"
+                          className="rad-btn rad-gh rad-sm"
+                        >
                           {t.notificationsMarkRead}
-                        </Button>
+                        </button>
                       </form>
                     ) : null}
                   </div>

@@ -13,10 +13,10 @@ import { PressRipple } from "@/components/motion/press-ripple";
 import { PressLink } from "@/components/portal/press-link";
 import { DealCard } from "@/components/trader/deal-card";
 import { TraderPageHeader } from "@/components/trader/page-header";
-import { ButtonLink } from "@/components/ui/button";
 import { ListFilterTabs } from "@/components/ui/list-filter-tabs";
 import { EmptyState } from "@/components/ui/empty-state";
-import { StatusChip } from "@/components/ui/status-chip";
+import { Pill } from "@/components/ui-kit/pill";
+import { statusToneToPill } from "@/lib/ui/pill-tone";
 import { isFresh } from "@/lib/ui/fresh";
 import { requireTraderSession } from "@/lib/auth/trader-session";
 import { isOpenWholesaleStatus, isWholesaleStatus } from "@/lib/wholesale/constants";
@@ -79,15 +79,13 @@ export default async function TraderWholesaleRequestsPage({
         title={t.wsMyRequests}
         icon={<Package className="size-5" strokeWidth={2} />}
         action={
-          <ButtonLink
+          <Link
             href="/trader/wholesale"
-            variant="primary"
-            size="sm"
-            className="hidden md:inline-flex"
+            className="rad-btn rad-pri rad-sm hidden md:inline-flex"
           >
             <Plus className="size-4" aria-hidden />
             {t.wsNewRequest}
-          </ButtonLink>
+          </Link>
         }
       />
 
@@ -153,17 +151,11 @@ export default async function TraderWholesaleRequestsPage({
                       <Td>{modeLabel}</Td>
                       <Td>
                         <span className="flex flex-wrap items-center gap-2">
-                          <StatusChip
-                            tone={tone}
-                            label={statusLabel}
-                            size="sm"
-                          />
+                          <Pill tone={statusToneToPill(tone)}>
+                            {statusLabel}
+                          </Pill>
                           {waiting ? (
-                            <StatusChip
-                              tone="attention"
-                              label={t.waitingOnYou}
-                              size="sm"
-                            />
+                            <Pill tone="warn">{t.waitingOnYou}</Pill>
                           ) : null}
                         </span>
                       </Td>
@@ -171,7 +163,7 @@ export default async function TraderWholesaleRequestsPage({
                       <Td>
                         <PressLink
                           href={`/trader/wholesale/${r.id}`}
-                          className="text-sm font-semibold text-ro-plum hover:underline"
+                          className="text-sm font-semibold text-[color:var(--rad-ac)] hover:underline"
                         >
                           {t.openRecord}
                         </PressLink>
@@ -185,11 +177,11 @@ export default async function TraderWholesaleRequestsPage({
         </>
       )}
 
-      <PressRipple className="fixed bottom-20 end-4 z-30 rounded-full md:hidden">
+      <PressRipple className="fixed end-4 bottom-[calc(68px+env(safe-area-inset-bottom,0px)+12px)] z-30 rounded-full min-[901px]:hidden">
         <Link
           href="/trader/wholesale"
           aria-label={t.wsNewRequest}
-          className="inline-flex size-14 items-center justify-center rounded-full bg-[linear-gradient(165deg,var(--ro-plum-700),var(--ro-plum-900))] text-[var(--ro-sand-100)] shadow-[0_12px_32px_-8px_color-mix(in_srgb,var(--ro-plum-900)_70%,transparent)] transition-transform duration-[var(--ro-dur-fast)] hover:scale-105 active:scale-95"
+          className="inline-flex size-14 items-center justify-center rounded-full bg-[color:var(--rad-btn)] text-[color:var(--rad-btn-tx)] shadow-[0_12px_32px_-8px_color-mix(in_srgb,var(--rad-btn)_70%,transparent)] transition-transform duration-[var(--ro-dur-fast)] hover:scale-105 active:scale-95"
         >
           <Plus className="size-6" aria-hidden />
         </Link>

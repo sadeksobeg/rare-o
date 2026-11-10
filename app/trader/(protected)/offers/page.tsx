@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { Stagger } from "@/components/motion/reveal";
 import { TraderPageHeader } from "@/components/trader/page-header";
-import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requireTraderSession } from "@/lib/auth/trader-session";
 import { prisma } from "@/lib/db/prisma";
@@ -67,9 +66,9 @@ export default async function TraderOffersPage() {
             return (
               <article
                 key={o.id}
-                className="ro-portal-card flex h-full flex-col overflow-hidden border"
+                className="rad-card flex h-full flex-col overflow-hidden"
               >
-                <div className="relative h-36 bg-[var(--ro-sand-200)]">
+                <div className="relative h-36 bg-[color:var(--rad-surface3)]">
                   {imagePath ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -78,36 +77,35 @@ export default async function TraderOffersPage() {
                       className="size-full object-cover"
                     />
                   ) : (
-                    <div className="flex size-full items-center justify-center bg-[linear-gradient(160deg,var(--ro-plum-100),var(--ro-sand-200))] text-xs text-ro-muted">
+                    <div className="flex size-full items-center justify-center bg-[color:var(--rad-surface2)] text-xs text-[color:var(--rad-tx3)]">
                       RARE OUD
                     </div>
                   )}
                 </div>
                 <div className="flex flex-1 flex-col gap-3 p-5">
-                  <h2 className="font-display text-xl font-semibold leading-snug">
+                  <h2 className="text-xl font-semibold leading-snug text-[color:var(--rad-tx)]" style={{ fontFamily: "var(--rad-font, inherit)" }}>
                     {title}
                   </h2>
                   {summary ? (
-                    <p className="line-clamp-3 text-sm leading-relaxed text-ro-muted">
+                    <p className="line-clamp-3 text-sm leading-relaxed text-[color:var(--rad-tx3)]">
                       {summary}
                     </p>
                   ) : null}
                   {productName ? (
-                    <p className="text-xs font-semibold text-[var(--ro-plum-800)]">
+                    <p className="text-xs font-semibold text-[color:var(--rad-ac)]">
                       {t.offersRelatedProduct}: {productName}
                     </p>
                   ) : null}
                   <div className="mt-auto flex flex-wrap gap-2 pt-1">
-                    <ButtonLink
+                    <Link
                       href={`/trader/offers/${o.slug}`}
-                      variant="secondary"
-                      size="sm"
+                      className="rad-btn rad-gh rad-sm"
                     >
                       {t.offersViewDetails}
-                    </ButtonLink>
-                    <ButtonLink href={dealHref} variant="primary" size="sm">
+                    </Link>
+                    <Link href={dealHref} className="rad-btn rad-pri rad-sm">
                       {t.offersStartDeal}
-                    </ButtonLink>
+                    </Link>
                   </div>
                 </div>
               </article>
@@ -115,8 +113,11 @@ export default async function TraderOffersPage() {
           })}
         </Stagger>
       )}
-      <p className="text-center text-sm text-ro-muted">
-        <Link href="/trader" className="font-medium text-ro-plum hover:underline">
+      <p className="text-center text-sm text-[color:var(--rad-tx3)]">
+        <Link
+          href="/trader"
+          className="font-medium text-[color:var(--rad-ac)] hover:underline"
+        >
           {t.overview}
         </Link>
       </p>

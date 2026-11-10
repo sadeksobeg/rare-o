@@ -1,47 +1,33 @@
-import { Suspense } from "react";
-import { Users } from "lucide-react";
 import {
-  DataTable,
-  DataTableHead,
-  RowHit,
-  Td,
-  Th,
-  Tr,
-} from "@/components/admin/data-table";
-import {
-  AdminRecordCard,
-  AdminRecordCardList,
-} from "@/components/admin/list-record-card";
-import { PortalHeroStrip } from "@/components/admin/portal-hero";
-import { AdminTableFilters } from "@/components/admin/table-filters";
-import { EmptyState } from "@/components/ui/empty-state";
-import { StatusChip } from "@/components/ui/status-chip";
+  CustomersListView,
+  type CustomersListRow,
+} from "@/components/admin/rad/customers-list-view";
 import { phonesWithWhatsAppMatch } from "@/lib/admin/wa-phone-match";
 import { uiVisibleCustomerWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
 import { containsCI } from "@/lib/db/search";
-import { formatDate, formatRelative } from "@/lib/i18n/format";
+import { formatAdminDate } from "@/lib/i18n/admin-format";
 import { getRequestDictionary } from "@/lib/i18n/server";
-import { isFresh } from "@/lib/ui/fresh";
+import { formatMaskedPhone } from "@/lib/whatsapp/messaging/phone-format";
 import type { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
+const PAGE_SIZE = 40;
+
 export default async function AdminCustomersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; tab?: string }>;
+  searchParams: Promise<{ q?: string; tab?: string; page?: string }>;
 }) {
-  const { q: qRaw, tab: tabRaw } = await searchParams;
+  const { q: qRaw, tab: tabRaw, page: pageRaw } = await searchParams;
   const query = qRaw?.trim() ?? "";
   const tab = tabRaw?.trim() || "all";
   const { locale, dict } = await getRequestDictionary();
-  const ar = locale === "ar";
   const a = dict.admin;
   const u = dict.adminUi;
 
   const visible = uiVisibleCustomerWhere();
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
   const searchWhere: Prisma.CustomerWhereInput | undefined = query
     ? {
@@ -57,21 +43,20 @@ export default async function AdminCustomersPage({
         : undefined;
 
   const listWhere: Prisma.CustomerWhereInput = {
-    AND: [visible, searchWhere, tabWhere].filter(Boolean) as Prisma.CustomerWhereInput[],
+    AND: [visible, searchWhere, tabWhere].filter(
+      Boolean
+    ) as Prisma.CustomerWhereInput[],
   };
 
-  const [allCount, withRequestsCount, newCount, customers] = await Promise.all([
+  const [allCount, withRequestsCount, customers] = await Promise.all([
     prisma.customer.count({ where: visible }),
     prisma.customer.count({
       where: { AND: [visible, { requests: { some: {} } }] },
     }),
-    prisma.customer.count({
-      where: { AND: [visible, { createdAt: { gte: sevenDaysAgo } }] },
-    }),
     prisma.customer.findMany({
       where: listWhere,
       orderBy: { createdAt: "desc" },
-      take: 100,
+      take: 200,
       include: {
         _count: {
           select: { requests: true, whatsAppConversations: true },
@@ -88,184 +73,76 @@ export default async function AdminCustomersPage({
   const noRequestsCount = Math.max(0, allCount - withRequestsCount);
   const waPhones = await phonesWithWhatsAppMatch(customers.map((c) => c.phone));
 
+  const page = Math.max(1, Number.parseInt(pageRaw || "1", 10) || 1);
+  const pageCount = Math.max(1, Math.ceil(customers.length / PAGE_SIZE));
+  const pageSafe = Math.min(page, pageCount);
+  const pageSlice = customers.slice(
+    (pageSafe - 1) * PAGE_SIZE,
+    pageSafe * PAGE_SIZE
+  );
+
+  const rows: CustomersListRow[] = pageSlice.map((c) => {
+    const last = c.requests[0];
+    const hasWa =
+      c._count.whatsAppConversations > 0 || waPhones.has(c.phone);
+    return {
+      id: c.id,
+      name: c.name,
+      phoneMasked: formatMaskedPhone(c.phone) || c.phone,
+      requestCount: c._count.requests,
+      lastActivity: last ? formatAdminDate(last.createdAt, locale) : "—",
+      lastReference: last?.reference ?? null,
+      hasWa,
+      createdLabel: formatAdminDate(c.createdAt, locale, { forceAbsolute: true }),
+      href: `/admin/customers/${c.id}`,
+    };
+  });
+
   return (
-    <section className="space-y-5 pb-16">
-      <PortalHeroStrip
-        eyebrow={ar ? "أشخاص" : "People"}
-        title={
-          <span className="inline-flex items-center gap-2.5">
-            <Users
-              className="size-7 shrink-0 text-[color:var(--ro-accent-fg,var(--ro-plum-800))]"
-              strokeWidth={1.5}
-            />
-            {a.customers}
-          </span>
-        }
-        subtitle={u.customersLead}
-        stats={[
-          { label: u.customersKpiAll, value: allCount },
-          { label: u.customersKpiWithRequests, value: withRequestsCount },
-          {
-            label: u.customersKpiNew,
-            value: newCount,
-            hint: u.customersKpiNewHint,
-          },
-        ]}
-      />
-
-      <Suspense fallback={null}>
-        <AdminTableFilters
-          tabsLabel={u.filterTabs}
-          searchLabel={u.search}
-          searchPlaceholder={u.searchCustomers}
-          resultCount={customers.length}
-          resultLabel={u.resultsLabel}
-          tabs={[
-            { id: "all", label: u.filterAll, count: allCount },
-            {
-              id: "with_requests",
-              label: u.customersFilterWithRequests,
-              count: withRequestsCount,
-            },
-            {
-              id: "no_requests",
-              label: u.customersFilterNoRequests,
-              count: noRequestsCount,
-            },
-          ]}
-        />
-      </Suspense>
-
-      {customers.length === 0 ? (
-        <EmptyState
-          variant={query || tab !== "all" ? "no-results" : "first-use"}
-          title={u.emptyTitle}
-          body={u.emptyBody}
-          actionHref={
-            query || tab !== "all" ? "/admin/customers" : "/admin/requests"
-          }
-          actionLabel={
-            query || tab !== "all" ? dict.catalog.clearFilters : a.requests
-          }
-        />
-      ) : (
-        <>
-          <AdminRecordCardList>
-            {customers.map((c) => {
-              const last = c.requests[0];
-              const hasWa =
-                c._count.whatsAppConversations > 0 || waPhones.has(c.phone);
-              return (
-                <AdminRecordCard
-                  key={c.id}
-                  href={`/admin/customers/${c.id}`}
-                  flash={isFresh(last?.createdAt ?? c.createdAt)}
-                  title={
-                    <span className="flex items-center gap-3">
-                      <span
-                        aria-hidden
-                        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--ro-plum-100)] text-sm font-semibold text-[var(--ro-plum-900)]"
-                      >
-                        {c.name.trim().slice(0, 1) || "C"}
-                      </span>
-                      {c.name}
-                    </span>
-                  }
-                  trailing={
-                    <span className="text-xs font-semibold tabular-nums text-[var(--ro-plum-900)]">
-                      {c._count.requests}
-                    </span>
-                  }
-                  meta={<span dir="ltr">{c.phone}</span>}
-                >
-                  <p className="text-xs text-[color:var(--ro-text-muted)]">
-                    {last ? (
-                      <>
-                        {last.reference}
-                        {" · "}
-                        {formatRelative(last.createdAt, locale)}
-                      </>
-                    ) : (
-                      formatDate(c.createdAt, locale, { dateStyle: "medium" })
-                    )}
-                    {hasWa ? ` · ${u.colWa}` : ""}
-                  </p>
-                </AdminRecordCard>
-              );
-            })}
-          </AdminRecordCardList>
-
-          <div className="hidden md:block">
-            <DataTable>
-              <DataTableHead>
-                <Th className="min-w-[10rem]">{a.colName}</Th>
-                <Th>{u.colPhone}</Th>
-                <Th className="w-[5.5rem]">{u.colRequests}</Th>
-                <Th>{u.colLastActivity}</Th>
-                <Th className="w-[6.5rem]">{u.colWa}</Th>
-                <Th className="w-[7.5rem]">{u.colCreated}</Th>
-              </DataTableHead>
-              <tbody>
-                {customers.map((c) => {
-                  const last = c.requests[0];
-                  const href = `/admin/customers/${c.id}`;
-                  const hasWa =
-                    c._count.whatsAppConversations > 0 || waPhones.has(c.phone);
-                  return (
-                    <Tr
-                      key={c.id}
-                      href={href}
-                      flash={isFresh(last?.createdAt ?? c.createdAt)}
-                    >
-                      <Td className="font-medium">
-                        <RowHit href={href}>
-                          <span className="inline-flex items-center gap-3">
-                            <span
-                              aria-hidden
-                              className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--ro-plum-100)] text-sm font-semibold text-[var(--ro-plum-900)]"
-                            >
-                              {c.name.trim().slice(0, 1) || "C"}
-                            </span>
-                            {c.name}
-                          </span>
-                        </RowHit>
-                      </Td>
-                      <Td>
-                        <span dir="ltr">{c.phone}</span>
-                      </Td>
-                      <Td className="tabular-nums">{c._count.requests}</Td>
-                      <Td className="text-[color:var(--ro-text-muted)]">
-                        {last ? (
-                          <>
-                            <span className="block font-medium text-[color:var(--ro-text)]">
-                              {last.reference}
-                            </span>
-                            {formatRelative(last.createdAt, locale)}
-                          </>
-                        ) : (
-                          "—"
-                        )}
-                      </Td>
-                      <Td>
-                        {hasWa ? (
-                          <StatusChip size="sm" tone="info" label={u.colWa} />
-                        ) : (
-                          "—"
-                        )}
-                      </Td>
-                      <Td className="text-[color:var(--ro-text-muted)]">
-                        {formatDate(c.createdAt, locale, {
-                          dateStyle: "medium",
-                        })}
-                      </Td>
-                    </Tr>
-                  );
-                })}
-              </tbody>
-            </DataTable>
-          </div>
-        </>
-      )}
-    </section>
+    <CustomersListView
+      title={a.customers}
+      lead={u.customersLead}
+      tabs={[
+        { value: "all", label: u.filterAll, count: allCount },
+        {
+          value: "with_requests",
+          label: u.customersFilterWithRequests,
+          count: withRequestsCount,
+        },
+        {
+          value: "no_requests",
+          label: u.customersFilterNoRequests,
+          count: noRequestsCount,
+        },
+      ]}
+      query={{ tab, q: query, page: pageSafe }}
+      rows={rows}
+      totalFiltered={customers.length}
+      pageCount={pageCount}
+      pageSize={PAGE_SIZE}
+      labels={{
+        listAria: a.customers,
+        statusFilterAria: u.filterTabs,
+        searchLabel: u.search,
+        searchPlaceholder: u.searchCustomers,
+        colName: a.colName,
+        colPhone: u.colPhone,
+        colRequests: u.colRequests,
+        colLastActivity: u.colLastActivity,
+        colWa: u.colWa,
+        colCreated: u.colCreated,
+        colActions: a.customers,
+        emptyTitle: u.emptyTitle,
+        emptyBody: u.emptyBody,
+        noResultsTitle: u.emptyTitle,
+        noResultsBody: u.emptyBody,
+        clearFilters: dict.catalog.clearFilters,
+        paginationSummary: u.listPaginationSummary,
+        paginationPrevious: dict.common.paginationPrevious,
+        paginationNext: dict.common.paginationNext,
+        requestsHref: "/admin/requests",
+        requestsLabel: a.requests,
+      }}
+    />
   );
 }

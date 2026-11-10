@@ -8,6 +8,7 @@ import {
 } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/text-field";
+import { Field, Select } from "@/components/ui-kit/field";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import {
   controlClass,
@@ -182,38 +183,31 @@ export function PromoBandForm({
             dense
           />
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className={controlLabelClass}>
-              <span className={controlLabelTextClass}>{f.tone}</span>
-              <select
+            <Field label={f.tone}>
+              <Select
                 name="tone"
                 value={tone}
                 onChange={(e) => {
                   setDirty(true);
                   setTone(e.target.value);
                 }}
-                className={controlClass}
               >
                 {(["ink", "plum", "sand"] as const).map((t) => (
                   <option key={t} value={t}>
                     {labels.promoTone[t] ?? t}
                   </option>
                 ))}
-              </select>
-            </label>
-            <label className={controlLabelClass}>
-              <span className={controlLabelTextClass}>{f.statusLabel}</span>
-              <select
-                name="status"
-                defaultValue={band?.status ?? "draft"}
-                className={controlClass}
-              >
+              </Select>
+            </Field>
+            <Field label={f.statusLabel}>
+              <Select name="status" defaultValue={band?.status ?? "draft"}>
                 {(["draft", "published"] as const).map((s) => (
                   <option key={s} value={s}>
                     {labels.promoStatus[s] ?? s}
                   </option>
                 ))}
-              </select>
-            </label>
+              </Select>
+            </Field>
           </div>
           <TextField
             name="imagePath"

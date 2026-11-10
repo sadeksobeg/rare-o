@@ -3,14 +3,16 @@ import { QuoteCard } from "@/components/trader/quote-card";
 import { TraderPageHeader } from "@/components/trader/page-header";
 import { TraderWholesaleActions } from "@/components/trader/wholesale-actions";
 import { Banner } from "@/components/ui/banner";
-import { StatusChip } from "@/components/ui/status-chip";
+import { Pill } from "@/components/ui-kit/pill";
 import { StatusStepper } from "@/components/ui/status-stepper";
 import { requireTraderSession } from "@/lib/auth/trader-session";
 import { getRequestDictionary } from "@/lib/i18n/server";
+import { statusToneToPill } from "@/lib/ui/pill-tone";
 import { getStatusMeta } from "@/lib/ui/status";
 import {
   formatDateTime,
   formatMoney,
+  humanizeWholesaleNote,
   wholesaleStatusLabel,
 } from "@/lib/ui/trader-labels";
 import { getWholesaleRequestForTrader } from "@/lib/wholesale/service";
@@ -50,13 +52,12 @@ export default async function TraderWholesaleDetailPage({
         backHref="/trader/wholesale/requests"
         backLabel={t.wsMyRequests}
         action={
-          <StatusChip
-            tone={meta.tone}
-            label={wholesaleStatusLabel(t, request.status)}
-          />
+          <Pill tone={statusToneToPill(meta.tone)}>
+            {wholesaleStatusLabel(t, request.status)}
+          </Pill>
         }
       />
-      <div className="ro-portal-card border p-3 sm:p-4">
+      <div className="rad-card p-3 sm:p-4">
         <StatusStepper domain="wholesale" current={request.status} dict={dict} />
       </div>
 
@@ -116,8 +117,8 @@ export default async function TraderWholesaleDetailPage({
       ) : null}
 
       {request.destinationCountry || request.shippingCostAmount != null ? (
-        <div className="ro-portal-card space-y-2 border p-4 text-sm">
-          <h2 className="font-semibold">
+        <div className="rad-card space-y-2 p-4 text-sm">
+          <h2 className="font-semibold text-[color:var(--rad-tx)]">
             {locale === "ar" ? "تقدير الشحن عند الطلب" : "Shipping estimate at submission"}
           </h2>
           {request.destinationCountry ? (
@@ -142,7 +143,11 @@ export default async function TraderWholesaleDetailPage({
                 {locale === "ar" ? "التكلفة التقديرية: " : "Estimated cost: "}
               </span>
               <bdi dir="ltr">
-                {Number(request.shippingCostAmount)} {request.shippingCostCurrency}
+                {formatMoney(
+                  request.shippingCostAmount,
+                  request.shippingCostCurrency,
+                  locale
+                )}
               </bdi>
             </p>
           ) : null}
@@ -150,8 +155,10 @@ export default async function TraderWholesaleDetailPage({
       ) : null}
 
       {request.carrier || request.trackingReference ? (
-        <div className="ro-portal-card space-y-2 border p-4 text-sm">
-          <h2 className="font-semibold">{dict.adminUi.form.shippingTitle}</h2>
+        <div className="rad-card space-y-2 p-4 text-sm">
+          <h2 className="font-semibold text-[color:var(--rad-tx)]">
+            {dict.adminUi.form.shippingTitle}
+          </h2>
           {request.carrier ? (
             <p>
               <span className="text-ro-muted">{dict.adminUi.form.carrier}: </span>
@@ -176,7 +183,7 @@ export default async function TraderWholesaleDetailPage({
 
       <div>
         <h2 className="mb-3 text-lg font-semibold">{t.wsLines}</h2>
-        <ul className="divide-y divide-ro-line border border-ro-line text-sm">
+        <ul className="rad-card divide-y divide-[color:var(--rad-bd)] text-sm">
           {request.lines.map((l) => (
             <li key={l.id} className="space-y-1 p-4">
               <div>
@@ -189,7 +196,7 @@ export default async function TraderWholesaleDetailPage({
               {l.proposedUnitPrice != null ? (
                 <div>
                   {t.wsProposed}:{" "}
-                  {formatMoney(l.proposedUnitPrice, l.currency)}
+                  {formatMoney(l.proposedUnitPrice, l.currency, locale)}
                 </div>
               ) : null}
               {l.quotedUnitPrice != null ? (
@@ -197,7 +204,8 @@ export default async function TraderWholesaleDetailPage({
                   {t.wsQuoted}:{" "}
                   {formatMoney(
                     l.quotedUnitPrice,
-                    request.quoteCurrency || l.currency
+                    request.quoteCurrency || l.currency,
+                    locale
                   )}
                 </div>
               ) : null}
@@ -206,7 +214,8 @@ export default async function TraderWholesaleDetailPage({
                   {t.wsRetailRef}:{" "}
                   {formatMoney(
                     l.catalogRetailPriceSnapshot,
-                    l.catalogCurrencySnapshot
+                    l.catalogCurrencySnapshot,
+                    locale
                   )}
                 </div>
               ) : null}
@@ -223,7 +232,7 @@ export default async function TraderWholesaleDetailPage({
 
       <div>
         <h2 className="mb-3 text-lg font-semibold">{t.wsHistory}</h2>
-        <ul className="divide-y divide-ro-line border border-ro-line text-sm">
+        <ul className="rad-card divide-y divide-[color:var(--rad-bd)] text-sm">
           {request.events.map((e) => (
             <li key={e.id} className="space-y-1 p-3">
               <div className="flex flex-wrap items-center gap-3">
@@ -240,7 +249,10 @@ export default async function TraderWholesaleDetailPage({
                   {formatDateTime(locale, e.createdAt)}
                 </span>
               </div>
-              {e.note ? <p className="text-ro-muted">{e.note}</p> : null}
+              {(() => {
+                const note = humanizeWholesaleNote(e.note, t);
+                return note ? <p className="text-ro-muted">{note}</p> : null;
+              })()}
             </li>
           ))}
         </ul>

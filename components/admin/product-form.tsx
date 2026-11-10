@@ -26,6 +26,8 @@ import {
   controlLabelTextClass,
   formErrorClass,
 } from "@/lib/ui/form-classes";
+import { formatAdminMoney } from "@/lib/i18n/admin-format";
+import { Field, Select } from "@/components/ui-kit/field";
 
 function fieldScore(value: string, weight = 1) {
   return value.trim().length > 0 ? weight : 0;
@@ -64,6 +66,7 @@ export function ProductForm({
   locale,
   showCompareAtPrice = false,
   imageCount = 0,
+  previewImagePath = null,
 }: {
   categories: CategoryOption[];
   product?: ProductValues;
@@ -73,7 +76,10 @@ export function ProductForm({
   showCompareAtPrice?: boolean;
   /** Images already attached to the product (0 on create). */
   imageCount?: number;
+  /** Primary image path for the live card preview. */
+  previewImagePath?: string | null;
 }) {
+  const ar = locale === "ar";
   const f = labels.form;
   const isEdit = Boolean(product?.id);
   const [state, action, pending] = useActionState(upsertProductAction, initial);
@@ -82,6 +88,7 @@ export function ProductForm({
   const [descAr, setDescAr] = useState(product?.descriptionAr ?? "");
   const [descEn, setDescEn] = useState(product?.descriptionEn ?? "");
   const [price, setPrice] = useState(product?.retailPrice ?? "");
+  const [currency, setCurrency] = useState(product?.currency ?? "USD");
   const [status, setStatus] = useState(product?.status ?? "draft");
   const [dirty, setDirty] = useState(false);
   const [enNameTouched, setEnNameTouched] = useState(
@@ -144,16 +151,28 @@ export function ProductForm({
           : state.error
       : null;
 
+  const previewPrice =
+    price.trim() && currency.trim()
+      ? formatAdminMoney(Number(price) || 0, currency, locale)
+      : price.trim() || "—";
+
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_17rem]">
+    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_17rem]">
     <form
       action={action}
-      className="max-w-2xl space-y-4"
+      className="relative max-w-2xl space-y-8 pb-20"
       onChange={() => setDirty(true)}
     >
+      <section id="sec-details" className="scroll-mt-28 space-y-4">
+      <h3
+        className="text-base font-semibold"
+        style={{ color: "var(--rad-tx)" }}
+      >
+        {ar ? "البيانات الأساسية" : "Basic details"}
+      </h3>
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <p className="text-xs font-medium text-ro-muted">
+          <p className="text-xs font-medium" style={{ color: "var(--rad-tx3)" }}>
             {labels.completenessAr}
           </p>
           <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[var(--ro-bg-sunken)]">
@@ -164,7 +183,7 @@ export function ProductForm({
           </div>
         </div>
         <div>
-          <p className="text-xs font-medium text-ro-muted">
+          <p className="text-xs font-medium" style={{ color: "var(--rad-tx3)" }}>
             {labels.completenessEn}
           </p>
           <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[var(--ro-bg-sunken)]">
@@ -278,21 +297,19 @@ export function ProductForm({
           }}
         />
       </div>
-      <label className={controlLabelClass}>
-        <span className={controlLabelTextClass}>{f.category}</span>
-        <select
+      <Field label={f.category}>
+        <Select
           name="categoryId"
           required
           defaultValue={product?.categoryId ?? categories[0]?.id}
-          className={controlClass}
         >
           {categories.map((c) => (
             <option key={c.id} value={c.id}>
               {categoryName(c)}
             </option>
           ))}
-        </select>
-      </label>
+        </Select>
+      </Field>
       <OudSpecsFields
         labels={f}
         values={product?.oudSpecs ?? EMPTY_OUD_SPECS_FORM}
@@ -308,6 +325,15 @@ export function ProductForm({
         arHelper={f.specsHelp}
         labels={translateLabels}
       />
+      </section>
+
+      <section id="sec-pricing" className="scroll-mt-28 space-y-4">
+      <h3
+        className="text-base font-semibold"
+        style={{ color: "var(--rad-tx)" }}
+      >
+        {ar ? "التسعير والحالة" : "Pricing & status"}
+      </h3>
       <div
         className={
           showCompareAtPrice ? "grid gap-3 sm:grid-cols-2" : "grid gap-3"
@@ -342,7 +368,11 @@ export function ProductForm({
       <CurrencySelect
         name="currency"
         required
-        defaultValue={product?.currency ?? "USD"}
+        value={currency}
+        onChange={(code) => {
+          setDirty(true);
+          setCurrency(code);
+        }}
         labels={{
           currency: f.currency,
           currencyUsd: f.currencyUsd,
@@ -352,14 +382,15 @@ export function ProductForm({
         className="max-w-xs"
       />
       <div className="grid gap-3 sm:grid-cols-2">
-        <label className={controlLabelClass}>
-          <span className={controlLabelTextClass}>{f.statusLabel}</span>
-          <select
+        <Field
+          label={f.statusLabel}
+          hint={publishBlockedText ?? f.publishRulesHint}
+        >
+          <Select
             name="status"
             value={status}
             onChange={(e) => setStatus(e.target.value)}
             aria-describedby="publish-rules-help"
-            className={controlClass}
           >
             {(["draft", "published", "archived"] as const).map((s) => (
               <option
@@ -370,37 +401,21 @@ export function ProductForm({
                 {labels.productStatus[s] ?? s}
               </option>
             ))}
-          </select>
-          <span
-            id="publish-rules-help"
-            className="block text-xs text-ro-muted"
-          >
-            {publishBlockedText ?? f.publishRulesHint}
-          </span>
-        </label>
-        <label className={controlLabelClass}>
-          <span className={controlLabelTextClass}>
-            {f.availabilityLabel}
-          </span>
-          <select
+          </Select>
+        </Field>
+        <Field label={f.availabilityLabel} hint={f.availabilityHelp}>
+          <Select
             name="availability"
             defaultValue={product?.availability ?? "available"}
             aria-describedby="availability-help"
-            className={controlClass}
           >
             {(["available", "unavailable"] as const).map((s) => (
               <option key={s} value={s}>
                 {labels.availability[s] ?? s}
               </option>
             ))}
-          </select>
-          <span
-            id="availability-help"
-            className="block text-xs text-ro-muted"
-          >
-            {f.availabilityHelp}
-          </span>
-        </label>
+          </Select>
+        </Field>
       </div>
       <fieldset className="space-y-3 rounded-[var(--ro-r-sm)] border border-ro-line p-4">
         <legend className={controlLabelTextClass}>{f.storeBadges}</legend>
@@ -447,14 +462,15 @@ export function ProductForm({
           {publishBlockedText}
         </p>
       ) : null}
-      <div className="z-20 flex flex-wrap items-center gap-3 border-t border-[color:var(--ro-border-subtle)] bg-[color:color-mix(in_srgb,var(--ro-bg-raised)_92%,transparent)] py-3 backdrop-blur md:sticky md:bottom-0">
+      </section>
+      <div className="rad-psave rad-above-tab sticky z-[15] -mx-1 mt-6 flex flex-wrap items-center gap-3 border-t border-[color:var(--rad-bd)] bg-[color:var(--rad-c0)] px-1 py-3">
         <Button type="submit" loading={pending} disabled={publishBlocked}>
           {pending ? f.saving : f.saveProduct}
         </Button>
         {product?.slug && product.status === "published" ? (
           <Link
             href={`/product/${product.slug}`}
-            className="text-sm font-medium text-ro-plum hover:underline"
+            className="text-sm font-medium text-[color:var(--rad-ac)] hover:underline"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -468,13 +484,10 @@ export function ProductForm({
       title={labels.livePreview}
       nameAr={nameAr}
       nameEn={nameEn}
-      priceLabel={price.trim() || "—"}
+      priceLabel={previewPrice}
       statusLabel={labels.productStatus[status] ?? status}
-      imageHint={
-        hasImage
-          ? `${imageCount}`
-          : f.publishNeedsImage
-      }
+      imageSrc={previewImagePath}
+      imageHint={f.publishNeedsImage}
     />
     </div>
   );

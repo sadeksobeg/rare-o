@@ -45,6 +45,12 @@
   --danger: #d64555;
   --danger-bg: #fce8eb;
 
+  /* Button primitives — admin [data-theme] overrides; elsewhere = plum/sand */
+  --rad-btn: var(--plum-700);
+  --rad-btn-tx: #f4e7d8;
+  --rad-ac: var(--plum-700);
+  --rad-tx: #140f1a;
+
   /* semantic light defaults (brighter portal light) */
   --bg-page: #f4f1f7;
   --bg-surface: rgba(255, 255, 255, 0.88);
@@ -231,10 +237,13 @@
  * this replaces it everywhere, including structural CSS in
  * styles/admin-dashboard.css.
  */
-.ro-portal[data-portal="admin"] {
+.ro-portal[data-portal="admin"],
+.ro-portal[data-portal="trader"] {
   --rad-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   --rad-r: 14px;
   --rad-r-sm: 10px;
+  --rad-font: var(--font-ibm-plex-arabic, var(--font-sans), sans-serif);
+  --rad-bg: var(--rad-c0, #0b080d);
 
   /* sidebar — always this dark rail, in both themes (reference --sb*) */
   --rad-sb: #0f0b12;
@@ -253,7 +262,74 @@
   --rad-cream: #f4e7d8;
 }
 
-.ro-portal[data-portal="admin"][data-theme="dark"] {
+/* Trader page canvas: never tint with purple radial glow (re-asserted after theme blocks). */
+.ro-portal[data-portal="trader"] {
+  --rad-glow: none;
+}
+
+/*
+ * TOKEN-LEVEL legacy bridge (admin + trader).
+ * Tailwind `@theme inline` maps utilities like `text-ro-ink` → `--color-ro-ink`
+ * → `--ro-ink-950` / sand paper vars. Remap those source variables here so
+ * every legacy utility follows `--rad-*` without per-component overrides.
+ */
+.ro-portal[data-portal="admin"],
+.ro-portal[data-portal="trader"] {
+  --ro-text: var(--rad-tx);
+  --ro-text-2: var(--rad-tx2);
+  --ro-text-muted: var(--rad-tx3);
+  --ro-bg: var(--rad-c0);
+  --ro-bg-raised: var(--rad-surface);
+  --ro-bg-elevated: var(--rad-surface2);
+  --ro-bg-sunken: var(--rad-surface3);
+  --ro-panel: var(--rad-surface2);
+  --ro-panel-hover: var(--rad-surface3);
+  --ro-border-subtle: var(--rad-bd);
+  --ro-border: var(--rad-bd);
+  --ro-border-control: var(--rad-bd2);
+  --ro-line: var(--rad-bd);
+  --ro-ink-muted: var(--rad-tx3);
+  --ro-sand-50: var(--rad-surface2);
+  --ro-sand-100: var(--rad-surface);
+  --ro-sand-200: var(--rad-surface3);
+  --ro-ink-950: var(--rad-tx);
+  --ro-ink-900: var(--rad-tx);
+  --ro-ink-800: var(--rad-tx);
+  --ro-ink-700: var(--rad-tx2);
+  --ro-ink-600: var(--rad-tx2);
+  --ro-ink-500: var(--rad-tx3);
+  --ro-ink-400: var(--rad-tx3);
+  --ro-ink-300: var(--rad-tx3);
+  --ro-ink-200: var(--rad-bd2);
+  --color-ro-ink: var(--rad-tx);
+  --color-ro-paper: var(--rad-surface2);
+  --color-ro-canvas: var(--rad-c0);
+  --color-ro-sunken: var(--rad-surface3);
+  --color-ro-surface: var(--rad-surface);
+  --color-ro-cream: var(--rad-surface);
+  --color-ro-ivory: var(--rad-surface2);
+  --color-ro-text: var(--rad-tx);
+  --color-ro-text-2: var(--rad-tx2);
+  --color-ro-muted: var(--rad-tx3);
+  --color-ro-border: var(--rad-bd);
+  --color-ro-line: var(--rad-bd);
+  --color-ro-black: var(--rad-tx);
+  /* Plum utilities as accent text/fill — never raw plum-900 on dark chrome */
+  --ro-plum-900: var(--rad-ac);
+  --ro-plum-800: var(--rad-ac);
+  --ro-plum-700: var(--rad-acf);
+  --ro-plum-500: var(--rad-ac);
+  --ro-accent-fg: var(--rad-ac);
+  --ro-link: var(--rad-ac);
+  --ro-link-hover: var(--rad-ac);
+  --color-ro-plum: var(--rad-ac);
+  --color-ro-purple: var(--rad-ac);
+  --background: var(--rad-c0);
+  --foreground: var(--rad-tx);
+}
+
+.ro-portal[data-portal="admin"][data-theme="dark"],
+.ro-portal[data-portal="trader"][data-theme="dark"] {
   --rad-c0: #0b080d;
   --rad-surface: #15101a;
   --rad-surface2: #1b1520;
@@ -261,8 +337,9 @@
   --rad-bd: rgba(244, 231, 216, 0.085);
   --rad-bd2: rgba(244, 231, 216, 0.16);
   --rad-tx: #f4e7d8;
-  --rad-tx2: rgba(244, 231, 216, 0.7);
-  --rad-tx3: rgba(244, 231, 216, 0.52);
+  --rad-tx2: rgba(244, 231, 216, 0.78);
+  /* ≥0.62 → WCAG AA ~4.5:1 on --rad-surface (was 0.52, failed contrast gate) */
+  --rad-tx3: rgba(244, 231, 216, 0.64);
   --rad-ac: #c4a0ea;
   --rad-acf: #7a44b3;
   --rad-acs: rgba(196, 160, 234, 0.13);
@@ -278,13 +355,70 @@
   --rad-btn-tx: #0b080d;
   --rad-sh: 0 1px 0 rgba(255, 255, 255, 0.035) inset, 0 10px 30px -18px rgba(0, 0, 0, 0.8);
   --rad-glow: radial-gradient(900px 380px at 85% -10%, rgba(122, 68, 179, 0.22), transparent 60%);
+  --rad-bg: var(--rad-c0);
   /* Inbox (round 3): outgoing bubble + default avatar gradient. */
   --rad-out: #3a1d57;
   --rad-g1: #7a44b3;
   --rad-g2: #32104f;
+
+  /* Legacy token bridge — old components still read --ro-* / --bg-* (no lavender). */
+  --bg-page: var(--rad-c0);
+  --bg-surface: color-mix(in srgb, var(--rad-surface) 92%, transparent);
+  --bg-surface-solid: var(--rad-surface);
+  --bg-elevated: var(--rad-surface2);
+  --text: var(--rad-tx);
+  --text-muted: var(--rad-tx3);
+  --border: var(--rad-bd);
+  --border-strong: var(--rad-bd2);
+  --ro-bg: var(--rad-c0);
+  --ro-bg-elevated: var(--rad-surface2);
+  --ro-bg-raised: var(--rad-surface);
+  --ro-bg-sunken: var(--rad-surface3);
+  --ro-panel: var(--rad-surface2);
+  --ro-panel-hover: var(--rad-surface3);
+  --ro-text: var(--rad-tx);
+  --ro-text-2: var(--rad-tx2);
+  --ro-text-muted: var(--rad-tx3);
+  --ro-border-subtle: var(--rad-bd);
+  --ro-border: var(--rad-bd);
+  --ro-border-control: var(--rad-bd2);
+  --ro-ink-muted: var(--rad-tx3);
+  --ro-line: var(--rad-bd);
+  --background: var(--rad-c0);
+  --foreground: var(--rad-tx);
+  --color-ro-paper: var(--rad-surface2);
+  --color-ro-ink: var(--rad-tx);
+  --color-ro-surface: var(--rad-surface);
+  --color-ro-sunken: var(--rad-surface3);
+  --color-ro-canvas: var(--rad-c0);
+  --color-ro-cream: var(--rad-surface);
+  --color-ro-ivory: var(--rad-surface);
+  --color-ro-purple-soft: color-mix(in srgb, var(--rad-ac) 18%, var(--rad-surface));
+  --ro-sand-50: var(--rad-surface2);
+  --ro-sand-100: var(--rad-surface);
+  --ro-sand-200: var(--rad-surface3);
+  --ro-ink-950: var(--rad-tx);
+  --ro-ink-900: var(--rad-tx);
+  --ro-ink-800: var(--rad-tx);
+  --ro-ink-700: var(--rad-tx2);
+  --ro-ink-600: var(--rad-tx2);
+  --ro-ink-500: var(--rad-tx3);
+  --ro-ink-400: var(--rad-tx3);
+  --ro-ink-300: var(--rad-tx3);
+  --ro-ink-200: var(--rad-bd2);
+  --ro-plum-900: var(--rad-ac);
+  --ro-plum-800: var(--rad-ac);
+  --ro-plum-700: var(--rad-acf);
+  --ro-plum-500: var(--rad-ac);
+  --ro-accent-fg: var(--rad-ac);
+  --ro-link: var(--rad-ac);
+  --ro-link-hover: var(--rad-ac);
+  --color-ro-plum: var(--rad-ac);
+  --color-ro-purple: var(--rad-ac);
 }
 
-.ro-portal[data-portal="admin"][data-theme="light"] {
+.ro-portal[data-portal="admin"][data-theme="light"],
+.ro-portal[data-portal="trader"][data-theme="light"] {
   --rad-c0: #f5efe6;
   --rad-surface: #ffffff;
   --rad-surface2: #fbf7f1;
@@ -293,32 +427,121 @@
   --rad-bd2: rgba(11, 8, 13, 0.18);
   --rad-tx: #0b080d;
   --rad-tx2: #4b4150;
-  --rad-tx3: #6b6170;
+  /* ≥4.5:1 on --rad-surface3 / warn soft fills (was #6b6170 @ 4.46). */
+  --rad-tx3: #5f5664;
   --rad-ac: #32104f;
   --rad-acf: #32104f;
   --rad-acs: rgba(50, 16, 79, 0.08);
-  --rad-ok: #1d7449;
-  --rad-warn: #8f5a00;
+  /* ≥4.5:1 on soft ok fills (was #1d7449 @ ~4.41 on pale green chips). */
+  --rad-ok: #196b43;
+  /* ≥4.5:1 on soft warn fills (was #8f5a00 @ 4.39). */
+  --rad-warn: #7a4d00;
   --rad-err: #ae352c;
   --rad-info: #2459aa;
   --rad-oks: rgba(29, 116, 73, 0.1);
   --rad-warns: rgba(143, 90, 0, 0.11);
   --rad-errs: rgba(174, 53, 44, 0.09);
   --rad-infos: rgba(36, 89, 170, 0.09);
-  --rad-btn: #0b080d;
+  --rad-btn: #32104f;
   --rad-btn-tx: #f4e7d8;
   --rad-sh: 0 1px 2px rgba(11, 8, 13, 0.05), 0 12px 28px -20px rgba(50, 16, 79, 0.35);
   --rad-glow: radial-gradient(900px 380px at 85% -10%, rgba(122, 68, 179, 0.14), transparent 60%);
+  --rad-bg: var(--rad-c0);
   /* Inbox (round 3): outgoing bubble + default avatar gradient. */
   --rad-out: #32104f;
   --rad-g1: #7a44b3;
   --rad-g2: #32104f;
+
+  /* Legacy token bridge — old components still read --ro-* / --bg-* (no lavender). */
+  --bg-page: var(--rad-c0);
+  --bg-surface: color-mix(in srgb, var(--rad-surface) 92%, transparent);
+  --bg-surface-solid: var(--rad-surface);
+  --bg-elevated: var(--rad-surface2);
+  --text: var(--rad-tx);
+  --text-muted: var(--rad-tx3);
+  --border: var(--rad-bd);
+  --border-strong: var(--rad-bd2);
+  --ro-bg: var(--rad-c0);
+  --ro-bg-elevated: var(--rad-surface2);
+  --ro-bg-raised: var(--rad-surface);
+  --ro-bg-sunken: var(--rad-surface3);
+  --ro-panel: var(--rad-surface2);
+  --ro-panel-hover: var(--rad-surface3);
+  --ro-text: var(--rad-tx);
+  --ro-text-2: var(--rad-tx2);
+  --ro-text-muted: var(--rad-tx3);
+  --ro-border-subtle: var(--rad-bd);
+  --ro-border: var(--rad-bd);
+  --ro-border-control: var(--rad-bd2);
+  --ro-ink-muted: var(--rad-tx3);
+  --ro-line: var(--rad-bd);
+  --background: var(--rad-c0);
+  --foreground: var(--rad-tx);
+  --color-ro-paper: var(--rad-surface2);
+  --color-ro-ink: var(--rad-tx);
+  --color-ro-surface: var(--rad-surface);
+  --color-ro-sunken: var(--rad-surface3);
+  --color-ro-canvas: var(--rad-c0);
+  --color-ro-cream: var(--rad-surface);
+  --color-ro-ivory: var(--rad-surface2);
+  --color-ro-purple-soft: color-mix(in srgb, var(--rad-ac) 8%, var(--rad-surface));
+  --ro-sand-50: var(--rad-surface2);
+  --ro-sand-100: var(--rad-surface);
+  --ro-sand-200: var(--rad-surface3);
+  --ro-ink-950: var(--rad-tx);
+  --ro-ink-900: var(--rad-tx);
+  --ro-ink-800: var(--rad-tx2);
+  --ro-ink-700: var(--rad-tx2);
+  --ro-ink-600: var(--rad-tx3);
+  --ro-ink-500: var(--rad-tx3);
+  --ro-ink-400: var(--rad-tx3);
+  --ro-ink-300: var(--rad-bd2);
+  --ro-ink-200: var(--rad-bd);
+  --ro-plum-900: var(--rad-ac);
+  --ro-plum-800: var(--rad-ac);
+  --ro-plum-700: var(--rad-acf);
+  --ro-plum-500: var(--rad-ac);
+  --ro-accent-fg: var(--rad-ac);
+  --ro-link: var(--rad-ac);
+  --ro-link-hover: var(--rad-ac);
+  --color-ro-plum: var(--rad-ac);
+  --color-ro-purple: var(--rad-ac);
+}
+
+/* Must win over shared [data-theme] --rad-glow gradients above. */
+.ro-portal[data-portal="trader"],
+.ro-portal[data-portal="trader"][data-theme="dark"],
+.ro-portal[data-portal="trader"][data-theme="light"] {
+  --rad-glow: none;
+}
+
+/* Button variants — paired with components/ui/button.tsx data-ro-variant */
+[data-ro-variant="primary"],
+[data-ro-variant="inverse-primary"] {
+  background: var(--rad-btn);
+  color: var(--rad-btn-tx);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--rad-btn-tx) 18%, transparent) inset,
+    0 12px 28px -14px color-mix(in srgb, var(--rad-btn) 55%, transparent);
+}
+/* Soft danger — readable on dark/light; no solid pink fill. */
+[data-ro-variant="danger"] {
+  background: color-mix(in srgb, var(--rad-err, #ec7c73) 16%, var(--rad-surface, #15101a)) !important;
+  color: var(--rad-err, #ec7c73) !important;
+  border: 1px solid color-mix(in srgb, var(--rad-err, #ec7c73) 35%, transparent);
+  box-shadow: none !important;
+}
+[data-ro-variant="danger"]:hover {
+  background: color-mix(in srgb, var(--rad-err, #ec7c73) 24%, var(--rad-surface, #15101a)) !important;
 }
 
 /**
  * Portal light — open, bright, editorial; plum for accent only.
+ * Admin is excluded: its light theme is owned by the rad token bridge above
+ * (`.ro-portal[data-portal="admin"][data-theme="light"]`) so fixed cream/ink
+ * hexes here cannot undo `text-ro-ink` / `bg-ro-paper` remaps.
  */
-.ro-portal[data-theme="light"] {
+.ro-portal[data-theme="light"]:not([data-portal="admin"]) {
   color-scheme: light;
 
   --bg-page: #f3f0f7;

@@ -1,8 +1,8 @@
+import Link from "next/link";
 import { Package } from "lucide-react";
 import { Reveal } from "@/components/motion/reveal";
 import { TraderPageHeader } from "@/components/trader/page-header";
 import { WholesaleRequestForm } from "@/components/trader/wholesale-request-form";
-import { ButtonLink } from "@/components/ui/button";
 import { requireTraderSession } from "@/lib/auth/trader-session";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { listWholesaleEligibleProducts } from "@/lib/wholesale/service";
@@ -20,17 +20,16 @@ export default async function TraderWholesaleCatalogPage() {
         description={t.wsLead}
         icon={<Package className="size-5" strokeWidth={2} />}
         action={
-          <ButtonLink
+          <Link
             href="/trader/wholesale/requests"
-            variant="secondary"
-            size="sm"
+            className="rad-btn rad-gh rad-sm"
           >
             {t.wsMyRequests}
-          </ButtonLink>
+          </Link>
         }
       />
       <Reveal>
-      <div className="ro-portal-card border p-4 sm:p-6">
+      <div className="rad-card p-4 sm:p-6">
         <WholesaleRequestForm
           labels={t}
           locale={locale}

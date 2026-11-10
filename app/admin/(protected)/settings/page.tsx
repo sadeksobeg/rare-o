@@ -5,18 +5,18 @@ import {
   Store,
   UserRound,
 } from "lucide-react";
-import { PortalHeroStrip } from "@/components/admin/portal-hero";
-import { StatusChip } from "@/components/ui/status-chip";
+import { Card, Pill } from "@/components/ui-kit";
 import { getAdminSession } from "@/lib/auth/admin-session";
 import { prisma } from "@/lib/db/prisma";
 import { getRequestDictionary } from "@/lib/i18n/server";
+import { statusToneToPill } from "@/lib/ui/pill-tone";
 import { getInboxHealthView } from "@/lib/whatsapp/messaging/inbox";
+import type { StatusTone } from "@/lib/ui/status";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminSettingsHubPage() {
-  const { locale, dict } = await getRequestDictionary();
-  const ar = locale === "ar";
+  const { dict } = await getRequestDictionary();
   const u = dict.adminUi;
   const session = await getAdminSession();
 
@@ -44,7 +44,7 @@ export default async function AdminSettingsHubPage() {
       lead: u.settingsProfileLead,
       icon: UserRound,
       status: admin?.name || admin?.email || undefined,
-      tone: "info" as const,
+      tone: "info" as StatusTone,
     },
     {
       href: "/admin/inbox",
@@ -52,15 +52,15 @@ export default async function AdminSettingsHubPage() {
       lead: u.settingsWhatsAppLead,
       icon: MessageSquare,
       status: waLabel,
-      tone: waConnected ? ("success" as const) : ("attention" as const),
+      tone: (waConnected ? "success" : "attention") as StatusTone,
     },
     {
       href: "/contact",
       title: u.settingsBrand,
       lead: u.settingsBrandLead,
       icon: Store,
-      status: undefined,
-      tone: "neutral" as const,
+      status: undefined as string | undefined,
+      tone: "neutral" as StatusTone,
     },
     {
       href: "/admin/settings/security",
@@ -68,48 +68,56 @@ export default async function AdminSettingsHubPage() {
       lead: u.settingsSecurityLead,
       icon: ShieldCheck,
       status: admin?.totpEnabledAt ? u.settings2faOn : u.settings2faOff,
-      tone: admin?.totpEnabledAt
-        ? ("success" as const)
-        : ("attention" as const),
+      tone: (admin?.totpEnabledAt ? "success" : "attention") as StatusTone,
     },
   ] as const;
 
   return (
-    <section className="ro-portal-stagger space-y-6 pb-16">
-      <PortalHeroStrip
-        eyebrow={ar ? "أشخاص" : "People"}
-        title={
-          <span className="inline-flex items-center gap-2.5">
-            <ShieldCheck
-              className="size-7 shrink-0 text-[color:var(--ro-accent-fg,var(--ro-plum-800))]"
-              strokeWidth={1.5}
-            />
+    <section data-admin-settings="" className="space-y-5 pb-16">
+      <header className="rad-phead">
+        <div className="min-w-0">
+          <h1 style={{ fontFamily: "var(--rad-font, inherit)" }}>
             {u.settingsHubTitle}
-          </span>
-        }
-        subtitle={u.settingsHubLead}
-      />
+          </h1>
+          <p>{u.settingsHubLead}</p>
+        </div>
+      </header>
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((card) => {
           const Icon = card.icon;
           return (
             <li key={card.href}>
-              <Link
-                href={card.href}
-                className="ro-portal-card flex h-full flex-col gap-3 border p-5"
-              >
-                <span className="ro-portal-icon-well size-10 [&>svg]:size-5">
-                  <Icon className="size-5" strokeWidth={1.5} aria-hidden />
-                </span>
-                <h2 className="font-display text-lg font-semibold text-[color:var(--ro-text)]">
-                  {card.title}
-                </h2>
-                <p className="flex-1 text-sm text-[color:var(--ro-text-muted)]">
-                  {card.lead}
-                </p>
-                {card.status ? (
-                  <StatusChip size="sm" tone={card.tone} label={card.status} />
-                ) : null}
+              <Link href={card.href} className="block h-full">
+                <Card className="flex h-full flex-col gap-3 !p-5 transition-[background-color,border-color] hover:bg-[color:var(--rad-surface3)]">
+                  <span
+                    className="inline-flex size-10 items-center justify-center rounded-[11px] border"
+                    style={{
+                      borderColor: "var(--rad-bd)",
+                      background: "var(--rad-surface2)",
+                      color: "var(--rad-ac)",
+                    }}
+                  >
+                    <Icon className="size-5" strokeWidth={1.5} aria-hidden />
+                  </span>
+                  <h2
+                    className="text-lg font-semibold"
+                    style={{
+                      color: "var(--rad-tx)",
+                      fontFamily: "var(--rad-font, inherit)",
+                    }}
+                  >
+                    {card.title}
+                  </h2>
+                  <p
+                    className="flex-1 text-sm"
+                    style={{ color: "var(--rad-tx3)" }}
+                  >
+                    {card.lead}
+                  </p>
+                  {card.status ? (
+                    <Pill tone={statusToneToPill(card.tone)}>{card.status}</Pill>
+                  ) : null}
+                </Card>
               </Link>
             </li>
           );

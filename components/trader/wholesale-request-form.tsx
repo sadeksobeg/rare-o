@@ -11,7 +11,8 @@ import {
 import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
 import { CurrencySelect } from "@/components/ui/currency-select";
-import { Dialog } from "@/components/ui/dialog";
+import { Field, Input, Select, Textarea } from "@/components/ui-kit/field";
+import { Modal } from "@/components/ui-kit/modal";
 import { coercePlatformCurrency } from "@/lib/catalog/currency";
 import type { Locale } from "@/lib/i18n/config";
 import { WHOLESALE_QTY_TECHNICAL_MAX } from "@/lib/wholesale/constants";
@@ -22,9 +23,6 @@ import { useActionState, useEffect, useMemo, useState } from "react";
 
 const initial: ActionResult | null = null;
 const DRAFT_KEY = "ro-trader-wholesale-draft";
-
-const control =
-  "min-h-11 w-full rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-paper px-3 py-2 text-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]";
 
 type Draft = {
   mode: "request_quote" | "propose_price";
@@ -181,21 +179,19 @@ export function WholesaleRequestForm({
 
   return (
     <div className="space-y-6 pb-24">
-      <label className="block max-w-md space-y-1.5 text-sm">
-        <span className="font-medium">{t.wsModeLabel}</span>
-        <select
+      <Field label={t.wsModeLabel} className="max-w-md">
+        <Select
           value={draft.mode}
           onChange={(e) =>
             patch({
               mode: e.target.value as "request_quote" | "propose_price",
             })
           }
-          className={control}
         >
           <option value="request_quote">{t.requestMode.request_quote}</option>
           <option value="propose_price">{t.requestMode.propose_price}</option>
-        </select>
-      </label>
+        </Select>
+      </Field>
       <p className="max-w-[45rem] text-sm leading-relaxed text-ro-muted">
         {fmt(t.wsFormHint, { max: WHOLESALE_QTY_TECHNICAL_MAX })}
       </p>
@@ -225,15 +221,14 @@ export function WholesaleRequestForm({
         disabled={selected.length === 0}
       />
 
-      <Dialog
+      <Modal
         open={reviewOpen}
         onClose={() => setReviewOpen(false)}
         title={t.wsReviewTitle}
-        size="md"
       >
         <form
           action={action}
-          className="space-y-4"
+          className="max-w-full space-y-4 overflow-x-clip"
           onSubmit={() => {
             try {
               sessionStorage.removeItem(DRAFT_KEY);
@@ -246,22 +241,19 @@ export function WholesaleRequestForm({
           <input type="hidden" name="requestMode" value={draft.mode} />
           <input type="hidden" name="traderNotes" value={draft.notes} />
 
-          <ul className="divide-y divide-ro-line border border-ro-line">
+          <ul className="divide-y divide-[color:var(--rad-bd)] overflow-hidden rounded-[var(--rad-r-sm,10px)] border border-[color:var(--rad-bd)]">
             {selected.map(({ product: p, quantity, name }) => (
-              <li key={p.id} className="space-y-2 p-3 text-sm">
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <span className="font-medium">{name}</span>
-                  <span className="text-ro-muted">
+              <li key={p.id} className="min-w-0 space-y-2 p-3 text-sm">
+                <div className="flex min-w-0 flex-wrap items-baseline justify-between gap-2">
+                  <span className="min-w-0 break-words font-medium">{name}</span>
+                  <span className="shrink-0 text-[color:var(--rad-tx3)]">
                     {t.wsQty}: {quantity}
                   </span>
                 </div>
                 {draft.mode === "propose_price" ? (
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <label className="block space-y-1">
-                      <span className="text-xs text-ro-muted">
-                        {t.wsColUnitPrice}
-                      </span>
-                      <input
+                  <div className="grid min-w-0 gap-2 sm:grid-cols-2">
+                    <Field label={t.wsColUnitPrice}>
+                      <Input
                         type="number"
                         min={0}
                         step="0.01"
@@ -276,9 +268,8 @@ export function WholesaleRequestForm({
                             },
                           }))
                         }
-                        className={control}
                       />
-                    </label>
+                    </Field>
                     <CurrencySelect
                       name={`currency-${p.id}`}
                       value={coercePlatformCurrency(
@@ -310,15 +301,13 @@ export function WholesaleRequestForm({
             oudUnitCount={selected.reduce((s, x) => s + x.quantity, 0)}
           />
 
-          <label className="block space-y-1.5 text-sm">
-            <span className="font-medium">{t.wsNotes}</span>
-            <textarea
+          <Field label={t.wsNotes}>
+            <Textarea
               rows={3}
               value={draft.notes}
               onChange={(e) => patch({ notes: e.target.value })}
-              className={control}
             />
-          </label>
+          </Field>
 
           {state && !state.ok ? (
             <Banner tone="danger" alert>
@@ -336,18 +325,20 @@ export function WholesaleRequestForm({
             {pending || navigating ? t.submitting : t.wsSubmit}
           </Button>
         </form>
-      </Dialog>
+      </Modal>
 
       {successId ? (
         <div
           role="status"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--ro-ink-950)_45%,transparent)] p-6"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--rad-c0,var(--ro-ink-950))_45%,transparent)] p-6"
         >
-          <div className="ro-portal-card max-w-sm space-y-3 border p-6 text-center shadow-[0_24px_60px_-28px_rgba(11,8,13,0.55)]">
-            <p className="font-display text-2xl font-semibold text-ro-ink">
+          <div className="rad-card max-w-sm space-y-3 p-6 text-center">
+            <p className="text-2xl font-semibold text-[color:var(--rad-tx)]">
               {t.wholesaleSuccessTitle}
             </p>
-            <p className="text-sm text-ro-muted">{t.wholesaleSuccessBody}</p>
+            <p className="text-sm text-[color:var(--rad-tx3)]">
+              {t.wholesaleSuccessBody}
+            </p>
             <Button
               type="button"
               onClick={() => {

@@ -3,15 +3,11 @@
 import { adminCreateTraderAction } from "@/app/deal-actions";
 import type { ActionResult } from "@/app/actions";
 import { Button } from "@/components/ui/button";
-import { Dialog } from "@/components/ui/dialog";
-import { TextField } from "@/components/ui/text-field";
+import { Field, Input, Textarea } from "@/components/ui-kit/field";
+import { Modal } from "@/components/ui-kit/modal";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
-import {
-  controlClass,
-  controlLabelClass,
-  controlLabelTextClass,
-} from "@/lib/ui/form-classes";
 import { useUnsavedGuard } from "@/lib/ui/use-unsaved-guard";
+import { cn } from "@/lib/utils";
 import { Check, Copy, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
@@ -20,7 +16,7 @@ const initial: ActionResult | null = null;
 
 type TempPasswordPayload = { tempPassword: string; email: string };
 
-/** Opens create-trader form in a dialog — not inline on the list page. */
+/** Opens create-trader form in the shared portal Modal. */
 export function CreateTraderButton({
   dict,
   className,
@@ -90,83 +86,22 @@ export function CreateTraderButton({
 
   return (
     <>
-      <Button
+      <button
         type="button"
-        variant="primary"
-        size="sm"
-        className={className}
+        className={cn("rad-btn rad-pri rad-sm inline-flex items-center gap-2", className)}
         onClick={() => setOpen(true)}
       >
-        <Plus className="size-3.5" strokeWidth={1.5} aria-hidden />
-        {u.newTrader}
-      </Button>
+        <Plus className="size-3.5 shrink-0" strokeWidth={1.5} aria-hidden />
+        <span>{u.newTrader}</span>
+      </button>
 
-      <Dialog
+      <Modal
         open={open}
         onClose={closeForm}
         title={u.traderCreateTitle}
-        description={u.traderCreateLead}
-        size="md"
-        preventDismiss={dirty && pending}
-      >
-        <form
-          key={formKey}
-          action={action}
-          className="space-y-5"
-          onChange={() => setDirty(true)}
-        >
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <TextField
-                name="email"
-                type="email"
-                label={u.traderEmail}
-                required
-                dense
-                dir="ltr"
-                autoComplete="off"
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <TextField
-                name="displayName"
-                label={u.traderDisplayName}
-                required
-                dense
-                autoComplete="off"
-              />
-            </div>
-            <TextField name="companyName" label={u.traderCompany} dense />
-            <TextField
-              name="phone"
-              label={u.traderPhone}
-              dense
-              dir="ltr"
-              inputMode="tel"
-            />
-            <div className="sm:col-span-2">
-              <label className={controlLabelClass}>
-                <span className={controlLabelTextClass}>{u.traderNotes}</span>
-                <textarea
-                  name="adminNotes"
-                  rows={3}
-                  className={controlClass}
-                  placeholder={u.traderNotes}
-                />
-              </label>
-            </div>
-          </div>
-
-          {state && !state.ok ? (
-            <p
-              className="rounded-[10px] border border-[color:color-mix(in_srgb,var(--ro-danger-700)_28%,transparent)] bg-[color:color-mix(in_srgb,var(--ro-danger-700)_10%,transparent)] px-3 py-2 text-sm text-[var(--ro-danger-700)]"
-              role="alert"
-            >
-              {state.error}
-            </p>
-          ) : null}
-
-          <div className="-mx-5 -mb-4 flex flex-wrap items-center justify-end gap-2 border-t border-[color:var(--ro-border-subtle)] bg-[color:color-mix(in_srgb,var(--ro-bg-sunken)_55%,transparent)] px-5 py-3.5">
+        className="max-w-[560px]"
+        actions={
+          <>
             <Button
               type="button"
               variant="secondary"
@@ -176,35 +111,92 @@ export function CreateTraderButton({
             >
               {dict.common.cancel}
             </Button>
-            <Button type="submit" size="sm" loading={pending}>
+            <Button
+              type="submit"
+              form="admin-create-trader"
+              size="sm"
+              loading={pending}
+            >
               {u.traderCreateSubmit}
             </Button>
+          </>
+        }
+      >
+        <p className="rad-dim mb-4 text-sm leading-relaxed">{u.traderCreateLead}</p>
+        <form
+          id="admin-create-trader"
+          key={formKey}
+          action={action}
+          className="space-y-4"
+          onChange={() => setDirty(true)}
+        >
+          <Field label={u.traderEmail}>
+            <Input
+              name="email"
+              type="email"
+              required
+              dir="ltr"
+              autoComplete="off"
+            />
+          </Field>
+          <Field label={u.traderDisplayName}>
+            <Input name="displayName" required autoComplete="off" />
+          </Field>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label={u.traderCompany}>
+              <Input name="companyName" />
+            </Field>
+            <Field label={u.traderPhone}>
+              <Input name="phone" dir="ltr" inputMode="tel" />
+            </Field>
           </div>
-        </form>
-      </Dialog>
+          <Field label={u.traderNotes}>
+            <Textarea name="adminNotes" rows={3} placeholder={u.traderNotes} />
+          </Field>
 
-      <Dialog
+          {state && !state.ok ? (
+            <p className="rad-ferr" role="alert">
+              {state.error}
+            </p>
+          ) : null}
+        </form>
+      </Modal>
+
+      <Modal
         open={!!revealed}
         onClose={closeReveal}
         title={u.traderTempPasswordTitle}
-        description={u.traderTempPasswordLead}
-        size="sm"
-        preventDismiss={!acked}
+        actions={
+          <Button
+            type="button"
+            size="sm"
+            disabled={!acked}
+            onClick={closeReveal}
+          >
+            {u.traderTempPasswordClose}
+          </Button>
+        }
       >
         {revealed ? (
           <div className="space-y-4">
-            <div className="rounded-[12px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-sunken)] p-4">
-              <p className="text-xs font-medium text-[color:var(--ro-text-muted)]">
+            <p className="rad-dim text-sm leading-relaxed">
+              {u.traderTempPasswordLead}
+            </p>
+            <div className="rounded-[12px] border border-[color:var(--rad-bd)] bg-[color:var(--rad-surface3)] p-4">
+              <p className="text-xs font-medium text-[color:var(--rad-tx3)]">
                 {u.traderEmail}
               </p>
-              <p className="mt-1 text-sm font-medium text-[color:var(--ro-text)]" dir="ltr">
+              <p
+                className="mt-1 text-sm font-medium text-[color:var(--rad-tx)]"
+                dir="ltr"
+              >
                 {revealed.email}
               </p>
-              <p className="mt-4 text-xs font-medium text-[color:var(--ro-text-muted)]">
+              <p className="mt-4 text-xs font-medium text-[color:var(--rad-tx3)]">
                 {u.traderTempPasswordTitle}
               </p>
               <p
-                className="mt-1.5 break-all font-mono text-base tracking-wide text-[color:var(--ro-text)]"
+                className="mt-1.5 break-all font-mono text-base tracking-wide text-[color:var(--rad-tx)]"
                 dir="ltr"
               >
                 {revealed.tempPassword}
@@ -225,30 +217,18 @@ export function CreateTraderButton({
               </Button>
             </div>
 
-            <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded-[12px] border border-[color:var(--ro-border-subtle)] px-3 py-3 text-sm text-[color:var(--ro-text)]">
+            <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded-[12px] border border-[color:var(--rad-bd)] px-3 py-3 text-sm text-[color:var(--rad-tx)]">
               <input
                 type="checkbox"
                 checked={acked}
                 onChange={(e) => setAcked(e.target.checked)}
-                className="mt-1 size-4 shrink-0 accent-[var(--ro-plum-900)]"
+                className="mt-1 size-4 shrink-0 accent-[var(--rad-ac)]"
               />
               <span>{u.traderTempPasswordAck}</span>
             </label>
-
-            <div className="-mx-5 -mb-4 border-t border-[color:var(--ro-border-subtle)] px-5 py-3.5">
-              <Button
-                type="button"
-                size="sm"
-                className="w-full sm:w-auto"
-                disabled={!acked}
-                onClick={closeReveal}
-              >
-                {u.traderTempPasswordClose}
-              </Button>
-            </div>
           </div>
         ) : null}
-      </Dialog>
+      </Modal>
     </>
   );
 }

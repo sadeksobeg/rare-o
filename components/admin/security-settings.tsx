@@ -6,9 +6,11 @@ import {
   confirmAdminTotpAction,
   enrollAdminTotpAction,
 } from "@/app/actions";
+import { AdminSettingsCard } from "@/components/admin/settings-shell";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/text-field";
 import { Banner } from "@/components/ui/banner";
+import { Pill } from "@/components/ui-kit/pill";
 
 export function AdminSecuritySettings({
   email,
@@ -18,6 +20,7 @@ export function AdminSecuritySettings({
   disabledLabel = "Off",
   enrollLabel = "Enable 2FA",
   resetLabel = "Reset 2FA",
+  sectionTitle = "2FA",
 }: {
   email: string;
   totpEnabled: boolean;
@@ -26,6 +29,7 @@ export function AdminSecuritySettings({
   disabledLabel?: string;
   enrollLabel?: string;
   resetLabel?: string;
+  sectionTitle?: string;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -57,28 +61,26 @@ export function AdminSecuritySettings({
   };
 
   return (
-    <div className="ro-portal-card space-y-4 border p-5 md:p-6">
-      <p className="text-sm text-[color:var(--ro-text)]">
+    <AdminSettingsCard
+      title={sectionTitle}
+      action={
+        <Pill tone={enabled ? "ok" : "no"}>
+          {enabled ? enabledLabel : disabledLabel}
+        </Pill>
+      }
+    >
+      <p className="text-sm" style={{ color: "var(--rad-tx)" }}>
         {accountLabel}:{" "}
         <span dir="ltr" className="font-medium">
           {email}
         </span>
       </p>
-      <p className="text-sm text-[color:var(--ro-text-muted)]">
-        {enabled ? enabledLabel : disabledLabel}
-      </p>
 
       {!enroll ? (
         <div className="flex flex-wrap gap-2">
-          {!enabled ? (
-            <Button type="button" loading={pending} onClick={beginEnroll}>
-              {enrollLabel}
-            </Button>
-          ) : (
-            <Button type="button" loading={pending} onClick={beginEnroll}>
-              {resetLabel}
-            </Button>
-          )}
+          <Button type="button" loading={pending} onClick={beginEnroll}>
+            {!enabled ? enrollLabel : resetLabel}
+          </Button>
         </div>
       ) : null}
 
@@ -91,9 +93,9 @@ export function AdminSecuritySettings({
               alt="TOTP QR code"
               width={200}
               height={200}
-              className="rounded-[12px] border border-[color:var(--ro-border-subtle)] bg-white p-2"
+              className="rounded-[12px] border border-[color:var(--rad-bd)] bg-white p-2"
             />
-            <p className="max-w-xs text-[color:var(--ro-text-muted)]">
+            <p className="max-w-xs" style={{ color: "var(--rad-tx2)" }}>
               Open Google Authenticator → add account → scan this code. If
               scanning fails, enter the secret manually below. Remove any old
               RARE OUD entry first.
@@ -101,22 +103,26 @@ export function AdminSecuritySettings({
           </div>
 
           <div>
-            <p className="mb-1 font-medium text-[color:var(--ro-text)]">
+            <p className="mb-1 font-medium" style={{ color: "var(--rad-tx)" }}>
               Manual secret (base32)
             </p>
             <code
               dir="ltr"
-              className="block break-all rounded-[10px] bg-[color:var(--ro-bg-sunken)] px-3 py-2 font-mono text-xs text-[color:var(--ro-text)]"
+              className="block break-all rounded-[11px] px-3 py-2 font-mono text-xs"
+              style={{ background: "var(--rad-surface3)", color: "var(--rad-tx)" }}
             >
               {enroll.secret}
             </code>
           </div>
 
           <div>
-            <p className="mb-1 font-medium text-[color:var(--ro-text)]">
+            <p className="mb-1 font-medium" style={{ color: "var(--rad-tx)" }}>
               Recovery codes (save once)
             </p>
-            <ul className="grid gap-1 rounded-[10px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-sunken)] p-3 font-mono text-xs sm:grid-cols-2">
+            <ul
+              className="grid gap-1 rounded-[11px] border p-3 font-mono text-xs sm:grid-cols-2"
+              style={{ borderColor: "var(--rad-bd)", background: "var(--rad-surface3)" }}
+            >
               {enroll.recoveryCodes.map((c) => (
                 <li key={c} dir="ltr">
                   {c}
@@ -161,6 +167,6 @@ export function AdminSecuritySettings({
           {error}
         </Banner>
       ) : null}
-    </div>
+    </AdminSettingsCard>
   );
 }

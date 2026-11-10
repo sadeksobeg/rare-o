@@ -42,8 +42,16 @@ export default async function AdminWhatsAppConversationPage({
 
   return (
     <>
-      <RadThread conversation={conversation} health={health} dict={dict} locale={locale} quickReplies={quickReplies} />
+      <RadThread
+        key="thread"
+        conversation={conversation}
+        health={health}
+        dict={dict}
+        locale={locale}
+        quickReplies={quickReplies}
+      />
       <RadContextPanel
+        key="context"
         conversation={conversation}
         context={context}
         suggestions={suggestions}

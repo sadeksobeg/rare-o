@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-/** Two-column definition list used by admin detail headers. */
+/** Two-column detail grid used by admin detail headers (div-based for axe). */
 export function DetailList({
   children,
   className,
@@ -10,14 +10,14 @@ export function DetailList({
   className?: string;
 }) {
   return (
-    <dl
+    <div
       className={cn(
         "ro-portal-card grid gap-4 border p-4 text-sm md:grid-cols-2 md:p-5",
         className
       )}
     >
       {children}
-    </dl>
+    </div>
   );
 }
 
@@ -40,10 +40,10 @@ export function DetailItem({
         </span>
       ) : null}
       <div className="min-w-0">
-        <dt className="text-xs font-bold tracking-wide text-ro-muted">{label}</dt>
-        <dd className="mt-0.5 text-[0.9375rem] font-semibold text-ro-ink">
+        <p className="text-xs font-bold tracking-wide text-ro-muted">{label}</p>
+        <div className="mt-0.5 text-[0.9375rem] font-semibold text-ro-ink">
           {children}
-        </dd>
+        </div>
       </div>
     </div>
   );

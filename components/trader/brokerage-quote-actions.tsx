@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { traderRespondQuoteAction } from "@/app/brokerage-actions";
-import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
@@ -33,24 +32,27 @@ export function BrokerageQuoteActions({
   }
 
   return (
-    <div className="space-y-3 rounded-[var(--ro-r-lg)] border border-[var(--ro-amber-500)]/40 bg-[var(--ro-amber-100)]/40 p-4">
-      <p className="text-sm font-medium text-ro-ink">{t.brokerageQuoteAwaiting}</p>
+    <div className="rad-card space-y-3 border-[color-mix(in_srgb,var(--ro-amber-500)_40%,var(--rad-bd))] bg-[color-mix(in_srgb,var(--ro-amber-100)_18%,var(--rad-surface))] p-4">
+      <p className="text-sm font-medium text-[color:var(--rad-tx)]">
+        {t.brokerageQuoteAwaiting}
+      </p>
       <div className="flex flex-wrap gap-2">
-        <Button
+        <button
           type="button"
+          className="rad-btn rad-pri"
           disabled={pending}
           onClick={() => setConfirm("approve")}
         >
           {t.brokerageApprove}
-        </Button>
-        <Button
+        </button>
+        <button
           type="button"
-          variant="danger"
+          className="rad-btn rad-dng"
           disabled={pending}
           onClick={() => setConfirm("reject")}
         >
           {t.brokerageDecline}
-        </Button>
+        </button>
       </div>
       {error ? (
         <p className="text-sm text-[var(--ro-danger-700)]">{error}</p>

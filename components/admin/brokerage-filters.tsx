@@ -1,14 +1,12 @@
 "use client";
 
-import { Suspense } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
-import { ListFilterTabs } from "@/components/ui/list-filter-tabs";
+import { Input, SegControl } from "@/components/ui-kit";
 import { cn } from "@/lib/utils";
 
 /**
- * Brokerage list chrome: all/stale tabs + trader/city search
- * (sticky under header — same pattern as AdminTableFilters).
+ * Brokerage list chrome: all/stale SegControl + compact trader/city row.
  */
 export function BrokerageAdminFilters({
   tabsLabel,
@@ -37,128 +35,94 @@ export function BrokerageAdminFilters({
   clearLabel: string;
   className?: string;
 }) {
-  return (
-    <div
-      className={cn(
-        "sticky top-0 z-20 space-y-3 rounded-[14px] border border-[color:var(--ro-border-subtle)] bg-[color:color-mix(in_srgb,var(--ro-bg-raised)_92%,transparent)] p-3 shadow-[var(--ro-e2)] backdrop-blur-md sm:p-3.5",
-        className
-      )}
-    >
-      <Suspense fallback={null}>
-        <ListFilterTabs
-          param="stale"
-          label={tabsLabel}
-          tabs={[
-            { id: "all", label: allLabel, count: allCount },
-            { id: "1", label: staleLabel, count: staleCount },
-          ]}
-        />
-      </Suspense>
-      <Suspense fallback={null}>
-        <BrokerageSearchFields
-          traderLabel={traderLabel}
-          cityLabel={cityLabel}
-          searchLabel={searchLabel}
-          clearLabel={clearLabel}
-          resultCount={resultCount}
-          resultLabel={resultLabel}
-        />
-      </Suspense>
-    </div>
-  );
-}
-
-function fieldClass() {
-  return "h-11 w-full rounded-[12px] border border-[color:var(--ro-border)] bg-[color:var(--ro-bg-sunken)] px-3 text-sm text-[color:var(--ro-text)] shadow-[inset_0_1px_0_color-mix(in_srgb,var(--ro-text)_5%,transparent)] outline-none placeholder:text-[color:var(--ro-text-muted)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]";
-}
-
-function BrokerageSearchFields({
-  traderLabel,
-  cityLabel,
-  searchLabel,
-  clearLabel,
-  resultCount,
-  resultLabel,
-}: {
-  traderLabel: string;
-  cityLabel: string;
-  searchLabel: string;
-  clearLabel: string;
-  resultCount?: number;
-  resultLabel?: string;
-}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const stale = searchParams.get("stale") === "1" ? "1" : "all";
   const trader = searchParams.get("trader") ?? "";
   const city = searchParams.get("city") ?? "";
   const hasFilters = Boolean(trader || city || searchParams.get("stale"));
 
+  const pushParams = (patch: Record<string, string | null>) => {
+    const next = new URLSearchParams(searchParams.toString());
+    for (const [k, v] of Object.entries(patch)) {
+      if (v == null || v === "" || v === "all") next.delete(k);
+      else next.set(k, v);
+    }
+    const qs = next.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  };
+
   return (
-    <form
-      className="flex flex-wrap items-end gap-2"
-      role="search"
-      onSubmit={(e) => {
-        e.preventDefault();
-        const data = new FormData(e.currentTarget);
-        const next = new URLSearchParams(searchParams.toString());
-        const traderValue = String(data.get("trader") ?? "").trim();
-        const cityValue = String(data.get("city") ?? "").trim();
-        if (traderValue) next.set("trader", traderValue);
-        else next.delete("trader");
-        if (cityValue) next.set("city", cityValue);
-        else next.delete("city");
-        if (next.get("stale") === "all") next.delete("stale");
-        const qs = next.toString();
-        router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-      }}
-    >
-      <label className="flex min-w-[10rem] flex-1 flex-col gap-1 text-xs text-[color:var(--ro-text-muted)]">
-        <span>{traderLabel}</span>
-        <input
+    <div className={cn("space-y-3", className)}>
+      <SegControl
+        aria-label={tabsLabel}
+        className="w-full max-w-full"
+        value={stale}
+        onChange={(value) => pushParams({ stale: value })}
+        items={[
+          { value: "all", label: allLabel, count: allCount },
+          { value: "1", label: staleLabel, count: staleCount },
+        ]}
+      />
+
+      <form
+        className="flex flex-wrap items-center gap-2"
+        role="search"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const data = new FormData(e.currentTarget);
+          pushParams({
+            trader: String(data.get("trader") ?? "").trim() || null,
+            city: String(data.get("city") ?? "").trim() || null,
+          });
+        }}
+      >
+        <Input
           name="trader"
           type="search"
           defaultValue={trader}
-          className={fieldClass()}
+          placeholder={traderLabel}
+          aria-label={traderLabel}
+          autoComplete="off"
+          className="min-w-[9rem] max-w-[14rem] flex-1"
         />
-      </label>
-      <label className="flex min-w-[8rem] flex-1 flex-col gap-1 text-xs text-[color:var(--ro-text-muted)]">
-        <span>{cityLabel}</span>
-        <input
+        <Input
           name="city"
           type="search"
           defaultValue={city}
-          className={fieldClass()}
+          placeholder={cityLabel}
+          aria-label={cityLabel}
+          autoComplete="off"
+          className="min-w-[7rem] max-w-[11rem] flex-1"
         />
-      </label>
-      <button
-        type="submit"
-        className="inline-flex h-11 items-center gap-1.5 rounded-[12px] border border-[color:color-mix(in_srgb,var(--ro-accent-fg,var(--ro-plum-700))_35%,var(--ro-border))] bg-[color:color-mix(in_srgb,var(--ro-accent-fg,var(--ro-plum-700))_14%,var(--ro-panel))] px-4 text-sm font-semibold text-[color:var(--ro-accent-fg,var(--ro-plum-800))] transition-[background-color,border-color] hover:bg-[color:color-mix(in_srgb,var(--ro-accent-fg,var(--ro-plum-700))_22%,var(--ro-panel))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
-      >
-        <Search className="size-4" strokeWidth={1.5} aria-hidden />
-        {searchLabel}
-      </button>
-      {hasFilters ? (
-        <button
-          type="button"
-          className="h-11 rounded-[12px] px-3 text-sm font-medium text-[color:var(--ro-text-2)] underline-offset-2 hover:text-[color:var(--ro-text)] hover:underline"
-          onClick={() => router.replace(pathname, { scroll: false })}
-        >
-          {clearLabel}
+        <button type="submit" className="rad-btn rad-gh rad-sm" aria-label={searchLabel}>
+          <Search width={16} height={16} strokeWidth={1.5} aria-hidden />
+          {searchLabel}
         </button>
-      ) : null}
-      {typeof resultCount === "number" ? (
-        <p
-          role="status"
-          aria-live="polite"
-          className="flex h-11 items-center text-sm tabular-nums text-[color:var(--ro-text-muted)]"
-        >
-          <span className="font-semibold text-[color:var(--ro-text)]">
-            {resultCount}
-          </span>
-          {resultLabel ? <span className="ms-1">{resultLabel}</span> : null}
-        </p>
-      ) : null}
-    </form>
+        {hasFilters ? (
+          <button
+            type="button"
+            className="rad-btn rad-gh rad-sm"
+            onClick={() => router.replace(pathname, { scroll: false })}
+          >
+            {clearLabel}
+          </button>
+        ) : null}
+        {typeof resultCount === "number" ? (
+          <p
+            role="status"
+            aria-live="polite"
+            className="ms-auto text-sm tabular-nums"
+            style={{ color: "var(--rad-tx3)" }}
+          >
+            <span style={{ color: "var(--rad-tx)", fontWeight: 600 }}>
+              {resultCount}
+            </span>
+            {resultLabel ? <span className="ms-1">{resultLabel}</span> : null}
+          </p>
+        ) : null}
+      </form>
+    </div>
   );
 }

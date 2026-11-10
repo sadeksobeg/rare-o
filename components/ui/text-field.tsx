@@ -103,7 +103,11 @@ export function TextField({
 
   return (
     <div className={cn("block space-y-1.5 text-sm", className)}>
-      <label htmlFor={fieldId} className="font-medium text-ro-ink">
+      <label
+        htmlFor={fieldId}
+        className="font-medium"
+        style={{ color: "var(--rad-tx, var(--ro-text, currentColor))" }}
+      >
         {label}
         {required ? " *" : ""}
       </label>
@@ -224,7 +228,11 @@ export function Textarea({
 
   return (
     <div className={cn("block space-y-1.5 text-sm", className)}>
-      <label htmlFor={fieldId} className="font-medium text-ro-ink">
+      <label
+        htmlFor={fieldId}
+        className="font-medium"
+        style={{ color: "var(--rad-tx, var(--ro-text, currentColor))" }}
+      >
         {label}
         {required ? " *" : ""}
       </label>

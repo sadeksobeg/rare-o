@@ -9,14 +9,20 @@ import {
   updateCategoryAction,
   type ActionResult,
 } from "@/app/actions";
+import { ArrowDown, ArrowUp, GripVertical, Tags } from "lucide-react";
+import {
+  Card,
+  CardHeader,
+  EmptyState,
+  Field,
+  Input,
+  Modal,
+  Pill,
+} from "@/components/ui-kit";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { ConfirmDialog, Dialog } from "@/components/ui/dialog";
-import { EmptyState } from "@/components/ui/empty-state";
 import { TextField } from "@/components/ui/text-field";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
-import { formErrorClass } from "@/lib/ui/form-classes";
 import { useUnsavedGuard } from "@/lib/ui/use-unsaved-guard";
 
 export type CategoryRow = {
@@ -53,11 +59,34 @@ export function CategoriesManager({
   const [ordered, setOrdered] = useState(rows);
   const [dragId, setDragId] = useState<string | null>(null);
   const [reordering, startReorder] = useTransition();
+  const [savedFlash, setSavedFlash] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     setOrdered(rows);
   }, [rows]);
+
+  function persistOrder(next: CategoryRow[]) {
+    setOrdered(next);
+    const fd = new FormData();
+    for (const row of next) fd.append("ids", row.id);
+    startReorder(async () => {
+      await adminReorderCategoriesAction(fd);
+      setSavedFlash(true);
+      window.setTimeout(() => setSavedFlash(false), 1800);
+      router.refresh();
+    });
+  }
+
+  function moveRow(id: string, direction: -1 | 1) {
+    const from = ordered.findIndex((x) => x.id === id);
+    const to = from + direction;
+    if (from < 0 || to < 0 || to >= ordered.length) return;
+    const next = [...ordered];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved!);
+    persistOrder(next);
+  }
 
   function openDialog(next: NonNullable<typeof dialog>) {
     setNonce((n) => n + 1);
@@ -97,38 +126,64 @@ export function CategoriesManager({
   const display = (r: CategoryRow) =>
     locale === "ar" ? r.nameAr || r.nameEn : r.nameEn || r.nameAr;
 
+  const reorderHint =
+    locale === "ar"
+      ? "اسحب من المقبض أو استخدم الأسهم لإعادة الترتيب — يُحفظ تلقائياً"
+      : "Drag the handle or use arrows to reorder — saves automatically";
+  const savedLabel = locale === "ar" ? "تم الحفظ" : "Saved";
+  const deleteBlockedTip =
+    locale === "ar"
+      ? "لا يمكن حذف فئة تحتوي على منتجات"
+      : "Cannot delete a category that contains products";
+
   return (
-    <div className="space-y-4">
-      <div
-        id="category-create"
-        className="flex scroll-mt-20 flex-wrap items-center justify-between gap-3 rounded-[14px] border border-[color:var(--ro-border-subtle)] bg-[color:color-mix(in_srgb,var(--ro-bg-raised)_92%,transparent)] p-3 shadow-[var(--ro-e2)] backdrop-blur-md sm:p-3.5"
+    <div id="category-create" className="scroll-mt-20">
+    <Card
+      padded={false}
+      aria-label={dict.admin.categories}
+      className="overflow-hidden"
+    >
+      <CardHeader
+        className="!pb-3.5"
+        title={dict.admin.categories}
+        count={ordered.length}
+        actions={
+          <button
+            type="button"
+            className="rad-btn rad-pri rad-sm whitespace-nowrap"
+            onClick={() => openDialog({ mode: "create" })}
+          >
+            {u.categoryCreate}
+          </button>
+        }
       >
-        <p className="text-xs text-[color:var(--ro-text-muted)]">
-          {locale === "ar"
-            ? "اسحب البطاقات لإعادة الترتيب — يُحفظ تلقائياً"
-            : "Drag cards to reorder — saves automatically"}
+        <p className="rad-hint2 !mt-0 w-full">
+          {reorderHint}
+          {savedFlash ? (
+            <span className="ms-2 font-semibold" style={{ color: "var(--rad-ok)" }}>
+              · {savedLabel}
+            </span>
+          ) : null}
         </p>
-        <Button
-          type="button"
-          size="sm"
-          variant="primary"
-          onClick={() => openDialog({ mode: "create" })}
-        >
-          {u.categoryCreate}
-        </Button>
-      </div>
+      </CardHeader>
 
       {ordered.length === 0 ? (
         <EmptyState
-          variant="first-use"
           title={u.emptyTitle}
           body={u.emptyBody}
-          actionHref="#category-create"
-          actionLabel={u.categoryCreate}
+          icon={<Tags width={26} height={26} strokeWidth={1.5} aria-hidden />}
+          action={
+            <button
+              type="button"
+              className="rad-btn rad-gh rad-sm"
+              onClick={() => openDialog({ mode: "create" })}
+            >
+              {u.categoryCreate}
+            </button>
+          }
         />
       ) : (
-        <>
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3 sm:p-5">
             {ordered.map((r, index) => (
               <li
                 key={r.id}
@@ -143,90 +198,114 @@ export function CategoriesManager({
                   const next = [...ordered];
                   const [moved] = next.splice(from, 1);
                   next.splice(to, 0, moved!);
-                  setOrdered(next);
                   setDragId(null);
-                  const fd = new FormData();
-                  for (const row of next) fd.append("ids", row.id);
-                  startReorder(async () => {
-                    await adminReorderCategoriesAction(fd);
-                    router.refresh();
-                  });
+                  persistOrder(next);
                 }}
                 className={cn(
-                  "ro-catalog-tile cursor-grab p-4 active:cursor-grabbing",
+                  "rad-card p-4",
                   dragId === r.id && "opacity-60",
                   reordering && "pointer-events-none"
                 )}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 space-y-1.5">
+                <div className="flex items-start gap-3">
+                  <div className="flex shrink-0 flex-col items-center gap-1">
+                    <span
+                      className="inline-flex size-9 cursor-grab items-center justify-center rounded-[10px] active:cursor-grabbing"
+                      style={{
+                        color: "var(--rad-tx3)",
+                        background: "var(--rad-surface3)",
+                      }}
+                      aria-hidden
+                      title={locale === "ar" ? "اسحب لإعادة الترتيب" : "Drag to reorder"}
+                    >
+                      <GripVertical width={16} height={16} strokeWidth={1.5} />
+                    </span>
+                    <button
+                      type="button"
+                      className="rad-btn rad-gh rad-sm !min-w-0 !px-2"
+                      disabled={index === 0 || reordering}
+                      aria-label={locale === "ar" ? "نقل لأعلى" : "Move up"}
+                      onClick={() => moveRow(r.id, -1)}
+                    >
+                      <ArrowUp width={14} height={14} strokeWidth={1.5} aria-hidden />
+                    </button>
+                    <button
+                      type="button"
+                      className="rad-btn rad-gh rad-sm !min-w-0 !px-2"
+                      disabled={index === ordered.length - 1 || reordering}
+                      aria-label={locale === "ar" ? "نقل لأسفل" : "Move down"}
+                      onClick={() => moveRow(r.id, 1)}
+                    >
+                      <ArrowDown width={14} height={14} strokeWidth={1.5} aria-hidden />
+                    </button>
+                  </div>
+                  <div className="min-w-0 flex-1 space-y-1.5">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-display text-lg font-semibold text-[color:var(--ro-text)]">
+                      <p className="text-base font-semibold text-[color:var(--rad-tx)]">
                         {display(r)}
                       </p>
                       {r.isLaunch ? (
-                        <span className="rounded-md bg-[color:color-mix(in_srgb,var(--ro-accent-fg,var(--ro-plum-700))_14%,transparent)] px-2 py-0.5 text-[0.65rem] font-semibold text-[color:var(--ro-accent-fg)]">
-                          {locale === "ar" ? "إطلاق" : "Launch"}
-                        </span>
+                        <Pill tone="ok">
+                          {locale === "ar" ? "نشطة" : "Active"}
+                        </Pill>
                       ) : null}
                     </div>
                     <p
-                      className="text-xs text-[color:var(--ro-text-muted)]"
+                      className="text-xs rad-mono"
+                      style={{ color: "var(--rad-tx3)" }}
                       dir="ltr"
                     >
                       {r.slug}
                     </p>
-                    <p className="text-xs font-medium text-[color:var(--ro-text-2)]">
+                    <p className="text-xs font-medium text-[color:var(--rad-tx2)]">
                       {u.categoryProducts}:{" "}
-                      <span className="tabular-nums text-[color:var(--ro-text)]">
-                        {r.productCount}
-                      </span>
+                      <span className="rad-num tabular-nums">{r.productCount}</span>
                     </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        className="rad-btn rad-gh rad-sm"
+                        onClick={() => openDialog({ mode: "edit", row: r })}
+                      >
+                        {dict.admin.edit}
+                      </button>
+                      <button
+                        type="button"
+                        className="rad-btn rad-gh rad-sm"
+                        disabled={r.isLaunch || r.productCount > 0}
+                        title={
+                          r.isLaunch
+                            ? u.categoryDeleteLaunch
+                            : r.productCount > 0
+                              ? deleteBlockedTip
+                              : undefined
+                        }
+                        onClick={() => {
+                          setDeleteError(null);
+                          setToDelete(r);
+                        }}
+                      >
+                        {u.categoryDelete}
+                      </button>
+                    </div>
                   </div>
-                  <span aria-hidden className="ro-catalog-monogram shrink-0">
-                    {(display(r) || "?").slice(0, 1)}
+                  <span
+                    className="rad-pt-empty shrink-0"
+                    style={{ width: 40, height: 40 }}
+                    aria-hidden
+                  >
+                    <Tags width={18} height={18} strokeWidth={1.5} />
                   </span>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => openDialog({ mode: "edit", row: r })}
-                  >
-                    {dict.admin.edit}
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="danger"
-                    disabled={r.isLaunch || r.productCount > 0}
-                    title={
-                      r.isLaunch
-                        ? u.categoryDeleteLaunch
-                        : r.productCount > 0
-                          ? u.categoryDeleteBlocked
-                          : undefined
-                    }
-                    onClick={() => {
-                      setDeleteError(null);
-                      setToDelete(r);
-                    }}
-                  >
-                    {u.categoryDelete}
-                  </Button>
                 </div>
               </li>
             ))}
-          </ul>
-        </>
+        </ul>
       )}
 
-      <Dialog
+      <Modal
         open={dialog !== null}
         onClose={() => setDialog(null)}
         title={dialog?.mode === "edit" ? u.categoryEdit : u.categoryCreate}
-        size="md"
       >
         {dialog ? (
           <CategoryForm
@@ -238,22 +317,42 @@ export function CategoriesManager({
             onDone={() => setDialog(null)}
           />
         ) : null}
-      </Dialog>
+      </Modal>
 
-      <ConfirmDialog
+      <Modal
         open={toDelete !== null}
-        onClose={() => setToDelete(null)}
-        onConfirm={confirmDelete}
+        onClose={() => {
+          if (!deleting) setToDelete(null);
+        }}
         title={u.categoryDelete}
-        body={
-          deleteError
-            ? deleteError
-            : `${u.categoryDeleteConfirm}${toDelete ? ` — ${display(toDelete)}` : ""}`
+        actions={
+          <>
+            <button
+              type="button"
+              className="rad-btn rad-gh"
+              disabled={deleting}
+              onClick={() => setToDelete(null)}
+            >
+              {dict.common.cancel}
+            </button>
+            <button
+              type="button"
+              className="rad-btn rad-pri"
+              disabled={deleting}
+              onClick={confirmDelete}
+            >
+              {deleting ? "…" : u.categoryDelete}
+            </button>
+          </>
         }
-        confirmLabel={u.categoryDelete}
-        cancelLabel={dict.common.cancel}
-        pending={deleting}
-      />
+      >
+        <p className="rad-dim">
+          {deleteError
+            ? deleteError
+            : `${u.categoryDeleteConfirm}${toDelete ? ` — ${display(toDelete)}` : ""}`}
+        </p>
+      </Modal>
+    </Card>
     </div>
   );
 }
@@ -291,14 +390,14 @@ function CategoryForm({
     >
       {row ? <input type="hidden" name="id" value={row.id} /> : null}
       {mode === "create" ? (
-        <TextField
-          name="slug"
-          label={u.categorySlug}
-          dir="ltr"
-          required
-          dense
-          pattern="[a-z0-9]+(-[a-z0-9]+)*"
-        />
+        <Field label={u.categorySlug}>
+          <Input
+            name="slug"
+            dir="ltr"
+            required
+            pattern="[a-z0-9]+(-[a-z0-9]+)*"
+          />
+        </Field>
       ) : (
         <p
           className="text-xs text-[color:var(--ro-text-muted)]"
@@ -336,17 +435,17 @@ function CategoryForm({
         dense
       />
       {state && !state.ok ? (
-        <p role="alert" className={formErrorClass}>
+        <p role="alert" className="rad-ferr">
           {errorMessage(state.error)}
         </p>
       ) : null}
-      <div className="flex justify-end gap-2 pt-1">
-        <Button type="button" variant="secondary" size="sm" onClick={onDone}>
+      <div className="rad-acts !mt-2 !px-0 !pb-0">
+        <button type="button" className="rad-btn rad-gh" onClick={onDone}>
           {dict.common.cancel}
-        </Button>
-        <Button type="submit" size="sm" loading={pending}>
-          {u.categorySave}
-        </Button>
+        </button>
+        <button type="submit" className="rad-btn rad-pri" disabled={pending}>
+          {pending ? "…" : u.categorySave}
+        </button>
       </div>
     </form>
   );

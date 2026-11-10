@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { CountUp } from "@/components/motion/count-up";
 import { DrawIn, RosetteMark } from "@/components/motion/draw-in";
-import { Stagger } from "@/components/motion/reveal";
 import { PressLink } from "@/components/portal/press-link";
 import { DealCard } from "@/components/trader/deal-card";
 import { TaskCard } from "@/components/trader/task-card";
@@ -19,7 +18,6 @@ import { TraderPageHeader } from "@/components/trader/page-header";
 import { PortalReveal } from "@/components/portal/reveal";
 import { Timeline } from "@/components/ui/timeline";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { requireTraderSession } from "@/lib/auth/trader-session";
@@ -190,7 +188,7 @@ async function WaitingBlock({
 
   if (!dealsR.ok && !wholesaleR.ok && !brokerageR.ok) {
     return (
-      <div className="flex flex-col space-y-3 lg:col-span-6">
+      <div className="flex flex-col space-y-3">
         <h2 className="ro-portal-section-title flex items-center gap-2">
           <span className="ro-portal-icon-well size-8 [&>svg]:size-4" aria-hidden>
             <Handshake className="size-4" strokeWidth={1.5} />
@@ -247,7 +245,7 @@ async function WaitingBlock({
   const myDeals = t.myDeals.replace("{n}", String(deals.length));
 
   return (
-    <div className="flex flex-col space-y-3 lg:col-span-6">
+    <div className="flex flex-col space-y-3">
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="ro-portal-section-title flex items-center gap-2">
           <span className="ro-portal-icon-well size-8 [&>svg]:size-4" aria-hidden>
@@ -261,7 +259,7 @@ async function WaitingBlock({
           </span>
         ) : null}
       </div>
-      <div className="ro-portal-card flex min-h-[12rem] flex-1 flex-col border p-4 sm:p-5">
+      <div className="rad-card flex min-h-[12rem] flex-1 flex-col p-4 sm:p-5">
         {waiting.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
             <DrawIn durationMs={900} className="size-16">
@@ -270,13 +268,13 @@ async function WaitingBlock({
             <p className="text-sm font-medium text-[var(--ro-success-700)]">
               {t.waitingIdle}
             </p>
-            <p className="text-sm text-ro-muted">{t.lead}</p>
-            <ButtonLink href="/trader/deals" variant="secondary" size="sm">
+            <p className="text-sm text-[color:var(--rad-tx3)]">{t.lead}</p>
+            <Link href="/trader/deals" className="rad-btn rad-gh rad-sm">
               {myDeals}
-            </ButtonLink>
+            </Link>
           </div>
         ) : (
-          <Stagger stepMs={70} className="space-y-3">
+          <div className="space-y-3">
             {waiting.map((item) => (
               <DealCard
                 key={item.key}
@@ -288,7 +286,7 @@ async function WaitingBlock({
                 waitingLabel={t.waitingOnYou}
               />
             ))}
-          </Stagger>
+          </div>
         )}
       </div>
     </div>
@@ -298,14 +296,14 @@ async function WaitingBlock({
 function TasksBlock({ dict }: { dict: Dictionary }) {
   const t = dict.trader;
   return (
-    <div className="flex flex-col space-y-3 lg:col-span-6">
+    <div className="flex flex-col space-y-2">
       <h2 className="ro-portal-section-title flex items-center gap-2">
         <span className="ro-portal-icon-well size-8 [&>svg]:size-4" aria-hidden>
           <Sparkles className="size-4" strokeWidth={1.5} />
         </span>
         {t.homeTasksTitle}
       </h2>
-      <div className="grid flex-1 gap-3">
+      <div className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-2">
         <TaskCard
           href="/trader/deals/new"
           title={t.taskDealTitle}
@@ -366,9 +364,9 @@ async function StatsBlock({
   ).length;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <h2 className="ro-portal-section-title">{t.homeStatsTitle}</h2>
-      <div className="grid gap-4 border-b border-ro-line pb-6 sm:grid-cols-3">
+      <div className="grid grid-cols-3 gap-3 border-b border-[color:var(--rad-bd)] pb-4 lg:border-b-0 lg:pb-0">
         {[
           {
             label: t.homeStatDeals,
@@ -388,13 +386,13 @@ async function StatsBlock({
         ].map((stat) => (
           <div
             key={stat.label}
-            className="border-s-2 border-[color-mix(in_srgb,var(--ro-plum-900)_35%,transparent)] ps-4"
+            className="border-s-2 border-[color:var(--rad-ac)]/40 ps-3"
           >
-            <p className="text-xs text-ro-muted">{stat.label}</p>
-            <p className="font-display text-3xl font-bold tabular-nums text-ro-ink">
+            <p className="text-xs text-[color:var(--rad-tx3)]">{stat.label}</p>
+            <p className="text-2xl font-bold tabular-nums text-[color:var(--rad-tx)] lg:text-3xl">
               <CountUp value={stat.value} durationMs={520} />
             </p>
-            <p className="text-xs text-ro-muted">{stat.hint}</p>
+            <p className="text-xs text-[color:var(--rad-tx3)]">{stat.hint}</p>
           </div>
         ))}
       </div>
@@ -418,12 +416,12 @@ async function OffersBlock({
   ]);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="font-display text-xl font-semibold">{t.offersNow}</h2>
+        <h2 className="ro-portal-section-title font-semibold">{t.offersNow}</h2>
         <Link
           href="/trader/offers"
-          className="text-sm font-medium text-ro-plum transition-colors hover:text-[var(--ro-plum-900)] hover:underline"
+          className="text-sm font-medium text-[color:var(--rad-ac)] transition-colors hover:underline"
         >
           {t.viewAllOffers}
         </Link>
@@ -444,7 +442,7 @@ async function OffersBlock({
             return null;
           }
           return (
-            <ul className="flex gap-3 overflow-x-auto pb-1">
+            <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-2">
               {offerPreview.map((o) => {
                 const title =
                   locale === "ar"
@@ -461,12 +459,12 @@ async function OffersBlock({
                   : null;
                 const imagePath = o.product?.images?.[0]?.path ?? null;
                 return (
-                  <li key={o.id} className="w-64 shrink-0">
+                  <li key={o.id}>
                     <PressLink
                       href={`/trader/offers/${o.slug}`}
-                      className="ro-portal-card group block overflow-hidden border focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
+                      className="rad-card group flex overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
                     >
-                      <div className="relative h-28 bg-[var(--ro-sand-200)]">
+                      <div className="relative h-20 w-20 shrink-0 bg-[color:var(--rad-surface3)] sm:h-24 sm:w-24">
                         {imagePath ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
@@ -480,21 +478,21 @@ async function OffersBlock({
                             alt=""
                             fill
                             className="object-cover opacity-80"
-                            sizes="256px"
+                            sizes="96px"
                           />
                         )}
                       </div>
-                      <div className="space-y-2 p-4">
-                        <p className="font-display font-semibold leading-snug transition-colors group-hover:text-[var(--ro-plum-900)]">
+                      <div className="min-w-0 flex-1 space-y-1 p-3">
+                        <p className="line-clamp-2 text-sm font-semibold leading-snug text-[color:var(--rad-tx)] transition-colors group-hover:text-[color:var(--rad-ac)]" style={{ fontFamily: "var(--rad-font, inherit)" }}>
                           {title}
                         </p>
                         {summary ? (
-                          <p className="line-clamp-2 text-xs text-ro-muted">
+                          <p className="line-clamp-1 text-xs text-[color:var(--rad-tx3)]">
                             {summary}
                           </p>
                         ) : null}
                         {productName ? (
-                          <p className="line-clamp-1 text-xs font-semibold text-[var(--ro-plum-800)]">
+                          <p className="line-clamp-1 text-xs font-semibold text-[color:var(--rad-ac)]">
                             {productName}
                           </p>
                         ) : null}
@@ -575,7 +573,7 @@ async function ActivityBlock({
     .slice(0, 5);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <h2 className="ro-portal-section-title flex items-center gap-2">
         <span className="ro-portal-icon-well size-8 [&>svg]:size-4" aria-hidden>
           <Activity className="size-4" strokeWidth={1.5} />
@@ -591,8 +589,9 @@ async function ActivityBlock({
           actionLabel={t.taskDealTitle}
         />
       ) : (
-        <div className="ro-portal-card border p-3 md:p-4">
+        <div className="rad-card p-2 md:p-3">
           <Timeline
+            compact
             label={t.recentActivity}
             events={activity.map((ev) => ({
               id: ev.id,
@@ -600,16 +599,20 @@ async function ActivityBlock({
               actor: ev.actor,
               relativeTime: formatRelative(ev.at, locale),
               absoluteTime: formatDate(ev.at, locale, {
-                dateStyle: "medium",
-                timeStyle: "short",
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
               }),
               icon:
                 ev.kind === "wholesale" ? (
-                  <Package className="size-4" strokeWidth={1.5} aria-hidden />
+                  <Package className="size-3.5" strokeWidth={1.5} aria-hidden />
                 ) : ev.kind === "brokerage" ? (
-                  <Compass className="size-4" strokeWidth={1.5} aria-hidden />
+                  <Compass className="size-3.5" strokeWidth={1.5} aria-hidden />
                 ) : (
-                  <Handshake className="size-4" strokeWidth={1.5} aria-hidden />
+                  <Handshake className="size-3.5" strokeWidth={1.5} aria-hidden />
                 ),
               tone:
                 ev.kind === "wholesale"
@@ -618,7 +621,10 @@ async function ActivityBlock({
                     ? "deal"
                     : "deal",
               detail: (
-                <Link href={ev.href} className="ro-icon-btn">
+                <Link
+                  href={ev.href}
+                  className="inline-flex h-8 items-center rounded-[var(--rad-r-sm,10px)] px-2.5 text-xs font-semibold text-[color:var(--rad-ac)] transition-colors hover:bg-[color:var(--rad-surface3)]"
+                >
                   {t.openRecord}
                 </Link>
               ),
@@ -635,7 +641,7 @@ function HeaderSkeleton() {
 }
 
 function WaitingSkeleton() {
-  return <Skeleton className="min-h-[12rem] lg:col-span-6" />;
+  return <Skeleton className="min-h-[12rem] w-full" />;
 }
 
 function StatsSkeleton() {
@@ -655,8 +661,8 @@ export default async function TraderHomePage() {
   const { locale, dict } = await getRequestDictionary();
 
   return (
-    <section data-trader-home className="relative space-y-8">
-      <div className="relative space-y-10">
+    <section data-trader-home className="relative space-y-4">
+      <div className="relative space-y-4 md:space-y-5">
         <Suspense fallback={<HeaderSkeleton />}>
           <HomeGreeting
             traderId={session.sub}
@@ -666,7 +672,7 @@ export default async function TraderHomePage() {
           />
         </Suspense>
 
-        <PortalReveal className="grid items-stretch gap-6 lg:grid-cols-12 lg:gap-8">
+        <PortalReveal eager>
           <Suspense fallback={<WaitingSkeleton />}>
             <WaitingBlock
               traderId={session.sub}
@@ -674,18 +680,16 @@ export default async function TraderHomePage() {
               dict={dict}
             />
           </Suspense>
+        </PortalReveal>
+
+        {/* Start-here + recent activity: tight 2-col on desktop */}
+        <PortalReveal
+          eager
+          className="grid items-start gap-3 lg:grid-cols-2 lg:gap-4"
+        >
           <TasksBlock dict={dict} />
-        </PortalReveal>
-
-        <PortalReveal>
-          <Suspense fallback={<StatsSkeleton />}>
-            <StatsBlock traderId={session.sub} dict={dict} />
-          </Suspense>
-        </PortalReveal>
-
-        <PortalReveal>
-          <Suspense fallback={<OffersSkeleton />}>
-            <OffersBlock
+          <Suspense fallback={<ActivitySkeleton />}>
+            <ActivityBlock
               traderId={session.sub}
               locale={locale}
               dict={dict}
@@ -693,9 +697,15 @@ export default async function TraderHomePage() {
           </Suspense>
         </PortalReveal>
 
-        <PortalReveal>
-          <Suspense fallback={<ActivitySkeleton />}>
-            <ActivityBlock
+        <PortalReveal
+          eager
+          className="grid items-start gap-3 lg:grid-cols-2 lg:gap-4"
+        >
+          <Suspense fallback={<StatsSkeleton />}>
+            <StatsBlock traderId={session.sub} dict={dict} />
+          </Suspense>
+          <Suspense fallback={<OffersSkeleton />}>
+            <OffersBlock
               traderId={session.sub}
               locale={locale}
               dict={dict}

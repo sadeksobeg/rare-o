@@ -2,20 +2,15 @@ import { LinkedRecordPanel } from "@/components/admin/linked-record-panel";
 import type { InboxConversationDetail } from "@/lib/whatsapp/messaging/inbox";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
-import { formatMaskedPhone } from "@/lib/whatsapp/messaging/inbox";
-import { avatarGradientClass, avatarInitial } from "@/components/admin/rad/inbox/avatar-color";
+import { formatMaskedPhone } from "@/lib/whatsapp/messaging/phone-format";
+import { RadAvatar } from "@/components/admin/rad/inbox/rad-avatar";
 import { RadNotesSection } from "@/components/admin/rad/inbox/notes-section";
 import { RadTagsSection } from "@/components/admin/rad/inbox/tags-section";
 import type { BusinessContextView, CrmPartySuggestion, LinkAuditEntry } from "@/lib/whatsapp/messaging/linking";
 
 /**
- * New rad-styled profile header + notes + tags (round 3, real/additive
- * features — see ROUND-3-PART-B-REPORT.md). The actual linking UI (search,
- * link, unlink, CRM suggestions) is the existing LinkedRecordPanel,
- * untouched — rebuilding its internals risked the brief's explicit "don't
- * modify existing features" instruction, so it's embedded as-is rather than
- * re-skinned; it will look visually distinct from the reference's own
- * linked-records card until a follow-up visual pass the owner approves.
+ * Profile header + notes + tags + linked-record panel (visual skin only on
+ * the latter — link/unlink/CRM actions unchanged).
  */
 export function RadContextPanel({
   conversation,
@@ -39,7 +34,7 @@ export function RadContextPanel({
   return (
     <aside className="rad-xp" aria-label={ib.moreInfo}>
       <section className="rad-pf2">
-        <span className={`rad-avt rad-lg ${avatarGradientClass(conversation.id)}`}>{avatarInitial(title)}</span>
+        <RadAvatar id={conversation.id} name={conversation.name} size="lg" />
         <b>{conversation.name ? title : <bdi dir="ltr">{title}</bdi>}</b>
         <span>
           <bdi dir="ltr">{maskedPhone ?? ""}</bdi>
@@ -57,6 +52,7 @@ export function RadContextPanel({
       </section>
 
       <section>
+        <h3>{ib.linkedRecordsHeading}</h3>
         <LinkedRecordPanel
           conversationId={conversation.id}
           link={conversation.link}

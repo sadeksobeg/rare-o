@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { adminQuickSetProductStatusAction } from "@/app/actions";
-import { cn } from "@/lib/utils";
 
 export function ProductPublishToggle({
   productId,
@@ -44,18 +43,12 @@ export function ProductPublishToggle({
             router.refresh();
           });
         }}
-        className={cn(
-          "inline-flex h-9 min-w-11 items-center justify-center rounded-full px-3 text-xs font-semibold transition-opacity",
-          published
-            ? "bg-[var(--ro-success-100)] text-[var(--ro-success-700)]"
-            : "bg-[var(--ro-sand-200)] text-ro-muted",
-          pending ? "opacity-60" : "hover:opacity-90"
-        )}
+        className="rad-btn rad-gh rad-sm"
       >
         {published ? unpublishLabel : publishLabel}
       </button>
       {error ? (
-        <p className="text-[0.65rem] text-[var(--ro-danger-700)]" role="alert">
+        <p className="text-[0.65rem]" style={{ color: "var(--rad-err)" }} role="alert">
           {error}
         </p>
       ) : null}

@@ -44,7 +44,10 @@ export function Select({
 
   return (
     <label className={cn("block space-y-1.5 text-sm", className)}>
-      <span className="font-medium text-ro-ink">
+      <span
+        className="font-medium"
+        style={{ color: "var(--rad-tx, var(--ro-text, currentColor))" }}
+      >
         {label}
         {required ? " *" : ""}
       </span>

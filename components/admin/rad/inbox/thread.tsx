@@ -11,6 +11,7 @@ import {
   Guitar,
   Info,
   LoaderCircle,
+  MessageSquareText,
   Paperclip,
   Search,
   Send,
@@ -26,7 +27,9 @@ import type { Locale } from "@/lib/i18n/config";
 import { formatDate, formatDayKey } from "@/lib/i18n/format";
 import { plural } from "@/lib/i18n/plural";
 import { formatMaskedPhone } from "@/lib/whatsapp/messaging/phone-format";
-import { avatarGradientClass, avatarInitial } from "@/components/admin/rad/inbox/avatar-color";
+import { humanizeMessageBody } from "@/lib/whatsapp/messaging/preview-label";
+import { inboxPreviewLabels } from "@/lib/whatsapp/messaging/preview-labels-from-dict";
+import { RadAvatar } from "@/components/admin/rad/inbox/rad-avatar";
 import { useInboxUi } from "@/components/admin/rad/inbox/inbox-shell";
 import { adminAddInboxNoteAction, adminSendWhatsAppTextAction } from "@/app/whatsapp-actions";
 import { cn } from "@/lib/utils";
@@ -161,7 +164,7 @@ export function RadThread({
           <Link href="/admin/inbox" className="rad-ib rad-backb" aria-label={ib.backToList}>
             <ChevronRight width={20} height={20} strokeWidth={1.5} aria-hidden style={{ transform: locale === "ar" ? "scaleX(-1)" : undefined }} />
           </Link>
-          <span className={cn("rad-avt", "rad-sm", avatarGradientClass(conversation.id))}>{avatarInitial(title)}</span>
+          <RadAvatar id={conversation.id} name={conversation.name} size="sm" />
           <div className="rad-tt">
             <b>{conversation.name ? title : <bdi dir="ltr">{title}</bdi>}</b>
             <small>
@@ -217,7 +220,26 @@ export function RadThread({
         ) : null}
 
         <div className="rad-msgs" id="msgs" ref={msgsRef}>
-          {rows}
+          {conversation.messages.length === 0 ? (
+            <div className="rad-ept rad-ept-thread">
+              <div>
+                <div className="rad-rg">
+                  <svg viewBox="0 0 150 150" fill="none" stroke="currentColor">
+                    <circle cx="75" cy="75" r="26" />
+                    <circle cx="75" cy="75" r="46" />
+                    <circle cx="75" cy="75" r="68" />
+                  </svg>
+                  <i>
+                    <MessageSquareText width={30} height={30} strokeWidth={1.5} aria-hidden />
+                  </i>
+                </div>
+                <b>{ib.threadEmptyTitle}</b>
+                <p>{ib.threadEmptyBody}</p>
+              </div>
+            </div>
+          ) : (
+            rows
+          )}
         </div>
 
         <div className="rad-cmp">
@@ -315,15 +337,17 @@ function linkTypeLabel(linkType: string, dict: Dictionary): string {
 }
 
 function Bubble({ m, i, locale, ib }: { m: InboxMessageItem; i: number; locale: Locale; ib: Dictionary["ib"] }) {
+  const labels = inboxPreviewLabels(ib);
   if (m.messageType === "system") {
     return (
       <div className="rad-sysm" key={m.id}>
         <ShieldCheck width={14} height={14} strokeWidth={1.5} aria-hidden />
-        {m.body}
+        {humanizeMessageBody(m.body, m.messageType, m.caption, labels)}
       </div>
     );
   }
   const isOut = m.direction === "outbound";
+  const bodyLabel = humanizeMessageBody(m.body, m.messageType, m.caption, labels);
   const tick =
     !isOut
       ? null
@@ -338,14 +362,14 @@ function Bubble({ m, i, locale, ib }: { m: InboxMessageItem; i: number; locale: 
             );
   return (
     <div className={cn("rad-bb", isOut ? "rad-out" : "rad-in", m.status === "failed" && "rad-bb-failed")} style={{ "--rad-i": i } as React.CSSProperties}>
-      {m.body}
+      {bodyLabel !== labels.empty ? bodyLabel : null}
       {m.mediaUrl ? (
         <div className="rad-pc">
           <div className="rad-im">
             <Guitar width={24} height={24} strokeWidth={1.5} aria-hidden />
           </div>
           <div>
-            <b>{m.mediaFileName || m.mediaMime || ""}</b>
+            <b>{m.mediaFileName || m.mediaMime || bodyLabel}</b>
           </div>
         </div>
       ) : null}
