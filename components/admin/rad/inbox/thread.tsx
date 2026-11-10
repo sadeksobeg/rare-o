@@ -6,7 +6,10 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   Check,
+  CheckCheck,
   ChevronRight,
+  CircleAlert,
+  Clock,
   Ellipsis,
   Guitar,
   Info,
@@ -85,6 +88,32 @@ export function RadThread({
     if (el) el.scrollTop = el.scrollHeight;
   }, [conversation.id, conversation.messages.length]);
 
+  // Delivery acks arrive asynchronously via the worker. Refresh while any
+  // outbound bubble is still pending/sending/sent so ticks advance to
+  // delivered/read without a manual reload. Cap at ~60s per wave.
+  const needsDeliveryPoll = useMemo(
+    () =>
+      conversation.messages.some(
+        (m) =>
+          m.direction === "outbound" &&
+          (m.status === "pending" ||
+            m.status === "sending" ||
+            m.status === "sent")
+      ),
+    [conversation.messages]
+  );
+
+  useEffect(() => {
+    if (!needsDeliveryPoll) return;
+    let ticks = 0;
+    const id = window.setInterval(() => {
+      ticks += 1;
+      router.refresh();
+      if (ticks >= 24) window.clearInterval(id);
+    }, 2500);
+    return () => window.clearInterval(id);
+  }, [needsDeliveryPoll, router, conversation.id]);
+
   const rows = useMemo(() => {
     const out: React.ReactNode[] = [];
     let lastDay: string | null = null;
@@ -113,24 +142,28 @@ export function RadThread({
           </div>
         );
       }
-      out.push(<Bubble key={m.id} m={m} i={i} locale={locale} ib={ib} />);
+      out.push(
+        <Bubble key={m.id} m={m} i={i} locale={locale} ib={ib} inbox={dict.inbox} />
+      );
     });
     return out;
-  }, [conversation.messages, conversation.unreadCount, ib, locale]);
+  }, [conversation.messages, conversation.unreadCount, dict.inbox, ib, locale]);
 
   function sendReply() {
     const v = text.trim();
     if (!v || pending) return;
+    // Clear composer immediately so the send feels instant; restore on failure.
+    setText("");
     startTransition(async () => {
       const fd = new FormData();
       fd.set("conversationId", conversation.id);
       fd.set("text", v);
       const result = await adminSendWhatsAppTextAction(fd);
       if (!result.ok) {
+        setText(v);
         toast.error(dict.inbox.sendFailed);
         return;
       }
-      setText("");
       router.refresh();
     });
   }
@@ -336,7 +369,45 @@ function linkTypeLabel(linkType: string, dict: Dictionary): string {
   return dict.inbox.notLinked;
 }
 
-function Bubble({ m, i, locale, ib }: { m: InboxMessageItem; i: number; locale: Locale; ib: Dictionary["ib"] }) {
+function DeliveryTick({
+  status,
+  inbox,
+}: {
+  status: string;
+  inbox: Dictionary["inbox"];
+}) {
+  const props = { width: 14, height: 14, strokeWidth: 1.5 as const };
+  switch (status) {
+    case "pending":
+      return <Clock {...props} aria-label={inbox.statusPending} />;
+    case "sending":
+      return <LoaderCircle {...props} aria-label={inbox.statusSending} />;
+    case "sent":
+      return <Check {...props} aria-label={inbox.statusSent} />;
+    case "delivered":
+      return <CheckCheck {...props} aria-label={inbox.statusDelivered} />;
+    case "read":
+      return <CheckCheck {...props} aria-label={inbox.statusRead} className="rad-rd" />;
+    case "failed":
+      return <CircleAlert {...props} aria-label={inbox.statusFailed} />;
+    default:
+      return null;
+  }
+}
+
+function Bubble({
+  m,
+  i,
+  locale,
+  ib,
+  inbox,
+}: {
+  m: InboxMessageItem;
+  i: number;
+  locale: Locale;
+  ib: Dictionary["ib"];
+  inbox: Dictionary["inbox"];
+}) {
   const labels = inboxPreviewLabels(ib);
   if (m.messageType === "system") {
     return (
@@ -348,20 +419,17 @@ function Bubble({ m, i, locale, ib }: { m: InboxMessageItem; i: number; locale: 
   }
   const isOut = m.direction === "outbound";
   const bodyLabel = humanizeMessageBody(m.body, m.messageType, m.caption, labels);
-  const tick =
-    !isOut
-      ? null
-      : m.status === "sent"
-        ? <Check width={14} height={14} strokeWidth={1.5} aria-label={ib.readSent} />
-        : m.status === "failed"
-          ? null
-          : (
-              <span className="rad-spin">
-                <LoaderCircle width={14} height={14} strokeWidth={1.5} aria-label={ib.readSent} />
-              </span>
-            );
+  const inFlight = isOut && (m.status === "pending" || m.status === "sending");
   return (
-    <div className={cn("rad-bb", isOut ? "rad-out" : "rad-in", m.status === "failed" && "rad-bb-failed")} style={{ "--rad-i": i } as React.CSSProperties}>
+    <div
+      className={cn(
+        "rad-bb",
+        isOut ? "rad-out" : "rad-in",
+        m.status === "failed" && "rad-bb-failed",
+        inFlight && "rad-sending"
+      )}
+      style={{ "--rad-i": i } as React.CSSProperties}
+    >
       {bodyLabel !== labels.empty ? bodyLabel : null}
       {m.mediaUrl ? (
         <div className="rad-pc">
@@ -375,7 +443,7 @@ function Bubble({ m, i, locale, ib }: { m: InboxMessageItem; i: number; locale: 
       ) : null}
       <div className="rad-bm">
         {timeOf(m, locale)}
-        {tick}
+        {isOut ? <DeliveryTick status={m.status} inbox={inbox} /> : null}
       </div>
     </div>
   );
