@@ -19,6 +19,10 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   // Required for the multi-stage production Dockerfile (standalone server).
   output: "standalone",
+  // Tree-shake lucide icon imports (material LH unused-JS win on portal shells).
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200],

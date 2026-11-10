@@ -8,12 +8,15 @@ import { cn } from "@/lib/utils";
 /**
  * Instant pending affordance on soft navigation — does not block the Link.
  * Clears when the pathname catches up.
+ * Default prefetch=false: portal sidebars/tabbars would otherwise prefetch
+ * every route in view and tank LCP / Lighthouse on home.
  */
 export function PendingNavLink({
   href,
   className,
   children,
   onClick,
+  prefetch = false,
   ...rest
 }: ComponentProps<typeof Link>) {
   const pathname = usePathname();
@@ -27,6 +30,7 @@ export function PendingNavLink({
   return (
     <Link
       href={href}
+      prefetch={prefetch}
       {...rest}
       aria-busy={pending || undefined}
       data-pending={pending ? "true" : undefined}

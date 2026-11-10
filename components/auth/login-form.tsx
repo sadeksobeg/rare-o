@@ -55,6 +55,8 @@ export function LoginForm({
   forgotWhatsAppLabel,
   forgotWhatsAppHref,
   backToSignInLabel,
+  /** Dev / visual fixtures only — does not change auth actions. */
+  forcedState,
 }: {
   action: (
     prev: ActionResult | null,
@@ -96,17 +98,24 @@ export function LoginForm({
   forgotWhatsAppLabel?: string;
   forgotWhatsAppHref?: string | null;
   backToSignInLabel?: string;
+  forcedState?: "error" | "lock" | "2fa" | "recovery" | null;
 }) {
   const [state, formAction, pending] = useActionState(action, initial);
   const [reveal, setReveal] = useState(false);
   const [capsLock, setCapsLock] = useState(false);
   const [lockLeft, setLockLeft] = useState(0);
-  const [view, setView] = useState<"form" | "forgot">("form");
+  const [view, setView] = useState<"form" | "forgot">(
+    forcedState === "recovery" ? "forgot" : "form"
+  );
   const canForgot = Boolean(
     forgotPasswordLabel && forgotTitle && forgotSubtitle && backToSignInLabel
   );
 
   useEffect(() => {
+    if (forcedState === "lock") {
+      setLockLeft(42);
+      return;
+    }
     if (!state || state.ok || state.error !== "LOGIN_LOCKED") {
       setLockLeft(0);
       return;
@@ -118,9 +127,9 @@ export function LoginForm({
         ? Number((state.data as { retryAfterSec?: number }).retryAfterSec)
         : 60;
     setLockLeft(Number.isFinite(sec) ? sec : 60);
-  }, [state]);
+  }, [state, forcedState]);
 
-  const lockedCountdown = lockLeft > 0;
+  const lockedCountdown = lockLeft > 0 && forcedState !== "lock";
   useEffect(() => {
     if (!lockedCountdown) return;
     const id = window.setInterval(() => {
@@ -129,35 +138,47 @@ export function LoginForm({
     return () => window.clearInterval(id);
   }, [lockedCountdown]);
 
-  const locked = lockLeft > 0;
+  const locked = lockLeft > 0 || forcedState === "lock";
   const headlineWords = (headline ?? title).split(/\s+/).filter(Boolean);
 
   const errorText =
-    state && !state.ok
-      ? state.error === "LOGIN_INVALID" ||
-        state.error === "Invalid email or password"
-        ? (loginErrorLabel ?? state.error)
-        : state.error === "LOGIN_LOCKED"
-          ? `${loginLockedLabel ?? loginErrorLabel ?? state.error}${
-              locked ? ` (${formatMmSs(lockLeft)})` : ""
-            }`
-          : state.error === "TOTP_REQUIRED"
-            ? (totpRequiredLabel ?? totpLabel ?? state.error)
-            : state.error === "TOTP_INVALID"
-              ? (totpInvalidLabel ?? totpLabel ?? state.error)
-              : state.error === "TOTP_ENROLL_REQUIRED"
-                ? (totpEnrollLabel ?? state.error)
-                : state.error
-      : null;
+    forcedState === "error"
+      ? (loginErrorLabel ?? "LOGIN_INVALID")
+      : forcedState === "lock"
+        ? `${loginLockedLabel ?? loginErrorLabel ?? "LOGIN_LOCKED"} (${formatMmSs(lockLeft || 42)})`
+        : forcedState === "2fa"
+          ? (totpRequiredLabel ?? totpLabel ?? "TOTP_REQUIRED")
+          : state && !state.ok
+            ? state.error === "LOGIN_INVALID" ||
+              state.error === "Invalid email or password"
+              ? (loginErrorLabel ?? state.error)
+              : state.error === "LOGIN_LOCKED"
+                ? `${loginLockedLabel ?? loginErrorLabel ?? state.error}${
+                    locked ? ` (${formatMmSs(lockLeft)})` : ""
+                  }`
+                : state.error === "TOTP_REQUIRED"
+                  ? (totpRequiredLabel ?? totpLabel ?? state.error)
+                  : state.error === "TOTP_INVALID"
+                    ? (totpInvalidLabel ?? totpLabel ?? state.error)
+                    : state.error === "TOTP_ENROLL_REQUIRED"
+                      ? (totpEnrollLabel ?? state.error)
+                      : state.error
+            : null;
+
+  const showTotp = Boolean(totpLabel) || forcedState === "2fa";
+  /* Login ceremony is dark-first for both portals — cream light theme caused
+     trader form mismatch against the ink brand panel (same Input/Button chrome). */
+  const authTheme = "dark";
 
   return (
     <MotionProvider surface={role === "admin" ? "admin" : "trader"}>
     <main
-      data-theme="light"
-      className="ro-portal grid min-h-[100dvh] w-full max-w-[100vw] grid-cols-1 overflow-x-hidden bg-[var(--ro-sand-50,#fffcf8)] md:grid-cols-[1.15fr_1fr]"
+      data-portal={role === "admin" ? "admin" : "trader"}
+      data-theme={authTheme}
+      className="ro-portal grid min-h-[100dvh] w-full max-w-[100vw] grid-cols-1 overflow-x-hidden bg-[color:var(--rad-c0,#0B080D)] md:grid-cols-[1.15fr_1fr]"
     >
-      {/* Living brand scene — VISION ceremony (stacked on small screens) */}
-      <section className="relative flex min-h-[44vh] flex-col justify-between overflow-hidden bg-[var(--ro-ink-950)] p-6 text-[var(--ro-sand-100)] sm:p-8 md:min-h-[100dvh]">
+      {/* Living brand scene — compact ≤120px on phone so form stays reachable */}
+      <section className="relative flex max-h-[120px] min-h-[100px] flex-col justify-between overflow-hidden bg-[var(--ro-ink-950)] p-4 text-[var(--ro-sand-100)] md:max-h-none md:min-h-[100dvh] md:p-8">
         <div
           className="pointer-events-none absolute inset-[-10%] motion-safe:animate-[ro-portal-ambient_9s_var(--ro-ease-resonance)_infinite]"
           aria-hidden
@@ -169,22 +190,33 @@ export function LoginForm({
             ].join(","),
           }}
         />
-        <div className="absolute inset-x-0 top-[8%] bottom-[34%]">
+        <div className="absolute inset-x-0 top-[8%] bottom-[34%] hidden md:block">
           <LogoSceneMount className="h-full w-full" />
         </div>
         <div className="relative z-10 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 font-display text-xl font-semibold">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/brand/logo-mark-small.svg"
-              alt=""
-              className="h-6 w-6 invert"
-            />
-            <bdi dir="ltr">{brand}</bdi>
+          <div className="flex items-center gap-3 text-xl font-semibold" style={{ fontFamily: "var(--rad-font, inherit)" }}>
+            <span
+              className="inline-flex size-8 shrink-0 items-center justify-center rounded-[9px]"
+              style={{ background: "#0B080D", boxShadow: "0 0 0 1px rgba(244,231,216,.22)" }}
+              aria-hidden
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/mark-small.webp"
+                alt=""
+                width={22}
+                height={22}
+                className="h-[22px] w-[22px] object-contain"
+                decoding="async"
+              />
+            </span>
+            <bdi dir="ltr" className="tracking-[0.28em] text-[color:#F4E7D8]">
+              {brand}
+            </bdi>
           </div>
           {children}
         </div>
-        <div className="relative z-10 rounded-t-2xl bg-gradient-to-t from-[var(--ro-ink-950)] via-[color-mix(in_srgb,var(--ro-ink-950)_70%,transparent)] to-transparent px-2 pb-2 pt-16 text-center">
+        <div className="relative z-10 hidden rounded-t-2xl bg-gradient-to-t from-[var(--ro-ink-950)] via-[color-mix(in_srgb,var(--ro-ink-950)_70%,transparent)] to-transparent px-2 pb-2 pt-16 text-center md:block">
           {tagline ? (
             <p className="ro-login-fade-up mb-2 text-sm text-[var(--ro-plum-300)]">
               {tagline}
@@ -205,13 +237,13 @@ export function LoginForm({
         </div>
       </section>
 
-      {/* Form panel — light default (never inherit portal dark remaps) */}
-      <section className="relative flex items-center justify-center bg-[var(--ro-sand-100,#f8f4ee)] p-6 md:p-10">
-        <div className="w-full max-w-sm rounded-[14px] border border-[color:rgba(50,16,79,0.08)] bg-[var(--ro-sand-50,#fffcf8)] p-8 shadow-[inset_0_1px_0_rgba(255,252,248,.9),0_1px_2px_rgba(11,8,13,.06),0_8px_24px_-12px_rgba(11,8,13,.14)]">
+      {/* Form panel — ui-kit auth (rad tokens; admin dark-first) */}
+      <section className="relative flex min-h-0 flex-1 items-start justify-center bg-[color:var(--rad-c0,#0B080D)] p-5 md:min-h-[100dvh] md:items-center md:p-10">
+        <div className="w-full max-w-sm rounded-[18px] border border-[color:var(--rad-bd2)] bg-[color:var(--rad-surface,#15101A)] p-6 shadow-[var(--rad-sh,0_24px_60px_-28px_rgba(0,0,0,.7))] sm:p-8">
           <div
             role="tablist"
             aria-label={brand}
-            className="mb-6 grid grid-cols-2 gap-1 rounded-[10px] bg-[color-mix(in_srgb,var(--ro-ink-950)_6%,transparent)] p-1"
+            className="mb-6 grid grid-cols-2 gap-1 rounded-[10px] bg-[color:var(--rad-surface3)] p-1"
           >
             <Link
               href="/admin/login"
@@ -220,8 +252,8 @@ export function LoginForm({
               className={cn(
                 "rounded-[8px] px-3 py-2 text-center text-sm font-semibold transition-colors duration-[var(--ro-dur-fast)]",
                 role === "admin"
-                  ? "bg-[var(--ro-sand-50)] text-ro-ink shadow-[0_1px_2px_rgba(11,8,13,.08)]"
-                  : "text-[var(--ro-ink-600)] hover:text-ro-ink"
+                  ? "bg-[color:var(--rad-surface2)] text-[color:var(--rad-tx)] shadow-[0_1px_3px_rgba(0,0,0,.35)]"
+                  : "text-[color:var(--rad-tx3)] hover:text-[color:var(--rad-tx)]"
               )}
             >
               {roleAdminLabel}
@@ -233,8 +265,8 @@ export function LoginForm({
               className={cn(
                 "rounded-[8px] px-3 py-2 text-center text-sm font-semibold transition-colors duration-[var(--ro-dur-fast)]",
                 role === "trader"
-                  ? "bg-[var(--ro-sand-50)] text-ro-ink shadow-[0_1px_2px_rgba(11,8,13,.08)]"
-                  : "text-[var(--ro-ink-600)] hover:text-ro-ink"
+                  ? "bg-[color:var(--rad-surface2)] text-[color:var(--rad-tx)] shadow-[0_1px_3px_rgba(0,0,0,.35)]"
+                  : "text-[color:var(--rad-tx3)] hover:text-[color:var(--rad-tx)]"
               )}
             >
               {roleTraderLabel}
@@ -246,14 +278,17 @@ export function LoginForm({
               <button
                 type="button"
                 onClick={() => setView("form")}
-                className="mb-5 text-sm text-[var(--ro-ink-600)] underline-offset-4 hover:underline"
+                className="mb-5 text-sm text-[color:var(--rad-tx2)] underline-offset-4 hover:underline"
               >
                 {backToSignInLabel}
               </button>
-              <h1 className="mb-1 font-display text-2xl font-semibold text-ro-ink">
+              <h1
+                className="mb-1 text-[26px] font-semibold"
+                style={{ color: "var(--rad-tx)", fontFamily: "var(--rad-font, inherit)" }}
+              >
                 {forgotTitle}
               </h1>
-              <p className="mb-6 text-sm text-[var(--ro-ink-600)]">
+              <p className="mb-6 text-sm leading-relaxed text-[color:var(--rad-tx2)]">
                 {forgotSubtitle}
               </p>
               {forgotWhatsAppHref && forgotWhatsAppLabel ? (
@@ -261,25 +296,30 @@ export function LoginForm({
                   href={forgotWhatsAppHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex w-full items-center justify-center rounded-[10px] bg-[var(--ro-plum-900)] px-4 py-3 text-sm font-semibold text-[var(--ro-sand-50)] transition-opacity hover:opacity-90"
+                  className="inline-flex w-full items-center justify-center rounded-[11px] bg-[color:var(--rad-btn)] px-4 py-3 text-sm font-semibold text-[color:var(--rad-btn-tx)] transition-opacity hover:opacity-90"
                 >
                   {forgotWhatsAppLabel}
                 </a>
               ) : footer ? (
-                <div className="text-center text-sm text-[var(--ro-ink-600)]">
+                <div className="text-center text-sm text-[color:var(--rad-tx2)]">
                   {footer}
                 </div>
               ) : null}
             </>
           ) : (
             <>
-              <h1 className="mb-1 font-display text-2xl font-semibold text-ro-ink">
+              <h1
+                className="mb-1 text-[26px] font-semibold"
+                style={{ color: "var(--rad-tx)", fontFamily: "var(--rad-font, inherit)" }}
+              >
                 {title}
               </h1>
               {subtitle ? (
-                <p className="mb-6 text-sm text-[var(--ro-ink-600)]">{subtitle}</p>
+                <p className="mb-6 text-sm leading-relaxed text-[color:var(--rad-tx2)]">
+                  {subtitle}
+                </p>
               ) : hint ? (
-                <div className="mb-6 text-sm text-[var(--ro-ink-600)]">{hint}</div>
+                <div className="mb-6 text-sm text-[color:var(--rad-tx2)]">{hint}</div>
               ) : (
                 <div className="mb-6" />
               )}
@@ -291,10 +331,17 @@ export function LoginForm({
               ) : null}
 
               {locked ? (
-                <div className="mb-4 flex items-start gap-2 rounded-[8px] bg-[var(--ro-danger-100)] p-3 text-sm text-[var(--ro-danger-700)]">
+                <div
+                  className="mb-4 flex items-start gap-2 rounded-[12px] p-3 text-sm"
+                  style={{
+                    background: "var(--rad-errs)",
+                    color: "var(--rad-tx)",
+                  }}
+                >
                   <ShieldCheck
                     className="mt-0.5 size-4 shrink-0"
                     strokeWidth={1.5}
+                    style={{ color: "var(--rad-err)" }}
                   />
                   <span>{errorText}</span>
                 </div>
@@ -333,7 +380,7 @@ export function LoginForm({
                   endAdornment={
                     <button
                       type="button"
-                      className="text-[var(--ro-ink-600)]"
+                      className="text-[color:var(--rad-tx3)]"
                       onClick={() => setReveal((v) => !v)}
                       aria-pressed={reveal}
                       aria-label={
@@ -354,7 +401,8 @@ export function LoginForm({
                 />
                 {capsLock ? (
                   <p
-                    className="flex items-center gap-1.5 text-xs text-[var(--ro-amber-800)]"
+                    className="flex items-center gap-1.5 text-xs"
+                    style={{ color: "var(--rad-warn)" }}
                     role="status"
                   >
                     <AlertTriangle
@@ -370,26 +418,31 @@ export function LoginForm({
                     <button
                       type="button"
                       onClick={() => setView("forgot")}
-                      className="text-sm font-medium text-[var(--ro-plum-900)] underline-offset-4 hover:underline"
+                      className="text-sm font-semibold text-[color:var(--rad-ac)] underline-offset-4 hover:underline"
                     >
                       {forgotPasswordLabel}
                     </button>
                   </div>
                 ) : null}
-                {totpLabel ? (
+                {showTotp ? (
                   <TextField
                     name="totpCode"
                     type="text"
-                    label={totpLabel}
+                    label={totpLabel ?? totpRequiredLabel ?? "2FA"}
                     dir="ltr"
                     autoComplete="one-time-code"
                     inputMode="numeric"
                   />
                 ) : null}
-                {!locked && errorText ? (
+                {!locked && errorText && forcedState !== "2fa" ? (
                   <Banner tone="danger" alert aria-live="assertive">
                     {errorText}
                   </Banner>
+                ) : null}
+                {forcedState === "2fa" && errorText ? (
+                  <p className="text-sm" style={{ color: "var(--rad-tx2)" }}>
+                    {errorText}
+                  </p>
                 ) : null}
                 <Button
                   type="submit"
@@ -403,7 +456,7 @@ export function LoginForm({
               </form>
 
               {rateLimitFooter ? (
-                <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-xs text-[var(--ro-ink-600)]">
+                <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-xs text-[color:var(--rad-tx3)]">
                   <ShieldCheck
                     className="size-4"
                     strokeWidth={1.5}
@@ -414,7 +467,7 @@ export function LoginForm({
               ) : null}
 
               {footer ? (
-                <div className="mt-4 text-center text-sm text-[var(--ro-ink-600)]">
+                <div className="mt-4 text-center text-sm text-[color:var(--rad-tx2)]">
                   {footer}
                 </div>
               ) : null}

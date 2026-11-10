@@ -1,11 +1,18 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import dynamic from "next/dynamic";
 import { RadSidebar, useRadSidebarCollapsed, type RadNavGroup } from "@/components/admin/rad/sidebar";
 import { RadTopbar } from "@/components/admin/rad/topbar";
-import { RadCommandPalette, type RadPaletteAction } from "@/components/admin/rad/command-palette";
+import type { RadPaletteAction } from "@/components/admin/rad/command-palette";
 import { RadMobileTabBar } from "@/components/admin/rad/mobile-tabbar";
 import type { Locale } from "@/lib/i18n/config";
+
+const RadCommandPalette = dynamic(
+  () =>
+    import("@/components/admin/rad/command-palette").then((m) => m.RadCommandPalette),
+  { ssr: false }
+);
 
 export function RadShellClient({
   groups,
@@ -71,6 +78,30 @@ export function RadShellClient({
   const [collapsed, setCollapsed] = useRadSidebarCollapsed();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [paletteMounted, setPaletteMounted] = useState(false);
+  useEffect(() => {
+    if (paletteOpen) setPaletteMounted(true);
+  }, [paletteOpen]);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen(true);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen(true);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   return (
     <div className={`rad-root rad-app${collapsed ? " rad-col" : ""}${mobileOpen ? " rad-open" : ""}`}>
@@ -119,19 +150,21 @@ export function RadShellClient({
         requestsCount={mobileRequestsCount}
         onMore={() => setMobileOpen(true)}
       />
-      <RadCommandPalette
-        open={paletteOpen}
-        onOpenChange={setPaletteOpen}
-        placeholder={paletteProps.placeholder}
-        emptyTemplate={paletteProps.emptyTemplate}
-        navGroupLabel={paletteProps.navGroupLabel}
-        actionsGroupLabel={paletteProps.actionsGroupLabel}
-        navHint={paletteProps.navHint}
-        openHint={paletteProps.openHint}
-        closeHint={paletteProps.closeHint}
-        pageLabels={paletteProps.pageLabels}
-        actions={paletteProps.actions}
-      />
+      {paletteMounted ? (
+        <RadCommandPalette
+          open={paletteOpen}
+          onOpenChange={setPaletteOpen}
+          placeholder={paletteProps.placeholder}
+          emptyTemplate={paletteProps.emptyTemplate}
+          navGroupLabel={paletteProps.navGroupLabel}
+          actionsGroupLabel={paletteProps.actionsGroupLabel}
+          navHint={paletteProps.navHint}
+          openHint={paletteProps.openHint}
+          closeHint={paletteProps.closeHint}
+          pageLabels={paletteProps.pageLabels}
+          actions={paletteProps.actions}
+        />
+      ) : null}
     </div>
   );
 }

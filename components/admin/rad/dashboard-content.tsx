@@ -140,7 +140,7 @@ export function AdminDashboardContent({
             <FileDown width={16} height={16} strokeWidth={1.5} aria-hidden />
             {ad2.export}
           </button>
-          <Link href="/admin/products/new" className="rad-btn rad-pri">
+          <Link href="/admin/products/new" prefetch={false} className="rad-btn rad-pri">
             <Plus width={16} height={16} strokeWidth={1.5} aria-hidden />
             {ad2.create}
           </Link>

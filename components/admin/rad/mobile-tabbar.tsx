@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Handshake, LayoutDashboard, Menu, MessageSquareText, ShoppingBag } from "lucide-react";
+import { PendingNavLink } from "@/components/ui/pending-nav-link";
 import { cn } from "@/lib/utils";
 
 export function RadMobileTabBar({
@@ -22,24 +22,24 @@ export function RadMobileTabBar({
 
   return (
     <nav className="rad-tabbar" aria-label={labels.more}>
-      <Link href="/admin" className={cn(is("/admin") && "rad-on")}>
+      <PendingNavLink href="/admin" className={cn(is("/admin") && "rad-on")}>
         <LayoutDashboard width={20} height={20} strokeWidth={1.5} aria-hidden />
         {labels.dashboard}
-      </Link>
-      <Link href="/admin/inbox" className={cn(is("/admin/inbox") && "rad-on")}>
+      </PendingNavLink>
+      <PendingNavLink href="/admin/inbox" className={cn(is("/admin/inbox") && "rad-on")}>
         <MessageSquareText width={20} height={20} strokeWidth={1.5} aria-hidden />
         {labels.inbox}
         {inboxCount > 0 ? <i className="rad-tb rad-num">{inboxCount}</i> : null}
-      </Link>
-      <Link href="/admin/requests" className={cn(is("/admin/requests") && "rad-on")}>
+      </PendingNavLink>
+      <PendingNavLink href="/admin/requests" className={cn(is("/admin/requests") && "rad-on")}>
         <ShoppingBag width={20} height={20} strokeWidth={1.5} aria-hidden />
         {labels.requests}
         {requestsCount > 0 ? <i className="rad-tb rad-num">{requestsCount}</i> : null}
-      </Link>
-      <Link href="/admin/deals" className={cn(is("/admin/deals") && "rad-on")}>
+      </PendingNavLink>
+      <PendingNavLink href="/admin/deals" className={cn(is("/admin/deals") && "rad-on")}>
         <Handshake width={20} height={20} strokeWidth={1.5} aria-hidden />
         {labels.deals}
-      </Link>
+      </PendingNavLink>
       <button type="button" onClick={onMore}>
         <Menu width={20} height={20} strokeWidth={1.5} aria-hidden />
         {labels.more}

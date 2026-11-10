@@ -144,6 +144,7 @@ export function RadActionQueue({
               <Link
                 key={row.id}
                 href={row.href}
+                prefetch={false}
                 role="listitem"
                 className="rad-row"
                 style={{ "--rad-i": i } as React.CSSProperties}
@@ -171,7 +172,9 @@ export function RadActionQueue({
       )}
       <div className="rad-lf">
         <span>{footerTemplate.replace("{shown}", String(visible.length)).replace("{total}", String(tabs.find((t) => t.key === tab)?.count ?? 0))}</span>
-        <Link href={viewAllHref}>{viewAllLabel}</Link>
+        <Link href={viewAllHref} prefetch={false}>
+          {viewAllLabel}
+        </Link>
       </div>
     </section>
   );
