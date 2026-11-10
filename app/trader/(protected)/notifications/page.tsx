@@ -1,16 +1,16 @@
 import Link from "next/link";
 import { Bell } from "lucide-react";
-import {
-  traderMarkAllNotificationsReadAction,
-  traderMarkNotificationReadAction,
-} from "@/app/trader-portal-actions";
+import { traderMarkAllNotificationsReadAction } from "@/app/trader-portal-actions";
 import { TraderPageHeader } from "@/components/trader/page-header";
+import {
+  TraderNotificationsList,
+  type TraderNotificationRow,
+} from "@/components/trader/notifications-list";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requireTraderSession } from "@/lib/auth/trader-session";
-import { formatRelative } from "@/lib/i18n/format";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { listTraderNotifications } from "@/lib/trader/notifications";
-import { cn, localizedName } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +31,7 @@ export default async function TraderNotificationsPage({
   const t = dict.trader;
   const sp = await searchParams;
   const domainFilter = isFilter(sp.domain) ? sp.domain : "all";
-  const items = await listTraderNotifications(session.sub, 50);
+  const items = await listTraderNotifications(session.sub, 120);
   const filtered =
     domainFilter === "all"
       ? items
@@ -44,6 +44,18 @@ export default async function TraderNotificationsPage({
     wholesale: t.notificationsFilterWholesale,
     brokerage: t.notificationsFilterBrokerage,
   };
+
+  const rows: TraderNotificationRow[] = filtered.map((n) => ({
+    id: n.id,
+    domain: n.domain,
+    titleAr: n.titleAr,
+    titleEn: n.titleEn,
+    bodyAr: n.bodyAr,
+    bodyEn: n.bodyEn,
+    href: n.href,
+    createdAt: n.createdAt.toISOString(),
+    readAt: n.readAt ? n.readAt.toISOString() : null,
+  }));
 
   return (
     <section className="space-y-8">
@@ -92,7 +104,7 @@ export default async function TraderNotificationsPage({
         })}
       </div>
 
-      {filtered.length === 0 ? (
+      {rows.length === 0 ? (
         <EmptyState
           title={t.notificationsEmpty}
           body={t.notificationsEmptyBody}
@@ -100,67 +112,16 @@ export default async function TraderNotificationsPage({
           actionLabel={t.overview}
         />
       ) : (
-        <ul className="rad-card divide-y divide-[color:var(--rad-bd)] overflow-hidden">
-          {filtered.map((n) => {
-            const title = localizedName(locale, n.titleAr, n.titleEn);
-            const body = localizedName(locale, n.bodyAr, n.bodyEn);
-            const unreadRow = !n.readAt;
-            return (
-              <li key={n.id}>
-                <div
-                  className={cn(
-                    "flex min-h-11 flex-wrap items-start gap-3 px-4 py-3.5 transition-[background-color] duration-[var(--ro-dur-fast)]",
-                    unreadRow &&
-                      "ro-row-flash bg-[color-mix(in_srgb,var(--rad-ac)_10%,transparent)]"
-                  )}
-                >
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <p
-                      className={
-                        unreadRow
-                          ? "font-bold text-[color:var(--rad-tx)]"
-                          : "font-semibold text-[color:var(--rad-tx)]"
-                      }
-                    >
-                      {title}
-                    </p>
-                    {body ? (
-                      <p className="text-sm text-[color:var(--rad-tx3)]">
-                        {body}
-                      </p>
-                    ) : null}
-                    <p className="text-xs text-[color:var(--rad-tx3)]">
-                      {formatRelative(n.createdAt, locale)}
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 flex-wrap items-center gap-2">
-                    <Link
-                      href={n.href}
-                      className="text-sm font-semibold text-[color:var(--rad-ac)] hover:underline"
-                    >
-                      {t.notificationsOpen}
-                    </Link>
-                    {unreadRow ? (
-                      <form action={traderMarkNotificationReadAction}>
-                        <input
-                          type="hidden"
-                          name="notificationId"
-                          value={n.id}
-                        />
-                        <button
-                          type="submit"
-                          className="rad-btn rad-gh rad-sm"
-                        >
-                          {t.notificationsMarkRead}
-                        </button>
-                      </form>
-                    ) : null}
-                  </div>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+        <TraderNotificationsList
+          items={rows}
+          locale={locale}
+          labels={{
+            open: t.notificationsOpen,
+            markRead: t.notificationsMarkRead,
+            showMore: t.notificationsShowMore,
+            groupedCount: t.notificationsGroupedCount,
+          }}
+        />
       )}
     </section>
   );

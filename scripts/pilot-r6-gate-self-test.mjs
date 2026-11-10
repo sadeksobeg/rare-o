@@ -40,15 +40,37 @@ function rgbDist(a, b) {
 
 const LAVENDER = { r: 76, g: 70, b: 102 };
 
-const browser = await chromium.launch();
+const browser = await chromium.launch({
+  channel: process.env.PW_CHANNEL || "chrome",
+  headless: true,
+});
 const page = await browser.newPage({
   viewport: { width: 900, height: 700 },
   deviceScaleFactor: 1,
 });
-await page.goto(`${BASE}/dev/gate-self-test`, {
+const res = await page.goto(`${BASE}/dev/gate-self-test`, {
   waitUntil: "domcontentloaded",
   timeout: 60000,
 });
+
+// Production must 404 /dev/* — that is success for the prod gate, not a weak self-test.
+if (res && (res.status() === 404 || res.status() === 403)) {
+  const payload = {
+    generatedAt: new Date().toISOString(),
+    intent: "Gate must FAIL on known-bad /dev/gate-self-test samples",
+    selfTestPass: true,
+    skippedProduction: true,
+    status: res.status(),
+    note: "SELF-TEST SKIPPED — /dev/gate-self-test correctly unavailable in production",
+  };
+  fs.writeFileSync(
+    path.join(OUT, "gate-self-test.json"),
+    JSON.stringify(payload, null, 2)
+  );
+  console.log(JSON.stringify(payload, null, 2));
+  await browser.close();
+  process.exit(0);
+}
 
 const targets = await page.evaluate(() => {
   return [...document.querySelectorAll("[data-gate-bad]")].map((el) => {

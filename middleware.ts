@@ -162,6 +162,14 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const nonce = createCspNonce();
 
+  // Dev fixtures (/dev/*) must never be reachable in production builds.
+  if (
+    process.env.NODE_ENV === "production" &&
+    (pathname === "/dev" || pathname.startsWith("/dev/"))
+  ) {
+    return new NextResponse(null, { status: 404 });
+  }
+
   if (pathname === "/forbidden") {
     const headers = new Headers(request.headers);
     headers.set(CSP_NONCE_HEADER, nonce);
@@ -277,5 +285,7 @@ export const config = {
     "/forbidden",
     "/admin/:path*",
     "/trader/:path*",
+    "/dev",
+    "/dev/:path*",
   ],
 };

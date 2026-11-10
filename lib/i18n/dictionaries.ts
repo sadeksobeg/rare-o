@@ -1275,6 +1275,8 @@ type Dict = {
     notificationsMarkAll: string;
     notificationsMarkRead: string;
     notificationsOpen: string;
+    notificationsShowMore: string;
+    notificationsGroupedCount: string;
     messagesTitle: string;
     messagesLead: string;
     messagesEmpty: string;
@@ -3007,6 +3009,8 @@ const ar: Dict = {
     notificationsMarkAll: "تعليم الكل كمقروء",
     notificationsMarkRead: "مقروء",
     notificationsOpen: "فتح",
+    notificationsShowMore: "عرض المزيد",
+    notificationsGroupedCount: "{n} تحديثات",
     messagesTitle: "الرسائل",
     messagesLead:
       "محادثة واحدة موحّدة مع فريق RARE OUD — سواء كتبت هنا أو عبر واتساب، تبقى كل الرسائل في نفس السياق. إن توقف واتساب لأي سبب، تقدر تستمر بالتواصل من هنا مباشرة.",
@@ -4763,6 +4767,8 @@ const en: Dict = {
     notificationsMarkAll: "Mark all read",
     notificationsMarkRead: "Read",
     notificationsOpen: "Open",
+    notificationsShowMore: "Show more",
+    notificationsGroupedCount: "{n} updates",
     messagesTitle: "Messages",
     messagesLead:
       "One unified conversation with the RARE OUD team — whether you write here or on WhatsApp, every message stays in the same context. If WhatsApp is ever unavailable, you can keep talking directly from here.",

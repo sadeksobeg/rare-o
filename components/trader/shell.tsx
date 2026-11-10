@@ -90,7 +90,7 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/brand/mark-small.webp"
+                src="/brand/logo-cream.png"
                 alt=""
                 width={30}
                 height={30}

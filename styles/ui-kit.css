@@ -1452,6 +1452,8 @@
   height: 30px;
   width: 30px;
   object-fit: contain;
+  /* Cream mark on dark chrome; invert only for light theme. */
+  filter: none;
 }
 .ro-portal[data-theme="light"] .rad-th2-mark {
   filter: brightness(0);

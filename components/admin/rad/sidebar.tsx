@@ -93,7 +93,7 @@ export function RadSidebar({
       <div className="rad-brand">
         {/* Cream mark — visible on the dark sidebar (reference logo_cream.png) */}
         <img
-          src="/brand/mark-small.webp"
+          src="/brand/logo-cream.png"
           alt=""
           width={32}
           height={32}
