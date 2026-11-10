@@ -1,12 +1,22 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { ChevronDown, QrCode, Unlink, X } from "lucide-react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { ChevronDown, OctagonX, QrCode, Unlink, X } from "lucide-react";
 import type { InboxHealthView } from "@/lib/whatsapp/messaging/inbox";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import type { Locale } from "@/lib/i18n/config";
+import {
+  adminSetOutboundGlobalRateAction,
+  adminSetOutboundKillSwitchAction,
+} from "@/app/whatsapp-actions";
+import { ConfirmDialog } from "@/components/ui/dialog";
+import { KillSwitchBannerText } from "@/components/admin/rad/inbox/kill-switch-banner-text";
 import { cn } from "@/lib/utils";
 
 function pillState(health: InboxHealthView): "connected" | "outbound-off" | "disconnected" | "reconnecting" {
+  if (health.outboundKillSwitch) return "outbound-off";
   if (health.state === "CONNECTED") {
     return health.outboundEnabled ? "connected" : "outbound-off";
   }
@@ -15,19 +25,65 @@ function pillState(health: InboxHealthView): "connected" | "outbound-off" | "dis
 }
 
 /**
- * Connection pill (opens the sheet) + the sheet itself. Everything here is
- * READ-ONLY against real health data — no button in the sheet calls a
- * pairing/reconnect/logout action. Those exist in app/whatsapp-actions.ts
- * and work, but wiring them here would let a click from this screen queue a
- * real linkCommand the worker executes — exactly what the owner's brief and
- * CLAUDE.md explicitly prohibit without separate written approval. Buttons
- * are shown (so the layout and copy can be reviewed) but inert.
+ * Connection pill (opens the sheet) + the sheet itself. Pairing/reconnect/logout
+ * buttons stay inert (no real linkCommand without separate owner approval).
+ * Emergency outbound kill is live — DB flag, confirm dialog, reversible.
  */
-export function RadConnectionSheet({ health, ib }: { health: InboxHealthView; ib: Dictionary["ib"] }) {
+export function RadConnectionSheet({
+  health,
+  ib,
+  locale = "ar",
+}: {
+  health: InboxHealthView;
+  ib: Dictionary["ib"];
+  locale?: Locale;
+}) {
   const [open, setOpen] = useState(false);
+  const [pending, startTransition] = useTransition();
+  const [confirmKill, setConfirmKill] = useState(false);
+  const [confirmResume, setConfirmResume] = useState(false);
+  const [reason, setReason] = useState("");
+  const [rateDraft, setRateDraft] = useState(String(health.outboundGlobalRatePerMin || 20));
+  const router = useRouter();
   const triggerRef = useRef<Element | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const state = pillState(health);
+
+  useEffect(() => {
+    setRateDraft(String(health.outboundGlobalRatePerMin || 20));
+  }, [health.outboundGlobalRatePerMin]);
+
+  function applyKillSwitch(enabled: boolean) {
+    startTransition(async () => {
+      const fd = new FormData();
+      fd.set("enabled", enabled ? "true" : "false");
+      if (enabled && reason.trim()) fd.set("reason", reason.trim());
+      const result = await adminSetOutboundKillSwitchAction(fd);
+      if (!result.ok) {
+        toast.error(ib.killSwitchError);
+        return;
+      }
+      toast.success(enabled ? ib.killEngageDone : ib.killResumeDone);
+      setConfirmKill(false);
+      setConfirmResume(false);
+      setReason("");
+      router.refresh();
+    });
+  }
+
+  function saveRate() {
+    startTransition(async () => {
+      const fd = new FormData();
+      fd.set("perMin", rateDraft);
+      const result = await adminSetOutboundGlobalRateAction(fd);
+      if (!result.ok) {
+        toast.error(ib.rateLimitSaveError);
+        return;
+      }
+      toast.success(ib.rateLimitSaved);
+      router.refresh();
+    });
+  }
 
   useEffect(() => {
     if (open) {
@@ -49,13 +105,15 @@ export function RadConnectionSheet({ health, ib }: { health: InboxHealthView; ib
   }, [open]);
 
   const label =
-    state === "connected"
-      ? ib.connConnected
-      : state === "outbound-off"
-        ? ib.connOutboundOff
-        : state === "reconnecting"
-          ? ib.connReconnecting
-          : ib.connDisconnected;
+    health.outboundKillSwitch
+      ? ib.killActivePill
+      : state === "connected"
+        ? ib.connConnected
+        : state === "outbound-off"
+          ? ib.connOutboundOff
+          : state === "reconnecting"
+            ? ib.connReconnecting
+            : ib.connDisconnected;
 
   const heartbeatAgeS = health.lastHeartbeatAt
     ? Math.max(0, Math.round((Date.now() - new Date(health.lastHeartbeatAt).getTime()) / 1000))
@@ -88,14 +146,30 @@ export function RadConnectionSheet({ health, ib }: { health: InboxHealthView; ib
             {label}
           </div>
           <p>
-            {state === "connected"
-              ? ib.connSheetConnectedBody
-              : state === "outbound-off"
-                ? ib.connSheetOutboundOffBody
-                : state === "reconnecting"
-                  ? ib.connSheetReconnectingBody
-                  : ib.connSheetDisconnectedBody}
+            {health.outboundKillSwitch
+              ? ib.killSheetBody
+              : state === "connected"
+                ? ib.connSheetConnectedBody
+                : state === "outbound-off"
+                  ? ib.connSheetOutboundOffBody
+                  : state === "reconnecting"
+                    ? ib.connSheetReconnectingBody
+                    : ib.connSheetDisconnectedBody}
           </p>
+
+          {health.outboundKillSwitch ? (
+            <div className="rad-bn rad-err" role="alert" style={{ marginBlock: 8 }}>
+              <OctagonX width={18} height={18} strokeWidth={1.5} aria-hidden />
+              <KillSwitchBannerText
+                ib={ib}
+                locale={locale}
+                by={health.outboundKillSwitchBy}
+                at={health.outboundKillSwitchAt}
+                reason={health.outboundKillSwitchReason}
+              />
+            </div>
+          ) : null}
+
           {state === "connected" || state === "outbound-off" || state === "reconnecting" ? (
             <>
               <div className="rad-stl">
@@ -114,6 +188,52 @@ export function RadConnectionSheet({ health, ib }: { health: InboxHealthView; ib
                 <Unlink width={16} height={16} strokeWidth={1.5} aria-hidden />
                 {ib.connSheetDisconnectButton}
               </button>
+
+              {health.outboundKillSwitch ? (
+                <button
+                  type="button"
+                  className="rad-btn rad-pri"
+                  disabled={pending}
+                  onClick={() => setConfirmResume(true)}
+                >
+                  <OctagonX width={16} height={16} strokeWidth={1.5} aria-hidden />
+                  {ib.killResumeLabel}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="rad-btn rad-dng"
+                  disabled={pending}
+                  onClick={() => setConfirmKill(true)}
+                >
+                  <OctagonX width={16} height={16} strokeWidth={1.5} aria-hidden />
+                  {ib.killEngageLabel}
+                </button>
+              )}
+
+              <div className="rad-fld" style={{ marginBlockStart: 12 }}>
+                <label htmlFor="wa-global-rate">{ib.rateLimitLabel}</label>
+                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <input
+                    id="wa-global-rate"
+                    type="number"
+                    min={1}
+                    max={120}
+                    value={rateDraft}
+                    onChange={(e) => setRateDraft(e.target.value)}
+                    disabled={pending}
+                    dir="ltr"
+                  />
+                  <button
+                    type="button"
+                    className="rad-btn rad-gh"
+                    disabled={pending}
+                    onClick={saveRate}
+                  >
+                    {ib.rateLimitSave}
+                  </button>
+                </div>
+              </div>
             </>
           ) : (
             <>
@@ -144,6 +264,72 @@ export function RadConnectionSheet({ health, ib }: { health: InboxHealthView; ib
           <p style={{ fontSize: 12.5, color: "var(--rad-tx3)" }}>{ib.connSheetNoSendNotice}</p>
         </div>
       </div>
+
+      {confirmKill ? (
+        <div
+          className="rad-sheet rad-on"
+          style={{ zIndex: 80 }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="rad-kill-t"
+        >
+          <div
+            className="rad-scr"
+            onClick={() => {
+              setConfirmKill(false);
+              setReason("");
+            }}
+          />
+          <div className="rad-pn" style={{ maxWidth: 420 }}>
+            <h2 id="rad-kill-t">{ib.killConfirmTitle}</h2>
+            <p>{ib.killConfirmBody}</p>
+            <div className="rad-fld">
+              <label htmlFor="wa-kill-reason">{ib.killReasonLabel}</label>
+              <textarea
+                id="wa-kill-reason"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                rows={3}
+                maxLength={240}
+                placeholder={ib.killReasonPlaceholder}
+              />
+            </div>
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+              <button
+                type="button"
+                className="rad-btn rad-gh"
+                disabled={pending}
+                onClick={() => {
+                  setConfirmKill(false);
+                  setReason("");
+                }}
+              >
+                {ib.killCancel}
+              </button>
+              <button
+                type="button"
+                className="rad-btn rad-dng"
+                disabled={pending}
+                onClick={() => applyKillSwitch(true)}
+              >
+                {pending ? "…" : ib.killConfirmAction}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      <ConfirmDialog
+        open={confirmResume}
+        onClose={() => setConfirmResume(false)}
+        onConfirm={() => applyKillSwitch(false)}
+        title={ib.killResumeConfirmTitle}
+        body={ib.killResumeConfirmBody}
+        confirmLabel={ib.killResumeLabel}
+        cancelLabel={ib.killCancel}
+        pending={pending}
+        destructive={false}
+      />
     </>
   );
 }

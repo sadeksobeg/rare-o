@@ -19,7 +19,16 @@ export const WHATSAPP_MESSAGE_STATUSES = [
   "pending",
   "sending",
   "sent",
+  "delivered",
+  "read",
   "failed",
 ] as const;
 
 export type WhatsAppMessageStatus = (typeof WHATSAPP_MESSAGE_STATUSES)[number];
+
+/** Exponential backoff before re-claiming a pending outbound after a failed attempt. */
+export function outboundRetryDelayMs(attemptCount: number): number {
+  const n = Math.max(1, Math.min(attemptCount, MAX_OUTBOUND_ATTEMPTS));
+  // 2s, 4s, 8s (capped)
+  return Math.min(2_000 * 2 ** (n - 1), 8_000);
+}

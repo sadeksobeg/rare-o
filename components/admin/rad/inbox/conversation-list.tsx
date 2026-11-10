@@ -65,7 +65,7 @@ export function RadConversationList({
       <div className="rad-lc-h">
         <div className="rad-lc-t">
           <h1>{dict.inbox.title}</h1>
-          <RadConnectionSheet health={health} ib={ib} />
+          <RadConnectionSheet health={health} ib={ib} locale={locale} />
         </div>
         <label className="rad-sb2">
           <Search width={16} height={16} strokeWidth={1.5} aria-hidden />

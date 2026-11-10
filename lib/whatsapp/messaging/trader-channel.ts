@@ -68,6 +68,7 @@ export async function getTraderConversation(
         mediaUrl: parsed ? mediaUrl(parsed.conversationId, parsed.fileName) : null,
         status: m.status,
         errorSafe: m.errorSafe,
+        clientRequestId: m.clientRequestId ?? null,
         waTimestamp: m.waTimestamp ? m.waTimestamp.toISOString() : null,
         createdAt: m.createdAt.toISOString(),
       };

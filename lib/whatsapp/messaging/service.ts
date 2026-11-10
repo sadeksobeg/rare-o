@@ -22,6 +22,7 @@ import {
 import {
   MAX_OUTBOUND_ATTEMPTS,
   STALE_SENDING_MS,
+  outboundRetryDelayMs,
 } from "@/lib/whatsapp/messaging/reliability";
 import {
   acquireOutboundSendSlot,
@@ -35,6 +36,8 @@ import {
 } from "@/lib/whatsapp/jid";
 import {
   isOutboundEnabled,
+  isOutboundEnvEnabled,
+  primeOutboundKillSwitch,
   type WhatsAppAdapter,
   type WhatsAppChatSeedEvent,
   type WhatsAppContactIdentityEvent,
@@ -43,6 +46,12 @@ import {
   type WhatsAppInboundTextEvent,
   type WhatsAppOutboundEchoEvent,
 } from "@/lib/whatsapp/types";
+import { publishInboxEvent } from "@/lib/whatsapp/messaging/inbox-events";
+import {
+  assessEnqueueRateLimit,
+  recordEnqueueAccepted,
+} from "@/lib/whatsapp/messaging/enqueue-rate-limit";
+import { refreshOutboundKillSwitchFromDb } from "@/lib/whatsapp/messaging/outbound-kill-switch";
 
 export type DbClient = PrismaClient;
 
@@ -75,6 +84,11 @@ export type EnqueueOutboundTextInput = {
   text: string;
   clientRequestId: string;
   adminId: string;
+  /**
+   * When false (default for admin W1), refuse to create a brand-new conversation
+   * from a cold JID — blocks blast-to-unknown-number paths.
+   */
+  allowCreateConversation?: boolean;
 };
 
 export type EnqueueOutboundMediaInput = {
@@ -105,7 +119,8 @@ export type EnqueueOutboundTextResult =
         | "PERSIST_FAILED"
         | "RATE_LIMITED"
         | "SAFETY_CIRCUIT"
-        | "RECONNECT_COOLDOWN";
+        | "RECONNECT_COOLDOWN"
+        | "CONVERSATION_REQUIRED";
       error: string;
     };
 
@@ -256,6 +271,21 @@ export async function persistInboundText(
         };
       }
     });
+
+    if (result.created) {
+      void publishInboxEvent("message.new", {
+        conversationId: result.conversationId,
+        messageId: result.messageId,
+        status: "received",
+        direction: "inbound",
+        messageType: "text",
+        preview: text,
+      });
+      void publishInboxEvent("conversation.updated", {
+        conversationId: result.conversationId,
+        preview: text,
+      });
+    }
 
     return {
       ok: true,
@@ -753,7 +783,7 @@ export async function upsertConnectionHealth(
     ? parseWaTimestamp(health.lastConnectedAt)
     : null;
 
-  await db.whatsAppConnectionHealth.upsert({
+  const row = await db.whatsAppConnectionHealth.upsert({
     where: { id: WHATSAPP_CONNECTION_HEALTH_ID },
     create: {
       id: WHATSAPP_CONNECTION_HEALTH_ID,
@@ -766,6 +796,13 @@ export async function upsertConnectionHealth(
       detailSafe: health.detail?.slice(0, 300) ?? null,
       ...(lastConnectedAt ? { lastConnectedAt } : {}),
     },
+    select: { state: true, outboundKillSwitch: true },
+  });
+  primeOutboundKillSwitch(row.outboundKillSwitch);
+  void publishInboxEvent("connection.state", {
+    connectionState: row.state,
+    outboundKillSwitch: row.outboundKillSwitch,
+    outboundEnabled: isOutboundEnvEnabled() && !row.outboundKillSwitch,
   });
 }
 
@@ -794,6 +831,7 @@ export async function enqueueOutboundText(
   input: EnqueueOutboundTextInput,
   db: DbClient = defaultPrisma
 ): Promise<EnqueueOutboundTextResult> {
+  await refreshOutboundKillSwitchFromDb();
   if (!isOutboundEnabled()) {
     return {
       ok: false,
@@ -815,6 +853,8 @@ export async function enqueueOutboundText(
   const adminId = input.adminId?.trim() ?? "";
   const text = input.text?.trim() ?? "";
   const jid = normalizeUserJid(input.waChatId);
+  // Default true for worker/tests; admin composer passes false (W1 cold-number block).
+  const allowCreate = input.allowCreateConversation !== false;
 
   if (!clientRequestId) {
     return { ok: false, code: "INVALID_INPUT", error: "clientRequestId is required" };
@@ -854,22 +894,49 @@ export async function enqueueOutboundText(
     };
   }
 
+  const rate = assessEnqueueRateLimit(jid);
+  if (!rate.ok) {
+    return { ok: false, code: rate.code, error: rate.error };
+  }
+
+  if (!allowCreate) {
+    const prior = await db.whatsAppConversation.findUnique({
+      where: { waChatId: jid },
+      select: { id: true },
+    });
+    if (!prior) {
+      return {
+        ok: false,
+        code: "CONVERSATION_REQUIRED",
+        error: "Cannot send to a number with no existing conversation",
+      };
+    }
+  }
+
   try {
     const result = await db.$transaction(async (tx) => {
-      const conversation = await tx.whatsAppConversation.upsert({
-        where: { waChatId: jid },
-        create: {
-          waChatId: jid,
-          remoteJid: jid,
-          lastMessageAt: new Date(),
-          lastMessagePreview: previewOf(text),
-          unreadCount: 0,
-        },
-        update: {
-          lastMessageAt: new Date(),
-          lastMessagePreview: previewOf(text),
-        },
-      });
+      const conversation = allowCreate
+        ? await tx.whatsAppConversation.upsert({
+            where: { waChatId: jid },
+            create: {
+              waChatId: jid,
+              remoteJid: jid,
+              lastMessageAt: new Date(),
+              lastMessagePreview: previewOf(text),
+              unreadCount: 0,
+            },
+            update: {
+              lastMessageAt: new Date(),
+              lastMessagePreview: previewOf(text),
+            },
+          })
+        : await tx.whatsAppConversation.update({
+            where: { waChatId: jid },
+            data: {
+              lastMessageAt: new Date(),
+              lastMessagePreview: previewOf(text),
+            },
+          });
 
       try {
         const message = await tx.whatsAppMessage.create({
@@ -881,6 +948,7 @@ export async function enqueueOutboundText(
             clientRequestId,
             status: "pending",
             attemptCount: 0,
+            nextRetryAt: null,
             adminId,
           },
         });
@@ -905,6 +973,23 @@ export async function enqueueOutboundText(
         };
       }
     });
+
+    if (!result.duplicate) {
+      recordEnqueueAccepted(jid);
+      void publishInboxEvent("message.new", {
+        conversationId: result.conversationId,
+        messageId: result.messageId,
+        clientRequestId,
+        status: result.status,
+        direction: "outbound",
+        messageType: "text",
+        preview: text,
+      });
+      void publishInboxEvent("conversation.updated", {
+        conversationId: result.conversationId,
+        preview: text,
+      });
+    }
 
     return { ok: true, ...result };
   } catch (err) {
@@ -1075,6 +1160,8 @@ export async function recoverInterruptedOutbound(
     },
     select: {
       id: true,
+      conversationId: true,
+      clientRequestId: true,
       waMessageId: true,
       attemptCount: true,
     },
@@ -1091,7 +1178,15 @@ export async function recoverInterruptedOutbound(
         data: {
           status: "sent",
           errorSafe: null,
+          nextRetryAt: null,
         },
+      });
+      void publishInboxEvent("message.status", {
+        conversationId: row.conversationId,
+        messageId: row.id,
+        clientRequestId: row.clientRequestId,
+        status: "sent",
+        direction: "outbound",
       });
       markedSent += 1;
       continue;
@@ -1104,18 +1199,35 @@ export async function recoverInterruptedOutbound(
           status: "failed",
           errorSafe:
             "Interrupted during send; max attempts reached — manual review required",
+          nextRetryAt: null,
         },
+      });
+      void publishInboxEvent("message.status", {
+        conversationId: row.conversationId,
+        messageId: row.id,
+        clientRequestId: row.clientRequestId,
+        status: "failed",
+        direction: "outbound",
       });
       markedFailed += 1;
       continue;
     }
 
+    const delay = outboundRetryDelayMs(Math.max(1, row.attemptCount));
     await db.whatsAppMessage.update({
       where: { id: row.id },
       data: {
         status: "pending",
         errorSafe: "Recovered after interrupted send — awaiting retry",
+        nextRetryAt: new Date(now.getTime() + delay),
       },
+    });
+    void publishInboxEvent("message.status", {
+      conversationId: row.conversationId,
+      messageId: row.id,
+      clientRequestId: row.clientRequestId,
+      status: "pending",
+      direction: "outbound",
     });
     recoveredToPending += 1;
   }
@@ -1147,7 +1259,13 @@ export async function recordOutboundStatusUpdate(
 
   const row = await db.whatsAppMessage.findUnique({
     where: { waMessageId: id },
-    select: { id: true, status: true, direction: true },
+    select: {
+      id: true,
+      status: true,
+      direction: true,
+      conversationId: true,
+      clientRequestId: true,
+    },
   });
   if (!row || row.direction !== "outbound") return { ok: false, applied: false };
 
@@ -1158,6 +1276,13 @@ export async function recordOutboundStatusUpdate(
   await db.whatsAppMessage.update({
     where: { id: row.id },
     data: { status },
+  });
+  void publishInboxEvent("message.status", {
+    conversationId: row.conversationId,
+    messageId: row.id,
+    clientRequestId: row.clientRequestId,
+    status,
+    direction: "outbound",
   });
   return { ok: true, applied: true };
 }
@@ -1201,6 +1326,9 @@ export async function claimOutboundForSend(
   if (row.status !== "pending") {
     return { ok: false, reason: "NOT_CLAIMABLE" };
   }
+  if (row.nextRetryAt && row.nextRetryAt.getTime() > Date.now()) {
+    return { ok: false, reason: "NOT_CLAIMABLE" };
+  }
   if (!row.clientRequestId) {
     return { ok: false, reason: "NOT_FOUND" };
   }
@@ -1212,6 +1340,13 @@ export async function claimOutboundForSend(
         errorSafe: "Max outbound attempts reached",
       },
     });
+    void publishInboxEvent("message.status", {
+      conversationId: row.conversationId,
+      messageId,
+      clientRequestId: row.clientRequestId,
+      status: "failed",
+      direction: "outbound",
+    });
     return { ok: false, reason: "MAX_ATTEMPTS" };
   }
 
@@ -1222,12 +1357,21 @@ export async function claimOutboundForSend(
       status: "sending",
       attemptCount: nextAttempt,
       lastAttemptAt: new Date(),
+      nextRetryAt: null,
       errorSafe: null,
     },
   });
   if (claimed.count !== 1) {
     return { ok: false, reason: "NOT_CLAIMABLE" };
   }
+
+  void publishInboxEvent("message.status", {
+    conversationId: row.conversationId,
+    messageId,
+    clientRequestId: row.clientRequestId,
+    status: "sending",
+    direction: "outbound",
+  });
 
   return {
     ok: true,
@@ -1394,14 +1538,23 @@ export async function dispatchOutboundMessage(
 
   if (send.ok) {
     recordOutboundSendSuccess();
-    await db.whatsAppMessage.update({
+    const updated = await db.whatsAppMessage.update({
       where: { id: messageId },
       data: {
         status: "sent",
         waMessageId: send.waMessageId,
         errorSafe: null,
+        nextRetryAt: null,
         waTimestamp: new Date(),
       },
+      select: { conversationId: true, clientRequestId: true },
+    });
+    void publishInboxEvent("message.status", {
+      conversationId: updated.conversationId,
+      messageId,
+      clientRequestId: updated.clientRequestId,
+      status: "sent",
+      direction: "outbound",
     });
     return {
       ok: true,
@@ -1413,12 +1566,21 @@ export async function dispatchOutboundMessage(
 
   // Do not permanently fail on kill switch / not connected — return to pending
   if (send.code === "OUTBOUND_DISABLED" || send.code === "NOT_CONNECTED") {
-    await db.whatsAppMessage.update({
+    const parked = await db.whatsAppMessage.update({
       where: { id: messageId },
       data: {
         status: "pending",
         errorSafe: send.error.slice(0, 300),
+        nextRetryAt: new Date(Date.now() + outboundRetryDelayMs(claimed.attemptCount)),
       },
+      select: { conversationId: true, clientRequestId: true },
+    });
+    void publishInboxEvent("message.status", {
+      conversationId: parked.conversationId,
+      messageId,
+      clientRequestId: parked.clientRequestId,
+      status: "pending",
+      direction: "outbound",
     });
     return {
       ok: false,
@@ -1432,12 +1594,21 @@ export async function dispatchOutboundMessage(
   recordOutboundSendFailure();
 
   if (claimed.attemptCount >= MAX_OUTBOUND_ATTEMPTS) {
-    await db.whatsAppMessage.update({
+    const failed = await db.whatsAppMessage.update({
       where: { id: messageId },
       data: {
         status: "failed",
         errorSafe: send.error.slice(0, 300),
+        nextRetryAt: null,
       },
+      select: { conversationId: true, clientRequestId: true },
+    });
+    void publishInboxEvent("message.status", {
+      conversationId: failed.conversationId,
+      messageId,
+      clientRequestId: failed.clientRequestId,
+      status: "failed",
+      direction: "outbound",
     });
     return {
       ok: false,
@@ -1448,16 +1619,25 @@ export async function dispatchOutboundMessage(
     };
   }
 
-  // Bounded retry remaining — park as pending
-  await db.whatsAppMessage.update({
+  // Bounded retry remaining — park as pending with backoff
+  const parked = await db.whatsAppMessage.update({
     where: { id: messageId },
     data: {
       status: "pending",
+      nextRetryAt: new Date(Date.now() + outboundRetryDelayMs(claimed.attemptCount)),
       errorSafe: `Attempt ${claimed.attemptCount}/${MAX_OUTBOUND_ATTEMPTS} failed: ${send.error}`.slice(
         0,
         300
       ),
     },
+    select: { conversationId: true, clientRequestId: true },
+  });
+  void publishInboxEvent("message.status", {
+    conversationId: parked.conversationId,
+    messageId,
+    clientRequestId: parked.clientRequestId,
+    status: "pending",
+    direction: "outbound",
   });
   return {
     ok: false,
@@ -1550,12 +1730,18 @@ export async function dispatchPendingOutbound(
   db: DbClient = defaultPrisma,
   limit = 20
 ): Promise<{ processed: number; results: DispatchOutboundResult[] }> {
+  await refreshOutboundKillSwitchFromDb();
   if (!isOutboundEnabled()) {
     return { processed: 0, results: [] };
   }
 
+  const now = new Date();
   const pending = await db.whatsAppMessage.findMany({
-    where: { direction: "outbound", status: "pending" },
+    where: {
+      direction: "outbound",
+      status: "pending",
+      OR: [{ nextRetryAt: null }, { nextRetryAt: { lte: now } }],
+    },
     orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     take: limit,
     select: { id: true },

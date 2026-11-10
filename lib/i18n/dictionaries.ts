@@ -506,6 +506,7 @@ type Dict = {
     newMessagesMany: string;
     newMessagesOther: string;
     bannerOutboundOff: string;
+    bannerKillSwitch: string;
     bannerReconnecting: string;
     bannerDisconnected: string;
     bannerPairAction: string;
@@ -553,6 +554,29 @@ type Dict = {
     connSheetPhoneLabel: string;
     connSheetShowQrButton: string;
     connSheetNoSendNotice: string;
+    killActivePill: string;
+    killSheetBody: string;
+    killEngageLabel: string;
+    killResumeLabel: string;
+    killConfirmTitle: string;
+    killConfirmBody: string;
+    killConfirmAction: string;
+    killCancel: string;
+    killResumeConfirmTitle: string;
+    killResumeConfirmBody: string;
+    killEngageDone: string;
+    killResumeDone: string;
+    killSwitchError: string;
+    killMeta: string;
+    killStoppedBy: string;
+    killReasonPrefix: string;
+    killReasonLabel: string;
+    killReasonPlaceholder: string;
+    retrySend: string;
+    rateLimitLabel: string;
+    rateLimitSave: string;
+    rateLimitSaved: string;
+    rateLimitSaveError: string;
     navHint: string;
     searchHint: string;
     escHint: string;
@@ -2124,6 +2148,7 @@ const ar: Dict = {
     newMessagesOther: "{n} رسالة جديدة",
     bannerOutboundOff:
       "الإرسال من الصندوق متوقف حالياً. تصلك الرسائل وتستطيع إضافة ملاحظات داخلية، لكن الرد يُحفظ هنا وقد يحتاج متابعة من هاتفك.",
+    bannerKillSwitch: "الإرسال موقوف طارئاً",
     bannerReconnecting: "جارٍ إعادة الاتصال بواتساب… قد تتأخر الرسائل الجديدة.",
     bannerDisconnected: "واتساب غير متصل. لن تصل رسائل جديدة قبل إعادة الربط.",
     bannerPairAction: "ربط الحساب",
@@ -2172,6 +2197,32 @@ const ar: Dict = {
     connSheetPhoneLabel: "رقم الهاتف (اختياري، للربط بالرمز)",
     connSheetShowQrButton: "إظهار رمز الربط",
     connSheetNoSendNotice: "لن يُرسل أي شيء إلى عملائك أثناء الربط.",
+    killActivePill: "إيقاف طارئ",
+    killSheetBody:
+      "الإرسال من الصندوق موقوف طارئاً من لوحة الإدارة. الرسائل الواردة تصل، والملاحظات الداخلية متاحة، ولن يغادر أي رد واتساب حتى يُرفع الإيقاف.",
+    killEngageLabel: "إيقاف طارئ للإرسال",
+    killResumeLabel: "استئناف الإرسال",
+    killConfirmTitle: "تأكيد الإيقاف الطارئ",
+    killConfirmBody:
+      "سيُمنع كل إرسال واتساب من الصندوق فوراً دون إعادة تشغيل. يمكن التراجع لاحقاً من هنا.",
+    killConfirmAction: "إيقاف الإرسال الآن",
+    killCancel: "إلغاء",
+    killResumeConfirmTitle: "استئناف الإرسال؟",
+    killResumeConfirmBody:
+      "سيُسمح مجدداً بإرسال الردود من الصندوق وفق إعدادات الخادم وحدود المعدّل.",
+    killEngageDone: "تم تفعيل الإيقاف الطارئ",
+    killResumeDone: "تم استئناف الإرسال",
+    killSwitchError: "تعذّر تحديث الإيقاف الطارئ",
+    killMeta: "بواسطة {by} · {when}",
+    killStoppedBy: "أوقفه",
+    killReasonPrefix: "السبب",
+    killReasonLabel: "السبب (اختياري)",
+    killReasonPlaceholder: "مثال: اشتباه حظر / صيانة",
+    retrySend: "إعادة المحاولة",
+    rateLimitLabel: "الحد العام للإرسال (رسالة/دقيقة)",
+    rateLimitSave: "حفظ",
+    rateLimitSaved: "تم حفظ حد الإرسال",
+    rateLimitSaveError: "تعذّر حفظ حد الإرسال",
     navHint: "تنقّل",
     searchHint: "بحث",
     escHint: "إغلاق/رجوع",
@@ -3874,6 +3925,7 @@ const en: Dict = {
     newMessagesOther: "{n} new messages",
     bannerOutboundOff:
       "Sending from the inbox is currently paused. Messages still arrive and you can add internal notes, but a reply is saved here and may need following up from your phone.",
+    bannerKillSwitch: "Outbound paused (emergency)",
     bannerReconnecting: "Reconnecting to WhatsApp… new messages may be delayed.",
     bannerDisconnected: "WhatsApp is disconnected. New messages won't arrive until it's reconnected.",
     bannerPairAction: "Link account",
@@ -3922,6 +3974,32 @@ const en: Dict = {
     connSheetPhoneLabel: "Phone number (optional, for code pairing)",
     connSheetShowQrButton: "Show pairing code",
     connSheetNoSendNotice: "Nothing is sent to your customers while pairing.",
+    killActivePill: "Emergency stop",
+    killSheetBody:
+      "Outbound from the inbox is emergency-paused by an admin. Inbound still arrives and notes work; no WhatsApp reply leaves until the stop is lifted.",
+    killEngageLabel: "Emergency stop outbound",
+    killResumeLabel: "Resume outbound",
+    killConfirmTitle: "Confirm emergency stop",
+    killConfirmBody:
+      "All inbox WhatsApp sends stop immediately with no restart. You can reverse this here later.",
+    killConfirmAction: "Stop outbound now",
+    killCancel: "Cancel",
+    killResumeConfirmTitle: "Resume outbound?",
+    killResumeConfirmBody:
+      "Inbox replies will be allowed again, subject to server flags and rate limits.",
+    killEngageDone: "Emergency stop engaged",
+    killResumeDone: "Outbound resumed",
+    killSwitchError: "Could not update emergency stop",
+    killMeta: "by {by} · {when}",
+    killStoppedBy: "Stopped by",
+    killReasonPrefix: "Reason",
+    killReasonLabel: "Reason (optional)",
+    killReasonPlaceholder: "e.g. ban risk / maintenance",
+    retrySend: "Retry",
+    rateLimitLabel: "Global send rate (messages / minute)",
+    rateLimitSave: "Save",
+    rateLimitSaved: "Send rate saved",
+    rateLimitSaveError: "Could not save send rate",
     navHint: "Navigate",
     searchHint: "Search",
     escHint: "Close/back",
