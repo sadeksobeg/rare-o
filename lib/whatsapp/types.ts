@@ -221,8 +221,51 @@ export function isFakeWhatsAppAdapter(): boolean {
   return process.env.WHATSAPP_ADAPTER?.trim().toLowerCase() === "fake";
 }
 
-export function isOutboundEnabled(): boolean {
+/** In-memory mirror of WhatsAppConnectionHealth.outboundKillSwitch (W1). */
+let outboundKillSwitchCached = false;
+let outboundKillSwitchCachedAt = 0;
+const KILL_SWITCH_TTL_MS = 2_000;
+
+export function primeOutboundKillSwitch(value: boolean): void {
+  outboundKillSwitchCached = value;
+  outboundKillSwitchCachedAt = Date.now();
+}
+
+export function getCachedOutboundKillSwitch(): boolean {
+  return outboundKillSwitchCached;
+}
+
+/** Env kill switch only (ignores DB runtime switch). */
+export function isOutboundEnvEnabled(): boolean {
   const raw = process.env.WHATSAPP_OUTBOUND_ENABLED?.trim().toLowerCase();
   if (raw === undefined || raw === "") return false;
   return raw === "1" || raw === "true" || raw === "yes" || raw === "on";
+}
+
+/**
+ * Outbound allowed when env is on AND the runtime DB kill switch is off.
+ * Callers that can await should refresh the cache via syncOutboundKillSwitch
+ * before relying on a fresh value across process boundaries.
+ */
+export function isOutboundEnabled(): boolean {
+  if (!isOutboundEnvEnabled()) return false;
+  return !outboundKillSwitchCached;
+}
+
+/** Refresh kill-switch cache from DB (TTL ~2s). Safe to call often. */
+export async function syncOutboundKillSwitch(
+  loader: () => Promise<boolean | null | undefined>
+): Promise<boolean> {
+  const now = Date.now();
+  if (now - outboundKillSwitchCachedAt < KILL_SWITCH_TTL_MS) {
+    return outboundKillSwitchCached;
+  }
+  try {
+    const value = await loader();
+    outboundKillSwitchCached = value === true;
+    outboundKillSwitchCachedAt = now;
+  } catch {
+    // Keep last known value on transient DB errors.
+  }
+  return outboundKillSwitchCached;
 }

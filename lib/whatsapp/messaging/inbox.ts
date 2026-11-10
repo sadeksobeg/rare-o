@@ -16,7 +16,10 @@ import {
   type WhatsAppLinkType,
 } from "@/lib/whatsapp/messaging/link-constants";
 import { mediaUrl, parseStorageKey } from "@/lib/whatsapp/media";
-import { isOutboundEnabled } from "@/lib/whatsapp/types";
+import {
+  isOutboundEnvEnabled,
+  primeOutboundKillSwitch,
+} from "@/lib/whatsapp/types";
 
 export type DbClient = PrismaClient;
 
@@ -55,6 +58,8 @@ export type InboxMessageItem = {
   mediaUrl: string | null;
   status: string;
   errorSafe: string | null;
+  /** Outbound idempotency key — used to reconcile optimistic UI bubbles */
+  clientRequestId: string | null;
   waTimestamp: string | null;
   createdAt: string;
 };
@@ -103,6 +108,8 @@ export type InboxHealthView = {
   lastHeartbeatAt: string | null;
   updatedAt: string | null;
   outboundEnabled: boolean;
+  /** Runtime DB kill switch (W1) — independent of env flag */
+  outboundKillSwitch: boolean;
   /** Admin-only pairing display (ephemeral; null once expired / cleared) */
   pairingPhone: string | null;
   pairingCode: string | null;
@@ -305,6 +312,7 @@ export async function getInboxConversation(
           : null,
         status: m.status,
         errorSafe: m.errorSafe,
+        clientRequestId: m.clientRequestId ?? null,
         waTimestamp: toIso(m.waTimestamp),
         createdAt: m.createdAt.toISOString(),
       };
@@ -448,6 +456,9 @@ async function getInboxHealthViewImpl(
   // but it must not say "connected" while unconfirmed.
   const state = rawState === "CONNECTED" && heartbeatStale ? "RECONNECTING" : rawState;
 
+  const kill = row?.outboundKillSwitch === true;
+  primeOutboundKillSwitch(kill);
+
   return {
     state,
     rawState,
@@ -455,7 +466,8 @@ async function getInboxHealthViewImpl(
     lastConnectedAt: toIso(row?.lastConnectedAt ?? null),
     lastHeartbeatAt: toIso(row?.lastHeartbeatAt ?? null),
     updatedAt: toIso(row?.updatedAt ?? null),
-    outboundEnabled: isOutboundEnabled(),
+    outboundEnabled: isOutboundEnvEnabled() && !kill,
+    outboundKillSwitch: kill,
     pairingPhone: row?.pairingPhone ?? null,
     pairingCode: pairingExpired ? null : (row?.pairingCode ?? null),
     qrDataUrl: pairingExpired ? null : (row?.qrDataUrl ?? null),

@@ -500,11 +500,13 @@ model WhatsAppMessage {
   waMessageId      String?              @unique
   /// Admin action idempotency key — outbound (unique when present)
   clientRequestId  String?              @unique
-  /// received | pending | sending | sent | failed
+  /// received | pending(=queued) | sending | sent | delivered | read | failed
   status           String
   /// Outbound attempt counter (bounded retry). Inbound stays 0.
   attemptCount     Int                  @default(0)
   lastAttemptAt    DateTime?
+  /// Earliest time a pending outbound may be claimed again (exponential backoff)
+  nextRetryAt      DateTime?
   /// Safe operator error — never session/QR material
   errorSafe        String?
   /// WhatsApp-side timestamp when known
@@ -516,6 +518,7 @@ model WhatsAppMessage {
   @@index([conversationId, createdAt])
   @@index([status])
   @@index([direction])
+  @@index([nextRetryAt])
 }
 
 /// Persisted mirror of the in-memory outbound anti-ban rate limiter
@@ -564,6 +567,21 @@ model WhatsAppConnectionHealth {
   /// none | pair | qr | reconnect | logout — consumed by the worker
   linkCommand      String?   @default("none")
   pairingExpiresAt DateTime?
+  /// Runtime outbound kill (W1) — ANDed with WHATSAPP_OUTBOUND_ENABLED env.
+  /// Flip from admin UI without restarting web/worker processes.
+  outboundKillSwitch Boolean @default(false)
+}
+
+/// Durable inbox realtime log for SSE resume (Last-Event-ID) + LISTEN/NOTIFY.
+/// Payload must stay free of phones, QR, session material, and full bodies.
+model WhatsAppInboxEvent {
+  id          String   @id @default(cuid())
+  /// message.new | message.status | conversation.updated | connection.state
+  type        String
+  payloadJson String
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
 }
 
 /// Simple auditable trail for explicit WhatsApp ↔ domain linking (Phase D).

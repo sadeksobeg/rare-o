@@ -160,6 +160,8 @@ export async function adminSendWhatsAppTextAction(
     text,
     clientRequestId,
     adminId: session.sub,
+    // W1: never invent a cold conversation from the admin composer
+    allowCreateConversation: false,
   });
 
   if (!result.ok) {
@@ -478,7 +480,17 @@ export async function adminRetryWhatsAppMessageAction(
 
   await prisma.whatsAppMessage.update({
     where: { id: messageId },
-    data: { status: "pending", errorSafe: null },
+    data: { status: "pending", errorSafe: null, nextRetryAt: null },
+  });
+
+  const { publishInboxEvent } = await import(
+    "@/lib/whatsapp/messaging/inbox-events"
+  );
+  void publishInboxEvent("message.status", {
+    conversationId: row.conversationId,
+    messageId: row.id,
+    status: "pending",
+    direction: "outbound",
   });
 
   revalidatePath("/admin/inbox");
@@ -736,3 +748,30 @@ export async function adminRemoveInboxTagAction(
   revalidatePath(`/admin/inbox/${conversationId}`);
   return { ok: true, data: { tags } };
 }
+
+/** W1 runtime outbound kill — no .env edit, no session touch, no restart. */
+export async function adminSetOutboundKillSwitchAction(
+  formData: FormData
+): Promise<ActionResult & { data?: { outboundEnabled: boolean; killSwitch: boolean } }> {
+  try {
+    await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const raw = String(formData.get("enabled") || "").trim().toLowerCase();
+  const enabled = raw === "1" || raw === "true" || raw === "yes" || raw === "on";
+  const { setOutboundKillSwitch } = await import(
+    "@/lib/whatsapp/messaging/outbound-kill-switch"
+  );
+  const result = await setOutboundKillSwitch(enabled);
+  if (!result.ok) return { ok: false, error: result.error };
+  revalidatePath("/admin/inbox");
+  return {
+    ok: true,
+    data: {
+      outboundEnabled: result.outboundEnabled,
+      killSwitch: enabled,
+    },
+  };
+}
+

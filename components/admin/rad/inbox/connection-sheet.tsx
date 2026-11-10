@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { ChevronDown, QrCode, Unlink, X } from "lucide-react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { ChevronDown, OctagonX, QrCode, Unlink, X } from "lucide-react";
 import type { InboxHealthView } from "@/lib/whatsapp/messaging/inbox";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import { adminSetOutboundKillSwitchAction } from "@/app/whatsapp-actions";
 import { cn } from "@/lib/utils";
 
 function pillState(health: InboxHealthView): "connected" | "outbound-off" | "disconnected" | "reconnecting" {
@@ -25,9 +28,29 @@ function pillState(health: InboxHealthView): "connected" | "outbound-off" | "dis
  */
 export function RadConnectionSheet({ health, ib }: { health: InboxHealthView; ib: Dictionary["ib"] }) {
   const [open, setOpen] = useState(false);
+  const [pending, startTransition] = useTransition();
+  const router = useRouter();
   const triggerRef = useRef<Element | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const state = pillState(health);
+
+  function toggleKillSwitch(enabled: boolean) {
+    startTransition(async () => {
+      const fd = new FormData();
+      fd.set("enabled", enabled ? "true" : "false");
+      const result = await adminSetOutboundKillSwitchAction(fd);
+      if (!result.ok) {
+        toast.error(ib.connSheetNoSendNotice);
+        return;
+      }
+      toast.success(
+        enabled
+          ? ib.connOutboundOff
+          : ib.connConnected
+      );
+      router.refresh();
+    });
+  }
 
   useEffect(() => {
     if (open) {
@@ -113,6 +136,15 @@ export function RadConnectionSheet({ health, ib }: { health: InboxHealthView; ib
               <button type="button" className="rad-btn rad-gh" disabled title={ib.connSheetNoSendNotice}>
                 <Unlink width={16} height={16} strokeWidth={1.5} aria-hidden />
                 {ib.connSheetDisconnectButton}
+              </button>
+              <button
+                type="button"
+                className="rad-btn rad-gh"
+                disabled={pending}
+                onClick={() => toggleKillSwitch(!health.outboundKillSwitch)}
+              >
+                <OctagonX width={16} height={16} strokeWidth={1.5} aria-hidden />
+                {health.outboundKillSwitch ? ib.connConnected : ib.connOutboundOff}
               </button>
             </>
           ) : (

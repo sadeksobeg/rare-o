@@ -75,6 +75,7 @@ function buildRichFixture(): AdminHomeData {
       lastHeartbeatAt: hoursAgo(0.01).toISOString(),
       updatedAt: hoursAgo(0.2).toISOString(),
       outboundEnabled: false,
+      outboundKillSwitch: false,
       pairingPhone: null,
       pairingCode: null,
       qrDataUrl: null,
