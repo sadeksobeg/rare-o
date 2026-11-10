@@ -1,0 +1,259 @@
+{
+  "at": "2026-11-09T07:25:36.907Z",
+  "totalStops": 24,
+  "stopsWithoutVisibleFocusRing": 0,
+  "paletteOpenedViaCtrlK": true,
+  "focusReturnedAfterEscape": true,
+  "steps": [
+    {
+      "step": "tab-1",
+      "ok": true,
+      "tag": "A",
+      "cls": "ro-portal-nav-link relative active:scale-[0.98] motion-reduc",
+      "label": "لوحة التحكم",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-2",
+      "ok": true,
+      "tag": "A",
+      "cls": "ro-portal-nav-link relative active:scale-[0.98] motion-reduc",
+      "label": "صندوق واتساب5",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-3",
+      "ok": true,
+      "tag": "A",
+      "cls": "ro-portal-nav-link relative active:scale-[0.98] motion-reduc",
+      "label": "طلبات التجزئة19",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-4",
+      "ok": true,
+      "tag": "A",
+      "cls": "ro-portal-nav-link relative active:scale-[0.98] motion-reduc",
+      "label": "الصفقات",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-5",
+      "ok": true,
+      "tag": "A",
+      "cls": "ro-portal-nav-link relative active:scale-[0.98] motion-reduc",
+      "label": "الجملة",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-6",
+      "ok": true,
+      "tag": "A",
+      "cls": "ro-portal-nav-link relative active:scale-[0.98] motion-reduc",
+      "label": "الوساطة1",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-7",
+      "ok": true,
+      "tag": "A",
+      "cls": "ro-portal-nav-link relative active:scale-[0.98] motion-reduc",
+      "label": "المنتجات",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-8",
+      "ok": true,
+      "tag": "A",
+      "cls": "ro-portal-nav-link relative active:scale-[0.98] motion-reduc",
+      "label": "الفئات",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-9",
+      "ok": true,
+      "tag": "A",
+      "cls": "ro-portal-nav-link relative active:scale-[0.98] motion-reduc",
+      "label": "العروض",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-10",
+      "ok": true,
+      "tag": "A",
+      "cls": "ro-portal-nav-link relative active:scale-[0.98] motion-reduc",
+      "label": "العملاء",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-11",
+      "ok": true,
+      "tag": "A",
+      "cls": "ro-portal-nav-link relative active:scale-[0.98] motion-reduc",
+      "label": "التجّار",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-12",
+      "ok": true,
+      "tag": "A",
+      "cls": "ro-portal-nav-link relative active:scale-[0.98] motion-reduc",
+      "label": "الفريق",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-13",
+      "ok": true,
+      "tag": "A",
+      "cls": "ro-portal-nav-link relative active:scale-[0.98] motion-reduc",
+      "label": "مركز التنبيهات",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-14",
+      "ok": true,
+      "tag": "A",
+      "cls": "ro-portal-nav-link relative active:scale-[0.98] motion-reduc",
+      "label": "الإعدادات",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "ctrl-k-open",
+      "tag": "INPUT",
+      "inPalette": true
+    },
+    {
+      "step": "escape-close",
+      "tag": "A",
+      "isBody": false
+    },
+    {
+      "step": "tab-card-1",
+      "ok": true,
+      "tag": "BUTTON",
+      "cls": "rad-colbtn",
+      "label": "طيّ القائمة",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-card-2",
+      "ok": true,
+      "tag": "BUTTON",
+      "cls": "rad-search",
+      "label": "بحث أو أمر",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-card-3",
+      "ok": true,
+      "tag": "A",
+      "cls": "rad-ib rad-hide-m",
+      "label": "الإشعارات",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-card-4",
+      "ok": true,
+      "tag": "A",
+      "cls": "rad-ib rad-hide-m",
+      "label": "صندوق واتساب",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-card-5",
+      "ok": true,
+      "tag": "BUTTON",
+      "cls": "rad-ib",
+      "label": "فاتح",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-card-6",
+      "ok": true,
+      "tag": "BUTTON",
+      "cls": "rad-ib",
+      "label": "EN",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-card-7",
+      "ok": true,
+      "tag": "BUTTON",
+      "cls": "rad-btn rad-gh",
+      "label": "تصدير",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-card-8",
+      "ok": true,
+      "tag": "A",
+      "cls": "rad-btn rad-pri",
+      "label": "إنشاء",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-card-9",
+      "ok": true,
+      "tag": "BUTTON",
+      "cls": "rad-on",
+      "label": "الكل19",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    },
+    {
+      "step": "tab-card-10",
+      "ok": true,
+      "tag": "BUTTON",
+      "cls": "",
+      "label": "تجزئة19",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none"
+    }
+  ]
+}

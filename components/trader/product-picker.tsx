@@ -1,7 +1,8 @@
 "use client";
 
 import { QtyStepper } from "@/components/storefront/qty-stepper";
-import { EmptyState } from "@/components/ui/empty-state";
+import { EmptyState } from "@/components/ui-kit/empty-state";
+import { Input } from "@/components/ui-kit/field";
 import { fmt, type TraderDict } from "@/lib/ui/trader-labels";
 import { WHOLESALE_QTY_TECHNICAL_MAX } from "@/lib/wholesale/constants";
 import type { Locale } from "@/lib/i18n/config";
@@ -16,6 +17,7 @@ export type PickerProduct = {
   categorySlug?: string | null;
   categoryNameEn?: string | null;
   categoryNameAr?: string | null;
+  imagePath?: string | null;
 };
 
 /** T05 — eligible products grid; QtyStepper; search + category chips; no prices. */
@@ -26,6 +28,7 @@ export function ProductPicker({
   labels: t,
   locale,
   className,
+  variant = "qty",
 }: {
   products: PickerProduct[];
   qtyById: Record<string, number>;
@@ -33,6 +36,8 @@ export function ProductPicker({
   labels: TraderDict;
   locale: Locale;
   className?: string;
+  /** `single` picks one catalog piece (deal wizard); `qty` is wholesale. */
+  variant?: "qty" | "single";
 }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string>("all");
@@ -77,9 +82,9 @@ export function ProductPicker({
     }
     setQtyErrors((prev) => {
       if (!prev[id]) return prev;
-      const next = { ...prev };
-      delete next[id];
-      return next;
+      const nextErr = { ...prev };
+      delete nextErr[id];
+      return nextErr;
     });
     onQtyChange(id, Math.max(0, next));
   }
@@ -91,15 +96,17 @@ export function ProductPicker({
   }
 
   return (
-    <div className={cn("space-y-4", className)}>
-      <label className="block space-y-1.5 text-sm">
+    <div className={cn("max-w-full space-y-4 overflow-x-clip", className)}>
+      <label className="block max-w-full space-y-1.5 text-sm">
         <span className="sr-only">{t.wsPickerSearch}</span>
-        <input
+        <Input
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t.wsPickerSearch}
-          className="min-h-11 w-full rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-paper px-3 py-2 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") e.preventDefault();
+          }}
         />
       </label>
 
@@ -107,7 +114,7 @@ export function ProductPicker({
         <div
           role="group"
           aria-label={t.wsPickerAllCategories}
-          className="flex gap-2 overflow-x-auto pb-1"
+          className="-mx-0 flex max-w-full gap-2 overflow-x-auto overscroll-x-contain pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           <Chip
             active={category === "all"}
@@ -125,7 +132,7 @@ export function ProductPicker({
         </div>
       ) : null}
 
-      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      <ul className="ro-picker-grid grid w-full max-w-full grid-cols-2 gap-2 overflow-x-hidden md:grid-cols-3 md:gap-3 lg:grid-cols-4">
         {filtered.map((p) => {
           const name =
             locale === "ar" ? p.nameAr || p.nameEn : p.nameEn || p.nameAr;
@@ -133,17 +140,35 @@ export function ProductPicker({
           return (
             <li
               key={p.id}
-              className="flex flex-col gap-3 border border-ro-line bg-ro-surface p-3"
+              className="box-border flex min-w-0 w-full max-w-full flex-col gap-2 overflow-hidden rounded-[var(--rad-r-sm,10px)] border border-[color:var(--rad-bd)] bg-[color:var(--rad-surface2)] p-2 sm:gap-3 sm:p-3"
             >
+              <div className="aspect-square overflow-hidden rounded-[var(--rad-r-sm,10px)] bg-[color:var(--rad-surface3)]">
+                {p.imagePath ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- upload paths vary; avoid next/image remote config
+                  <img
+                    src={p.imagePath}
+                    alt=""
+                    className="size-full object-cover"
+                  />
+                ) : (
+                  <div className="flex size-full items-center justify-center text-xs text-[color:var(--rad-tx3)]">
+                    —
+                  </div>
+                )}
+              </div>
               <div className="min-w-0 flex-1 space-y-1">
-                <p className="text-sm font-semibold leading-snug">{name}</p>
+                <p className="line-clamp-2 break-words text-sm font-semibold leading-snug">
+                  {name}
+                </p>
                 {(() => {
                   const cat =
                     locale === "ar"
                       ? p.categoryNameAr || p.categoryNameEn
                       : p.categoryNameEn || p.categoryNameAr;
                   return cat ? (
-                    <p className="truncate text-xs text-ro-muted">{cat}</p>
+                    <p className="truncate text-xs text-[color:var(--rad-tx3)]">
+                      {cat}
+                    </p>
                   ) : null;
                 })()}
               </div>
@@ -154,6 +179,14 @@ export function ProductPicker({
                   className="min-h-11 w-full border border-ro-line text-sm hover:bg-ro-sunken"
                 >
                   {t.wsAddPiece}
+                </button>
+              ) : variant === "single" ? (
+                <button
+                  type="button"
+                  onClick={() => setQty(p.id, 0)}
+                  className="min-h-11 w-full border border-[var(--ro-plum-900)] bg-[var(--ro-plum-100)] text-sm font-semibold text-[var(--ro-plum-900)]"
+                >
+                  {t.wsRemovePiece}
                 </button>
               ) : (
                 <div className="space-y-1">

@@ -1,0 +1,68 @@
+{
+  "at": "2026-11-09T06:33:53.032Z",
+  "url": "http://127.0.0.1:3000/admin",
+  "runsPerRoute": 2,
+  "desktop": {
+    "width": 1440,
+    "height": 900
+  },
+  "median": {
+    "performance": 0.5700000000000001,
+    "accessibility": 0.99
+  },
+  "runs": [
+    {
+      "performance": 0.65,
+      "accessibility": 0.99,
+      "finalUrl": "http://127.0.0.1:3000/admin",
+      "opportunities": [
+        {
+          "id": "unused-javascript",
+          "title": "Reduce unused JavaScript",
+          "score": 0,
+          "savingsMs": 150
+        }
+      ],
+      "a11yIssues": [
+        {
+          "id": "aria-allowed-role",
+          "title": "Uses ARIA roles on incompatible elements",
+          "score": 0
+        },
+        {
+          "id": "label-content-name-mismatch",
+          "title": "Elements with visible text labels do not have matching accessible names.",
+          "score": 0
+        }
+      ],
+      "run": 1
+    },
+    {
+      "performance": 0.49,
+      "accessibility": 0.99,
+      "finalUrl": "http://127.0.0.1:3000/admin",
+      "opportunities": [
+        {
+          "id": "unused-javascript",
+          "title": "Reduce unused JavaScript",
+          "score": 0,
+          "savingsMs": 150
+        }
+      ],
+      "a11yIssues": [
+        {
+          "id": "aria-allowed-role",
+          "title": "Uses ARIA roles on incompatible elements",
+          "score": 0
+        },
+        {
+          "id": "label-content-name-mismatch",
+          "title": "Elements with visible text labels do not have matching accessible names.",
+          "score": 0
+        }
+      ],
+      "run": 2
+    }
+  ],
+  "note": "Authenticated via a real admin login session (Playwright cookie passed to Lighthouse via extraHeaders)."
+}

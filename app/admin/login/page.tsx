@@ -1,35 +1,57 @@
 import type { Metadata } from "next";
 import { adminLoginAction } from "@/app/actions";
 import { LoginForm } from "@/components/auth/login-form";
-import { AdminLocaleToggle } from "@/components/admin/locale-toggle";
+import { whatsAppGreetingLink } from "@/lib/config/contact";
 import { getRequestDictionary } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function AdminLoginPage() {
-  const { locale, dict } = await getRequestDictionary();
+export default async function AdminLoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ returnTo?: string; notice?: string }>;
+}) {
+  const { dict } = await getRequestDictionary();
+  const { returnTo, notice } = await searchParams;
+  const a = dict.auth;
 
   return (
     <LoginForm
       action={adminLoginAction}
-      title={dict.auth.adminTitle}
       brand={dict.brand}
+      role="admin"
+      roleAdminLabel={a.roleAdmin}
+      roleTraderLabel={a.roleTrader}
+      tagline={a.tagline}
+      headline={a.headline}
+      title={a.adminTitle}
+      subtitle={a.adminSubtitle}
       emailLabel={dict.common.email}
       passwordLabel={dict.common.password}
       submitLabel={dict.common.signIn}
-      showPasswordLabel={dict.auth.showPassword}
-      hidePasswordLabel={dict.auth.hidePassword}
-      loginErrorLabel={dict.auth.loginError}
-      totpLabel="2FA / recovery"
-      inverse
-      localeSlot={
-        <AdminLocaleToggle
-          locale={locale}
-          label={dict.common.language}
-          tone="on-dark"
-        />
+      showPasswordLabel={a.showPassword}
+      hidePasswordLabel={a.hidePassword}
+      loginErrorLabel={a.loginError}
+      loginLockedLabel={a.loginLocked}
+      totpLabel={a.totpLabel}
+      totpRequiredLabel={a.totpRequired}
+      totpInvalidLabel={a.totpInvalid}
+      totpEnrollLabel={a.totpEnrollRequired}
+      capsLockLabel={a.capsLockOn}
+      rateLimitFooter={a.rateLimitFooter}
+      forgotPasswordLabel={a.forgotPassword}
+      forgotTitle={a.forgotTitle}
+      forgotSubtitle={a.forgotSubtitle}
+      forgotWhatsAppLabel={a.forgotWhatsApp}
+      forgotWhatsAppHref={whatsAppGreetingLink(a.forgotWhatsAppMessage)}
+      backToSignInLabel={a.backToSignIn}
+      returnTo={returnTo}
+      notice={
+        notice === "session_invalidated"
+          ? a.sessionInvalidatedNotice
+          : undefined
       }
     />
   );

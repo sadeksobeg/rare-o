@@ -3,6 +3,39 @@ import type { Locale } from "@/lib/i18n/config";
 
 const tz = process.env.APP_TIMEZONE || "Asia/Damascus";
 
+export const APP_TIMEZONE = tz;
+
+/** Calendar day `YYYY-MM-DD` in `APP_TIMEZONE`. */
+export function formatDayKey(date: Date): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
+/** Oldest-first calendar keys ending today (`APP_TIMEZONE`), length `n`. */
+export function lastCalendarDayKeys(n: number, from = new Date()): string[] {
+  const today = formatDayKey(from);
+  const [year, month, day] = today.split("-").map(Number);
+  const keys: string[] = [];
+  for (let i = n - 1; i >= 0; i -= 1) {
+    const utc = new Date(Date.UTC(year, month - 1, day - i));
+    keys.push(utc.toISOString().slice(0, 10));
+  }
+  return keys;
+}
+
+export function hourInAppTimezone(date = new Date()): number {
+  const hour = new Intl.DateTimeFormat("en-GB", {
+    timeZone: tz,
+    hour: "numeric",
+    hourCycle: "h23",
+  }).format(date);
+  return Number.parseInt(hour, 10);
+}
+
 function localeTag(locale: Locale) {
   return `${locale}-u-nu-latn`;
 }
@@ -46,6 +79,30 @@ export function formatDate(
     timeZone: tz,
     ...options,
   }).format(date);
+}
+
+/**
+ * Compact chat-list timestamp (round 3 inbox): today → HH:mm, yesterday →
+ * "Yesterday", within the last 6 days → weekday name, older → short date
+ * ("5 Nov"). All computed against APP_TIMEZONE so "today"/"yesterday" match
+ * the business's own calendar day, not the server's UTC day.
+ */
+export function formatCompactChatTime(value: Date | string, locale: Locale) {
+  const date = typeof value === "string" ? new Date(value) : value;
+  const dayKey = formatDayKey(date);
+  const todayKey = formatDayKey(new Date());
+  const yesterdayKey = formatDayKey(new Date(Date.now() - 86_400_000));
+  if (dayKey === todayKey) {
+    return formatDate(date, locale, { hour: "2-digit", minute: "2-digit", hour12: false });
+  }
+  if (dayKey === yesterdayKey) {
+    return locale === "ar" ? "أمس" : "Yesterday";
+  }
+  const daysAgo = Math.round((new Date(todayKey).getTime() - new Date(dayKey).getTime()) / 86_400_000);
+  if (daysAgo >= 0 && daysAgo < 6) {
+    return formatDate(date, locale, { weekday: "long" });
+  }
+  return formatDate(date, locale, { day: "numeric", month: "short" });
 }
 
 export function formatRelative(value: Date | string, locale: Locale) {

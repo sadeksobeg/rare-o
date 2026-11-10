@@ -46,6 +46,7 @@ export function BrandMark({
         tone === "on-dark" && "ro-mark-on-dark",
         className
       )}
+      suppressHydrationWarning
     />
   );
 }

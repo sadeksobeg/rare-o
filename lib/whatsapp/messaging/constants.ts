@@ -1,14 +1,39 @@
 /**
- * WhatsApp messaging domain constants (Stage A text-only).
- * Communication layer — not Retail / Deal / Wholesale.
+ * WhatsApp messaging domain constants (human admin desk).
  */
 
 export const WHATSAPP_MESSAGE_DIRECTIONS = ["inbound", "outbound"] as const;
 export type WhatsAppMessageDirection =
   (typeof WHATSAPP_MESSAGE_DIRECTIONS)[number];
 
-export const WHATSAPP_MESSAGE_TYPES = ["text", "unsupported"] as const;
+export const WHATSAPP_MESSAGE_TYPES = [
+  "text",
+  "image",
+  "video",
+  "audio",
+  "document",
+  "sticker",
+  "location",
+  "contact",
+  "unsupported",
+] as const;
 export type WhatsAppMessageType = (typeof WHATSAPP_MESSAGE_TYPES)[number];
+
+export const WHATSAPP_MEDIA_MESSAGE_TYPES = [
+  "image",
+  "video",
+  "audio",
+  "document",
+  "sticker",
+] as const;
+export type WhatsAppMediaMessageType =
+  (typeof WHATSAPP_MEDIA_MESSAGE_TYPES)[number];
+
+export function isWhatsAppMediaMessageType(
+  value: string
+): value is WhatsAppMediaMessageType {
+  return (WHATSAPP_MEDIA_MESSAGE_TYPES as readonly string[]).includes(value);
+}
 
 export {
   MAX_OUTBOUND_ATTEMPTS,

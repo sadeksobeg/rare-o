@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { Sparkles } from "lucide-react";
 import { notFound } from "next/navigation";
+import { Reveal } from "@/components/motion/reveal";
 import { TraderPageHeader } from "@/components/trader/page-header";
-import { ButtonLink } from "@/components/ui/button";
 import { requireTraderSession } from "@/lib/auth/trader-session";
 import { getPublishedPublicOfferBySlug } from "@/lib/offers/service";
 import { getRequestDictionary } from "@/lib/i18n/server";
@@ -37,38 +38,44 @@ export default async function TraderOfferDetailPage({
     : null;
 
   return (
-    <section className="ro-portal-stagger space-y-6">
-      <Link
-        href="/trader/offers"
-        className="inline-flex text-sm font-semibold text-[var(--ro-plum-900)] hover:underline"
-      >
-        ← {t.offersBack}
-      </Link>
-
-      <TraderPageHeader title={title} description={t.offersLead} />
+    <section className="space-y-6">
+      <TraderPageHeader
+        title={title}
+        description={t.offersLead}
+        icon={<Sparkles className="size-5" strokeWidth={1.5} />}
+        backHref="/trader/offers"
+        backLabel={t.offersBack}
+      />
 
       {summary ? (
-        <div className="ro-portal-card max-w-2xl whitespace-pre-wrap border p-5 text-base leading-relaxed text-ro-text-2">
-          {summary}
-        </div>
+        <Reveal>
+          <div className="rad-card max-w-2xl whitespace-pre-wrap p-5 text-base leading-relaxed text-[color:var(--rad-tx2)]">
+            {summary}
+          </div>
+        </Reveal>
       ) : null}
 
       {offer.product && productName ? (
-        <div className="ro-portal-card max-w-2xl border p-5">
-          <p className="ro-type-overline text-[var(--ro-plum-800)]">
+        <div className="rad-card max-w-2xl p-5">
+          <p className="ro-type-overline text-[color:var(--rad-ac)]">
             {t.offersRelatedProduct}
           </p>
-          <p className="mt-2 font-display text-xl font-semibold">{productName}</p>
+          <p className="mt-2 text-xl font-semibold text-[color:var(--rad-tx)]" style={{ fontFamily: "var(--rad-font, inherit)" }}>
+            {productName}
+          </p>
         </div>
       ) : null}
 
       <div className="flex flex-wrap gap-3">
-        <ButtonLink href="/trader/deals/new" variant="primary">
+        <Link
+          href={`/trader/deals/new?title=${encodeURIComponent(title)}`}
+          className="rad-btn rad-pri"
+        >
           {t.offersStartDeal}
-        </ButtonLink>
-        <ButtonLink href="/trader/offers" variant="secondary">
+        </Link>
+        <Link href="/trader/offers" className="rad-btn rad-gh">
           {t.offersBack}
-        </ButtonLink>
+        </Link>
       </div>
     </section>
   );

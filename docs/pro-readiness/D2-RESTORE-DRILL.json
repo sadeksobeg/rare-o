@@ -1,12 +1,12 @@
 {
   "ok": true,
-  "at": "2026-10-19T08:54:34.200Z",
+  "at": "2026-11-09T06:32:59.479Z",
   "tools": "docker",
-  "backupDir": "backups\\restore-drill-pg-1792400074199",
+  "backupDir": "backups\\restore-drill-pg-1794205979478",
   "dump": {
     "file": "db.dump",
-    "bytes": 74778,
-    "sha256": "4f264d0648278f6ec41e979d86c5cb25e6ad6f46addfc7737bae019e45be39d5"
+    "bytes": 164926,
+    "sha256": "83e9e6fa6564ebbbcdb6db549fc6ffa585393894d84edac4c3ee8ef55dc2fa8b"
   },
   "uploads": {
     "source": "public/uploads",
@@ -14,11 +14,17 @@
     "mismatches": []
   },
   "waAuth": {
-    "source": ".wa-auth",
-    "files": 0,
+    "source": "./.wa-auth",
+    "files": 32,
     "mismatches": []
   },
   "tables": [
+    {
+      "table": "AdminAuditLog",
+      "source": 149,
+      "restored": 149,
+      "ok": true
+    },
     {
       "table": "AdminUser",
       "source": 1,
@@ -26,39 +32,63 @@
       "ok": true
     },
     {
+      "table": "BrokerageEvent",
+      "source": 26,
+      "restored": 26,
+      "ok": true
+    },
+    {
+      "table": "BrokerageInspection",
+      "source": 3,
+      "restored": 3,
+      "ok": true
+    },
+    {
+      "table": "BrokerageQuote",
+      "source": 3,
+      "restored": 3,
+      "ok": true
+    },
+    {
+      "table": "BrokerageRequest",
+      "source": 3,
+      "restored": 3,
+      "ok": true
+    },
+    {
       "table": "Category",
-      "source": 2,
-      "restored": 2,
+      "source": 6,
+      "restored": 6,
       "ok": true
     },
     {
       "table": "Customer",
-      "source": 24,
-      "restored": 24,
+      "source": 81,
+      "restored": 81,
       "ok": true
     },
     {
       "table": "DealProposal",
-      "source": 22,
-      "restored": 22,
+      "source": 119,
+      "restored": 119,
       "ok": true
     },
     {
       "table": "NegotiationEntry",
-      "source": 54,
-      "restored": 54,
+      "source": 289,
+      "restored": 289,
       "ok": true
     },
     {
       "table": "Product",
-      "source": 21,
-      "restored": 21,
+      "source": 74,
+      "restored": 74,
       "ok": true
     },
     {
       "table": "ProductImage",
-      "source": 15,
-      "restored": 15,
+      "source": 25,
+      "restored": 25,
       "ok": true
     },
     {
@@ -69,38 +99,38 @@
     },
     {
       "table": "PublicCuratedOffer",
-      "source": 11,
-      "restored": 11,
+      "source": 67,
+      "restored": 67,
       "ok": true
     },
     {
       "table": "RetailHandoffEvent",
-      "source": 57,
-      "restored": 57,
+      "source": 252,
+      "restored": 252,
       "ok": true
     },
     {
       "table": "RetailRequest",
-      "source": 24,
-      "restored": 24,
+      "source": 79,
+      "restored": 79,
       "ok": true
     },
     {
       "table": "RetailRequestLine",
-      "source": 24,
-      "restored": 24,
+      "source": 79,
+      "restored": 79,
       "ok": true
     },
     {
       "table": "TraderAccount",
-      "source": 8,
-      "restored": 8,
+      "source": 3,
+      "restored": 3,
       "ok": true
     },
     {
       "table": "TraderNotification",
-      "source": 27,
-      "restored": 27,
+      "source": 324,
+      "restored": 324,
       "ok": true
     },
     {
@@ -111,8 +141,8 @@
     },
     {
       "table": "WhatsAppConversation",
-      "source": 1,
-      "restored": 1,
+      "source": 12,
+      "restored": 12,
       "ok": true
     },
     {
@@ -123,32 +153,38 @@
     },
     {
       "table": "WhatsAppMessage",
-      "source": 3,
-      "restored": 3,
+      "source": 236,
+      "restored": 236,
+      "ok": true
+    },
+    {
+      "table": "WhatsAppOutboundSafetyState",
+      "source": 0,
+      "restored": 0,
       "ok": true
     },
     {
       "table": "WholesaleRequest",
-      "source": 16,
-      "restored": 16,
-      "ok": true
-    },
-    {
-      "table": "WholesaleRequestEvent",
       "source": 53,
       "restored": 53,
       "ok": true
     },
     {
+      "table": "WholesaleRequestEvent",
+      "source": 207,
+      "restored": 207,
+      "ok": true
+    },
+    {
       "table": "WholesaleRequestLine",
-      "source": 16,
-      "restored": 16,
+      "source": 53,
+      "restored": 53,
       "ok": true
     },
     {
       "table": "_prisma_migrations",
-      "source": 1,
-      "restored": 1,
+      "source": 15,
+      "restored": 15,
       "ok": true
     }
   ]

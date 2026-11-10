@@ -22,10 +22,18 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 ARG DATABASE_URL=postgresql://rareoud:rareoud@postgres:5432/rareoud?schema=public
 ENV DATABASE_URL=$DATABASE_URL
+ARG SITE_URL=https://rareoud.com
+ARG SECURITY_EMAIL=security@rareoud.com
+ARG NEXT_PUBLIC_SITE_URL=https://rareoud.com
+ENV SITE_URL=$SITE_URL
+ENV SECURITY_EMAIL=$SECURITY_EMAIL
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 RUN npx prisma generate
 RUN npm run build
 # Keep tsx for the WhatsApp worker entry (TypeScript). Prune other devDeps.
-RUN npm prune --omit=dev && npm install tsx@4.19.3 --omit=dev --no-audit --no-fund
+RUN npm prune --omit=dev \
+  && npm install tsx@4.19.3 --save-prod --no-audit --no-fund \
+  && test -f node_modules/tsx/dist/cli.mjs
 
 FROM node:20-bookworm-slim AS runner
 WORKDIR /app
@@ -45,10 +53,12 @@ COPY --from=builder /app/worker ./worker
 COPY --from=builder /app/lib ./lib
 COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/tsconfig.json ./tsconfig.json
 COPY --from=builder /app/node_modules ./node_modules
 
-RUN mkdir -p /app/public/uploads /app/.wa-auth /app/backups \
-  && chown -R nextjs:nodejs /app/public/uploads /app/.wa-auth /app/backups /app/node_modules
+RUN mkdir -p /app/public/uploads /app/storage/uploads /app/.wa-auth /app/backups \
+  && chown -R nextjs:nodejs /app/public/uploads /app/storage /app/.wa-auth /app/backups /app/node_modules \
+  && test -f /app/node_modules/tsx/dist/cli.mjs
 
 USER nextjs
 EXPOSE 3000

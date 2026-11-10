@@ -1,28 +1,22 @@
-import Link from "next/link";
-import { Suspense } from "react";
 import {
-  DataTable,
-  DataTableHead,
-  Td,
-  Th,
-  Tr,
-} from "@/components/admin/data-table";
-import { PageHeader } from "@/components/admin/page-header";
-import { AdminTableFilters } from "@/components/admin/table-filters";
-import { EmptyState } from "@/components/ui/empty-state";
-import { StatusChip } from "@/components/ui/status-chip";
+  WholesaleListView,
+  type WholesaleListRow,
+} from "@/components/admin/rad/wholesale-list-view";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { wholesaleNextActor } from "@/lib/ui/status";
-import { getStatusChipProps } from "@/lib/ui/status-labels";
+import { adminPillToneForStatus } from "@/lib/ui/status-tone";
+import { getStatusLabel } from "@/lib/ui/status-labels";
 import { WHOLESALE_STATUSES } from "@/lib/wholesale/constants";
 import { listWholesaleRequestsForAdmin } from "@/lib/wholesale/service";
+
+const PAGE_SIZE = 40;
 
 export default async function AdminWholesalePage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; q?: string }>;
+  searchParams: Promise<{ tab?: string; q?: string; page?: string }>;
 }) {
-  const { tab: tabRaw, q: qRaw } = await searchParams;
+  const { tab: tabRaw, q: qRaw, page: pageRaw } = await searchParams;
   const { dict } = await getRequestDictionary();
   const a = dict.admin;
   const u = dict.adminUi;
@@ -56,98 +50,89 @@ export default async function AdminWholesalePage({
     return hay.includes(q);
   });
 
+  const page = Math.max(1, Number.parseInt(pageRaw || "1", 10) || 1);
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pageSafe = Math.min(page, pageCount);
+  const pageRows = filtered.slice(
+    (pageSafe - 1) * PAGE_SIZE,
+    pageSafe * PAGE_SIZE
+  );
+
   const statusLabel = (status: string) =>
-    u.status.wholesale[status] ??
-    dict.trader.wholesaleStatus[status] ??
+    getStatusLabel(dict, "wholesale", status) ||
+    dict.trader.wholesaleStatus[status] ||
     status;
 
+  const listRows: WholesaleListRow[] = pageRows.map(({ r, waiting }) => {
+    const shipping =
+      [r.carrier, r.trackingReference].filter(Boolean).join(" · ") ||
+      u.shippingPlaceholder;
+    return {
+      id: r.id,
+      reference: r.reference,
+      traderName: r.trader.displayName,
+      traderEmail: r.trader.email,
+      modeLabel:
+        r.requestMode === "request_quote"
+          ? u.modeRequestQuote
+          : r.requestMode === "propose_price"
+            ? u.modeProposePrice
+            : r.requestMode,
+      statusLabel: statusLabel(r.status),
+      pillTone: adminPillToneForStatus("wholesale", r.status),
+      waiting,
+      waitingLabel: u.waitingOnYou,
+      shipping,
+      lines: r._count.lines,
+      href: `/admin/wholesale/${r.id}`,
+    };
+  });
+
   return (
-    <section className="space-y-6">
-      <PageHeader title={a.wholesale} description={u.wholesaleLead} />
-      <Suspense fallback={null}>
-        <AdminTableFilters
-          tabsLabel={u.filterTabs}
-          searchLabel={u.search}
-          searchPlaceholder={u.searchPlaceholder}
-          resultCount={filtered.length}
-          resultLabel={u.resultsLabel}
-          tabs={[
-            { id: "all", label: u.filterAll, count: counts.all },
-            {
-              id: "waiting",
-              label: u.filterWaiting,
-              count: counts.waiting,
-            },
-            ...WHOLESALE_STATUSES.map((s) => ({
-              id: s,
-              label: statusLabel(s),
-              count: counts[s] ?? 0,
-            })),
-          ]}
-        />
-      </Suspense>
-      {filtered.length === 0 ? (
-        <div className="border border-ro-line">
-          <EmptyState title={u.emptyTitle} body={u.emptyBody} />
-        </div>
-      ) : (
-        <DataTable>
-          <DataTableHead>
-            <Th>{u.colReference}</Th>
-            <Th>{u.colTrader}</Th>
-            <Th>{u.colMode}</Th>
-            <Th>{a.colStatus}</Th>
-            <Th>{u.colShipping}</Th>
-            <Th>{u.colLines}</Th>
-            <Th />
-          </DataTableHead>
-          <tbody>
-            {filtered.map(({ r, waiting }) => (
-              <Tr key={r.id}>
-                <Td className="font-medium">{r.reference}</Td>
-                <Td>
-                  {r.trader.displayName}
-                  <div className="text-ro-muted" dir="ltr">
-                    {r.trader.email}
-                  </div>
-                </Td>
-                <Td>
-                  {r.requestMode === "request_quote"
-                    ? u.modeRequestQuote
-                    : r.requestMode === "propose_price"
-                      ? u.modeProposePrice
-                      : r.requestMode}
-                </Td>
-                <Td>
-                  <span className="flex flex-wrap items-center gap-2">
-                    <StatusChip
-                      size="sm"
-                      {...getStatusChipProps(dict, "wholesale", r.status)}
-                    />
-                    {waiting ? (
-                      <StatusChip
-                        size="sm"
-                        tone="attention"
-                        label={u.waitingOnYou}
-                      />
-                    ) : null}
-                  </span>
-                </Td>
-                <Td className="text-ro-muted">{u.shippingPlaceholder}</Td>
-                <Td className="tabular-nums">{r._count.lines}</Td>
-                <Td>
-                  <Link
-                    href={`/admin/wholesale/${r.id}`}
-                    className="text-ro-plum hover:underline"
-                  >
-                    {u.actionReview}
-                  </Link>
-                </Td>
-              </Tr>
-            ))}
-          </tbody>
-        </DataTable>
-      )}
-    </section>
+    <WholesaleListView
+      title={a.wholesale}
+      lead={u.wholesaleLead}
+      tabs={[
+        { value: "all", label: u.filterAll, count: counts.all },
+        {
+          value: "waiting",
+          label: u.filterWaiting,
+          count: counts.waiting,
+        },
+        ...WHOLESALE_STATUSES.map((s) => ({
+          value: s,
+          label: statusLabel(s),
+          count: counts[s] ?? 0,
+        })),
+      ]}
+      query={{ tab, q: qRaw?.trim() ?? "", page: pageSafe }}
+      rows={listRows}
+      totalFiltered={filtered.length}
+      pageCount={pageCount}
+      pageSize={PAGE_SIZE}
+      labels={{
+        listAria: a.wholesale,
+        statusFilterAria: u.filterTabs,
+        searchLabel: u.search,
+        searchPlaceholder: u.searchWholesale,
+        colReference: u.colReference,
+        colTrader: u.colTrader,
+        colMode: u.colMode,
+        colStatus: a.colStatus,
+        colShipping: u.colShipping,
+        colLines: u.colLines,
+        colActions: u.actionReview,
+        emptyTitle: u.wholesaleEmptyTitle,
+        emptyBody: u.wholesaleEmptyBody,
+        noResultsTitle: u.wholesaleEmptyFilteredTitle,
+        noResultsBody: u.wholesaleEmptyFilteredBody,
+        clearFilters: dict.catalog.clearFilters,
+        paginationSummary: u.listPaginationSummary,
+        paginationPrevious: dict.common.paginationPrevious,
+        paginationNext: dict.common.paginationNext,
+        tradersHref: "/admin/traders",
+        newTrader: u.newTrader,
+      }}
+    />
   );
 }

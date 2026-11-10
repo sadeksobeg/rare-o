@@ -13,10 +13,12 @@ export {
   type WhatsAppAdapterEvents,
   type WhatsAppConnectionState,
   type WhatsAppHealth,
+  type WhatsAppInboundMediaEvent,
   type WhatsAppInboundTextEvent,
   type WhatsAppInboundUnsupportedEvent,
   type WhatsAppPairingCodePayload,
   type WhatsAppQrPayload,
+  type WhatsAppSendMediaInput,
   type WhatsAppSendTextInput,
   type WhatsAppSendTextResult,
 } from "@/lib/whatsapp/types";
@@ -48,10 +50,15 @@ export {
 export {
   dispatchOutboundMessage,
   dispatchPendingOutbound,
+  enqueueOutboundMedia,
   enqueueOutboundText,
+  persistInboundMedia,
   persistInboundText,
+  applyContactIdentity,
+  persistOutboundEcho,
   persistUnsupportedInbound,
   recoverInterruptedOutbound,
+  seedConversationFromChat,
   claimOutboundForSend,
   sendOutboundText,
   upsertConnectionHealth,
@@ -62,6 +69,16 @@ export {
   STALE_SENDING_MS,
   MAX_BAILEYS_RECONNECT_ATTEMPTS,
 } from "@/lib/whatsapp/messaging/reliability";
+
+export {
+  acquireOutboundSendSlot,
+  assessOutboundEnqueue,
+  getOutboundSafetyConfig,
+  getOutboundSafetyStatus,
+  recordOutboundSendFailure,
+  recordOutboundSendSuccess,
+  resetOutboundSafetyForTests,
+} from "@/lib/whatsapp/outbound-safety";
 
 export {
   formatConversationDisplayLabel,
@@ -76,6 +93,8 @@ export {
   getBusinessContextForConversation,
   linkConversationToBusinessRecord,
   assertLinkTargetExists,
+  setConversationCrmParty,
+  suggestCrmPartiesForConversation,
 } from "@/lib/whatsapp/messaging/linking";
 
 export {

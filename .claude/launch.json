@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "rare-oud-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "rare-oud-prod",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start"],
+      "port": 3000
+    },
+    {
+      "name": "ui-mockups",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "4600", "docs/ui/design/mockups"],
+      "port": 4600
+    },
+    {
+      "name": "design-lab",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "design-lab", "run", "dev", "--", "-p", "3100"],
+      "port": 3100
+    }
+  ]
+}

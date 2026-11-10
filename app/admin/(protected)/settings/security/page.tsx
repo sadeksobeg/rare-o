@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { ShieldCheck, UserRound } from "lucide-react";
+import { AdminSecuritySettings } from "@/components/admin/security-settings";
+import { AdminPasswordSettings } from "@/components/admin/password-settings";
+import { AdminSettingsShell } from "@/components/admin/settings-shell";
 import { getAdminSession } from "@/lib/auth/admin-session";
 import { prisma } from "@/lib/db/prisma";
-import { AdminSecuritySettings } from "@/components/admin/security-settings";
 import { getRequestDictionary } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
@@ -13,27 +16,54 @@ export default async function AdminSecuritySettingsPage() {
   const session = await getAdminSession();
   if (!session) redirect("/admin/login");
 
-  const admin = await prisma.adminUser.findUnique({
-    where: { id: session.sub },
-    select: { totpEnabledAt: true, email: true },
-  });
-  const { dict } = await getRequestDictionary();
+  const [{ dict, locale }, admin] = await Promise.all([
+    getRequestDictionary(),
+    prisma.adminUser.findUnique({
+      where: { id: session.sub },
+      select: { totpEnabledAt: true, email: true },
+    }),
+  ]);
+  const a = dict.auth;
+  const u = dict.adminUi;
 
   return (
-    <div className="mx-auto max-w-xl space-y-6 p-6">
-      <div>
-        <h1 className="text-2xl font-semibold">
-          {dict.auth.adminTitle} — 2FA
-        </h1>
-        <p className="text-sm text-ro-muted">
-          TOTP authenticator + one-time recovery codes. Required when{" "}
-          <code className="text-xs">REQUIRE_ADMIN_2FA=1</code>.
-        </p>
-      </div>
+    <AdminSettingsShell
+      locale={locale}
+      title={u.settingsSecurity}
+      description={u.settingsSecurityLead}
+      breadcrumb={[
+        { href: "/admin/settings", label: u.settingsHubTitle },
+        { label: u.settingsSecurity },
+      ]}
+      navLabel={u.settingsHubTitle}
+      nav={[
+        {
+          href: "/admin/profile",
+          label: a.profileTab,
+          icon: <UserRound strokeWidth={1.5} aria-hidden />,
+        },
+        {
+          href: "/admin/settings/security",
+          label: a.securityTab,
+          icon: <ShieldCheck strokeWidth={1.5} aria-hidden />,
+          active: true,
+        },
+      ]}
+    >
+      <AdminPasswordSettings
+        forceDict={dict.forcePasswordChange}
+        sectionDict={dict.changePassword}
+      />
       <AdminSecuritySettings
         email={admin?.email ?? session.email}
         totpEnabled={Boolean(admin?.totpEnabledAt)}
+        accountLabel={dict.common.email}
+        enabledLabel={dict.common.switchOn}
+        disabledLabel={u.settings2faOffShort}
+        enrollLabel={a.totpEnrollButton}
+        resetLabel={a.totpResetButton}
+        sectionTitle={a.securityTab}
       />
-    </div>
+    </AdminSettingsShell>
   );
 }

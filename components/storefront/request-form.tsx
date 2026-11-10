@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import {
   createRetailRequestAction,
@@ -12,6 +12,10 @@ import {
   HandoffSuccess,
   type HandoffSuccessLabels,
 } from "@/components/storefront/handoff-success";
+import {
+  ShippingCostSelector,
+  type ShippingSelection,
+} from "@/components/storefront/shipping-cost-selector";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { TextField } from "@/components/ui/text-field";
@@ -25,6 +29,20 @@ type SuccessData = {
   whatsAppDeepLink?: string | null;
   handoffMessageText?: string | null;
 };
+
+const SUCCESS_STORAGE_KEY = "ro-request-success";
+
+function readStoredSuccess(): ActionResult | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(SUCCESS_STORAGE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw) as SuccessData;
+    return { ok: true, data };
+  } catch {
+    return null;
+  }
+}
 
 export function RequestForm({
   locale,
@@ -69,9 +87,17 @@ export function RequestForm({
 }) {
   const { items, clear } = useCart();
   const [result, setResult] = useState<ActionResult | null>(null);
+  const [restoring, setRestoring] = useState(true);
   const [pending, startTransition] = useTransition();
   const [opening, setOpening] = useState(false);
   const [openError, setOpenError] = useState<string | null>(null);
+  const [shipping, setShipping] = useState<ShippingSelection | null>(null);
+
+  useEffect(() => {
+    const stored = readStoredSuccess();
+    if (stored) setResult(stored);
+    setRestoring(false);
+  }, []);
   /** One idempotency key per mount — double-submit / retry reuses it. */
   const idempotencyKeyRef = useRef<string | null>(null);
 
@@ -82,6 +108,10 @@ export function RequestForm({
       ),
     [items]
   );
+
+  if (restoring) {
+    return null;
+  }
 
   if (items.length === 0 && !(result && result.ok)) {
     return (
@@ -158,17 +188,27 @@ export function RequestForm({
         <p className="text-sm text-ro-muted">{labels.shippingNote}</p>
       </header>
 
-      <div className="flex items-center justify-between gap-4 rounded-[var(--ro-r-sm)] border border-ro-border bg-ro-surface/60 px-4 py-3 text-sm">
-        <span className="text-ro-text-2">
-          {labels.summaryTitle} ·{" "}
-          {labels.itemsCount.replace("{n}", pieces.toLocaleString(locale))}
-        </span>
-        <Link
-          href={href("/cart", locale)}
-          className="shrink-0 text-ro-plum underline-offset-4 hover:underline"
-        >
-          {labels.backToCart}
-        </Link>
+      <div className="space-y-2 rounded-[var(--ro-r-sm)] border border-ro-border bg-ro-surface/60 px-4 py-3 text-sm">
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-ro-text-2">
+            {labels.summaryTitle} ·{" "}
+            {labels.itemsCount.replace("{n}", pieces.toLocaleString(locale))}
+          </span>
+          <Link
+            href={href("/cart", locale)}
+            className="shrink-0 text-ro-plum underline-offset-4 hover:underline"
+          >
+            {labels.backToCart}
+          </Link>
+        </div>
+        {shipping ? (
+          <div className="flex items-center justify-between gap-4 border-t border-ro-border pt-2 text-ro-text-2">
+            <span>{locale === "ar" ? "تقدير الشحن" : "Shipping estimate"}</span>
+            <bdi dir="ltr" className="font-medium text-ro-ink">
+              {shipping.amount} {shipping.currency}
+            </bdi>
+          </div>
+        ) : null}
       </div>
 
       <form
@@ -181,7 +221,17 @@ export function RequestForm({
           startTransition(async () => {
             const res = await createRetailRequestAction(null, formData);
             setResult(res);
-            if (res.ok) clear();
+            if (res.ok) {
+              clear();
+              try {
+                sessionStorage.setItem(
+                  SUCCESS_STORAGE_KEY,
+                  JSON.stringify(res.data ?? {})
+                );
+              } catch {
+                /* ignore */
+              }
+            }
           });
         }}
       >
@@ -213,11 +263,10 @@ export function RequestForm({
           placeholder={labels.phonePlaceholder}
           helper={labels.phoneHelper}
         />
-        <TextField
-          label={labels.country}
-          name="destinationCountry"
-          required
-          autoComplete="country-name"
+        <ShippingCostSelector
+          locale={locale}
+          oudUnitCount={pieces}
+          onChange={setShipping}
         />
         <label className="block space-y-1.5 text-sm">
           <span className="font-medium text-ro-ink">{labels.notes}</span>

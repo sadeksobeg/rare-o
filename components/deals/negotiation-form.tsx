@@ -6,12 +6,23 @@ import {
 } from "@/app/deal-actions";
 import type { ActionResult } from "@/app/actions";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/dialog";
+import {
+  AlertTriangle,
+  Ban,
+  CheckCircle2,
+  MessageSquare,
+  RefreshCw,
+  Send,
+  XCircle,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import type { TraderDict } from "@/lib/ui/trader-labels";
+import { useRef, useState, useTransition, type ReactNode } from "react";
+import { toastErr, toastOk } from "@/lib/portal/toast";
+import { traderActionMessage, type TraderDict } from "@/lib/ui/trader-labels";
 
 const fieldClass =
-  "w-full rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-paper px-3 py-2.5 text-sm text-ro-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]";
+  "w-full rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-paper px-3 py-2.5 text-sm font-medium text-ro-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]";
 
 type ConflictWarning = {
   reference: string;
@@ -19,27 +30,72 @@ type ConflictWarning = {
   status: string;
 };
 
+function actionLeading(action: string): ReactNode {
+  switch (action) {
+    case "counter":
+      return <RefreshCw className="size-4" strokeWidth={2} aria-hidden />;
+    case "accept":
+      return <CheckCircle2 className="size-4" strokeWidth={2} aria-hidden />;
+    case "reject":
+      return <XCircle className="size-4" strokeWidth={2} aria-hidden />;
+    case "close":
+      return <Ban className="size-4" strokeWidth={2} aria-hidden />;
+    default:
+      return <MessageSquare className="size-4" strokeWidth={2} aria-hidden />;
+  }
+}
+
 /** Structured negotiation action bar (A19) — not free chat. */
 export function NegotiationForm({
   dealId,
   mode,
   labels,
+  currency,
 }: {
   dealId: string;
   mode: "trader" | "admin";
   /** Optional bilingual labels (trader portal). Admin keeps English defaults. */
   labels?: TraderDict;
+  currency?: string | null;
 }) {
   const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
+  const skipConfirm = useRef(false);
   const [pending, startTransition] = useTransition();
   const [result, setResult] = useState<ActionResult | null>(null);
   const [action, setAction] = useState("continue");
   const [warnings, setWarnings] = useState<ConflictWarning[]>([]);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const needsConfirm =
+    action === "accept" || action === "close" || action === "reject";
+  const confirmTitle =
+    action === "accept"
+      ? (labels?.negConfirmAcceptTitle ?? "Accept this deal?")
+      : action === "close"
+        ? (labels?.negConfirmCloseTitle ?? "Close this deal?")
+        : (labels?.negConfirmRejectTitle ?? "Reject this deal?");
+  const confirmBody =
+    action === "accept"
+      ? (labels?.negConfirmAcceptBody ??
+        "Accepting locks the agreed price and opens WhatsApp payment — admin must confirm receipt.")
+      : action === "close"
+        ? (labels?.negConfirmCloseBody ??
+          "Closing ends negotiation without accepting.")
+        : (labels?.negConfirmRejectBody ?? "Rejecting ends the deal.");
 
   return (
     <form
-      className="space-y-4 border border-ro-line bg-ro-surface p-4"
+      ref={formRef}
+      className="ro-portal-card space-y-4 border p-4 pb-6 md:p-5 max-[900px]:mb-[calc(12px+env(safe-area-inset-bottom,0px))]"
       data-component="negotiation-action-bar"
+      onSubmit={(e) => {
+        if (needsConfirm && !skipConfirm.current) {
+          e.preventDefault();
+          setConfirmOpen(true);
+        }
+        skipConfirm.current = false;
+      }}
       action={(fd) => {
         startTransition(async () => {
           const res =
@@ -52,24 +108,31 @@ export function NegotiationForm({
               | { conflictWarnings?: ConflictWarning[] }
               | undefined;
             setWarnings(data?.conflictWarnings ?? []);
+            toastOk(labels?.negRecorded ?? "Negotiation entry recorded.");
             router.refresh();
           } else {
             setWarnings([]);
+            toastErr(
+              labels ? traderActionMessage(labels, res.error) : res.error
+            );
           }
         });
       }}
     >
       <div className="space-y-1">
-        <h3 className="text-base font-semibold">
+        <h3 className="ro-portal-section-title flex items-center gap-2 text-base">
+          <span className="ro-portal-icon-well size-8 [&>svg]:size-4" aria-hidden>
+            {actionLeading(action)}
+          </span>
           {labels?.negTitle ?? "Negotiation response"}
         </h3>
-        <p className="text-sm text-ro-muted">
+        <p className="ro-portal-muted">
           {labels?.negHint ??
             "Structured negotiation — not chat. Choose continue, counter, accept, reject, or close."}
         </p>
       </div>
       <input type="hidden" name="dealId" value={dealId} />
-      <label className="block space-y-1 text-sm">
+      <label className="block space-y-1.5 text-sm font-semibold">
         <span className="text-ro-muted">{labels?.negAction ?? "Action"}</span>
         <select
           name="action"
@@ -94,7 +157,7 @@ export function NegotiationForm({
           <option value="close">{labels?.dealAction.close ?? "Close"}</option>
         </select>
       </label>
-      <label className="block space-y-1 text-sm">
+      <label className="block space-y-1.5 text-sm font-semibold">
         <span className="text-ro-muted">
           {action === "reject"
             ? (labels?.negRejectReason ?? "Reject reason (optional)")
@@ -113,31 +176,15 @@ export function NegotiationForm({
         />
       </label>
       {action === "counter" ? (
-        <div className="grid gap-3 sm:grid-cols-3">
-          <label className="block space-y-1 text-sm">
-            <span className="text-ro-muted">
-              {labels?.negPrice ?? "Proposed price"}
-            </span>
-            <input
-              name="proposedPrice"
-              type="number"
-              step="0.01"
-              min="0"
-              className={fieldClass}
-            />
-          </label>
-          <label className="block space-y-1 text-sm">
-            <span className="text-ro-muted">
-              {labels?.negCurrency ?? "Currency"}
-            </span>
-            <input
-              name="currency"
-              placeholder="USD"
-              dir="ltr"
-              className={fieldClass}
-            />
-          </label>
-          <label className="block space-y-1 text-sm">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <p className="sm:col-span-2 text-xs leading-snug text-ro-muted">
+            {labels?.negCounterPriceLocked ??
+              "Price stays fixed after the trader’s proposal — counter can adjust quantity or notes only."}
+          </p>
+          {currency ? (
+            <input type="hidden" name="currency" value={currency} />
+          ) : null}
+          <label className="block space-y-1.5 text-sm font-semibold">
             <span className="text-ro-muted">{labels?.negQty ?? "Quantity"}</span>
             <input
               name="quantity"
@@ -146,7 +193,7 @@ export function NegotiationForm({
               className={fieldClass}
             />
           </label>
-          <label className="block space-y-1 text-sm sm:col-span-3">
+          <label className="block space-y-1.5 text-sm font-semibold sm:col-span-2">
             <span className="text-ro-muted">
               {labels?.negConditions ?? "Conditions / notes"}
             </span>
@@ -158,34 +205,63 @@ export function NegotiationForm({
         <div
           role="status"
           data-conflict-warning="1"
-          className="space-y-1 border border-[var(--ro-attention-border,var(--ro-line))] bg-[var(--ro-attention-bg,var(--ro-paper))] p-3 text-sm"
+          className="flex gap-2.5 border border-[color-mix(in_srgb,var(--ro-amber-800)_28%,transparent)] bg-[var(--ro-amber-100)] p-3 text-sm"
         >
-          <p className="font-semibold">
-            {labels?.conflictWarningTitle ??
-              "Warning: other active catalog deals on this product"}
-          </p>
-          <ul className="list-inside list-disc text-ro-muted">
-            {warnings.map((w) => (
-              <li key={w.reference}>
-                {w.reference} · {w.traderDisplayName} · {w.status}
-              </li>
-            ))}
-          </ul>
+          <AlertTriangle
+            className="mt-0.5 size-4 shrink-0 text-[var(--ro-amber-800)]"
+            strokeWidth={2}
+            aria-hidden
+          />
+          <div className="space-y-1">
+            <p className="font-bold text-[var(--ro-amber-800)]">
+              {labels?.conflictWarningTitle ??
+                "Warning: other active catalog deals on this product"}
+            </p>
+            <ul className="list-inside list-disc font-medium text-ro-muted">
+              {warnings.map((w) => (
+                <li key={w.reference}>
+                  {w.reference} · {w.traderDisplayName} · {w.status}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       ) : null}
       {result && !result.ok ? (
-        <p className="text-sm text-[var(--ro-danger-700)]" role="alert">
-          {result.error}
+        <p className="text-sm font-semibold text-[var(--ro-danger-700)]" role="alert">
+          {labels ? traderActionMessage(labels, result.error) : result.error}
         </p>
       ) : null}
       {result?.ok ? (
-        <p className="text-sm text-ro-muted">
+        <p className="text-sm font-semibold text-ro-muted">
           {labels?.negRecorded ?? "Negotiation entry recorded."}
         </p>
       ) : null}
       <Button type="submit" variant="primary" size="md" disabled={pending}>
+        <Send className="size-4" strokeWidth={2} aria-hidden />
         {labels?.negSubmit ?? "Submit entry"}
       </Button>
+      <ConfirmDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={() => {
+          skipConfirm.current = true;
+          setConfirmOpen(false);
+          formRef.current?.requestSubmit();
+        }}
+        title={confirmTitle}
+        body={confirmBody}
+        confirmLabel={
+          action === "accept"
+            ? (labels?.dealAction.accept ?? "Accept")
+            : action === "close"
+              ? (labels?.dealAction.close ?? "Close")
+              : (labels?.dealAction.reject ?? "Reject")
+        }
+        cancelLabel={labels?.confirmCancel ?? "Cancel"}
+        pending={pending}
+        destructive={action !== "accept"}
+      />
     </form>
   );
 }

@@ -1,25 +1,65 @@
+import { Handshake } from "lucide-react";
+import { Reveal } from "@/components/motion/reveal";
 import { NewDealForm } from "@/components/trader/new-deal-form";
+import { TraderPageHeader } from "@/components/trader/page-header";
 import { requireTraderSession } from "@/lib/auth/trader-session";
 import { prisma } from "@/lib/db/prisma";
 import { getRequestDictionary } from "@/lib/i18n/server";
 
-export default async function NewTraderDealPage() {
+export default async function NewTraderDealPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ title?: string }>;
+}) {
   await requireTraderSession();
+  const { title } = await searchParams;
   const { locale, dict } = await getRequestDictionary();
   const t = dict.trader;
   const products = await prisma.product.findMany({
     where: { status: "published" },
     orderBy: { nameEn: "asc" },
-    select: { id: true, nameEn: true, nameAr: true, slug: true },
+    select: {
+      id: true,
+      nameEn: true,
+      nameAr: true,
+      slug: true,
+      currency: true,
+      category: { select: { slug: true, nameEn: true, nameAr: true } },
+      images: {
+        orderBy: { sortOrder: "asc" },
+        take: 1,
+        select: { path: true },
+      },
+    },
   });
 
   return (
     <section className="space-y-6">
-      <h1 className="font-display text-3xl font-semibold tracking-tight">
-        {t.newDealTitle}
-      </h1>
-      <p className="max-w-[45rem] text-sm text-ro-muted">{t.newDealLead}</p>
-      <NewDealForm products={products} labels={t} locale={locale} />
+      <TraderPageHeader
+        title={t.newDealTitle}
+        description={t.newDealLead}
+        icon={<Handshake className="size-5" strokeWidth={2} />}
+        backHref="/trader/deals"
+        backLabel={t.deals}
+      />
+      <Reveal>
+      <NewDealForm
+        products={products.map((p) => ({
+          id: p.id,
+          slug: p.slug,
+          nameEn: p.nameEn,
+          nameAr: p.nameAr,
+          currency: p.currency,
+          categorySlug: p.category.slug,
+          categoryNameEn: p.category.nameEn,
+          categoryNameAr: p.category.nameAr,
+          imagePath: p.images[0]?.path ?? null,
+        }))}
+        labels={t}
+        locale={locale}
+        initialTitle={typeof title === "string" ? title : ""}
+      />
+      </Reveal>
     </section>
   );
 }

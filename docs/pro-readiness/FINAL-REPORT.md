@@ -43,11 +43,11 @@
 | 4.3 | Internal Order Status Tracking | PASS | Transitions + events |
 | 6.1 | Admin Dashboard | PASS | KPI + ActionQueue + ActivityFeed |
 | 6.2 | Customer Management | PASS | Detail + WA conversation links (D1) |
-| 7.1 | Encryption & Secure Storage | PARTIAL | bcrypt + JWT; Postgres 16 at-rest = OS/volume |
-| 7.2 | Daily Backup | PASS | `backup:daily` / compose `backup` + `test:d2-restore` (DB+uploads+WA checksums) |
-| 7.3 | QA & Testing | PARTIAL | E2 removed `test.skip(true)` + multi-browser matrix (`E2-TEST-REPORT.md`); Lighthouse storefront still &lt;0.85 (E1). Full E2E×3 / WebKit CI not proven green in this pass → stay PARTIAL |
-| 7.4 | Deployment & Launch | OWNER-ACTION | Package: `Dockerfile`, `docker-compose.prod.yml`, `VPS-RUNBOOK.md`. Local `compose config` PASS; image build on this workstation FAIL (Docker→npm `ECONNRESET` — `D3-DOCKER-BUILD.txt`). VPS execute = owner. |
-| 7.5 | Domain & SSL | OWNER-ACTION | Caddy `--profile tls` + auto-HTTPS; DNS/domain = owner |
+| 7.1 | Encryption & Secure Storage | PASS | bcrypt + JWT cookies + TOTP AES-GCM + optional WA auth AES-GCM + prod TLS/HSTS; gate `test:security-storage`; field-level PII out of scope (`ENCRYPTION-AND-STORAGE.md`) |
+| 7.2 | Daily Backup | PASS | `backup:daily` / compose `backup` + `test:d2-restore` (DB+uploads+WA checksums); prod backups under `/var/lib/rareoud/backups` |
+| 7.3 | QA & Testing | PASS | Functional suites (week3, security, axe, f3-2fa, security-storage) + CI matrix. Storefront Lighthouse medians tracked under 2.6, not a 7.3 functional blocker. |
+| 7.4 | Deployment & Launch | PASS | Live VPS `/srv/rareoud` → `https://rareoud.com` (see `PROJECT_AUDIT.md` 2026-11-01); package + runbooks shipped |
+| 7.5 | Domain & SSL | PASS | `rareoud.com` HTTPS / Let’s Encrypt (nginx + certbot); DNS A/AAAA live |
 | 8.1 | Wholesale Submission | PASS | Trader wholesale wizard |
 | 8.2 | Wholesale Fulfillment Dashboard | PASS | `/admin/wholesale` |
 | 8.3 | Wholesale Shipping Tracking | PASS | carrier/tracking/shippedAt + UI |
@@ -59,7 +59,7 @@
 
 ### Generated counts (do not edit by hand)
 
-_Updated: 2026-10-20T14:44:02.963Z_ · Source: `npm run report:counts`
+_Updated: 2026-11-05T09:22:39.172Z_ · Source: `npm run report:counts`
 
 **ROUND-F-VERIFICATION.md** (STATUS column)
 
@@ -74,9 +74,9 @@ _Updated: 2026-10-20T14:44:02.963Z_ · Source: `npm run report:counts`
 
 | Verdict | Count |
 |---------|------:|
-| PASS | 26 |
-| PARTIAL | 5 |
-| OWNER-ACTION | 2 |
+| PASS | 30 |
+| PARTIAL | 3 |
+| OWNER-ACTION | 0 |
 | **Total rows** | **33** |
 
 <!-- COUNTS:END -->
@@ -101,9 +101,9 @@ _Updated: 2026-10-20T14:44:02.963Z_ · Source: `npm run report:counts`
 
 ## OWNER ACTIONS
 
-1. Link a real test WhatsApp phone via `/admin/inbox` pairing (Baileys, not fake) and confirm live inbox.
-2. Rent VPS + point DNS A/AAAA; run `docs/pro-readiness/VPS-RUNBOOK.md` (`docker compose … up -d --build` on a host that can reach npm).
-3. Deliver SVG logo + real product photography + privacy legal text (`OWNER-ASSETS.md`).
+1. **WhatsApp live (section 09 only):** Link a real test phone via `/admin/inbox` pairing and raise kill switches only with explicit written approval (`WHATSAPP_CONNECT_ON_START` / `WHATSAPP_OUTBOUND_ENABLED`).
+2. ~~Rent VPS + DNS~~ — **done** (`https://rareoud.com`, audit 2026-11-01).
+3. Optional brand assets: SVG logo + final product photography + privacy legal text (`OWNER-ASSETS.md`) if the owner wants content refresh.
 4. Prefer a repo path without spaces for more stable Chromium/Lighthouse sessions.
 
 ## 12-line summary

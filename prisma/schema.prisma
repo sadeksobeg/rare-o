@@ -7,7 +7,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// Launch categories only: string-instruments, accessories
+/// Launch browse: oud-economy, oud-mid, oud-professional, oud-vip, accessories.
+/// string-instruments is retained as a protected legacy bucket.
 model Category {
   id        String    @id @default(cuid())
   slug      String    @unique
@@ -28,6 +29,8 @@ model Product {
   descriptionEn     String                 @default("")
   specsTextAr       String                 @default("")
   specsTextEn       String                 @default("")
+  /// Optional structured oud wood / measure / finish details (admin-filled)
+  oudSpecs          Json?
   categoryId        String
   category          Category               @relation(fields: [categoryId], references: [id])
   /// Nullable with currency as a pair (D28b): both set or both null = price on request
@@ -89,52 +92,60 @@ model ProductImage {
   altAr     String  @default("")
   altEn     String  @default("")
   sortOrder Int     @default(0)
-  /// image | video
+  /// image | video | audio
   kind      String  @default("image")
 }
 
 /// Contact record — phone is NOT a unique business identity
 model Customer {
-  id        String          @id @default(cuid())
-  name      String
-  phone     String
-  notes     String?
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
-  requests  RetailRequest[]
+  id                    String                 @id @default(cuid())
+  name                  String
+  phone                 String
+  notes                 String?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  requests              RetailRequest[]
+  whatsAppConversations WhatsAppConversation[]
 
   @@index([phone])
 }
 
 model RetailRequest {
-  id                  String               @id @default(cuid())
-  reference           String               @unique
-  locale              String
+  id                   String               @id @default(cuid())
+  reference            String               @unique
+  locale               String
   /// draft | ready_for_handoff | handoff_opened | in_follow_up | completed | cancelled
-  status              String               @default("draft")
-  customerName        String
-  customerPhone       String
-  customerNotes       String               @default("")
-  destinationCountry  String
-  shippingMethodCode  String?
-  shippingMethodLabel String?
-  subtotal            Decimal
-  currency            String
-  handoffPayloadJson  String
+  status               String               @default("draft")
+  customerName         String
+  customerPhone        String
+  customerNotes        String               @default("")
+  destinationCountry   String
+  /// ISO-ish code into lib/shipping/rates.ts zones, or a Syria governorate
+  /// code — null for requests placed before the shipping calculator shipped
+  destinationCode      String?
+  shippingMethodCode   String?
+  shippingMethodLabel  String?
+  /// Calculator estimate, not a charge — platform has no payment gateway
+  shippingCostAmount   Decimal?
+  shippingCostCurrency String?
+  shippingWeightKg     Decimal?
+  subtotal             Decimal
+  currency             String
+  handoffPayloadJson   String
   /// Stored/generated WhatsApp prefilled message text (Week 3 wa.me handoff)
-  handoffMessageText  String?
+  handoffMessageText   String?
   /// Built wa.me deep link — no WhatsApp Business API
-  whatsAppDeepLink    String?
+  whatsAppDeepLink     String?
   /// Client-generated UUID — makes storefront submit idempotent
-  idempotencyKey      String?              @unique
-  handoffPreparedAt   DateTime?
-  handoffOpenedAt     DateTime?
-  customerId          String?
-  customer            Customer?            @relation(fields: [customerId], references: [id])
-  lines               RetailRequestLine[]
-  handoffEvents       RetailHandoffEvent[]
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
+  idempotencyKey       String?              @unique
+  handoffPreparedAt    DateTime?
+  handoffOpenedAt      DateTime?
+  customerId           String?
+  customer             Customer?            @relation(fields: [customerId], references: [id])
+  lines                RetailRequestLine[]
+  handoffEvents        RetailHandoffEvent[]
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
 
   @@index([status])
   @@index([customerPhone])
@@ -173,16 +184,19 @@ model RetailRequestLine {
 }
 
 model AdminUser {
-  id              String    @id @default(cuid())
-  email           String    @unique
-  passwordHash    String
-  name            String
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  passwordHash       String
+  name               String
   /// Encrypted TOTP secret (AES via AUTH_SECRET); null until 2FA enrolled
-  totpSecretEnc   String?
+  totpSecretEnc      String?
   /// JSON array of bcrypt-hashed one-time recovery codes
-  totpRecoveryHashes String  @default("[]")
-  totpEnabledAt   DateTime?
-  createdAt       DateTime  @default(now())
+  totpRecoveryHashes String    @default("[]")
+  totpEnabledAt      DateTime?
+  /// Forces the change-password screen on next sign-in (e.g. after a reset)
+  mustChangePassword Boolean   @default(false)
+  passwordChangedAt  DateTime?
+  createdAt          DateTime  @default(now())
 }
 
 /// Append-only admin audit trail (F3)
@@ -201,32 +215,37 @@ model AdminAuditLog {
 
 /// Minimal admin-provisioned trader identity — not a marketplace seller account
 model TraderAccount {
-  id                    String               @id @default(cuid())
-  email                 String               @unique
+  id                    String                 @id @default(cuid())
+  email                 String                 @unique
   passwordHash          String
   displayName           String
-  companyName           String               @default("")
-  phone                 String               @default("")
+  companyName           String                 @default("")
+  phone                 String                 @default("")
   /// active | disabled
-  status                String               @default("active")
-  adminNotes            String               @default("")
+  status                String                 @default("active")
+  adminNotes            String                 @default("")
   /// Comma-separated launch category slugs the trader is interested in
-  interestCategorySlugs String               @default("")
+  interestCategorySlugs String                 @default("")
   /// Free-text deal preferences for admin matching
-  interestNotes         String               @default("")
+  interestNotes         String                 @default("")
+  /// Forces the change-password screen on next sign-in (e.g. after an admin reset)
+  mustChangePassword    Boolean                @default(false)
+  passwordChangedAt     DateTime?
   deals                 DealProposal[]
   wholesaleRequests     WholesaleRequest[]
+  brokerageRequests     BrokerageRequest[]
   notifications         TraderNotification[]
-  createdAt             DateTime             @default(now())
-  updatedAt             DateTime             @updatedAt
+  whatsAppConversations WhatsAppConversation[]
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
 }
 
-/// In-app status center for traders (deals + wholesale) — pull inbox, not push.
+/// In-app status center for traders (deals + wholesale + brokerage) — pull inbox, not push.
 model TraderNotification {
   id        String        @id @default(cuid())
   traderId  String
   trader    TraderAccount @relation(fields: [traderId], references: [id], onDelete: Cascade)
-  /// deal | wholesale | system
+  /// deal | wholesale | brokerage | system
   domain    String
   titleAr   String
   titleEn   String
@@ -242,27 +261,36 @@ model TraderNotification {
 
 /// Trader commercial deal proposal — separate from RetailRequest / Wholesale
 model DealProposal {
-  id              String               @id @default(cuid())
-  reference       String               @unique
-  traderId        String
-  trader          TraderAccount        @relation(fields: [traderId], references: [id], onDelete: Restrict)
+  id                        String               @id @default(cuid())
+  reference                 String               @unique
+  traderId                  String
+  trader                    TraderAccount        @relation(fields: [traderId], references: [id], onDelete: Restrict)
   /// catalog | non_catalog
-  dealKind        String
-  title           String
+  dealKind                  String
+  title                     String
   /// Catalog deals may reference an existing RARE OUD Product (ownership stays with RARE OUD)
-  productId       String?
-  product         Product?             @relation(fields: [productId], references: [id], onDelete: SetNull)
-  /// Optional commercial fields — exact pricing rules remain OPEN; free-text covers ambiguity
-  proposedPrice   Decimal?
-  currency        String?
-  quantity        Int?
-  conditionsNotes String               @default("")
-  /// proposed | negotiating | accepted | rejected | closed
-  status          String               @default("proposed")
-  entries         NegotiationEntry[]
-  curatedOffers   PublicCuratedOffer[]
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
+  productId                 String?
+  product                   Product?             @relation(fields: [productId], references: [id], onDelete: SetNull)
+  /// Trader-stated price (required on new creates — payment-first, 2026-11-03)
+  proposedPrice             Decimal?
+  currency                  String?
+  quantity                  Int?
+  conditionsNotes           String               @default("")
+  /// Model / SKU identifier (replaces category language on deals UI)
+  modelNumber               String               @default("")
+  /// proposed | negotiating | accepted | awaiting_payment | payment_confirmed | rejected | closed
+  status                    String               @default("proposed")
+  /// WhatsApp payment handoff (additive — mirrors retail pattern; no online pay)
+  handoffMessageText        String?
+  whatsAppDeepLink          String?
+  handoffPreparedAt         DateTime?
+  handoffOpenedAt           DateTime?
+  paymentConfirmedAt        DateTime?
+  paymentConfirmedByAdminId String?
+  entries                   NegotiationEntry[]
+  curatedOffers             PublicCuratedOffer[]
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
 
   @@index([traderId])
   @@index([status])
@@ -316,32 +344,50 @@ model PublicCuratedOffer {
 
 /// Wholesale trader ordering — separate from RetailRequest and DealProposal
 model WholesaleRequest {
-  id                 String                  @id @default(cuid())
-  reference          String                  @unique
-  traderId           String
-  trader             TraderAccount           @relation(fields: [traderId], references: [id], onDelete: Restrict)
+  id                   String                  @id @default(cuid())
+  reference            String                  @unique
+  traderId             String
+  trader               TraderAccount           @relation(fields: [traderId], references: [id], onDelete: Restrict)
   /// request_quote | propose_price
-  requestMode        String
+  requestMode          String
   /// submitted | under_review | quote_provided | confirmed | completed | cancelled
-  status             String                  @default("submitted")
-  traderNotes        String                  @default("")
+  status               String                  @default("submitted")
+  traderNotes          String                  @default("")
   /// Admin quotation response (simple Week 3 workflow)
-  quoteMessage       String?
-  quoteCurrency      String?
-  quotedAt           DateTime?
-  quotedByAdminId    String?
-  traderResponseNote String?
-  confirmedAt        DateTime?
-  completedAt        DateTime?
-  cancelledAt        DateTime?
+  quoteMessage         String?
+  quoteCurrency        String?
+  quotedAt             DateTime?
+  quotedByAdminId      String?
+  traderResponseNote   String?
+  confirmedAt          DateTime?
+  completedAt          DateTime?
+  cancelledAt          DateTime?
+  /// Trader-declared destination — country name or Syria governorate name
+  destinationCountry   String?
+  /// Zone/governorate code into lib/shipping/rates.ts
+  destinationCode      String?
+  shippingMethodCode   String?
+  shippingMethodLabel  String?
+  /// Calculator estimate, not a charge — platform has no payment gateway
+  shippingCostAmount   Decimal?
+  shippingCostCurrency String?
+  shippingWeightKg     Decimal?
+  /// Stored/generated WhatsApp prefilled message text, built once the
+  /// request reaches "confirmed" (trader accepted a quote, or admin
+  /// confirmed a propose_price request)
+  handoffMessageText   String?
+  /// Built wa.me deep link — no WhatsApp Business API
+  whatsAppDeepLink     String?
+  handoffPreparedAt    DateTime?
+  handoffOpenedAt      DateTime?
   /// D37b / Appendix S 8.3 — shipping fulfillment (nullable until set)
-  carrier            String?
-  trackingReference  String?
-  shippedAt          DateTime?
-  lines              WholesaleRequestLine[]
-  events             WholesaleRequestEvent[]
-  createdAt          DateTime                @default(now())
-  updatedAt          DateTime                @updatedAt
+  carrier              String?
+  trackingReference    String?
+  shippedAt            DateTime?
+  lines                WholesaleRequestLine[]
+  events               WholesaleRequestEvent[]
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
 
   @@index([traderId])
   @@index([status])
@@ -387,8 +433,8 @@ model WholesaleRequestEvent {
   @@index([requestId])
 }
 
-/// WhatsApp communication domain (Stage A) — independent of Retail/Deal/Wholesale.
-/// Phase D: optional explicit primary link to one Week 3 domain record (not a merge).
+/// WhatsApp communication domain — human admin desk (Baileys linked device).
+/// Optional CRM FKs + one primary business-request link (not a merge).
 model WhatsAppConversation {
   id                 String              @id @default(cuid())
   /// Stable WhatsApp chat JID (one-to-one). Unique conversation identity.
@@ -399,51 +445,99 @@ model WhatsAppConversation {
   lastMessageAt      DateTime?
   lastMessagePreview String              @default("")
   unreadCount        Int                 @default(0)
-  /// none | retail_request | deal_proposal | wholesale_request — ONE active primary link
+  /// Unread-for-trader counter — mirrors unreadCount (unread-for-admin) for
+  /// outbound platform-channel messages the trader hasn't opened yet.
+  traderUnreadCount  Int                 @default(0)
+  /// none | retail_request | deal_proposal | wholesale_request | brokerage_request
   linkType           String              @default("none")
   /// Domain record id when linked; null when linkType=none
   linkId             String?
   linkedAt           DateTime?
   linkedByAdminId    String?
+  /// Optional CRM party (owner confirms; may be suggested from phone)
+  customerId         String?
+  customer           Customer?           @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  traderId           String?
+  trader             TraderAccount?      @relation(fields: [traderId], references: [id], onDelete: SetNull)
   messages           WhatsAppMessage[]
   linkAudits         WhatsAppLinkAudit[]
+  notes              WhatsAppConversationNote[]
+  /// Free-form labels an admin attaches to the conversation (round 3 inbox).
+  tags               String[]            @default([])
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
 
   @@index([lastMessageAt])
   @@index([participantE164])
   @@index([linkType, linkId])
+  @@index([customerId])
+  @@index([traderId])
 }
 
 model WhatsAppMessage {
-  id              String               @id @default(cuid())
-  conversationId  String
-  conversation    WhatsAppConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  id               String               @id @default(cuid())
+  conversationId   String
+  conversation     WhatsAppConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   /// inbound | outbound
-  direction       String
-  /// text | unsupported (Stage A text-only)
-  messageType     String               @default("text")
-  body            String               @default("")
+  direction        String
+  /// whatsapp | platform — platform = trader-portal in-app message, stored
+  /// in the same conversation so WhatsApp + platform history stay unified
+  channel          String               @default("whatsapp")
+  /// text | image | video | audio | document | sticker | location | contact | unsupported
+  messageType      String               @default("text")
+  body             String               @default("")
+  /// Optional caption for media; location/contact may store JSON in body
+  caption          String?
+  mediaMime        String?
+  mediaSize        Int?
+  mediaDurationSec Int?
+  mediaFileName    String?
+  mediaSha256      String?
+  /// Relative key under storage/uploads/whatsapp — never a public URL
+  storageKey       String?
+  thumbnailKey     String?
   /// Baileys/WhatsApp message id — inbound idempotency (unique when present)
-  waMessageId     String?              @unique
+  waMessageId      String?              @unique
   /// Admin action idempotency key — outbound (unique when present)
-  clientRequestId String?              @unique
+  clientRequestId  String?              @unique
   /// received | pending | sending | sent | failed
-  status          String
+  status           String
   /// Outbound attempt counter (bounded retry). Inbound stays 0.
-  attemptCount    Int                  @default(0)
-  lastAttemptAt   DateTime?
+  attemptCount     Int                  @default(0)
+  lastAttemptAt    DateTime?
   /// Safe operator error — never session/QR material
-  errorSafe       String?
+  errorSafe        String?
   /// WhatsApp-side timestamp when known
-  waTimestamp     DateTime?
-  adminId         String?
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
+  waTimestamp      DateTime?
+  adminId          String?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
 
   @@index([conversationId, createdAt])
   @@index([status])
   @@index([direction])
+}
+
+/// Persisted mirror of the in-memory outbound anti-ban rate limiter
+/// (lib/whatsapp/outbound-safety.ts), single row. Exists only so a worker
+/// restart (Docker `restart: unless-stopped` on crash, or a redeploy)
+/// cannot silently reset the daily send cap or an open failure circuit —
+/// without this, a crash loop could re-arm the full daily allowance on
+/// every restart, defeating the cap's entire purpose. Hydrated once at
+/// worker startup; the in-memory counters remain the fast path for every
+/// per-message check.
+model WhatsAppOutboundSafetyState {
+  /// Always "default" — single worker state row
+  id                String    @id @default("default")
+  dayKey            String    @default("")
+  dayCount          Int       @default(0)
+  /// JSON array of epoch-ms send timestamps within the sliding burst window
+  windowStampsJson  String    @default("[]")
+  /// JSON array of epoch-ms timestamps of recent send failures
+  failureStampsJson String    @default("[]")
+  lastAttemptAt     DateTime?
+  circuitOpenUntil  DateTime?
+  updatedAt         DateTime  @updatedAt
 }
 
 /// Singleton connection health mirror for admin UI (Phase C). No secrets.
@@ -454,6 +548,12 @@ model WhatsAppConnectionHealth {
   state            String    @default("DISCONNECTED")
   detailSafe       String?
   lastConnectedAt  DateTime?
+  /// Liveness ping the worker writes on an interval while CONNECTED — distinct
+  /// from updatedAt, which only moves on an actual state transition and can
+  /// otherwise sit unchanged for a healthy, long-running connection. Admin UI
+  /// uses staleness of this field (not updatedAt) to catch a worker that died
+  /// without a clean disconnect event leaving a stale "CONNECTED" row behind.
+  lastHeartbeatAt  DateTime?
   updatedAt        DateTime  @updatedAt
   /// Admin pairing — E.164 digits of the phone being linked (no +)
   pairingPhone     String?
@@ -483,4 +583,124 @@ model WhatsAppLinkAudit {
 
   @@index([conversationId, createdAt])
   @@index([adminId])
+}
+
+/// Internal admin note on an inbox conversation (round 3) — never sent to the
+/// customer, append-only (no edit/delete yet — matches the reference's own
+/// minimal note display, which only ever shows existing notes).
+model WhatsAppConversationNote {
+  id             String               @id @default(cuid())
+  conversationId String
+  conversation   WhatsAppConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  authorAdminId  String
+  /// Snapshot of the admin's display name at write time (survives a rename).
+  authorName     String
+  body           String
+  createdAt      DateTime             @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+/// Fourth commercial domain — trader asks RARE OUD to inspect/source goods (VISION §7).
+model BrokerageRequest {
+  id                        String               @id @default(cuid())
+  reference                 String               @unique
+  traderId                  String
+  trader                    TraderAccount        @relation(fields: [traderId], references: [id], onDelete: Restrict)
+  /// SUBMITTED | NEEDS_INFO | AWAITING_PAYMENT | PAYMENT_CONFIRMED | ACCEPTED | INSPECTION_SCHEDULED | INSPECTED | QUOTE_SENT | APPROVED | PURCHASED | SHIPPED | DELIVERED | CLOSED | DECLINED | REJECTED | CANCELLED
+  status                    String               @default("SUBMITTED")
+  descriptionAr             String
+  descriptionEn             String               @default("")
+  /// Legacy free-text category — kept for old rows; new UI writes modelNumber
+  categoryAr                String               @default("")
+  categoryEn                String               @default("")
+  /// Model / SKU (owner 2026-11-03 — replaces category on create)
+  modelNumber               String               @default("")
+  /// Trader-stated goods price in USD (payment-first; no admin quote gate)
+  statedPriceUsd            Int?
+  quantity                  Int                  @default(1)
+  cityAr                    String               @default("")
+  cityEn                    String               @default("")
+  placeNameAr               String               @default("")
+  placeNameEn               String               @default("")
+  sellerContact             String               @default("")
+  sourceUrl                 String               @default("")
+  budgetMinUsd              Int?
+  budgetMaxUsd              Int?
+  timelineNotes             String               @default("")
+  traderNotes               String               @default("")
+  /// JSON string array of public image paths (trader request photos)
+  photoPaths                String               @default("[]")
+  adminDeclineReason        String               @default("")
+  inspectionAt              DateTime?
+  inspectionAssignee        String               @default("")
+  inspectionLocation        String               @default("")
+  carrier                   String               @default("")
+  trackingRef               String               @default("")
+  shippedAt                 DateTime?
+  deliveredAt               DateTime?
+  /// WhatsApp payment handoff (additive)
+  handoffMessageText        String?
+  whatsAppDeepLink          String?
+  handoffPreparedAt         DateTime?
+  handoffOpenedAt           DateTime?
+  paymentConfirmedAt        DateTime?
+  paymentConfirmedByAdminId String?
+  inspection                BrokerageInspection?
+  quote                     BrokerageQuote?
+  events                    BrokerageEvent[]
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
+
+  @@index([traderId, createdAt])
+  @@index([status, createdAt])
+}
+
+model BrokerageInspection {
+  id         String           @id @default(cuid())
+  requestId  String           @unique
+  request    BrokerageRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  /// A | B | C | D
+  grade      String           @default("B")
+  notesAr    String           @default("")
+  notesEn    String           @default("")
+  verdictAr  String           @default("")
+  verdictEn  String           @default("")
+  /// JSON string array of public image paths
+  photoPaths String           @default("[]")
+  checklist  String           @default("")
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+}
+
+model BrokerageQuote {
+  id             String           @id @default(cuid())
+  requestId      String           @unique
+  request        BrokerageRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  goodsValueUsd  Int
+  /// 1.0 – 2.0
+  commissionRate Float
+  shippingUsd    Int              @default(0)
+  notesAr        String           @default("")
+  notesEn        String           @default("")
+  validUntil     DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+model BrokerageEvent {
+  id         String           @id @default(cuid())
+  requestId  String
+  request    BrokerageRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  /// status_change | note | system
+  kind       String           @default("status_change")
+  /// admin | trader | system
+  actor      String
+  fromStatus String?
+  toStatus   String?
+  messageAr  String           @default("")
+  messageEn  String           @default("")
+  createdAt  DateTime         @default(now())
+
+  @@index([requestId, createdAt])
 }

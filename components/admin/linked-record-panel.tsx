@@ -5,19 +5,23 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   adminLinkWhatsAppConversationAction,
+  adminSetWhatsAppCrmPartyAction,
   adminUnlinkWhatsAppConversationAction,
   type LinkableRecordHit,
 } from "@/app/whatsapp-actions";
 import { BusinessContextPanel } from "@/components/admin/business-context-panel";
 import { RecordPicker } from "@/components/admin/record-picker";
-import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
-import type { InboxLinkSummary } from "@/lib/whatsapp/messaging/inbox";
+import type {
+  InboxCrmParty,
+  InboxLinkSummary,
+} from "@/lib/whatsapp/messaging/inbox";
 import { formatDate } from "@/lib/i18n/format";
 import type {
   BusinessContextView,
+  CrmPartySuggestion,
   LinkAuditEntry,
 } from "@/lib/whatsapp/messaging/linking";
 
@@ -30,6 +34,8 @@ function adminHref(link: InboxLinkSummary): string | null {
       return `/admin/deals/${link.linkId}`;
     case "wholesale_request":
       return `/admin/wholesale/${link.linkId}`;
+    case "brokerage_request":
+      return `/admin/brokerage/${link.linkId}`;
     default:
       return null;
   }
@@ -37,12 +43,14 @@ function adminHref(link: InboxLinkSummary): string | null {
 
 /**
  * A16 — LinkedRecordPanel + confirm link/unlink via A17 picker.
- * Linking never changes the business record status.
+ * Round 3.1: visual skin only (rad-rec / rad-btn) — linking logic unchanged.
  */
 export function LinkedRecordPanel({
   conversationId,
   link,
   context,
+  crm,
+  suggestions = [],
   audits = [],
   dict,
   locale,
@@ -50,6 +58,8 @@ export function LinkedRecordPanel({
   conversationId: string;
   link: InboxLinkSummary;
   context: BusinessContextView;
+  crm: InboxCrmParty;
+  suggestions?: CrmPartySuggestion[];
   /** Recent link/unlink audit entries (newest first). */
   audits?: LinkAuditEntry[];
   dict: Dictionary;
@@ -71,9 +81,25 @@ export function LinkedRecordPanel({
         return i.typeDeal;
       case "wholesale_request":
         return i.typeWholesale;
+      case "brokerage_request":
+        return i.typeBrokerage;
       default:
         return type;
     }
+  }
+
+  function setCrm(kind: "customer" | "trader" | "clear", id?: string) {
+    const fd = new FormData();
+    fd.set("conversationId", conversationId);
+    if (kind === "clear") fd.set("clear", "1");
+    else if (kind === "customer" && id) fd.set("customerId", id);
+    else if (kind === "trader" && id) fd.set("traderId", id);
+    startTransition(async () => {
+      setError(null);
+      const res = await adminSetWhatsAppCrmPartyAction(fd);
+      if (!res.ok) setError(i.linkErrorNotFound);
+      else router.refresh();
+    });
   }
 
   function onConfirmLink(hit: LinkableRecordHit) {
@@ -108,67 +134,120 @@ export function LinkedRecordPanel({
   }
 
   return (
-    <div data-inbox-pane="context" className="space-y-3">
-      <BusinessContextPanel context={context} dict={dict} locale={locale} />
+    <div data-inbox-pane="context" className="rad-link-panel">
+      <section aria-label={i.crmParty} className="rad-rec rad-rec-static">
+        <div className="rad-tt">
+          <b>{i.crmParty}</b>
+          {crm.customer ? (
+            <span>
+              <Link href="/admin/customers">{crm.customer.name}</Link>
+              {" · "}
+              <bdi dir="ltr">+{crm.customer.phone.replace(/^\+/, "")}</bdi>
+            </span>
+          ) : null}
+          {crm.trader ? (
+            <span>
+              <Link href="/admin/traders">{crm.trader.displayName}</Link>
+              {" · "}
+              <bdi dir="ltr">{crm.trader.phone || crm.trader.companyName}</bdi>
+            </span>
+          ) : null}
+          {!crm.customer && !crm.trader ? <span>{i.crmNone}</span> : null}
+        </div>
+        {crm.customer || crm.trader ? (
+          <button
+            type="button"
+            className="rad-btn rad-gh rad-sm"
+            disabled={pending}
+            onClick={() => setCrm("clear")}
+          >
+            {i.crmClear}
+          </button>
+        ) : null}
+        {suggestions.length > 0 ? (
+          <div className="rad-link-suggest">
+            <p>{i.crmSuggest}</p>
+            <ul>
+              {suggestions.map((s) => (
+                <li key={`${s.kind}-${s.id}`}>
+                  <span className="rad-tt">
+                    <b>{s.label}</b>
+                    <span>
+                      <bdi dir="ltr">{s.phone}</bdi>
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    className="rad-btn rad-gh rad-sm"
+                    disabled={pending}
+                    onClick={() =>
+                      setCrm(s.kind === "customer" ? "customer" : "trader", s.id)
+                    }
+                  >
+                    {s.kind === "customer" ? i.crmLinkCustomer : i.crmLinkTrader}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </section>
 
-      <div className="space-y-2 border border-ro-border bg-ro-paper p-4 text-sm">
+      <div className="rad-link-context">
+        <BusinessContextPanel context={context} dict={dict} locale={locale} />
+      </div>
+
+      <div className="rad-rec rad-rec-static rad-link-actions">
         {link.linked ? (
           <>
             {href ? (
-              <ButtonLinkish href={href} label={i.openLinkedRecord} />
+              <Link href={href} className="rad-btn rad-gh rad-sm">
+                {i.openLinkedRecord}
+              </Link>
             ) : null}
-            <Button
+            <button
               type="button"
-              variant="secondary"
-              size="sm"
+              className="rad-btn rad-gh rad-sm"
               disabled={pending}
               onClick={() => setUnlinkOpen(true)}
             >
               {i.linkClear}
-            </Button>
-            <Button
+            </button>
+            <button
               type="button"
-              variant="text"
-              size="sm"
+              className="rad-btn rad-gh rad-sm"
               disabled={pending}
               onClick={() => setPickerOpen(true)}
             >
               {i.linkChange}
-            </Button>
+            </button>
           </>
         ) : (
-          <Button
+          <button
             type="button"
-            variant="secondary"
-            size="sm"
+            className="rad-btn rad-gh rad-sm"
             disabled={pending}
             onClick={() => setPickerOpen(true)}
           >
             {i.linkRecord}
-          </Button>
+          </button>
         )}
-        <p className="text-xs text-ro-muted">{i.linkConfirmHint}</p>
+        <p className="rad-link-hint">{i.linkConfirmHint}</p>
         {error ? (
-          <p className="text-[var(--ro-danger-700)]" role="alert">
+          <p className="rad-link-err" role="alert">
             {error}
           </p>
         ) : null}
       </div>
 
       {audits.length > 0 ? (
-        <section
-          aria-label={i.linkHistory}
-          className="space-y-2 border border-ro-border bg-ro-paper p-4 text-sm"
-        >
-          <h3 className="text-xs font-semibold tracking-wide text-ro-text-2">
-            {i.linkHistory}
-          </h3>
-          <ul className="space-y-1.5">
+        <section aria-label={i.linkHistory} className="rad-rec rad-rec-static">
+          <div className="rad-tt">
+            <b>{i.linkHistory}</b>
+          </div>
+          <ul className="rad-link-audit">
             {audits.map((a) => (
-              <li
-                key={a.id}
-                className="flex flex-wrap items-baseline justify-between gap-2"
-              >
+              <li key={a.id}>
                 <span>
                   {a.action === "clear"
                     ? i.linkAuditClear
@@ -177,10 +256,7 @@ export function LinkedRecordPanel({
                       : i.linkAuditSet}
                   {a.action !== "clear" ? ` · ${linkTypeLabel(a.newLinkType)}` : ""}
                 </span>
-                <time
-                  dateTime={a.createdAt}
-                  className="text-xs tabular-nums text-ro-muted"
-                >
+                <time dateTime={a.createdAt}>
                   {formatDate(a.createdAt, locale, {
                     dateStyle: "short",
                     timeStyle: "short",
@@ -205,37 +281,24 @@ export function LinkedRecordPanel({
         title={i.unlinkConfirm}
         size="sm"
       >
-        <div className="flex justify-end gap-2 p-4">
-          <Button
+        <div className="rad-link-dialog-actions">
+          <button
             type="button"
-            variant="secondary"
-            size="sm"
+            className="rad-btn rad-gh rad-sm"
             onClick={() => setUnlinkOpen(false)}
           >
             {dict.common.cancel}
-          </Button>
-          <Button
+          </button>
+          <button
             type="button"
-            variant="danger"
-            size="sm"
+            className="rad-btn rad-pri rad-sm"
             disabled={pending}
             onClick={onConfirmUnlink}
           >
             {i.confirmUnlink}
-          </Button>
+          </button>
         </div>
       </Dialog>
     </div>
-  );
-}
-
-function ButtonLinkish({ href, label }: { href: string; label: string }) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex h-9 items-center justify-center border border-ro-ink px-5 text-xs font-semibold !text-ro-ink hover:bg-ro-sunken"
-    >
-      {label}
-    </Link>
   );
 }

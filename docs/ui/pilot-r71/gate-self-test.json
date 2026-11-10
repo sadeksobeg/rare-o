@@ -1,0 +1,59 @@
+{
+  "generatedAt": "2026-11-10T09:48:00.506Z",
+  "intent": "Gate must FAIL on known-bad /dev/gate-self-test samples",
+  "selfTestPass": true,
+  "catches": [
+    {
+      "kind": "dark-on-dark",
+      "text": "نص داكن على أرضية داكنة — يجب أن يفشل ال",
+      "worstRatio": 1.01,
+      "min": 4.5,
+      "contrastFail": true,
+      "lavenderFail": false,
+      "lavDist": 107.04,
+      "bgImage": "none"
+    },
+    {
+      "kind": "button-on-gradient",
+      "text": "حفظ المنتج",
+      "worstRatio": 1.26,
+      "min": 4.5,
+      "contrastFail": true,
+      "lavenderFail": false,
+      "lavDist": 226.59,
+      "bgImage": "linear-gradient(120deg, rgb(122, 68, 179), rgb(244, 231, 216))"
+    },
+    {
+      "kind": "lavender-tile",
+      "text": "معاينة",
+      "worstRatio": 1.04,
+      "min": 4.5,
+      "contrastFail": true,
+      "lavenderFail": true,
+      "lavDist": 44.61,
+      "bgImage": "linear-gradient(160deg, rgb(76, 70, 102), rgb(90, 82, 120))"
+    },
+    {
+      "kind": "icon-low-contrast",
+      "text": "icon-low-contrast",
+      "worstRatio": 1.04,
+      "min": 3,
+      "contrastFail": true,
+      "lavenderFail": false,
+      "lavDist": 106.54,
+      "bgImage": "none"
+    },
+    {
+      "kind": "nego-terms",
+      "text": "شروط · 1,200 US$ · الكمية 2",
+      "worstRatio": 1.42,
+      "min": 4.5,
+      "contrastFail": true,
+      "lavenderFail": false,
+      "lavDist": 106.54,
+      "bgImage": "none"
+    }
+  ],
+  "missed": [],
+  "note": "SELF-TEST OK — gate correctly fails on injected defects"
+}

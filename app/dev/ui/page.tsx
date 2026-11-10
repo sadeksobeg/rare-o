@@ -9,6 +9,11 @@ import { Loader } from "@/components/ui/loader";
 import { MaterialPlate } from "@/components/storefront/material-plate";
 import { PrimitivesB1Gallery } from "@/components/dev/primitives-b1-gallery";
 import { PrimitivesB2Gallery } from "@/components/dev/primitives-b2-gallery";
+import { MotionGallery } from "@/components/dev/motion-gallery";
+import { IconGallery } from "@/components/dev/icon-gallery";
+import { DevToastDemo } from "@/components/dev/toast-demo";
+import { DashboardDomainChartMount } from "@/components/admin/dashboard-domain-chart-mount";
+import { SonnerToaster } from "@/components/ui/sonner-toaster";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getRequestLocale } from "@/lib/i18n/server";
 
@@ -127,6 +132,7 @@ export default async function DevUiPage() {
 
   return (
     <div className="min-h-screen bg-ro-canvas text-ro-ink">
+      <SonnerToaster />
       <header className="border-b border-ro-border px-6 py-6">
         <p className="ro-type-overline text-ro-plum">DEV ONLY · /dev/ui</p>
         <h1 className="ro-type-h1 mt-2">UI Foundations Gallery</h1>
@@ -255,11 +261,7 @@ export default async function DevUiPage() {
             <Skeleton className="aspect-[4/5]" />
           </div>
           <div className="mx-auto max-w-xs">
-            <MaterialPlate
-              caption={
-                locale === "ar" ? "الصورة قيد التصوير" : "Photography in progress"
-              }
-            />
+            <MaterialPlate caption={dict.catalog.photoCaption} />
           </div>
           <EmptyState
             title={locale === "ar" ? "لا نتائج" : "No results"}
@@ -385,6 +387,88 @@ export default async function DevUiPage() {
                   }
             }
           />
+        </section>
+
+        <section className="space-y-4" id="icons">
+          <h2 className="ro-type-h2">
+            {locale === "ar" ? "الأيقونات — V2" : "Icons — V2"}
+          </h2>
+          <IconGallery locale={locale === "ar" ? "ar" : "en"} />
+        </section>
+
+        <section className="space-y-4" id="motion">
+          <h2 className="ro-type-h2">
+            {locale === "ar" ? "الحركة — V1" : "Motion — V1"}
+          </h2>
+          <p className="max-w-2xl text-sm text-ro-text-2">
+            {locale === "ar"
+              ? "بدائيات المستوى A/B/C/Lite. العيّنة تعرض صدى الضغط، الأوتار، الطيران إلى القائمة، والعدّ التصاعدي. لا تُوصَّل إلى صفحات المتجر في هذه الجولة."
+              : "A/B/C/Lite primitives. The sampler shows press ripple, plucked strings, fly-to-list, and count-up. Not wired to live storefront routes in this round."}
+          </p>
+          <MotionGallery
+            copy={
+              locale === "ar"
+                ? {
+                    locale: "ar",
+                    title: "الحركة",
+                    lead: "مختبر V1",
+                    tier: "المستوى",
+                    reduce: "تقليل الحركة",
+                    auto: "تلقائي",
+                    sampler: "مرّر على الأوتار، اضغط الحلقات، ثم أضف إلى القائمة",
+                    add: "أضف إلى الطلب",
+                    list: "قائمة الطلب",
+                    pieces: "قطع في المجموعة",
+                    replay: "إعادة",
+                    ripple: "صدى الضغط",
+                    strings: "أوتار العود",
+                    tilt: "سطح يميل مع المؤشر (حاسوب فقط، ≤ 4°)",
+                    reveal: "ظهور",
+                    spy: "نص تجريبي لتمييز القسم أثناء التمرير.",
+                    spyA: "القسم أ",
+                    spyB: "القسم ب",
+                    spyC: "القسم ج",
+                  }
+                : {
+                    locale: "en",
+                    title: "Motion",
+                    lead: "V1 lab",
+                    tier: "Tier",
+                    reduce: "Reduce motion",
+                    auto: "Auto",
+                    sampler:
+                      "Hover the strings, click the rings, then add to the list",
+                    add: "Add to request",
+                    list: "Request list",
+                    pieces: "Pieces in the collection",
+                    replay: "Replay",
+                    ripple: "Press ripple",
+                    strings: "Oud strings",
+                    tilt: "Pointer tilt (desktop only, ≤ 4°)",
+                    reveal: "Reveal",
+                    spy: "Sample copy so the spy can highlight the section.",
+                    spyA: "Section A",
+                    spyB: "Section B",
+                    spyC: "Section C",
+                  }
+            }
+          />
+        </section>
+
+        <section className="space-y-4" id="sonner-recharts">
+          <h2 className="ro-type-h2">Sonner + recharts</h2>
+          <DevToastDemo locale={locale} />
+          <div className="rounded-[var(--ro-r-sm)] border border-ro-border bg-ro-paper p-6">
+            <DashboardDomainChartMount
+              title={locale === "ar" ? "مثال: توزيع المسارات" : "Example: domain mix"}
+              slices={[
+                { key: "retail", label: locale === "ar" ? "تجزئة" : "Retail", value: 12, color: "var(--ro-plum-700)" },
+                { key: "deals", label: locale === "ar" ? "صفقات" : "Deals", value: 7, color: "var(--ro-plum-300)" },
+                { key: "wholesale", label: locale === "ar" ? "جملة" : "Wholesale", value: 4, color: "var(--ro-amber-500)" },
+                { key: "brokerage", label: locale === "ar" ? "وساطة" : "Brokerage", value: 3, color: "var(--ro-progress-700)" },
+              ]}
+            />
+          </div>
         </section>
       </main>
     </div>

@@ -1,44 +1,70 @@
 "use client";
 
 import {
-  adminCreateTraderAction,
+  adminResetTraderPasswordAction,
   adminSetTraderStatusAction,
 } from "@/app/deal-actions";
-import type { ActionResult } from "@/app/actions";
 import { Button } from "@/components/ui/button";
-import { Dialog } from "@/components/ui/dialog";
-import { TextField } from "@/components/ui/text-field";
-import type { Dictionary } from "@/lib/i18n/dictionaries";
+import { Modal } from "@/components/ui-kit/modal";
+import { Check, Copy } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useState, useTransition } from "react";
-
-const initial: ActionResult | null = null;
-
-const controlClass =
-  "w-full rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-paper px-3 py-2 text-sm text-ro-ink outline-none focus:border-[var(--ro-plum-900)]";
+import { useState, useTransition } from "react";
 
 type TempPasswordPayload = { tempPassword: string; email: string };
 
-export function CreateTraderForm({ dict }: { dict: Dictionary }) {
-  const u = dict.adminUi;
-  const [state, action, pending] = useActionState(
-    adminCreateTraderAction,
-    initial
-  );
+export function TraderResetPasswordButton({
+  traderId,
+  label,
+  confirmTitle,
+  confirmBody,
+  confirmLabel,
+  cancelLabel,
+  tempPasswordTitle,
+  tempPasswordLead,
+  tempPasswordCopy,
+  tempPasswordCopied,
+  tempPasswordAck,
+  tempPasswordClose,
+}: {
+  traderId: string;
+  label: string;
+  confirmTitle: string;
+  confirmBody: string;
+  confirmLabel: string;
+  cancelLabel: string;
+  tempPasswordTitle: string;
+  tempPasswordLead: string;
+  tempPasswordCopy: string;
+  tempPasswordCopied: string;
+  tempPasswordAck: string;
+  tempPasswordClose: string;
+}) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [revealed, setRevealed] = useState<TempPasswordPayload | null>(null);
   const [copied, setCopied] = useState(false);
   const [acked, setAcked] = useState(false);
-  const router = useRouter();
 
-  useEffect(() => {
-    if (!state?.ok || !state.data || typeof state.data !== "object") return;
-    const data = state.data as Partial<TempPasswordPayload>;
-    if (typeof data.tempPassword === "string" && typeof data.email === "string") {
-      setRevealed({ tempPassword: data.tempPassword, email: data.email });
-      setCopied(false);
-      setAcked(false);
-    }
-  }, [state]);
+  function run() {
+    const fd = new FormData();
+    fd.set("traderId", traderId);
+    startTransition(async () => {
+      const res = await adminResetTraderPasswordAction(fd);
+      setConfirmOpen(false);
+      if (res.ok && res.data && typeof res.data === "object") {
+        const data = res.data as Partial<TempPasswordPayload>;
+        if (
+          typeof data.tempPassword === "string" &&
+          typeof data.email === "string"
+        ) {
+          setRevealed({ tempPassword: data.tempPassword, email: data.email });
+          setCopied(false);
+          setAcked(false);
+        }
+      }
+    });
+  }
 
   async function copyPassword() {
     if (!revealed) return;
@@ -58,85 +84,100 @@ export function CreateTraderForm({ dict }: { dict: Dictionary }) {
 
   return (
     <>
-      <form
-        action={action}
-        className="grid max-w-xl gap-3 border border-ro-line bg-ro-surface p-4"
+      <Button
+        type="button"
+        variant="secondary"
+        size="sm"
+        loading={pending}
+        className="!min-w-0 rounded-[11px] px-3"
+        onClick={() => setConfirmOpen(true)}
       >
-        <h2 className="text-lg font-semibold">{u.traderCreateTitle}</h2>
-        <p className="text-sm text-ro-muted">{u.traderCreateLead}</p>
-        <TextField
-          name="email"
-          type="email"
-          label={u.traderEmail}
-          required
-          dense
-          dir="ltr"
-        />
-        <TextField
-          name="displayName"
-          label={u.traderDisplayName}
-          required
-          dense
-        />
-        <TextField name="companyName" label={u.traderCompany} dense />
-        <TextField name="phone" label={u.traderPhone} dense dir="ltr" />
-        <label className="block space-y-1.5 text-sm">
-          <span className="font-medium text-ro-ink">{u.traderNotes}</span>
-          <textarea name="adminNotes" rows={2} className={controlClass} />
-        </label>
-        {state && !state.ok ? (
-          <p className="text-sm text-[var(--ro-danger-700)]" role="alert">
-            {state.error}
-          </p>
-        ) : null}
-        <Button type="submit" size="sm" loading={pending} className="w-fit">
-          {u.traderCreateSubmit}
-        </Button>
-      </form>
-
-      <Dialog
+        {label}
+      </Button>
+      <Modal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        title={confirmTitle}
+        actions={
+          <>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setConfirmOpen(false)}
+            >
+              {cancelLabel}
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              loading={pending}
+              onClick={run}
+            >
+              {confirmLabel}
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm leading-relaxed text-[color:var(--rad-tx2)]">
+          {confirmBody}
+        </p>
+      </Modal>
+      <Modal
         open={!!revealed}
         onClose={closeReveal}
-        title={u.traderTempPasswordTitle}
-        preventDismiss={!acked}
+        title={tempPasswordTitle}
+        actions={
+          <Button
+            type="button"
+            size="sm"
+            disabled={!acked}
+            onClick={closeReveal}
+          >
+            {tempPasswordClose}
+          </Button>
+        }
       >
         {revealed ? (
           <div className="space-y-4">
-            <p className="text-sm text-ro-muted">{u.traderTempPasswordLead}</p>
+            <p className="text-sm leading-relaxed text-[color:var(--rad-tx2)]">
+              {tempPasswordLead}
+            </p>
             <p className="text-sm" dir="ltr">
               {revealed.email}
             </p>
             <p
-              className="rounded-[var(--ro-r-sm)] border border-ro-line bg-ro-paper px-3 py-2 font-mono text-sm tracking-wide"
+              className="rounded-[11px] border border-[color:var(--rad-bd)] bg-[color:var(--rad-surface3)] px-3 py-2 font-mono text-sm tracking-wide text-[color:var(--rad-tx)]"
               dir="ltr"
             >
               {revealed.tempPassword}
             </p>
-            <div className="flex flex-wrap gap-2">
-              <Button type="button" size="sm" variant="secondary" onClick={copyPassword}>
-                {copied ? u.traderTempPasswordCopied : u.traderTempPasswordCopy}
-              </Button>
-            </div>
-            <label className="flex items-start gap-2 text-sm">
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={copyPassword}
+            >
+              {copied ? (
+                <Check className="size-3.5" strokeWidth={1.5} aria-hidden />
+              ) : (
+                <Copy className="size-3.5" strokeWidth={1.5} aria-hidden />
+              )}
+              {copied ? tempPasswordCopied : tempPasswordCopy}
+            </Button>
+            <label className="flex items-start gap-2 text-sm text-[color:var(--rad-tx)]">
               <input
                 type="checkbox"
                 checked={acked}
                 onChange={(e) => setAcked(e.target.checked)}
-                className="mt-1"
+                className="mt-1 accent-[var(--rad-ac)]"
               />
-              <span>{u.traderTempPasswordAck}</span>
+              <span>{tempPasswordAck}</span>
             </label>
-            <Button
-              type="button"
-              size="sm"
-              disabled={!acked}
-              onClick={closeReveal}
-            >
-              {u.traderTempPasswordClose}
-            </Button>
           </div>
         ) : null}
-      </Dialog>
+      </Modal>
     </>
   );
 }
@@ -145,34 +186,102 @@ export function TraderStatusButton({
   traderId,
   nextStatus,
   label,
+  confirmTitle,
+  confirmBody,
+  confirmLabel,
+  cancelLabel,
 }: {
   traderId: string;
   nextStatus: "active" | "disabled";
   label: string;
+  confirmTitle?: string;
+  confirmBody?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const needsConfirm = nextStatus === "disabled";
+
+  function run() {
+    const fd = new FormData();
+    fd.set("traderId", traderId);
+    fd.set("status", nextStatus);
+    startTransition(async () => {
+      await adminSetTraderStatusAction(fd);
+      setConfirmOpen(false);
+      router.refresh();
+    });
+  }
 
   return (
-    <form
-      action={(fd) => {
-        startTransition(async () => {
-          await adminSetTraderStatusAction(fd);
-          router.refresh();
-        });
-      }}
-    >
-      <input type="hidden" name="traderId" value={traderId} />
-      <input type="hidden" name="status" value={nextStatus} />
-      <Button
-        type="submit"
-        variant="secondary"
-        size="sm"
-        loading={pending}
-        className="h-8 px-3"
-      >
-        {label}
-      </Button>
-    </form>
+    <>
+      {needsConfirm ? (
+        <>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            loading={pending}
+            className="!min-w-0 rounded-[11px] px-3"
+            onClick={() => setConfirmOpen(true)}
+          >
+            {label}
+          </Button>
+          <Modal
+            open={confirmOpen}
+            onClose={() => setConfirmOpen(false)}
+            title={confirmTitle ?? label}
+            actions={
+              <>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setConfirmOpen(false)}
+                >
+                  {cancelLabel ?? "Cancel"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="danger"
+                  size="sm"
+                  loading={pending}
+                  onClick={run}
+                >
+                  {confirmLabel ?? label}
+                </Button>
+              </>
+            }
+          >
+            <p className="text-sm leading-relaxed text-[color:var(--rad-tx2)]">
+              {confirmBody ?? label}
+            </p>
+          </Modal>
+        </>
+      ) : (
+        <form
+          action={(fd) => {
+            startTransition(async () => {
+              await adminSetTraderStatusAction(fd);
+              router.refresh();
+            });
+          }}
+        >
+          <input type="hidden" name="traderId" value={traderId} />
+          <input type="hidden" name="status" value={nextStatus} />
+          <Button
+            type="submit"
+            variant="secondary"
+            size="sm"
+            loading={pending}
+            className="!min-w-0 rounded-[11px] px-3"
+          >
+            {label}
+          </Button>
+        </form>
+      )}
+    </>
   );
 }

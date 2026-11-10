@@ -4,14 +4,24 @@ import { revalidatePath } from "next/cache";
 import { randomUUID } from "node:crypto";
 
 import type { ActionResult } from "@/app/actions";
-import { requireAdminSession } from "@/lib/auth/admin-session";
 import {
+  handleAdminSessionError,
+  requireAdminSession,
+} from "@/lib/auth/admin-session";
+import {
+  addInboxNote,
+  addInboxTag,
   getInboxConversation,
   getInboxHealthView,
   listInboxConversations,
   markConversationRead,
+  removeInboxTag,
 } from "@/lib/whatsapp/messaging/inbox";
-import { enqueueOutboundText } from "@/lib/whatsapp/messaging/service";
+import {
+  enqueueOutboundMedia,
+  enqueueOutboundText,
+} from "@/lib/whatsapp/messaging/service";
+import { sendAdminPlatformMessage } from "@/lib/whatsapp/messaging/trader-channel";
 import {
   applyFakeLogout,
   applyFakePairing,
@@ -25,7 +35,15 @@ import {
   clearConversationBusinessLink,
   getBusinessContextForConversation,
   linkConversationToBusinessRecord,
+  setConversationCrmParty,
+  suggestCrmPartiesForConversation,
 } from "@/lib/whatsapp/messaging/linking";
+import {
+  mediaKindFromMime,
+  normalizeOutboundMime,
+  WHATSAPP_MAX_MEDIA_BYTES,
+  WHATSAPP_OUTBOUND_MIME,
+} from "@/lib/whatsapp/media-shared";
 import { prisma } from "@/lib/db/prisma";
 import { containsCI } from "@/lib/db/search";
 
@@ -39,8 +57,8 @@ export async function adminListInboxConversationsAction(): Promise<
 > {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
   const data = await listInboxConversations();
   return { ok: true, data };
@@ -55,8 +73,8 @@ export async function adminGetInboxConversationAction(
 > {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
   const data = await getInboxConversation(conversationId);
   if (!data) return { ok: false, error: "NOT_FOUND" };
@@ -68,8 +86,8 @@ export async function adminGetInboxHealthAction(): Promise<
 > {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
   const data = await getInboxHealthView();
   return { ok: true, data };
@@ -80,8 +98,8 @@ export async function adminMarkInboxConversationReadAction(
 ): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
   const ok = await markConversationRead(conversationId);
   if (!ok) return { ok: false, error: "NOT_FOUND" };
@@ -110,8 +128,8 @@ export async function adminSendWhatsAppTextAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
 
   const conversationId = String(formData.get("conversationId") || "").trim();
@@ -146,7 +164,36 @@ export async function adminSendWhatsAppTextAction(
 
   if (!result.ok) {
     if (result.code === "OUTBOUND_DISABLED") {
-      return { ok: false, error: "OUTBOUND_DISABLED" };
+      // Real WhatsApp send is unavailable (kill switch or no connection) —
+      // fall back to the same platform channel the trader portal already
+      // writes into, so the admin can still reply. Same conversation, same
+      // thread the trader already reads; never a second inbox.
+      const platformResult = await sendAdminPlatformMessage({
+        conversationId: conversation.id,
+        adminId: session.sub,
+        text,
+      });
+      if (!platformResult.ok) {
+        return { ok: false, error: platformResult.error };
+      }
+      revalidatePath("/admin/inbox");
+      revalidatePath(`/admin/inbox/${conversationId}`);
+      return {
+        ok: true,
+        data: {
+          messageId: platformResult.messageId,
+          conversationId: platformResult.conversationId,
+          status: "sent",
+          duplicate: false,
+        },
+      };
+    }
+    if (
+      result.code === "RATE_LIMITED" ||
+      result.code === "SAFETY_CIRCUIT" ||
+      result.code === "RECONNECT_COOLDOWN"
+    ) {
+      return { ok: false, error: "RATE_LIMITED" };
     }
     return { ok: false, error: result.error };
   }
@@ -165,6 +212,148 @@ export async function adminSendWhatsAppTextAction(
   };
 }
 
+/** Enqueue outbound image/video/audio/document from admin composer. */
+export async function adminSendWhatsAppMediaAction(
+  formData: FormData
+): Promise<
+  ActionResult & {
+    data?: {
+      messageId: string;
+      conversationId: string;
+      status: string;
+      duplicate: boolean;
+    };
+  }
+> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+
+  const conversationId = String(formData.get("conversationId") || "").trim();
+  const clientRequestId =
+    String(formData.get("clientRequestId") || "").trim() || randomUUID();
+  const caption = String(formData.get("caption") || "").trim() || null;
+  const file = formData.get("file");
+
+  if (!conversationId) return { ok: false, error: "INVALID_INPUT" };
+  if (!(file instanceof File) || file.size <= 0) {
+    return { ok: false, error: "EMPTY_MEDIA" };
+  }
+  if (file.size > WHATSAPP_MAX_MEDIA_BYTES) {
+    return { ok: false, error: "MEDIA_TOO_LARGE" };
+  }
+
+  const mime = normalizeOutboundMime(file.type || "");
+  if (!WHATSAPP_OUTBOUND_MIME[mime]) {
+    return { ok: false, error: "BAD_MIME" };
+  }
+  const kind = mediaKindFromMime(mime);
+  if (!kind || kind === "sticker") {
+    return { ok: false, error: "BAD_MIME" };
+  }
+
+  const conversation = await prisma.whatsAppConversation.findUnique({
+    where: { id: conversationId },
+    select: { id: true, waChatId: true },
+  });
+  if (!conversation) return { ok: false, error: "NOT_FOUND" };
+
+  const bytes = Buffer.from(await file.arrayBuffer());
+  const result = await enqueueOutboundMedia({
+    waChatId: conversation.waChatId,
+    clientRequestId,
+    adminId: session.sub,
+    messageType: kind,
+    bytes,
+    mime,
+    fileName: file.name || null,
+    caption,
+  });
+
+  if (!result.ok) {
+    if (result.code === "OUTBOUND_DISABLED") {
+      return { ok: false, error: "OUTBOUND_DISABLED" };
+    }
+    if (
+      result.code === "RATE_LIMITED" ||
+      result.code === "SAFETY_CIRCUIT" ||
+      result.code === "RECONNECT_COOLDOWN"
+    ) {
+      return { ok: false, error: "RATE_LIMITED" };
+    }
+    return { ok: false, error: result.error };
+  }
+
+  revalidatePath("/admin/inbox");
+  revalidatePath(`/admin/inbox/${conversationId}`);
+
+  return {
+    ok: true,
+    data: {
+      messageId: result.messageId,
+      conversationId: result.conversationId,
+      status: result.status,
+      duplicate: result.duplicate,
+    },
+  };
+}
+
+export async function adminSetWhatsAppCrmPartyAction(
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+
+  const conversationId = String(formData.get("conversationId") || "").trim();
+  const customerIdRaw = formData.get("customerId");
+  const traderIdRaw = formData.get("traderId");
+  const clear = String(formData.get("clear") || "") === "1";
+
+  const result = await setConversationCrmParty({
+    conversationId,
+    adminId: session.sub,
+    customerId: clear
+      ? null
+      : customerIdRaw != null
+        ? String(customerIdRaw)
+        : undefined,
+    traderId: clear
+      ? null
+      : traderIdRaw != null
+        ? String(traderIdRaw)
+        : undefined,
+  });
+
+  if (!result.ok) return { ok: false, error: result.code };
+
+  revalidatePath("/admin/inbox");
+  revalidatePath(`/admin/inbox/${conversationId}`);
+  return { ok: true };
+}
+
+export async function adminSuggestWhatsAppCrmPartiesAction(
+  conversationId: string
+): Promise<
+  ActionResult & {
+    data?: Awaited<ReturnType<typeof suggestCrmPartiesForConversation>>;
+  }
+> {
+  try {
+    await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const data = await suggestCrmPartiesForConversation(conversationId);
+  return { ok: true, data };
+}
+
 /**
  * Explicitly link a conversation to an existing Week 3 domain record.
  * Allowlisted link types only. Does not mutate business status.
@@ -175,8 +364,8 @@ export async function adminLinkWhatsAppConversationAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
 
   const conversationId = String(formData.get("conversationId") || "").trim();
@@ -208,8 +397,8 @@ export async function adminUnlinkWhatsAppConversationAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
 
   const conversationId = String(formData.get("conversationId") || "").trim();
@@ -236,8 +425,8 @@ export async function adminGetBusinessContextAction(
 > {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
   const data = await getBusinessContextForConversation(conversationId);
   return { ok: true, data };
@@ -253,8 +442,8 @@ export async function adminRetryWhatsAppMessageAction(
 ): Promise<ActionResult & { data?: { messageId: string; status: string } }> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
 
   const messageId = String(formData.get("messageId") || "").trim();
@@ -301,7 +490,11 @@ export type LinkableRecordHit = {
   id: string;
   reference: string;
   label: string;
-  linkType: "retail_request" | "deal_proposal" | "wholesale_request";
+  linkType:
+    | "retail_request"
+    | "deal_proposal"
+    | "wholesale_request"
+    | "brokerage_request";
 };
 
 /** Search domain records for A17 RecordPicker (reference / title). */
@@ -310,8 +503,8 @@ export async function adminSearchLinkableRecordsAction(
 ): Promise<ActionResult & { data?: LinkableRecordHit[] }> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
 
   const linkType = String(formData.get("linkType") || "").trim();
@@ -320,7 +513,8 @@ export async function adminSearchLinkableRecordsAction(
   if (
     linkType !== "retail_request" &&
     linkType !== "deal_proposal" &&
-    linkType !== "wholesale_request"
+    linkType !== "wholesale_request" &&
+    linkType !== "brokerage_request"
   ) {
     return { ok: false, error: "UNSUPPORTED_LINK_TYPE" };
   }
@@ -377,19 +571,44 @@ export async function adminSearchLinkableRecordsAction(
     };
   }
 
-  const rows = await prisma.wholesaleRequest.findMany({
-    where: q ? { reference: containsCI(q) } : undefined,
+  if (linkType === "wholesale_request") {
+    const rows = await prisma.wholesaleRequest.findMany({
+      where: q ? { reference: containsCI(q) } : undefined,
+      orderBy: { updatedAt: "desc" },
+      take,
+      select: { id: true, reference: true },
+    });
+    return {
+      ok: true,
+      data: rows.map((r) => ({
+        id: r.id,
+        reference: r.reference,
+        label: r.reference,
+        linkType: "wholesale_request" as const,
+      })),
+    };
+  }
+
+  const rows = await prisma.brokerageRequest.findMany({
+    where: q
+      ? {
+          OR: [
+            { reference: containsCI(q) },
+            { descriptionAr: containsCI(q) },
+          ],
+        }
+      : undefined,
     orderBy: { updatedAt: "desc" },
     take,
-    select: { id: true, reference: true },
+    select: { id: true, reference: true, descriptionAr: true },
   });
   return {
     ok: true,
     data: rows.map((r) => ({
       id: r.id,
       reference: r.reference,
-      label: r.reference,
-      linkType: "wholesale_request" as const,
+      label: r.descriptionAr.slice(0, 60) || r.reference,
+      linkType: "brokerage_request" as const,
     })),
   };
 }
@@ -406,8 +625,8 @@ export async function adminRequestWhatsAppPairingAction(
 ): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
 
   const digits = normalizePairingPhone(String(phone ?? ""));
@@ -427,8 +646,8 @@ export async function adminRequestWhatsAppPairingAction(
 export async function adminWhatsAppReconnectAction(): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
 
   if (isFakeWhatsAppAdapter()) {
@@ -444,8 +663,8 @@ export async function adminWhatsAppReconnectAction(): Promise<ActionResult> {
 export async function adminWhatsAppLogoutAction(): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "UNAUTHORIZED" };
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
   }
 
   if (isFakeWhatsAppAdapter()) {
@@ -456,4 +675,64 @@ export async function adminWhatsAppLogoutAction(): Promise<ActionResult> {
 
   revalidatePath("/admin/inbox");
   return { ok: true };
+}
+
+/** Internal note — never sent to the customer. Round 3 inbox context panel. */
+export async function adminAddInboxNoteAction(
+  formData: FormData
+): Promise<ActionResult & { data?: { id: string; body: string; authorName: string; createdAt: string } }> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const conversationId = String(formData.get("conversationId") || "").trim();
+  const body = String(formData.get("body") || "").trim();
+  if (!conversationId) return { ok: false, error: "INVALID_INPUT" };
+  if (!body) return { ok: false, error: "EMPTY_TEXT" };
+
+  const note = await addInboxNote({
+    conversationId,
+    adminId: session.sub,
+    adminName: session.name,
+    body,
+  });
+  if (!note) return { ok: false, error: "EMPTY_TEXT" };
+  revalidatePath(`/admin/inbox/${conversationId}`);
+  return { ok: true, data: note };
+}
+
+export async function adminAddInboxTagAction(
+  formData: FormData
+): Promise<ActionResult & { data?: { tags: string[] } }> {
+  try {
+    await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const conversationId = String(formData.get("conversationId") || "").trim();
+  const tag = String(formData.get("tag") || "").trim();
+  if (!conversationId || !tag) return { ok: false, error: "INVALID_INPUT" };
+
+  const tags = await addInboxTag({ conversationId, tag });
+  revalidatePath(`/admin/inbox/${conversationId}`);
+  return { ok: true, data: { tags } };
+}
+
+export async function adminRemoveInboxTagAction(
+  formData: FormData
+): Promise<ActionResult & { data?: { tags: string[] } }> {
+  try {
+    await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const conversationId = String(formData.get("conversationId") || "").trim();
+  const tag = String(formData.get("tag") || "").trim();
+  if (!conversationId || !tag) return { ok: false, error: "INVALID_INPUT" };
+
+  const tags = await removeInboxTag({ conversationId, tag });
+  revalidatePath(`/admin/inbox/${conversationId}`);
+  return { ok: true, data: { tags } };
 }

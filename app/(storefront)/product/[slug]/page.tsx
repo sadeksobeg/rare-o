@@ -6,22 +6,29 @@ import {
   getPublishedProductBySlug,
   listRelatedPublishedProducts,
 } from "@/lib/catalog/service";
-import { parseSpecs } from "@/lib/catalog/specs";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { AddToCartButton } from "@/components/storefront/add-to-cart-button";
 import { HandoffExplainer } from "@/components/storefront/handoff-explainer";
+import { ProductAPlus } from "@/components/storefront/product-a-plus";
+import { ProductBuyBox } from "@/components/storefront/product-buy-box";
+import {
+  parseFeatureLines,
+  ProductFeatureBullets,
+} from "@/components/storefront/product-feature-bullets";
 import { ProductGallery } from "@/components/storefront/product-gallery";
 import { StickyCtaBar } from "@/components/storefront/sticky-cta-bar";
 import { AvailabilityChip } from "@/components/storefront/catalog/availability-chip";
 import { PriceBlock } from "@/components/storefront/catalog/price-block";
 import { ProductBadges } from "@/components/storefront/catalog/product-badges";
 import { ProductGrid } from "@/components/storefront/catalog/product-grid";
+import { OudSpecGallery } from "@/components/storefront/catalog/oud-spec-gallery";
 import { SpecTable } from "@/components/storefront/catalog/spec-table";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { href } from "@/lib/href";
 import { localizedName } from "@/lib/utils";
 import {
   absoluteUrl,
+  breadcrumbJsonLd,
   jsonLdString,
   productJsonLd,
   storefrontMetadata,
@@ -104,18 +111,21 @@ export default async function ProductPage({
     path: img.path,
     kind: img.kind,
     alt:
-      (locale === "ar" ? img.altAr || img.altEn : img.altEn || img.altAr) ||
+      localizedName(locale, img.altAr, img.altEn) ||
       name ||
       product.slug,
   }));
 
   const priceNumber = Number(product.retailPrice);
+  const compareAtPriceNumber =
+    product.compareAtPrice != null ? Number(product.compareAtPrice) : null;
   const jsonLd = productJsonLd({
     name: name || product.slug,
     description: description || undefined,
-    images: product.images.map((img) => absoluteUrl(img.path)),
+    images: product.images
+      .filter((img) => img.kind !== "audio")
+      .map((img) => absoluteUrl(img.path)),
     price: Number.isFinite(priceNumber) ? priceNumber : null,
-    // schema.org expects ISO 4217; skip non-ISO fixture codes.
     currency:
       product.currency && /^[A-Z]{3}$/.test(product.currency)
         ? product.currency
@@ -130,11 +140,30 @@ export default async function ProductPage({
     : "";
   const descriptionText = description?.trim() ?? "";
   const longDescription = descriptionText.length > SHORT_DESCRIPTOR_MAX;
-  const keySpecs = parseSpecs(specs).rows.slice(0, 4);
   const related = await listRelatedPublishedProducts(
     product.categoryId,
     product.id
   );
+
+  const featureItems = [
+    ...parseFeatureLines(specs),
+    ...parseFeatureLines(descriptionText),
+  ].filter((v, i, arr) => arr.indexOf(v) === i);
+
+  const aPlusBlocks = [
+    {
+      title: dict.product.craftStory,
+      body: dict.product.craftStoryBody,
+      imageSrc: "/brand/instruments/oud-workshop.jpg",
+      imageAlt: dict.product.craftStory,
+    },
+    {
+      title: dict.product.soundStory,
+      body: dict.product.soundStoryBody,
+      imageSrc: "/brand/instruments/oud-strings-close.jpg",
+      imageAlt: dict.product.soundStory,
+    },
+  ];
 
   return (
     <div
@@ -143,6 +172,32 @@ export default async function ProductPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdString(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: jsonLdString(
+            breadcrumbJsonLd([
+              { name: dict.nav.home, path: href("/", locale) },
+              { name: dict.nav.catalog, path: href("/catalog", locale) },
+              ...(categoryName && product.category?.slug
+                ? [
+                    {
+                      name: categoryName,
+                      path: href(
+                        `/catalog?category=${product.category.slug}`,
+                        locale
+                      ),
+                    },
+                  ]
+                : []),
+              {
+                name: displayName,
+                path: href(`/product/${product.slug}`, locale),
+              },
+            ])
+          ),
+        }}
       />
 
       <nav aria-label={dict.product.breadcrumb}>
@@ -158,17 +213,37 @@ export default async function ProductPage({
               {dict.nav.catalog}
             </Link>
           </li>
+          {categoryName && product.category?.slug ? (
+            <>
+              <ChevronRight className="size-3.5 rtl:rotate-180" aria-hidden />
+              <li>
+                <Link
+                  href={href(`/catalog?category=${product.category.slug}`, locale)}
+                  className="hover:text-ro-ink"
+                >
+                  {categoryName}
+                </Link>
+              </li>
+            </>
+          ) : null}
           <ChevronRight className="size-3.5 rtl:rotate-180" aria-hidden />
-          <li aria-current="page" className="text-ro-ink">
+          <li aria-current="page" className="max-w-[14rem] truncate text-ro-ink">
             {displayName}
           </li>
         </ol>
       </nav>
 
-      <section className="grid gap-8 lg:grid-cols-12 lg:gap-12">
+      <section className="grid gap-8 lg:grid-cols-12 lg:items-start lg:gap-10">
         <div className="relative min-w-0 lg:col-span-7">
           <ProductBadges
-            product={product}
+            product={{
+              badgeNew: product.badgeNew,
+              badgeFeatured: product.badgeFeatured,
+              badgeSale: product.badgeSale,
+              retailPrice: priceNumber,
+              compareAtPrice: compareAtPriceNumber,
+              categorySlug: product.category?.slug,
+            }}
             locale={locale}
             className="z-20"
           />
@@ -187,93 +262,105 @@ export default async function ProductPage({
             }}
           />
         </div>
+
         <div className="space-y-5 lg:col-span-5 lg:sticky lg:top-24 lg:self-start">
           {categoryName ? (
             <p className="ro-type-overline text-ro-plum">{categoryName}</p>
           ) : null}
-          <h1 className="ro-type-h1">{displayName}</h1>
-          <div className="flex flex-wrap items-center gap-3">
-            <PriceBlock
-              size="pdp"
-              price={priceNumber}
-              compareAtPrice={
-                product.compareAtPrice != null
-                  ? Number(product.compareAtPrice)
-                  : null
-              }
-              currency={product.currency}
-              locale={locale}
-              onRequestLabel={dict.product.priceOnRequest}
-              wasLabel={dict.product.priceWas}
-              nowLabel={dict.product.priceNow}
-              onSaleLabel={dict.product.onSale}
-            />
-            <AvailabilityChip
-              size="md"
-              availability={product.availability}
-              label={dict.product.unavailable}
-            />
-          </div>
-          {descriptionText ? (
-            <p className="text-ro-text-2">
-              {longDescription
-                ? `${descriptionText.slice(0, SHORT_DESCRIPTOR_MAX).trimEnd()}…`
-                : descriptionText}
-            </p>
-          ) : null}
-          {keySpecs.length > 0 ? (
-            <dl className="border-t border-ro-border">
-              {keySpecs.map((row, i) => (
-                <div
-                  key={`${row.label}-${i}`}
-                  className="flex items-baseline justify-between gap-6 border-b border-ro-border py-2.5"
-                >
-                  <dt className="text-sm text-ro-muted">{row.label}</dt>
-                  <dd className="text-sm font-medium text-ro-ink text-end">
-                    {row.value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          ) : null}
-          {available ? (
-            <div id="pdp-cta">
-              <AddToCartButton
-                variant="pdp"
-                productId={product.id}
-                slug={product.slug}
-                name={displayName}
+          <h1 className="ro-type-h1 leading-tight">{displayName}</h1>
+
+          <ProductBuyBox
+            trust={[
+              { icon: "shield", label: dict.product.trustNoPayment },
+              { icon: "package", label: dict.product.trustHandoff },
+              { icon: "truck", label: dict.product.trustUnique },
+              { icon: "whatsapp", label: dict.product.trustWhatsApp },
+            ]}
+          >
+            <div className="flex flex-wrap items-center gap-3">
+              <PriceBlock
+                size="pdp"
                 price={priceNumber}
-                currency={product.currency ?? ""}
-                imagePath={images[0]?.path ?? null}
-                label={dict.product.addToCart}
-                addedLabel={dict.product.added}
+                compareAtPrice={
+                  product.compareAtPrice != null
+                    ? Number(product.compareAtPrice)
+                    : null
+                }
+                currency={product.currency}
+                locale={locale}
+                onRequestLabel={dict.product.priceOnRequest}
+                wasLabel={dict.product.priceWas}
+                nowLabel={dict.product.priceNow}
+                onSaleLabel={dict.product.onSale}
+              />
+              <AvailabilityChip
+                size="md"
+                availability={product.availability}
+                label={dict.product.unavailable}
               />
             </div>
-          ) : (
-            <div className="space-y-3">
-              <Button size="lg" className="w-full" disabled>
-                {dict.product.addToCart}
-              </Button>
-              <p className="text-sm text-ro-text-2">
-                {dict.product.unavailableReason}
+
+            {descriptionText ? (
+              <p className="text-sm leading-relaxed text-ro-text-2">
+                {longDescription
+                  ? `${descriptionText.slice(0, SHORT_DESCRIPTOR_MAX).trimEnd()}…`
+                  : descriptionText}
               </p>
-              <ButtonLink
-                href={href("/contact", locale)}
-                variant="secondary"
-                size="lg"
-                className="w-full"
-              >
-                {dict.product.contactUs}
-              </ButtonLink>
-            </div>
-          )}
+            ) : null}
+
+            <ProductFeatureBullets
+              title={dict.product.featureBullets}
+              items={featureItems}
+            />
+
+            {available ? (
+              <div id="pdp-cta" className="space-y-3">
+                <AddToCartButton
+                  variant="pdp"
+                  productId={product.id}
+                  slug={product.slug}
+                  name={displayName}
+                  price={priceNumber}
+                  currency={product.currency ?? ""}
+                  imagePath={images[0]?.path ?? null}
+                  label={dict.product.addToCart}
+                  addedLabel={dict.product.added}
+                />
+                <ButtonLink
+                  href={href("/cart", locale)}
+                  variant="secondary"
+                  size="lg"
+                  className="w-full"
+                >
+                  {dict.product.viewCart}
+                </ButtonLink>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <Button size="lg" className="w-full" disabled>
+                  {dict.product.addToCart}
+                </Button>
+                <p className="text-sm text-ro-text-2">
+                  {dict.product.unavailableReason}
+                </p>
+                <ButtonLink
+                  href={href("/contact", locale)}
+                  variant="secondary"
+                  size="lg"
+                  className="w-full"
+                >
+                  {dict.product.contactUs}
+                </ButtonLink>
+              </div>
+            )}
+          </ProductBuyBox>
+
           <HandoffExplainer dict={dict} compact />
         </div>
       </section>
 
       {longDescription ? (
-        <section className="max-w-[680px] space-y-4">
+        <section className="max-w-[720px] space-y-4">
           <h2 className="ro-type-h2">{dict.product.description}</h2>
           <p className="whitespace-pre-line leading-relaxed text-ro-text-2">
             {descriptionText}
@@ -281,7 +368,11 @@ export default async function ProductPage({
         </section>
       ) : null}
 
-      <SpecTable text={specs} heading={dict.product.specs} />
+      <OudSpecGallery specs={product.oudSpecs} locale={locale} dict={dict} />
+
+      <SpecTable text={specs} heading={dict.product.extras} />
+
+      <ProductAPlus heading={dict.product.aboutThisPiece} blocks={aPlusBlocks} />
 
       {related.length > 0 ? (
         <section className="space-y-6">

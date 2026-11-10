@@ -26,19 +26,19 @@ One row per contract item. Authoritative verdicts: `docs/pro-readiness/FINAL-REP
 | 4.3 | Internal Order Status Tracking | PASS | Row 4.3 |
 | 6.1 | Admin Dashboard | PASS | Row 6.1 |
 | 6.2 | Customer Management | PASS | Row 6.2 |
-| 7.1 | Encryption & Secure Storage | PARTIAL | Row 7.1 |
+| 7.1 | Encryption & Secure Storage | PASS | Row 7.1 — `test:security-storage` |
 | 7.2 | Daily Backup | PASS | Row 7.2 |
-| 7.3 | QA & Testing | PARTIAL | Row 7.3 — E2/Lighthouse closure |
-| 7.4 | Deployment & Launch | OWNER-ACTION | Row 7.4 — VPS execute |
-| 7.5 | Domain & SSL | OWNER-ACTION | Row 7.5 — DNS |
+| 7.3 | QA & Testing | PASS | Row 7.3 — functional suites; LH under 2.6 |
+| 7.4 | Deployment & Launch | PASS | Row 7.4 — live `rareoud.com` |
+| 7.5 | Domain & SSL | PASS | Row 7.5 — LE HTTPS live |
 | 8.1 | Wholesale Submission | PASS | Row 8.1 |
 | 8.2 | Wholesale Fulfillment Dashboard | PASS | Row 8.2 |
 | 8.3 | Wholesale Shipping Tracking | PASS | Row 8.3 |
-| 9.1 | WhatsApp Connection | PARTIAL | Row 9.1 — live phone |
+| 9.1 | WhatsApp Connection | PARTIAL | Row 9.1 — **live phone still OWNER** (kill switches off) |
 | 9.2 | Unified Inbox | PASS | Row 9.2 |
 | 9.3 | Order-to-Conversation Linking | PASS | Row 9.3 |
 
-**Summary (D4):** PASS 27 · PARTIAL 4 · OWNER-ACTION 2 — see FINAL-REPORT owner actions and E5 content OWNER-ACTION for assets/legal.
+**Summary (2026-11-05):** Section **07 closed PASS**. Remaining contract hold: **9.1 live WhatsApp** (+ optional brand/legal assets). Client AR: `docs/client-report/SECTION-07-CLIENT-DELIVERY-AR.md`.
 
 ## Round F6 proof artifacts (2026-10-20)
 

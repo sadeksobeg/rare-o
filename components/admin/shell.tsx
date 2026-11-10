@@ -1,21 +1,18 @@
-import { Suspense } from "react";
-import Link from "next/link";
-import { adminLogoutAction } from "@/app/actions";
-import { AdminLocaleToggle } from "@/components/admin/locale-toggle";
-import {
-  AdminMobileNav,
-  AdminSidebar,
-  type AdminNavGroup,
-} from "@/components/admin/nav";
-import { BrandWallpaper, Emblem } from "@/components/brand";
-import { PortalRouteProgress } from "@/components/portal/route-progress";
+import { redirect } from "next/navigation";
+import { RadShellClient } from "@/components/admin/rad/shell-client";
+import type { RadNavGroup } from "@/components/admin/rad/sidebar";
+import { PortalThemeProvider } from "@/components/portal/portal-theme";
 import { OfflineBanner } from "@/components/system/offline-banner";
-import { AppToast } from "@/components/system/app-toast";
-import { Button } from "@/components/ui/button";
+import { SonnerToaster } from "@/components/ui/sonner-toaster";
 import { getAdminSessionChrome } from "@/lib/auth/admin-session";
 import { isPromoFeaturesEnabled } from "@/lib/config/feature-flags";
+import { prisma } from "@/lib/db/prisma";
 import { getRequestDictionary } from "@/lib/i18n/server";
-import { redirect } from "next/navigation";
+import { countActiveBrokerage } from "@/lib/brokerage/service";
+import { statusesAwaitingAdmin } from "@/lib/ui/status";
+import {
+  uiVisibleRetailRequestWhere,
+} from "@/lib/admin/ui-hidden";
 
 export async function AdminShell({ children }: { children: React.ReactNode }) {
   const session = await getAdminSessionChrome();
@@ -23,17 +20,32 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
 
   const { locale, dict } = await getRequestDictionary();
   const a = dict.admin;
+  const ad2 = dict.ad2;
   const promoFeatures = isPromoFeaturesEnabled();
 
-  const groups: AdminNavGroup[] = [
+  const [unreadInbox, retailAwaiting, activeBrokerage] = await Promise.all([
+    prisma.whatsAppConversation.count({ where: { unreadCount: { gt: 0 } } }),
+    prisma.retailRequest.count({
+      where: {
+        AND: [
+          uiVisibleRetailRequestWhere(),
+          { status: { in: statusesAwaitingAdmin("retail") } },
+        ],
+      },
+    }),
+    countActiveBrokerage(),
+  ]);
+
+  const groups: RadNavGroup[] = [
     {
       title: dict.common.navOps,
       items: [
         { href: "/admin", label: a.dashboard },
-        { href: "/admin/inbox", label: a.inbox },
-        { href: "/admin/requests", label: a.requests },
+        { href: "/admin/inbox", label: a.inbox, badge: unreadInbox },
+        { href: "/admin/requests", label: a.requests, badge: retailAwaiting },
         { href: "/admin/deals", label: a.deals },
         { href: "/admin/wholesale", label: a.wholesale },
+        { href: "/admin/brokerage", label: a.brokerage, badge: activeBrokerage },
       ],
     },
     {
@@ -42,9 +54,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
         { href: "/admin/products", label: a.products },
         { href: "/admin/categories", label: a.categories },
         { href: "/admin/offers", label: a.offers },
-        ...(promoFeatures
-          ? [{ href: "/admin/promos", label: a.promos }]
-          : []),
+        ...(promoFeatures ? [{ href: "/admin/promos", label: a.promos }] : []),
       ],
     },
     {
@@ -52,70 +62,88 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
       items: [
         { href: "/admin/customers", label: a.customers },
         { href: "/admin/traders", label: a.traders },
+        { href: "/admin/team", label: a.team },
+      ],
+    },
+    {
+      title: dict.common.navSystem,
+      items: [
+        { href: "/admin/notifications", label: dict.adminUi.notificationsTitle },
+        { href: "/admin/settings", label: dict.adminUi.settingsHubTitle },
       ],
     },
   ];
 
-  const brand = `RARE OUD · ${a.dashboard}`;
+  const pageLabels: Record<string, string> = {
+    "/admin": a.dashboard,
+    "/admin/inbox": a.inbox,
+    "/admin/requests": a.requests,
+    "/admin/deals": a.deals,
+    "/admin/wholesale": a.wholesale,
+    "/admin/brokerage": a.brokerage,
+    "/admin/products": a.products,
+    "/admin/categories": a.categories,
+    "/admin/offers": a.offers,
+    "/admin/customers": a.customers,
+    "/admin/traders": a.traders,
+    "/admin/team": a.team,
+    "/admin/settings": dict.adminUi.settingsHubTitle,
+    "/admin/notifications": dict.adminUi.notificationsTitle,
+  };
+
+  const actions = [
+    { href: "/admin/products/new", title: ad2.newProduct },
+    { href: "/admin/offers/new", title: ad2.newOffer },
+    { href: "/admin/traders", title: ad2.newTrader },
+  ];
 
   return (
-    <AppToast dismissLabel={dict.common.toastDismiss}>
-      <div className="ro-portal ro-portal-admin relative flex min-h-screen text-ro-ink">
-        <BrandWallpaper
-          tone="cream"
-          patternId="ro-admin-wallpaper"
-          className="z-0 opacity-[0.55]"
-        />
-        <div className="ro-portal-atmosphere" aria-hidden />
-        <Suspense fallback={null}>
-          <PortalRouteProgress />
-        </Suspense>
-        <div className="relative z-10 flex min-h-screen w-full">
-          <AdminSidebar groups={groups} brand={brand} />
-          <div className="flex min-w-0 flex-1 flex-col">
-            <OfflineBanner />
-            <header className="ro-portal-header sticky top-0 z-30 flex h-14 items-center justify-between gap-3 px-4">
-              <div className="flex items-center gap-3">
-                <AdminMobileNav
-                  groups={groups}
-                  menuLabel={dict.common.menu}
-                  closeLabel={dict.common.close}
-                />
-                <Link
-                  href="/admin"
-                  className="flex items-center gap-2 lg:hidden"
-                >
-                  <Emblem variant="small" className="size-7" />
-                  <span className="font-display text-sm font-semibold tracking-[0.14em] text-ro-ink">
-                    {brand}
-                  </span>
-                </Link>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <AdminLocaleToggle
-                  locale={locale}
-                  label={dict.common.language}
-                  tone="on-light"
-                />
-                <span className="hidden truncate text-ro-muted sm:inline">
-                  {session.email}
-                </span>
-                <form action={adminLogoutAction}>
-                  <Button type="submit" variant="secondary" size="sm">
-                    {a.logout}
-                  </Button>
-                </form>
-              </div>
-            </header>
-            <main
-              id="main-content"
-              className="ro-portal-main-enter mx-auto w-full max-w-[1440px] flex-1 px-4 py-6 has-[[data-admin-inbox]]:max-w-none has-[[data-admin-inbox]]:px-3 has-[[data-admin-inbox]]:py-4 sm:px-6 lg:px-8"
-            >
-              {children}
-            </main>
-          </div>
-        </div>
-      </div>
-    </AppToast>
+    <PortalThemeProvider defaultTheme="dark" dataPortal="admin" className="contents ro-portal">
+      <SonnerToaster />
+      <RadShellClient
+        groups={groups}
+        brand="RARE OUD"
+        brandSub={dict.common.adminBrandSub}
+        userName={session.name}
+        userRole={ad2.userRole}
+        navLabel={dict.common.navLabelAdmin}
+        collapseLabel={ad2.collapseMenu}
+        expandLabel={ad2.expandMenu}
+        breadcrumbRoot={ad2.breadcrumbAdmin}
+        pageTitle={a.dashboard}
+        searchPlaceholder={ad2.searchPlaceholder}
+        searchLabel={dict.admin.commandSearch}
+        notificationsLabel={ad2.notifications}
+        notificationsCount={0}
+        inboxLabel={a.inbox}
+        inboxCount={unreadInbox}
+        themeLabel={dict.common.themeLight}
+        languageLabel={dict.common.language}
+        locale={locale}
+        menuLabel={ad2.menuLabel}
+        paletteProps={{
+          placeholder: ad2.paletteSearchPlaceholder,
+          emptyTemplate: ad2.paletteEmpty,
+          navGroupLabel: ad2.paletteNavGroup,
+          actionsGroupLabel: ad2.paletteActionsGroup,
+          navHint: ad2.paletteNav,
+          openHint: ad2.paletteOpen,
+          closeHint: ad2.paletteClose,
+          pageLabels,
+          actions,
+        }}
+        mobileTabLabels={{
+          dashboard: a.dashboard,
+          inbox: a.inbox,
+          requests: a.requests,
+          deals: a.deals,
+          more: ad2.moreTab,
+        }}
+        mobileRequestsCount={retailAwaiting}
+      >
+        <OfflineBanner />
+        {children}
+      </RadShellClient>
+    </PortalThemeProvider>
   );
 }

@@ -1,3 +1,4 @@
+import { Check, Circle, Ban } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { getStatusLabel } from "@/lib/ui/status-labels";
@@ -74,27 +75,31 @@ export function StatusStepper({
           ) : null}
           <span
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-[var(--ro-r-sm)] px-2 py-1 text-xs",
+              "inline-flex items-center gap-1.5 rounded-[var(--ro-r-sm)] px-2.5 py-1.5 text-xs font-semibold transition-transform duration-[var(--ro-dur-fast)]",
               step.state === "current" &&
-                "bg-[var(--ro-plum-900)] font-semibold text-ro-canvas",
+                "bg-[var(--ro-plum-900)] font-bold text-ro-canvas shadow-[0_8px_20px_-12px_color-mix(in_srgb,var(--ro-plum-900)_70%,transparent)]",
               step.state === "done" &&
                 "bg-[var(--ro-plum-100)] text-[var(--ro-plum-900)]",
               step.state === "upcoming" &&
                 "border border-ro-line text-ro-muted",
               step.state === "blocked" &&
-                "bg-[#E6E0EA] font-semibold text-[var(--ro-ink-500)]"
+                "bg-[#E6E0EA] font-bold text-[var(--ro-ink-500)]"
             )}
           >
-            <span
-              aria-hidden
-              className={cn(
-                "size-1.5 rounded-full",
-                step.state === "current" && "bg-ro-canvas",
-                step.state === "done" && "bg-[var(--ro-plum-900)]",
-                step.state === "upcoming" && "bg-[var(--ro-ink-300)]",
-                step.state === "blocked" && "bg-[var(--ro-ink-500)]"
-              )}
-            />
+            {step.state === "done" ? (
+              <Check className="size-3.5 shrink-0" strokeWidth={2.5} aria-hidden />
+            ) : step.state === "blocked" ? (
+              <Ban className="size-3.5 shrink-0" strokeWidth={2} aria-hidden />
+            ) : (
+              <Circle
+                className={cn(
+                  "size-3.5 shrink-0",
+                  step.state === "current" && "fill-current"
+                )}
+                strokeWidth={2}
+                aria-hidden
+              />
+            )}
             {getStatusLabel(dict, domain, step.value)}
             <span className="sr-only">: {stateText[step.state]}</span>
           </span>

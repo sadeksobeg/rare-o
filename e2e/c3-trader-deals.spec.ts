@@ -55,7 +55,14 @@ test.describe("C3 trader deals and portal guards", () => {
     if (await bar.isVisible().catch(() => false)) {
       await bar.locator('select[name="action"]').selectOption("counter");
       await bar.locator('input[name="proposedPrice"]').fill("1500");
-      await bar.locator('input[name="currency"]').fill("USD");
+      const currencyField = bar.locator(
+        'select[name="currency"], input[name="currency"]'
+      );
+      if (await currencyField.evaluate((el) => el.tagName === "SELECT")) {
+        await currencyField.selectOption("USD");
+      } else if (await currencyField.isVisible().catch(() => false)) {
+        await currencyField.fill("USD");
+      }
       await bar.locator('input[name="quantity"]').fill("1");
       await bar.getByRole("button", { name: /submit|entry|تسجيل/i }).click();
       await expect(

@@ -1,0 +1,30 @@
+{
+  "at": "2026-10-22T06:01:26.297Z",
+  "base": "http://127.0.0.1:3000",
+  "files": [
+    "docs\\visual\\v2\\screenshots\\admin-dashboard-ar-390.png",
+    "docs\\visual\\v2\\screenshots\\admin-dashboard-ar-768.png",
+    "docs\\visual\\v2\\screenshots\\admin-dashboard-ar-1440.png",
+    "docs\\visual\\v2\\screenshots\\admin-dashboard-en-390.png",
+    "docs\\visual\\v2\\screenshots\\admin-dashboard-en-768.png",
+    "docs\\visual\\v2\\screenshots\\admin-dashboard-en-1440.png",
+    "docs\\visual\\v2\\screenshots\\trader-home-ar-390.png",
+    "docs\\visual\\v2\\screenshots\\trader-home-ar-768.png",
+    "docs\\visual\\v2\\screenshots\\trader-home-ar-1440.png",
+    "docs\\visual\\v2\\screenshots\\trader-home-en-390.png",
+    "docs\\visual\\v2\\screenshots\\trader-home-en-768.png",
+    "docs\\visual\\v2\\screenshots\\trader-home-en-1440.png",
+    "docs\\visual\\v2\\screenshots\\empty-state-ar-390.png",
+    "docs\\visual\\v2\\screenshots\\empty-state-ar-768.png",
+    "docs\\visual\\v2\\screenshots\\empty-state-ar-1440.png",
+    "docs\\visual\\v2\\screenshots\\empty-state-en-390.png",
+    "docs\\visual\\v2\\screenshots\\empty-state-en-768.png",
+    "docs\\visual\\v2\\screenshots\\empty-state-en-1440.png",
+    "docs\\visual\\v2\\screenshots\\dev-ui-icons-ar-390.png",
+    "docs\\visual\\v2\\screenshots\\dev-ui-icons-ar-768.png",
+    "docs\\visual\\v2\\screenshots\\dev-ui-icons-ar-1440.png",
+    "docs\\visual\\v2\\screenshots\\dev-ui-icons-en-390.png",
+    "docs\\visual\\v2\\screenshots\\dev-ui-icons-en-768.png",
+    "docs\\visual\\v2\\screenshots\\dev-ui-icons-en-1440.png"
+  ]
+}

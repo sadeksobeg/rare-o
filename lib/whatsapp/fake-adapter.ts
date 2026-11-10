@@ -14,6 +14,8 @@ import {
   type WhatsAppAdapterEvents,
   type WhatsAppConnectionState,
   type WhatsAppHealth,
+  type WhatsAppSendMediaInput,
+  type WhatsAppSendResult,
   type WhatsAppSendTextInput,
   type WhatsAppSendTextResult,
 } from "@/lib/whatsapp/types";
@@ -43,12 +45,23 @@ export type FakeWhatsAppAdapterOptions = {
   connectOnStart?: boolean;
   /** Override the connect tick (tests). */
   connectDelayMs?: number;
+  /**
+   * Auto-advance sent → delivered → read shortly after a successful send,
+   * mimicking a real WhatsApp client so the admin UI demos truthfully
+   * without a separate E2E script. Default true; set false for tests that
+   * assert on "sent" staying put.
+   */
+  autoReceipts?: boolean;
+  /** Override the delivered/read auto-advance delays (tests). */
+  autoReceiptDelaysMs?: { delivered: number; read: number };
 };
 
 export class FakeWhatsAppAdapter implements WhatsAppAdapter {
   private readonly events: WhatsAppAdapterEvents;
   private readonly connectOnStart: boolean;
   private readonly connectDelayMs: number;
+  private readonly autoReceipts: boolean;
+  private readonly autoReceiptDelaysMs: { delivered: number; read: number };
 
   private state: WhatsAppConnectionState = "DISCONNECTED";
   private detail: string | undefined;
@@ -71,6 +84,11 @@ export class FakeWhatsAppAdapter implements WhatsAppAdapter {
     this.events = options.events ?? {};
     this.connectOnStart = options.connectOnStart ?? false;
     this.connectDelayMs = options.connectDelayMs ?? FAKE_PAIRING_CONNECT_DELAY_MS;
+    this.autoReceipts = options.autoReceipts ?? true;
+    this.autoReceiptDelaysMs = options.autoReceiptDelaysMs ?? {
+      delivered: 1_200,
+      read: 4_000,
+    };
   }
 
   getHealth(): WhatsAppHealth {
@@ -216,6 +234,61 @@ export class FakeWhatsAppAdapter implements WhatsAppAdapter {
       text,
       clientRequestId,
     });
+    this.scheduleAutoReceipts(waMessageId);
+    return { ok: true, waMessageId, clientRequestId };
+  }
+
+  async sendMedia(input: WhatsAppSendMediaInput): Promise<WhatsAppSendResult> {
+    const clientRequestId = input.clientRequestId?.trim() ?? "";
+    if (!clientRequestId) {
+      return {
+        ok: false,
+        clientRequestId: "",
+        error: "clientRequestId is required",
+        code: "INVALID_INPUT",
+      };
+    }
+    if (this.seenClientRequestIds.has(clientRequestId)) {
+      return {
+        ok: false,
+        clientRequestId,
+        error: "Duplicate clientRequestId",
+        code: "DUPLICATE",
+      };
+    }
+    if (!isOutboundEnabled()) {
+      return {
+        ok: false,
+        clientRequestId,
+        error: "Outbound messaging is disabled (WHATSAPP_OUTBOUND_ENABLED)",
+        code: "OUTBOUND_DISABLED",
+      };
+    }
+    if (this.state !== "CONNECTED") {
+      return {
+        ok: false,
+        clientRequestId,
+        error: "WhatsApp is not connected",
+        code: "NOT_CONNECTED",
+      };
+    }
+    if (!input.bytes?.length) {
+      return {
+        ok: false,
+        clientRequestId,
+        error: "Media payload is empty",
+        code: "INVALID_INPUT",
+      };
+    }
+    const waMessageId = `FAKE-MEDIA-${randomUUID()}`;
+    this.seenClientRequestIds.add(clientRequestId);
+    this.sent.push({
+      waMessageId,
+      waChatId: input.waChatId,
+      text: `[${input.messageType}] ${input.fileName ?? ""}`.trim(),
+      clientRequestId,
+    });
+    this.scheduleAutoReceipts(waMessageId);
     return { ok: true, waMessageId, clientRequestId };
   }
 
@@ -247,6 +320,36 @@ export class FakeWhatsAppAdapter implements WhatsAppAdapter {
       timestamp: nowIso(),
     });
     return { waMessageId };
+  }
+
+  private scheduleAutoReceipts(waMessageId: string): void {
+    if (!this.autoReceipts) return;
+    setTimeout(() => {
+      void this.events.onOutboundStatusUpdate?.({
+        waMessageId,
+        status: "delivered",
+        timestamp: nowIso(),
+      });
+    }, this.autoReceiptDelaysMs.delivered);
+    setTimeout(() => {
+      void this.events.onOutboundStatusUpdate?.({
+        waMessageId,
+        status: "read",
+        timestamp: nowIso(),
+      });
+    }, this.autoReceiptDelaysMs.read);
+  }
+
+  /** E2E helper — simulate a delivery/read receipt for a message we "sent". */
+  async simulateStatusUpdate(
+    waMessageId: string,
+    status: "delivered" | "read"
+  ): Promise<void> {
+    await this.events.onOutboundStatusUpdate?.({
+      waMessageId,
+      status,
+      timestamp: nowIso(),
+    });
   }
 
   /** E2E helper — force the connected state (no pairing). */

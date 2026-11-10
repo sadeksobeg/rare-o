@@ -2,8 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import type { ActionResult } from "@/app/actions";
-import { requireAdminSession } from "@/lib/auth/admin-session";
-import { requireTraderSession } from "@/lib/auth/trader-session";
+import {
+  handleAdminSessionError,
+  requireAdminSession,
+} from "@/lib/auth/admin-session";
+import {
+  handleTraderSessionError,
+  requireTraderSession,
+} from "@/lib/auth/trader-session";
 import {
   wholesaleAdminTransitionSchema,
   wholesaleQuoteSchema,
@@ -16,6 +22,7 @@ import {
   adminTransitionWholesaleStatus,
   adminUpdateWholesaleShipping,
   createWholesaleRequest,
+  markWholesaleHandoffOpened,
   traderCancelWholesaleRequest,
   traderRespondToWholesaleQuote,
 } from "@/lib/wholesale/service";
@@ -40,8 +47,8 @@ export async function traderCreateWholesaleRequestAction(
   let session;
   try {
     session = await requireTraderSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleTraderSessionError(e);
   }
 
   let linesRaw: unknown = [];
@@ -54,6 +61,10 @@ export async function traderCreateWholesaleRequestAction(
   const parsed = wholesaleRequestCreateSchema.safeParse({
     requestMode: formData.get("requestMode"),
     traderNotes: formData.get("traderNotes") || "",
+    destinationCountry: formData.get("destinationCountry") || null,
+    destinationCode: formData.get("destinationCode") || null,
+    shippingMethodCode: formData.get("shippingMethodCode") || null,
+    shippingMethodLabel: formData.get("shippingMethodLabel") || null,
     lines: linesRaw,
   });
   if (!parsed.success) {
@@ -69,6 +80,10 @@ export async function traderCreateWholesaleRequestAction(
       traderId: session.sub,
       requestMode: parsed.data.requestMode,
       traderNotes: parsed.data.traderNotes,
+      destinationCountry: parsed.data.destinationCountry,
+      destinationCode: parsed.data.destinationCode,
+      shippingMethodCode: parsed.data.shippingMethodCode,
+      shippingMethodLabel: parsed.data.shippingMethodLabel,
       lines: parsed.data.lines.map((l) => ({
         productId: l.productId,
         quantity: l.quantity,
@@ -101,8 +116,8 @@ export async function traderRespondWholesaleQuoteAction(
   let session;
   try {
     session = await requireTraderSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleTraderSessionError(e);
   }
 
   const parsed = wholesaleTraderRespondSchema.safeParse({
@@ -115,11 +130,14 @@ export async function traderRespondWholesaleQuoteAction(
   }
 
   try {
+    const { getRequestLocale } = await import("@/lib/i18n/server");
+    const locale = await getRequestLocale();
     const updated = await traderRespondToWholesaleQuote({
       requestId: parsed.data.requestId,
       traderId: session.sub,
       accept: parsed.data.accept === "yes",
       note: parsed.data.note,
+      locale,
     });
     revalidateWholesaleSurfaces(updated.id);
     return { ok: true, data: { status: updated.status } };
@@ -138,8 +156,8 @@ export async function traderCancelWholesaleRequestAction(
   let session;
   try {
     session = await requireTraderSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleTraderSessionError(e);
   }
 
   const parsed = wholesaleRequestIdSchema.safeParse({
@@ -170,8 +188,8 @@ export async function adminTransitionWholesaleAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const parsed = wholesaleAdminTransitionSchema.safeParse({
@@ -206,8 +224,8 @@ export async function adminProvideWholesaleQuoteAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const parsed = wholesaleQuoteSchema.safeParse({
@@ -260,8 +278,8 @@ export async function adminUpdateWholesaleShippingAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const requestId = String(formData.get("requestId") || "").trim();
@@ -285,4 +303,24 @@ export async function adminUpdateWholesaleShippingAction(
     const msg = e instanceof Error ? e.message : "Shipping update failed";
     return { ok: false, error: msg };
   }
+}
+
+export async function traderOpenWholesaleHandoffAction(
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireTraderSession();
+  } catch (e) {
+    return handleTraderSessionError(e);
+  }
+  const requestId = String(formData.get("requestId") ?? "");
+  if (!requestId) return { ok: false, error: "Missing request" };
+  try {
+    await markWholesaleHandoffOpened({ requestId, traderId: session.sub });
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "ERROR" };
+  }
+  revalidatePath(`/trader/wholesale/${requestId}`);
+  return { ok: true };
 }

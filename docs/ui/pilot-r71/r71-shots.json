@@ -1,0 +1,27 @@
+{
+  "at": "2026-11-10T09:47:48.829Z",
+  "evidence": {
+    "login": "r71-trader-login-1440.png",
+    "home1440": "r71-trader-home-1440.png",
+    "home390": "r71-trader-home-390.png",
+    "deal": "r71-trader-deal-detail-1440.png",
+    "reply": "r71-trader-reply-form-390.png",
+    "ws": "r71-trader-wholesale-detail-1440.png",
+    "newDeal": "r71-trader-new-deal-390.png",
+    "homeLight": "r71-trader-light-home-1440.png",
+    "profile": "r71-admin-profile-1440.png",
+    "traders": "r71-admin-traders-1440.png"
+  },
+  "files": [
+    "r71-admin-profile-1440.png",
+    "r71-admin-traders-1440.png",
+    "r71-trader-deal-detail-1440.png",
+    "r71-trader-home-1440.png",
+    "r71-trader-home-390.png",
+    "r71-trader-light-home-1440.png",
+    "r71-trader-login-1440.png",
+    "r71-trader-new-deal-390.png",
+    "r71-trader-reply-form-390.png",
+    "r71-trader-wholesale-detail-1440.png"
+  ]
+}

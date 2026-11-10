@@ -3,8 +3,8 @@
 import { useActionState } from "react";
 import { traderUpdatePreferencesAction } from "@/app/trader-portal-actions";
 import type { ActionResult } from "@/app/actions";
+import { Field, Textarea } from "@/components/ui-kit/field";
 import { Banner } from "@/components/ui/banner";
-import { Button } from "@/components/ui/button";
 import type { TraderDict } from "@/lib/ui/trader-labels";
 
 const initial: ActionResult | null = null;
@@ -26,19 +26,23 @@ export function TraderPreferencesForm({
   );
 
   return (
-    <form action={action} className="ro-portal-card space-y-4 border p-5 sm:p-6">
+    <form action={action} className="rad-card space-y-4 p-5 sm:p-6">
       <div>
-        <h2 className="font-display text-lg font-semibold">{t.prefsTitle}</h2>
-        <p className="mt-1 text-sm text-ro-muted">{t.prefsLead}</p>
+        <h2 className="text-lg font-semibold text-[color:var(--rad-tx)]">
+          {t.prefsTitle}
+        </h2>
+        <p className="mt-1 text-sm text-[color:var(--rad-tx3)]">{t.prefsLead}</p>
       </div>
 
       <fieldset className="space-y-2">
-        <legend className="text-sm font-medium">{t.prefsCategories}</legend>
+        <legend className="text-sm font-medium text-[color:var(--rad-tx)]">
+          {t.prefsCategories}
+        </legend>
         <div className="flex flex-wrap gap-3">
           {categories.map((c) => (
             <label
               key={c.slug}
-              className="inline-flex items-center gap-2 text-sm"
+              className="inline-flex items-center gap-2 text-sm text-[color:var(--rad-tx)]"
             >
               <input
                 type="checkbox"
@@ -50,19 +54,19 @@ export function TraderPreferencesForm({
             </label>
           ))}
         </div>
-        <p className="text-xs text-ro-muted">{t.prefsCategoriesHint}</p>
+        <p className="text-xs text-[color:var(--rad-tx3)]">
+          {t.prefsCategoriesHint}
+        </p>
       </fieldset>
 
-      <label className="block space-y-1.5 text-sm">
-        <span className="font-medium">{t.prefsNotes}</span>
-        <textarea
+      <Field label={t.prefsNotes}>
+        <Textarea
           name="interestNotes"
           rows={3}
           defaultValue={interestNotes}
           maxLength={2000}
-          className="min-h-11 w-full rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-paper px-3 py-2 text-ro-ink outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
         />
-      </label>
+      </Field>
 
       {state?.ok ? <Banner tone="success">{t.prefsSaved}</Banner> : null}
       {state && !state.ok ? (
@@ -71,9 +75,9 @@ export function TraderPreferencesForm({
         </Banner>
       ) : null}
 
-      <Button type="submit" size="sm" loading={pending}>
+      <button type="submit" className="rad-btn rad-pri rad-sm" disabled={pending}>
         {pending ? t.submitting : t.prefsSave}
-      </Button>
+      </button>
     </form>
   );
 }

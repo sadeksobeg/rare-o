@@ -41,16 +41,22 @@ function base32Decode(input: string): Buffer {
   return Buffer.from(out);
 }
 
-export function generateTotpSecret(): { secret: string; otpauthUrl: string } {
+export function generateTotpSecret(account = "admin"): {
+  secret: string;
+  otpauthUrl: string;
+} {
   const secret = base32Encode(randomBytes(20));
-  const otpauthUrl = `otpauth://totp/RARE%20OUD:admin?secret=${secret}&issuer=RARE%20OUD&digits=${DIGITS}&period=${PERIOD}`;
+  const label = encodeURIComponent(`RARE OUD:${account}`);
+  const issuer = encodeURIComponent("RARE OUD");
+  const otpauthUrl = `otpauth://totp/${label}?secret=${secret}&issuer=${issuer}&digits=${DIGITS}&period=${PERIOD}&algorithm=SHA1`;
   return { secret, otpauthUrl };
 }
 
-export function verifyTotp(secret: string, token: string, window = 1): boolean {
-  const clean = token.replace(/\s/g, "");
+export function verifyTotp(secret: string, token: string, window = 2): boolean {
+  const clean = token.replace(/\s/g, "").replace(/[^\d]/g, "");
   if (!/^\d{6}$/.test(clean)) return false;
   const key = base32Decode(secret);
+  if (key.length < 10) return false;
   const now = Math.floor(Date.now() / 1000 / PERIOD);
   for (let w = -window; w <= window; w += 1) {
     const counter = Buffer.alloc(8);

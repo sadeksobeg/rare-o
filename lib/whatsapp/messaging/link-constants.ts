@@ -8,6 +8,7 @@ export const WHATSAPP_LINK_TYPES = [
   "retail_request",
   "deal_proposal",
   "wholesale_request",
+  "brokerage_request",
 ] as const;
 
 export type WhatsAppLinkType = (typeof WHATSAPP_LINK_TYPES)[number];
@@ -17,6 +18,7 @@ export const WHATSAPP_ACTIVE_LINK_TYPES = [
   "retail_request",
   "deal_proposal",
   "wholesale_request",
+  "brokerage_request",
 ] as const;
 
 export type WhatsAppActiveLinkType =

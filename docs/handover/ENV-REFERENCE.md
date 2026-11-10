@@ -25,6 +25,11 @@ Copy from `.env.example` / `.env.production.example`. Never commit secrets.
 | `WHATSAPP_AUTH_DIR` | `./.wa-auth` | Baileys session (secret volume) |
 | `WHATSAPP_CONNECT_ON_START` | `false` | Auto-open socket |
 | `WHATSAPP_OUTBOUND_ENABLED` | `false` | Send kill switch |
+| `WHATSAPP_OUTBOUND_MIN_GAP_MS` | `8000` | Min quiet time between transmits |
+| `WHATSAPP_OUTBOUND_JITTER_MS_MAX` | `4000` | Extra random delay (anti-ban) |
+| `WHATSAPP_OUTBOUND_WINDOW_MAX` / `_WINDOW_MS` | `12` / `600000` | Burst cap in sliding window |
+| `WHATSAPP_OUTBOUND_DAILY_MAX` | `60` | UTC day transmit cap |
+| `WHATSAPP_OUTBOUND_CIRCUIT_FAILURES` | `5` | Opens safety circuit after N failures |
 | `WHATSAPP_ADAPTER` | `baileys` | `fake` for E2E without phone |
 | `WHATSAPP_AUTH_KEY` | — | Encrypt session at rest (recommended prod) |
 

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { SlidersHorizontal, X } from "lucide-react";
 import { Sheet } from "@/components/ui/dialog";
 import { CATALOG_SORTS, type CatalogSort } from "@/lib/catalog/constants";
@@ -179,19 +180,28 @@ export function FilterBar({
           aria-label={labels.activeFilters}
           className="mt-3 flex flex-wrap items-center gap-2"
         >
-          {chips.map((chip) => (
-            <li key={chip.key}>
-              <button
-                type="button"
-                aria-label={labels.removeFilter.replace("{label}", chip.label)}
-                onClick={() => navigate(chip.clear)}
-                className="inline-flex h-8 items-center gap-1.5 rounded-[var(--ro-r-full)] bg-[var(--ro-plum-100)] px-3 text-xs font-medium text-[var(--ro-plum-900)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
+          <AnimatePresence initial={false} mode="popLayout">
+            {chips.map((chip) => (
+              <m.li
+                key={chip.key}
+                layout
+                initial={{ opacity: 0, scale: 0.75 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.75 }}
+                transition={{ type: "spring", stiffness: 480, damping: 32 }}
               >
-                {chip.label}
-                <X className="size-3.5" aria-hidden />
-              </button>
-            </li>
-          ))}
+                <button
+                  type="button"
+                  aria-label={labels.removeFilter.replace("{label}", chip.label)}
+                  onClick={() => navigate(chip.clear)}
+                  className="inline-flex h-8 items-center gap-1.5 rounded-[var(--ro-r-full)] bg-[var(--ro-plum-100)] px-3 text-xs font-medium text-[var(--ro-plum-900)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
+                >
+                  {chip.label}
+                  <X className="size-3.5" aria-hidden />
+                </button>
+              </m.li>
+            ))}
+          </AnimatePresence>
           <li>
             <button
               type="button"
@@ -229,13 +239,21 @@ function FilterFields({
   /** Mobile sheet: single column. Desktop: two rows. */
   stacked: boolean;
 }) {
+  /** Mobile sheet and desktop row render simultaneously (native <dialog> stays
+   * mounted while closed) — scope the sliding pill's layoutId per instance so
+   * the two active chips never share one projection target. */
+  const pillId = `ro-catalog-type-pill-${stacked ? "mobile" : "desktop"}`;
   const typeRow = (
     <div
       role="group"
       aria-label={labels.typeLabel}
       className="flex flex-wrap items-center gap-2"
     >
-      <TypeChip active={!current.type} onClick={() => navigate({ type: null })}>
+      <TypeChip
+        active={!current.type}
+        onClick={() => navigate({ type: null })}
+        pillId={pillId}
+      >
         {labels.allCategories}
       </TypeChip>
       {categories.map((c) => (
@@ -243,6 +261,7 @@ function FilterFields({
           key={c.slug}
           active={current.type === c.slug}
           onClick={() => navigate({ type: c.slug })}
+          pillId={pillId}
         >
           {c.name}
         </TypeChip>
@@ -386,24 +405,38 @@ function FilterFields({
 function TypeChip({
   active,
   onClick,
+  pillId,
   children,
 }: {
   active: boolean;
   onClick: () => void;
+  pillId: string;
   children: React.ReactNode;
 }) {
+  const reduce = useReducedMotion();
   return (
     <button
       type="button"
       aria-pressed={active}
       onClick={onClick}
       className={cn(
-        "h-11 rounded-[var(--ro-r-full)] border px-4 text-sm transition-colors duration-[var(--ro-dur-fast)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]",
+        "relative isolate h-11 overflow-hidden rounded-[var(--ro-r-full)] border px-4 text-sm transition-colors duration-[var(--ro-dur-fast)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]",
         active
-          ? "border-ro-ink bg-ro-ink font-semibold text-ro-canvas"
+          ? "border-ro-ink font-semibold text-ro-canvas"
           : "border-[var(--ro-border-control)] text-ro-text-2 hover:border-ro-ink hover:text-ro-ink"
       )}
     >
+      {active ? (
+        <m.span
+          layoutId={pillId}
+          className="absolute inset-0 -z-10 bg-ro-ink"
+          transition={
+            reduce
+              ? { duration: 0 }
+              : { type: "spring", stiffness: 480, damping: 34 }
+          }
+        />
+      ) : null}
       {children}
     </button>
   );

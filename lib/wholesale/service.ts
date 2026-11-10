@@ -1,6 +1,9 @@
 import { uiVisibleWholesaleWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { notifyTrader } from "@/lib/trader/notifications";
+import { calculateOudShipmentWeightKg } from "@/lib/shipping/rates";
+import { resolveAvailableMethods } from "@/lib/shipping/resolve-available-methods";
 import {
   WHOLESALE_QTY_TECHNICAL_MAX,
   canTransitionWholesale,
@@ -10,6 +13,79 @@ import {
   type WholesaleRequestMode,
   type WholesaleStatus,
 } from "@/lib/wholesale/constants";
+
+/**
+ * Builds and persists the WhatsApp handoff for a just-confirmed wholesale
+ * request. Best-effort: a missing WHATSAPP_BUSINESS_E164 must not block the
+ * status transition that already committed — the request stays "confirmed"
+ * and an admin can still reach the trader directly; this only skips the
+ * prefilled deep link.
+ */
+async function prepareWholesaleHandoffForRequest(
+  requestId: string,
+  locale: "ar" | "en"
+): Promise<void> {
+  try {
+    const request = await prisma.wholesaleRequest.findUnique({
+      where: { id: requestId },
+      include: {
+        lines: true,
+        trader: { select: { displayName: true, companyName: true, phone: true } },
+      },
+    });
+    if (!request) return;
+
+    const { buildWholesaleHandoffMessage, prepareWholesaleHandoff } =
+      await import("@/lib/whatsapp/wholesale-handoff");
+
+    const messageText = buildWholesaleHandoffMessage({
+      locale,
+      reference: request.reference,
+      requestMode: request.requestMode as WholesaleRequestMode,
+      traderName: request.trader.displayName,
+      traderCompany: request.trader.companyName,
+      traderPhone: request.trader.phone,
+      lines: request.lines.map((l) => ({
+        nameAr: l.productNameAr,
+        nameEn: l.productNameEn,
+        quantity: l.quantity,
+        unitPrice:
+          l.quotedUnitPrice != null
+            ? Number(l.quotedUnitPrice)
+            : l.proposedUnitPrice != null
+              ? Number(l.proposedUnitPrice)
+              : null,
+        currency: l.currency,
+      })),
+      quoteMessage: request.quoteMessage,
+      destinationCountry: request.destinationCountry,
+      shippingMethodLabel: request.shippingMethodLabel,
+      shippingCost:
+        request.shippingCostAmount != null && request.shippingCostCurrency
+          ? {
+              amount: Number(request.shippingCostAmount),
+              currency: request.shippingCostCurrency,
+            }
+          : null,
+      traderNotes: request.traderNotes,
+    });
+
+    const prepared = prepareWholesaleHandoff(messageText);
+    await prisma.wholesaleRequest.update({
+      where: { id: request.id },
+      data: {
+        handoffMessageText: prepared.messageText,
+        whatsAppDeepLink: prepared.deepLink,
+        handoffPreparedAt: new Date(),
+      },
+    });
+  } catch (err) {
+    console.error(
+      "[wholesale] handoff preparation failed (status transition already committed):",
+      err instanceof Error ? err.message : err
+    );
+  }
+}
 
 function buildReference(now = new Date()): string {
   const y = now.getUTCFullYear();
@@ -31,6 +107,10 @@ export type CreateWholesaleRequestInput = {
   requestMode: WholesaleRequestMode;
   traderNotes?: string;
   lines: WholesaleLineInput[];
+  destinationCountry?: string | null;
+  destinationCode?: string | null;
+  shippingMethodCode?: string | null;
+  shippingMethodLabel?: string | null;
 };
 
 export function isWholesaleEligibleProduct(product: {
@@ -52,6 +132,11 @@ export async function listWholesaleEligibleProducts() {
       currency: true,
       retailPrice: true,
       category: { select: { nameEn: true, nameAr: true, slug: true } },
+      images: {
+        orderBy: { sortOrder: "asc" },
+        take: 1,
+        select: { path: true, altAr: true, altEn: true },
+      },
     },
   });
 }
@@ -132,6 +217,26 @@ export async function createWholesaleRequest(input: CreateWholesaleRequestInput)
   const reference = buildReference();
   const status: WholesaleStatus = "submitted";
 
+  const totalQty = resolved.reduce((sum, l) => sum + l.quantity, 0);
+  const shippingWeightKg = calculateOudShipmentWeightKg(Math.max(1, totalQty));
+  let shippingMethodCode: string | null = null;
+  let shippingMethodLabel: string | null = null;
+  let shippingCostAmount: number | null = null;
+  let shippingCostCurrency: string | null = null;
+
+  if (input.destinationCode && input.shippingMethodCode) {
+    const available = resolveAvailableMethods(
+      input.destinationCode,
+      shippingWeightKg
+    );
+    const match = available.find((m) => m.code === input.shippingMethodCode);
+    if (!match) throw new Error("SHIPPING_METHOD_NOT_AVAILABLE");
+    shippingMethodCode = match.code;
+    shippingMethodLabel = input.shippingMethodLabel?.trim() || match.labelAr;
+    shippingCostAmount = match.amount;
+    shippingCostCurrency = match.currency;
+  }
+
   return prisma.wholesaleRequest.create({
     data: {
       reference,
@@ -139,6 +244,13 @@ export async function createWholesaleRequest(input: CreateWholesaleRequestInput)
       requestMode: input.requestMode,
       status,
       traderNotes: input.traderNotes?.trim() || "",
+      destinationCountry: input.destinationCountry?.trim() || null,
+      destinationCode: input.destinationCode?.trim() || null,
+      shippingMethodCode,
+      shippingMethodLabel,
+      shippingCostAmount,
+      shippingCostCurrency,
+      shippingWeightKg,
       lines: {
         create: resolved.map((l) => ({
           productId: l.productId,
@@ -165,6 +277,21 @@ export async function createWholesaleRequest(input: CreateWholesaleRequestInput)
       },
     },
     include: { lines: true },
+  });
+}
+
+export async function markWholesaleHandoffOpened(input: {
+  requestId: string;
+  traderId: string;
+}) {
+  const request = await prisma.wholesaleRequest.findFirst({
+    where: { id: input.requestId, traderId: input.traderId },
+  });
+  if (!request) throw new Error("REQUEST_NOT_FOUND");
+  if (request.handoffOpenedAt) return request;
+  return prisma.wholesaleRequest.update({
+    where: { id: input.requestId },
+    data: { handoffOpenedAt: new Date() },
   });
 }
 
@@ -236,6 +363,7 @@ export async function adminTransitionWholesaleStatus(input: {
   toStatus: WholesaleStatus;
   actorAdminId: string;
   note?: string;
+  locale?: "ar" | "en";
 }) {
   const request = await prisma.wholesaleRequest.findUnique({
     where: { id: input.requestId },
@@ -285,13 +413,21 @@ export async function adminTransitionWholesaleStatus(input: {
     include: { lines: true, events: { orderBy: { createdAt: "asc" } } },
   });
 
+  if (input.toStatus === "confirmed") {
+    await prepareWholesaleHandoffForRequest(updated.id, input.locale ?? "ar");
+  }
+
+  const statusAr =
+    getDictionary("ar").trader.wholesaleStatus[input.toStatus] ?? input.toStatus;
+  const statusEn =
+    getDictionary("en").trader.wholesaleStatus[input.toStatus] ?? input.toStatus;
   await notifyTrader({
     traderId: updated.traderId,
     domain: "wholesale",
     titleAr: `تحديث طلب جملة · ${updated.reference}`,
     titleEn: `Wholesale update · ${updated.reference}`,
-    bodyAr: `الحالة: ${input.toStatus}`,
-    bodyEn: `Status: ${input.toStatus}`,
+    bodyAr: `طلب الجملة أصبح: ${statusAr}`,
+    bodyEn: `Wholesale request is now ${statusEn}.`,
     href: `/trader/wholesale/${updated.id}`,
   });
 
@@ -405,6 +541,7 @@ export async function traderRespondToWholesaleQuote(input: {
   traderId: string;
   accept: boolean;
   note?: string;
+  locale?: "ar" | "en";
 }) {
   const request = await prisma.wholesaleRequest.findFirst({
     where: { id: input.requestId, traderId: input.traderId },
@@ -417,7 +554,7 @@ export async function traderRespondToWholesaleQuote(input: {
   const to: WholesaleStatus = input.accept ? "confirmed" : "cancelled";
   const now = new Date();
 
-  return prisma.wholesaleRequest.update({
+  const updated = await prisma.wholesaleRequest.update({
     where: { id: request.id },
     data: {
       status: to,
@@ -437,6 +574,12 @@ export async function traderRespondToWholesaleQuote(input: {
     },
     include: { lines: true, events: { orderBy: { createdAt: "asc" } } },
   });
+
+  if (input.accept && updated.status === "confirmed") {
+    await prepareWholesaleHandoffForRequest(updated.id, input.locale ?? "ar");
+  }
+
+  return updated;
 }
 
 export async function traderCancelWholesaleRequest(input: {
@@ -495,7 +638,7 @@ export async function adminUpdateWholesaleShipping(input: {
     throw new Error("SHIPPING_FIELDS_REQUIRED");
   }
 
-  return prisma.wholesaleRequest.update({
+  const updated = await prisma.wholesaleRequest.update({
     where: { id: request.id },
     data: {
       carrier,
@@ -518,4 +661,16 @@ export async function adminUpdateWholesaleShipping(input: {
       trader: true,
     },
   });
+
+  await notifyTrader({
+    traderId: updated.traderId,
+    domain: "wholesale",
+    titleAr: `تحديث شحن الجملة · ${updated.reference}`,
+    titleEn: `Wholesale shipping update · ${updated.reference}`,
+    bodyAr: `الناقل ${carrier} — رقم التتبع ${trackingReference}`,
+    bodyEn: `Carrier ${carrier} — tracking ${trackingReference}`,
+    href: `/trader/wholesale/${updated.id}`,
+  });
+
+  return updated;
 }

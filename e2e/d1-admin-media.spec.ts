@@ -1,6 +1,11 @@
 import path from "node:path";
 import { test, expect } from "@playwright/test";
-import { disconnectPrisma, goLocale, loginAdmin } from "./helpers";
+import {
+  deleteTraderByEmail,
+  disconnectPrisma,
+  goLocale,
+  loginAdmin,
+} from "./helpers";
 import { disconnectEnsureSeed, ensureE2EFixtures } from "./ensure-seed";
 
 const FIXTURES = path.join(__dirname, "fixtures");
@@ -42,7 +47,7 @@ test.describe("D1 admin media + guards", () => {
     await page.locator('input[name="slug"]').fill(slug);
     await page.locator('input[name="nameEn"]').fill("E2E D1 Product");
     await page.locator('input[name="nameAr"]').fill("");
-    await page.locator('input[name="currency"]').fill("USD");
+    await page.locator('select[name="currency"]').selectOption("USD");
     await page.locator('select[name="status"]').selectOption("draft");
     await page.getByRole("button", { name: /save product|حفظ المنتج/i }).click();
     await page.waitForURL(/\/admin\/products\/[^/]+/, { timeout: 30_000 });
@@ -134,20 +139,26 @@ test.describe("D1 admin media + guards", () => {
     await expect(form, "create trader form").toBeVisible();
 
     const email = `e2e-trader-${Date.now()}@rareoud.test`;
-    await form.locator('input[name="email"]').fill(email);
-    await form.locator('input[name="displayName"]').fill("E2E Trader");
-    await form
-      .getByRole("button", { name: /create trader|إنشاء التاجر/i })
-      .click();
+    try {
+      await form.locator('input[name="email"]').fill(email);
+      await form.locator('input[name="displayName"]').fill("E2E Trader");
+      await form
+        .getByRole("button", { name: /create trader|إنشاء التاجر/i })
+        .click();
 
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible({ timeout: 30_000 });
-    await expect(dialog.locator(".font-mono, [dir='ltr']").last()).not.toHaveText(
-      ""
-    );
-    await dialog.getByRole("checkbox").check();
-    await dialog.getByRole("button", { name: /close|إغلاق/i }).click();
-    await expect(dialog).toBeHidden();
+      const dialog = page.getByRole("dialog");
+      await expect(dialog).toBeVisible({ timeout: 30_000 });
+      await expect(
+        dialog.locator(".font-mono, [dir='ltr']").last()
+      ).not.toHaveText("");
+      await dialog.getByRole("checkbox").check();
+      await dialog.getByRole("button", { name: /close|إغلاق/i }).click();
+      await expect(dialog).toBeHidden();
+    } finally {
+      // Runs even if an assertion above fails, so this test never leaves a
+      // trader row behind (previously accumulated as e2e-trader-*@rareoud.test).
+      await deleteTraderByEmail(email);
+    }
   });
 
   test("customer detail opens from list", async ({ page }) => {

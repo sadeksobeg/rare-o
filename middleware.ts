@@ -76,6 +76,28 @@ async function readRole(
   }
 }
 
+/**
+ * Edge-only check: the JWT claim is good enough here because the
+ * action-level guard (requireAdminSession / requireTraderSession) is
+ * authoritative against the DB on every server action and page render —
+ * see lib/auth/admin-session.ts and lib/auth/trader-session.ts.
+ */
+async function mustChangePasswordFromToken(
+  token: string | undefined,
+  secret: string
+): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const { payload } = await jwtVerify(
+      token,
+      new TextEncoder().encode(secret)
+    );
+    return payload.mustChangePassword === true;
+  } catch {
+    return false;
+  }
+}
+
 async function guardRole(
   request: NextRequest,
   expected: "admin" | "trader",
@@ -140,6 +162,14 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const nonce = createCspNonce();
 
+  // Dev fixtures (/dev/*) must never be reachable in production builds.
+  if (
+    process.env.NODE_ENV === "production" &&
+    (pathname === "/dev" || pathname.startsWith("/dev/"))
+  ) {
+    return new NextResponse(null, { status: 404 });
+  }
+
   if (pathname === "/forbidden") {
     const headers = new Headers(request.headers);
     headers.set(CSP_NONCE_HEADER, nonce);
@@ -170,6 +200,18 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
     const denied = await guardRole(request, "admin", "/admin/login");
     if (denied) return denied;
+    const forcePath = "/admin/force-password-change";
+    const secret = process.env.AUTH_SECRET ?? "";
+    const mustChange = await mustChangePasswordFromToken(
+      request.cookies.get(ADMIN_COOKIE)?.value,
+      secret
+    );
+    if (mustChange && pathname !== forcePath) {
+      return NextResponse.redirect(new URL(forcePath, request.url));
+    }
+    if (!mustChange && pathname === forcePath) {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
     const headers = new Headers(request.headers);
     headers.set(CSP_NONCE_HEADER, nonce);
     return applySecurityHeaders(
@@ -181,6 +223,18 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith("/trader") && !pathname.startsWith("/trader/login")) {
     const denied = await guardRole(request, "trader", "/trader/login");
     if (denied) return denied;
+    const forcePath = "/trader/force-password-change";
+    const secret = process.env.AUTH_SECRET ?? "";
+    const mustChange = await mustChangePasswordFromToken(
+      request.cookies.get(TRADER_COOKIE)?.value,
+      secret
+    );
+    if (mustChange && pathname !== forcePath) {
+      return NextResponse.redirect(new URL(forcePath, request.url));
+    }
+    if (!mustChange && pathname === forcePath) {
+      return NextResponse.redirect(new URL("/trader", request.url));
+    }
     const headers = new Headers(request.headers);
     headers.set(CSP_NONCE_HEADER, nonce);
     return applySecurityHeaders(
@@ -231,5 +285,7 @@ export const config = {
     "/forbidden",
     "/admin/:path*",
     "/trader/:path*",
+    "/dev",
+    "/dev/:path*",
   ],
 };

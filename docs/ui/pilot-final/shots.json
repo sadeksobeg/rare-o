@@ -1,0 +1,32 @@
+{
+  "at": "2026-11-10T12:04:27.015Z",
+  "base": "http://127.0.0.1:3001",
+  "evidence": {
+    "adminDashboard": "final-admin-dashboard-1440.png",
+    "adminInbox": "final-admin-inbox-1440.png",
+    "adminRequestsLight": "final-admin-requests-1440-light.png",
+    "adminDealPay": "final-admin-deal-payment-modal-1440.png",
+    "adminProduct": "final-admin-product-editor-1440.png",
+    "adminBrokerage": "final-admin-brokerage-kanban-1440.png",
+    "traderLogin": "final-trader-login-1440.png",
+    "traderHome390": "final-trader-home-390.png",
+    "traderNewDeal": "final-trader-new-deal-390.png",
+    "traderDeal": "final-trader-deal-detail-1440.png",
+    "traderWs": "final-trader-wholesale-new-1440.png",
+    "traderNotif": "final-trader-notifications-390.png"
+  },
+  "files": [
+    "final-admin-brokerage-kanban-1440.png",
+    "final-admin-dashboard-1440.png",
+    "final-admin-deal-payment-modal-1440.png",
+    "final-admin-inbox-1440.png",
+    "final-admin-product-editor-1440.png",
+    "final-admin-requests-1440-light.png",
+    "final-trader-deal-detail-1440.png",
+    "final-trader-home-390.png",
+    "final-trader-login-1440.png",
+    "final-trader-new-deal-390.png",
+    "final-trader-notifications-390.png",
+    "final-trader-wholesale-new-1440.png"
+  ]
+}

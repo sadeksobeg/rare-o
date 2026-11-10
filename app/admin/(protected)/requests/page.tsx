@@ -1,29 +1,39 @@
 import Link from "next/link";
-import { Suspense } from "react";
 import {
-  DataTable,
-  DataTableHead,
-  Td,
-  Th,
-  Tr,
-} from "@/components/admin/data-table";
-import { PageHeader } from "@/components/admin/page-header";
-import { AdminTableFilters } from "@/components/admin/table-filters";
-import { EmptyState } from "@/components/ui/empty-state";
-import { StatusChip } from "@/components/ui/status-chip";
+  RequestsListView,
+  type RequestsListRow,
+} from "@/components/admin/rad/requests-list-view";
+import { RetailKanbanBoard } from "@/components/admin/retail-kanban";
 import { uiVisibleRetailRequestWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
 import { containsCI } from "@/lib/db/search";
-import { formatRelative } from "@/lib/i18n/format";
+import {
+  formatAdminListCreated,
+  formatAdminMoneyOrNull,
+} from "@/lib/i18n/admin-format";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import {
   RETAIL_REQUEST_STATUSES,
   isRetailRequestStatus,
 } from "@/lib/retail-request/constants";
-import { getStatusChipProps } from "@/lib/ui/status-labels";
+import { isFresh } from "@/lib/ui/fresh";
+import { statusesAwaitingAdmin } from "@/lib/ui/status";
+import { adminPillToneForStatus } from "@/lib/ui/status-tone";
+import { getStatusLabel } from "@/lib/ui/status-labels";
+import { formatMaskedPhone } from "@/lib/whatsapp/messaging/phone-format";
 import type { Prisma } from "@prisma/client";
 
 const PAGE_SIZE = 40;
+
+const SORTABLE_FIELDS = {
+  reference: "reference",
+  status: "status",
+  created: "createdAt",
+} as const;
+type SortField = keyof typeof SORTABLE_FIELDS;
+function isSortField(v: string | undefined): v is SortField {
+  return !!v && v in SORTABLE_FIELDS;
+}
 
 function handoffLabel(
   u: {
@@ -44,9 +54,26 @@ export const dynamic = "force-dynamic";
 export default async function AdminRequestsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; q?: string; page?: string }>;
+  searchParams: Promise<{
+    tab?: string;
+    q?: string;
+    page?: string;
+    view?: string;
+    sort?: string;
+    dir?: string;
+  }>;
 }) {
-  const { tab: tabRaw, q: qRaw, page: pageRaw } = await searchParams;
+  const {
+    tab: tabRaw,
+    q: qRaw,
+    page: pageRaw,
+    view: viewRaw,
+    sort: sortRaw,
+    dir: dirRaw,
+  } = await searchParams;
+  const view = viewRaw === "kanban" ? "kanban" : "table";
+  const sortField = isSortField(sortRaw) ? sortRaw : "created";
+  const sortDir = dirRaw === "asc" ? "asc" : "desc";
   const { locale, dict } = await getRequestDictionary();
   const a = dict.admin;
   const u = dict.adminUi;
@@ -58,12 +85,16 @@ export default async function AdminRequestsPage({
     Number.parseInt(pageRaw || "1", 10) || 1
   );
 
+  const waitingStatuses = statusesAwaitingAdmin("retail");
   const statusFilter =
-    tab !== "all" && isRetailRequestStatus(tab) ? tab : undefined;
+    tab !== "all" && tab !== "waiting" && isRetailRequestStatus(tab)
+      ? tab
+      : undefined;
 
   const where: Prisma.RetailRequestWhereInput = {
     AND: [
       uiVisibleRetailRequestWhere(),
+      ...(tab === "waiting" ? [{ status: { in: waitingStatuses } }] : []),
       ...(statusFilter ? [{ status: statusFilter }] : []),
       ...(q
         ? [
@@ -72,6 +103,16 @@ export default async function AdminRequestsPage({
                 { reference: containsCI(q) },
                 { customerName: containsCI(q) },
                 { customerPhone: containsCI(q) },
+                {
+                  lines: {
+                    some: {
+                      OR: [
+                        { productNameAr: containsCI(q) },
+                        { productNameEn: containsCI(q) },
+                      ],
+                    },
+                  },
+                },
               ],
             },
           ]
@@ -91,22 +132,26 @@ export default async function AdminRequestsPage({
   const pageCount = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
   const page = Math.min(pageRequested, pageCount);
 
+  const orderBy: Prisma.RetailRequestFindManyArgs["orderBy"] = {
+    [SORTABLE_FIELDS[sortField]]: sortDir,
+  };
+
   const requests = await prisma.retailRequest.findMany({
     where,
-    orderBy: { updatedAt: "desc" },
-    skip: (page - 1) * PAGE_SIZE,
-    take: PAGE_SIZE,
+    orderBy,
+    skip: view === "kanban" ? 0 : (page - 1) * PAGE_SIZE,
+    take: view === "kanban" ? 200 : PAGE_SIZE,
     include: {
-      _count: { select: { lines: true } },
-      handoffEvents: {
-        orderBy: { createdAt: "desc" },
-        take: 1,
+      lines: {
+        orderBy: { id: "asc" },
+        take: 3,
         select: {
-          createdAt: true,
-          eventType: true,
-          actor: true,
+          productNameAr: true,
+          productNameEn: true,
+          quantity: true,
         },
       },
+      _count: { select: { lines: true } },
     },
   });
 
@@ -115,128 +160,155 @@ export default async function AdminRequestsPage({
   for (const s of RETAIL_REQUEST_STATUSES) {
     counts[s] = statusGroups.find((g) => g.status === s)?._count._all ?? 0;
   }
+  counts.waiting = waitingStatuses.reduce((n, s) => n + (counts[s] ?? 0), 0);
 
-  const statusLabel = (status: string) => u.status.retail[status] ?? status;
+  const statusLabelFn = (status: string) =>
+    getStatusLabel(dict, "retail", status);
+
+  const tableQs = new URLSearchParams();
+  if (tab !== "all") tableQs.set("tab", tab);
+  if (q) tableQs.set("q", q);
+  const tableHref = tableQs.toString()
+    ? `/admin/requests?${tableQs.toString()}`
+    : "/admin/requests";
+
+  if (view === "kanban") {
+    const kanbanHref = `/admin/requests?${new URLSearchParams({
+      ...(tab !== "all" ? { tab } : {}),
+      ...(q ? { q } : {}),
+      view: "kanban",
+    }).toString()}`;
+    return (
+      <section data-admin-requests="" className="space-y-5 pb-2">
+        <header className="rad-phead">
+          <div className="flex min-w-0 flex-wrap items-end gap-3">
+            <div className="min-w-0">
+              <h1>{a.requests}</h1>
+              <p>
+                <b className="rad-num">{allCount}</b>
+                {" · "}
+                {u.requestsLead}
+              </p>
+            </div>
+            <div
+              className="rad-seg rad-view-toggle"
+              role="group"
+              aria-label={`${u.viewTable} / ${u.viewKanban}`}
+            >
+              <Link href={tableHref}>{u.viewTable}</Link>
+              <Link href={kanbanHref} className="rad-on" aria-current="page">
+                {u.viewKanban}
+              </Link>
+            </div>
+          </div>
+        </header>
+        <RetailKanbanBoard
+          dict={dict}
+          cards={requests.map((r) => ({
+            id: r.id,
+            reference: r.reference,
+            customerName: r.customerName,
+            status: r.status,
+          }))}
+        />
+      </section>
+    );
+  }
+
+  const rows: RequestsListRow[] = requests.map((r) => {
+    const first = r.lines[0];
+    const productLabel = first
+      ? locale === "ar"
+        ? first.productNameAr || first.productNameEn
+        : first.productNameEn || first.productNameAr
+      : "—";
+    const moreCount = Math.max(0, r._count.lines - 1);
+    const onRequest = Number(r.subtotal) <= 0;
+    const created = formatAdminListCreated(r.createdAt, locale);
+    const money = formatAdminMoneyOrNull(Number(r.subtotal), r.currency, locale);
+    return {
+      id: r.id,
+      reference: r.reference,
+      customerName: r.customerName,
+      customerPhone:
+        formatMaskedPhone(r.customerPhone) || r.customerPhone,
+      status: r.status,
+      statusLabel: statusLabelFn(r.status),
+      pillTone: adminPillToneForStatus("retail", r.status),
+      itemCount: r._count.lines,
+      productLabel,
+      moreCount,
+      valueLabel: onRequest ? u.onRequestPrice : money ?? u.onRequestPrice,
+      valueOnRequest: onRequest,
+      handoffLabel: handoffLabel(u, r.handoffOpenedAt, r.handoffPreparedAt),
+      createdLabel: created.primary,
+      createdSecondary: created.secondary,
+      href: `/admin/requests/${r.id}`,
+      fresh: isFresh(r.updatedAt),
+    };
+  });
+
+  const tabs = [
+    { value: "all", label: u.filterAll, count: counts.all },
+    { value: "waiting", label: u.filterWaiting, count: counts.waiting },
+    ...RETAIL_REQUEST_STATUSES.map((s) => ({
+      value: s,
+      label: statusLabelFn(s),
+      count: counts[s] ?? 0,
+    })),
+  ];
 
   return (
-    <section className="space-y-6">
-      <PageHeader title={a.requests} description={u.requestsLead} />
-      <Suspense fallback={null}>
-        <AdminTableFilters
-          tabsLabel={u.filterTabs}
-          searchLabel={u.search}
-          searchPlaceholder={u.searchPlaceholder}
-          resultCount={totalFiltered}
-          resultLabel={u.resultsLabel}
-          tabs={[
-            { id: "all", label: u.filterAll, count: counts.all },
-            ...RETAIL_REQUEST_STATUSES.map((s) => ({
-              id: s,
-              label: statusLabel(s),
-              count: counts[s] ?? 0,
-            })),
-          ]}
-        />
-      </Suspense>
-      {requests.length === 0 ? (
-        <div className="border border-ro-line">
-          <EmptyState title={u.emptyTitle} body={a.noRequests} />
-        </div>
-      ) : (
+    <RequestsListView
+      title={a.requests}
+      lead={
         <>
-          <DataTable>
-            <DataTableHead>
-              <Th>{u.colReference}</Th>
-              <Th>{u.colCustomer}</Th>
-              <Th>{u.colItems}</Th>
-              <Th>{a.colStatus}</Th>
-              <Th>{u.colHandoff}</Th>
-              <Th>{u.colLastEvent}</Th>
-              <Th>{u.colCreated}</Th>
-              <Th />
-            </DataTableHead>
-            <tbody>
-              {requests.map((r) => {
-                const last = r.handoffEvents[0];
-                return (
-                  <Tr key={r.id}>
-                    <Td className="font-medium">{r.reference}</Td>
-                    <Td>
-                      {r.customerName}
-                      <div className="text-ro-muted" dir="ltr">
-                        {r.customerPhone}
-                      </div>
-                    </Td>
-                    <Td className="tabular-nums">{r._count.lines}</Td>
-                    <Td>
-                      <StatusChip
-                        size="sm"
-                        {...getStatusChipProps(dict, "retail", r.status)}
-                      />
-                    </Td>
-                    <Td>
-                      {handoffLabel(u, r.handoffOpenedAt, r.handoffPreparedAt)}
-                    </Td>
-                    <Td className="text-ro-muted">
-                      {last
-                        ? formatRelative(last.createdAt, locale)
-                        : formatRelative(r.updatedAt, locale)}
-                    </Td>
-                    <Td className="text-ro-muted">
-                      {formatRelative(r.createdAt, locale)}
-                    </Td>
-                    <Td>
-                      <Link
-                        href={`/admin/requests/${r.id}`}
-                        className="text-ro-plum hover:underline"
-                      >
-                        {u.actionView}
-                      </Link>
-                    </Td>
-                  </Tr>
-                );
-              })}
-            </tbody>
-          </DataTable>
-          {pageCount > 1 ? (
-            <nav
-              aria-label="Pagination"
-              className="flex flex-wrap items-center justify-between gap-3 text-sm"
-            >
-              <p className="text-ro-muted">
-                {totalFiltered} · {page}/{pageCount}
-              </p>
-              <div className="flex gap-2">
-                {page > 1 ? (
-                  <Link
-                    href={buildPageHref(tab, q, page - 1)}
-                    className="rounded-[var(--ro-r-sm)] border border-ro-line px-3 py-2 hover:bg-ro-sunken"
-                  >
-                    ←
-                  </Link>
-                ) : null}
-                {page < pageCount ? (
-                  <Link
-                    href={buildPageHref(tab, q, page + 1)}
-                    className="rounded-[var(--ro-r-sm)] border border-ro-line px-3 py-2 hover:bg-ro-sunken"
-                  >
-                    →
-                  </Link>
-                ) : null}
-              </div>
-            </nav>
-          ) : null}
+          <b className="rad-num">{allCount}</b>
+          {" · "}
+          {u.requestsLead}
         </>
-      )}
-    </section>
+      }
+      tabs={tabs}
+      query={{
+        tab,
+        q,
+        page,
+        sort: sortField,
+        dir: sortDir,
+        view: "table",
+      }}
+      rows={rows}
+      totalFiltered={totalFiltered}
+      pageCount={pageCount}
+      pageSize={PAGE_SIZE}
+      locale={locale}
+      labels={{
+        listAria: a.requests,
+        statusFilterAria: u.filterTabs,
+        searchLabel: u.search,
+        searchPlaceholder: u.searchRequests,
+        sortNewest: u.sortNewestFirst,
+        sortOldest: u.sortOldestFirst,
+        colReference: u.colReference,
+        colCustomer: u.colCustomer,
+        colProducts: u.colItems,
+        colValue: u.colTotal,
+        colStatus: a.colStatus,
+        colHandoff: u.colHandoff,
+        colCreated: u.colCreated,
+        colActions: u.actionView,
+        moreProducts: u.moreProducts,
+        emptyTitle: u.requestsEmptyTitle,
+        emptyBody: u.requestsEmptyBody,
+        noResultsTitle: u.noResultsForQuery,
+        noResultsBody: u.noResultsHint,
+        clearFilters: dict.catalog.clearFilters,
+        paginationSummary: u.listPaginationSummary,
+        paginationPrevious: dict.common.paginationPrevious,
+        paginationNext: dict.common.paginationNext,
+        viewTable: u.viewTable,
+        viewKanban: u.viewKanban,
+      }}
+    />
   );
-}
-
-function buildPageHref(tab: string, q: string, page: number) {
-  const params = new URLSearchParams();
-  if (tab && tab !== "all") params.set("tab", tab);
-  if (q) params.set("q", q);
-  if (page > 1) params.set("page", String(page));
-  const qs = params.toString();
-  return qs ? `/admin/requests?${qs}` : "/admin/requests";
 }

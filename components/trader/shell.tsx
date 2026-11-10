@@ -1,13 +1,13 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { Bell } from "lucide-react";
+import { Bell, LogOut, MessageCircle } from "lucide-react";
 import { traderLogoutAction } from "@/app/deal-actions";
 import { AdminLocaleToggle } from "@/components/admin/locale-toggle";
-import { BrandWallpaper, Emblem } from "@/components/brand";
-import { PortalRouteProgress } from "@/components/portal/route-progress";
+import { PortalRouteProgressMount } from "@/components/portal/route-progress-mount";
+import { PortalShellFrame } from "@/components/portal/portal-shell-frame";
+import { PortalThemeToggle } from "@/components/portal/portal-theme";
 import { OfflineBanner } from "@/components/system/offline-banner";
-import { AppToast } from "@/components/system/app-toast";
-import { Button } from "@/components/ui/button";
+import { SonnerToaster } from "@/components/ui/sonner-toaster";
 import {
   TraderBottomTabs,
   TraderDesktopNav,
@@ -16,6 +16,8 @@ import {
 import { getTraderSession } from "@/lib/auth/trader-session";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { countUnreadTraderNotifications } from "@/lib/trader/notifications";
+import { getTraderWaitingCounts } from "@/lib/trader/waiting-counts";
+import { getTraderUnreadCount } from "@/lib/whatsapp/messaging/trader-channel";
 import { redirect } from "next/navigation";
 
 export async function TraderShell({ children }: { children: React.ReactNode }) {
@@ -23,7 +25,11 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
   if (!session) redirect("/trader/login");
 
   const { locale, dict } = await getRequestDictionary();
-  const unreadNotifications = await countUnreadTraderNotifications(session.sub);
+  const [unreadNotifications, waiting, unreadMessages] = await Promise.all([
+    countUnreadTraderNotifications(session.sub),
+    getTraderWaitingCounts(session.sub),
+    getTraderUnreadCount(session.sub),
+  ]);
 
   const tabs: TraderTab[] = [
     {
@@ -37,18 +43,21 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
       label: dict.trader.deals,
       match: "prefix",
       icon: "deals",
+      waiting: waiting.deals,
     },
     {
       href: "/trader/wholesale",
       label: dict.trader.wholesale,
       match: "prefix",
       icon: "wholesale",
+      waiting: waiting.wholesale,
     },
     {
-      href: "/trader/offers",
-      label: dict.trader.offers,
+      href: "/trader/brokerage",
+      label: dict.trader.brokerage,
       match: "prefix",
-      icon: "offers",
+      icon: "brokerage",
+      waiting: waiting.brokerage,
     },
     {
       href: "/trader/profile",
@@ -58,76 +67,103 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
     },
   ];
 
+  const initial = session.displayName.trim().slice(0, 1) || "ت";
+
   return (
-    <AppToast dismissLabel={dict.common.toastDismiss}>
-      <div className="ro-portal ro-portal-trader relative min-h-screen overflow-x-clip text-ro-ink">
-        <BrandWallpaper
-          tone="cream"
-          patternId="ro-trader-wallpaper"
-          className="z-0 opacity-[0.72]"
-        />
-        <div className="ro-portal-atmosphere" aria-hidden />
+    <>
+      <SonnerToaster />
+      <PortalShellFrame
+        surface="trader"
+        defaultTheme="dark"
+        className="ro-portal ro-portal-trader rad-tapp relative min-h-dvh overflow-x-clip"
+      >
         <Suspense fallback={null}>
-          <PortalRouteProgress />
+          <PortalRouteProgressMount />
         </Suspense>
-        <div className="relative z-10">
+        <div className="relative z-10 flex min-h-dvh flex-col">
           <OfflineBanner />
-          <header className="sticky top-0 z-30 border-b border-[color-mix(in_srgb,var(--ro-sand-100)_12%,transparent)] bg-[linear-gradient(105deg,var(--ro-plum-900)_0%,var(--ro-ink-950)_58%,var(--ro-ink-900)_100%)] text-[var(--ro-sand-100)] shadow-[0_16px_40px_-28px_rgba(11,8,13,0.45)]">
-            <div className="mx-auto flex h-16 max-w-[1180px] items-center justify-between gap-4 px-4 sm:px-6">
+          <header className="rad-th2">
+            <Link
+              href="/trader"
+              className="rad-th2-logo"
+              aria-label="RARE OUD"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/logo-cream.png"
+                alt=""
+                width={30}
+                height={30}
+                className="rad-th2-mark"
+              />
+              <b aria-hidden="true">
+                <bdi dir="ltr">RARE OUD</bdi>
+              </b>
+            </Link>
+
+            <TraderDesktopNav tabs={tabs} navLabel={dict.common.navLabelTrader} />
+
+            <span className="rad-th2-sp" aria-hidden />
+
+            <div className="rad-th2-tools">
               <Link
-                href="/trader"
-                className="group flex items-center gap-3 transition-opacity hover:opacity-95"
+                href="/trader/messages"
+                className="rad-ib"
+                aria-label={dict.trader.messagesTitle}
               >
-                <Emblem
-                  variant="small"
-                  className="size-8 brightness-110 transition-transform duration-[var(--ro-dur-fast)] group-hover:scale-105"
-                />
-                <span className="font-display text-sm font-semibold tracking-[0.24em] text-[var(--ro-sand-50)]">
-                  RARE OUD
-                  <span className="mt-0.5 block text-[0.65rem] tracking-[0.18em] text-[var(--ro-plum-300)]">
-                    {dict.trader.brand}
-                  </span>
-                </span>
+                <MessageCircle width={18} height={18} strokeWidth={1.5} aria-hidden />
+                {unreadMessages > 0 ? (
+                  <i className="rad-ib-dot">{unreadMessages > 99 ? "99+" : unreadMessages}</i>
+                ) : null}
               </Link>
-              <TraderDesktopNav tabs={tabs} tone="on-dark" />
-              <div className="flex items-center gap-2.5 text-sm">
-                <Link
-                  href="/trader/notifications"
-                  className="relative inline-flex size-10 items-center justify-center rounded-[var(--ro-r-sm)] text-[var(--ro-sand-100)] transition-colors hover:bg-[color-mix(in_srgb,var(--ro-sand-100)_12%,transparent)]"
-                  aria-label={dict.trader.notifications}
-                >
-                  <Bell className="size-5" strokeWidth={1.75} aria-hidden />
-                  {unreadNotifications > 0 ? (
-                    <span className="absolute end-1.5 top-1.5 flex min-w-[1.1rem] items-center justify-center rounded-full bg-[var(--ro-plum-300)] px-1 text-[0.65rem] font-bold text-[var(--ro-ink-950)]">
-                      {unreadNotifications > 9 ? "9+" : unreadNotifications}
-                    </span>
-                  ) : null}
-                </Link>
+              <Link
+                href="/trader/notifications"
+                className="rad-ib"
+                aria-label={dict.trader.notifications}
+              >
+                <Bell width={18} height={18} strokeWidth={1.5} aria-hidden />
+                {unreadNotifications > 0 ? (
+                  <i className="rad-ib-dot">
+                    {unreadNotifications > 99 ? "99+" : unreadNotifications}
+                  </i>
+                ) : null}
+              </Link>
+              <span className="hidden sm:contents">
+                <PortalThemeToggle
+                  lightLabel={dict.common.themeLight}
+                  darkLabel={dict.common.themeDark}
+                  chrome
+                />
                 <AdminLocaleToggle
                   locale={locale}
                   label={dict.common.language}
-                  tone="on-dark"
+                  tone="auto"
+                  chrome
                 />
-                <span className="hidden max-w-[9rem] truncate text-[color-mix(in_srgb,var(--ro-sand-100)_70%,transparent)] lg:inline">
-                  {session.displayName}
+              </span>
+              <Link href="/trader/profile" className="rad-tme" aria-label={dict.trader.profile}>
+                <span className="rad-tme-av" aria-hidden>
+                  {initial}
                 </span>
-                <form action={traderLogoutAction}>
-                  <Button type="submit" variant="inverse-secondary" size="sm">
-                    {dict.trader.logout}
-                  </Button>
-                </form>
-              </div>
+                <span className="rad-tme-name">{session.displayName}</span>
+              </Link>
+              <form action={traderLogoutAction} className="contents">
+                <button type="submit" className="rad-ib" aria-label={dict.trader.logout}>
+                  <LogOut width={18} height={18} strokeWidth={1.5} aria-hidden />
+                </button>
+              </form>
             </div>
           </header>
-          <main
-            id="main-content"
-            className="ro-portal-main-enter mx-auto max-w-[1180px] px-4 py-6 pb-28 sm:px-6 md:pb-12"
-          >
+
+          <main id="main-content" className="rad-tpage flex-1">
             {children}
           </main>
-          <TraderBottomTabs tabs={tabs} />
+
+          <TraderBottomTabs tabs={tabs} navLabel={dict.common.navLabelTrader} />
         </div>
-      </div>
-    </AppToast>
+      </PortalShellFrame>
+    </>
   );
 }
+
+export default TraderShell;

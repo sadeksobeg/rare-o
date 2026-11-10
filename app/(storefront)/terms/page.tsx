@@ -25,14 +25,11 @@ export default async function TermsPage() {
     return (
       <LegalDocumentView
         doc={{
-          title: locale === "ar" ? "شروط الاستخدام" : "Terms of use",
+          title: dict.terms.title,
           lastUpdated: "",
           isPlaceholder: true,
           banner: dict.privacy.placeholderBanner,
-          fallbackBody:
-            locale === "ar"
-              ? "محتوى الشروط قيد الإعداد."
-              : "Terms content is being prepared.",
+          fallbackBody: dict.terms.fallbackBody,
           sections: [],
         }}
         dict={dict}

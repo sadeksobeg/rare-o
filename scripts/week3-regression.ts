@@ -24,6 +24,7 @@ import {
 import { canTransitionRetailRequest } from "../lib/retail-request/constants";
 import {
   addNegotiationEntry,
+  confirmDealPayment,
   createDealProposal,
   getDealForTrader,
 } from "../lib/deals/service";
@@ -207,6 +208,7 @@ async function main() {
     dealKind: "catalog",
     title: "Regression catalog deal",
     productId: product!.id,
+    modelNumber: "REG-MODEL-80",
     proposedPrice: 80,
     currency: "TEST",
     quantity: 2,
@@ -249,10 +251,14 @@ async function main() {
     message: "admin counter",
     proposedPrice: 75,
     currency: "TEST",
-    quantity: 2,
+    quantity: 3,
   });
   assert(countered.deal.status === "negotiating", "counter stays negotiating");
-  assert(Number(countered.deal.proposedPrice) === 75, "counter updates commercial snapshot");
+  assert(
+    Number(countered.deal.proposedPrice) === 80,
+    "payment-first: counter must not change price"
+  );
+  assert(countered.deal.quantity === 3, "counter may update quantity");
 
   const accepted = await addNegotiationEntry({
     dealId: countered.deal.id,
@@ -261,7 +267,10 @@ async function main() {
     actorTraderId: traderA.id,
     message: "trader accept",
   });
-  assert(accepted.deal.status === "accepted", "accept → accepted");
+  assert(
+    accepted.deal.status === "awaiting_payment",
+    "accept → awaiting_payment"
+  );
 
   await expectThrow(
     () =>
@@ -272,7 +281,7 @@ async function main() {
         actorAdminId: admin!.id,
         message: "too late",
       }),
-    "negotiation rejected on accepted deal"
+    "negotiation rejected on awaiting_payment deal"
   );
 
   const productsAfterAccept = await prisma.product.count();
@@ -291,6 +300,9 @@ async function main() {
     traderId: traderA.id,
     dealKind: "non_catalog",
     title: "Non-catalog opportunity",
+    modelNumber: "NONCAT-1",
+    proposedPrice: 120,
+    currency: "TEST",
     conditionsNotes: "custom opportunity",
     message: "propose non-catalog",
   });
@@ -301,6 +313,9 @@ async function main() {
         traderId: traderA.id,
         dealKind: "non_catalog",
         title: "bad",
+        modelNumber: "BAD",
+        proposedPrice: 1,
+        currency: "TEST",
         productId: product!.id,
       }),
     "non-catalog cannot reference product"
@@ -350,6 +365,59 @@ async function main() {
   assert(
     (await getPublishedPublicOfferBySlug(draftOffer.slug)) === null,
     "unpublished offer not publicly visible"
+  );
+
+  // ------------------------------------------------------------------
+  // 4b) Offer-publish gate: every post-acceptance deal status explicitly
+  // (round 2.1 — this gate change shipped mixed into a UI commit; this is
+  // the dedicated coverage the owner asked for, covering both the status
+  // this should reject and the one payment confirmation reaches.)
+  // ------------------------------------------------------------------
+  const stillNegotiating = await createDealProposal({
+    traderId: traderA.id,
+    productId: product!.id,
+    dealKind: "catalog",
+    title: "Gate check deal",
+    modelNumber: "GATE-1",
+    proposedPrice: 70,
+    currency: "TEST",
+    message: "gate check: still negotiating",
+  });
+  const draftOnNegotiating = await createPublicCuratedOffer({
+    slug: `reg-gate-negotiating-${Date.now()}`,
+    titleEn: "Gate check (negotiating)",
+    titleAr: "فحص البوابة (قيد التفاوض)",
+    summaryEn: "must be rejected",
+    summaryAr: "يجب رفضه",
+    dealProposalId: stillNegotiating.id,
+    productId: product!.id,
+  });
+  await expectThrow(
+    () => setPublicOfferStatus(draftOnNegotiating.id, "published"),
+    "publish gate rejects a deal not yet accepted (proposed)"
+  );
+
+  const paid = await confirmDealPayment({
+    dealId: accepted.deal.id,
+    adminId: admin!.id,
+  });
+  assert(
+    paid.status === "payment_confirmed",
+    "admin payment confirmation → payment_confirmed"
+  );
+  const draftOnConfirmed = await createPublicCuratedOffer({
+    slug: `reg-gate-confirmed-${Date.now()}`,
+    titleEn: "Gate check (payment confirmed)",
+    titleAr: "فحص البوابة (دفع مؤكَّد)",
+    summaryEn: "must publish",
+    summaryAr: "يجب نشره",
+    dealProposalId: accepted.deal.id,
+    productId: product!.id,
+  });
+  await setPublicOfferStatus(draftOnConfirmed.id, "published");
+  assert(
+    !!(await getPublishedPublicOfferBySlug(draftOnConfirmed.slug)),
+    "publish gate accepts a payment_confirmed deal"
   );
 
   // ------------------------------------------------------------------

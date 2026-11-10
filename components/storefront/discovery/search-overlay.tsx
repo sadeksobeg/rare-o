@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
-import type { HomepageSearchItem } from "@/lib/catalog/homepage";
+import type { HomepageSearchItem } from "@/lib/catalog/homepage-search";
 import { localizedName } from "@/lib/utils";
 import { href } from "@/lib/href";
 import { useDiscovery } from "./discovery-context";

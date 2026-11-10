@@ -2,53 +2,22 @@ import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db/prisma";
 import { listLaunchCategories } from "@/lib/catalog/service";
 import { listPublishedPublicOffers } from "@/lib/offers/service";
-import { LAUNCH_CATEGORY_SLUGS } from "@/lib/catalog/constants";
+import { isOudTierSlug, LAUNCH_CATEGORY_SLUGS } from "@/lib/catalog/constants";
+import type {
+  HomepageCategory,
+  HomepageOffer,
+  HomepageProduct,
+} from "@/lib/catalog/homepage-types";
 
-export type HomepageProductImage = {
-  path: string;
-  altAr: string;
-  altEn: string;
-};
+export type {
+  HomepageProduct,
+  HomepageProductImage,
+  HomepageCategory,
+  HomepageOffer,
+} from "@/lib/catalog/homepage-types";
 
-export type HomepageProduct = {
-  id: string;
-  slug: string;
-  nameAr: string;
-  nameEn: string;
-  descriptionAr: string;
-  descriptionEn: string;
-  specsTextAr: string;
-  specsTextEn: string;
-  retailPrice: string;
-  compareAtPrice: string | null;
-  currency: string;
-  availability: string;
-  updatedAt: string;
-  category: {
-    id: string;
-    slug: string;
-    nameAr: string;
-    nameEn: string;
-  };
-  images: HomepageProductImage[];
-};
-
-export type HomepageCategory = {
-  id: string;
-  slug: string;
-  nameAr: string;
-  nameEn: string;
-  productCount: number;
-};
-
-export type HomepageOffer = {
-  id: string;
-  slug: string;
-  titleAr: string;
-  titleEn: string;
-  summaryAr: string;
-  summaryEn: string;
-};
+export type { HomepageSearchItem } from "@/lib/catalog/homepage-search";
+export { toSearchIndex } from "@/lib/catalog/homepage-search";
 
 function mapProduct(
   p: Awaited<ReturnType<typeof fetchPublishedProducts>>[number]
@@ -130,10 +99,11 @@ export async function loadHomepageDiscoveryData() {
 
   const mosaic = products.filter((p) => p.id !== featuredInstrument?.id);
 
+  const oudProducts = products.filter((p) => isOudTierSlug(p.category.slug));
   const secondaryRail =
     byCategory["accessories"].length > 0
       ? byCategory["accessories"]
-      : byCategory["string-instruments"].filter(
+      : oudProducts.filter(
           (p) => p.id !== featuredInstrument?.id && p.id !== heroProduct?.id
         );
 
@@ -177,7 +147,7 @@ export async function loadHomepageDiscoveryData() {
 
 export const getHomepageDiscoveryData = unstable_cache(
   loadHomepageDiscoveryData,
-  ["homepage-discovery-v2"],
+  ["homepage-discovery-v3"],
   { revalidate: 60, tags: ["homepage", "catalog"] }
 );
 
@@ -185,4 +155,19 @@ export type HomepageDiscoveryData = Awaited<
   ReturnType<typeof loadHomepageDiscoveryData>
 >;
 
-export type HomepageSearchItem = HomepageDiscoveryData["searchIndex"][number];
+/**
+ * All published products, mapped the same way the homepage does — used to
+ * mount the storefront's search/quick-view/compare context from the shared
+ * layout, so search works on every storefront page, not only the homepage.
+ * Cheaper than loadHomepageDiscoveryData (skips hero/collections/offers).
+ */
+async function loadDiscoveryProducts(): Promise<HomepageProduct[]> {
+  const rawProducts = await fetchPublishedProducts();
+  return rawProducts.map(mapProduct);
+}
+
+export const getDiscoveryProducts = unstable_cache(
+  loadDiscoveryProducts,
+  ["storefront-discovery-products-v1"],
+  { revalidate: 60, tags: ["catalog"] }
+);

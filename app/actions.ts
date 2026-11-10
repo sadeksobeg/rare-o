@@ -1,23 +1,30 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { safePortalReturnTo } from "@/lib/auth/return-to";
 import {
   adminLoginSchema,
   categoryCreateSchema,
   categoryLabelUpdateSchema,
+  changePasswordSchema,
   productUpsertSchema,
   promoBandUpsertSchema,
+  customerUpdateSchema,
   retailRequestCreateSchema,
   retailRequestIdSchema,
   retailRequestTransitionSchema,
 } from "@/lib/validation/schemas";
+import { oudSpecsFromFormData } from "@/lib/catalog/oud-specs";
 import {
-  clearAdminSessionCookie,
   createAdminSessionToken,
+  handleAdminSessionError,
+  hashPassword,
   requireAdminSession,
+  requireAdminSessionAllowPasswordChange,
   setAdminSessionCookie,
   verifyPassword,
 } from "@/lib/auth/admin-session";
+import { checkNewPassword } from "@/lib/auth/password-policy";
 import { prisma } from "@/lib/db/prisma";
 import {
   createCategory,
@@ -26,6 +33,8 @@ import {
   updateCategoryLabels,
   updateProduct,
 } from "@/lib/catalog/service";
+import { productSlugCandidate } from "@/lib/catalog/slug";
+import { ensureUniqueProductSlug } from "@/lib/catalog/slug-unique";
 import {
   createPromoBand,
   deletePromoBand,
@@ -45,25 +54,12 @@ import {
   transitionRetailRequestStatus,
 } from "@/lib/retail-request/service";
 import { isRetailRequestStatus } from "@/lib/retail-request/constants";
-import { LOCALE_COOKIE } from "@/lib/i18n/server";
-import { isLocale, type Locale } from "@/lib/i18n/config";
-import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { revalidateHomepageAndCatalogTags } from "@/lib/cache/revalidate-storefront";
 
 export type ActionResult =
   | { ok: true; message?: string; data?: unknown }
-  | { ok: false; error: string };
-
-export async function setLocaleAction(locale: string): Promise<void> {
-  if (!isLocale(locale)) return;
-  const jar = await cookies();
-  jar.set(LOCALE_COOKIE, locale as Locale, {
-    path: "/",
-    sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 365,
-  });
-}
+  | { ok: false; error: string; data?: unknown };
 
 export async function adminLoginAction(
   _prev: ActionResult | null,
@@ -75,6 +71,7 @@ export async function adminLoginAction(
   const parsed = adminLoginSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
+    totpCode: formData.get("totpCode") || undefined,
   });
   if (!parsed.success) {
     return { ok: false, error: "LOGIN_INVALID" };
@@ -83,7 +80,11 @@ export async function adminLoginAction(
   const email = parsed.data.email.toLowerCase();
   const lock = isLoginLocked("admin", email);
   if (lock.locked) {
-    return { ok: false, error: "LOGIN_LOCKED" };
+    return {
+      ok: false,
+      error: "LOGIN_LOCKED",
+      data: { retryAfterSec: lock.retryAfterSec ?? 60 },
+    };
   }
 
   const admin = await prisma.adminUser.findUnique({
@@ -158,21 +159,154 @@ export async function adminLoginAction(
     sub: admin.id,
     email: admin.email,
     name: admin.name,
+    mustChangePassword: admin.mustChangePassword,
+    pwv: admin.passwordChangedAt?.getTime() ?? 0,
   });
   await setAdminSessionCookie(token);
-  redirect("/admin");
+  redirect(safePortalReturnTo(formData.get("returnTo"), "/admin"));
+}
+
+/** Used both by the forced /admin/force-password-change screen and the
+ *  normal security-settings "change password" section — same policy either way. */
+export async function adminChangePasswordAction(
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSessionAllowPasswordChange();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+
+  const parsed = changePasswordSchema.safeParse({
+    currentPassword: formData.get("currentPassword"),
+    newPassword: formData.get("newPassword"),
+    confirmPassword: formData.get("confirmPassword"),
+  });
+  if (!parsed.success) {
+    return { ok: false, error: "LOGIN_INVALID" };
+  }
+
+  const { clearLoginFailures, isLoginLocked, recordLoginFailure } =
+    await import("@/lib/auth/rate-limit");
+  const lock = isLoginLocked("admin-pwchange", session.sub);
+  if (lock.locked) {
+    return {
+      ok: false,
+      error: "LOGIN_LOCKED",
+      data: { retryAfterSec: lock.retryAfterSec ?? 60 },
+    };
+  }
+
+  const admin = await prisma.adminUser.findUnique({
+    where: { id: session.sub },
+    select: { id: true, email: true, name: true, passwordHash: true },
+  });
+  if (!admin) {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const currentOk = await verifyPassword(
+    parsed.data.currentPassword,
+    admin.passwordHash
+  );
+  if (!currentOk) {
+    recordLoginFailure("admin-pwchange", session.sub);
+    return { ok: false, error: "CURRENT_WRONG" };
+  }
+  clearLoginFailures("admin-pwchange", session.sub);
+
+  const policyError = checkNewPassword(
+    parsed.data.newPassword,
+    parsed.data.confirmPassword,
+    parsed.data.currentPassword,
+    admin.email
+  );
+  if (policyError) {
+    return { ok: false, error: policyError };
+  }
+
+  const passwordHash = await hashPassword(parsed.data.newPassword);
+  const now = new Date();
+  await prisma.adminUser.update({
+    where: { id: admin.id },
+    data: { passwordHash, mustChangePassword: false, passwordChangedAt: now },
+  });
+
+  const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
+  await writeAdminAudit({
+    adminId: admin.id,
+    action: "admin.password_change",
+  });
+
+  const token = await createAdminSessionToken({
+    sub: admin.id,
+    email: admin.email,
+    name: admin.name,
+    mustChangePassword: false,
+    pwv: now.getTime(),
+  });
+  await setAdminSessionCookie(token);
+  return { ok: true };
+}
+
+/** AUTH-07 — bump passwordChangedAt so other JWTs fail pwv without changing the password. */
+export async function adminInvalidateOtherSessionsAction(): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+
+  const admin = await prisma.adminUser.findUnique({
+    where: { id: session.sub },
+    select: { id: true, email: true, name: true, mustChangePassword: true },
+  });
+  if (!admin) {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const now = new Date();
+  await prisma.adminUser.update({
+    where: { id: admin.id },
+    data: { passwordChangedAt: now },
+  });
+
+  const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
+  await writeAdminAudit({
+    adminId: admin.id,
+    action: "admin.sessions.invalidate_others",
+  });
+
+  const token = await createAdminSessionToken({
+    sub: admin.id,
+    email: admin.email,
+    name: admin.name,
+    mustChangePassword: admin.mustChangePassword,
+    pwv: now.getTime(),
+  });
+  await setAdminSessionCookie(token);
+  return { ok: true };
 }
 
 /** Start TOTP enrollment — returns otpauth URL + plaintext recovery codes once. */
 export async function enrollAdminTotpAction(): Promise<
-  | { ok: true; otpauthUrl: string; secret: string; recoveryCodes: string[] }
+  | {
+      ok: true;
+      otpauthUrl: string;
+      secret: string;
+      recoveryCodes: string[];
+      qrDataUrl: string;
+    }
   | { ok: false; error: string }
 > {
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
   const {
     generateTotpSecret,
@@ -180,8 +314,15 @@ export async function enrollAdminTotpAction(): Promise<
     generateRecoveryCodes,
     hashRecoveryCodes,
   } = await import("@/lib/auth/totp");
-  const { secret, otpauthUrl } = generateTotpSecret();
+  const QRCode = (await import("qrcode")).default;
+  const { secret, otpauthUrl } = generateTotpSecret(session.email);
   const recoveryCodes = generateRecoveryCodes(8);
+  const qrDataUrl = await QRCode.toDataURL(otpauthUrl, {
+    errorCorrectionLevel: "M",
+    margin: 2,
+    width: 200,
+    color: { dark: "#08060a", light: "#ffffff" },
+  });
   await prisma.adminUser.update({
     where: { id: session.sub },
     data: {
@@ -190,7 +331,31 @@ export async function enrollAdminTotpAction(): Promise<
       totpEnabledAt: null,
     },
   });
-  return { ok: true, otpauthUrl, secret, recoveryCodes };
+  return { ok: true, otpauthUrl, secret, recoveryCodes, qrDataUrl };
+}
+
+/** Clear TOTP so the admin can enroll again (e.g. new authenticator). */
+export async function disableAdminTotpAction(): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+  const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
+  await prisma.adminUser.update({
+    where: { id: session.sub },
+    data: {
+      totpSecretEnc: null,
+      totpRecoveryHashes: "[]",
+      totpEnabledAt: null,
+    },
+  });
+  await writeAdminAudit({
+    adminId: session.sub,
+    action: "admin.totp.disabled",
+  });
+  return { ok: true };
 }
 
 /** Confirm TOTP enrollment with a live code. */
@@ -201,8 +366,8 @@ export async function confirmAdminTotpAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
   const code = String(formData.get("totpCode") || "").trim();
   const admin = await prisma.adminUser.findUnique({
@@ -233,11 +398,6 @@ export async function confirmAdminTotpAction(
   return { ok: true };
 }
 
-export async function adminLogoutAction(): Promise<void> {
-  await clearAdminSessionCookie();
-  redirect("/admin/login");
-}
-
 export async function upsertProductAction(
   _prev: ActionResult | null,
   formData: FormData
@@ -245,8 +405,8 @@ export async function upsertProductAction(
   let adminSession;
   try {
     adminSession = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const id = String(formData.get("id") || "");
@@ -258,6 +418,7 @@ export async function upsertProductAction(
     descriptionEn: formData.get("descriptionEn") || "",
     specsTextAr: formData.get("specsTextAr") || "",
     specsTextEn: formData.get("specsTextEn") || "",
+    oudSpecs: oudSpecsFromFormData(formData),
     categoryId: formData.get("categoryId"),
     retailPrice: formData.get("retailPrice"),
     compareAtPrice: formData.get("compareAtPrice") ?? "",
@@ -295,12 +456,14 @@ export async function upsertProductAction(
     if (id) {
       const prev = await prisma.product.findUnique({
         where: { id },
-        select: { status: true },
+        select: { status: true, slug: true },
       });
-      await updateProduct(id, parsed.data);
+      if (!prev) return { ok: false, error: "NOT_FOUND" };
+      // Slug is system-protected after create — never accept client changes.
+      await updateProduct(id, { ...parsed.data, slug: prev.slug });
       if (
         parsed.data.status === "published" &&
-        prev?.status !== "published"
+        prev.status !== "published"
       ) {
         const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
         await writeAdminAudit({
@@ -315,7 +478,10 @@ export async function upsertProductAction(
       revalidateProductStorefront();
       redirect(`/admin/products/${id}`);
     }
-    const created = await createProduct(parsed.data);
+    const slug = await ensureUniqueProductSlug(
+      productSlugCandidate(parsed.data.nameEn, parsed.data.nameAr)
+    );
+    const created = await createProduct({ ...parsed.data, slug });
     revalidatePath("/admin/products");
     revalidateProductStorefront();
     redirect(`/admin/products/${created.id}`);
@@ -331,6 +497,92 @@ export async function upsertProductAction(
     if (typeof e === "object" && e && "digest" in e) throw e;
     return { ok: false, error: msg };
   }
+}
+
+/** CAT-01 — one-click publish/unpublish from the products gallery/table. */
+export async function adminQuickSetProductStatusAction(
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+
+  const id = String(formData.get("productId") || "");
+  const nextStatus = String(formData.get("status") || "");
+  if (!id || (nextStatus !== "published" && nextStatus !== "draft")) {
+    return { ok: false, error: "Invalid status" };
+  }
+
+  const product = await prisma.product.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      nameAr: true,
+      status: true,
+      _count: { select: { images: true } },
+    },
+  });
+  if (!product) return { ok: false, error: "Not found" };
+
+  if (nextStatus === "published") {
+    if (!product.nameAr.trim()) {
+      return { ok: false, error: "PUBLISH_NEEDS_NAME_AR" };
+    }
+    if (product._count.images < 1) {
+      return { ok: false, error: "PUBLISH_NEEDS_IMAGE" };
+    }
+  }
+
+  await prisma.product.update({
+    where: { id },
+    data: { status: nextStatus },
+  });
+
+  if (nextStatus === "published" && product.status !== "published") {
+    const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
+    await writeAdminAudit({
+      adminId: session.sub,
+      action: "product.publish",
+      targetType: "product",
+      targetId: id,
+    });
+  }
+
+  revalidatePath("/admin/products");
+  revalidatePath(`/admin/products/${id}`);
+  revalidateProductStorefront();
+  return { ok: true };
+}
+
+/** CAT-02 — persist drag-reorder as contiguous sortOrder values. */
+export async function adminReorderCategoriesAction(
+  formData: FormData
+): Promise<ActionResult> {
+  try {
+    await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+
+  const ids = formData
+    .getAll("ids")
+    .map((v) => String(v).trim())
+    .filter(Boolean);
+  if (ids.length === 0) return { ok: false, error: "Empty order" };
+
+  await prisma.$transaction(
+    ids.map((id, index) =>
+      prisma.category.update({
+        where: { id },
+        data: { sortOrder: index },
+      })
+    )
+  );
+  revalidateCategoryPaths();
+  return { ok: true };
 }
 
 function imageErrorMessage(code: ImageActionError): string {
@@ -356,8 +608,8 @@ export async function attachProductImageAction(
 ): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const productId = String(formData.get("productId") || "");
@@ -463,8 +715,8 @@ export async function updateCategoryAction(
 ): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
   const parsed = categoryLabelUpdateSchema.safeParse({
     id: formData.get("id"),
@@ -489,8 +741,8 @@ export async function createCategoryAction(
 ): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
   const parsed = categoryCreateSchema.safeParse({
     slug: formData.get("slug"),
@@ -518,8 +770,8 @@ export async function deleteCategoryAction(
 ): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
   const id = String(formData.get("id") || "");
   if (!id) return { ok: false, error: "CATEGORY_INVALID" };
@@ -559,6 +811,7 @@ export async function createRetailRequestAction(
     customerPhone: formData.get("customerPhone"),
     customerNotes: formData.get("customerNotes") || "",
     destinationCountry: formData.get("destinationCountry"),
+    destinationCode: formData.get("destinationCode") || null,
     shippingMethodCode: formData.get("shippingMethodCode") || null,
     shippingMethodLabel: formData.get("shippingMethodLabel") || null,
     lines,
@@ -656,8 +909,8 @@ export async function adminTransitionRetailRequestAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const parsed = retailRequestTransitionSchema.safeParse({
@@ -695,8 +948,8 @@ export async function adminRetriggerRetailHandoffAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const parsed = retailRequestIdSchema.safeParse({
@@ -739,8 +992,8 @@ export async function adminMarkRetailHandoffOpenedAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const parsed = retailRequestIdSchema.safeParse({
@@ -778,8 +1031,8 @@ export async function upsertPromoBandAction(
 ): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const id = String(formData.get("id") || "");
@@ -834,4 +1087,61 @@ export async function deletePromoBandAction(formData: FormData): Promise<void> {
   revalidatePath("/");
   revalidatePath("/admin/promos");
   redirect("/admin/promos");
+}
+
+export async function adminUpdateCustomerAction(
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+
+  const parsed = customerUpdateSchema.safeParse({
+    customerId: formData.get("customerId"),
+    name: formData.get("name"),
+    phone: formData.get("phone"),
+  });
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid customer",
+    };
+  }
+
+  const existing = await prisma.customer.findUnique({
+    where: { id: parsed.data.customerId },
+    select: { id: true, name: true, phone: true },
+  });
+  if (!existing) {
+    return { ok: false, error: "Customer not found" };
+  }
+
+  await prisma.customer.update({
+    where: { id: existing.id },
+    data: {
+      name: parsed.data.name,
+      phone: parsed.data.phone,
+    },
+  });
+
+  const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
+  await writeAdminAudit({
+    adminId: session.sub,
+    action: "customer.update",
+    targetType: "customer",
+    targetId: existing.id,
+    meta: {
+      nameFrom: existing.name,
+      nameTo: parsed.data.name,
+      phoneChanged: existing.phone !== parsed.data.phone,
+    },
+  });
+
+  revalidatePath("/admin/customers");
+  revalidatePath(`/admin/customers/${existing.id}`);
+  return { ok: true, message: "Customer updated" };
 }

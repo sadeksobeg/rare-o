@@ -170,6 +170,15 @@ export async function countRetailRequestsByIdempotencyKey(
   }
 }
 
+/** Cleanup for e2e tests that create a throwaway trader via the admin UI. */
+export async function deleteTraderByEmail(email: string): Promise<void> {
+  try {
+    await prisma().traderAccount.delete({ where: { email } });
+  } catch {
+    // Already gone / never created — nothing to clean up.
+  }
+}
+
 export async function disconnectPrisma(): Promise<void> {
   if (prismaSingleton) {
     await prismaSingleton.$disconnect();

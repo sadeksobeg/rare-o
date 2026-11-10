@@ -1,0 +1,233 @@
+{
+  "at": "2026-10-22T06:03:06.306Z",
+  "base": "http://127.0.0.1:3001",
+  "threshold": 0.85,
+  "runsPerRoute": 5,
+  "budgetFile": "lighthouse-budget.json",
+  "note": "E1: median of 5; hard gate on storefront routes only.",
+  "routes": [
+    {
+      "name": "home",
+      "url": "http://127.0.0.1:3001/?lang=ar",
+      "runs": [
+        {
+          "performance": 0.78,
+          "accessibility": 0.99,
+          "run": 1
+        },
+        {
+          "performance": 0.78,
+          "accessibility": 0.99,
+          "run": 2
+        },
+        {
+          "performance": 0.8,
+          "accessibility": 0.99,
+          "run": 3
+        },
+        {
+          "performance": 0.97,
+          "accessibility": 0.95,
+          "run": 4
+        },
+        {
+          "performance": 0.98,
+          "accessibility": 0.95,
+          "run": 5
+        }
+      ],
+      "median": {
+        "performance": 0.8,
+        "accessibility": 0.99
+      },
+      "passed": false,
+      "hardGate": true
+    },
+    {
+      "name": "catalog",
+      "url": "http://127.0.0.1:3001/catalog?lang=ar",
+      "runs": [
+        {
+          "performance": 0.99,
+          "accessibility": 0.98,
+          "run": 1
+        },
+        {
+          "performance": 0.99,
+          "accessibility": 0.98,
+          "run": 2
+        },
+        {
+          "performance": 0.83,
+          "accessibility": 0.98,
+          "run": 3
+        },
+        {
+          "performance": 1,
+          "accessibility": 0.98,
+          "run": 4
+        },
+        {
+          "performance": 1,
+          "accessibility": 0.98,
+          "run": 5
+        }
+      ],
+      "median": {
+        "performance": 0.99,
+        "accessibility": 0.98
+      },
+      "passed": true,
+      "hardGate": true
+    },
+    {
+      "name": "product",
+      "url": "http://127.0.0.1:3001/product/tuner-digital?lang=ar",
+      "runs": [
+        {
+          "performance": 0.84,
+          "accessibility": 0.99,
+          "run": 1
+        },
+        {
+          "performance": 0.84,
+          "accessibility": 0.99,
+          "run": 2
+        },
+        {
+          "performance": 0.84,
+          "accessibility": 0.99,
+          "run": 3
+        },
+        {
+          "performance": 0.84,
+          "accessibility": 0.99,
+          "run": 4
+        },
+        {
+          "performance": 1,
+          "accessibility": 0.99,
+          "run": 5
+        }
+      ],
+      "median": {
+        "performance": 0.84,
+        "accessibility": 0.99
+      },
+      "passed": false,
+      "hardGate": true
+    },
+    {
+      "name": "request",
+      "url": "http://127.0.0.1:3001/request?lang=ar",
+      "runs": [
+        {
+          "performance": 0.87,
+          "accessibility": 0.95,
+          "run": 1
+        },
+        {
+          "performance": 0.87,
+          "accessibility": 0.95,
+          "run": 2
+        },
+        {
+          "performance": 0.87,
+          "accessibility": 0.95,
+          "run": 3
+        },
+        {
+          "performance": 0.99,
+          "accessibility": 0.95,
+          "run": 4
+        },
+        {
+          "performance": 1,
+          "accessibility": 0.95,
+          "run": 5
+        }
+      ],
+      "median": {
+        "performance": 0.87,
+        "accessibility": 0.95
+      },
+      "passed": true,
+      "hardGate": true
+    },
+    {
+      "name": "admin-home",
+      "url": "http://127.0.0.1:3001/admin",
+      "runs": [
+        {
+          "performance": 1,
+          "accessibility": 0.95,
+          "run": 1
+        },
+        {
+          "performance": 1,
+          "accessibility": 0.95,
+          "run": 2
+        },
+        {
+          "performance": 1,
+          "accessibility": 0.95,
+          "run": 3
+        },
+        {
+          "performance": 1,
+          "accessibility": 0.95,
+          "run": 4
+        },
+        {
+          "performance": 1,
+          "accessibility": 0.95,
+          "run": 5
+        }
+      ],
+      "median": {
+        "performance": 1,
+        "accessibility": 0.95
+      },
+      "passed": true,
+      "hardGate": false
+    },
+    {
+      "name": "trader-home",
+      "url": "http://127.0.0.1:3001/trader",
+      "runs": [
+        {
+          "performance": 1,
+          "accessibility": 0.95,
+          "run": 1
+        },
+        {
+          "performance": 1,
+          "accessibility": 0.95,
+          "run": 2
+        },
+        {
+          "performance": 1,
+          "accessibility": 0.95,
+          "run": 3
+        },
+        {
+          "performance": 1,
+          "accessibility": 0.95,
+          "run": 4
+        },
+        {
+          "performance": 1,
+          "accessibility": 0.95,
+          "run": 5
+        }
+      ],
+      "median": {
+        "performance": 1,
+        "accessibility": 0.95
+      },
+      "passed": true,
+      "hardGate": false
+    }
+  ],
+  "passed": false
+}

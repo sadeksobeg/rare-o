@@ -1,0 +1,384 @@
+/* RARE OUD — Phase 2 static mockups.
+   Tokens below are copied verbatim from docs/ui-planning/plan/PLAN.md section 4
+   (the owner-approved token block, D1-D26) rather than invented for this file.
+   No frameworks, no build step, zero emoji. */
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Amiri:wght@400;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap");
+
+:root {
+  /* sand */
+  --ro-sand-50:#FBF6EE; --ro-sand-100:#F4E7D8; --ro-sand-200:#EFE3D4; --ro-sand-300:#E3D6C5; --ro-sand-400:#D2C2AC;
+  /* ink */
+  --ro-ink-950:#0B080D; --ro-ink-900:#15101A; --ro-ink-800:#211A29; --ro-ink-700:#332A3C;
+  --ro-ink-600:#4B4056; --ro-ink-500:#5A4F66; --ro-ink-400:#6B6074; --ro-ink-300:#A79DB3; --ro-ink-200:#B9AFC4;
+  /* plum */
+  --ro-plum-900:#32104F; --ro-plum-800:#3F1962; --ro-plum-700:#52277C; --ro-plum-300:#C9B2E3; --ro-plum-100:#E9DDF3; --ro-plum-50:#F5EFFA;
+  /* amber */
+  --ro-amber-800:#6B4614; --ro-amber-600:#8A5A22; --ro-amber-500:#B8863F; --ro-amber-400:#CFA25E; --ro-amber-100:#F1E0BF;
+  /* semantic (status tones, PLAN.md 3.3) */
+  --ro-success-700:#1F5130; --ro-success-100:#DCEBDD;
+  --ro-danger-700:#8A2433;  --ro-danger-100:#F4DADC;
+  --ro-progress-700:#1F3F57; --ro-progress-100:#D9E6EE;
+
+  /* roles (light) */
+  --ro-bg:var(--ro-sand-100); --ro-bg-raised:var(--ro-sand-50); --ro-bg-sunken:var(--ro-sand-200);
+  --ro-text:var(--ro-ink-950); --ro-text-2:var(--ro-ink-600); --ro-text-muted:var(--ro-ink-500);
+  --ro-link:var(--ro-plum-900); --ro-link-hover:var(--ro-plum-700);
+  --ro-border-subtle:rgba(11,8,13,.14); --ro-border:rgba(11,8,13,.28); --ro-border-control:#8F8473;
+  --ro-focus:var(--ro-plum-900);
+
+  /* space (4px base, PLAN.md section 6) */
+  --ro-s-1:4px; --ro-s-2:8px; --ro-s-3:12px; --ro-s-4:16px; --ro-s-5:20px; --ro-s-6:24px; --ro-s-8:32px;
+  --ro-s-10:40px; --ro-s-12:48px; --ro-s-16:64px; --ro-s-20:80px; --ro-s-24:96px; --ro-s-32:128px; --ro-s-40:160px;
+
+  /* shape (D18) */
+  --ro-r-xs:2px; --ro-r-sm:4px; --ro-r-md:8px; --ro-r-lg:16px; --ro-r-full:9999px;
+
+  /* elevation (D19 — only two shadows exist) */
+  --ro-e2:0 1px 2px rgba(11,8,13,.06), 0 8px 24px -12px rgba(11,8,13,.18);
+  --ro-e3:0 24px 64px -24px rgba(11,8,13,.45);
+
+  /* motion (section 8.1) */
+  --ro-dur-instant:90ms; --ro-dur-fast:160ms; --ro-dur-base:240ms; --ro-dur-slow:420ms; --ro-dur-enter:700ms; --ro-dur-hero:1100ms;
+  --ro-ease-standard:cubic-bezier(.2,0,0,1);
+  --ro-ease-enter:cubic-bezier(.16,1,.3,1);
+  --ro-ease-exit:cubic-bezier(.4,0,1,1);
+  --ro-ease-resonance:cubic-bezier(.37,0,.63,1);
+
+  /* -------- legacy aliases (PLAN.md section 4: "keep until Phase 7, then delete")
+     Nine Phase-2 screens not yet redone in this round still read these names. -------- */
+  --ink-950: var(--ro-ink-950); --sand-200: var(--ro-sand-100); --plum-700: var(--ro-plum-900);
+  --ink-900: var(--ro-ink-900); --ink-800: var(--ro-ink-800); --ink-700: var(--ro-ink-700);
+  --ink-600: var(--ro-ink-600); --ink-500: var(--ro-ink-500); --ink-400: var(--ro-ink-400);
+  --plum-900: var(--ro-plum-900); --plum-800: var(--ro-plum-800); --plum-600: var(--ro-plum-700);
+  --plum-500: var(--ro-plum-700); --plum-400: var(--ro-plum-300); --plum-300: var(--ro-plum-300);
+  --plum-200: var(--ro-plum-100); --plum-100: var(--ro-plum-100);
+  --sand-50: var(--ro-sand-50); --sand-100: var(--ro-sand-100); --sand-300: var(--ro-sand-300);
+  --sand-400: var(--ro-sand-400); --sand-500: var(--ro-sand-400);
+  --ok: var(--ro-success-700); --ok-bg: var(--ro-success-100);
+  --warn: var(--ro-amber-800); --warn-bg: var(--ro-amber-100);
+  --danger: var(--ro-danger-700); --danger-bg: var(--ro-danger-100);
+  --bg-page: var(--ro-bg); --bg-surface-solid: var(--ro-bg-raised); --bg-inverse: var(--ro-ink-950);
+  --text: var(--ro-text); --text-muted: var(--ro-text-muted); --text-inverse: var(--ro-sand-100);
+  --border: var(--ro-border-subtle); --border-strong: var(--ro-border); --accent: var(--ro-link); --focus: var(--ro-focus);
+  --r-sm: var(--ro-r-sm); --r-md: var(--ro-r-md); --r-lg: var(--ro-r-lg); --r-xl: var(--ro-r-lg);
+  --shadow-1: var(--ro-e2); --shadow-2: var(--ro-e2); --shadow-3: var(--ro-e3);
+  --ring-focus: 0 0 0 2px var(--ro-bg-raised), 0 0 0 4px var(--ro-focus);
+  --s-1: var(--ro-s-1); --s-2: var(--ro-s-2); --s-3: var(--ro-s-3); --s-4: var(--ro-s-4);
+  --s-5: var(--ro-s-5); --s-6: var(--ro-s-6); --s-8: var(--ro-s-8); --s-10: var(--ro-s-10);
+  --s-12: var(--ro-s-12); --s-16: var(--ro-s-16);
+  --dur-fast: var(--ro-dur-fast); --dur-base: var(--ro-dur-base);
+  --ease-out: var(--ro-ease-enter);
+  --font-latin-display: "Cormorant Garamond", serif;
+  --font-ar-display: "Amiri", serif;
+  --font-latin-ui: "Source Sans 3", sans-serif;
+  --font-ar-ui: "IBM Plex Sans Arabic", sans-serif;
+}
+
+.ro-inverse { /* any dark section: hero, trader band, footer, admin sidebar (PLAN.md 4) */
+  --ro-bg:var(--ro-ink-950); --ro-bg-raised:var(--ro-ink-900); --ro-bg-sunken:var(--ro-ink-950);
+  --ro-text:var(--ro-sand-100); --ro-text-2:var(--ro-ink-200); --ro-text-muted:var(--ro-ink-300);
+  --ro-link:var(--ro-plum-300); --ro-link-hover:var(--ro-sand-100);
+  --ro-border-subtle:rgba(244,231,216,.16); --ro-border:rgba(244,231,216,.30); --ro-border-control:#7C7288;
+  --ro-focus:var(--ro-sand-100);
+}
+
+/* language-driven type system (PLAN.md section 4) */
+html[lang="ar"] {
+  --ro-font-display: "Amiri", "Cormorant Garamond", serif;
+  --ro-font-ui: "IBM Plex Sans Arabic", "Source Sans 3", system-ui, sans-serif;
+  --ro-display-weight:400; --ro-display-scale:.94; --ro-ui-scale:1.06;
+  --ro-lh-body:1.8; --ro-lh-heading:1.35; --ro-track-overline:0;
+}
+html[lang="en"] {
+  --ro-font-display: "Cormorant Garamond", "Amiri", serif;
+  --ro-font-ui: "Source Sans 3", "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --ro-display-weight:500; --ro-display-scale:1; --ro-ui-scale:1;
+  --ro-lh-body:1.6; --ro-lh-heading:1.12; --ro-track-overline:.14em;
+}
+
+* { box-sizing: border-box; }
+html { font-size: 16px; }
+body {
+  margin: 0;
+  background: var(--ro-bg);
+  color: var(--ro-text);
+  font-family: var(--ro-font-ui);
+  line-height: var(--ro-lh-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* -------- type scale (PLAN.md 5.2) -------- */
+h1, h2, .display { font-family: var(--ro-font-display); font-weight: var(--ro-display-weight); line-height: var(--ro-lh-heading); margin: 0 0 var(--ro-s-2); }
+h3, h4 { font-family: var(--ro-font-ui); font-weight: 600; margin: 0 0 var(--ro-s-1); }
+h1 { font-size: clamp(2rem, 1.55rem + 2vw, 3.25rem); }
+h2 { font-size: clamp(1.625rem, 1.35rem + 1.2vw, 2.25rem); }
+h3 { font-size: clamp(1.25rem, 1.15rem + .5vw, 1.5rem); line-height: 1.5; }
+h4 { font-size: 1.125rem; line-height: 1.55; }
+p { margin: 0 0 var(--ro-s-3); color: var(--ro-text); max-width: 62ch; }
+.ro-body-sm { font-size: .875rem; line-height: 1.7; }
+.ro-caption { font-size: .8125rem; line-height: 1.65; color: var(--ro-text-muted); }
+.muted { color: var(--ro-text-muted); }
+a { color: var(--ro-link); }
+a:hover { color: var(--ro-link-hover); }
+bdi { unicode-bidi: isolate; }
+.ro-tabular { font-variant-numeric: tabular-nums; }
+
+/* -------- focus (PLAN.md "Universal interaction states") -------- */
+:focus-visible { outline: 2px solid var(--ro-focus); outline-offset: 2px; }
+.ro-icon { display: inline-block; vertical-align: -3px; }
+
+/* -------- skip link -------- */
+.skip-link {
+  position: absolute; inset-inline-start: var(--ro-s-3); top: -48px; z-index: 100;
+  background: var(--ro-ink-950); color: var(--ro-sand-50); padding: 10px 16px;
+  border-radius: 0 0 var(--ro-r-sm) var(--ro-r-sm); text-decoration: none; font-size: .85rem;
+  transition: top var(--ro-dur-fast) var(--ro-ease-standard);
+}
+.skip-link:focus { top: 0; }
+
+/* ======== layout shell (admin) ======== */
+.ro-shell { display: flex; min-height: 100vh; }
+.ro-sidebar {
+  width: 264px; flex-shrink: 0; background: var(--ro-ink-950); color: var(--ro-sand-100);
+  padding: var(--ro-s-5) var(--ro-s-4); display: flex; flex-direction: column; gap: var(--ro-s-6);
+}
+.ro-sidebar .ro-brand { display: flex; align-items: center; gap: var(--ro-s-2); font-family: var(--ro-font-display); font-weight: 600; font-size: 1.05rem; }
+.ro-sidebar nav { display: flex; flex-direction: column; gap: var(--ro-s-1); }
+.ro-sidebar nav a {
+  display: flex; align-items: center; gap: var(--ro-s-3); padding: var(--ro-s-2) var(--ro-s-3);
+  border-radius: var(--ro-r-sm); color: rgba(244, 231, 216, .72); text-decoration: none;
+  font-size: .92rem; transition: background var(--ro-dur-fast) var(--ro-ease-standard), color var(--ro-dur-fast);
+}
+.ro-sidebar nav a svg { flex-shrink: 0; opacity: .85; }
+.ro-sidebar nav a:hover { background: rgba(244, 231, 216, .08); color: var(--ro-sand-100); }
+.ro-sidebar nav a.active { background: rgba(244, 231, 216, .14); color: var(--ro-sand-100); font-weight: 600; }
+.ro-sidebar nav a.active svg { opacity: 1; }
+.ro-main { flex: 1; min-width: 0; padding: var(--ro-s-8); }
+.ro-topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--ro-s-4);
+  margin-bottom: var(--ro-s-6); padding-bottom: var(--ro-s-4); border-bottom: 1px solid var(--ro-border-subtle);
+}
+.ro-sidebar-hamburger { display: none; }
+
+@media (max-width: 1023px) {
+  .ro-shell { flex-direction: column; }
+  .ro-sidebar { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; padding: var(--ro-s-3) var(--ro-s-4); }
+  .ro-sidebar nav { display: none; }
+  .ro-sidebar-hamburger { display: inline-flex; }
+  .ro-main { padding: var(--ro-s-4); }
+}
+
+/* drawer content shared by admin sidebar + trader header on narrow viewports */
+.ro-drawer-nav a { display: flex; align-items: center; gap: var(--ro-s-3); padding: var(--ro-s-3); border-radius: var(--ro-r-sm); text-decoration: none; color: var(--ro-text); font-size: .95rem; }
+.ro-drawer-nav a.active { background: var(--ro-plum-100); color: var(--ro-plum-900); font-weight: 600; }
+.ro-drawer-nav a:hover { background: var(--ro-sand-200); }
+
+/* ======== buttons (P01: sm 36 / md 44 / lg 52, radius 4) ======== */
+.ro-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--ro-s-2);
+  border: 1px solid transparent; border-radius: var(--ro-r-sm); font-family: inherit; font-weight: 600;
+  cursor: pointer; transition: background var(--ro-dur-fast) var(--ro-ease-standard), filter var(--ro-dur-fast);
+  height: 44px; padding-inline: var(--ro-s-6); font-size: .92rem;
+}
+.ro-btn-sm { height: 36px; padding-inline: var(--ro-s-5); font-size: .85rem; }
+.ro-btn-lg { height: 52px; padding-inline: var(--ro-s-8); font-size: 1rem; }
+.ro-btn:active { filter: brightness(.92); }
+.ro-btn-primary { background: var(--ro-ink-950); color: var(--ro-sand-100); }
+.ro-btn-primary:hover { background: var(--ro-plum-800); }
+.ro-btn-secondary { background: transparent; color: var(--ro-ink-950); border-color: var(--ro-ink-950); }
+.ro-btn-secondary:hover { background: var(--ro-sand-200); }
+.ro-btn-quiet { background: transparent; color: var(--ro-text); border: none; }
+.ro-btn-quiet:hover { background: var(--ro-sand-200); }
+.ro-btn[disabled], .ro-btn[aria-disabled="true"] { opacity: .45; cursor: not-allowed; pointer-events: none; }
+.ro-icon-btn {
+  display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px;
+  border-radius: var(--ro-r-sm); border: 1px solid var(--ro-border); background: transparent;
+  color: var(--ro-text); cursor: pointer; transition: background var(--ro-dur-fast);
+}
+.ro-icon-btn:hover { background: var(--ro-sand-200); }
+.ro-inverse .ro-icon-btn { color: var(--ro-text); border-color: var(--ro-border); }
+.ro-inverse .ro-icon-btn:hover { background: rgba(244,231,216,.1); }
+
+/* ======== fields (P02: height 48 default, 40 admin-dense, radius 4) ======== */
+.ro-field { display: flex; flex-direction: column; gap: var(--ro-s-1); margin-bottom: var(--ro-s-4); }
+.ro-field label { font-size: .85rem; font-weight: 600; }
+.ro-field input, .ro-field select, .ro-field textarea {
+  font-family: inherit; font-size: .95rem; padding-inline: var(--ro-s-3); border: 1px solid var(--ro-border-control);
+  border-radius: var(--ro-r-sm); background: var(--ro-sand-50); color: var(--ro-text); height: 48px;
+}
+.ro-field textarea { height: auto; padding-block: var(--ro-s-2); min-height: calc(4 * 1.6em); }
+.ro-field-dense input, .ro-field-dense select { height: 40px; }
+.ro-field input:focus-visible, .ro-field select:focus-visible, .ro-field textarea:focus-visible {
+  outline: none; border-color: var(--ro-plum-900); box-shadow: 0 0 0 2px var(--ro-plum-900);
+}
+.ro-field .ro-help { font-size: .8rem; color: var(--ro-text-muted); margin: 0; }
+.ro-field .ro-error { color: var(--ro-danger-700); font-size: .82rem; display: flex; align-items: center; gap: 4px; }
+.ro-field.has-error input { border-color: var(--ro-danger-700); }
+
+/* ======== card (P07: radius 4, hairline, no shadow by default) ======== */
+.ro-card { background: var(--ro-bg-raised); border: 1px solid var(--ro-border-subtle); border-radius: var(--ro-r-sm); padding: var(--ro-s-5); }
+.ro-card-link { text-decoration: none; color: inherit; display: block; transition: box-shadow var(--ro-dur-fast); }
+.ro-card-link:hover { box-shadow: var(--ro-e2); }
+
+/* ======== table ======== */
+.ro-table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+.ro-table th { text-align: start; font-weight: 600; color: var(--ro-text-muted); font-size: .8rem; padding: var(--ro-s-2) var(--ro-s-3); border-bottom: 1px solid var(--ro-border); }
+.ro-table td { padding: var(--ro-s-3); border-bottom: 1px solid var(--ro-border-subtle); }
+.ro-table tr.row-link { cursor: pointer; }
+.ro-table tr.row-link:hover { background: var(--ro-sand-200); }
+.ro-table-scroll { overflow-x: auto; }
+
+/* ======== status chips (PLAN.md 3.3 — 7 semantic tones, icon + text always) ======== */
+.ro-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: var(--ro-r-full); font-size: .78rem; font-weight: 600; }
+.ro-chip svg { flex-shrink: 0; }
+.ro-chip-neutral { background: var(--ro-sand-300); color: var(--ro-ink-600); }
+.ro-chip-info { background: var(--ro-plum-100); color: var(--ro-plum-900); }
+.ro-chip-progress { background: var(--ro-progress-100); color: var(--ro-progress-700); }
+.ro-chip-attention { background: var(--ro-amber-100); color: var(--ro-amber-800); }
+.ro-chip-success { background: var(--ro-success-100); color: var(--ro-success-700); }
+.ro-chip-danger { background: var(--ro-danger-100); color: var(--ro-danger-700); }
+.ro-chip-closed { background: #E6E0EA; color: var(--ro-ink-500); }
+
+/* ======== KPI grid (D20: counts only, no charts) ======== */
+.ro-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--ro-s-3); margin-bottom: var(--ro-s-6); }
+.ro-kpi-card .ro-kpi-label { font-size: .82rem; color: var(--ro-text-muted); margin-bottom: var(--ro-s-1); }
+.ro-kpi-card .ro-kpi-value { font-size: 1.7rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+@media (max-width: 1023px) { .ro-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .ro-kpi-grid { grid-template-columns: 1fr; } }
+
+/* ======== dialogs / sheets (P08, D22: native <dialog>, Esc + backdrop close, focus returns) ======== */
+dialog.ro-dialog, dialog.ro-sheet, dialog.ro-drawer {
+  border: none; padding: 0; background: var(--ro-bg-raised); color: var(--ro-text);
+  border-radius: var(--ro-r-md); box-shadow: var(--ro-e3); margin: auto;
+}
+dialog.ro-dialog::backdrop, dialog.ro-sheet::backdrop, dialog.ro-drawer::backdrop { background: rgba(11,8,13,.55); }
+dialog.ro-dialog { width: min(440px, 92vw); opacity: 0; transform: translateY(8px); transition: opacity var(--ro-dur-base) var(--ro-ease-standard), transform var(--ro-dur-base) var(--ro-ease-standard), overlay var(--ro-dur-base) allow-discrete, display var(--ro-dur-base) allow-discrete; }
+dialog.ro-dialog[open] { opacity: 1; transform: translateY(0); }
+@starting-style { dialog.ro-dialog[open] { opacity: 0; transform: translateY(8px); } }
+
+dialog.ro-drawer {
+  margin: 0; margin-inline-end: 0; height: 100vh; max-height: 100vh; width: min(320px, 86vw);
+  border-radius: 0; inset-inline-start: auto; inset-inline-end: 0;
+  transform: translateX(100%); transition: transform var(--ro-dur-slow) var(--ro-ease-standard), overlay var(--ro-dur-slow) allow-discrete, display var(--ro-dur-slow) allow-discrete;
+}
+html[dir="rtl"] dialog.ro-drawer { transform: translateX(-100%); }
+dialog.ro-drawer[open] { transform: translateX(0); }
+@starting-style { dialog.ro-drawer[open] { transform: translateX(100%); } }
+html[dir="rtl"] dialog.ro-drawer[open] { transform: translateX(0); }
+@starting-style { html[dir="rtl"] dialog.ro-drawer[open] { transform: translateX(-100%); } }
+
+/* ======== lang toggle ======== */
+.lang-toggle {
+  border: 1px solid var(--ro-border); background: transparent; border-radius: var(--ro-r-sm);
+  padding: 0 var(--ro-s-4); font-size: .8rem; font-weight: 700; letter-spacing: .04em; cursor: pointer;
+  height: 44px; color: var(--ro-text);
+}
+.ro-inverse .lang-toggle, body.ro-inverse .lang-toggle { color: var(--ro-sand-100); border-color: rgba(244,231,216,.3); }
+
+[data-lang] { display: inline; }
+html[lang="ar"] [data-lang="en"] { display: none; }
+html[lang="en"] [data-lang="ar"] { display: none; }
+
+.skeleton { background: linear-gradient(90deg, var(--ro-sand-300) 25%, var(--ro-sand-200) 37%, var(--ro-sand-300) 63%); background-size: 400% 100%; animation: shimmer 1.4s ease infinite; border-radius: var(--ro-r-sm); }
+@keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+
+/* ======== reduced motion (PLAN.md 8.4: 120ms opacity fade, everything else off) ======== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  dialog.ro-dialog, dialog.ro-drawer { transition: opacity 120ms linear !important; transform: none !important; }
+}
+
+/* =====================================================================
+   LEGACY classes — unchanged structurally, used by the 9 Phase-2 screens
+   not yet redone in this round. Colors/spacing now resolve through the
+   alias tokens above instead of invented values. Will be replaced with
+   the .ro-* system (above) screen by screen, on separate approval.
+   ===================================================================== */
+.shell { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 248px; flex-shrink: 0; background: var(--ink-950); color: var(--text-inverse);
+  padding: var(--s-5) var(--s-4); display: flex; flex-direction: column; gap: var(--s-6);
+}
+.sidebar .brand { font-family: var(--font-ar-display); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.06em; }
+html[lang="en"] .sidebar .brand { font-family: var(--font-latin-display); }
+.sidebar nav { display: flex; flex-direction: column; gap: var(--s-1); }
+.sidebar nav a {
+  display: flex; align-items: center; gap: var(--s-2); padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-sm); color: rgba(244, 231, 216, 0.72); text-decoration: none;
+  font-size: 0.92rem; transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast);
+}
+.sidebar nav a:hover { background: rgba(244, 231, 216, 0.08); color: var(--text-inverse); }
+.sidebar nav a.active { background: rgba(244, 231, 216, 0.14); color: var(--text-inverse); font-weight: 600; }
+.main { flex: 1; min-width: 0; padding: var(--s-6) var(--s-8); }
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-4);
+  margin-bottom: var(--s-6); padding-bottom: var(--s-4); border-bottom: 1px solid var(--border);
+}
+.btn {
+  display: inline-flex; align-items: center; gap: var(--s-2); border: 1px solid transparent;
+  border-radius: var(--r-sm); padding: 0.55rem 1rem; font-size: 0.92rem; font-weight: 600;
+  font-family: inherit; cursor: pointer; transition: transform var(--dur-fast), box-shadow var(--dur-fast);
+  min-height: 44px;
+}
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: var(--plum-700); color: var(--sand-50); box-shadow: var(--shadow-1); }
+.btn-primary:hover { background: var(--plum-800); box-shadow: var(--shadow-2); }
+.btn-secondary { background: var(--sand-50); color: var(--ink-950); border-color: var(--border-strong); }
+.btn-secondary:hover { background: var(--sand-100); }
+.btn-ghost { background: transparent; color: var(--ink-950); }
+.btn-ghost:hover { background: var(--sand-200); }
+.card {
+  background: var(--bg-surface-solid); border: 1px solid var(--border); border-radius: var(--r-md);
+  padding: var(--s-5); box-shadow: var(--shadow-1);
+}
+.card-link { text-decoration: none; color: inherit; display: block; transition: box-shadow var(--dur-fast), transform var(--dur-fast); }
+.card-link:hover { box-shadow: var(--shadow-2); transform: translateY(-1px); }
+.field { display: flex; flex-direction: column; gap: var(--s-1); margin-bottom: var(--s-4); }
+.field label { font-size: 0.85rem; font-weight: 600; }
+.field input, .field select, .field textarea {
+  font-family: inherit; font-size: 0.95rem; padding: 0.6rem 0.75rem; border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm); background: var(--sand-50); color: var(--text); min-height: 44px;
+}
+.field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible {
+  outline: none; box-shadow: var(--ring-focus); border-color: var(--focus);
+}
+.field .error { color: var(--danger); font-size: 0.82rem; }
+.field.has-error input { border-color: var(--danger); }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th { text-align: start; font-weight: 600; color: var(--text-muted); font-size: 0.8rem;
+  padding: var(--s-2) var(--s-3); border-bottom: 1px solid var(--border-strong); }
+td { padding: var(--s-3); border-bottom: 1px solid var(--border); }
+tr.row-link { cursor: pointer; }
+tr.row-link:hover { background: var(--sand-200); }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px;
+  font-size: 0.78rem; font-weight: 600; }
+.chip-ok { background: var(--ok-bg); color: var(--ok); }
+.chip-warn { background: var(--warn-bg); color: var(--warn); }
+.chip-danger { background: var(--danger-bg); color: var(--danger); }
+.chip-neutral { background: var(--sand-300); color: var(--ink-700); }
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-3); margin-bottom: var(--s-6); }
+@media (max-width: 860px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } .shell { flex-direction: column; } .sidebar { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; } .sidebar nav { flex-direction: row; flex-wrap: wrap; } .main { padding: var(--s-4); } }
+.kpi-card .value { font-size: 1.6rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.kpi-card .label { font-size: 0.82rem; color: var(--text-muted); margin-bottom: var(--s-1); }
+.empty-state { text-align: center; padding: var(--s-10) var(--s-4); }
+.empty-state svg { margin-bottom: var(--s-3); color: var(--plum-400); }
+
+/* ---- trader portal header, responsive (hamburger -> drawer nav) ----
+   Shared across all trader screens. Below 860px, inline nav hides and
+   the hamburger + <dialog class="ro-drawer"> drawer takes over. */
+.tr-header {
+  background: linear-gradient(105deg, var(--ro-plum-900) 0%, var(--ro-ink-950) 58%, var(--ro-ink-900) 100%);
+  color: var(--ro-sand-100); padding: var(--ro-s-3) var(--ro-s-6); display: flex; justify-content: space-between; align-items: center; gap: var(--ro-s-3);
+}
+.tr-header .brand { font-family: var(--ro-font-display); font-weight: 700; display: flex; align-items: center; gap: var(--ro-s-2); }
+.tr-header nav { display: flex; gap: var(--ro-s-1); }
+.tr-header nav a { color: rgba(244,231,216,.72); text-decoration: none; padding: var(--ro-s-2) var(--ro-s-3); border-radius: var(--ro-r-sm); font-size: .88rem; display: flex; align-items: center; gap: var(--ro-s-2); }
+.tr-header nav a.active { background: rgba(244,231,216,.14); color: var(--ro-sand-100); font-weight: 600; }
+.tr-header .tr-hamburger { display: none; }
+.tr-main { padding: var(--ro-s-6) var(--ro-s-8); max-width: 1100px; margin: 0 auto; }
+
+@media (max-width: 860px) {
+  .tr-header nav { display: none; }
+  .tr-header .tr-hamburger { display: inline-flex; }
+  .tr-main { padding: var(--ro-s-4); }
+}

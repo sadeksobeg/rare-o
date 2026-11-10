@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>صندوق واتساب — RARE OUD (نموذج مرحلة 2)</title>
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .inbox { display: grid; grid-template-columns: 280px 1fr 260px; gap: var(--s-3); height: calc(100vh - 140px); }
+  .pane { background: var(--bg-surface-solid); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; display: flex; flex-direction: column; }
+  .conv { padding: var(--s-3); border-bottom: 1px solid var(--border); cursor: pointer; }
+  .conv.active { background: var(--sand-200); }
+  .conv .name { font-weight: 600; font-size: .88rem; }
+  .conv .snippet { font-size: .78rem; color: var(--text-muted); }
+  .thread { flex: 1; padding: var(--s-4); overflow-y: auto; display: flex; flex-direction: column; gap: var(--s-2); }
+  .bubble { max-width: 70%; padding: var(--s-2) var(--s-3); border-radius: var(--r-md); font-size: .88rem; }
+  .bubble.in { background: var(--sand-200); align-self: flex-start; }
+  .bubble.out { background: var(--plum-100); align-self: flex-end; }
+  .composer { padding: var(--s-3); border-top: 1px solid var(--border); display: flex; gap: var(--s-2); }
+  .composer input { flex: 1; }
+  @media (max-width: 860px) { .inbox { grid-template-columns: 1fr; height: auto; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">RARE OUD</div>
+    <nav>
+      <a href="admin-dashboard.html">🏠 <span data-lang="ar">لوحة التحكم</span><span data-lang="en" hidden>Dashboard</span></a>
+      <a class="active" href="whatsapp-inbox.html">💬 <span data-lang="ar">صندوق واتساب</span><span data-lang="en" hidden>WhatsApp Inbox</span></a>
+    </nav>
+  </aside>
+  <main class="main">
+    <div class="topbar">
+      <h1><span data-lang="ar">صندوق واتساب</span><span data-lang="en" hidden>WhatsApp Inbox</span></h1>
+      <button class="lang-toggle" onclick="roToggleLang()">EN</button>
+    </div>
+    <div class="inbox">
+      <div class="pane">
+        <div class="conv active"><div class="name"><bdi>سارة أحمد</bdi></div><div class="snippet"><span data-lang="ar">شكراً، سأراجع وأرد</span><span data-lang="en" hidden>Thanks, I'll review and reply</span></div></div>
+        <div class="conv"><div class="name"><bdi>Karim N.</bdi></div><div class="snippet"><span data-lang="ar">هل يتوفر شحن لحلب؟</span><span data-lang="en" hidden>Shipping to Aleppo?</span></div></div>
+      </div>
+      <div class="pane">
+        <div class="thread">
+          <div class="bubble in"><span data-lang="ar">مرحباً، أريد الاستفسار عن القانون المختار</span><span data-lang="en" hidden>Hi, I'd like to ask about the Qanun Select</span></div>
+          <div class="bubble out"><span data-lang="ar">أهلاً سارة، القطعة متوفرة وسعرها 8,845 دولاراً</span><span data-lang="en" hidden>Hi Sarah, it's available at $8,845</span></div>
+          <div class="bubble in"><span data-lang="ar">شكراً، سأراجع وأرد</span><span data-lang="en" hidden>Thanks, I'll review and reply</span></div>
+        </div>
+        <div class="composer">
+          <input type="text" placeholder="…" />
+          <button class="btn btn-primary"><span data-lang="ar">إرسال</span><span data-lang="en" hidden>Send</span></button>
+        </div>
+      </div>
+      <div class="pane" style="padding:var(--s-4)">
+        <h3><span data-lang="ar">الربط</span><span data-lang="en" hidden>Linking</span></h3>
+        <p class="muted" style="font-size:.85rem"><span data-lang="ar">مرتبطة بطلب</span><span data-lang="en" hidden>Linked to request</span> <a href="request-detail.html">RO-2026-7595</a></p>
+        <button class="btn btn-secondary" style="width:100%;justify-content:center"><span data-lang="ar">إلغاء الربط</span><span data-lang="en" hidden>Unlink</span></button>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="shared.js"></script>
+</body>
+</html>

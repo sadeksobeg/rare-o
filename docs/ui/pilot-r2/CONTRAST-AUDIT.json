@@ -1,0 +1,406 @@
+{
+  "at": "2026-11-09T07:25:30.609Z",
+  "rows": [
+    {
+      "fg": "--rad-tx",
+      "bg": "--rad-c0",
+      "desc": "page text on page bg",
+      "size": "normal",
+      "ratio": 16.37,
+      "min": 4.5,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-tx",
+      "bg": "--rad-surface",
+      "desc": "card text on card surface",
+      "size": "normal",
+      "ratio": 15.41,
+      "min": 4.5,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-tx2",
+      "bg": "--rad-surface",
+      "desc": "secondary text on card",
+      "size": "normal",
+      "ratio": 7.91,
+      "min": 4.5,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-tx3",
+      "bg": "--rad-surface",
+      "desc": "muted text on card",
+      "size": "normal",
+      "ratio": 4.85,
+      "min": 4.5,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-tx3",
+      "bg": "--rad-c0",
+      "desc": "muted text on page bg",
+      "size": "normal",
+      "ratio": 4.86,
+      "min": 4.5,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-tx2",
+      "bg": "--rad-surface3",
+      "desc": "segmented label on surface3",
+      "size": "normal",
+      "ratio": 7.33,
+      "min": 4.5,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-ac",
+      "bg": "--rad-surface3",
+      "desc": "command-k icon on surface3",
+      "size": "large",
+      "ratio": 7.59,
+      "min": 3,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-sb-tx",
+      "bg": "--rad-sb",
+      "desc": "sidebar nav text",
+      "size": "normal",
+      "ratio": 7.66,
+      "min": 4.5,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-sb-tx3",
+      "bg": "--rad-sb",
+      "desc": "sidebar group label / role text",
+      "size": "normal",
+      "ratio": 5.33,
+      "min": 4.5,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-cream",
+      "bg": "--rad-sb",
+      "desc": "sidebar active nav text",
+      "size": "normal",
+      "ratio": 16.04,
+      "min": 4.5,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-ac",
+      "bg": "--rad-acs",
+      "desc": "kpi icon chip (accent)",
+      "size": "large",
+      "ratio": 6.86,
+      "min": 3,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-ok",
+      "bg": "--rad-oks",
+      "desc": "kpi icon chip (ok)",
+      "size": "large",
+      "ratio": 7.19,
+      "min": 3,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-warn",
+      "bg": "--rad-warns",
+      "desc": "kpi icon chip (warn)",
+      "size": "large",
+      "ratio": 7.59,
+      "min": 3,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-info",
+      "bg": "--rad-infos",
+      "desc": "kpi icon chip (info)",
+      "size": "large",
+      "ratio": 6.9,
+      "min": 3,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-err",
+      "bg": "--rad-errs",
+      "desc": "kpi icon chip (err)",
+      "size": "large",
+      "ratio": 5.73,
+      "min": 3,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-btn-tx",
+      "bg": "--rad-btn",
+      "desc": "primary button text",
+      "size": "normal",
+      "ratio": 16.37,
+      "min": 4.5,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-cream",
+      "bg": "--rad-out",
+      "desc": "inbox: outgoing bubble text",
+      "size": "normal",
+      "ratio": 11.56,
+      "min": 4.5,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-c0",
+      "bg": "--rad-tx",
+      "desc": "inbox: active filter chip text",
+      "size": "normal",
+      "ratio": 16.37,
+      "min": 4.5,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-tx2",
+      "bg": "--rad-surface2",
+      "desc": "inbox: conversation preview text",
+      "size": "normal",
+      "ratio": 7.69,
+      "min": 4.5,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-ac",
+      "bg": "--rad-surface",
+      "desc": "inbox: unread time / unread marker",
+      "size": "normal",
+      "ratio": 8.53,
+      "min": 4.5,
+      "pass": true,
+      "theme": "dark"
+    },
+    {
+      "fg": "--rad-tx",
+      "bg": "--rad-c0",
+      "desc": "page text on page bg",
+      "size": "normal",
+      "ratio": 17.42,
+      "min": 4.5,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-tx",
+      "bg": "--rad-surface",
+      "desc": "card text on card surface",
+      "size": "normal",
+      "ratio": 19.91,
+      "min": 4.5,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-tx2",
+      "bg": "--rad-surface",
+      "desc": "secondary text on card",
+      "size": "normal",
+      "ratio": 9.67,
+      "min": 4.5,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-tx3",
+      "bg": "--rad-surface",
+      "desc": "muted text on card",
+      "size": "normal",
+      "ratio": 5.88,
+      "min": 4.5,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-tx3",
+      "bg": "--rad-c0",
+      "desc": "muted text on page bg",
+      "size": "normal",
+      "ratio": 5.15,
+      "min": 4.5,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-tx2",
+      "bg": "--rad-surface3",
+      "desc": "segmented label on surface3",
+      "size": "normal",
+      "ratio": 8.11,
+      "min": 4.5,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-ac",
+      "bg": "--rad-surface3",
+      "desc": "command-k icon on surface3",
+      "size": "large",
+      "ratio": 13.31,
+      "min": 3,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-sb-tx",
+      "bg": "--rad-sb",
+      "desc": "sidebar nav text",
+      "size": "normal",
+      "ratio": 7.66,
+      "min": 4.5,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-sb-tx3",
+      "bg": "--rad-sb",
+      "desc": "sidebar group label / role text",
+      "size": "normal",
+      "ratio": 5.33,
+      "min": 4.5,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-cream",
+      "bg": "--rad-sb",
+      "desc": "sidebar active nav text",
+      "size": "normal",
+      "ratio": 16.04,
+      "min": 4.5,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-ac",
+      "bg": "--rad-acs",
+      "desc": "kpi icon chip (accent)",
+      "size": "large",
+      "ratio": 13.54,
+      "min": 3,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-ok",
+      "bg": "--rad-oks",
+      "desc": "kpi icon chip (ok)",
+      "size": "large",
+      "ratio": 5.01,
+      "min": 3,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-warn",
+      "bg": "--rad-warns",
+      "desc": "kpi icon chip (warn)",
+      "size": "large",
+      "ratio": 4.96,
+      "min": 3,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-info",
+      "bg": "--rad-infos",
+      "desc": "kpi icon chip (info)",
+      "size": "large",
+      "ratio": 5.95,
+      "min": 3,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-err",
+      "bg": "--rad-errs",
+      "desc": "kpi icon chip (err)",
+      "size": "large",
+      "ratio": 5.47,
+      "min": 3,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-btn-tx",
+      "bg": "--rad-btn",
+      "desc": "primary button text",
+      "size": "normal",
+      "ratio": 16.37,
+      "min": 4.5,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-cream",
+      "bg": "--rad-out",
+      "desc": "inbox: outgoing bubble text",
+      "size": "normal",
+      "ratio": 13.06,
+      "min": 4.5,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-c0",
+      "bg": "--rad-tx",
+      "desc": "inbox: active filter chip text",
+      "size": "normal",
+      "ratio": 17.42,
+      "min": 4.5,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-tx2",
+      "bg": "--rad-surface2",
+      "desc": "inbox: conversation preview text",
+      "size": "normal",
+      "ratio": 9.06,
+      "min": 4.5,
+      "pass": true,
+      "theme": "light"
+    },
+    {
+      "fg": "--rad-ac",
+      "bg": "--rad-surface",
+      "desc": "inbox: unread time / unread marker",
+      "size": "normal",
+      "ratio": 15.88,
+      "min": 4.5,
+      "pass": true,
+      "theme": "light"
+    }
+  ],
+  "failing": []
+}

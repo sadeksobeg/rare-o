@@ -1,28 +1,22 @@
-import Link from "next/link";
-import { Suspense } from "react";
 import {
-  DataTable,
-  DataTableHead,
-  Td,
-  Th,
-  Tr,
-} from "@/components/admin/data-table";
-import { PageHeader } from "@/components/admin/page-header";
-import { AdminTableFilters } from "@/components/admin/table-filters";
-import { EmptyState } from "@/components/ui/empty-state";
-import { StatusChip } from "@/components/ui/status-chip";
+  DealsListView,
+  type DealsListRow,
+} from "@/components/admin/rad/deals-list-view";
 import { DEAL_STATUSES } from "@/lib/deals/constants";
 import { listDealsForAdmin } from "@/lib/deals/service";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { dealNextActor } from "@/lib/ui/status";
-import { getStatusChipProps } from "@/lib/ui/status-labels";
+import { adminPillToneForStatus } from "@/lib/ui/status-tone";
+import { getStatusLabel } from "@/lib/ui/status-labels";
+
+const PAGE_SIZE = 40;
 
 export default async function AdminDealsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; q?: string }>;
+  searchParams: Promise<{ tab?: string; q?: string; page?: string }>;
 }) {
-  const { tab: tabRaw, q: qRaw } = await searchParams;
+  const { tab: tabRaw, q: qRaw, page: pageRaw } = await searchParams;
   const { dict } = await getRequestDictionary();
   const a = dict.admin;
   const u = dict.adminUi;
@@ -51,109 +45,90 @@ export default async function AdminDealsPage({
       return false;
     }
     if (!q) return true;
-    const hay = [
-      d.reference,
-      d.title,
-      d.trader.displayName,
-      d.trader.email,
-    ]
+    const hay = [d.reference, d.title, d.trader.displayName, d.trader.email]
       .join(" ")
       .toLowerCase();
     return hay.includes(q);
   });
 
+  const page = Math.max(1, Number.parseInt(pageRaw || "1", 10) || 1);
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pageSafe = Math.min(page, pageCount);
+  const pageRows = filtered.slice(
+    (pageSafe - 1) * PAGE_SIZE,
+    pageSafe * PAGE_SIZE
+  );
+
   const statusLabel = (status: string) =>
-    u.status.deal[status] ??
-    dict.trader.dealStatus[status] ??
+    getStatusLabel(dict, "deal", status) ||
+    dict.trader.dealStatus[status] ||
     status;
 
+  const listRows: DealsListRow[] = pageRows.map(({ d, waiting }) => ({
+    id: d.id,
+    reference: d.reference,
+    title: d.title,
+    traderName: d.trader.displayName,
+    traderEmail: d.trader.email,
+    kindLabel:
+      d.dealKind === "catalog"
+        ? u.kindCatalog
+        : d.dealKind === "non_catalog"
+          ? u.kindNonCatalog
+          : d.dealKind,
+    statusLabel: statusLabel(d.status),
+    pillTone: adminPillToneForStatus("deal", d.status),
+    waiting,
+    waitingLabel: u.waitingOnYou,
+    entries: d._count.entries,
+    href: `/admin/deals/${d.id}`,
+  }));
+
   return (
-    <section className="space-y-6">
-      <PageHeader title={a.deals} description={u.dealsLead} />
-      <Suspense fallback={null}>
-        <AdminTableFilters
-          tabsLabel={u.filterTabs}
-          searchLabel={u.search}
-          searchPlaceholder={u.searchPlaceholder}
-          resultCount={filtered.length}
-          resultLabel={u.resultsLabel}
-          tabs={[
-            { id: "all", label: u.filterAll, count: counts.all },
-            {
-              id: "waiting",
-              label: u.filterWaiting,
-              count: counts.waiting,
-            },
-            ...DEAL_STATUSES.map((s) => ({
-              id: s,
-              label: statusLabel(s),
-              count: counts[s] ?? 0,
-            })),
-          ]}
-        />
-      </Suspense>
-      {filtered.length === 0 ? (
-        <div className="border border-ro-line">
-          <EmptyState title={u.emptyTitle} body={u.emptyBody} />
-        </div>
-      ) : (
-        <DataTable>
-          <DataTableHead>
-            <Th>{u.colReference}</Th>
-            <Th>{u.colTrader}</Th>
-            <Th>{u.colTitle}</Th>
-            <Th>{u.colKind}</Th>
-            <Th>{a.colStatus}</Th>
-            <Th>{u.colEntries}</Th>
-            <Th />
-          </DataTableHead>
-          <tbody>
-            {filtered.map(({ d, waiting }) => (
-              <Tr key={d.id}>
-                <Td className="font-medium">{d.reference}</Td>
-                <Td>
-                  {d.trader.displayName}
-                  <div className="text-ro-muted" dir="ltr">
-                    {d.trader.email}
-                  </div>
-                </Td>
-                <Td>{d.title}</Td>
-                <Td>
-                  {d.dealKind === "catalog"
-                    ? u.kindCatalog
-                    : d.dealKind === "non_catalog"
-                      ? u.kindNonCatalog
-                      : d.dealKind}
-                </Td>
-                <Td>
-                  <span className="flex flex-wrap items-center gap-2">
-                    <StatusChip
-                      size="sm"
-                      {...getStatusChipProps(dict, "deal", d.status)}
-                    />
-                    {waiting ? (
-                      <StatusChip
-                        size="sm"
-                        tone="attention"
-                        label={u.waitingOnYou}
-                      />
-                    ) : null}
-                  </span>
-                </Td>
-                <Td className="tabular-nums">{d._count.entries}</Td>
-                <Td>
-                  <Link
-                    href={`/admin/deals/${d.id}`}
-                    className="text-ro-plum hover:underline"
-                  >
-                    {u.actionNegotiate}
-                  </Link>
-                </Td>
-              </Tr>
-            ))}
-          </tbody>
-        </DataTable>
-      )}
-    </section>
+    <DealsListView
+      title={a.deals}
+      lead={u.dealsLead}
+      tabs={[
+        { value: "all", label: u.filterAll, count: counts.all },
+        {
+          value: "waiting",
+          label: u.filterWaiting,
+          count: counts.waiting,
+        },
+        ...DEAL_STATUSES.map((s) => ({
+          value: s,
+          label: statusLabel(s),
+          count: counts[s] ?? 0,
+        })),
+      ]}
+      query={{ tab, q: qRaw?.trim() ?? "", page: pageSafe }}
+      rows={listRows}
+      totalFiltered={filtered.length}
+      pageCount={pageCount}
+      pageSize={PAGE_SIZE}
+      labels={{
+        listAria: a.deals,
+        statusFilterAria: u.filterTabs,
+        searchLabel: u.search,
+        searchPlaceholder: u.searchDeals,
+        colReference: u.colReference,
+        colTrader: u.colTrader,
+        colTitle: u.colTitle,
+        colKind: u.colKind,
+        colStatus: a.colStatus,
+        colEntries: u.colEntries,
+        colActions: u.actionNegotiate,
+        emptyTitle: u.dealsEmptyTitle,
+        emptyBody: u.dealsEmptyBody,
+        noResultsTitle: u.dealsEmptyFilteredTitle,
+        noResultsBody: u.dealsEmptyFilteredBody,
+        clearFilters: dict.catalog.clearFilters,
+        paginationSummary: u.listPaginationSummary,
+        paginationPrevious: dict.common.paginationPrevious,
+        paginationNext: dict.common.paginationNext,
+        tradersHref: "/admin/traders",
+        newTrader: u.newTrader,
+      }}
+    />
   );
 }

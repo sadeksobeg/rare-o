@@ -1,0 +1,74 @@
+---
+description: RARE OUD visual system — binding UI rules for every change
+alwaysApply: true
+---
+
+# RARE OUD UI
+
+> **تجاوز بصري من المالك 2026-11-08 (نطاق: `[data-portal="admin"]` و`[data-portal="trader"]`
+> فقط):** كل القيود البصرية أدناه (الألوان، الخطوط عدا خطوط العلامة، مكتبة الأيقونات،
+> حدود الحركة بالأرقام) **ملغاة** لبوابتي الإدارة والتاجر لصالح
+> `docs/ui/PILOT-DIRECTION.md` وقرارات `PLAN.md` D27+. راجع قسم «تجاوز بصري من المالك
+> 2026-11-08» أعلى `CLAUDE.md` قبل أي قرار. القواعد غير البصرية أدناه (الأمان، i18n،
+> حدود النطاق، الجودة التقنية) **تبقى سارية بلا تغيير**. `docs/ui/01_DESIGN_SYSTEM.md`
+> أُرشِف إلى `docs/ui/_archive_superseded/` ولم يعد مرجعاً.
+
+Visual/motion authority for **admin + trader + login**: `docs/ui-planning/VISION.md`
+(owner-approved). Business boundaries, routes, i18n mechanics, and domain isolation
+remain `docs/ui-planning/plan/PLAN.md`. Hex colors live only in `styles/tokens.css`.
+
+Admin token/component bible: `docs/ui/01_DESIGN_SYSTEM.md` (archived — see override above)
+— defer to VISION when they conflict on theme intensity, charts, or allowed motion libraries.
+
+## Stack
+
+- Next.js App Router + Tailwind 4 + `components/motion`.
+- **VISION program (admin/trader/login):** `motion` (Framer Motion successor),
+  `sonner`, and `cmdk` are allowed when they serve the result. Prefer existing
+  hand-rolled command palette unless cmdk clearly improves a11y. Lazy-load heavy
+  effects; always ship a static / Lite fallback.
+- Do not migrate `lib/i18n/dictionaries.ts` to `ar.json`/`en.json` in visual phases.
+- No Prisma schema, API contracts, or business logic changes for pure UI work
+  (additive schema only with explicit owner OK).
+- Storefront restyle only when a storefront phase is explicit.
+
+## Identity
+
+- Brand core: ink, sand, plum (+ amber ≤2% accent). Status `--ok/--warn/--danger`
+  never as decoration. No plum text on ink.
+- **Dark-luxury first** for admin, trader, and login chrome; cream canvas allowed
+  for long reading. Optional light/dark toggle via `data-theme` on portal roots.
+- Arabic first: logical properties (`ms/me/ps/pe/start/end`). No physical
+  `left/right/ml/mr` except numeric `dir="ltr"`. Wrap Latin in `<bdi dir="ltr">`.
+  **No letter-spacing on Arabic.**
+- lucide-react stroke 1.5. No emoji as icons. Mirror directional icons in RTL only.
+
+## Motion
+
+- Animate `transform`, `opacity`, `filter`, and `clip-path`. No `transition: all`.
+  No animating width/height/top/left/box-shadow.
+- Admin UI ≤300ms; data animations ≤900ms. Trader: warm, rewarding. Login: cinematic once.
+- Enter faster than exit (~60%). Stagger at most 8 items.
+- `prefers-reduced-motion` / Save-Data / weak device → Lite: ≤150ms fades; stop
+  rings/spin/WebGL (static image). Layout and data unchanged.
+- Count-up on first appearance only. Sparkline only if ≥7 real points.
+- Press: scale ~0.97 plus concentric echo. New/updated rows flash plum ~400ms.
+- Charts are allowed on admin (and trader stats) when fed by real data.
+
+## Components / screens
+
+- Admin sidebar is full `--ink-950` including the brand block — never a white cap.
+- The row/card is the hit target; do not add a heavy black «فتح» as the only affordance.
+- Empty = drawn rose + one action. Loading skeleton matches final geometry.
+  Errors are human + retry (per-block on trader home).
+- Filters/tabs/sort/page belong in the URL. Keyboard: Ctrl/⌘K, `/`, Esc, j/k on lists.
+- Unsaved-changes guard on forms. Do not statically import `useSearchParams` into shells.
+- Trader bottom tabs (VISION program): Home · Deals · Wholesale · Brokerage · Account
+  (5). Offers live on home + `/trader/offers`, not as a sixth tab.
+
+## Quality
+
+- Touch targets ≥44px. `focus-visible` always. WCAG 2.2 AA contrast.
+- After a phase: `npx tsc --noEmit` and `npx next lint` on touched files.
+  Playwright when the phase names it.
+- Do not merge a phase that fails its acceptance criteria.

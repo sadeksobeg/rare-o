@@ -37,10 +37,7 @@ export default async function ContactPage() {
           <Banner tone="attention">{dict.contact.missingNumber}</Banner>
         )}
       </div>
-      <MaterialPlate
-        caption={locale === "ar" ? "RARE OUD" : "RARE OUD"}
-        className="max-w-md md:ms-auto"
-      />
+      <MaterialPlate caption="RARE OUD" className="max-w-md md:ms-auto" />
     </section>
   );
 }

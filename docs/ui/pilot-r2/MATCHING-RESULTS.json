@@ -1,0 +1,393 @@
+{
+  "at": "2026-11-09T06:29:35.444Z",
+  "pageThreshold": 2,
+  "regionThreshold": 3,
+  "geometryToleranceP": 2,
+  "results": [
+    {
+      "combo": "dark-1440-rich",
+      "hasReference": true,
+      "note": "page-level only — chrome-less dev fixture, see script comment",
+      "page": {
+        "diffPct": 5.36,
+        "threshold": 8,
+        "pass": true
+      },
+      "pass": true
+    },
+    {
+      "combo": "dark-1440-sparse",
+      "hasReference": true,
+      "page": {
+        "diffPct": 1.89,
+        "threshold": 2,
+        "pass": true
+      },
+      "regions": [
+        {
+          "region": "sidebar",
+          "present": true,
+          "box": {
+            "x": 1172,
+            "y": 0,
+            "width": 268,
+            "height": 900
+          },
+          "diffPct": 1.1,
+          "threshold": 3,
+          "pass": true
+        },
+        {
+          "region": "topbar",
+          "present": true,
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 1172,
+            "height": 60
+          },
+          "diffPct": 1.11,
+          "threshold": 3,
+          "pass": true
+        },
+        {
+          "region": "page-head",
+          "present": true,
+          "box": {
+            "x": 32,
+            "y": 88,
+            "width": 1108,
+            "height": 63
+          },
+          "diffPct": 4.7,
+          "threshold": 3,
+          "pass": false
+        },
+        {
+          "region": "kpi-row",
+          "present": true,
+          "box": {
+            "x": 32,
+            "y": 175,
+            "width": 1108,
+            "height": 179
+          },
+          "diffPct": 0.61,
+          "threshold": 3,
+          "pass": true
+        },
+        {
+          "region": "list-card",
+          "present": true,
+          "box": {
+            "x": 465,
+            "y": 370,
+            "width": 675,
+            "height": 628
+          },
+          "diffPct": 2.17,
+          "threshold": 3,
+          "pass": true
+        },
+        {
+          "region": "right-rail",
+          "present": true,
+          "box": {
+            "x": 32,
+            "y": 370,
+            "width": 417,
+            "height": 852
+          },
+          "diffPct": 3.96,
+          "threshold": 3,
+          "pass": false
+        }
+      ],
+      "geometry": [
+        {
+          "name": "topbar-height",
+          "selector": ".rad-top",
+          "expectedPx": 60,
+          "actualPx": 60,
+          "toleranceP": 2,
+          "pass": true
+        },
+        {
+          "name": "list-row-height",
+          "selector": ".rad-row",
+          "expectedPx": 62,
+          "actualPx": 62,
+          "toleranceP": 2,
+          "pass": true
+        },
+        {
+          "name": "sidebar-width",
+          "selector": ".rad-side",
+          "expectedPx": 268,
+          "actualPx": 268,
+          "toleranceP": 2,
+          "pass": true
+        },
+        {
+          "name": "page-padding-inline",
+          "selector": ".rad-page",
+          "expectedPx": 32,
+          "actualPx": 32,
+          "toleranceP": 2,
+          "pass": true
+        }
+      ],
+      "pass": false
+    },
+    {
+      "combo": "dark-390-sparse",
+      "hasReference": true,
+      "page": {
+        "diffPct": 2.21,
+        "threshold": 2,
+        "pass": false
+      },
+      "regions": [
+        {
+          "region": "sidebar",
+          "present": true,
+          "box": {
+            "x": 390,
+            "y": 0,
+            "width": 292,
+            "height": 900
+          },
+          "diffPct": 0,
+          "threshold": 3,
+          "pass": true
+        },
+        {
+          "region": "topbar",
+          "present": true,
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 390,
+            "height": 60
+          },
+          "diffPct": 0.94,
+          "threshold": 3,
+          "pass": true
+        },
+        {
+          "region": "page-head",
+          "present": true,
+          "box": {
+            "x": 16,
+            "y": 80,
+            "width": 358,
+            "height": 112
+          },
+          "diffPct": 5.64,
+          "threshold": 3,
+          "pass": false
+        },
+        {
+          "region": "kpi-row",
+          "present": true,
+          "box": {
+            "x": 16,
+            "y": 216,
+            "width": 358,
+            "height": 360
+          },
+          "diffPct": 1.51,
+          "threshold": 3,
+          "pass": true
+        },
+        {
+          "region": "list-card",
+          "present": true,
+          "box": {
+            "x": 16,
+            "y": 591,
+            "width": 358,
+            "height": 664
+          },
+          "diffPct": 3.11,
+          "threshold": 3,
+          "pass": false
+        },
+        {
+          "region": "right-rail",
+          "present": true,
+          "box": {
+            "x": 16,
+            "y": 1271,
+            "width": 358,
+            "height": 846
+          },
+          "diffPct": 0,
+          "threshold": 3,
+          "pass": true
+        }
+      ],
+      "geometry": [
+        {
+          "name": "topbar-height",
+          "selector": ".rad-top",
+          "expectedPx": 60,
+          "actualPx": 60,
+          "toleranceP": 2,
+          "pass": true
+        },
+        {
+          "name": "list-row-height",
+          "selector": ".rad-row",
+          "expectedPx": 62,
+          "actualPx": 62,
+          "toleranceP": 2,
+          "pass": true
+        },
+        {
+          "name": "page-padding-inline",
+          "selector": ".rad-page",
+          "expectedPx": 16,
+          "actualPx": 16,
+          "toleranceP": 2,
+          "pass": true
+        }
+      ],
+      "pass": false
+    },
+    {
+      "combo": "light-1440-sparse",
+      "hasReference": true,
+      "page": {
+        "diffPct": 2.51,
+        "threshold": 2,
+        "pass": false
+      },
+      "regions": [
+        {
+          "region": "sidebar",
+          "present": true,
+          "box": {
+            "x": 1172,
+            "y": 0,
+            "width": 268,
+            "height": 900
+          },
+          "diffPct": 1.26,
+          "threshold": 3,
+          "pass": true
+        },
+        {
+          "region": "topbar",
+          "present": true,
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 1172,
+            "height": 60
+          },
+          "diffPct": 1.14,
+          "threshold": 3,
+          "pass": true
+        },
+        {
+          "region": "page-head",
+          "present": true,
+          "box": {
+            "x": 32,
+            "y": 88,
+            "width": 1108,
+            "height": 63
+          },
+          "diffPct": 4.28,
+          "threshold": 3,
+          "pass": false
+        },
+        {
+          "region": "kpi-row",
+          "present": true,
+          "box": {
+            "x": 32,
+            "y": 175,
+            "width": 1108,
+            "height": 179
+          },
+          "diffPct": 1.03,
+          "threshold": 3,
+          "pass": true
+        },
+        {
+          "region": "list-card",
+          "present": true,
+          "box": {
+            "x": 465,
+            "y": 370,
+            "width": 675,
+            "height": 628
+          },
+          "diffPct": 2.18,
+          "threshold": 3,
+          "pass": true
+        },
+        {
+          "region": "right-rail",
+          "present": true,
+          "box": {
+            "x": 32,
+            "y": 370,
+            "width": 417,
+            "height": 852
+          },
+          "diffPct": 6.88,
+          "threshold": 3,
+          "pass": false
+        }
+      ],
+      "geometry": [
+        {
+          "name": "topbar-height",
+          "selector": ".rad-top",
+          "expectedPx": 60,
+          "actualPx": 60,
+          "toleranceP": 2,
+          "pass": true
+        },
+        {
+          "name": "list-row-height",
+          "selector": ".rad-row",
+          "expectedPx": 62,
+          "actualPx": 62,
+          "toleranceP": 2,
+          "pass": true
+        },
+        {
+          "name": "sidebar-width",
+          "selector": ".rad-side",
+          "expectedPx": 268,
+          "actualPx": 268,
+          "toleranceP": 2,
+          "pass": true
+        },
+        {
+          "name": "page-padding-inline",
+          "selector": ".rad-page",
+          "expectedPx": 32,
+          "actualPx": 32,
+          "toleranceP": 2,
+          "pass": true
+        }
+      ],
+      "pass": false
+    }
+  ],
+  "coverage": [
+    "dark-1440-ar",
+    "dark-390-ar",
+    "light-1440-ar",
+    "light-390-ar",
+    "dark-1440-en",
+    "dark-390-en",
+    "light-1440-en",
+    "light-390-en"
+  ]
+}

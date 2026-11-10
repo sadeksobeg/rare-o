@@ -17,9 +17,11 @@ export type HandoffPayload = {
   currency: string;
   customer: { name: string; phone: string; notes: string };
   destinationCountry: string;
+  destinationCode: string | null;
   shippingMethodCode: string | null;
   shippingMethodLabel: string | null;
-  shippingCharge: null;
+  /** Calculator estimate (lib/shipping/rates.ts) — not a charge, no payment gateway exists */
+  shippingCharge: { amount: number; currency: string } | null;
   packagingCharge: null;
   createdAt: string;
 };

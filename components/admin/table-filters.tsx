@@ -2,6 +2,7 @@
 
 import { Suspense } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Search } from "lucide-react";
 import { ListFilterTabs, type ListFilterTab } from "@/components/ui/list-filter-tabs";
 import { cn } from "@/lib/utils";
 
@@ -31,7 +32,7 @@ export function AdminTableFilters({
   return (
     <div
       className={cn(
-        "sticky top-0 z-20 space-y-3 border-b border-ro-line bg-ro-surface/95 py-3 backdrop-blur",
+        "sticky top-0 z-20 space-y-3 rounded-[14px] border border-[color:var(--ro-border-subtle)] bg-[color:color-mix(in_srgb,var(--ro-bg-raised)_92%,transparent)] p-3 shadow-[var(--ro-e2)] backdrop-blur-md sm:p-3.5",
         className
       )}
     >
@@ -83,19 +84,26 @@ function AdminSearchField({
         router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
       }}
     >
-      <label className="flex min-w-[12rem] flex-1 flex-col gap-1 text-xs text-ro-muted">
+      <label className="flex min-w-[12rem] flex-1 flex-col gap-1 text-xs text-[color:var(--ro-text-muted)]">
         <span>{label}</span>
-        <input
-          name="q"
-          type="search"
-          defaultValue={q}
-          placeholder={placeholder}
-          className="h-11 rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-paper px-3 text-sm text-ro-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
-        />
+        <span className="relative block">
+          <Search
+            className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-[color:var(--ro-text-muted)]"
+            strokeWidth={1.5}
+            aria-hidden
+          />
+          <input
+            name="q"
+            type="search"
+            defaultValue={q}
+            placeholder={placeholder}
+            className="h-11 w-full rounded-[12px] border border-[color:var(--ro-border-subtle)] bg-[color:var(--ro-bg-sunken)] pe-3 ps-10 text-sm text-[color:var(--ro-text)] outline-none placeholder:text-[color:var(--ro-text-muted)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
+          />
+        </span>
       </label>
       <button
         type="submit"
-        className="h-11 rounded-[var(--ro-r-sm)] border border-ro-ink px-4 text-sm font-semibold text-ro-ink hover:bg-ro-sunken focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
+        className="h-11 rounded-[12px] border border-[color:var(--ro-border)] bg-[color:var(--ro-panel)] px-4 text-sm font-semibold text-[color:var(--ro-text)] transition-[background-color,border-color] hover:bg-[color:var(--ro-panel-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
       >
         {label}
       </button>
@@ -103,9 +111,11 @@ function AdminSearchField({
         <p
           role="status"
           aria-live="polite"
-          className="flex h-11 items-center text-sm tabular-nums text-ro-muted"
+          className="flex h-11 items-center text-sm tabular-nums text-[color:var(--ro-text-muted)]"
         >
-          <span className="font-semibold text-ro-ink">{resultCount}</span>
+          <span className="font-semibold text-[color:var(--ro-text)]">
+            {resultCount}
+          </span>
           {resultLabel ? <span className="ms-1">{resultLabel}</span> : null}
         </p>
       ) : null}

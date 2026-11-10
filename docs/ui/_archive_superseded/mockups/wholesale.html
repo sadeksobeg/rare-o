@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>طلب جملة — RARE OUD (نموذج مرحلة 2)</title>
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .tr-header { background: linear-gradient(105deg, var(--plum-900) 0%, var(--ink-950) 58%, var(--ink-900) 100%); color: var(--text-inverse); padding: var(--s-3) var(--s-6); display: flex; justify-content: space-between; align-items: center; }
+  .tr-main { padding: var(--s-6) var(--s-8); max-width: 760px; margin: 0 auto; }
+  .line-row { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: var(--s-2); align-items: end; margin-bottom: var(--s-3); }
+</style>
+</head>
+<body>
+  <header class="tr-header">
+    <div style="font-family:var(--font-ar-display);font-weight:700">RARE OUD</div>
+    <button class="lang-toggle" onclick="roToggleLang()">EN</button>
+  </header>
+  <main class="tr-main">
+    <a href="trader-home.html" class="muted" style="font-size:.85rem;text-decoration:none">← <span data-lang="ar">الرئيسية</span><span data-lang="en" hidden>Home</span></a>
+    <h1><span data-lang="ar">طلب جملة جديد</span><span data-lang="en" hidden>New wholesale request</span></h1>
+
+    <div class="field">
+      <label><span data-lang="ar">وضع الطلب</span><span data-lang="en" hidden>Request mode</span></label>
+      <div class="kind-toggle" style="display:flex;gap:var(--s-2)">
+        <button type="button" style="flex:1;padding:.7rem;border-radius:var(--r-md);border:1px solid var(--plum-700);background:var(--plum-700);color:#fff;font-weight:600">
+          <span data-lang="ar">اطلب عرض سعر</span><span data-lang="en" hidden>Request a quote</span>
+        </button>
+        <button type="button" style="flex:1;padding:.7rem;border-radius:var(--r-md);border:1px solid var(--border-strong);background:var(--sand-50);font-weight:600">
+          <span data-lang="ar">اقترح سعراً</span><span data-lang="en" hidden>Propose a price</span>
+        </button>
+      </div>
+      <p class="muted" style="font-size:.82rem"><span data-lang="ar">فقط القطع المُعلَّمة «مؤهلة للجملة» تظهر هنا — قاعدة حقيقية مفحوصة في الباك-إند</span><span data-lang="en" hidden>Only items flagged "wholesale-eligible" appear here — a real backend-enforced rule</span></p>
+    </div>
+
+    <div class="card">
+      <h2><span data-lang="ar">القطع</span><span data-lang="en" hidden>Items</span></h2>
+      <div class="line-row">
+        <div class="field" style="margin:0"><label><span data-lang="ar">القطعة</span><span data-lang="en" hidden>Item</span></label><select><option><bdi>عود ورشة</bdi></option></select></div>
+        <div class="field" style="margin:0"><label><span data-lang="ar">الكمية</span><span data-lang="en" hidden>Qty</span></label><input type="number" value="12" /></div>
+        <div class="field" style="margin:0"><label><span data-lang="ar">السعر</span><span data-lang="en" hidden>Price</span></label><input type="number" disabled placeholder="—" /></div>
+        <button class="btn btn-ghost" type="button" style="color:var(--danger)">✕</button>
+      </div>
+      <button class="btn btn-secondary" type="button">+ <span data-lang="ar">إضافة سطر</span><span data-lang="en" hidden>Add line</span></button>
+    </div>
+
+    <div class="field" style="margin-top:var(--s-4)"><label><span data-lang="ar">ملاحظات</span><span data-lang="en" hidden>Notes</span></label><textarea rows="3"></textarea></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center"><span data-lang="ar">إرسال الطلب</span><span data-lang="en" hidden>Submit request</span></button>
+  </main>
+<script src="shared.js"></script>
+</body>
+</html>

@@ -18,6 +18,33 @@ function assert(cond: boolean, msg: string) {
   console.log(`PASS: ${msg}`);
 }
 
+const cleanupState = {
+  requestIds: [] as string[],
+  traderIds: [] as string[],
+  blockedProductId: null as string | null,
+};
+
+async function cleanup() {
+  // WholesaleRequest.trader is onDelete: Restrict, so requests (and their
+  // cascaded lines/events) must go before the trader rows.
+  if (cleanupState.requestIds.length > 0) {
+    await prisma.wholesaleRequest.deleteMany({
+      where: { id: { in: cleanupState.requestIds } },
+    });
+  }
+  if (cleanupState.traderIds.length > 0) {
+    await prisma.traderAccount.deleteMany({
+      where: { id: { in: cleanupState.traderIds } },
+    });
+  }
+  if (cleanupState.blockedProductId) {
+    await prisma.product.deleteMany({
+      where: { id: cleanupState.blockedProductId },
+    });
+  }
+  console.log("cleanup: removed wholesale-security-checks fixtures");
+}
+
 async function main() {
   const hash = await bcrypt.hash("SecurityCheck1!", 12);
 
@@ -46,6 +73,7 @@ async function main() {
     where: { status: "published", wholesaleEligible: true },
   });
   assert(!!eligible, "eligible wholesale product exists for checks");
+  cleanupState.traderIds = [traderA.id, traderB.id];
 
   const ineligible = await prisma.product.findFirst({
     where: {
@@ -69,6 +97,7 @@ async function main() {
         wholesaleEligible: false,
       },
     });
+    cleanupState.blockedProductId = blocked.id;
   }
 
   const reqA = await createWholesaleRequest({
@@ -76,6 +105,7 @@ async function main() {
     requestMode: "request_quote",
     lines: [{ productId: eligible!.id, quantity: 2 }],
   });
+  cleanupState.requestIds.push(reqA.id);
   assert(reqA.traderId === traderA.id, "request owned by trader A (session id)");
 
   // 1+2 IDOR: B cannot read/modify A's request
@@ -177,8 +207,14 @@ async function main() {
 main()
   .catch((e) => {
     console.error(e);
-    process.exit(1);
+    process.exitCode = 1;
+  })
+  .then(() => cleanup())
+  .catch((e) => {
+    console.error("cleanup failed", e);
+    process.exitCode = 1;
   })
   .finally(async () => {
     await prisma.$disconnect();
+    if (process.exitCode) process.exit(process.exitCode);
   });

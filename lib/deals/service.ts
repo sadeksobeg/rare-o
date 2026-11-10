@@ -44,7 +44,20 @@ export async function createTraderAccount(input: CreateTraderInput) {
       phone: input.phone?.trim() || "",
       adminNotes: input.adminNotes?.trim() || "",
       status: "active",
+      mustChangePassword: true,
     },
+  });
+}
+
+/** Admin reset: new temp password, forces the change-password screen on next sign-in. */
+export async function resetTraderAccountPassword(
+  traderId: string,
+  tempPassword: string
+) {
+  const passwordHash = await hashPassword(tempPassword);
+  return prisma.traderAccount.update({
+    where: { id: traderId },
+    data: { passwordHash, mustChangePassword: true },
   });
 }
 
@@ -64,8 +77,10 @@ export type CreateDealInput = {
   dealKind: DealKind;
   title: string;
   productId?: string | null;
-  proposedPrice?: number | null;
-  currency?: string | null;
+  modelNumber: string;
+  /** Required — trader-stated price (payment-first, 2026-11-03) */
+  proposedPrice: number;
+  currency: string;
   quantity?: number | null;
   conditionsNotes?: string;
   message?: string;
@@ -75,6 +90,13 @@ export async function createDealProposal(input: CreateDealInput) {
   if (!DEAL_KINDS.includes(input.dealKind)) {
     throw new Error("INVALID_DEAL_KIND");
   }
+  const modelNumber = input.modelNumber.trim();
+  if (!modelNumber) throw new Error("MODEL_NUMBER_REQUIRED");
+  if (!Number.isFinite(input.proposedPrice) || input.proposedPrice <= 0) {
+    throw new Error("PRICE_REQUIRED");
+  }
+  const currency = input.currency.trim().toUpperCase();
+  if (!currency) throw new Error("CURRENCY_REQUIRED");
 
   let productId: string | null = null;
   if (input.dealKind === "catalog") {
@@ -83,9 +105,7 @@ export async function createDealProposal(input: CreateDealInput) {
       where: { id: input.productId },
     });
     if (!product) throw new Error("PRODUCT_NOT_FOUND");
-    // Reference only — does not transfer ownership or create catalog rows
     productId = product.id;
-    // Owner decision: never block traders on product conflict (admin warning on accept).
   } else {
     if (input.productId) throw new Error("NON_CATALOG_MUST_NOT_REFERENCE_PRODUCT");
     productId = null;
@@ -101,11 +121,9 @@ export async function createDealProposal(input: CreateDealInput) {
       dealKind: input.dealKind,
       title: input.title.trim(),
       productId,
-      proposedPrice:
-        input.proposedPrice === undefined || input.proposedPrice === null
-          ? null
-          : input.proposedPrice,
-      currency: input.currency?.trim().toUpperCase() || null,
+      modelNumber,
+      proposedPrice: input.proposedPrice,
+      currency,
       quantity: input.quantity ?? null,
       conditionsNotes: input.conditionsNotes?.trim() || "",
       status,
@@ -115,17 +133,13 @@ export async function createDealProposal(input: CreateDealInput) {
           actorRole: "trader",
           actorTraderId: input.traderId,
           message: input.message?.trim() || input.conditionsNotes?.trim() || "",
-          proposedPrice:
-            input.proposedPrice === undefined || input.proposedPrice === null
-              ? null
-              : input.proposedPrice,
-          currency: input.currency?.trim().toUpperCase() || null,
+          proposedPrice: input.proposedPrice,
+          currency,
           quantity: input.quantity ?? null,
           conditionsNotes: input.conditionsNotes?.trim() || null,
         },
       },
     },
-    /** Slim write payload — detail pages load full relations separately. */
     select: { id: true, reference: true, status: true, productId: true },
   });
 }
@@ -216,12 +230,13 @@ export async function addNegotiationEntry(input: AddNegotiationInput) {
       currency?: string | null;
       quantity?: number | null;
       conditionsNotes?: string;
+      handoffMessageText?: string | null;
+      whatsAppDeepLink?: string | null;
+      handoffPreparedAt?: Date | null;
     } = { status: nextStatus };
 
-    // Counter updates the deal's current commercial snapshot when provided
+    // Payment-first: counter may update qty/conditions only — not price.
     if (input.action === "counter") {
-      if (price !== undefined) dealUpdate.proposedPrice = price;
-      if (currency !== undefined) dealUpdate.currency = currency;
       if (input.quantity !== undefined) dealUpdate.quantity = input.quantity;
       if (input.conditionsNotes !== undefined) {
         dealUpdate.conditionsNotes = input.conditionsNotes?.trim() || "";
@@ -240,31 +255,68 @@ export async function addNegotiationEntry(input: AddNegotiationInput) {
         traderId: true,
         reference: true,
         title: true,
+        modelNumber: true,
       },
     });
   });
+
+  // After accept → prepare WhatsApp payment handoff on the deal row.
+  if (input.action === "accept" && updated.status === "awaiting_payment") {
+    try {
+      const trader = await prisma.traderAccount.findUnique({
+        where: { id: updated.traderId },
+        select: { displayName: true, email: true },
+      });
+      const {
+        buildDealPaymentHandoffMessage,
+        preparePaymentHandoff,
+      } = await import("@/lib/whatsapp/payment-handoff");
+      const priceStr =
+        updated.proposedPrice != null ? String(updated.proposedPrice) : "—";
+      const messageText = buildDealPaymentHandoffMessage({
+        locale: "ar",
+        reference: updated.reference,
+        title: updated.title,
+        modelNumber: updated.modelNumber ?? "",
+        price: priceStr,
+        currency: updated.currency ?? "USD",
+        traderName: trader?.displayName || trader?.email || "",
+      });
+      const prepared = preparePaymentHandoff(messageText);
+      await prisma.dealProposal.update({
+        where: { id: updated.id },
+        data: {
+          handoffMessageText: prepared.messageText,
+          whatsAppDeepLink: prepared.deepLink,
+          handoffPreparedAt: new Date(),
+        },
+      });
+    } catch {
+      /* E164 missing — status still awaiting_payment */
+    }
+  }
 
   // Notify the trader when admin acts (status center — §3.4).
   if (input.actorRole === "admin") {
     const actionLabelAr =
       input.action === "accept"
-        ? "تم قبول الصفقة"
+        ? "قُبلت الشروط — بانتظار الدفع"
         : input.action === "reject"
           ? "رُفضت الصفقة"
           : input.action === "close"
             ? "أُغلقت الصفقة"
             : input.action === "counter"
-              ? "عرض مقابل من الإدارة"
+              ? "رد من الإدارة (بدون تغيير السعر)"
               : "تحديث على الصفقة";
     const actionLabelEn =
       input.action === "accept"
-        ? "Deal accepted"
+        ? "Terms accepted — awaiting payment"
         : input.action === "reject"
           ? "Deal rejected"
           : input.action === "close"
             ? "Deal closed"
             : input.action === "counter"
-              ? "Admin counter-offer"
+              ? "Admin reply (price unchanged)"
               : "Deal update";
     const rejectReason =
       input.action === "reject" ? input.message?.trim() || "" : "";
@@ -284,6 +336,52 @@ export async function addNegotiationEntry(input: AddNegotiationInput) {
   }
 
   return { deal: updated, conflictWarnings };
+}
+
+/** Admin confirms offline payment; closes the payment-first deal path. */
+export async function confirmDealPayment(input: {
+  dealId: string;
+  adminId: string;
+}) {
+  const deal = await prisma.dealProposal.findUnique({ where: { id: input.dealId } });
+  if (!deal) throw new Error("DEAL_NOT_FOUND");
+  if (deal.status !== "awaiting_payment") throw new Error("INVALID_STATUS");
+
+  const updated = await prisma.dealProposal.update({
+    where: { id: input.dealId },
+    data: {
+      status: "payment_confirmed",
+      paymentConfirmedAt: new Date(),
+      paymentConfirmedByAdminId: input.adminId,
+    },
+  });
+
+  await notifyTrader({
+    traderId: deal.traderId,
+    domain: "deal",
+    titleAr: `تأكيد دفع الصفقة · ${deal.reference}`,
+    titleEn: `Deal payment confirmed · ${deal.reference}`,
+    bodyAr: "أكدت الإدارة استلام الدفع واكتمال الطلب.",
+    bodyEn: "Admin confirmed payment and completed the order.",
+    href: `/trader/deals/${deal.id}`,
+  });
+
+  return updated;
+}
+
+export async function markDealHandoffOpened(input: {
+  dealId: string;
+  traderId: string;
+}) {
+  const deal = await prisma.dealProposal.findFirst({
+    where: { id: input.dealId, traderId: input.traderId },
+  });
+  if (!deal) throw new Error("DEAL_NOT_FOUND");
+  if (deal.handoffOpenedAt) return deal;
+  return prisma.dealProposal.update({
+    where: { id: input.dealId },
+    data: { handoffOpenedAt: new Date() },
+  });
 }
 
 /** Trader-scoped fetch — enforces ownership by session traderId. */

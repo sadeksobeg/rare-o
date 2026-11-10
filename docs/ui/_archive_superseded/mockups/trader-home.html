@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>بوابة التجّار — RARE OUD</title>
+<link rel="icon" href="assets/logo-mark-small.svg" />
+<link rel="stylesheet" href="shared.css" />
+<link rel="stylesheet" href="tokens-v3.css" />
+<style>
+  body { padding-bottom: 76px; } /* room for bottom tab bar on mobile */
+  @media (min-width: 860px) { body { padding-bottom: 0; } }
+
+  .th-task-row { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--ro-s-3); margin-bottom: var(--ro-s-6); }
+  @media (max-width: 760px) { .th-task-row { grid-template-columns: 1fr; } }
+  .th-task-card {
+    position: relative; overflow: hidden; border-radius: var(--ro-r-md); min-height: 240px;
+    color: var(--ro-sand-100); text-decoration: none; display: flex; flex-direction: column; justify-content: flex-end;
+    background: var(--ro-ink-950);
+  }
+  .th-task-card .th-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--ro3-ease-damped); }
+  .th-task-card:hover .th-photo { transform: scale(1.06); }
+  @media (prefers-reduced-motion: reduce) { .th-task-card:hover .th-photo { transform: none; } }
+  .th-task-card .th-scrim { position: absolute; inset: 0; background: linear-gradient(to top, rgba(11,8,13,.92) 25%, rgba(11,8,13,.35) 65%, rgba(11,8,13,.1) 100%); }
+  .th-task-card .th-icon { width: 40px; height: 40px; border-radius: var(--ro-r-sm); background: rgba(244,231,216,.14); display: flex; align-items: center; justify-content: center; margin-bottom: var(--ro-s-3); position: relative; z-index: 1; }
+  .th-task-card .th-body { position: relative; z-index: 1; padding: var(--ro-s-5); }
+  .th-task-card h3 { font-size: 1.1rem; margin: 0 0 4px; }
+  .th-task-card p { color: var(--ro-ink-200); font-size: .85rem; margin: 0; }
+  .th-task-card.is-broker .th-scrim { background: linear-gradient(to top, rgba(50,16,79,.94) 25%, rgba(11,8,13,.4) 65%, rgba(11,8,79,.15) 100%); }
+
+  .th-offers { display: flex; gap: var(--ro-s-3); overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: var(--ro-s-2); margin: 0 calc(var(--ro-s-1) * -1); padding-inline: var(--ro-s-1); }
+  .th-offer-card { scroll-snap-align: start; flex: 0 0 240px; border-radius: var(--ro-r-md); overflow: hidden; border: 1px solid var(--ro-border-subtle); background: var(--ro-bg-raised); }
+  .th-offer-media { height: 120px; background: var(--ro-ink-900); position: relative; overflow: hidden; }
+  .th-offer-media img { width: 100%; height: 100%; object-fit: cover; }
+  .th-offer-body { padding: var(--ro-s-3); }
+
+  .th-stats-row { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: var(--ro-s-3); margin-bottom: var(--ro-s-5); }
+  .th-stat-chart { height: 56px; }
+
+  .th-tabbar {
+    position: fixed; inset-inline: 0; bottom: 0; z-index: 30; background: var(--ro-ink-950); border-top: 1px solid rgba(244,231,216,.1);
+    display: flex; justify-content: space-around; padding: 6px var(--ro-s-2); padding-bottom: max(6px, env(safe-area-inset-bottom));
+  }
+  @media (min-width: 860px) { .th-tabbar { display: none; } }
+  .th-tabbar a { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--ro-ink-300); text-decoration: none; font-size: .68rem; padding: 6px 10px; border-radius: var(--ro-r-sm); flex: 1; text-align: center; }
+  .th-tabbar a.active { color: var(--ro-sand-100); }
+  .th-tab-indicator { position: absolute; top: 0; height: 2px; width: 28px; background: var(--ro-plum-300); border-radius: 2px; transition: left var(--ro3-dur-ui) var(--ro3-ease-damped); }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link"><span data-lang="ar">تخطَّ إلى المحتوى</span><span data-lang="en" hidden>Skip to content</span></a>
+<header class="tr-header">
+  <div class="brand"><img src="assets/logo-mark-small.svg" alt="" style="width:20px;height:20px;filter:invert(1)" /> RARE OUD</div>
+  <nav aria-label="بوابة التجّار">
+    <a class="active" href="trader-home.html" aria-current="page" data-icon="home"><span data-lang="ar">الرئيسية</span><span data-lang="en" hidden>Home</span></a>
+    <a href="deal-wizard.html" data-icon="handshake"><span data-lang="ar">صفقاتي</span><span data-lang="en" hidden>My deals</span></a>
+    <a href="wholesale.html" data-icon="package"><span data-lang="ar">الجملة</span><span data-lang="en" hidden>Wholesale</span></a>
+    <a href="brokerage-pending-decision.html" data-icon="compass"><span data-lang="ar">الوساطة</span><span data-lang="en" hidden>Brokerage</span></a>
+    <a href="notifications.html" data-icon="bell"><span data-lang="ar">الإشعارات</span><span data-lang="en" hidden>Notifications</span></a>
+    <a href="account.html" data-icon="user"><span data-lang="ar">حسابي</span><span data-lang="en" hidden>Account</span></a>
+  </nav>
+  <div style="display:flex;gap:var(--ro-s-2);align-items:center">
+    <button class="lang-toggle" onclick="roToggleLang()" style="background:transparent;border-color:rgba(244,231,216,.3);color:#f4e7d8">EN</button>
+    <button class="ro-icon-btn tr-hamburger" data-open-dialog="tr-mobile-nav" style="background:transparent;border-color:rgba(244,231,216,.3);color:#f4e7d8" aria-label="القائمة">
+      <span data-icon="menu" data-icon-size="20"></span>
+    </button>
+  </div>
+</header>
+
+<dialog id="tr-mobile-nav" class="ro-drawer" aria-label="قائمة التنقل">
+  <div style="padding:var(--ro-s-5)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--ro-s-5)">
+      <strong style="font-family:var(--ro-font-display)">RARE OUD</strong>
+      <button class="ro-icon-btn" data-close-dialog aria-label="إغلاق"><span data-icon="x" data-icon-size="18"></span></button>
+    </div>
+    <nav class="ro-drawer-nav" aria-label="القائمة">
+      <a class="active" href="trader-home.html" data-icon="home"><span data-lang="ar">الرئيسية</span><span data-lang="en" hidden>Home</span></a>
+      <a href="deal-wizard.html" data-icon="handshake"><span data-lang="ar">صفقاتي</span><span data-lang="en" hidden>My deals</span></a>
+      <a href="wholesale.html" data-icon="package"><span data-lang="ar">الجملة</span><span data-lang="en" hidden>Wholesale</span></a>
+      <a href="brokerage-pending-decision.html" data-icon="compass"><span data-lang="ar">الوساطة</span><span data-lang="en" hidden>Brokerage</span></a>
+      <a href="notifications.html" data-icon="bell"><span data-lang="ar">الإشعارات</span><span data-lang="en" hidden>Notifications</span></a>
+      <a href="account.html" data-icon="user"><span data-lang="ar">حسابي</span><span data-lang="en" hidden>Account</span></a>
+    </nav>
+  </div>
+</dialog>
+
+<main class="tr-main" id="main">
+  <h1 style="display:flex;align-items:center;gap:10px"><span data-lang="ar">طاب يومك، عدنان</span><span data-lang="en" hidden>Good day, Adnan</span></h1>
+  <p class="muted" style="display:flex;align-items:center;gap:6px">
+    <span class="ro-pulse-dot"></span>
+    <span data-lang="ar">صفقة واحدة بانتظارك وعرض وساطة جديد — تحقّق أدناه</span>
+    <span data-lang="en" hidden>One deal awaiting you and a new brokerage quote — check below</span>
+  </p>
+
+  <h2 style="margin-top:var(--ro-s-6);font-size:1.15rem"><span data-lang="ar">ابدأ من هنا</span><span data-lang="en" hidden>Start here</span></h2>
+  <div class="th-task-row" data-stagger>
+    <a class="th-task-card" href="deal-wizard.html">
+      <img class="th-photo" src="assets/hero-oud-atelier-a.jpg" alt="" />
+      <div class="th-scrim"></div>
+      <div class="th-body">
+        <div class="th-icon"><span data-icon="handshake" data-icon-size="20"></span></div>
+        <h3><span data-lang="ar">اقترح صفقة</span><span data-lang="en" hidden>Propose a deal</span></h3>
+        <p><span data-lang="ar">قدّم عرضاً تجارياً على قطعة من الكتالوج أو خارجه</span><span data-lang="en" hidden>Offer a commercial proposal on a catalog piece or outside it</span></p>
+      </div>
+    </a>
+    <a class="th-task-card" href="wholesale.html">
+      <img class="th-photo" src="assets/hero-oud-atelier-b.jpg" alt="" />
+      <div class="th-scrim"></div>
+      <div class="th-body">
+        <div class="th-icon"><span data-icon="package" data-icon-size="20"></span></div>
+        <h3><span data-lang="ar">اطلب بالجملة</span><span data-lang="en" hidden>Request wholesale</span></h3>
+        <p><span data-lang="ar">اختر القطع والكميات؛ الإدارة ترد بعرض السعر</span><span data-lang="en" hidden>Pick items and quantities; admin replies with a quote</span></p>
+      </div>
+    </a>
+    <a class="th-task-card is-broker" href="brokerage-pending-decision.html">
+      <img class="th-photo" src="assets/hero-closeup.jpg" alt="" />
+      <div class="th-scrim"></div>
+      <div class="th-body">
+        <div class="th-icon"><span data-icon="compass" data-icon-size="20"></span></div>
+        <h3><span data-lang="ar">اطلب وساطة</span><span data-lang="en" hidden>Request brokerage</span></h3>
+        <p><span data-lang="ar">رأيت قطعة نادرة في مكان ما؟ نعاينها ونشتريها لك</span><span data-lang="en" hidden>Spotted a rare piece somewhere? We'll inspect and buy it for you</span></p>
+      </div>
+    </a>
+  </div>
+
+  <h2 style="font-size:1.15rem"><span data-lang="ar">إحصائياتي</span><span data-lang="en" hidden>My stats</span></h2>
+  <div class="th-stats-row">
+    <div class="ro-card">
+      <div class="ro-kpi-label"><span data-lang="ar">صفقاتي هذا الشهر</span><span data-lang="en" hidden>My deals this month</span></div>
+      <div class="ro-kpi-value ro-count" data-count-to="9">0</div>
+      <div class="th-stat-chart"><canvas id="chart-mystats"></canvas></div>
+    </div>
+    <div class="ro-card">
+      <div class="ro-kpi-label"><span data-lang="ar">نسبة القبول</span><span data-lang="en" hidden>Acceptance rate</span></div>
+      <div class="ro-kpi-value ro-count" data-count-to="78">0<span style="font-size:1rem">%</span></div>
+      <div class="th-stat-chart"><canvas id="chart-accept"></canvas></div>
+    </div>
+  </div>
+
+  <h2 style="font-size:1.15rem"><span data-lang="ar">العروض المتاحة الآن</span><span data-lang="en" hidden>Available offers now</span></h2>
+  <div class="th-offers" tabindex="0" role="region" aria-label="العروض المتاحة الآن">
+    <div class="th-offer-card">
+      <div class="th-offer-media"><img src="assets/hero-oud-majestic.jpg" alt="" /></div>
+      <div class="th-offer-body"><h3 style="font-size:.95rem;margin:0 0 4px"><bdi><span data-lang="ar">مختارات وترية</span><span data-lang="en" hidden>Strings Selection</span></bdi></h3><p class="ro-caption" style="margin:0"><span data-lang="ar">قطع يختارها فريق RARE OUD</span><span data-lang="en" hidden>Hand-picked by the RARE OUD team</span></p></div>
+    </div>
+    <div class="th-offer-card">
+      <div class="th-offer-media"><img src="assets/instrument-dark.jpg" alt="" /></div>
+      <div class="th-offer-body"><h3 style="font-size:.95rem;margin:0 0 4px"><bdi><span data-lang="ar">تحرير الأتيليه</span><span data-lang="en" hidden>Atelier Edit</span></bdi></h3><p class="ro-caption" style="margin:0"><span data-lang="ar">اختيار قصير من الورشة</span><span data-lang="en" hidden>A short workshop selection</span></p></div>
+    </div>
+    <div class="th-offer-card">
+      <div class="th-offer-media"><img src="assets/oud-heritage.jpg" alt="" /></div>
+      <div class="th-offer-body"><h3 style="font-size:.95rem;margin:0 0 4px"><bdi><span data-lang="ar">قطع نادرة معتّقة</span><span data-lang="en" hidden>Aged Rarities</span></bdi></h3><p class="ro-caption" style="margin:0"><span data-lang="ar">كمية محدودة — تحديث أسبوعي</span><span data-lang="en" hidden>Limited quantity — refreshed weekly</span></p></div>
+    </div>
+  </div>
+
+  <h2 style="font-size:1.15rem"><span data-lang="ar">نشاط حديث</span><span data-lang="en" hidden>Recent activity</span></h2>
+  <div class="ro-card" data-stagger>
+    <div style="display:flex;gap:12px;padding:8px 0"><span class="ro-chip ro-chip-success" style="padding:4px"><span data-icon="circle-check" data-icon-size="13"></span></span><div><p style="margin:0;font-size:.88rem"><span data-lang="ar">قبلت الإدارة اقتراحك لـ قانون مختار بسعر 7,500 دولار</span><span data-lang="en" hidden>Admin accepted your proposal for Qanun Select at $7,500</span></p><p class="ro-caption" style="margin:0"><span data-lang="ar">قبل 18 دقيقة</span><span data-lang="en" hidden>18 min ago</span></p></div></div>
+    <div style="display:flex;gap:12px;padding:8px 0"><span class="ro-chip ro-chip-attention" style="padding:4px"><span data-icon="circle-alert" data-icon-size="13"></span></span><div><p style="margin:0;font-size:.88rem"><span data-lang="ar">وصل عرض سعر الوساطة لطلبك — بانتظار موافقتك</span><span data-lang="en" hidden>Your brokerage quote has arrived — awaiting your approval</span></p><p class="ro-caption" style="margin:0"><span data-lang="ar">قبل 3 ساعات</span><span data-lang="en" hidden>3 hours ago</span></p></div></div>
+  </div>
+</main>
+
+<nav class="th-tabbar" aria-label="تنقّل سريع">
+  <span class="th-tab-indicator" id="tab-indicator"></span>
+  <a href="trader-home.html" class="active"><span data-icon="home" data-icon-size="20"></span><span data-lang="ar">الرئيسية</span><span data-lang="en" hidden>Home</span></a>
+  <a href="deal-wizard.html"><span data-icon="handshake" data-icon-size="20"></span><span data-lang="ar">صفقات</span><span data-lang="en" hidden>Deals</span></a>
+  <a href="brokerage-pending-decision.html"><span data-icon="compass" data-icon-size="20"></span><span data-lang="ar">وساطة</span><span data-lang="en" hidden>Brokerage</span></a>
+  <a href="notifications.html"><span data-icon="bell" data-icon-size="20"></span><span data-lang="ar">إشعارات</span><span data-lang="en" hidden>Alerts</span></a>
+  <a href="account.html"><span data-icon="user" data-icon-size="20"></span><span data-lang="ar">حسابي</span><span data-lang="en" hidden>Account</span></a>
+</nav>
+
+<script src="icons.js"></script>
+<script src="shared.js"></script>
+<script src="nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="motion-v3.js"></script>
+<script>
+  (function () {
+    var indicator = document.getElementById("tab-indicator");
+    var tabs = document.querySelectorAll(".th-tabbar a");
+    function place(el) {
+      var wrap = el.parentElement.getBoundingClientRect();
+      var r = el.getBoundingClientRect();
+      indicator.style.left = (r.left - wrap.left + r.width / 2 - 14) + "px";
+    }
+    var active = document.querySelector(".th-tabbar a.active") || tabs[0];
+    window.addEventListener("load", function () { place(active); });
+    window.addEventListener("resize", function () { place(active); });
+  })();
+
+  window.addEventListener("load", function () {
+    if (!window.Chart) return;
+    var theme = roChartTheme(false);
+    var reduceAnim = roMotion.reduced();
+    new Chart(document.getElementById("chart-mystats").getContext("2d"), {
+      type: "bar",
+      data: { labels: ["", "", "", "", "", "", ""], datasets: [{ data: [1, 2, 1, 3, 2, 4, 3], backgroundColor: theme.line, borderRadius: 3 }] },
+      options: { responsive: true, maintainAspectRatio: false, animation: reduceAnim ? false : { duration: 700 },
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        scales: { x: { display: false }, y: { display: false, beginAtZero: true } } }
+    });
+    new Chart(document.getElementById("chart-accept").getContext("2d"), {
+      type: "doughnut",
+      data: { datasets: [{ data: [78, 22], backgroundColor: [theme.amber, theme.grid], borderWidth: 0 }] },
+      options: { responsive: true, maintainAspectRatio: false, cutout: "72%", rotation: -90, circumference: 180,
+        animation: reduceAnim ? false : { duration: 700 },
+        plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+    });
+  });
+</script>
+</body>
+</html>

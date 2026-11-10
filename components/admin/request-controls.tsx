@@ -6,14 +6,11 @@ import {
   adminTransitionRetailRequestAction,
 } from "@/app/actions";
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
+import { TextField } from "@/components/ui/text-field";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { RetailRequestStatus } from "@/lib/retail-request/constants";
-import {
-  controlClass,
-  controlLabelClass,
-  controlLabelTextClass,
-  formErrorClass,
-} from "@/lib/ui/form-classes";
+import { formErrorClass } from "@/lib/ui/form-classes";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -59,20 +56,23 @@ export function AdminRequestControls({
           }}
         >
           <input type="hidden" name="requestId" value={requestId} />
-          <label className={controlLabelClass}>
-            <span className={controlLabelTextClass}>{f.moveTo}</span>
-            <select name="toStatus" required className={controlClass}>
-              {nextStatuses.map((s) => (
-                <option key={s} value={s}>
-                  {labels.status.retail[s] ?? s}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className={controlLabelClass}>
-            <span className={controlLabelTextClass}>{f.noteOptional}</span>
-            <input name="note" className={controlClass} />
-          </label>
+          <Select
+            name="toStatus"
+            label={f.moveTo}
+            required
+            dense
+            className="min-w-[10rem]"
+            options={nextStatuses.map((s) => ({
+              value: s,
+              label: labels.status.retail[s] ?? s,
+            }))}
+          />
+          <TextField
+            name="note"
+            label={f.noteOptional}
+            dense
+            className="min-w-[12rem] flex-1"
+          />
           <Button type="submit" size="sm" loading={pending}>
             {f.applyTransition}
           </Button>

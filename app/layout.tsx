@@ -8,12 +8,15 @@ import {
 import "./globals.css";
 import { getRequestLocale } from "@/lib/i18n/server";
 import { dirForLocale } from "@/lib/i18n/config";
+import { MotionProvider } from "@/components/motion/provider";
 
+// Decorative display faces — no preload (swap lazily; UI fonts preload below).
 const amiri = Amiri({
   subsets: ["arabic", "latin"],
   weight: ["400"],
   variable: "--font-amiri",
   display: "swap",
+  preload: false,
 });
 
 const cormorant = Cormorant_Garamond({
@@ -21,25 +24,34 @@ const cormorant = Cormorant_Garamond({
   weight: ["500", "600"],
   variable: "--font-cormorant",
   display: "swap",
+  preload: false,
 });
 
 const source = Source_Sans_3({
   subsets: ["latin"],
-  weight: ["400", "600"],
+  weight: ["400", "600", "700"],
   variable: "--font-source",
   display: "swap",
+  preload: true,
 });
 
 const plexAr = IBM_Plex_Sans_Arabic({
   subsets: ["arabic"],
-  weight: ["400", "600"],
+  weight: ["400", "500", "600"],
   variable: "--font-plex-ar",
   display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {
   title: "RARE OUD",
   description: "RARE OUD — curated string instruments and accessories",
+  // app/favicon.ico removed — it triggered Next 15 "no direct app page entry
+  // found for /favicon.ico" during production build. Static public/favicon.ico
+  // covers /favicon.ico; app/icon.png is still auto-discovered by Next.
+  icons: {
+    icon: [{ url: "/favicon.ico", sizes: "any" }],
+  },
 };
 
 export default async function RootLayout({
@@ -57,16 +69,22 @@ export default async function RootLayout({
       className={
         // Only the active locale's font variables are applied; unused vars
         // fall back via globals.css so the other locale's files never load.
+        // -u-nu-latn: Western digits app-wide (PLAN D5 / design-lab port).
         locale === "ar"
           ? `${amiri.variable} ${plexAr.variable}`
           : `${cormorant.variable} ${source.variable}`
       }
+      style={{ fontVariantNumeric: "lining-nums" }}
     >
       <body className="min-h-screen antialiased">
         <a href="#main-content" className="ro-skip-link">
           {locale === "ar" ? "تخطَّ إلى المحتوى" : "Skip to content"}
         </a>
-        {children}
+        {process.env.RO_SKIP_MOTION_PROVIDER === "1" ? (
+          children
+        ) : (
+          <MotionProvider>{children}</MotionProvider>
+        )}
       </body>
     </html>
   );

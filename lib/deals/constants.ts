@@ -8,6 +8,8 @@ export const DEAL_STATUSES = [
   "proposed",
   "negotiating",
   "accepted",
+  "awaiting_payment",
+  "payment_confirmed",
   "rejected",
   "closed",
 ] as const;
@@ -56,14 +58,14 @@ export function isOpenDealStatus(status: DealStatus): boolean {
 
 /**
  * Maps a negotiation action to the resulting deal status.
- * propose is create-only; continue/counter keep/move to negotiating.
+ * Admin/trader accept → awaiting_payment (payment-first, 2026-11-03).
  */
 export function nextDealStatusForAction(
   current: DealStatus,
   action: NegotiationAction
 ): DealStatus {
   if (action === "propose") return "proposed";
-  if (action === "accept") return "accepted";
+  if (action === "accept") return "awaiting_payment";
   if (action === "reject") return "rejected";
   if (action === "close") return "closed";
   if (action === "continue" || action === "counter") {

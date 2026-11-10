@@ -5,26 +5,40 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { revalidateHomepageAndCatalogTags } from "@/lib/cache/revalidate-storefront";
 import {
+  changePasswordSchema,
   dealProposalCreateSchema,
   negotiationEntrySchema,
   publicOfferStatusSchema,
   publicOfferUpsertSchema,
   traderCreateSchema,
   traderLoginSchema,
+  traderProfileUpdateSchema,
 } from "@/lib/validation/schemas";
+import { LAUNCH_CATEGORY_SLUGS } from "@/lib/catalog/constants";
 import {
   clearTraderSessionCookie,
   createTraderSessionToken,
+  handleTraderSessionError,
+  hashPassword,
   requireTraderSession,
+  requireTraderSessionAllowPasswordChange,
   setTraderSessionCookie,
   verifyPassword,
 } from "@/lib/auth/trader-session";
-import { requireAdminSession } from "@/lib/auth/admin-session";
+import {
+  handleAdminSessionError,
+  requireAdminSession,
+} from "@/lib/auth/admin-session";
+import { checkNewPassword } from "@/lib/auth/password-policy";
+import { safePortalReturnTo } from "@/lib/auth/return-to";
 import { prisma } from "@/lib/db/prisma";
 import {
   addNegotiationEntry,
+  confirmDealPayment,
   createDealProposal,
   createTraderAccount,
+  markDealHandoffOpened,
+  resetTraderAccountPassword,
   setTraderAccountStatus,
 } from "@/lib/deals/service";
 import {
@@ -46,13 +60,17 @@ export async function traderLoginAction(
     password: formData.get("password"),
   });
   if (!parsed.success) {
-    return { ok: false, error: "Invalid credentials payload" };
+    return { ok: false, error: "LOGIN_INVALID" };
   }
 
   const email = parsed.data.email.toLowerCase();
   const lock = isLoginLocked("trader", email);
   if (lock.locked) {
-    return { ok: false, error: "LOGIN_LOCKED" };
+    return {
+      ok: false,
+      error: "LOGIN_LOCKED",
+      data: { retryAfterSec: lock.retryAfterSec ?? 60 },
+    };
   }
 
   const trader = await prisma.traderAccount.findUnique({
@@ -60,13 +78,13 @@ export async function traderLoginAction(
   });
   if (!trader || trader.status !== "active") {
     recordLoginFailure("trader", email);
-    return { ok: false, error: "Invalid email or password" };
+    return { ok: false, error: "LOGIN_INVALID" };
   }
 
   const valid = await verifyPassword(parsed.data.password, trader.passwordHash);
   if (!valid) {
     recordLoginFailure("trader", email);
-    return { ok: false, error: "Invalid email or password" };
+    return { ok: false, error: "LOGIN_INVALID" };
   }
 
   clearLoginFailures("trader", email);
@@ -74,14 +92,129 @@ export async function traderLoginAction(
     sub: trader.id,
     email: trader.email,
     displayName: trader.displayName,
+    mustChangePassword: trader.mustChangePassword,
+    pwv: trader.passwordChangedAt?.getTime() ?? 0,
   });
   await setTraderSessionCookie(token);
-  redirect("/trader");
+  redirect(safePortalReturnTo(formData.get("returnTo"), "/trader"));
 }
 
 export async function traderLogoutAction(): Promise<void> {
   await clearTraderSessionCookie();
   redirect("/trader/login");
+}
+
+/** Used both by the forced /trader/force-password-change screen and the
+ *  normal profile "change password" section — same policy either way. */
+export async function traderChangePasswordAction(
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireTraderSessionAllowPasswordChange();
+  } catch (e) {
+    return handleTraderSessionError(e);
+  }
+
+  const parsed = changePasswordSchema.safeParse({
+    currentPassword: formData.get("currentPassword"),
+    newPassword: formData.get("newPassword"),
+    confirmPassword: formData.get("confirmPassword"),
+  });
+  if (!parsed.success) {
+    return { ok: false, error: "LOGIN_INVALID" };
+  }
+
+  const { clearLoginFailures, isLoginLocked, recordLoginFailure } =
+    await import("@/lib/auth/rate-limit");
+  const lock = isLoginLocked("trader-pwchange", session.sub);
+  if (lock.locked) {
+    return {
+      ok: false,
+      error: "LOGIN_LOCKED",
+      data: { retryAfterSec: lock.retryAfterSec ?? 60 },
+    };
+  }
+
+  const trader = await prisma.traderAccount.findUnique({
+    where: { id: session.sub },
+    select: { id: true, email: true, passwordHash: true },
+  });
+  if (!trader) {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const currentOk = await verifyPassword(
+    parsed.data.currentPassword,
+    trader.passwordHash
+  );
+  if (!currentOk) {
+    recordLoginFailure("trader-pwchange", session.sub);
+    return { ok: false, error: "CURRENT_WRONG" };
+  }
+  clearLoginFailures("trader-pwchange", session.sub);
+
+  const policyError = checkNewPassword(
+    parsed.data.newPassword,
+    parsed.data.confirmPassword,
+    parsed.data.currentPassword,
+    trader.email
+  );
+  if (policyError) {
+    return { ok: false, error: policyError };
+  }
+
+  const passwordHash = await hashPassword(parsed.data.newPassword);
+  const now = new Date();
+  await prisma.traderAccount.update({
+    where: { id: trader.id },
+    data: { passwordHash, mustChangePassword: false, passwordChangedAt: now },
+  });
+
+  const token = await createTraderSessionToken({
+    sub: trader.id,
+    email: trader.email,
+    displayName: session.displayName,
+    mustChangePassword: false,
+    pwv: now.getTime(),
+  });
+  await setTraderSessionCookie(token);
+  return { ok: true };
+}
+
+/** AUTH-07 — bump passwordChangedAt so other trader JWTs fail pwv. */
+export async function traderInvalidateOtherSessionsAction(): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireTraderSession();
+  } catch (e) {
+    return handleTraderSessionError(e);
+  }
+
+  const trader = await prisma.traderAccount.findUnique({
+    where: { id: session.sub },
+    select: { id: true, email: true, mustChangePassword: true },
+  });
+  if (!trader) {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const now = new Date();
+  await prisma.traderAccount.update({
+    where: { id: trader.id },
+    data: { passwordChangedAt: now },
+  });
+
+  const token = await createTraderSessionToken({
+    sub: trader.id,
+    email: trader.email,
+    displayName: session.displayName,
+    mustChangePassword: trader.mustChangePassword,
+    pwv: now.getTime(),
+  });
+  await setTraderSessionCookie(token);
+  return { ok: true };
 }
 
 function generateTempPassword(length = 14): string {
@@ -102,8 +235,8 @@ export async function adminCreateTraderAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const tempPassword = generateTempPassword();
@@ -153,10 +286,11 @@ export async function adminCreateTraderAction(
 export async function adminSetTraderStatusAction(
   formData: FormData
 ): Promise<ActionResult> {
+  let session;
   try {
-    await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const traderId = String(formData.get("traderId") || "");
@@ -167,7 +301,17 @@ export async function adminSetTraderStatusAction(
 
   try {
     await setTraderAccountStatus(traderId, status);
+    const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
+    await writeAdminAudit({
+      adminId: session.sub,
+      action: "trader.status",
+      targetType: "trader",
+      targetId: traderId,
+      meta: { status },
+    });
     revalidatePath("/admin/traders");
+    revalidatePath(`/admin/traders/${traderId}`);
+
     return { ok: true };
   } catch (e) {
     return {
@@ -177,6 +321,124 @@ export async function adminSetTraderStatusAction(
   }
 }
 
+export async function adminResetTraderPasswordAction(
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+
+  const traderId = String(formData.get("traderId") || "");
+  if (!traderId) {
+    return { ok: false, error: "Invalid trader" };
+  }
+
+  const trader = await prisma.traderAccount.findUnique({
+    where: { id: traderId },
+    select: { id: true, email: true },
+  });
+  if (!trader) {
+    return { ok: false, error: "Trader not found" };
+  }
+
+  const tempPassword = generateTempPassword();
+  try {
+    await resetTraderAccountPassword(traderId, tempPassword);
+    const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
+    await writeAdminAudit({
+      adminId: session.sub,
+      action: "trader.password_reset",
+      targetType: "trader",
+      targetId: traderId,
+    });
+    revalidatePath("/admin/traders");
+    revalidatePath(`/admin/traders/${traderId}`);
+    return {
+      ok: true,
+      message: "Password reset",
+      data: { tempPassword, email: trader.email },
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Reset failed",
+    };
+  }
+}
+
+export async function adminUpdateTraderProfileAction(
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+
+  const parsed = traderProfileUpdateSchema.safeParse({
+    traderId: formData.get("traderId"),
+    displayName: formData.get("displayName"),
+    companyName: formData.get("companyName") || "",
+    phone: formData.get("phone") || "",
+    adminNotes: formData.get("adminNotes") || "",
+    interestNotes: formData.get("interestNotes") || "",
+  });
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid trader",
+    };
+  }
+
+  const slugs = formData
+    .getAll("interestCategorySlugs")
+    .map((v) => String(v).trim())
+    .filter(Boolean)
+    .filter((s) =>
+      (LAUNCH_CATEGORY_SLUGS as readonly string[]).includes(s)
+    );
+
+  const existing = await prisma.traderAccount.findUnique({
+    where: { id: parsed.data.traderId },
+    select: { id: true },
+  });
+  if (!existing) {
+    return { ok: false, error: "Trader not found" };
+  }
+
+  await prisma.traderAccount.update({
+    where: { id: existing.id },
+    data: {
+      displayName: parsed.data.displayName,
+      companyName: parsed.data.companyName ?? "",
+      phone: parsed.data.phone ?? "",
+      adminNotes: parsed.data.adminNotes ?? "",
+      interestNotes: parsed.data.interestNotes ?? "",
+      interestCategorySlugs: slugs.join(","),
+    },
+  });
+
+  const { writeAdminAudit } = await import("@/lib/auth/admin-audit");
+  await writeAdminAudit({
+    adminId: session.sub,
+    action: "trader.update",
+    targetType: "trader",
+    targetId: existing.id,
+    meta: {
+      interestCount: slugs.length,
+    },
+  });
+
+  revalidatePath("/admin/traders");
+  revalidatePath(`/admin/traders/${existing.id}`);
+  return { ok: true, message: "Trader updated" };
+}
+
 export async function traderCreateDealAction(
   _prev: ActionResult | null,
   formData: FormData
@@ -184,14 +446,15 @@ export async function traderCreateDealAction(
   let session;
   try {
     session = await requireTraderSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleTraderSessionError(e);
   }
 
   const parsed = dealProposalCreateSchema.safeParse({
     dealKind: formData.get("dealKind"),
     title: formData.get("title"),
     productId: formData.get("productId") || null,
+    modelNumber: formData.get("modelNumber"),
     proposedPrice: formData.get("proposedPrice"),
     currency: formData.get("currency"),
     quantity: formData.get("quantity"),
@@ -212,6 +475,7 @@ export async function traderCreateDealAction(
       dealKind: parsed.data.dealKind,
       title: parsed.data.title,
       productId: parsed.data.productId,
+      modelNumber: parsed.data.modelNumber,
       proposedPrice: parsed.data.proposedPrice,
       currency: parsed.data.currency,
       quantity: parsed.data.quantity,
@@ -238,8 +502,8 @@ export async function traderNegotiateAction(
   let session;
   try {
     session = await requireTraderSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleTraderSessionError(e);
   }
 
   const parsed = negotiationEntrySchema.safeParse({
@@ -293,8 +557,8 @@ export async function adminNegotiateAction(
   let session;
   try {
     session = await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const parsed = negotiationEntrySchema.safeParse({
@@ -352,8 +616,8 @@ export async function adminUpsertPublicOfferAction(
 ): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const id = String(formData.get("id") || "");
@@ -406,8 +670,8 @@ export async function adminSetPublicOfferStatusAction(
 ): Promise<ActionResult> {
   try {
     await requireAdminSession();
-  } catch {
-    return { ok: false, error: "Unauthorized" };
+  } catch (e) {
+    return handleAdminSessionError(e);
   }
 
   const parsed = publicOfferStatusSchema.safeParse({
@@ -469,4 +733,48 @@ export async function adminCreateOfferDraftFromDealAction(
   revalidatePath("/admin/offers");
   revalidatePath(`/admin/deals/${dealId}`);
   redirect(`/admin/offers/${offer.id}`);
+}
+
+export async function adminConfirmDealPaymentAction(
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+  const dealId = String(formData.get("dealId") ?? "");
+  if (!dealId) return { ok: false, error: "Missing deal" };
+  try {
+    await confirmDealPayment({ dealId, adminId: session.sub });
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "ERROR" };
+  }
+  revalidatePath(`/admin/deals/${dealId}`);
+  revalidatePath(`/trader/deals/${dealId}`);
+  revalidatePath("/admin/deals");
+  revalidatePath("/trader/deals");
+  return { ok: true };
+}
+
+export async function traderOpenDealHandoffAction(
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireTraderSession();
+  } catch (e) {
+    return handleTraderSessionError(e);
+  }
+  const dealId = String(formData.get("dealId") ?? "");
+  if (!dealId) return { ok: false, error: "Missing deal" };
+  try {
+    await markDealHandoffOpened({ dealId, traderId: session.sub });
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "ERROR" };
+  }
+  revalidatePath(`/trader/deals/${dealId}`);
+  return { ok: true };
 }

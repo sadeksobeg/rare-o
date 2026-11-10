@@ -21,7 +21,7 @@ export type CatalogCardProduct = {
   badgeNew?: boolean;
   badgeFeatured?: boolean;
   badgeSale?: boolean;
-  category?: { nameAr: string; nameEn: string } | null;
+  category?: { nameAr: string; nameEn: string; slug?: string } | null;
   images: { path: string; altAr: string; altEn: string; kind?: string }[];
 };
 
@@ -50,10 +50,17 @@ export function CatalogProductCard({
     ? localizedName(locale, product.category.nameAr, product.category.nameEn)
     : "";
   const price = Number(product.retailPrice);
+  const compareAtPrice =
+    product.compareAtPrice != null ? Number(product.compareAtPrice) : null;
 
   return (
-    <article className={cn("group relative", className)}>
-      <div className="ro-card-lift relative overflow-hidden rounded-[var(--ro-r-xs)]">
+    <article
+      className={cn(
+        "group relative transition-transform duration-[var(--ro-dur-fast)] active:scale-[0.985]",
+        className
+      )}
+    >
+      <div className="ro-card-lift ro-catalog-sheen relative overflow-hidden rounded-[var(--ro-r-xs)]">
         <CatalogCardMedia
           primaryPath={primary?.path}
           primaryKind={primary?.kind}
@@ -63,7 +70,17 @@ export function CatalogProductCard({
           plateCaption={dict.catalog.photoCaption}
           dimmed={!available}
         />
-        <ProductBadges product={product} locale={locale} />
+        <ProductBadges
+          product={{
+            badgeNew: product.badgeNew,
+            badgeFeatured: product.badgeFeatured,
+            badgeSale: product.badgeSale,
+            retailPrice: price,
+            compareAtPrice,
+            categorySlug: product.category?.slug,
+          }}
+          locale={locale}
+        />
         {available ? (
           <QuickAddButton
             productId={product.id}
@@ -94,11 +111,7 @@ export function CatalogProductCard({
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <PriceBlock
             price={price}
-            compareAtPrice={
-              product.compareAtPrice != null
-                ? Number(product.compareAtPrice)
-                : null
-            }
+            compareAtPrice={compareAtPrice}
             currency={product.currency}
             locale={locale}
             onRequestLabel={dict.product.priceOnRequest}

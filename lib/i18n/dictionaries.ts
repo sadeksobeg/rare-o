@@ -49,6 +49,10 @@ type Dict = {
     categoriesCta: string;
     categoryDescInstruments: string;
     categoryDescAccessories: string;
+    categoryDescEconomy: string;
+    categoryDescMid: string;
+    categoryDescProfessional: string;
+    categoryDescVip: string;
     oudEyebrow: string;
     oudTitle: string;
     oudBody: string;
@@ -196,6 +200,39 @@ type Dict = {
     priceWas: string;
     priceNow: string;
     onSale: string;
+    extras: string;
+    aboutThisPiece: string;
+    featureBullets: string;
+    craftStory: string;
+    craftStoryBody: string;
+    soundStory: string;
+    soundStoryBody: string;
+    trustNoPayment: string;
+    trustHandoff: string;
+    trustUnique: string;
+    trustWhatsApp: string;
+    qtyLabel: string;
+    oudSpecs: {
+      title: string;
+      wood: string;
+      measures: string;
+      details: string;
+      back: string;
+      face: string;
+      pegs: string;
+      fingerboard: string;
+      bridge: string;
+      faceWidth: string;
+      faceDepth: string;
+      faceLength: string;
+      neckLength: string;
+      stringLength: string;
+      standardNeck: string;
+      standardNeckYes: string;
+      standardNeckNo: string;
+      finish: string;
+      mm: string;
+    };
   };
   cart: {
     title: string;
@@ -263,11 +300,14 @@ type Dict = {
     traders: string;
     deals: string;
     wholesale: string;
+    brokerage: string;
     offers: string;
     promos: string;
     kpiRetail: string;
     kpiDeals: string;
     kpiWholesale: string;
+    kpiBrokerage: string;
+    kpiWaitingTotal: string;
     kpiUnread: string;
     kpiIdle: string;
     recentRequests: string;
@@ -276,6 +316,8 @@ type Dict = {
     actionOpen: string;
     actionEmpty: string;
     activityEmpty: string;
+    activityShowMore: string;
+    activityShowLess: string;
     nextActorAdmin: string;
     lastConnected: string;
     neverConnected: string;
@@ -301,6 +343,7 @@ type Dict = {
     imagesAdd: string;
     imagesFileLabel: string;
     imagesKindVideo: string;
+    imagesKindAudio: string;
     imagesAfterSaveHint: string;
     imagesAltAr: string;
     imagesAltEn: string;
@@ -317,6 +360,225 @@ type Dict = {
     quickProduct: string;
     quickOffer: string;
     quickTrader: string;
+    waitingToday: string;
+    waitingTodayZero: string;
+    filterAll: string;
+    filterRetail: string;
+    filterDeals: string;
+    filterWholesale: string;
+    trendUp: string;
+    trendDown: string;
+    trendFlat: string;
+    contentHealth: string;
+    contentHealthRatio: string;
+    contentHealthMissing: string;
+    contentHealthComplete: string;
+    pipeline: string;
+    pipelineLegend: string;
+    domainMixTitle: string;
+    requestsOverDays: string;
+    requestsOverDaysTotal: string;
+    requestsOverDaysDay: string;
+    firstUseTitle: string;
+    firstUseBody: string;
+    firstUseAction: string;
+    whatsappNoun: string;
+    whatsappLastMessage: string;
+    whatsappNoMessage: string;
+    piecesCount: string;
+    commandSearch: string;
+    commandPlaceholder: string;
+    commandEmpty: string;
+    commandSearching: string;
+    commandQuickActions: string;
+    commandNavigate: string;
+    quickCreate: string;
+    manageHub: string;
+    settings: string;
+    team: string;
+    savedToast: string;
+  };
+  /** AD-02 dashboard, round 2 (owner reference-driven rebuild, 2026-11-08). */
+  ad2: {
+    breadcrumbAdmin: string;
+    searchPlaceholder: string;
+    export: string;
+    create: string;
+    newProduct: string;
+    newOffer: string;
+    newTrader: string;
+    exportCsv: string;
+    notifications: string;
+    collapseMenu: string;
+    expandMenu: string;
+    needsAction: string;
+    awaitingYouSuffix: string;
+    kpiRetailNew: string;
+    kpiWholesale: string;
+    deltaVsLastWeek: string;
+    deltaFlat: string;
+    tabAll: string;
+    listFooter: string;
+    viewAll: string;
+    emptyQueueTitle: string;
+    emptyQueueBody: string;
+    openRow: string;
+    chartTitle: string;
+    rangeDays: string;
+    waTitle: string;
+    waConnected: string;
+    waConnecting: string;
+    waReconnecting: string;
+    waDisconnected: string;
+    waAuthRequired: string;
+    waError: string;
+    waDescriptionZero: string;
+    waOpenInbox: string;
+    activityTitle: string;
+    userRole: string;
+    paletteSearchPlaceholder: string;
+    paletteEmpty: string;
+    paletteNavGroup: string;
+    paletteActionsGroup: string;
+    paletteNav: string;
+    paletteOpen: string;
+    paletteClose: string;
+    pendingZero: string;
+    pendingOne: string;
+    pendingTwo: string;
+    pendingFew: string;
+    pendingMany: string;
+    pendingOther: string;
+    waUnreadZero: string;
+    waUnreadOne: string;
+    waUnreadTwo: string;
+    waUnreadFew: string;
+    waUnreadMany: string;
+    waUnreadOther: string;
+    chartCaptionZero: string;
+    chartCaptionOne: string;
+    chartCaptionTwo: string;
+    chartCaptionFew: string;
+    chartCaptionMany: string;
+    chartCaptionOther: string;
+    rowRequestZero: string;
+    rowRequestOne: string;
+    rowRequestTwo: string;
+    rowRequestFew: string;
+    rowRequestMany: string;
+    rowRequestOther: string;
+    menuLabel: string;
+    moreTab: string;
+    skipToContent: string;
+    statusNew: string;
+    statusAwaitingReply: string;
+    statusInProgress: string;
+    statusReady: string;
+    pieceSuffixRetail: string;
+  };
+  /** Admin inbox, round 3 (owner reference-driven rebuild, 2026-11-09). */
+  ib: {
+    searchPlaceholder: string;
+    searchLabel: string;
+    filterAll: string;
+    filterUnread: string;
+    filterLinked: string;
+    filterUnlinked: string;
+    connConnected: string;
+    connOutboundOff: string;
+    connDisconnected: string;
+    connReconnecting: string;
+    emptyListTitle: string;
+    emptyListBody: string;
+    noResultsTitle: string;
+    noResultsBody: string;
+    selectConvTitle: string;
+    selectConvBody: string;
+    selectConvHintBefore: string;
+    selectConvHintAfter: string;
+    previewNoText: string;
+    threadEmptyTitle: string;
+    threadEmptyBody: string;
+    newMessagesZero: string;
+    newMessagesOne: string;
+    newMessagesTwo: string;
+    newMessagesFew: string;
+    newMessagesMany: string;
+    newMessagesOther: string;
+    bannerOutboundOff: string;
+    bannerReconnecting: string;
+    bannerDisconnected: string;
+    bannerPairAction: string;
+    composerReplyTab: string;
+    composerNoteTab: string;
+    composerReplyPlaceholder: string;
+    composerNotePlaceholder: string;
+    composerDisabledOutboundOff: string;
+    composerDisabledDisconnected: string;
+    composerSendHint: string;
+    sendButton: string;
+    saveNoteButton: string;
+    attachLabel: string;
+    quickRepliesLabel: string;
+    noteSystemLabel: string;
+    contextUnlinkLabel: string;
+    contextLinkLabel: string;
+    linkedRecordsHeading: string;
+    noLinkedRecords: string;
+    quickActionsHeading: string;
+    createRequestFromConv: string;
+    openNewDeal: string;
+    pinConversation: string;
+    notesHeading: string;
+    notesEmpty: string;
+    addNotePlaceholder: string;
+    addNoteButton: string;
+    tagsHeading: string;
+    noTags: string;
+    addTagLabel: string;
+    addTagPlaceholder: string;
+    backToList: string;
+    connSheetTitle: string;
+    connSheetClose: string;
+    connSheetConnectedBody: string;
+    connSheetOutboundOffBody: string;
+    connSheetReconnectingBody: string;
+    connSheetDisconnectedBody: string;
+    connSheetHeartbeatLabel: string;
+    connSheetLinkedNumberLabel: string;
+    connSheetDisconnectButton: string;
+    connSheetStep1: string;
+    connSheetStep2: string;
+    connSheetStep3: string;
+    connSheetPhoneLabel: string;
+    connSheetShowQrButton: string;
+    connSheetNoSendNotice: string;
+    navHint: string;
+    searchHint: string;
+    escHint: string;
+    searchInThread: string;
+    moreInfo: string;
+    moreActions: string;
+    readSent: string;
+    readDelivered: string;
+    readRead: string;
+    profileTab: string;
+    qr1Title: string;
+    qr1Body: string;
+    qr2Title: string;
+    qr2Body: string;
+    qr3Title: string;
+    qr3Body: string;
+    previewSticker: string;
+    previewImage: string;
+    previewVideo: string;
+    previewAudio: string;
+    previewDocument: string;
+    previewLocation: string;
+    previewContact: string;
+    previewReaction: string;
+    previewUnsupported: string;
+    previewEmpty: string;
   };
   adminUi: {
     colReference: string;
@@ -354,6 +616,16 @@ type Dict = {
     wholesaleLead: string;
     customersLead: string;
     tradersLead: string;
+    traderDetailLead: string;
+    colWholesale: string;
+    colBrokerage: string;
+    traderBack: string;
+    traderActivity: string;
+    traderRecentDeals: string;
+    traderRecentWholesale: string;
+    traderRecentBrokerage: string;
+    traderNoActivity: string;
+    traderInterests: string;
     categoriesLead: string;
     offersLead: string;
     newOffer: string;
@@ -363,13 +635,64 @@ type Dict = {
     promoStatus: Record<string, string>;
     promoTone: Record<string, string>;
     searchPlaceholder: string;
+    searchRequests: string;
+    searchDeals: string;
+    searchWholesale: string;
+    searchProducts: string;
     search: string;
     filterTabs: string;
     filterAll: string;
     filterWaiting: string;
+    viewTable: string;
+    viewGallery: string;
+    viewKanban: string;
+    publishNow: string;
+    unpublish: string;
+    completenessAr: string;
+    completenessEn: string;
+    livePreview: string;
+    settingsHubTitle: string;
+    settingsHubLead: string;
+    settingsWhatsApp: string;
+    settingsWhatsAppLead: string;
+    settingsBrand: string;
+    settingsBrandLead: string;
+    settingsSecurity: string;
+    settingsSecurityLead: string;
+    notificationsTitle: string;
+    notificationsLead: string;
+    notificationsEmpty: string;
+    notificationsUnreadInbox: string;
+    notificationsAwaiting: string;
+    kanbanConfirmTitle: string;
+    kanbanConfirmBody: string;
+    shippingTracker: string;
+    shipStepOpen: string;
+    shipStepQuoted: string;
+    shipStepShipped: string;
+    shipStepDelivered: string;
     negotiationThread: string;
     emptyTitle: string;
     emptyBody: string;
+    sortNewestFirst: string;
+    sortOldestFirst: string;
+    moreProducts: string;
+    listPaginationSummary: string;
+    noResultsForQuery: string;
+    noResultsHint: string;
+    onRequestPrice: string;
+    requestsEmptyTitle: string;
+    requestsEmptyBody: string;
+    showPhone: string;
+    hidePhone: string;
+    dealsEmptyTitle: string;
+    dealsEmptyBody: string;
+    dealsEmptyFilteredTitle: string;
+    dealsEmptyFilteredBody: string;
+    wholesaleEmptyTitle: string;
+    wholesaleEmptyBody: string;
+    wholesaleEmptyFilteredTitle: string;
+    wholesaleEmptyFilteredBody: string;
     newTrader: string;
     traderCreateTitle: string;
     traderCreateLead: string;
@@ -389,6 +712,12 @@ type Dict = {
     traderTempPasswordClose: string;
     traderActivate: string;
     traderDisable: string;
+    traderDisableTitle: string;
+    traderDisableBody: string;
+    traderResetPassword: string;
+    traderResetPasswordConfirmTitle: string;
+    traderResetPasswordConfirmBody: string;
+    traderResetPasswordConfirmLabel: string;
     categorySave: string;
     categoryNameAr: string;
     categoryNameEn: string;
@@ -409,6 +738,72 @@ type Dict = {
     customerWaTitle: string;
     customerWaEmpty: string;
     customerWaOpen: string;
+    customerNotesSave: string;
+    customerNotesSaved: string;
+    customerNotesFailed: string;
+    customerNotesInvalid: string;
+    customerNotesHelper: string;
+    customersFilterWithRequests: string;
+    customersFilterNoRequests: string;
+    customersKpiAll: string;
+    customersKpiWithRequests: string;
+    customersKpiNew: string;
+    customersKpiNewHint: string;
+    searchCustomers: string;
+    colLastActivity: string;
+    colWa: string;
+    customerEditTitle: string;
+    customerName: string;
+    customerEditSave: string;
+    customerEditSaved: string;
+    customerEditFailed: string;
+    customerOpenRequests: string;
+    customerOpenWa: string;
+    tradersFilterActive: string;
+    tradersFilterDisabled: string;
+    tradersKpiActive: string;
+    tradersKpiDisabled: string;
+    tradersKpiOpenDeals: string;
+    searchTraders: string;
+    traderEditTitle: string;
+    traderEditSave: string;
+    traderEditSaved: string;
+    traderEditFailed: string;
+    traderInterestNotes: string;
+    traderWaTitle: string;
+    traderWaEmpty: string;
+    notificationsFilterAction: string;
+    notificationsFilterInbox: string;
+    notificationsFilterTrade: string;
+    notificationsSectionAction: string;
+    notificationsSectionInbox: string;
+    notificationsSectionTrade: string;
+    notificationsDomainRetail: string;
+    notificationsDomainDeal: string;
+    notificationsDomainWholesale: string;
+    settingsProfile: string;
+    settingsProfileLead: string;
+    settingsWaConnected: string;
+    settingsWaDisconnected: string;
+    settingsWaOther: string;
+    settings2faOn: string;
+    /** Short pill label when 2FA is off (settings/security). */
+    settings2faOffShort: string;
+    settings2faOff: string;
+    teamTitle: string;
+    teamLead: string;
+    teamTabTeam: string;
+    teamTabAudit: string;
+    teamInviteNote: string;
+    teamAuditFilter: string;
+    teamAuditExport: string;
+    teamAuditCount: string;
+    teamAuditMeta: string;
+    teamAuditIp: string;
+    teamColName: string;
+    teamColEmail: string;
+    teamColSince: string;
+    teamSecurityLink: string;
     kindCatalog: string;
     kindNonCatalog: string;
     modeRequestQuote: string;
@@ -504,6 +899,12 @@ type Dict = {
       saveShipping: string;
       shippingSaved: string;
       slug: string;
+      slugAutoHint: string;
+      slugLockedHint: string;
+      translateDraftHint: string;
+      translateSuggest: string;
+      translatePending: string;
+      translateFailed: string;
       titleAr: string;
       titleEn: string;
       summaryAr: string;
@@ -542,6 +943,30 @@ type Dict = {
       descriptionEn: string;
       specsAr: string;
       specsEn: string;
+      specsHelp: string;
+      oudSpecsTitle: string;
+      oudSpecsHint: string;
+      oudWoodTitle: string;
+      oudMeasuresTitle: string;
+      oudDetailsTitle: string;
+      oudWoodBack: string;
+      oudWoodFace: string;
+      oudWoodPegs: string;
+      oudWoodFingerboard: string;
+      oudWoodBridge: string;
+      oudFaceWidth: string;
+      oudFaceDepth: string;
+      oudFaceLength: string;
+      oudNeckLength: string;
+      oudStringLength: string;
+      oudStandardNeck: string;
+      oudStandardNeckUnset: string;
+      oudStandardNeckYes: string;
+      oudStandardNeckNo: string;
+      oudFinish: string;
+      oudMm: string;
+      oudAr: string;
+      oudEn: string;
       category: string;
       retailPrice: string;
       compareAtPrice: string;
@@ -549,11 +974,19 @@ type Dict = {
       currency: string;
       currencyHelp: string;
       currencyPlaceholder: string;
+      currencyUsd: string;
+      currencySyp: string;
       statusLabel: string;
       availabilityLabel: string;
       availabilityHelp: string;
       wholesaleEligible: string;
       wholesaleEligibleHelp: string;
+      storeBadges: string;
+      storeBadgesHelp: string;
+      badgeNew: string;
+      badgeFeatured: string;
+      badgeSale: string;
+      previewStorefront: string;
       saveProduct: string;
       saving: string;
     };
@@ -565,16 +998,94 @@ type Dict = {
     newDeal: string;
     wholesale: string;
     wholesaleRequests: string;
+    brokerage: string;
+    newBrokerage: string;
+    taskBrokerageTitle: string;
+    taskBrokerageBody: string;
     offers: string;
     profile: string;
     logout: string;
     welcome: string;
+    waitingToday: string;
+    waitingTodayZero: string;
     lead: string;
     homeTasksTitle: string;
     taskDealTitle: string;
     taskDealBody: string;
     taskWholesaleTitle: string;
     taskWholesaleBody: string;
+    homeStatsTitle: string;
+    homeStatDeals: string;
+    homeStatWholesale: string;
+    homeStatBrokerage: string;
+    homeStatOpen: string;
+    dealSuccessTitle: string;
+    dealSuccessBody: string;
+    dealSuccessContinue: string;
+    wholesaleSuccessTitle: string;
+    wholesaleSuccessBody: string;
+    wholesaleSuccessContinue: string;
+    brokerageSuccessTitle: string;
+    brokerageSuccessBody: string;
+    brokerageSuccessContinue: string;
+    offersViewDetails: string;
+    notificationsFilterAll: string;
+    notificationsFilterDeal: string;
+    notificationsFilterWholesale: string;
+    notificationsFilterBrokerage: string;
+    brokerageWizardTitle: string;
+    brokerageExplainerTitle: string;
+    brokerageExplainerBody: string;
+    brokerageStepWhat: string;
+    brokerageStepWhere: string;
+    brokerageStepExpectations: string;
+    brokerageStepReview: string;
+    brokerageFieldDescription: string;
+    brokerageFieldCategory: string;
+    brokerageFieldQuantity: string;
+    brokerageFieldCity: string;
+    brokerageFieldPlace: string;
+    brokerageFieldSeller: string;
+    brokerageFieldSource: string;
+    brokerageFieldBudgetMin: string;
+    brokerageFieldBudgetMax: string;
+    brokerageFieldNotes: string;
+    brokerageSubmit: string;
+    brokerageSubmitting: string;
+    brokerageQuoteAwaiting: string;
+    brokerageApprove: string;
+    brokerageDecline: string;
+    brokerageConfirmApproveTitle: string;
+    brokerageConfirmApproveBody: string;
+    brokerageConfirmDeclineTitle: string;
+    brokerageConfirmDeclineBody: string;
+    brokerageListTitle: string;
+    brokerageListSubtitle: string;
+    brokerageNewCta: string;
+    brokerageStatTotal: string;
+    brokerageStatInProgress: string;
+    brokerageStatNeedsYou: string;
+    brokerageStatNeedsYouHint: string;
+    brokerageStatClosed: string;
+    brokerageEmptyTitle: string;
+    brokerageEmptyBody: string;
+    brokerageNeedsYouChip: string;
+    brokerageMyRequests: string;
+    brokerageYourRequest: string;
+    brokeragePath: string;
+    brokerageYourPhotos: string;
+    brokerageNoPhotos: string;
+    brokerageInfoNeeded: string;
+    brokerageQuoteTitle: string;
+    brokerageGoodsValue: string;
+    brokerageCommission: string;
+    brokerageShipping: string;
+    brokerageQuoteTotal: string;
+    brokerageInspectionReport: string;
+    brokerageGrade: string;
+    brokerageInspectionPhotos: string;
+    brokerageTimeline: string;
+    brokeragePiecePhotos: string;
     myDeals: string;
     waitingTitle: string;
     waitingIdle: string;
@@ -594,6 +1105,7 @@ type Dict = {
     waitingOnYou: string;
     waitingOnAdmin: string;
     dealsTitle: string;
+    dealsLead: string;
     dealsEmpty: string;
     dealsEmptyBody: string;
     dealsTabList: string;
@@ -626,6 +1138,9 @@ type Dict = {
     wizardLeaveConfirm: string;
     wizardNeedTitle: string;
     wizardNeedProduct: string;
+    wizardNeedModel: string;
+    wizardNeedPrice: string;
+    wizardNeedCurrency: string;
     recentActivity: string;
     recentActivityEmpty: string;
     activityDeal: string;
@@ -646,13 +1161,28 @@ type Dict = {
     productLabel: string;
     productPlaceholder: string;
     nonCatalogNote: string;
+    modelNumberLabel: string;
     priceOptional: string;
     currencyLabel: string;
+    currencyUsd: string;
+    currencySyp: string;
     quantityLabel: string;
     conditionsLabel: string;
     initialMessageLabel: string;
     submitProposal: string;
     submitting: string;
+    dealPayTitle: string;
+    dealPayBody: string;
+    dealPayOpenWa: string;
+    dealPayUnavailable: string;
+    dealPayConfirmed: string;
+    wsHandoffTitle: string;
+    wsHandoffBody: string;
+    wsHandoffOpenWa: string;
+    wsHandoffUnavailable: string;
+    brokeragePayTitle: string;
+    brokeragePayBody: string;
+    negCounterPriceLocked: string;
     dealProduct: string;
     dealNonCatalog: string;
     dealSnapshot: string;
@@ -745,6 +1275,20 @@ type Dict = {
     notificationsMarkAll: string;
     notificationsMarkRead: string;
     notificationsOpen: string;
+    notificationsShowMore: string;
+    notificationsGroupedCount: string;
+    messagesTitle: string;
+    messagesLead: string;
+    messagesEmpty: string;
+    messagesEmptyBody: string;
+    messagesPlaceholder: string;
+    messagesSend: string;
+    messagesSending: string;
+    messagesChannelWhatsapp: string;
+    messagesChannelPlatform: string;
+    messagesErrorEmpty: string;
+    messagesErrorTooLong: string;
+    messagesErrorGeneric: string;
     offersTitle: string;
     offersLead: string;
     offersEmpty: string;
@@ -752,6 +1296,24 @@ type Dict = {
     offersBack: string;
     offersRelatedProduct: string;
     offersStartDeal: string;
+    confirmCancel: string;
+    negConfirmAcceptTitle: string;
+    negConfirmAcceptBody: string;
+    negConfirmCloseTitle: string;
+    negConfirmCloseBody: string;
+    negConfirmRejectTitle: string;
+    negConfirmRejectBody: string;
+    wsConfirmAcceptTitle: string;
+    wsConfirmAcceptBody: string;
+    wsConfirmDeclineTitle: string;
+    wsConfirmDeclineBody: string;
+    wsConfirmCancelTitle: string;
+    wsConfirmCancelBody: string;
+    actionErrorUnauthorized: string;
+    actionErrorNotAllowed: string;
+    actionErrorInvalid: string;
+    actionErrorGeneric: string;
+    actionError: Record<string, string>;
   };
   inbox: {
     title: string;
@@ -834,20 +1396,44 @@ type Dict = {
     authRequired: string;
     error: string;
     sendingPaused: string;
+    platformFallbackNotice: string;
     rateLimited: string;
     linkAccount: string;
     reconnect: string;
     nonText: string;
     retry: string;
+    statusDelivered: string;
+    statusRead: string;
+    channelPlatform: string;
     newMessages: string;
     linkRecord: string;
     unlinkConfirm: string;
     pickRecord: string;
+    quickRepliesLabel: string;
+    quickReplyGreeting: string;
+    quickReplyFollowUp: string;
+    quickReplyThanks: string;
+    typeBrokerage: string;
     searchRecords: string;
     openContext: string;
     confirmLink: string;
     confirmUnlink: string;
     lengthNearLimit: string;
+    msgLocation: string;
+    msgContact: string;
+    attachFile: string;
+    attachCaption: string;
+    voiceRecord: string;
+    voiceRecording: string;
+    voiceStop: string;
+    voiceCancel: string;
+    voiceDenied: string;
+    crmParty: string;
+    crmSuggest: string;
+    crmLinkCustomer: string;
+    crmLinkTrader: string;
+    crmClear: string;
+    crmNone: string;
     emptyThread: string;
     /** WhatsApp account pairing panel (admin link account) */
     pairingTitle: string;
@@ -883,11 +1469,18 @@ type Dict = {
     errorOffline: string;
     backOnline: string;
     toastDismiss: string;
+    themeLight: string;
+    themeDark: string;
+    themeGroup: string;
+    navLabelAdmin: string;
+    navLabelTrader: string;
     goToPortal: string;
     signOut: string;
     navOps: string;
     navCatalog: string;
     navPeople: string;
+    navSystem: string;
+    adminBrandSub: string;
     switchOn: string;
     switchOff: string;
     paginationPrevious: string;
@@ -895,6 +1488,10 @@ type Dict = {
     /** Supports `{page}` and `{pages}` placeholders. */
     paginationPageOf: string;
     timelineLabel: string;
+    greetingMorning: string;
+    greetingAfternoon: string;
+    greetingEvening: string;
+    greetingNamed: string;
   };
   contact: {
     title: string;
@@ -917,13 +1514,95 @@ type Dict = {
     s3Title: string;
     s3Body: string;
   };
+  terms: {
+    title: string;
+    fallbackBody: string;
+  };
   auth: {
     adminTitle: string;
     traderTitle: string;
     traderHint: string;
+    roleAdmin: string;
+    roleTrader: string;
+    tagline: string;
+    headline: string;
+    adminSubtitle: string;
+    traderSubtitle: string;
+    capsLockOn: string;
+    rateLimitFooter: string;
+    forgotPassword: string;
+    forgotTitle: string;
+    forgotSubtitle: string;
+    forgotWhatsApp: string;
+    forgotWhatsAppMessage: string;
+    backToSignIn: string;
     loginError: string;
+    loginLocked: string;
+    totpLabel: string;
+    totpRequired: string;
+    totpInvalid: string;
+    totpEnrollRequired: string;
+    totpEnrollButton: string;
+    totpResetButton: string;
     showPassword: string;
     hidePassword: string;
+    sessionInvalidatedNotice: string;
+    profileTitle: string;
+    profileSubtitle: string;
+    /** Appearance section lead — distinct from profileSubtitle. */
+    appearanceLead: string;
+    profileTab: string;
+    securityTab: string;
+    profileName: string;
+    profileEmail: string;
+    profileRole: string;
+    profileRoleAdmin: string;
+    profileSecurityNote: string;
+    profileOpenSecurity: string;
+    sessionsTab: string;
+    activeSessions: string;
+    activeSessionsDesc: string;
+    currentSession: string;
+    signOutOthers: string;
+    signOutOthersTitle: string;
+    signOutOthersDesc: string;
+    signedOutOthers: string;
+    avatarUnavailable: string;
+  };
+  forcePasswordChange: {
+    title: string;
+    subtitle: string;
+    explanation: string;
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+    mismatch: string;
+    submit: string;
+    strengthLabel: string;
+    strengthWeak: string;
+    strengthFair: string;
+    strengthGood: string;
+    strengthStrong: string;
+    strengthVeryStrong: string;
+    ruleLength: string;
+    ruleNotTemp: string;
+    ruleNotEmail: string;
+    errorCurrentWrong: string;
+    errorWeak: string;
+    errorSameAsTemp: string;
+    errorSameAsEmail: string;
+    success: string;
+    signOut: string;
+    showPassword: string;
+    hidePassword: string;
+  };
+  changePassword: {
+    sectionTitle: string;
+    sectionLead: string;
+    /** Label for voluntary password change (not the forced-temp flow). */
+    currentPassword: string;
+    submit: string;
+    success: string;
   };
   seo: {
     catalogDescription: string;
@@ -981,7 +1660,11 @@ const ar: Dict = {
     categoriesIntro: "فئتان قائمتان في المنصة عالمان بصريان ضمن هوية RARE OUD.",
     categoriesCta: "استكشف",
     categoryDescInstruments: "اكتشف المجموعة الأولى من الكتالوج.",
-    categoryDescAccessories: "اكتشف المجموعة الثانية من الكتالوج.",
+    categoryDescAccessories: "إكسسوارات مختارة للسفر والعزف اليومي.",
+    categoryDescEconomy: "عود ورشة للممارسة والعزف اليومي.",
+    categoryDescMid: "عود متوازن للاستخدام المنتظم والاستوديو.",
+    categoryDescProfessional: "عود حفلات بنبرة أوضح واستجابة سريعة.",
+    categoryDescVip: "قطع نادرة بأخشاب مختارة وتشطيب أتيليه.",
     oudEyebrow: "الندرة",
     oudTitle: "مادة نادرة واختيار واعٍ",
     oudBody:
@@ -1057,14 +1740,14 @@ const ar: Dict = {
     search: "بحث",
     filters: "تصفية",
     allCategories: "كل الفئات",
-    lead: "قطع مختارة بعناية من العود والآلات الوترية والملحقات. اختر القطعة التي تلفت نظرك وأضفها إلى قائمة الطلب.",
+    lead: "أربع درجات من العود — اقتصادي، متوسط، احترافي، VIP — مع إكسسوارات مختارة. اختر القطعة التي تلفت نظرك وأضفها إلى قائمة الطلب.",
     photoCaption: "الصورة قيد التصوير",
     filtersTitle: "تصفية وترتيب",
     typeLabel: "النوع",
     priceLabel: "السعر",
     priceMin: "الحد الأدنى",
     priceMax: "الحد الأقصى",
-    priceCurrencyHint: "رمز العملة كما في الكتالوج (مثال USD)",
+    priceCurrencyHint: "عملة الكتالوج: دولار أو ليرة سورية",
     priceCurrencyShort: "عملة",
     showResultsForms: {
       zero: "عرض {n} قطعة",
@@ -1128,6 +1811,41 @@ const ar: Dict = {
     priceWas: "كان",
     priceNow: "الآن",
     onSale: "سعر مخفّض",
+    extras: "ميزات إضافية",
+    aboutThisPiece: "عن هذه القطعة",
+    featureBullets: "أبرز المزايا",
+    craftStory: "حرفة الورشة",
+    craftStoryBody:
+      "كل عود يُختار ويُعرض كقطعة مستقلة — الخشب، الوجه، والتشطيب جزء من هويته لا من كتالوج عام.",
+    soundStory: "صوت وحضور",
+    soundStoryBody:
+      "الصور التحريرية هنا مؤقتة للعرض. القطعة الحقيقية تُراجع عبر مسار الطلب وواتساب قبل أي التزام.",
+    trustNoPayment: "لا دفع إلكتروني — الطلب يُكمَل عبر واتساب.",
+    trustHandoff: "نستلم طلبك ونرد بتفاصيل القطعة والتوفر.",
+    trustUnique: "قطع محدودة؛ التوفر يظهر على الصفحة.",
+    trustWhatsApp: "محادثة مباشرة بعد إرسال الطلب.",
+    qtyLabel: "الكمية",
+    oudSpecs: {
+      title: "مواصفات العود",
+      wood: "نوع الخشب",
+      measures: "مقاسات العود",
+      details: "المواصفات",
+      back: "الظهر",
+      face: "الوجه",
+      pegs: "المفاتيح",
+      fingerboard: "لوحة الأصابع",
+      bridge: "مربط الأوتار",
+      faceWidth: "عرض الوجه",
+      faceDepth: "عمق الظهر",
+      faceLength: "طول الوجه",
+      neckLength: "طول الزند",
+      stringLength: "طول الوتر",
+      standardNeck: "الزند عياري",
+      standardNeckYes: "عياري",
+      standardNeckNo: "غير عياري",
+      finish: "نوع الطلاء",
+      mm: "مم",
+    },
   },
   cart: {
     title: "قائمة الطلب",
@@ -1196,11 +1914,14 @@ const ar: Dict = {
     traders: "التجّار",
     deals: "الصفقات",
     wholesale: "الجملة",
+    brokerage: "الوساطة",
     offers: "العروض",
     promos: "الترويج",
-    kpiRetail: "طلبات بانتظار الإدارة",
+    kpiRetail: "طلبات تجزئة جديدة",
     kpiDeals: "صفقات بانتظار الرد",
-    kpiWholesale: "جملة بانتظار الرد",
+    kpiWholesale: "طلبات جملة",
+    kpiBrokerage: "وساطة نشطة",
+    kpiWaitingTotal: "إجمالي بانتظارك",
     kpiUnread: "محادثات غير مقروءة",
     kpiIdle: "لا شيء بانتظارك",
     recentRequests: "أحدث طلبات التجزئة",
@@ -1209,6 +1930,8 @@ const ar: Dict = {
     actionOpen: "فتح",
     actionEmpty: "لا شيء بانتظارك",
     activityEmpty: "لا أحداث بعد.",
+    activityShowMore: "عرض المزيد",
+    activityShowLess: "عرض أقل",
     nextActorAdmin: "بانتظار الإدارة",
     lastConnected: "آخر اتصال",
     neverConnected: "لم يُسجَّل اتصال بعد",
@@ -1228,15 +1951,16 @@ const ar: Dict = {
     colAvailability: "التوفر",
     colPrice: "السعر",
     colCategory: "الفئة",
-    imagesTitle: "صور وفيديو المنتج",
-    imagesEmpty: "لا وسائط بعد — ارفع صورة أو فيديو أعلاه.",
+    imagesTitle: "صور وفيديو وصوت المنتج",
+    imagesEmpty: "لا وسائط بعد — ارفع صورة أو فيديو أو صوتاً أعلاه.",
     imagesLimits:
-      "صورة: JPEG / PNG / WebP حتى 8 ميغابايت (الضلع الأطول ≥ 1600 بكسل) · فيديو: MP4 / WebM حتى 48 ميغابايت · حد 8 ملفات",
-    imagesAdd: "رفع صورة أو فيديو",
-    imagesFileLabel: "اختر صورة أو فيديو",
+      "صورة: JPEG / PNG / WebP حتى 8 ميغابايت (الضلع الأطول ≥ 1600 بكسل) · فيديو: MP4 / WebM حتى 48 ميغابايت · صوت: MP3 / OGG حتى 16 ميغابايت · حد 8 ملفات",
+    imagesAdd: "رفع صورة أو فيديو أو صوت",
+    imagesFileLabel: "اختر صورة أو فيديو أو صوتاً",
     imagesKindVideo: "فيديو",
+    imagesKindAudio: "صوت",
     imagesAfterSaveHint:
-      "احفظ بيانات المنتج أولاً — بعدها ستُفتح صفحة التعديل لرفع الصور والفيديو.",
+      "احفظ بيانات المنتج أولاً — بعدها ستُفتح صفحة التعديل لرفع الصور والفيديو والصوت.",
     imagesAltAr: "النص البديل (عربي)",
     imagesAltEn: "النص البديل (إنجليزي)",
     imagesPrimary: "الرئيسية",
@@ -1244,14 +1968,236 @@ const ar: Dict = {
     imagesMoveEarlier: "تحريك للأمام",
     imagesMoveLater: "تحريك للخلف",
     imagesUploading: "جارٍ الرفع…",
-    imagesErrorType: "نوع الملف غير مدعوم. استخدم صورة JPEG/PNG/WebP أو فيديو MP4/WebM.",
-    imagesErrorSize: "الملف أكبر من الحد المسموح (8 ميغابايت للصورة أو 48 للفيديو).",
+    imagesErrorType:
+      "نوع الملف غير مدعوم. استخدم صورة JPEG/PNG/WebP أو فيديو MP4/WebM أو صوت MP3/OGG.",
+    imagesErrorSize:
+      "الملف أكبر من الحد المسموح (8 ميغابايت للصورة، 48 للفيديو، 16 للصوت).",
     imagesErrorDim: "للصور: الضلع الأطول يجب أن يكون 1600 بكسل على الأقل.",
     imagesErrorMax: "وصلت إلى الحد الأقصى (8 ملفات).",
     imagesErrorGeneric: "تعذّر رفع الملف.",
     quickProduct: "منتج",
     quickOffer: "عرض",
     quickTrader: "حساب تاجر",
+    waitingToday: "{n} أمور بانتظارك اليوم · {date}",
+    waitingTodayZero: "لا شيء بانتظارك اليوم · {date}",
+    filterAll: "الكل {n}",
+    filterRetail: "تجزئة",
+    filterDeals: "صفقات",
+    filterWholesale: "جملة",
+    trendUp: "+{n} عن أمس",
+    trendDown: "−{n} عن أمس",
+    trendFlat: "بلا تغيير",
+    contentHealth: "صحة المحتوى",
+    contentHealthRatio: "{have} من {total}",
+    contentHealthMissing: "{n} قطع تنتظر صوراً خاصة بها",
+    contentHealthComplete: "كل القطع المنشورة لها صور",
+    pipeline: "مسار الطلبات",
+    pipelineLegend: "جديد · متابعة · فُتح · مكتمل",
+    domainMixTitle: "توزيع المسارات",
+    requestsOverDays: "الطلبات خلال 14 يوماً",
+    requestsOverDaysTotal: "المجموع",
+    requestsOverDaysDay: "اليوم {n}",
+    firstUseTitle: "ابدأ من هنا",
+    firstUseBody:
+      "أضف منتجاً منشوراً، أو أنشئ تاجراً، أو انتظر أول طلب — لوحة التحكم تمتلئ تلقائياً.",
+    firstUseAction: "إضافة منتج",
+    whatsappNoun: "واتساب",
+    whatsappLastMessage: "آخر رسالة {relative}",
+    whatsappNoMessage: "لا رسائل بعد",
+    piecesCount: "{n} قطع",
+    commandSearch: "بحث أو أمر",
+    commandPlaceholder: "ابحث عن طلب أو منتج أو تاجر…",
+    commandEmpty: "لا نتائج",
+    commandSearching: "جاري البحث…",
+    commandQuickActions: "إجراءات سريعة",
+    commandNavigate: "الانتقال إلى",
+    quickCreate: "إنشاء سريع",
+    manageHub: "إدارة",
+    settings: "الأمان",
+    team: "الفريق",
+    savedToast: "تم الحفظ.",
+  },
+  ad2: {
+    breadcrumbAdmin: "الإدارة",
+    searchPlaceholder: "بحث أو أمر…",
+    export: "تصدير",
+    create: "إنشاء",
+    newProduct: "إنشاء منتج جديد",
+    newOffer: "إنشاء عرض",
+    newTrader: "إضافة تاجر",
+    exportCsv: "تصدير الطلبات (CSV)",
+    notifications: "الإشعارات",
+    collapseMenu: "طيّ القائمة",
+    expandMenu: "توسعة القائمة",
+    needsAction: "يحتاج إجراءً",
+    awaitingYouSuffix: "بانتظارك",
+    kpiRetailNew: "طلبات التجزئة الجديدة",
+    kpiWholesale: "طلبات الجملة",
+    deltaVsLastWeek: "عن الأسبوع الماضي",
+    deltaFlat: "دون تغيّر",
+    tabAll: "الكل",
+    listFooter: "يُعرض {shown} من {total}",
+    viewAll: "عرض الكل",
+    emptyQueueTitle: "لا شيء بانتظارك هنا",
+    emptyQueueBody: "كل شيء في هذا القسم تمّت متابعته.",
+    openRow: "فتح",
+    chartTitle: "الطلبات",
+    rangeDays: "{n} يوماً",
+    waTitle: "اتصال واتساب",
+    waConnected: "متصل",
+    waConnecting: "جاري الاتصال",
+    waReconnecting: "إعادة الاتصال",
+    waDisconnected: "غير متصل",
+    waAuthRequired: "يحتاج توثيقاً",
+    waError: "خطأ في الاتصال",
+    waDescriptionZero: "الإرسال غير مفعّل حالياً.",
+    waOpenInbox: "فتح الصندوق",
+    activityTitle: "آخر النشاط",
+    userRole: "مدير النظام",
+    paletteSearchPlaceholder: "ابحث عن طلب أو عميل أو منتج، أو اكتب أمراً…",
+    paletteEmpty: "لا نتائج لـ «{q}»",
+    paletteNavGroup: "الانتقال إلى",
+    paletteActionsGroup: "إجراءات سريعة",
+    paletteNav: "تنقّل",
+    paletteOpen: "فتح",
+    paletteClose: "إغلاق",
+    pendingZero: "لا شيء",
+    pendingOne: "أمر واحد",
+    pendingTwo: "أمران",
+    pendingFew: "{n} أمور",
+    pendingMany: "{n} أمراً",
+    pendingOther: "{n} أمر",
+    waUnreadZero: "لا محادثات غير مقروءة بانتظارك في الصندوق.",
+    waUnreadOne: "لديك محادثة واحدة غير مقروءة بانتظارك في الصندوق.",
+    waUnreadTwo: "لديك محادثتان غير مقروءتان بانتظارك في الصندوق.",
+    waUnreadFew: "لديك {n} محادثات غير مقروءة بانتظارك في الصندوق.",
+    waUnreadMany: "لديك {n} محادثة غير مقروءة بانتظارك في الصندوق.",
+    waUnreadOther: "لديك {n} محادثة غير مقروءة بانتظارك في الصندوق.",
+    chartCaptionZero: "لا طلبات",
+    chartCaptionOne: "طلب واحد",
+    chartCaptionTwo: "طلبان",
+    chartCaptionFew: "{n} طلبات",
+    chartCaptionMany: "{n} طلباً",
+    chartCaptionOther: "{n} طلب",
+    rowRequestZero: "لا قطع",
+    rowRequestOne: "قطعة واحدة",
+    rowRequestTwo: "قطعتان",
+    rowRequestFew: "{n} قطع",
+    rowRequestMany: "{n} قطعة",
+    rowRequestOther: "{n} قطعة",
+    menuLabel: "القائمة",
+    moreTab: "المزيد",
+    skipToContent: "تخطَّ إلى المحتوى",
+    statusNew: "جديد",
+    statusAwaitingReply: "بانتظار ردّك",
+    statusInProgress: "قيد المتابعة",
+    statusReady: "جاهز",
+    pieceSuffixRetail: "طلب تجزئة",
+  },
+  ib: {
+    searchPlaceholder: "ابحث بالاسم أو رقم الطلب أو النص…",
+    searchLabel: "بحث في المحادثات",
+    filterAll: "الكل",
+    filterUnread: "غير مقروء",
+    filterLinked: "مرتبط",
+    filterUnlinked: "غير مرتبط",
+    connConnected: "متصل",
+    connOutboundOff: "الإرسال متوقف",
+    connDisconnected: "غير متصل",
+    connReconnecting: "جارٍ إعادة الاتصال",
+    emptyListTitle: "لا محادثات بعد",
+    emptyListBody: "ستظهر هنا رسائل العملاء الواردة عبر واتساب فور وصولها.",
+    noResultsTitle: "لا نتائج",
+    noResultsBody: "جرّب كلمة أخرى أو غيّر التصفية.",
+    selectConvTitle: "اختر محادثة",
+    selectConvBody: "اختر محادثة من القائمة لعرض الرسائل. استخدم J وK للتنقل بين المحادثات.",
+    selectConvHintBefore: "اختر محادثة من القائمة لعرض الرسائل. استخدم",
+    selectConvHintAfter: "للتنقل بين المحادثات.",
+    previewNoText: "لا رسائل نصية",
+    threadEmptyTitle: "لا رسائل في هذه المحادثة بعد",
+    threadEmptyBody: "عندما تصل رسالة أو تُرسل رداً، ستظهر هنا.",
+    newMessagesZero: "لا رسائل جديدة",
+    newMessagesOne: "رسالة جديدة واحدة",
+    newMessagesTwo: "رسالتان جديدتان",
+    newMessagesFew: "{n} رسائل جديدة",
+    newMessagesMany: "{n} رسالة جديدة",
+    newMessagesOther: "{n} رسالة جديدة",
+    bannerOutboundOff:
+      "الإرسال من الصندوق متوقف حالياً. تصلك الرسائل وتستطيع إضافة ملاحظات داخلية، لكن الرد يُحفظ هنا وقد يحتاج متابعة من هاتفك.",
+    bannerReconnecting: "جارٍ إعادة الاتصال بواتساب… قد تتأخر الرسائل الجديدة.",
+    bannerDisconnected: "واتساب غير متصل. لن تصل رسائل جديدة قبل إعادة الربط.",
+    bannerPairAction: "ربط الحساب",
+    composerReplyTab: "رد",
+    composerNoteTab: "ملاحظة داخلية",
+    composerReplyPlaceholder: "اكتب رداً…",
+    composerNotePlaceholder: "اكتب ملاحظة داخلية لفريقك…",
+    composerDisabledOutboundOff: "الرد متوقف حالياً — استخدم ملاحظة داخلية",
+    composerDisabledDisconnected: "غير متاح أثناء انقطاع الاتصال",
+    composerSendHint: "Enter إرسال · Shift+Enter سطر جديد",
+    sendButton: "إرسال",
+    saveNoteButton: "حفظ الملاحظة",
+    attachLabel: "إرفاق",
+    quickRepliesLabel: "ردود جاهزة",
+    noteSystemLabel: "ملاحظة داخلية · لا يراها العميل",
+    contextUnlinkLabel: "فك الربط",
+    contextLinkLabel: "ربط بعميل",
+    linkedRecordsHeading: "السجلات المرتبطة",
+    noLinkedRecords: "لا توجد سجلات مرتبطة بهذا الرقم بعد.",
+    quickActionsHeading: "إجراءات سريعة",
+    createRequestFromConv: "إنشاء طلب من المحادثة",
+    openNewDeal: "فتح صفقة جديدة",
+    pinConversation: "تثبيت المحادثة",
+    notesHeading: "ملاحظات",
+    notesEmpty: "لا توجد ملاحظات بعد.",
+    addNotePlaceholder: "أضف ملاحظة داخلية…",
+    addNoteButton: "إضافة",
+    tagsHeading: "الوسوم",
+    noTags: "لا وسوم",
+    addTagLabel: "+ وسم",
+    addTagPlaceholder: "اسم الوسم…",
+    backToList: "رجوع",
+    connSheetTitle: "اتصال واتساب",
+    connSheetClose: "إغلاق",
+    connSheetConnectedBody: "الحساب مرتبط ويستقبل الرسائل. الإرسال من الصندوق مفعّل.",
+    connSheetOutboundOffBody:
+      "الحساب مرتبط ويستقبل الرسائل، لكن الإرسال من الصندوق غير مفعّل من إعدادات الخادم.",
+    connSheetReconnectingBody: "جلسة الربط موجودة، ويجري استعادة الاتصال تلقائياً. لا حاجة لإجراء الآن.",
+    connSheetDisconnectedBody: "لا توجد جلسة ربط نشطة. اربط رقم المؤسسة لاستقبال الرسائل.",
+    connSheetHeartbeatLabel: "آخر نبضة اتصال قبل {s} ثانية",
+    connSheetLinkedNumberLabel: "الرقم المرتبط",
+    connSheetDisconnectButton: "فصل الحساب",
+    connSheetStep1: "افتح واتساب على هاتف المؤسسة",
+    connSheetStep2: "الأجهزة المرتبطة ← ربط جهاز",
+    connSheetStep3: "امسح الرمز الذي سيظهر هنا",
+    connSheetPhoneLabel: "رقم الهاتف (اختياري، للربط بالرمز)",
+    connSheetShowQrButton: "إظهار رمز الربط",
+    connSheetNoSendNotice: "لن يُرسل أي شيء إلى عملائك أثناء الربط.",
+    navHint: "تنقّل",
+    searchHint: "بحث",
+    escHint: "إغلاق/رجوع",
+    searchInThread: "بحث في المحادثة",
+    moreInfo: "معلومات العميل",
+    moreActions: "المزيد",
+    readSent: "أُرسلت",
+    readDelivered: "وصلت",
+    readRead: "قُرئت",
+    profileTab: "الملف",
+    qr1Title: "تفاصيل التوصيل",
+    qr1Body: "التوصيل إلى المحافظات خلال ٣–٥ أيام عمل، والكلفة تُحدد حسب الوجهة.",
+    qr2Title: "طريقة الدفع",
+    qr2Body: "الدفع بالتحويل، وسنرسل لك بيانات الحساب بعد تأكيد الطلب.",
+    qr3Title: "تأكيد الاستلام",
+    qr3Body: "وصلتنا رسالتك، سيتابع معك أحد فريقنا خلال دقائق.",
+    previewSticker: "ملصق",
+    previewImage: "صورة",
+    previewVideo: "فيديو",
+    previewAudio: "مقطع صوتي",
+    previewDocument: "ملف",
+    previewLocation: "موقع",
+    previewContact: "جهة اتصال",
+    previewReaction: "تفاعل",
+    previewUnsupported: "رسالة غير مدعومة",
+    previewEmpty: "—",
   },
   adminUi: {
     colReference: "المرجع",
@@ -1292,6 +2238,16 @@ const ar: Dict = {
     customersLead:
       "جهات الاتصال الناتجة عن طلبات التجزئة. يمكن البحث بالهاتف وهو ليس هوية فريدة.",
     tradersLead: "حسابات التجّار تُنشأ من الإدارة فقط. لا تسجيل عام.",
+    traderDetailLead: "ملف التاجر، نشاطه عبر المسارات الثلاثة، والملاحظات الإدارية.",
+    colWholesale: "الجملة",
+    colBrokerage: "الوساطة",
+    traderBack: "العودة للتجّار",
+    traderActivity: "ملخص النشاط",
+    traderRecentDeals: "أحدث الصفقات",
+    traderRecentWholesale: "أحدث طلبات الجملة",
+    traderRecentBrokerage: "أحدث طلبات الوساطة",
+    traderNoActivity: "لا سجلات بعد في هذا المسار.",
+    traderInterests: "اهتمامات التصنيف",
     categoriesLead:
       "إدارة فئات الكتالوج: إنشاء وتعديل الأسماء والترتيب. لا يمكن حذف فئة تحتوي على منتجات.",
     offersLead: "عروض عامة منسّقة من الإدارة — ليست متاجر للتجّار.",
@@ -1310,13 +2266,69 @@ const ar: Dict = {
       sand: "رملي",
     },
     searchPlaceholder: "ابحث بالاسم أو الهاتف",
+    searchRequests: "ابحث بالمرجع أو العميل",
+    searchDeals: "ابحث بالمرجع أو التاجر",
+    searchWholesale: "ابحث بالمرجع أو التاجر",
+    searchProducts: "ابحث بالاسم أو التصنيف",
     search: "بحث",
     filterTabs: "تصفية القائمة",
     filterAll: "الكل",
     filterWaiting: "بانتظارك",
+    viewTable: "جدول",
+    viewGallery: "معرض",
+    viewKanban: "كانبان",
+    publishNow: "نشر",
+    unpublish: "إلغاء النشر",
+    completenessAr: "اكتمال العربية",
+    completenessEn: "اكتمال الإنجليزية",
+    livePreview: "معاينة البطاقة",
+    settingsHubTitle: "الإعدادات",
+    settingsHubLead: "واتساب، بيانات العلامة، والأمان — من مكان واحد.",
+    settingsWhatsApp: "واتساب",
+    settingsWhatsAppLead: "حالة الاتصال وإعادة الربط وإيقاف الإرسال من صندوق الوارد.",
+    settingsBrand: "العلامة والتواصل",
+    settingsBrandLead: "بيانات التواصل العامة تُدار عبر متغيرات البيئة وصفحة التواصل.",
+    settingsSecurity: "الأمان",
+    settingsSecurityLead: "كلمة المرور والتحقق بخطوتين لهذا الحساب.",
+    notificationsTitle: "مركز التنبيهات",
+    notificationsLead: "ما ينتظر إجراءك الآن — من الطوابير وصندوق واتساب.",
+    notificationsEmpty: "لا تنبيهات عاجلة الآن.",
+    notificationsUnreadInbox: "محادثات غير مقروءة",
+    notificationsAwaiting: "بانتظار الإدارة",
+    kanbanConfirmTitle: "نقل الطلب؟",
+    kanbanConfirmBody: "سيُطبَّق الانتقال فقط إن كان مسموحاً في مسار الحالات.",
+    shippingTracker: "تتبع الشحن",
+    shipStepOpen: "مفتوح",
+    shipStepQuoted: "عرض جاهز",
+    shipStepShipped: "أُرسل",
+    shipStepDelivered: "وُصّل / أُغلق",
     negotiationThread: "سجل التفاوض",
     emptyTitle: "لا يوجد شيء هنا بعد",
     emptyBody: "ستظهر السجلات هنا عند إنشائها.",
+    sortNewestFirst: "الأحدث أولاً",
+    sortOldestFirst: "الأقدم أولاً",
+    moreProducts: "+{n} منتجات أخرى",
+    listPaginationSummary: "عرض {from}–{to} من {total}",
+    noResultsForQuery: "لا نتائج لـ «{q}»",
+    noResultsHint: "تحقق من الإملاء أو أزل بعض عوامل التصفية.",
+    onRequestPrice: "عند الطلب",
+    requestsEmptyTitle: "لا طلبات بعد",
+    requestsEmptyBody:
+      "ستظهر هنا طلبات العملاء القادمة من الموقع وواتساب فور وصولها.",
+    showPhone: "إظهار",
+    hidePhone: "إخفاء",
+    dealsEmptyTitle: "لا صفقات بعد",
+    dealsEmptyBody:
+      "عندما يقترح تاجر صفقة تظهر هنا لمتابعة التفاوض والقبول والإغلاق — بمعزل تام عن طلبات التجزئة.",
+    dealsEmptyFilteredTitle: "لا نتائج لهذا التصفية",
+    dealsEmptyFilteredBody:
+      "جرّب تبويباً آخر أو امسح البحث لعرض كل الصفقات.",
+    wholesaleEmptyTitle: "لا طلبات جملة بعد",
+    wholesaleEmptyBody:
+      "طلبات الجملة من التجّار تظهر هنا لعرض السعر والتأكيد والإكمال — مسار منفصل عن التجزئة والصفقات.",
+    wholesaleEmptyFilteredTitle: "لا نتائج لهذا التصفية",
+    wholesaleEmptyFilteredBody:
+      "جرّب تبويباً آخر أو امسح البحث لعرض كل طلبات الجملة.",
     newTrader: "إضافة تاجر",
     traderCreateTitle: "إنشاء حساب تاجر",
     traderCreateLead:
@@ -1338,6 +2350,13 @@ const ar: Dict = {
     traderTempPasswordClose: "تم — إغلاق",
     traderActivate: "تفعيل",
     traderDisable: "تعطيل",
+    traderResetPassword: "إعادة تعيين كلمة المرور",
+    traderResetPasswordConfirmTitle: "إعادة تعيين كلمة مرور التاجر؟",
+    traderResetPasswordConfirmBody:
+      "ستُنشأ كلمة مرور مؤقتة جديدة، والقديمة لن تعمل بعد الآن. سيُطلب من التاجر تغييرها فوراً عند دخوله.",
+    traderResetPasswordConfirmLabel: "إعادة تعيين",
+    traderDisableTitle: "تعطيل حساب التاجر؟",
+    traderDisableBody: "لن يستطيع التاجر الدخول حتى يُعاد تفعيله. سجلاته تبقى ظاهرة.",
     categorySave: "حفظ التسميات",
     categoryNameAr: "الاسم (عربي)",
     categoryNameEn: "الاسم (إنجليزي)",
@@ -1358,6 +2377,74 @@ const ar: Dict = {
     customerWaTitle: "محادثات واتساب",
     customerWaEmpty: "لا توجد محادثات واتساب مرتبطة برقم هذا العميل.",
     customerWaOpen: "فتح المحادثة",
+    customerNotesSave: "حفظ الملاحظات",
+    customerNotesSaved: "تم حفظ الملاحظات.",
+    customerNotesFailed: "تعذّر حفظ الملاحظات.",
+    customerNotesInvalid: "الملاحظة أطول من المسموح.",
+    customerNotesHelper:
+      "ملاحظات داخلية للإدارة فقط. لا تغيّر حالة الطلب ولا محادثة واتساب.",
+    customersFilterWithRequests: "لديهم طلبات",
+    customersFilterNoRequests: "بلا طلبات",
+    customersKpiAll: "الكل",
+    customersKpiWithRequests: "مع طلبات",
+    customersKpiNew: "جدد",
+    customersKpiNewHint: "آخر 7 أيام",
+    searchCustomers: "ابحث بالاسم أو الهاتف",
+    colLastActivity: "آخر نشاط",
+    colWa: "واتساب",
+    customerEditTitle: "تعديل جهة الاتصال",
+    customerName: "الاسم",
+    customerEditSave: "حفظ البيانات",
+    customerEditSaved: "تم حفظ البيانات.",
+    customerEditFailed: "تعذّر حفظ البيانات.",
+    customerOpenRequests: "عرض الطلبات",
+    customerOpenWa: "فتح واتساب",
+    tradersFilterActive: "نشط",
+    tradersFilterDisabled: "معطّل",
+    tradersKpiActive: "نشط",
+    tradersKpiDisabled: "معطّل",
+    tradersKpiOpenDeals: "صفقات مفتوحة",
+    searchTraders: "ابحث بالاسم أو البريد أو الهاتف",
+    traderEditTitle: "تعديل ملف التاجر",
+    traderEditSave: "حفظ الملف",
+    traderEditSaved: "تم حفظ الملف.",
+    traderEditFailed: "تعذّر حفظ الملف.",
+    traderInterestNotes: "ملاحظات الاهتمام",
+    traderWaTitle: "محادثات واتساب",
+    traderWaEmpty: "لا توجد محادثات واتساب مرتبطة بهذا التاجر.",
+    notificationsFilterAction: "يحتاج إجراء",
+    notificationsFilterInbox: "صندوق وارد",
+    notificationsFilterTrade: "تجارة",
+    notificationsSectionAction: "يحتاج إجراءك",
+    notificationsSectionInbox: "صندوق واتساب",
+    notificationsSectionTrade: "صفقات وجملة",
+    notificationsDomainRetail: "تجزئة",
+    notificationsDomainDeal: "صفقة",
+    notificationsDomainWholesale: "جملة",
+    settingsProfile: "الملف الشخصي",
+    settingsProfileLead: "الاسم والبريد ومظهر الواجهة لهذا الحساب.",
+    settingsWaConnected: "متصل",
+    settingsWaDisconnected: "غير متصل",
+    settingsWaOther: "حالة أخرى",
+    settings2faOn: "التحقق بخطوتين مفعّل",
+    settings2faOff: "التحقق بخطوتين غير مفعّل",
+    settings2faOffShort: "غير مفعّل",
+    teamTitle: "الفريق والأمان",
+    teamLead:
+      "حسابات الإدارة الحقيقية — لا أدوار مالك/مدير/موظف في المخطط بعد. التحقق بخطوتين من صفحة الأمان.",
+    teamTabTeam: "الفريق",
+    teamTabAudit: "سجل الأمان",
+    teamInviteNote:
+      "دعوة أعضاء جدد ومصفوفة الصلاحيات تتطلب حقول أدوار في قاعدة البيانات — غير مُنفَّذة في هذه المرحلة. أنشئ الحساب عبر التشغيل/البذرة.",
+    teamAuditFilter: "تصفية حسب الإجراء…",
+    teamAuditExport: "تصدير CSV",
+    teamAuditCount: "{n} حدثاً",
+    teamAuditMeta: "تفاصيل",
+    teamAuditIp: "IP",
+    teamColName: "الاسم",
+    teamColEmail: "البريد",
+    teamColSince: "منذ",
+    teamSecurityLink: "أمان حسابي",
     kindCatalog: "من الكتالوج",
     kindNonCatalog: "خارج الكتالوج",
     modeRequestQuote: "طلب عرض سعر",
@@ -1375,6 +2462,8 @@ const ar: Dict = {
         proposed: "مقترحة",
         negotiating: "قيد التفاوض",
         accepted: "مقبولة",
+        awaiting_payment: "بانتظار الدفع",
+        payment_confirmed: "تأكيد الدفع",
         rejected: "مرفوضة",
         closed: "مغلقة",
       },
@@ -1492,6 +2581,12 @@ const ar: Dict = {
       saveShipping: "حفظ الشحن",
       shippingSaved: "تم حفظ بيانات الشحن.",
       slug: "المعرّف (Slug)",
+      slugAutoHint: "يُولَّد تلقائياً من الاسم — لا يُدخله المشرف.",
+      slugLockedHint: "المعرّف محمي بعد الإنشاء لحماية روابط المتجر.",
+      translateDraftHint: "اقتراح ترجمة — راجع النص الإنجليزي قبل النشر.",
+      translateSuggest: "اقترح الإنجليزية",
+      translatePending: "جاري الاقتراح…",
+      translateFailed: "تعذّر الاقتراح الآن — أدخل الإنجليزية يدوياً.",
       titleAr: "العنوان (عربي)",
       titleEn: "العنوان (إنجليزي)",
       summaryAr: "الملخص (عربي)",
@@ -1530,20 +2625,52 @@ const ar: Dict = {
       productNameEn: "الاسم (إنجليزي)",
       descriptionAr: "الوصف (عربي)",
       descriptionEn: "الوصف (إنجليزي)",
-      specsAr: "المواصفات (عربي)",
-      specsEn: "المواصفات (إنجليزي)",
-      category: "الفئة (مجموعة الإطلاق فقط)",
+      specsAr: "ميزات إضافية (عربي)",
+      specsEn: "ميزات إضافية (إنجليزي)",
+      specsHelp: "نص حر يظهر تحت مواصفات العود فقط — ليس بنوداً مستقلة.",
+      oudSpecsTitle: "مواصفات العود (اختياري)",
+      oudSpecsHint: "املأ ما ينطبق على هذه القطعة. الحقول الفارغة لا تظهر في المتجر.",
+      oudWoodTitle: "نوع الخشب",
+      oudMeasuresTitle: "مقاسات العود",
+      oudDetailsTitle: "المواصفات",
+      oudWoodBack: "الظهر",
+      oudWoodFace: "الوجه",
+      oudWoodPegs: "المفاتيح",
+      oudWoodFingerboard: "لوحة الأصابع",
+      oudWoodBridge: "مربط الأوتار",
+      oudFaceWidth: "عرض الوجه",
+      oudFaceDepth: "عمق الظهر",
+      oudFaceLength: "طول الوجه",
+      oudNeckLength: "طول الزند",
+      oudStringLength: "طول الوتر",
+      oudStandardNeck: "الزند عياري",
+      oudStandardNeckUnset: "غير محدد",
+      oudStandardNeckYes: "عياري",
+      oudStandardNeckNo: "غير عياري",
+      oudFinish: "نوع الطلاء",
+      oudMm: "بالملليمتر",
+      oudAr: "عربي",
+      oudEn: "إنجليزي",
+      category: "الفئة",
       retailPrice: "سعر التجزئة",
       compareAtPrice: "السعر السابق (اختياري)",
       compareAtHelp: "اتركه فارغاً إن لم يكن هناك سعر سابق. يظهر الخصم فقط إذا كان أعلى من سعر التجزئة.",
-      currency: "رمز العملة",
-      currencyHelp: "قابل للضبط — القيمة التجارية الافتراضية ما زالت مفتوحة.",
-      currencyPlaceholder: "مثال: TEST لبيانات الاختبار فقط",
+      currency: "العملة",
+      currencyHelp: "اختر دولار أمريكي أو ليرة سورية.",
+      currencyPlaceholder: "USD أو SYP",
+      currencyUsd: "دولار أمريكي (USD)",
+      currencySyp: "ليرة سورية (SYP)",
       statusLabel: "الحالة",
       availabilityLabel: "التوفر",
       availabilityHelp: "علامة توفر للتجزئة، وليست مخزوناً.",
       wholesaleEligible: "مؤهَّل للجملة",
       wholesaleEligibleHelp: "علامة فقط — لا واجهة جملة مرتبطة بها حالياً.",
+      storeBadges: "شارات المتجر",
+      storeBadgesHelp: "تظهر على بطاقة المنتج وصورة القطعة. يتحكم الأدمن بكل شارة بشكل مستقل.",
+      badgeNew: "جديد",
+      badgeFeatured: "مميّز",
+      badgeSale: "خصم",
+      previewStorefront: "معاينة في المتجر",
       saveProduct: "حفظ المنتج",
       saving: "جارٍ الحفظ…",
     },
@@ -1555,16 +2682,98 @@ const ar: Dict = {
     newDeal: "اقتراح صفقة",
     wholesale: "الجملة",
     wholesaleRequests: "طلبات الجملة",
+    brokerage: "الوساطة",
+    newBrokerage: "طلب وساطة",
+    taskBrokerageTitle: "اطلب وساطة",
+    taskBrokerageBody: "رأينا قطعة؟ نعاينها ونرسل عرضاً قبل الشراء.",
     offers: "العروض العامة",
     profile: "حسابي",
     logout: "خروج",
     welcome: "أهلاً، {name}",
+    waitingToday: "{n} أمور بانتظارك اليوم · {date}",
+    waitingTodayZero: "لا شيء بانتظارك اليوم · {date}",
     lead: "فاوض على الصفقات وقدّم طلبات الجملة من مخزون RARE OUD — هذه البوابة ليست متجراً.",
     homeTasksTitle: "ابدأ من هنا",
     taskDealTitle: "اقترح صفقة",
     taskDealBody: "قدّم عرضاً تجارياً على قطعة من الكتالوج أو خارجها.",
     taskWholesaleTitle: "اطلب بالجملة",
     taskWholesaleBody: "اختر القطع والكميات؛ الإدارة ترد بعرض السعر.",
+    homeStatsTitle: "نشاطك",
+    homeStatDeals: "صفقات",
+    homeStatWholesale: "طلبات جملة",
+    homeStatBrokerage: "وساطة",
+    homeStatOpen: "مفتوحة",
+    dealSuccessTitle: "أُرسل الاقتراح",
+    dealSuccessBody: "سيظهر في قائمتك ويمكنك متابعة التفاوض من صفحة الصفقة.",
+    dealSuccessContinue: "فتح الصفقة",
+    wholesaleSuccessTitle: "أُرسل طلب الجملة",
+    wholesaleSuccessBody: "سيظهر في قائمتك، وسيتواصل معك الفريق بعرض السعر.",
+    wholesaleSuccessContinue: "فتح الطلب",
+    brokerageSuccessTitle: "أُرسل طلب الوساطة",
+    brokerageSuccessBody: "سيراجع الفريق التفاصيل ويتواصل معك بعرض المعاينة.",
+    brokerageSuccessContinue: "فتح الطلب",
+    offersViewDetails: "التفاصيل",
+    notificationsFilterAll: "الكل",
+    notificationsFilterDeal: "صفقات",
+    notificationsFilterWholesale: "جملة",
+    notificationsFilterBrokerage: "وساطة",
+    brokerageWizardTitle: "طلب وساطة جديد",
+    brokerageExplainerTitle: "الدفع أولاً ثم المتابعة",
+    brokerageExplainerBody:
+      "تُدخل رقم الموديل والسعر الذي تبلغ به. بعدها تفتح محادثة واتساب مع الإدارة للدفع. بعد تأكيد الإدارة لنجاح الدفع تُفتح بقية مراحل الوساطة (معاينة وشراء وشحن).",
+    brokerageStepWhat: "القطعة",
+    brokerageStepWhere: "المكان",
+    brokerageStepExpectations: "التوقعات",
+    brokerageStepReview: "مراجعة",
+    brokerageFieldDescription: "وصف القطعة",
+    brokerageFieldCategory: "رقم الموديل",
+    brokerageFieldQuantity: "الكمية",
+    brokerageFieldCity: "المدينة",
+    brokerageFieldPlace: "اسم المكان",
+    brokerageFieldSeller: "تواصل البائع",
+    brokerageFieldSource: "رابط (اختياري)",
+    brokerageFieldBudgetMin: "السعر (USD)",
+    brokerageFieldBudgetMax: "إلى",
+    brokerageFieldNotes: "ملاحظات",
+    brokerageSubmit: "إرسال الطلب",
+    brokerageSubmitting: "جارٍ الإرسال…",
+    brokerageQuoteAwaiting: "العرض بانتظار قرارك",
+    brokerageApprove: "موافقة",
+    brokerageDecline: "رفض العرض",
+    brokerageConfirmApproveTitle: "الموافقة على عرض الوساطة؟",
+    brokerageConfirmApproveBody:
+      "الموافقة تقبل المبلغ والعمولة والشحن كما في بطاقة العرض.",
+    brokerageConfirmDeclineTitle: "رفض عرض الوساطة؟",
+    brokerageConfirmDeclineBody: "الرفض يُنهي مسار العرض الحالي لهذا الطلب.",
+    brokerageListTitle: "طلبات الوساطة",
+    brokerageListSubtitle:
+      "نتابع القطعة، نعاينها، ونرسل عرضاً قبل أي شراء",
+    brokerageNewCta: "طلب وساطة",
+    brokerageStatTotal: "الكل",
+    brokerageStatInProgress: "قيد المتابعة",
+    brokerageStatNeedsYou: "ينتظرك",
+    brokerageStatNeedsYouHint: "رد الآن",
+    brokerageStatClosed: "مغلق",
+    brokerageEmptyTitle: "لا طلبات بعد",
+    brokerageEmptyBody:
+      "ابدأ أول وساطة — نعاين القطعة ونرسل عرضاً قبل الشراء",
+    brokerageNeedsYouChip: "ينتظرك",
+    brokerageMyRequests: "طلباتي",
+    brokerageYourRequest: "طلبك",
+    brokeragePath: "مسار الوساطة",
+    brokerageYourPhotos: "صور الطلب",
+    brokerageNoPhotos: "لا صور مرفقة بعد",
+    brokerageInfoNeeded: "معلومات مطلوبة",
+    brokerageQuoteTitle: "عرض الأسعار",
+    brokerageGoodsValue: "قيمة البضاعة",
+    brokerageCommission: "العمولة",
+    brokerageShipping: "الشحن",
+    brokerageQuoteTotal: "الإجمالي",
+    brokerageInspectionReport: "تقرير المعاينة",
+    brokerageGrade: "التقدير",
+    brokerageInspectionPhotos: "صور المعاينة",
+    brokerageTimeline: "الخط الزمني",
+    brokeragePiecePhotos: "صور القطعة",
     myDeals: "صفقاتي ({n})",
     waitingTitle: "بانتظارك",
     waitingIdle: "لا شيء بانتظارك الآن",
@@ -1575,6 +2784,8 @@ const ar: Dict = {
       proposed: "مقترحة",
       negotiating: "قيد التفاوض",
       accepted: "مقبولة",
+      awaiting_payment: "بانتظار الدفع",
+      payment_confirmed: "تأكيد الدفع",
       rejected: "مرفوضة",
       closed: "مغلقة",
     },
@@ -1615,6 +2826,7 @@ const ar: Dict = {
     waitingOnYou: "بانتظارك",
     waitingOnAdmin: "بانتظار الإدارة",
     dealsTitle: "مقترحات صفقاتي",
+    dealsLead: "تابع مقترحاتك المرسلة وتفاوض مباشرة مع فريق RARE OUD.",
     dealsEmpty: "لا توجد مقترحات بعد",
     dealsEmptyBody: "ابدأ بتقديم أول مقترح صفقة إلى RARE OUD.",
     dealsTabList: "تصفية الصفقات",
@@ -1648,6 +2860,9 @@ const ar: Dict = {
     wizardLeaveConfirm: "لديك مسودة غير مرسلة. هل تريد المغادرة؟",
     wizardNeedTitle: "أدخل عنوان الصفقة للمتابعة.",
     wizardNeedProduct: "اختر منتجاً من الكتالوج للمتابعة.",
+    wizardNeedModel: "أدخل رقم الموديل للمتابعة.",
+    wizardNeedPrice: "أدخل سعراً موجباً للمتابعة.",
+    wizardNeedCurrency: "اختر العملة للمتابعة.",
     recentActivity: "نشاطي الأخير",
     recentActivityEmpty: "لا نشاط حديث بعد.",
     activityDeal: "صفقة {ref}",
@@ -1669,13 +2884,34 @@ const ar: Dict = {
     productPlaceholder: "اختر المنتج",
     nonCatalogNote:
       "المقترحات خارج الكتالوج لا تُنشئ ولا تعدّل أي منتجات أو تصنيفات.",
-    priceOptional: "السعر المقترح (اختياري)",
+    modelNumberLabel: "رقم الموديل",
+    priceOptional: "السعر (مطلوب)",
     currencyLabel: "العملة",
+    currencyUsd: "دولار أمريكي (USD)",
+    currencySyp: "ليرة سورية (SYP)",
     quantityLabel: "الكمية",
     conditionsLabel: "الشروط / ملاحظات",
     initialMessageLabel: "الرسالة الأولى",
     submitProposal: "إرسال المقترح",
     submitting: "جارٍ الإرسال…",
+    dealPayTitle: "ادفع عبر واتساب",
+    dealPayBody:
+      "افتح واتساب لإتمام التحويل بالسعر المتفق. بعد الدفع تنتظر تأكيد الإدارة.",
+    dealPayOpenWa: "فتح واتساب للدفع",
+    dealPayUnavailable:
+      "رابط واتساب غير جاهز بعد — تواصل مع الإدارة أو أعد المحاولة لاحقاً.",
+    dealPayConfirmed: "أكدت الإدارة استلام الدفع واكتمال الطلب.",
+    wsHandoffTitle: "أكمل طلب الجملة عبر واتساب",
+    wsHandoffBody:
+      "افتح واتساب وأرسل رسالة تأكيد الطلب المعدّة إلى فريق RARE OUD لإتمام تفاصيل الدفع والتسليم.",
+    wsHandoffOpenWa: "فتح واتساب لتأكيد الطلب",
+    wsHandoffUnavailable:
+      "رابط واتساب غير جاهز بعد — تواصل مع الإدارة أو أعد المحاولة لاحقاً.",
+    brokeragePayTitle: "ادفع عبر واتساب لإكمال الوساطة",
+    brokeragePayBody:
+      "افتح واتساب وأتمّ التحويل. بعد تأكيد الإدارة تُفتح بقية مراحل الوساطة.",
+    negCounterPriceLocked:
+      "السعر ثابت بعد مقترح التاجر — العرض المقابل يعدّل الكمية أو الملاحظات فقط.",
     dealProduct: "المنتج",
     dealNonCatalog: "خارج الكتالوج (بلا ربط بمنتج)",
     dealSnapshot: "الملخص التجاري",
@@ -1773,12 +3009,46 @@ const ar: Dict = {
     notificationsMarkAll: "تعليم الكل كمقروء",
     notificationsMarkRead: "مقروء",
     notificationsOpen: "فتح",
+    notificationsShowMore: "عرض المزيد",
+    notificationsGroupedCount: "{n} تحديثات",
+    messagesTitle: "الرسائل",
+    messagesLead:
+      "محادثة واحدة موحّدة مع فريق RARE OUD — سواء كتبت هنا أو عبر واتساب، تبقى كل الرسائل في نفس السياق. إن توقف واتساب لأي سبب، تقدر تستمر بالتواصل من هنا مباشرة.",
+    messagesEmpty: "لا رسائل بعد",
+    messagesEmptyBody: "ابدأ المحادثة مع فريق RARE OUD برسالة من الأسفل.",
+    messagesPlaceholder: "اكتب رسالتك…",
+    messagesSend: "إرسال",
+    messagesSending: "جارٍ الإرسال…",
+    messagesChannelWhatsapp: "عبر واتساب",
+    messagesChannelPlatform: "عبر المنصة",
+    messagesErrorEmpty: "اكتب رسالة أولاً",
+    messagesErrorTooLong: "الرسالة أطول من الحد المسموح",
+    messagesErrorGeneric: "تعذّر إرسال الرسالة — حاول مرة أخرى",
     offersTitle: "العروض العامة المختارة",
     offersLead: "عروض RARE OUD المنشورة فقط — وليست متاجر للتجّار.",
     offersEmpty: "لا توجد عروض منشورة بعد.",
     offersBack: "العودة إلى العروض",
     offersRelatedProduct: "المنتج المرتبط",
     offersStartDeal: "بدء صفقة من هذا العرض",
+    confirmCancel: "إلغاء",
+    negConfirmAcceptTitle: "قبول هذه الصفقة؟",
+    negConfirmAcceptBody:
+      "القبول يُقفل السعر المتفق ويفتح دفع واتساب — الإدارة تؤكّد الاستلام لإكمال الطلب.",
+    negConfirmCloseTitle: "إغلاق هذه الصفقة؟",
+    negConfirmCloseBody: "الإغلاق يُنهي التفاوض دون قبول. لا يمكن التراجع من هنا.",
+    negConfirmRejectTitle: "رفض هذه الصفقة؟",
+    negConfirmRejectBody: "الرفض يُنهي الصفقة. يمكنك إضافة سبب يظهر للتاجر.",
+    wsConfirmAcceptTitle: "قبول عرض السعر؟",
+    wsConfirmAcceptBody: "القبول يعني نيّة التنفيذ على الأسعار المعروضة.",
+    wsConfirmDeclineTitle: "رفض عرض السعر؟",
+    wsConfirmDeclineBody: "رفض العرض يُلغي طلب الجملة. يمكنك إرسال طلب جديد لاحقاً.",
+    wsConfirmCancelTitle: "إلغاء طلب الجملة؟",
+    wsConfirmCancelBody: "سيُلغى الطلب ولن تتمكن من تعديله بعد الإلغاء.",
+    actionErrorUnauthorized: "انتهت جلستك. سجّل الدخول من جديد.",
+    actionErrorNotAllowed: "هذا الإجراء غير متاح لهذه الحالة.",
+    actionErrorInvalid: "تعذّر إرسال البيانات. راجع الحقول وحاول مرة أخرى.",
+    actionErrorGeneric: "تعذّر إكمال العملية. حاول مرة أخرى.",
+    actionError: {},
   },
   inbox: {
     title: "صندوق واتساب",
@@ -1859,15 +3129,25 @@ const ar: Dict = {
     authRequired: "يتطلب ربط الحساب",
     error: "خطأ في الاتصال",
     sendingPaused: "الإرسال عبر واتساب متوقف مؤقتاً",
+    platformFallbackNotice:
+      "واتساب غير متصل — ستصل رسالتك للتاجر فوراً عبر رسائل المنصة (يظهر له إشعار ضمن حسابه).",
     rateLimited: "تم بلوغ حد الإرسال، حاول بعد قليل",
     linkAccount: "ربط الحساب",
     reconnect: "إعادة الاتصال",
     nonText: "مرفق",
     retry: "إعادة المحاولة",
+    statusDelivered: "تم التسليم",
+    statusRead: "تمت القراءة",
+    channelPlatform: "عبر منصة التاجر",
     newMessages: "رسائل جديدة ↓",
     linkRecord: "ربط بسجل",
     unlinkConfirm: "إزالة الربط؟",
     pickRecord: "اختيار سجل",
+    quickRepliesLabel: "ردود سريعة",
+    quickReplyGreeting: "مرحباً، تواصلنا بخصوص طلبك لدى RARE OUD.",
+    quickReplyFollowUp: "نود متابعة طلبك — هل يناسبك الرد خلال اليوم؟",
+    quickReplyThanks: "شكراً لتواصلك. سنعود إليك فور توفر التفاصيل.",
+    typeBrokerage: "وساطة",
     searchRecords: "بحث بالمرجع…",
     openContext: "التفاصيل",
     confirmLink: "تأكيد الربط",
@@ -1886,6 +3166,21 @@ const ar: Dict = {
     pairingNotLinked: "لا يوجد حساب مرتبط",
     pairingError: "تعذّر ربط الحساب، تحقق من الرقم وحاول مرة أخرى",
     pairingLogout: "تسجيل الخروج من الحساب",
+    msgLocation: "موقع",
+    msgContact: "جهة اتصال",
+    attachFile: "إرفاق ملف",
+    attachCaption: "تعليق (اختياري)",
+    voiceRecord: "تسجيل صوتي",
+    voiceRecording: "جارٍ التسجيل…",
+    voiceStop: "إيقاف",
+    voiceCancel: "إلغاء",
+    voiceDenied: "لم يُسمح بالوصول إلى الميكروفون",
+    crmParty: "سجل العميل / التاجر",
+    crmSuggest: "اقتراحات من رقم الهاتف",
+    crmLinkCustomer: "ربط كعميل",
+    crmLinkTrader: "ربط كتاجر",
+    crmClear: "إزالة ربط السجل",
+    crmNone: "لا يوجد ربط بسجل عميل أو تاجر",
   },
   common: {
     language: "EN",
@@ -1909,17 +3204,28 @@ const ar: Dict = {
     errorOffline: "لا يوجد اتصال بالإنترنت",
     backOnline: "عاد الاتصال بالإنترنت",
     toastDismiss: "إغلاق الإشعار",
+    themeLight: "فاتح",
+    themeDark: "داكن",
+    themeGroup: "مظهر الواجهة",
+    navLabelAdmin: "إدارة",
+    navLabelTrader: "تاجر",
     goToPortal: "الانتقال إلى بوابتك",
     signOut: "تسجيل الخروج",
     navOps: "التشغيل",
     navCatalog: "الكتالوج",
     navPeople: "الأشخاص",
+    navSystem: "النظام",
+    adminBrandSub: "لوحة الإدارة",
     switchOn: "مفعّل",
     switchOff: "متوقف",
     paginationPrevious: "السابق",
     paginationNext: "التالي",
     paginationPageOf: "صفحة {page} من {pages}",
     timelineLabel: "سجل النشاط",
+    greetingMorning: "صباح الخير",
+    greetingAfternoon: "طاب يومك",
+    greetingEvening: "مساء الخير",
+    greetingNamed: "{greeting}، {name}",
   },
   contact: {
     title: "تواصل معنا",
@@ -1947,13 +3253,104 @@ const ar: Dict = {
     s3Body:
       "[PLACEHOLDER] قسم تجريبي. يضع العميل هنا نص ملفات الارتباط وقنوات التواصل المعتمد.",
   },
+  terms: {
+    title: "شروط الاستخدام",
+    fallbackBody: "محتوى الشروط قيد الإعداد.",
+  },
   auth: {
     adminTitle: "دخول الإدارة",
-    traderTitle: "دخول التجّار",
+    traderTitle: "دخول التاجر",
     traderHint: "الحسابات تُنشأ من الإدارة فقط — لا تسجيل ذاتي عام.",
+    roleAdmin: "إدارة",
+    roleTrader: "تاجر",
+    tagline: "آلات عود نادرة — مصنوعة يدوياً",
+    headline: "صدى الصنعة، محفوظ بدقّة",
+    adminSubtitle:
+      "صلاحية كاملة على التجزئة والصفقات والجملة والوساطة وصندوق واتساب",
+    traderSubtitle:
+      "اقترح صفقات، اطلب بالجملة، واطلب وساطة على قطعة رأيتها",
+    capsLockOn: "مفتاح Caps Lock مُفعَّل",
+    rateLimitFooter:
+      "محاولات الدخول المتكررة تُوقَف مؤقتاً لحماية حسابك",
+    forgotPassword: "نسيت كلمة المرور؟",
+    forgotTitle: "استعادة الوصول",
+    forgotSubtitle:
+      "حسابات الإدارة والتجّار تُدار من فريق RARE OUD — لا إعادة تعيين ذاتية بالبريد. تواصل عبر واتساب لإعادة التعيين الآمن.",
+    forgotWhatsApp: "تواصل عبر واتساب",
+    forgotWhatsAppMessage:
+      "مرحباً، أحتاج مساعدة لاستعادة الوصول إلى حسابي في RARE OUD.",
+    backToSignIn: "العودة لتسجيل الدخول",
     loginError: "البريد أو كلمة المرور غير صحيحة.",
+    loginLocked: "محاولات كثيرة. انتظر قليلاً ثم أعد المحاولة.",
+    totpLabel: "رمز التحقق أو الاسترداد",
+    totpRequired: "أدخل رمز التحقق أو رمز الاسترداد.",
+    totpInvalid: "رمز التحقق غير صحيح.",
+    totpEnrollRequired: "فعّل التحقق بخطوتين من إعدادات الأمان قبل الدخول.",
+    totpEnrollButton: "ابدأ تفعيل التحقق بخطوتين",
+    totpResetButton: "إعادة ضبط التحقق بخطوتين",
     showPassword: "إظهار",
     hidePassword: "إخفاء",
+    sessionInvalidatedNotice:
+      "تم تغيير كلمة المرور من جهاز آخر. سجّل الدخول من جديد.",
+    profileTitle: "حسابي",
+    profileSubtitle: "بياناتك الشخصية وإعدادات الأمان لهذا الحساب.",
+    appearanceLead: "اختر الوضع الداكن أو الفاتح لواجهة الإدارة على هذا الجهاز.",
+    profileTab: "الملف",
+    securityTab: "الأمان",
+    profileName: "الاسم",
+    profileEmail: "البريد الإلكتروني",
+    profileRole: "الدور",
+    profileRoleAdmin: "مسؤول",
+    profileSecurityNote:
+      "تغيير كلمة المرور يسجّل خروجك تلقائياً من الأجهزة الأخرى.",
+    profileOpenSecurity: "إدارة كلمة المرور والتحقق بخطوتين",
+    sessionsTab: "الجلسات",
+    activeSessions: "الجلسات النشطة",
+    activeSessionsDesc:
+      "لا نخزّن قائمة أجهزة مفصّلة. تسجيل الخروج من الأجهزة الأخرى يعتمد على إبطال الجلسات عبر إصدار كلمة المرور (pwv).",
+    currentSession: "هذه الجلسة",
+    signOutOthers: "تسجيل الخروج من الأجهزة الأخرى",
+    signOutOthersTitle: "تسجيل الخروج من كل الجلسات الأخرى؟",
+    signOutOthersDesc:
+      "ستحتاج كل الأجهزة الأخرى إلى تسجيل الدخول مجدداً. هذه الجلسة الحالية تبقى متصلة.",
+    signedOutOthers: "تم تسجيل الخروج من الأجهزة الأخرى.",
+    avatarUnavailable:
+      "رفع الصورة الشخصية غير متاح بعد — يتطلب حقل تخزين في قاعدة البيانات.",
+  },
+  forcePasswordChange: {
+    title: "عيّن كلمة مرور جديدة",
+    subtitle: "هذه خطوة لمرة واحدة",
+    explanation:
+      "أعادت الإدارة تعيين كلمة مرور حسابك. لأسباب أمنية لا تستطيع الإدارة رؤية كلمة مرورك الحالية في أي وقت — عليك اختيار كلمة مرور جديدة الآن قبل المتابعة.",
+    currentPassword: "كلمة المرور المؤقتة الحالية",
+    newPassword: "كلمة المرور الجديدة",
+    confirmPassword: "تأكيد كلمة المرور",
+    mismatch: "كلمتا المرور غير متطابقتين",
+    submit: "تعيين كلمة المرور والمتابعة",
+    strengthLabel: "قوة كلمة المرور",
+    strengthWeak: "ضعيفة",
+    strengthFair: "مقبولة",
+    strengthGood: "جيدة",
+    strengthStrong: "قوية",
+    strengthVeryStrong: "قوية جداً",
+    ruleLength: "10 أحرف على الأقل",
+    ruleNotTemp: "مختلفة عن كلمة المرور المؤقتة",
+    ruleNotEmail: "مختلفة عن بريدك الإلكتروني",
+    errorCurrentWrong: "كلمة المرور الحالية غير صحيحة.",
+    errorWeak: "كلمة المرور يجب أن تكون 10 أحرف على الأقل.",
+    errorSameAsTemp: "لا يمكن استخدام كلمة المرور المؤقتة نفسها.",
+    errorSameAsEmail: "لا يمكن أن تكون كلمة المرور بريدك الإلكتروني.",
+    success: "تم تعيين كلمة المرور. سجّلنا خروجك من الأجهزة الأخرى.",
+    signOut: "تسجيل الخروج",
+    showPassword: "إظهار",
+    hidePassword: "إخفاء",
+  },
+  changePassword: {
+    sectionTitle: "تغيير كلمة المرور",
+    sectionLead: "استخدم كلمة مرور قوية خاصة بهذا الحساب فقط.",
+    currentPassword: "كلمة المرور الحالية",
+    submit: "تحديث كلمة المرور",
+    success: "تم تحديث كلمة المرور.",
   },
   seo: {
     catalogDescription:
@@ -2013,7 +3410,11 @@ const en: Dict = {
     categoriesIntro: "The two launch categories on the platform — distinct visual worlds within the RARE OUD identity.",
     categoriesCta: "Explore",
     categoryDescInstruments: "Discover the first collection in the catalog.",
-    categoryDescAccessories: "Discover the second collection in the catalog.",
+    categoryDescAccessories: "Selected accessories for travel and daily play.",
+    categoryDescEconomy: "Workshop ouds for practice and everyday playing.",
+    categoryDescMid: "Balanced ouds for regular use and studio work.",
+    categoryDescProfessional: "Concert ouds with clearer tone and quick response.",
+    categoryDescVip: "Rare pieces with selected woods and atelier finishing.",
     oudEyebrow: "Rarity",
     oudTitle: "Rare material, considered selection",
     oudBody:
@@ -2089,14 +3490,14 @@ const en: Dict = {
     search: "Search",
     filters: "Filters",
     allCategories: "All categories",
-    lead: "Pieces chosen with care: oud, string instruments and accessories. Pick what catches your eye and add it to your request list.",
+    lead: "Four oud tiers — economy, mid, professional, VIP — plus selected accessories. Pick what catches your eye and add it to your request list.",
     photoCaption: "Photography in progress",
     filtersTitle: "Filter & sort",
     typeLabel: "Type",
     priceLabel: "Price",
     priceMin: "Min",
     priceMax: "Max",
-    priceCurrencyHint: "Catalog currency code (e.g. USD)",
+    priceCurrencyHint: "Catalog currency: USD or Syrian pound",
     priceCurrencyShort: "ccy",
     showResultsForms: {
       zero: "Show {n} pieces",
@@ -2160,6 +3561,41 @@ const en: Dict = {
     priceWas: "Was",
     priceNow: "Now",
     onSale: "On offer",
+    extras: "Extra features",
+    aboutThisPiece: "About this piece",
+    featureBullets: "Highlights",
+    craftStory: "Workshop craft",
+    craftStoryBody:
+      "Each oud is presented as its own piece — wood, face, and finish are part of its identity, not a generic catalog SKU.",
+    soundStory: "Presence and tone",
+    soundStoryBody:
+      "Editorial photos here are temporary for layout. The real piece is confirmed through the request and WhatsApp handoff.",
+    trustNoPayment: "No online payment — the request finishes on WhatsApp.",
+    trustHandoff: "We receive your list and reply with availability details.",
+    trustUnique: "Limited pieces; availability is shown on the page.",
+    trustWhatsApp: "Direct chat after you submit the request.",
+    qtyLabel: "Quantity",
+    oudSpecs: {
+      title: "Oud specifications",
+      wood: "Wood type",
+      measures: "Oud measurements",
+      details: "Specifications",
+      back: "Back",
+      face: "Face",
+      pegs: "Keys",
+      fingerboard: "Fingerboard",
+      bridge: "String holder",
+      faceWidth: "Face width",
+      faceDepth: "Back depth",
+      faceLength: "Face length",
+      neckLength: "Neck length",
+      stringLength: "String length",
+      standardNeck: "Standard neck",
+      standardNeckYes: "Standard",
+      standardNeckNo: "Non-standard",
+      finish: "Finish type",
+      mm: "mm",
+    },
   },
   cart: {
     title: "Request list",
@@ -2228,11 +3664,14 @@ const en: Dict = {
     traders: "Traders",
     deals: "Deals",
     wholesale: "Wholesale",
+    brokerage: "Brokerage",
     offers: "Offers",
     promos: "Promos",
-    kpiRetail: "Requests needing admin",
+    kpiRetail: "New retail requests",
     kpiDeals: "Deals awaiting reply",
-    kpiWholesale: "Wholesale awaiting reply",
+    kpiWholesale: "Wholesale requests",
+    kpiBrokerage: "Active brokerage",
+    kpiWaitingTotal: "Total waiting",
     kpiUnread: "Unread conversations",
     kpiIdle: "Nothing waiting for you",
     recentRequests: "Recent retail requests",
@@ -2241,6 +3680,8 @@ const en: Dict = {
     actionOpen: "Open",
     actionEmpty: "Nothing waiting for you",
     activityEmpty: "No events yet.",
+    activityShowMore: "Show more",
+    activityShowLess: "Show less",
     nextActorAdmin: "Waiting on admin",
     lastConnected: "Last connected",
     neverConnected: "No connection recorded yet",
@@ -2260,15 +3701,16 @@ const en: Dict = {
     colAvailability: "Availability",
     colPrice: "Price",
     colCategory: "Category",
-    imagesTitle: "Product images & video",
-    imagesEmpty: "No media yet — upload an image or video below.",
+    imagesTitle: "Product images, video & audio",
+    imagesEmpty: "No media yet — upload an image, video, or audio below.",
     imagesLimits:
-      "Image: JPEG / PNG / WebP up to 8 MB (longest side ≥ 1600 px) · Video: MP4 / WebM up to 48 MB · max 8 files",
-    imagesAdd: "Upload image or video",
-    imagesFileLabel: "Choose image or video",
+      "Image: JPEG / PNG / WebP up to 8 MB (longest side ≥ 1600 px) · Video: MP4 / WebM up to 48 MB · Audio: MP3 / OGG up to 16 MB · max 8 files",
+    imagesAdd: "Upload image, video, or audio",
+    imagesFileLabel: "Choose image, video, or audio",
     imagesKindVideo: "Video",
+    imagesKindAudio: "Audio",
     imagesAfterSaveHint:
-      "Save the product details first — you will then open the edit page to upload images and video.",
+      "Save the product details first — you will then open the edit page to upload images, video, and audio.",
     imagesAltAr: "Alt text (Arabic)",
     imagesAltEn: "Alt text (English)",
     imagesPrimary: "Primary",
@@ -2277,14 +3719,235 @@ const en: Dict = {
     imagesMoveLater: "Move later",
     imagesUploading: "Uploading…",
     imagesErrorType:
-      "Unsupported file type. Use JPEG/PNG/WebP images or MP4/WebM video.",
-    imagesErrorSize: "File exceeds the limit (8 MB for images, 48 MB for video).",
+      "Unsupported file type. Use JPEG/PNG/WebP images, MP4/WebM video, or MP3/OGG audio.",
+    imagesErrorSize:
+      "File exceeds the limit (8 MB for images, 48 MB for video, 16 MB for audio).",
     imagesErrorDim: "For images: longest side must be at least 1600 px.",
     imagesErrorMax: "Maximum of 8 media files reached.",
     imagesErrorGeneric: "Could not upload the file.",
     quickProduct: "Product",
     quickOffer: "Offer",
     quickTrader: "Trader account",
+    waitingToday: "{n} items waiting today · {date}",
+    waitingTodayZero: "Nothing waiting today · {date}",
+    filterAll: "All {n}",
+    filterRetail: "Retail",
+    filterDeals: "Deals",
+    filterWholesale: "Wholesale",
+    trendUp: "+{n} vs yesterday",
+    trendDown: "−{n} vs yesterday",
+    trendFlat: "Unchanged",
+    contentHealth: "Catalog health",
+    contentHealthRatio: "{have} of {total}",
+    contentHealthMissing: "{n} pieces still need their own photos",
+    contentHealthComplete: "Every published piece has photos",
+    pipeline: "Request path",
+    pipelineLegend: "New · Follow-up · Opened · Done",
+    domainMixTitle: "Domain mix",
+    requestsOverDays: "Requests over 14 days",
+    requestsOverDaysTotal: "Total",
+    requestsOverDaysDay: "Day {n}",
+    firstUseTitle: "Start here",
+    firstUseBody:
+      "Publish a product, create a trader, or wait for the first request — the dashboard fills itself.",
+    firstUseAction: "Add product",
+    whatsappNoun: "WhatsApp",
+    whatsappLastMessage: "Last message {relative}",
+    whatsappNoMessage: "No messages yet",
+    piecesCount: "{n} pieces",
+    commandSearch: "Search or command",
+    commandPlaceholder: "Search a request, product, or trader…",
+    commandEmpty: "No results",
+    commandSearching: "Searching…",
+    commandQuickActions: "Quick actions",
+    commandNavigate: "Go to",
+    quickCreate: "Quick create",
+    manageHub: "Manage",
+    settings: "Security",
+    team: "Team",
+    savedToast: "Saved.",
+  },
+  ad2: {
+    breadcrumbAdmin: "Admin",
+    searchPlaceholder: "Search or command…",
+    export: "Export",
+    create: "Create",
+    newProduct: "Create new product",
+    newOffer: "Create offer",
+    newTrader: "Add trader",
+    exportCsv: "Export requests (CSV)",
+    notifications: "Notifications",
+    collapseMenu: "Collapse menu",
+    expandMenu: "Expand menu",
+    needsAction: "Needs your action",
+    awaitingYouSuffix: "awaiting you",
+    kpiRetailNew: "New retail requests",
+    kpiWholesale: "Wholesale requests",
+    deltaVsLastWeek: "vs. last week",
+    deltaFlat: "No change",
+    tabAll: "All",
+    listFooter: "Showing {shown} of {total}",
+    viewAll: "View all",
+    emptyQueueTitle: "Nothing waiting here",
+    emptyQueueBody: "Everything in this section has been handled.",
+    openRow: "Open",
+    chartTitle: "Requests",
+    rangeDays: "{n} days",
+    waTitle: "WhatsApp connection",
+    waConnected: "Connected",
+    waConnecting: "Connecting",
+    waReconnecting: "Reconnecting",
+    waDisconnected: "Disconnected",
+    waAuthRequired: "Needs authentication",
+    waError: "Connection error",
+    waDescriptionZero: "Sending is currently disabled.",
+    waOpenInbox: "Open inbox",
+    activityTitle: "Recent activity",
+    userRole: "System admin",
+    paletteSearchPlaceholder: "Search a request, customer, or product, or type a command…",
+    paletteEmpty: "No results for “{q}”",
+    paletteNavGroup: "Go to",
+    paletteActionsGroup: "Quick actions",
+    paletteNav: "Navigate",
+    paletteOpen: "Open",
+    paletteClose: "Close",
+    pendingZero: "Nothing",
+    pendingOne: "1 item",
+    pendingTwo: "2 items",
+    pendingFew: "{n} items",
+    pendingMany: "{n} items",
+    pendingOther: "{n} items",
+    waUnreadZero: "No unread conversations waiting in the inbox.",
+    waUnreadOne: "You have 1 unread conversation waiting in the inbox.",
+    waUnreadTwo: "You have 2 unread conversations waiting in the inbox.",
+    waUnreadFew: "You have {n} unread conversations waiting in the inbox.",
+    waUnreadMany: "You have {n} unread conversations waiting in the inbox.",
+    waUnreadOther: "You have {n} unread conversations waiting in the inbox.",
+    chartCaptionZero: "No requests",
+    chartCaptionOne: "1 request",
+    chartCaptionTwo: "2 requests",
+    chartCaptionFew: "{n} requests",
+    chartCaptionMany: "{n} requests",
+    chartCaptionOther: "{n} requests",
+    rowRequestZero: "No pieces",
+    rowRequestOne: "1 piece",
+    rowRequestTwo: "2 pieces",
+    rowRequestFew: "{n} pieces",
+    rowRequestMany: "{n} pieces",
+    rowRequestOther: "{n} pieces",
+    menuLabel: "Menu",
+    moreTab: "More",
+    skipToContent: "Skip to content",
+    statusNew: "New",
+    statusAwaitingReply: "Awaiting your reply",
+    statusInProgress: "In progress",
+    statusReady: "Ready",
+    pieceSuffixRetail: "Retail request",
+  },
+  ib: {
+    searchPlaceholder: "Search by name, request number, or text…",
+    searchLabel: "Search conversations",
+    filterAll: "All",
+    filterUnread: "Unread",
+    filterLinked: "Linked",
+    filterUnlinked: "Unlinked",
+    connConnected: "Connected",
+    connOutboundOff: "Sending paused",
+    connDisconnected: "Disconnected",
+    connReconnecting: "Reconnecting",
+    emptyListTitle: "No conversations yet",
+    emptyListBody: "Customer messages arriving over WhatsApp will appear here as soon as they come in.",
+    noResultsTitle: "No results",
+    noResultsBody: "Try a different word or change the filter.",
+    selectConvTitle: "Select a conversation",
+    selectConvBody: "Pick a conversation from the list to see its messages. Use J and K to move between conversations.",
+    selectConvHintBefore: "Pick a conversation from the list to see its messages. Use",
+    selectConvHintAfter: "to move between conversations.",
+    previewNoText: "No text messages",
+    threadEmptyTitle: "No messages in this conversation yet",
+    threadEmptyBody: "When a message arrives or you send a reply, it will show up here.",
+    newMessagesZero: "No new messages",
+    newMessagesOne: "1 new message",
+    newMessagesTwo: "2 new messages",
+    newMessagesFew: "{n} new messages",
+    newMessagesMany: "{n} new messages",
+    newMessagesOther: "{n} new messages",
+    bannerOutboundOff:
+      "Sending from the inbox is currently paused. Messages still arrive and you can add internal notes, but a reply is saved here and may need following up from your phone.",
+    bannerReconnecting: "Reconnecting to WhatsApp… new messages may be delayed.",
+    bannerDisconnected: "WhatsApp is disconnected. New messages won't arrive until it's reconnected.",
+    bannerPairAction: "Link account",
+    composerReplyTab: "Reply",
+    composerNoteTab: "Internal note",
+    composerReplyPlaceholder: "Write a reply…",
+    composerNotePlaceholder: "Write an internal note for your team…",
+    composerDisabledOutboundOff: "Replies are paused right now — use an internal note",
+    composerDisabledDisconnected: "Unavailable while disconnected",
+    composerSendHint: "Enter to send · Shift+Enter for a new line",
+    sendButton: "Send",
+    saveNoteButton: "Save note",
+    attachLabel: "Attach",
+    quickRepliesLabel: "Quick replies",
+    noteSystemLabel: "Internal note · not visible to the customer",
+    contextUnlinkLabel: "Unlink",
+    contextLinkLabel: "Link to customer",
+    linkedRecordsHeading: "Linked records",
+    noLinkedRecords: "No records linked to this number yet.",
+    quickActionsHeading: "Quick actions",
+    createRequestFromConv: "Create a request from this conversation",
+    openNewDeal: "Open a new deal",
+    pinConversation: "Pin conversation",
+    notesHeading: "Notes",
+    notesEmpty: "No notes yet.",
+    addNotePlaceholder: "Add an internal note…",
+    addNoteButton: "Add",
+    tagsHeading: "Tags",
+    noTags: "No tags",
+    addTagLabel: "+ Tag",
+    addTagPlaceholder: "Tag name…",
+    backToList: "Back",
+    connSheetTitle: "WhatsApp connection",
+    connSheetClose: "Close",
+    connSheetConnectedBody: "The account is linked and receiving messages. Sending from the inbox is enabled.",
+    connSheetOutboundOffBody:
+      "The account is linked and receiving messages, but sending from the inbox is disabled in server settings.",
+    connSheetReconnectingBody: "A linked session exists and the connection is being restored automatically. No action needed right now.",
+    connSheetDisconnectedBody: "No active linked session. Link the business number to start receiving messages.",
+    connSheetHeartbeatLabel: "Last connection heartbeat {s} seconds ago",
+    connSheetLinkedNumberLabel: "Linked number",
+    connSheetDisconnectButton: "Disconnect account",
+    connSheetStep1: "Open WhatsApp on the business phone",
+    connSheetStep2: "Linked devices → Link a device",
+    connSheetStep3: "Scan the code that will appear here",
+    connSheetPhoneLabel: "Phone number (optional, for code pairing)",
+    connSheetShowQrButton: "Show pairing code",
+    connSheetNoSendNotice: "Nothing is sent to your customers while pairing.",
+    navHint: "Navigate",
+    searchHint: "Search",
+    escHint: "Close/back",
+    searchInThread: "Search in conversation",
+    moreInfo: "Customer info",
+    moreActions: "More",
+    readSent: "Sent",
+    readDelivered: "Delivered",
+    readRead: "Read",
+    profileTab: "Profile",
+    qr1Title: "Delivery details",
+    qr1Body: "Delivery to other governorates takes 3–5 business days; cost depends on destination.",
+    qr2Title: "Payment method",
+    qr2Body: "Payment is by bank transfer — we'll send the account details once the order is confirmed.",
+    qr3Title: "Confirming receipt",
+    qr3Body: "Your message has arrived — someone from our team will follow up within minutes.",
+    previewSticker: "Sticker",
+    previewImage: "Image",
+    previewVideo: "Video",
+    previewAudio: "Audio",
+    previewDocument: "File",
+    previewLocation: "Location",
+    previewContact: "Contact",
+    previewReaction: "Reaction",
+    previewUnsupported: "Unsupported message",
+    previewEmpty: "—",
   },
   adminUi: {
     colReference: "Reference",
@@ -2325,6 +3988,16 @@ const en: Dict = {
     customersLead:
       "Contact records from retail requests. Phone is searchable but not a unique identity.",
     tradersLead: "Accounts are provisioned by admin only. No public registration.",
+    traderDetailLead: "Trader profile, activity across the three lanes, and admin notes.",
+    colWholesale: "Wholesale",
+    colBrokerage: "Brokerage",
+    traderBack: "Back to traders",
+    traderActivity: "Activity summary",
+    traderRecentDeals: "Recent deals",
+    traderRecentWholesale: "Recent wholesale",
+    traderRecentBrokerage: "Recent brokerage",
+    traderNoActivity: "No records in this lane yet.",
+    traderInterests: "Category interests",
     categoriesLead:
       "Manage catalog categories: create, edit names and order. A category with products cannot be deleted.",
     offersLead: "Admin-curated public presentations — not trader storefronts.",
@@ -2343,13 +4016,69 @@ const en: Dict = {
       sand: "Sand",
     },
     searchPlaceholder: "Search name or phone",
+    searchRequests: "Search reference or customer",
+    searchDeals: "Search reference or trader",
+    searchWholesale: "Search reference or trader",
+    searchProducts: "Search name or category",
     search: "Search",
     filterTabs: "Filter list",
     filterAll: "All",
     filterWaiting: "Waiting on you",
+    viewTable: "Table",
+    viewGallery: "Gallery",
+    viewKanban: "Kanban",
+    publishNow: "Publish",
+    unpublish: "Unpublish",
+    completenessAr: "Arabic completeness",
+    completenessEn: "English completeness",
+    livePreview: "Card preview",
+    settingsHubTitle: "Settings",
+    settingsHubLead: "WhatsApp, brand contact, and security — one hub.",
+    settingsWhatsApp: "WhatsApp",
+    settingsWhatsAppLead: "Connection status, re-link, and outbound pause live in the inbox.",
+    settingsBrand: "Brand & contact",
+    settingsBrandLead: "Public contact details come from environment config and the contact page.",
+    settingsSecurity: "Security",
+    settingsSecurityLead: "Password and two-factor for this account.",
+    notificationsTitle: "Alerts center",
+    notificationsLead: "What needs you now — queues and WhatsApp unread.",
+    notificationsEmpty: "Nothing urgent right now.",
+    notificationsUnreadInbox: "Unread conversations",
+    notificationsAwaiting: "Awaiting admin",
+    kanbanConfirmTitle: "Move this request?",
+    kanbanConfirmBody: "The status change applies only if the transition is allowed.",
+    shippingTracker: "Shipping tracker",
+    shipStepOpen: "Open",
+    shipStepQuoted: "Quoted",
+    shipStepShipped: "Shipped",
+    shipStepDelivered: "Delivered / closed",
     negotiationThread: "Negotiation history",
     emptyTitle: "Nothing here yet",
     emptyBody: "Records will appear here once they are created.",
+    sortNewestFirst: "Newest first",
+    sortOldestFirst: "Oldest first",
+    moreProducts: "+{n} more products",
+    listPaginationSummary: "Showing {from}–{to} of {total}",
+    noResultsForQuery: "No results for “{q}”",
+    noResultsHint: "Check spelling or clear some filters.",
+    onRequestPrice: "On request",
+    requestsEmptyTitle: "No requests yet",
+    requestsEmptyBody:
+      "Customer requests from the storefront and WhatsApp will appear here as they arrive.",
+    showPhone: "Show",
+    hidePhone: "Hide",
+    dealsEmptyTitle: "No deals yet",
+    dealsEmptyBody:
+      "When a trader proposes a deal it appears here for negotiation, acceptance, and close — fully separate from retail requests.",
+    dealsEmptyFilteredTitle: "No deals match this filter",
+    dealsEmptyFilteredBody:
+      "Try another tab or clear search to see every deal.",
+    wholesaleEmptyTitle: "No wholesale requests yet",
+    wholesaleEmptyBody:
+      "Trader wholesale requests appear here for quoting, confirmation, and completion — a path separate from retail and deals.",
+    wholesaleEmptyFilteredTitle: "No wholesale requests match this filter",
+    wholesaleEmptyFilteredBody:
+      "Try another tab or clear search to see every wholesale request.",
     newTrader: "Add trader",
     traderCreateTitle: "Create trader account",
     traderCreateLead:
@@ -2372,6 +4101,13 @@ const en: Dict = {
     traderTempPasswordClose: "Done — close",
     traderActivate: "Activate",
     traderDisable: "Disable",
+    traderResetPassword: "Reset password",
+    traderResetPasswordConfirmTitle: "Reset this trader's password?",
+    traderResetPasswordConfirmBody:
+      "A new temporary password will be generated and the old one will stop working. The trader will be required to change it immediately at their next sign-in.",
+    traderResetPasswordConfirmLabel: "Reset",
+    traderDisableTitle: "Disable this trader?",
+    traderDisableBody: "They will not be able to sign in until reactivated. Their records stay visible.",
     categorySave: "Save labels",
     categoryNameAr: "Name (Arabic)",
     categoryNameEn: "Name (English)",
@@ -2393,6 +4129,74 @@ const en: Dict = {
     customerWaTitle: "WhatsApp conversations",
     customerWaEmpty: "No WhatsApp conversations match this customer's phone.",
     customerWaOpen: "Open conversation",
+    customerNotesSave: "Save notes",
+    customerNotesSaved: "Notes saved.",
+    customerNotesFailed: "Could not save notes.",
+    customerNotesInvalid: "The note is longer than allowed.",
+    customerNotesHelper:
+      "Internal admin notes only. Saving does not change a request status or a WhatsApp conversation.",
+    customersFilterWithRequests: "With requests",
+    customersFilterNoRequests: "No requests",
+    customersKpiAll: "All",
+    customersKpiWithRequests: "With requests",
+    customersKpiNew: "New",
+    customersKpiNewHint: "Last 7 days",
+    searchCustomers: "Search name or phone",
+    colLastActivity: "Last activity",
+    colWa: "WhatsApp",
+    customerEditTitle: "Edit contact",
+    customerName: "Name",
+    customerEditSave: "Save details",
+    customerEditSaved: "Details saved.",
+    customerEditFailed: "Could not save details.",
+    customerOpenRequests: "View requests",
+    customerOpenWa: "Open WhatsApp",
+    tradersFilterActive: "Active",
+    tradersFilterDisabled: "Disabled",
+    tradersKpiActive: "Active",
+    tradersKpiDisabled: "Disabled",
+    tradersKpiOpenDeals: "Open deals",
+    searchTraders: "Search name, email, or phone",
+    traderEditTitle: "Edit trader profile",
+    traderEditSave: "Save profile",
+    traderEditSaved: "Profile saved.",
+    traderEditFailed: "Could not save profile.",
+    traderInterestNotes: "Interest notes",
+    traderWaTitle: "WhatsApp conversations",
+    traderWaEmpty: "No WhatsApp conversations linked to this trader.",
+    notificationsFilterAction: "Needs action",
+    notificationsFilterInbox: "Inbox",
+    notificationsFilterTrade: "Trade",
+    notificationsSectionAction: "Needs your action",
+    notificationsSectionInbox: "WhatsApp inbox",
+    notificationsSectionTrade: "Deals & wholesale",
+    notificationsDomainRetail: "Retail",
+    notificationsDomainDeal: "Deal",
+    notificationsDomainWholesale: "Wholesale",
+    settingsProfile: "Profile",
+    settingsProfileLead: "Name, email, and appearance for this account.",
+    settingsWaConnected: "Connected",
+    settingsWaDisconnected: "Disconnected",
+    settingsWaOther: "Other status",
+    settings2faOn: "Two-factor is on",
+    settings2faOffShort: "Off",
+    settings2faOff: "Two-factor is off",
+    teamTitle: "Team & security",
+    teamLead:
+      "Live admin accounts — Owner/Manager/Staff roles are not in the schema yet. Manage 2FA on the security page.",
+    teamTabTeam: "Team",
+    teamTabAudit: "Audit log",
+    teamInviteNote:
+      "Invites and a permission matrix need role fields in the database — not built in this phase. Provision accounts via ops/seed.",
+    teamAuditFilter: "Filter by action…",
+    teamAuditExport: "Export CSV",
+    teamAuditCount: "{n} events",
+    teamAuditMeta: "Details",
+    teamAuditIp: "IP",
+    teamColName: "Name",
+    teamColEmail: "Email",
+    teamColSince: "Since",
+    teamSecurityLink: "My security",
     kindCatalog: "Catalog",
     kindNonCatalog: "Non-catalog",
     modeRequestQuote: "Request quote",
@@ -2410,6 +4214,8 @@ const en: Dict = {
         proposed: "Proposed",
         negotiating: "Negotiating",
         accepted: "Accepted",
+        awaiting_payment: "Awaiting payment",
+        payment_confirmed: "Payment confirmed",
         rejected: "Rejected",
         closed: "Closed",
       },
@@ -2528,6 +4334,12 @@ const en: Dict = {
       saveShipping: "Save shipping",
       shippingSaved: "Shipping details saved.",
       slug: "Slug",
+      slugAutoHint: "Generated automatically from the name — not admin-entered.",
+      slugLockedHint: "Slug is locked after create to protect storefront URLs.",
+      translateDraftHint: "Draft translation — review English before publishing.",
+      translateSuggest: "Suggest English",
+      translatePending: "Suggesting…",
+      translateFailed: "Suggestion unavailable — enter English manually.",
       titleAr: "Title (Arabic)",
       titleEn: "Title (English)",
       summaryAr: "Summary (Arabic)",
@@ -2568,20 +4380,52 @@ const en: Dict = {
       productNameEn: "Name (English)",
       descriptionAr: "Description (Arabic)",
       descriptionEn: "Description (English)",
-      specsAr: "Specs (Arabic)",
-      specsEn: "Specs (English)",
-      category: "Category (launch set only)",
+      specsAr: "Extra features (Arabic)",
+      specsEn: "Extra features (English)",
+      specsHelp: "Free text shown only as extra features — not a separate spec list.",
+      oudSpecsTitle: "Oud specifications (optional)",
+      oudSpecsHint: "Fill only what applies. Empty fields stay hidden on the storefront.",
+      oudWoodTitle: "Wood type",
+      oudMeasuresTitle: "Oud measurements",
+      oudDetailsTitle: "Specifications",
+      oudWoodBack: "Back",
+      oudWoodFace: "Face",
+      oudWoodPegs: "Keys",
+      oudWoodFingerboard: "Fingerboard",
+      oudWoodBridge: "String holder",
+      oudFaceWidth: "Face width",
+      oudFaceDepth: "Back depth",
+      oudFaceLength: "Face length",
+      oudNeckLength: "Neck length",
+      oudStringLength: "String length",
+      oudStandardNeck: "Standard neck",
+      oudStandardNeckUnset: "Not set",
+      oudStandardNeckYes: "Standard",
+      oudStandardNeckNo: "Non-standard",
+      oudFinish: "Finish type",
+      oudMm: "Millimetres",
+      oudAr: "Arabic",
+      oudEn: "English",
+      category: "Category",
       retailPrice: "Retail price",
       compareAtPrice: "Compare-at price (optional)",
       compareAtHelp: "Leave empty if there is no prior price. A discount shows only when this is higher than retail.",
-      currency: "Currency code",
-      currencyHelp: "Configurable — commercial default is still open.",
-      currencyPlaceholder: "e.g. TEST for fixtures only",
+      currency: "Currency",
+      currencyHelp: "Choose US dollar or Syrian pound.",
+      currencyPlaceholder: "USD or SYP",
+      currencyUsd: "US Dollar (USD)",
+      currencySyp: "Syrian Pound (SYP)",
       statusLabel: "Status",
       availabilityLabel: "Availability",
       availabilityHelp: "Retail flag, not inventory.",
       wholesaleEligible: "Wholesale eligible",
       wholesaleEligibleHelp: "Flag only — no wholesale UI is attached to it yet.",
+      storeBadges: "Store badges",
+      storeBadgesHelp: "Shown on the product card and plate. Each badge is independent.",
+      badgeNew: "New",
+      badgeFeatured: "Featured",
+      badgeSale: "Sale",
+      previewStorefront: "Preview on storefront",
       saveProduct: "Save product",
       saving: "Saving…",
     },
@@ -2593,16 +4437,99 @@ const en: Dict = {
     newDeal: "Propose deal",
     wholesale: "Wholesale",
     wholesaleRequests: "Wholesale requests",
+    brokerage: "Brokerage",
+    newBrokerage: "New brokerage",
+    taskBrokerageTitle: "Request brokerage",
+    taskBrokerageBody: "Saw a piece? We inspect and quote before purchase.",
     offers: "Public offers",
     profile: "Profile",
     logout: "Sign out",
     welcome: "Welcome, {name}",
+    waitingToday: "{n} items waiting today · {date}",
+    waitingTodayZero: "Nothing waiting today · {date}",
     lead: "Negotiate deals and submit wholesale requests against RARE OUD stock — this is not a storefront.",
     homeTasksTitle: "Start here",
     taskDealTitle: "Propose a deal",
     taskDealBody: "Submit a commercial proposal on a catalog or non-catalog piece.",
     taskWholesaleTitle: "Order wholesale",
     taskWholesaleBody: "Choose pieces and quantities; admin responds with a quote.",
+    homeStatsTitle: "Your activity",
+    homeStatDeals: "Deals",
+    homeStatWholesale: "Wholesale",
+    homeStatBrokerage: "Brokerage",
+    homeStatOpen: "Open",
+    dealSuccessTitle: "Proposal sent",
+    dealSuccessBody: "It is on your list — open the deal to continue negotiating.",
+    dealSuccessContinue: "Open deal",
+    wholesaleSuccessTitle: "Wholesale request sent",
+    wholesaleSuccessBody: "It is on your list — our team will follow up with a quote.",
+    wholesaleSuccessContinue: "Open request",
+    brokerageSuccessTitle: "Brokerage request sent",
+    brokerageSuccessBody: "Our team will review the details and follow up with an inspection offer.",
+    brokerageSuccessContinue: "Open request",
+    offersViewDetails: "Details",
+    notificationsFilterAll: "All",
+    notificationsFilterDeal: "Deals",
+    notificationsFilterWholesale: "Wholesale",
+    notificationsFilterBrokerage: "Brokerage",
+    brokerageWizardTitle: "New brokerage request",
+    brokerageExplainerTitle: "Payment first, then the rest",
+    brokerageExplainerBody:
+      "Enter the model number and the price you state. Then open WhatsApp with admin to pay. After admin confirms payment, the remaining brokerage stages unlock (inspection, purchase, shipping).",
+    brokerageStepWhat: "The piece",
+    brokerageStepWhere: "Location",
+    brokerageStepExpectations: "Expectations",
+    brokerageStepReview: "Review",
+    brokerageFieldDescription: "Piece description",
+    brokerageFieldCategory: "Model number",
+    brokerageFieldQuantity: "Quantity",
+    brokerageFieldCity: "City",
+    brokerageFieldPlace: "Place name",
+    brokerageFieldSeller: "Seller contact",
+    brokerageFieldSource: "Link (optional)",
+    brokerageFieldBudgetMin: "Price (USD)",
+    brokerageFieldBudgetMax: "Max",
+    brokerageFieldNotes: "Notes",
+    brokerageSubmit: "Submit request",
+    brokerageSubmitting: "Submitting…",
+    brokerageQuoteAwaiting: "Quote awaiting your decision",
+    brokerageApprove: "Approve",
+    brokerageDecline: "Decline quote",
+    brokerageConfirmApproveTitle: "Approve this brokerage quote?",
+    brokerageConfirmApproveBody:
+      "Approval accepts the goods, commission, and shipping amounts on the quote card.",
+    brokerageConfirmDeclineTitle: "Decline this brokerage quote?",
+    brokerageConfirmDeclineBody:
+      "Declining ends the current quote path for this request.",
+    brokerageListTitle: "Brokerage requests",
+    brokerageListSubtitle:
+      "We inspect the piece and send a quote before any purchase",
+    brokerageNewCta: "New request",
+    brokerageStatTotal: "Total",
+    brokerageStatInProgress: "In progress",
+    brokerageStatNeedsYou: "Needs you",
+    brokerageStatNeedsYouHint: "Respond now",
+    brokerageStatClosed: "Closed",
+    brokerageEmptyTitle: "No requests yet",
+    brokerageEmptyBody:
+      "Start your first brokerage — we inspect and quote before purchase",
+    brokerageNeedsYouChip: "Needs you",
+    brokerageMyRequests: "My requests",
+    brokerageYourRequest: "Your request",
+    brokeragePath: "Brokerage path",
+    brokerageYourPhotos: "Your photos",
+    brokerageNoPhotos: "No photos attached yet",
+    brokerageInfoNeeded: "Information needed",
+    brokerageQuoteTitle: "Quote",
+    brokerageGoodsValue: "Goods",
+    brokerageCommission: "Commission",
+    brokerageShipping: "Shipping",
+    brokerageQuoteTotal: "Total",
+    brokerageInspectionReport: "Inspection report",
+    brokerageGrade: "Grade",
+    brokerageInspectionPhotos: "Inspection photos",
+    brokerageTimeline: "Timeline",
+    brokeragePiecePhotos: "Piece photos",
     myDeals: "My deals ({n})",
     waitingTitle: "Waiting on you",
     waitingIdle: "Nothing waiting for you right now",
@@ -2613,6 +4540,8 @@ const en: Dict = {
       proposed: "Proposed",
       negotiating: "Negotiating",
       accepted: "Accepted",
+      awaiting_payment: "Awaiting payment",
+      payment_confirmed: "Payment confirmed",
       rejected: "Rejected",
       closed: "Closed",
     },
@@ -2653,6 +4582,7 @@ const en: Dict = {
     waitingOnYou: "Waiting on you",
     waitingOnAdmin: "Waiting on RARE OUD",
     dealsTitle: "My deal proposals",
+    dealsLead: "Track your submitted proposals and negotiate directly with the RARE OUD team.",
     dealsEmpty: "No proposals yet",
     dealsEmptyBody: "Start by sending your first deal proposal to RARE OUD.",
     dealsTabList: "Filter deals",
@@ -2686,6 +4616,9 @@ const en: Dict = {
     wizardLeaveConfirm: "You have an unsaved draft. Leave anyway?",
     wizardNeedTitle: "Enter a deal title to continue.",
     wizardNeedProduct: "Pick a catalog product to continue.",
+    wizardNeedModel: "Enter a model number to continue.",
+    wizardNeedPrice: "Enter a positive price to continue.",
+    wizardNeedCurrency: "Choose a currency to continue.",
     recentActivity: "Recent activity",
     recentActivityEmpty: "No recent activity yet.",
     activityDeal: "Deal {ref}",
@@ -2707,13 +4640,34 @@ const en: Dict = {
     productPlaceholder: "Select product",
     nonCatalogNote:
       "Non-catalog proposals do not create or modify products/categories.",
-    priceOptional: "Proposed price (optional)",
+    modelNumberLabel: "Model number",
+    priceOptional: "Price (required)",
     currencyLabel: "Currency",
+    currencyUsd: "US Dollar (USD)",
+    currencySyp: "Syrian Pound (SYP)",
     quantityLabel: "Quantity",
     conditionsLabel: "Conditions / notes",
     initialMessageLabel: "Initial message",
     submitProposal: "Submit proposal",
     submitting: "Submitting…",
+    dealPayTitle: "Pay via WhatsApp",
+    dealPayBody:
+      "Open WhatsApp to complete the transfer at the agreed price. After payment, wait for admin confirmation.",
+    dealPayOpenWa: "Open WhatsApp to pay",
+    dealPayUnavailable:
+      "WhatsApp link is not ready yet — contact admin or try again later.",
+    dealPayConfirmed: "Admin confirmed payment and completed the order.",
+    wsHandoffTitle: "Complete your wholesale order via WhatsApp",
+    wsHandoffBody:
+      "Open WhatsApp and send the prepared confirmation message to the RARE OUD team to finalize payment and delivery details.",
+    wsHandoffOpenWa: "Open WhatsApp to confirm",
+    wsHandoffUnavailable:
+      "WhatsApp link is not ready yet — contact admin or try again later.",
+    brokeragePayTitle: "Pay via WhatsApp to continue brokerage",
+    brokeragePayBody:
+      "Open WhatsApp and complete the transfer. After admin confirmation, remaining brokerage stages unlock.",
+    negCounterPriceLocked:
+      "Price stays fixed after the trader’s proposal — counter adjusts quantity or notes only.",
     dealProduct: "Product",
     dealNonCatalog: "Non-catalog (no product link)",
     dealSnapshot: "Commercial snapshot",
@@ -2813,12 +4767,51 @@ const en: Dict = {
     notificationsMarkAll: "Mark all read",
     notificationsMarkRead: "Read",
     notificationsOpen: "Open",
+    notificationsShowMore: "Show more",
+    notificationsGroupedCount: "{n} updates",
+    messagesTitle: "Messages",
+    messagesLead:
+      "One unified conversation with the RARE OUD team — whether you write here or on WhatsApp, every message stays in the same context. If WhatsApp is ever unavailable, you can keep talking directly from here.",
+    messagesEmpty: "No messages yet",
+    messagesEmptyBody: "Start the conversation with the RARE OUD team below.",
+    messagesPlaceholder: "Write your message…",
+    messagesSend: "Send",
+    messagesSending: "Sending…",
+    messagesChannelWhatsapp: "via WhatsApp",
+    messagesChannelPlatform: "via platform",
+    messagesErrorEmpty: "Write a message first",
+    messagesErrorTooLong: "Message exceeds the limit",
+    messagesErrorGeneric: "Couldn't send the message — try again",
     offersTitle: "Public curated offers",
     offersLead: "Published RARE OUD presentations only — not trader storefronts.",
     offersEmpty: "No published offers yet.",
     offersBack: "Back to offers",
     offersRelatedProduct: "Related product",
     offersStartDeal: "Start a deal from this offer",
+    confirmCancel: "Cancel",
+    negConfirmAcceptTitle: "Accept this deal?",
+    negConfirmAcceptBody:
+      "Accepting locks the agreed price and opens WhatsApp payment — admin must confirm receipt to complete the order.",
+    negConfirmCloseTitle: "Close this deal?",
+    negConfirmCloseBody:
+      "Closing ends negotiation without accepting. This cannot be undone here.",
+    negConfirmRejectTitle: "Reject this deal?",
+    negConfirmRejectBody:
+      "Rejecting ends the deal. You can add a reason shown to the trader.",
+    wsConfirmAcceptTitle: "Accept this quotation?",
+    wsConfirmAcceptBody:
+      "Accepting records fulfillment intent on the quoted prices.",
+    wsConfirmDeclineTitle: "Decline this quotation?",
+    wsConfirmDeclineBody:
+      "Declining cancels the wholesale request. You can submit a new one later.",
+    wsConfirmCancelTitle: "Cancel this wholesale request?",
+    wsConfirmCancelBody:
+      "The request will be cancelled and cannot be edited afterwards.",
+    actionErrorUnauthorized: "Your session has expired. Please sign in again.",
+    actionErrorNotAllowed: "This action is not available for the current status.",
+    actionErrorInvalid: "The form could not be sent. Check the fields and try again.",
+    actionErrorGeneric: "Could not complete that action. Please try again.",
+    actionError: {},
   },
   inbox: {
     title: "WhatsApp inbox",
@@ -2900,15 +4893,25 @@ const en: Dict = {
     authRequired: "Account linking required",
     error: "Connection error",
     sendingPaused: "WhatsApp sending is temporarily paused",
+    platformFallbackNotice:
+      "WhatsApp isn't connected — your message reaches the trader right away through platform messages (shown in their account).",
     rateLimited: "Sending limit reached, try again shortly",
     linkAccount: "Link account",
     reconnect: "Reconnect",
     nonText: "Attachment",
     retry: "Retry",
+    statusDelivered: "Delivered",
+    statusRead: "Read",
+    channelPlatform: "via trader portal",
     newMessages: "New messages ↓",
     linkRecord: "Link to record",
     unlinkConfirm: "Remove link?",
     pickRecord: "Pick a record",
+    quickRepliesLabel: "Quick replies",
+    quickReplyGreeting: "Hello — we're following up on your RARE OUD request.",
+    quickReplyFollowUp: "Just checking in on your request — can you reply today?",
+    quickReplyThanks: "Thanks for reaching out. We'll get back once we have details.",
+    typeBrokerage: "Brokerage",
     searchRecords: "Search by reference…",
     openContext: "Details",
     confirmLink: "Confirm link",
@@ -2927,6 +4930,21 @@ const en: Dict = {
     pairingNotLinked: "No account linked",
     pairingError: "Could not link the account. Check the number and try again",
     pairingLogout: "Log out account",
+    msgLocation: "Location",
+    msgContact: "Contact",
+    attachFile: "Attach file",
+    attachCaption: "Caption (optional)",
+    voiceRecord: "Voice note",
+    voiceRecording: "Recording…",
+    voiceStop: "Stop",
+    voiceCancel: "Cancel",
+    voiceDenied: "Microphone access was denied",
+    crmParty: "Customer / trader record",
+    crmSuggest: "Suggestions from phone number",
+    crmLinkCustomer: "Link as customer",
+    crmLinkTrader: "Link as trader",
+    crmClear: "Clear CRM link",
+    crmNone: "No customer or trader record linked",
   },
   common: {
     language: "العربية",
@@ -2950,17 +4968,28 @@ const en: Dict = {
     errorOffline: "You're offline",
     backOnline: "You're back online",
     toastDismiss: "Dismiss notification",
+    themeLight: "Light",
+    themeDark: "Dark",
+    themeGroup: "Appearance",
+    navLabelAdmin: "Admin",
+    navLabelTrader: "Trader",
     goToPortal: "Go to your portal",
     signOut: "Sign out",
     navOps: "Operations",
     navCatalog: "Catalog",
     navPeople: "People",
+    navSystem: "System",
+    adminBrandSub: "Admin panel",
     switchOn: "On",
     switchOff: "Off",
     paginationPrevious: "Previous",
     paginationNext: "Next",
     paginationPageOf: "Page {page} of {pages}",
     timelineLabel: "Activity timeline",
+    greetingMorning: "Good morning",
+    greetingAfternoon: "Good afternoon",
+    greetingEvening: "Good evening",
+    greetingNamed: "{greeting}, {name}",
   },
   contact: {
     title: "Contact us",
@@ -2988,13 +5017,104 @@ const en: Dict = {
     s3Body:
       "[PLACEHOLDER] Sample section. Client supplies approved cookies and contact wording.",
   },
+  terms: {
+    title: "Terms of use",
+    fallbackBody: "Terms content is being prepared.",
+  },
   auth: {
     adminTitle: "Admin sign in",
     traderTitle: "Trader sign in",
     traderHint: "Accounts are provisioned by RARE OUD admin. No public registration.",
+    roleAdmin: "Admin",
+    roleTrader: "Trader",
+    tagline: "Rare oud instruments — handcrafted",
+    headline: "The echo of craft, kept precisely",
+    adminSubtitle:
+      "Full access to retail, deals, wholesale, brokerage, and the WhatsApp inbox",
+    traderSubtitle:
+      "Propose deals, request wholesale, and ask us to broker a piece you've found",
+    capsLockOn: "Caps Lock is on",
+    rateLimitFooter:
+      "Repeated sign-in attempts are paused temporarily to protect your account",
+    forgotPassword: "Forgot password?",
+    forgotTitle: "Recover access",
+    forgotSubtitle:
+      "Admin and trader accounts are managed by the RARE OUD team — there is no self-serve email reset. Contact us on WhatsApp for a secure reset.",
+    forgotWhatsApp: "Contact via WhatsApp",
+    forgotWhatsAppMessage:
+      "Hello — I need help recovering access to my RARE OUD account.",
+    backToSignIn: "Back to sign in",
     loginError: "Email or password is incorrect.",
+    loginLocked: "Too many attempts. Wait a moment and try again.",
+    totpLabel: "2FA or recovery code",
+    totpRequired: "Enter your authenticator or recovery code.",
+    totpInvalid: "That verification code is not valid.",
+    totpEnrollRequired: "Turn on two-factor authentication in security settings before signing in.",
+    totpEnrollButton: "Start 2FA enrollment",
+    totpResetButton: "Reset two-factor authentication",
     showPassword: "Show",
     hidePassword: "Hide",
+    sessionInvalidatedNotice:
+      "Your password was changed on another device. Please sign in again.",
+    profileTitle: "My account",
+    profileSubtitle: "Your personal details and security settings for this account.",
+    appearanceLead: "Choose dark or light for the admin interface on this device.",
+    profileTab: "Profile",
+    securityTab: "Security",
+    profileName: "Name",
+    profileEmail: "Email",
+    profileRole: "Role",
+    profileRoleAdmin: "Admin",
+    profileSecurityNote:
+      "Changing your password automatically signs you out of other devices.",
+    profileOpenSecurity: "Manage password and two-factor authentication",
+    sessionsTab: "Sessions",
+    activeSessions: "Active sessions",
+    activeSessionsDesc:
+      "We do not store a detailed device list. Signing out other devices invalidates sessions via the password version (pwv).",
+    currentSession: "This session",
+    signOutOthers: "Sign out other devices",
+    signOutOthersTitle: "Sign out of all other sessions?",
+    signOutOthersDesc:
+      "Every other device will need to sign in again. This current session stays connected.",
+    signedOutOthers: "Other devices have been signed out.",
+    avatarUnavailable:
+      "Profile photo upload is not available yet — it needs a storage field in the database.",
+  },
+  forcePasswordChange: {
+    title: "Set a new password",
+    subtitle: "This is a one-time step",
+    explanation:
+      "An admin reset your account's password. For security reasons, admins can never see your actual password — you need to choose a new one now before continuing.",
+    currentPassword: "Current temporary password",
+    newPassword: "New password",
+    confirmPassword: "Confirm password",
+    mismatch: "Passwords don't match",
+    submit: "Set password and continue",
+    strengthLabel: "Password strength",
+    strengthWeak: "Weak",
+    strengthFair: "Fair",
+    strengthGood: "Good",
+    strengthStrong: "Strong",
+    strengthVeryStrong: "Very strong",
+    ruleLength: "At least 10 characters",
+    ruleNotTemp: "Different from the temporary password",
+    ruleNotEmail: "Different from your email",
+    errorCurrentWrong: "The current password is incorrect.",
+    errorWeak: "Password must be at least 10 characters.",
+    errorSameAsTemp: "You can't reuse the temporary password.",
+    errorSameAsEmail: "Your password can't be your email address.",
+    success: "Password set. We signed you out of other devices.",
+    signOut: "Sign out",
+    showPassword: "Show",
+    hidePassword: "Hide",
+  },
+  changePassword: {
+    sectionTitle: "Change password",
+    sectionLead: "Use a strong password unique to this account.",
+    currentPassword: "Current password",
+    submit: "Update password",
+    success: "Password updated.",
   },
   seo: {
     catalogDescription:

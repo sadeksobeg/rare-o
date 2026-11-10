@@ -5,21 +5,10 @@ import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 import type { HomepageDiscoveryData } from "@/lib/catalog/homepage";
 import { DiscoveryProvider, useDiscovery } from "./discovery-context";
-import dynamic from "next/dynamic";
+import { SearchOverlay } from "./search-overlay";
+import { QuickViewPanel } from "./quick-view-panel";
+import { CompareTray } from "./compare-tray";
 import { ENABLE_COMPARE } from "@/lib/features";
-
-const SearchOverlay = dynamic(
-  () => import("./search-overlay").then((m) => m.SearchOverlay),
-  { ssr: false }
-);
-const QuickViewPanel = dynamic(
-  () => import("./quick-view-panel").then((m) => m.QuickViewPanel),
-  { ssr: false }
-);
-const CompareTray = dynamic(
-  () => import("./compare-tray").then((m) => m.CompareTray),
-  { ssr: false }
-);
 
 function ShellListeners({
   dict,

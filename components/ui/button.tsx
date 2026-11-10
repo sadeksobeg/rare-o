@@ -16,32 +16,34 @@ export type ButtonVariant =
 
 export type ButtonSize = "sm" | "md" | "lg";
 
-/* `!text-*` beats unlayered `a { color: inherit }` so Link labels stay visible. */
+/* Semantic surfaces — work in portal dark + light via tokens. */
 const variantClass: Record<ButtonVariant, string> = {
+  /* Colors for primary/inverse-primary/danger come from [data-ro-variant] in tokens.css
+     (Tailwind arbitrary bg-[var(--rad-btn)] was not emitted in this build). */
   primary:
-    "bg-[var(--ro-plum-900)] !text-[var(--ro-sand-100)] tracking-[0.08em] shadow-[0_1px_0_color-mix(in_srgb,var(--ro-sand-100)_20%,transparent)_inset,0_10px_26px_-14px_color-mix(in_srgb,var(--ro-plum-900)_65%,transparent)] hover:bg-[var(--ro-plum-800)] hover:-translate-y-px hover:shadow-[0_1px_0_color-mix(in_srgb,var(--ro-sand-100)_28%,transparent)_inset,0_16px_34px_-14px_color-mix(in_srgb,var(--ro-plum-800)_70%,transparent)] active:translate-y-0 active:bg-[var(--ro-ink-950)] active:shadow-[inset_0_2px_4px_color-mix(in_srgb,var(--ro-ink-950)_40%,transparent)] focus-visible:outline-[var(--ro-focus)]",
+    "tracking-[0.06em] hover:brightness-110 hover:-translate-y-px active:translate-y-0 active:brightness-95 focus-visible:outline-[var(--ro-focus)]",
   secondary:
-    "border-[1.5px] border-[color-mix(in_srgb,var(--ro-plum-900)_50%,var(--ro-ink-950))] bg-[color-mix(in_srgb,var(--ro-sand-50)_85%,var(--ro-plum-50))] !text-[var(--ro-plum-900)] tracking-[0.06em] shadow-[inset_0_1px_0_color-mix(in_srgb,var(--ro-sand-50)_90%,transparent)] hover:border-[var(--ro-plum-900)] hover:bg-[var(--ro-sand-50)] hover:-translate-y-px hover:shadow-[0_8px_22px_-16px_color-mix(in_srgb,var(--ro-plum-900)_45%,transparent)] active:translate-y-0 active:bg-ro-sunken focus-visible:outline-[var(--ro-focus)]",
-  text: "bg-transparent !text-ro-text-2 tracking-[0.04em] underline-offset-[6px] hover:!text-ro-ink hover:underline focus-visible:outline-[var(--ro-focus)]",
+    "border-[1.5px] border-[color:var(--ro-border)] bg-[color:var(--ro-bg-elevated)] !text-[color:var(--ro-link)] tracking-[0.04em] shadow-[inset_0_1px_0_color-mix(in_srgb,var(--ro-text)_6%,transparent)] hover:border-[color:var(--rad-ac)] hover:bg-[color:var(--ro-bg-raised)] hover:-translate-y-px active:translate-y-0 active:bg-[color:var(--ro-bg-sunken)] focus-visible:outline-[var(--ro-focus)]",
+  text: "bg-transparent !text-[color:var(--ro-text-2)] tracking-[0.03em] underline-offset-[6px] hover:!text-[color:var(--ro-text)] hover:underline focus-visible:outline-[var(--ro-focus)]",
   "inverse-primary":
-    "bg-[var(--ro-sand-100)] !text-ro-ink tracking-[0.06em] shadow-[0_2px_10px_color-mix(in_srgb,var(--ro-ink-950)_35%,transparent),inset_0_-1px_0_color-mix(in_srgb,var(--ro-ink-950)_10%,transparent)] hover:bg-white hover:shadow-[0_6px_20px_color-mix(in_srgb,var(--ro-ink-950)_40%,transparent)] active:bg-[var(--ro-sand-200)] focus-visible:outline-ro-canvas focus-visible:outline-offset-[3px]",
+    "tracking-[0.05em] hover:brightness-105 hover:-translate-y-px active:translate-y-0 active:brightness-95 focus-visible:outline-[color:var(--rad-btn)] focus-visible:outline-offset-[3px]",
   "inverse-secondary":
-    "border-[1.5px] border-[color-mix(in_srgb,var(--ro-sand-100)_78%,transparent)] bg-[color-mix(in_srgb,var(--ro-sand-100)_10%,transparent)] !text-[var(--ro-sand-100)] tracking-[0.05em] backdrop-blur-[2px] shadow-[inset_0_1px_0_color-mix(in_srgb,var(--ro-sand-100)_18%,transparent)] hover:border-ro-canvas hover:bg-[color-mix(in_srgb,var(--ro-sand-100)_18%,transparent)] active:bg-[color-mix(in_srgb,var(--ro-sand-100)_24%,transparent)] focus-visible:outline-ro-canvas focus-visible:outline-offset-[3px]",
+    "border-[1.5px] border-[color:color-mix(in_srgb,var(--rad-tx)_72%,transparent)] bg-[color:color-mix(in_srgb,var(--rad-tx)_10%,transparent)] !text-[color:var(--rad-tx)] tracking-[0.04em] backdrop-blur-[2px] hover:border-[color:var(--rad-tx)] hover:bg-[color:color-mix(in_srgb,var(--rad-tx)_18%,transparent)] hover:-translate-y-px active:translate-y-0 focus-visible:outline-[color:var(--rad-tx)] focus-visible:outline-offset-[3px]",
   danger:
-    "bg-[var(--ro-danger-700)] !text-[var(--ro-sand-100)] tracking-[0.04em] shadow-[0_1px_2px_color-mix(in_srgb,var(--ro-ink-950)_18%,transparent)] hover:opacity-90 active:opacity-85 focus-visible:outline-[var(--ro-danger-700)]",
+    "tracking-[0.03em] hover:opacity-92 active:opacity-85 focus-visible:outline-[var(--ro-danger-700)]",
   quiet:
-    "border-0 bg-transparent !text-ro-text-2 tracking-[0.03em] hover:!text-ro-ink focus-visible:outline-[var(--ro-focus)]",
+    "border-0 bg-transparent !text-[color:var(--ro-text-2)] tracking-[0.02em] hover:!text-[color:var(--ro-text)] focus-visible:outline-[var(--ro-focus)]",
 };
 
-/** P01 sizes: sm 36 / md 44 / lg 52; padding-inline 20 / 24 / 28. */
+/** Touch: sm ≥36, md/lg ≥44. */
 const sizeClass: Record<ButtonSize, string> = {
-  sm: "h-9 min-w-[5.5rem] px-5 text-xs",
-  md: "h-11 min-w-[7rem] px-6 text-sm",
-  lg: "h-[52px] min-w-[8.5rem] px-8 text-sm",
+  sm: "h-9 min-h-9 min-w-[5.5rem] px-5 text-xs",
+  md: "h-11 min-h-11 min-w-[7rem] px-6 text-sm",
+  lg: "h-[52px] min-h-[52px] min-w-[8.5rem] px-8 text-sm",
 };
 
 const base =
-  "relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-[var(--ro-r-sm)] font-semibold transition-[color,background-color,border-color,transform,opacity,box-shadow,filter] duration-[var(--ro-dur-fast)] ease-[var(--ro-ease-standard)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-45 active:scale-[0.985] motion-reduce:active:scale-100";
+  "relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-[var(--ro-r-sm)] font-semibold transition-[color,background-color,border-color,transform,opacity,box-shadow,filter] duration-[var(--ro-dur-fast)] ease-[var(--ro-ease-standard)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-45 active:scale-[0.97] motion-reduce:active:scale-100 motion-reduce:hover:translate-y-0";
 
 function rippleAllowed(variant: ButtonVariant) {
   return (
@@ -85,12 +87,12 @@ export function Button({
   loading,
   ripple,
   onPointerDown,
+  style,
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
-  /** Defaults on for primary / inverse-primary. */
   ripple?: boolean;
 }) {
   const ref = useRef<HTMLButtonElement>(null);
@@ -99,12 +101,21 @@ export function Button({
   const rippleTone =
     variant === "inverse-primary" || variant === "secondary" ? "ink" : "cream";
 
+  const toneStyle =
+    variant === "primary" || variant === "inverse-primary"
+      ? {
+          background: "var(--rad-btn)",
+          color: "var(--rad-btn-tx)",
+        }
+      : undefined;
+
   return (
     <button
       ref={ref}
       type={type}
       data-ro-variant={variant}
       className={cn(base, variantClass[variant], sizeClass[size], className)}
+      style={{ ...toneStyle, ...style }}
       aria-busy={loading || undefined}
       disabled={props.disabled || loading}
       onPointerDown={(e) => {
@@ -136,7 +147,6 @@ export function ButtonLink({
   variant?: ButtonVariant;
   size?: ButtonSize;
   className?: string;
-  /** Defaults on for primary / inverse-primary. */
   ripple?: boolean;
 }) {
   const useRipple =
@@ -172,7 +182,7 @@ export function IconButton({
   size?: ButtonSize;
   variant?: ButtonVariant;
 }) {
-  const box = size === "sm" ? "size-9" : "size-11";
+  const box = size === "sm" ? "size-9 min-h-9" : "size-11 min-h-11";
   return (
     <button
       type="button"

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>الإشعارات — RARE OUD (نموذج مرحلة 2)</title>
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .tr-header { background: linear-gradient(105deg, var(--plum-900) 0%, var(--ink-950) 58%, var(--ink-900) 100%); color: var(--text-inverse); padding: var(--s-3) var(--s-6); display: flex; justify-content: space-between; align-items: center; }
+  .tr-main { padding: var(--s-6) var(--s-8); max-width: 640px; margin: 0 auto; }
+  .notif { display: flex; gap: var(--s-3); padding: var(--s-3); border-bottom: 1px solid var(--border); }
+  .notif.unread { background: var(--plum-100); border-radius: var(--r-sm); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--plum-700); margin-top: 6px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+  <header class="tr-header">
+    <div style="font-family:var(--font-ar-display);font-weight:700">RARE OUD</div>
+    <button class="lang-toggle" onclick="roToggleLang()">EN</button>
+  </header>
+  <main class="tr-main">
+    <div class="topbar">
+      <h1><span data-lang="ar">الإشعارات</span><span data-lang="en" hidden>Notifications</span></h1>
+      <button class="btn btn-ghost" style="font-size:.85rem"><span data-lang="ar">تعليم الكل كمقروء</span><span data-lang="en" hidden>Mark all read</span></button>
+    </div>
+    <div class="card" style="padding:0">
+      <div class="notif unread"><div class="dot"></div><div><p style="margin:0;font-size:.9rem"><span data-lang="ar">قبلت الإدارة اقتراح صفقتك على «قانون مختار»</span><span data-lang="en" hidden>Admin accepted your proposal on "Qanun Select"</span></p><p class="muted" style="margin:0;font-size:.78rem"><span data-lang="ar">قبل 10 دقائق</span><span data-lang="en" hidden>10 min ago</span></p></div></div>
+      <div class="notif"><div class="dot" style="background:transparent"></div><div><p style="margin:0;font-size:.9rem"><span data-lang="ar">قدّمت الإدارة عرض سعر لطلب الجملة WS-0088</span><span data-lang="en" hidden>Admin provided a quote for wholesale request WS-0088</span></p><p class="muted" style="margin:0;font-size:.78rem"><span data-lang="ar">أمس</span><span data-lang="en" hidden>Yesterday</span></p></div></div>
+    </div>
+  </main>
+<script src="shared.js"></script>
+</body>
+</html>

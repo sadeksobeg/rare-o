@@ -1,0 +1,28 @@
+{
+  "checks": 53,
+  "fails": 0,
+  "ok": true,
+  "byRoute": {
+    "/trader": {
+      "checks": 32,
+      "fails": [],
+      "failCount": 0
+    },
+    "/trader/deals": {
+      "checks": 9,
+      "fails": [],
+      "failCount": 0
+    },
+    "/admin/profile": {
+      "checks": 9,
+      "fails": [],
+      "failCount": 0
+    },
+    "/admin/traders": {
+      "checks": 3,
+      "fails": [],
+      "failCount": 0
+    }
+  },
+  "method": "css-color-vs-nearest-opaque-parent"
+}

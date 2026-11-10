@@ -8,6 +8,7 @@ import { probeImageDimensions } from "@/lib/catalog/image-dimensions";
 const MAX_MEDIA = 8;
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 48 * 1024 * 1024;
+const MAX_AUDIO_BYTES = 16 * 1024 * 1024;
 const MIN_LONG_SIDE = 1600;
 
 const ALLOWED_IMAGE = new Set([
@@ -25,16 +26,27 @@ function isSvgPayload(buf: Buffer, declaredType: string): boolean {
 
 const ALLOWED_VIDEO = new Set(["video/mp4", "video/webm"]);
 
+/**
+ * mp3/ogg only — deliberately excludes audio/mp4 (m4a): m4a shares the same
+ * ISO-BMFF "ftyp" container as mp4 video, which would make magic-byte
+ * sniffing ambiguous between an audio and a video upload (see
+ * detectMediaMagic below). Two safe, unambiguous formats cover the real use
+ * case (short product voice notes / oud sound samples) without that risk.
+ */
+const ALLOWED_AUDIO = new Set(["audio/mpeg", "audio/ogg"]);
+
 const EXT: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/png": "png",
   "image/webp": "webp",
   "video/mp4": "mp4",
   "video/webm": "webm",
+  "audio/mpeg": "mp3",
+  "audio/ogg": "ogg",
 };
 
 /** Magic-byte sniff — do not trust client MIME alone. */
-function detectMediaMagic(buf: Buffer): "image" | "video" | null {
+function detectMediaMagic(buf: Buffer): "image" | "video" | "audio" | null {
   if (buf.length < 12) return null;
   // JPEG
   if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return "image";
@@ -65,6 +77,11 @@ function detectMediaMagic(buf: Buffer): "image" | "video" | null {
   ) {
     return "video";
   }
+  // OGG: "OggS"
+  if (buf.toString("ascii", 0, 4) === "OggS") return "audio";
+  // MP3: ID3v2 tag, or a raw MPEG frame sync (11 set bits: 0xFF Ex/Fx)
+  if (buf.toString("ascii", 0, 3) === "ID3") return "audio";
+  if (buf[0] === 0xff && (buf[1]! & 0xe0) === 0xe0) return "audio";
   return null;
 }
 
@@ -105,9 +122,14 @@ export async function attachProductImage(input: {
   const type = input.file.type;
   const isImage = ALLOWED_IMAGE.has(type);
   const isVideo = ALLOWED_VIDEO.has(type);
-  if (!isImage && !isVideo) return { ok: false, error: "TYPE" };
+  const isAudio = ALLOWED_AUDIO.has(type);
+  if (!isImage && !isVideo && !isAudio) return { ok: false, error: "TYPE" };
 
-  const maxBytes = isVideo ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
+  const maxBytes = isVideo
+    ? MAX_VIDEO_BYTES
+    : isAudio
+      ? MAX_AUDIO_BYTES
+      : MAX_IMAGE_BYTES;
   if (input.file.size > maxBytes) return { ok: false, error: "SIZE" };
 
   const buf = Buffer.from(await input.file.arrayBuffer());
@@ -118,6 +140,7 @@ export async function attachProductImage(input: {
   if (!magicKind) return { ok: false, error: "TYPE" };
   if (isImage && magicKind !== "image") return { ok: false, error: "TYPE" };
   if (isVideo && magicKind !== "video") return { ok: false, error: "TYPE" };
+  if (isAudio && magicKind !== "audio") return { ok: false, error: "TYPE" };
 
   let outBuf = buf;
   let outExt = EXT[type] ?? "bin";
@@ -156,7 +179,7 @@ export async function attachProductImage(input: {
       altAr: input.altAr?.trim() || "",
       altEn: input.altEn?.trim() || "",
       sortOrder: (maxSort._max.sortOrder ?? -1) + 1,
-      kind: isVideo ? "video" : "image",
+      kind: isVideo ? "video" : isAudio ? "audio" : "image",
     },
   });
 

@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
+import { CountUp } from "@/components/motion/count-up";
 import { cn } from "@/lib/utils";
 
 export type ListFilterTab = {
@@ -47,8 +48,8 @@ export function ListFilterTabs({
             className={cn(
               "inline-flex h-10 shrink-0 items-center gap-1.5 px-3 text-sm transition-[color,background-color,box-shadow,transform] duration-[var(--ro-dur-fast)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)] active:scale-[0.98]",
               selected
-                ? "font-semibold text-[var(--ro-plum-900)]"
-                : "text-ro-text-2 hover:text-[var(--ro-plum-800)]"
+                ? "font-semibold text-[color:var(--ro-text)]"
+                : "text-[color:var(--ro-text-2)] hover:text-[color:var(--ro-text)]"
             )}
             onClick={() => {
               if (selected) return;
@@ -69,11 +70,11 @@ export function ListFilterTabs({
                 className={cn(
                   "rounded-full px-1.5 py-0.5 text-[0.65rem] tabular-nums",
                   selected
-                    ? "bg-[var(--ro-plum-100)] text-[var(--ro-plum-900)]"
-                    : "bg-ro-sunken text-ro-muted"
+                    ? "bg-[color:var(--ro-accent-well)] text-[color:var(--ro-accent-fg)]"
+                    : "bg-[color:color-mix(in_srgb,var(--ro-text)_8%,transparent)] text-[color:var(--ro-text-muted)]"
                 )}
               >
-                {tab.count}
+                <CountUp value={tab.count} durationMs={200} />
               </span>
             ) : null}
           </button>

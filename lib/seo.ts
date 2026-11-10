@@ -81,6 +81,53 @@ export function productJsonLd(input: {
   return data;
 }
 
+export function organizationJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "RARE OUD",
+    url: absoluteUrl("/"),
+    logo: absoluteUrl("/brand/logo-mark.svg"),
+  };
+}
+
+export function websiteJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "RARE OUD",
+    url: absoluteUrl("/"),
+    inLanguage: ["ar", "en"],
+  };
+}
+
+export function breadcrumbJsonLd(
+  items: Array<{ name: string; path: string }>
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: absoluteUrl(item.path),
+    })),
+  };
+}
+
+/** Default Open Graph image for storefront marketing pages (not PDP-specific). */
+export function withDefaultOgImage(meta: Metadata): Metadata {
+  const image = absoluteUrl("/brand/instruments/oud-atelier-light.jpg");
+  return {
+    ...meta,
+    openGraph: {
+      ...meta.openGraph,
+      images: meta.openGraph?.images ?? [{ url: image }],
+    },
+  };
+}
+
 /** Serialise JSON-LD safely for inline <script type="application/ld+json">. */
 export function jsonLdString(data: unknown): string {
   return JSON.stringify(data).replace(/</g, "\\u003c");

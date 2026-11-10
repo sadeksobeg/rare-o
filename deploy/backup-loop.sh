@@ -13,6 +13,9 @@ while true; do
   if [ -d /uploads ]; then
     cp -a /uploads "${DEST}/uploads"
   fi
+  if [ -d /uploads-storage ]; then
+    cp -a /uploads-storage "${DEST}/uploads-storage"
+  fi
   if [ -d /wa-auth ]; then
     cp -a /wa-auth "${DEST}/wa-auth"
   fi

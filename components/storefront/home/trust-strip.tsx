@@ -1,6 +1,6 @@
 "use client";
 
-import { Reveal } from "@/components/storefront/motion";
+import { Reveal } from "@/components/storefront/motion/reveal";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils";
 

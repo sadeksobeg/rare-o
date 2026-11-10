@@ -109,6 +109,13 @@ export async function assertLinkTargetExists(
       });
       return !!row;
     }
+    case "brokerage_request": {
+      const row = await db.brokerageRequest.findUnique({
+        where: { id },
+        select: { id: true },
+      });
+      return !!row;
+    }
     default:
       return false;
   }
@@ -433,8 +440,52 @@ export async function getBusinessContextForConversation(
     };
   }
 
-  // wholesale_request
-  const row = await db.wholesaleRequest.findUnique({
+  if (linkType === "wholesale_request") {
+    const row = await db.wholesaleRequest.findUnique({
+      where: { id: linkId },
+      include: {
+        trader: {
+          select: {
+            displayName: true,
+            email: true,
+            companyName: true,
+          },
+        },
+        lines: {
+          select: {
+            productNameAr: true,
+            productNameEn: true,
+            quantity: true,
+          },
+        },
+      },
+    });
+    if (!row) return { linked: false };
+    return {
+      linked: true,
+      linkType,
+      recordId: row.id,
+      reference: row.reference,
+      status: row.status,
+      updatedAt: toIso(row.updatedAt),
+      adminHref: `/admin/wholesale/${row.id}`,
+      identityLabel: row.trader.displayName || row.trader.email,
+      identityDetail: row.trader.companyName || row.trader.email,
+      title: null,
+      dealKind: null,
+      requestMode: row.requestMode,
+      productLabel: null,
+      latestNegotiation: null,
+      lines: row.lines.map((l) => ({
+        nameAr: l.productNameAr,
+        nameEn: l.productNameEn,
+        quantity: l.quantity,
+      })),
+    };
+  }
+
+  // brokerage_request
+  const row = await db.brokerageRequest.findUnique({
     where: { id: linkId },
     include: {
       trader: {
@@ -442,13 +493,6 @@ export async function getBusinessContextForConversation(
           displayName: true,
           email: true,
           companyName: true,
-        },
-      },
-      lines: {
-        select: {
-          productNameAr: true,
-          productNameEn: true,
-          quantity: true,
         },
       },
     },
@@ -461,18 +505,139 @@ export async function getBusinessContextForConversation(
     reference: row.reference,
     status: row.status,
     updatedAt: toIso(row.updatedAt),
-    adminHref: `/admin/wholesale/${row.id}`,
+    adminHref: `/admin/brokerage/${row.id}`,
     identityLabel: row.trader.displayName || row.trader.email,
     identityDetail: row.trader.companyName || row.trader.email,
-    title: null,
+    title: row.descriptionAr.slice(0, 80) || null,
     dealKind: null,
-    requestMode: row.requestMode,
+    requestMode: null,
     productLabel: null,
     latestNegotiation: null,
-    lines: row.lines.map((l) => ({
-      nameAr: l.productNameAr,
-      nameEn: l.productNameEn,
-      quantity: l.quantity,
-    })),
+    lines: [],
   };
+}
+
+export type CrmPartySuggestion = {
+  kind: "customer" | "trader";
+  id: string;
+  label: string;
+  phone: string;
+};
+
+/** Suggest CRM parties from conversation E.164 (digits). Owner must confirm. */
+export async function suggestCrmPartiesForConversation(
+  conversationId: string,
+  db: DbClient = defaultPrisma
+): Promise<CrmPartySuggestion[]> {
+  const conversation = await db.whatsAppConversation.findUnique({
+    where: { id: conversationId.trim() },
+    select: { participantE164: true },
+  });
+  const phone = conversation?.participantE164?.replace(/\D/g, "") ?? "";
+  if (phone.length < 8) return [];
+
+  const [customers, traders] = await Promise.all([
+    db.customer.findMany({
+      where: { phone: { contains: phone.slice(-9) } },
+      take: 5,
+      select: { id: true, name: true, phone: true },
+    }),
+    db.traderAccount.findMany({
+      where: { phone: { contains: phone.slice(-9) } },
+      take: 5,
+      select: { id: true, displayName: true, companyName: true, phone: true },
+    }),
+  ]);
+
+  return [
+    ...customers.map((c) => ({
+      kind: "customer" as const,
+      id: c.id,
+      label: c.name,
+      phone: c.phone,
+    })),
+    ...traders.map((t) => ({
+      kind: "trader" as const,
+      id: t.id,
+      label: t.displayName || t.companyName || t.id,
+      phone: t.phone,
+    })),
+  ];
+}
+
+export async function setConversationCrmParty(
+  input: {
+    conversationId: string;
+    customerId?: string | null;
+    traderId?: string | null;
+    adminId: string;
+  },
+  db: DbClient = defaultPrisma
+): Promise<
+  | { ok: true }
+  | { ok: false; code: "NOT_FOUND" | "INVALID_INPUT" | "TARGET_NOT_FOUND"; error: string }
+> {
+  const conversationId = input.conversationId.trim();
+  if (!conversationId || !input.adminId.trim()) {
+    return { ok: false, code: "INVALID_INPUT", error: "Missing ids" };
+  }
+
+  const conversation = await db.whatsAppConversation.findUnique({
+    where: { id: conversationId },
+    select: { id: true },
+  });
+  if (!conversation) {
+    return { ok: false, code: "NOT_FOUND", error: "Conversation not found" };
+  }
+
+  const clearBoth =
+    input.customerId === null &&
+    input.traderId === null &&
+    input.customerId !== undefined &&
+    input.traderId !== undefined;
+
+  const customerIdRaw =
+    input.customerId === undefined ? undefined : input.customerId?.trim() || null;
+  const traderIdRaw =
+    input.traderId === undefined ? undefined : input.traderId?.trim() || null;
+
+  if (customerIdRaw) {
+    const c = await db.customer.findUnique({
+      where: { id: customerIdRaw },
+      select: { id: true },
+    });
+    if (!c) {
+      return { ok: false, code: "TARGET_NOT_FOUND", error: "Customer not found" };
+    }
+    await db.whatsAppConversation.update({
+      where: { id: conversationId },
+      data: { customerId: customerIdRaw, traderId: null },
+    });
+    return { ok: true };
+  }
+
+  if (traderIdRaw) {
+    const t = await db.traderAccount.findUnique({
+      where: { id: traderIdRaw },
+      select: { id: true },
+    });
+    if (!t) {
+      return { ok: false, code: "TARGET_NOT_FOUND", error: "Trader not found" };
+    }
+    await db.whatsAppConversation.update({
+      where: { id: conversationId },
+      data: { traderId: traderIdRaw, customerId: null },
+    });
+    return { ok: true };
+  }
+
+  if (clearBoth || (customerIdRaw === null && traderIdRaw === null)) {
+    await db.whatsAppConversation.update({
+      where: { id: conversationId },
+      data: { customerId: null, traderId: null },
+    });
+    return { ok: true };
+  }
+
+  return { ok: false, code: "INVALID_INPUT", error: "No CRM party specified" };
 }

@@ -44,9 +44,28 @@ next-env.d.ts
 public/uploads/*
 !public/uploads/.gitkeep
 
+# Private uploads served only through an authenticated route handler —
+# never under public/. See app/api/media/brokerage/[requestId]/[file]/route.ts.
+storage/uploads/*
+!storage/uploads/.gitkeep
+
 # WhatsApp Baileys session (high-value secret — never commit)
 .wa-auth/
 **/.wa-auth/
 
 # Local backup / restore-drill copies (never commit DB dumps)
 backups/
+
+# Local scratch / tool output (not part of the shipped app)
+debug.log
+npm-out.txt
+tmp-npm-install.txt
+tmp/
+test-results/
+
+# Wave 1 checkpoint video captures (large binaries, delivered directly, not committed)
+docs/ui-planning/wave1-capture/videos/
+
+# Visual evidence (screenshots/videos) from MASTER-BUILD-PLAN.md Part B7 onward —
+# heavy binaries stay out of git; only text summaries in docs/ui-planning/evidence/ are committed.
+artifacts/

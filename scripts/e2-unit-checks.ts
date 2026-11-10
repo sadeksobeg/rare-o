@@ -2,9 +2,19 @@
  * Closure E2 — lightweight unit-style checks (no test framework).
  * Run: npm run test:e2-unit
  */
+import {
+  collectOudSpecItems,
+  oudSpecsFromFormData,
+  parseOudSpecs,
+} from "../lib/catalog/oud-specs";
 import { consumeRateLimit } from "../lib/auth/public-rate-limit";
 import { assertNoCatalogDealConflict, isConflictStatus } from "../lib/deals/conflict";
 import { formatCurrency, formatNumber } from "../lib/i18n/format";
+import {
+  isWeakDevice,
+  resolveMotionTier,
+  surfaceFromPathname,
+} from "../components/motion/resolve-tier";
 
 let passed = 0;
 let failed = 0;
@@ -64,6 +74,90 @@ async function main() {
   assert(
     formatCurrency(100, "TEST", "en", "On request") === "On request",
     "formatCurrency hides TEST code"
+  );
+
+  assert(parseOudSpecs(null) === null, "parseOudSpecs null");
+  assert(parseOudSpecs({ wood: { face: { ar: "", en: "" } } }) === null, "parseOudSpecs empty");
+  const filled = parseOudSpecs({
+    wood: { face: { ar: "شوح", en: "spruce" } },
+    measures: { faceWidthMm: 360 },
+    standardNeck: true,
+  });
+  assert(filled?.wood?.face?.en === "spruce", "parseOudSpecs keeps wood");
+  assert(filled?.measures?.faceWidthMm === 360, "parseOudSpecs keeps measure");
+  const items = collectOudSpecItems(filled, "ar", "مم", "نعم", "لا");
+  assert(items.some((i) => i.key === "face" && i.value === "شوح"), "collectOudSpecItems AR wood");
+  const fd = new FormData();
+  fd.set("oudWoodBackAr", "جوز");
+  fd.set("oudFaceWidthMm", "350");
+  const fromForm = oudSpecsFromFormData(fd);
+  assert(fromForm?.wood?.back?.ar === "جوز", "oudSpecsFromFormData wood");
+  assert(fromForm?.measures?.faceWidthMm === 350, "oudSpecsFromFormData measure");
+
+  assert(surfaceFromPathname("/catalog") === "storefront", "surface storefront");
+  assert(surfaceFromPathname("/admin/deals") === "admin", "surface admin");
+  assert(surfaceFromPathname("/trader/offers") === "trader", "surface trader");
+  assert(
+    resolveMotionTier({
+      reducedMotion: false,
+      saveData: false,
+      deviceMemory: 8,
+      hardwareConcurrency: 8,
+      surface: "storefront",
+    }) === "A",
+    "tier A storefront"
+  );
+  assert(
+    resolveMotionTier({
+      reducedMotion: false,
+      saveData: false,
+      deviceMemory: 8,
+      hardwareConcurrency: 8,
+      surface: "trader",
+    }) === "B",
+    "tier B trader"
+  );
+  assert(
+    resolveMotionTier({
+      reducedMotion: false,
+      saveData: false,
+      deviceMemory: 8,
+      hardwareConcurrency: 8,
+      surface: "admin",
+    }) === "C",
+    "tier C admin"
+  );
+  assert(
+    resolveMotionTier({
+      reducedMotion: true,
+      saveData: false,
+      deviceMemory: 8,
+      hardwareConcurrency: 8,
+      surface: "storefront",
+    }) === "Lite",
+    "tier Lite reduced motion"
+  );
+  assert(
+    resolveMotionTier({
+      reducedMotion: false,
+      saveData: true,
+      deviceMemory: 8,
+      hardwareConcurrency: 8,
+      surface: "admin",
+    }) === "Lite",
+    "tier Lite save-data"
+  );
+  assert(isWeakDevice({ deviceMemory: 4, hardwareConcurrency: 8 }) === true, "weak 4GB");
+  assert(isWeakDevice({ deviceMemory: 8, hardwareConcurrency: 4 }) === true, "weak 4 cores");
+  assert(
+    resolveMotionTier({
+      reducedMotion: false,
+      saveData: false,
+      deviceMemory: 4,
+      hardwareConcurrency: 16,
+      surface: "storefront",
+    }) === "Lite",
+    "tier Lite weak device"
   );
 
   console.log(`\ne2-unit-checks: ${passed} passed, ${failed} failed`);

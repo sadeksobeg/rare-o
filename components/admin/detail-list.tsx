@@ -1,33 +1,50 @@
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-/** Two-column definition list used by admin detail headers. */
+/** Two-column detail grid used by admin detail headers (div-based for axe). */
 export function DetailList({
   children,
   className,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }) {
   return (
-    <dl className={cn("grid gap-4 text-sm md:grid-cols-2", className)}>
+    <div
+      className={cn(
+        "ro-portal-card grid gap-4 border p-4 text-sm md:grid-cols-2 md:p-5",
+        className
+      )}
+    >
       {children}
-    </dl>
+    </div>
   );
 }
 
 export function DetailItem({
   label,
   children,
+  icon,
   className,
 }: {
   label: string;
-  children: React.ReactNode;
+  children: ReactNode;
+  icon?: ReactNode;
   className?: string;
 }) {
   return (
-    <div className={className}>
-      <dt className="text-xs text-ro-muted">{label}</dt>
-      <dd className="mt-0.5">{children}</dd>
+    <div className={cn("flex items-start gap-2.5", className)}>
+      {icon ? (
+        <span className="ro-portal-icon-well size-8 [&>svg]:size-3.5" aria-hidden>
+          {icon}
+        </span>
+      ) : null}
+      <div className="min-w-0">
+        <p className="text-xs font-bold tracking-wide text-ro-muted">{label}</p>
+        <div className="mt-0.5 text-[0.9375rem] font-semibold text-ro-ink">
+          {children}
+        </div>
+      </div>
     </div>
   );
 }
@@ -36,13 +53,22 @@ export function DetailItem({
 export function DetailSection({
   title,
   children,
+  icon,
 }: {
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
+  icon?: ReactNode;
 }) {
   return (
-    <div>
-      <h2 className="mb-3 text-lg font-semibold">{title}</h2>
+    <div className="space-y-3">
+      <h2 className="ro-portal-section-title flex items-center gap-2">
+        {icon ? (
+          <span className="ro-portal-icon-well size-8 [&>svg]:size-4" aria-hidden>
+            {icon}
+          </span>
+        ) : null}
+        {title}
+      </h2>
       {children}
     </div>
   );

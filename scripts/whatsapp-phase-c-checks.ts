@@ -14,15 +14,19 @@ import { createIsolatedDb } from "./lib/isolated-db";
 import { SignJWT } from "jose";
 
 import {
+  addInboxNote,
+  addInboxTag,
   formatConversationDisplayLabel,
   getInboxConversation,
   getInboxHealthView,
   listInboxConversations,
   markConversationRead,
+  removeInboxTag,
 } from "../lib/whatsapp/messaging/inbox";
 import {
   enqueueOutboundText,
   persistInboundText,
+  touchConnectionHeartbeat,
   upsertConnectionHealth,
 } from "../lib/whatsapp/messaging/service";
 import { getDictionary } from "../lib/i18n/dictionaries";
@@ -221,8 +225,21 @@ async function main(): Promise<void> {
       },
       db
     );
+
+    // A CONNECTED row with no heartbeat yet (worker just wrote the state,
+    // hasn't pinged) must not be displayed as live-connected — round 3,
+    // owner-reported: production showed "connected" against a dead worker.
+    const staleHealth = await getInboxHealthView(db);
+    assert(
+      staleHealth.rawState === "CONNECTED" && staleHealth.state === "RECONNECTING",
+      "CONNECTED with no heartbeat is displayed as reconnecting, not connected"
+    );
+
+    // Once the worker pings (as it does immediately on every real connect —
+    // see onHealth in worker/whatsapp-worker.ts), it displays as connected.
+    await touchConnectionHeartbeat(db);
     const health = await getInboxHealthView(db);
-    assert(health.state === "CONNECTED", "connection health displayed");
+    assert(health.state === "CONNECTED", "connection health displayed once heartbeat is fresh");
     assert(health.outboundEnabled === true, "health includes outbound flag");
     const healthJson = JSON.stringify(health);
     assert(!healthJson.includes("creds"), "health has no creds");
@@ -231,6 +248,45 @@ async function main(): Promise<void> {
       !/data:image|BEGIN:/i.test(healthJson) && !health.qrDataUrl,
       "health has no QR payload"
     );
+
+    // A heartbeat that goes stale again (worker died without a clean
+    // disconnect) must downgrade the display back, not stay stuck CONNECTED.
+    await db.whatsAppConnectionHealth.update({
+      where: { id: "default" },
+      data: { lastHeartbeatAt: new Date(Date.now() - 10 * 60 * 1000) },
+    });
+    const diedHealth = await getInboxHealthView(db);
+    assert(
+      diedHealth.rawState === "CONNECTED" && diedHealth.state === "RECONNECTING",
+      "a dead worker's stale heartbeat is not shown as connected"
+    );
+
+    // --- inbox notes (round 3 Part B, additive) ---
+    const note = await addInboxNote(
+      { conversationId: first.conversationId, adminId: "admin-pc", adminName: "QA Admin", body: "العميل جاد" },
+      db
+    );
+    assert(!!note && note.body === "العميل جاد", "note is created with the given body");
+    const withNote = await getInboxConversation(first.conversationId, db);
+    assert(
+      !!withNote && withNote.notes.length === 1 && withNote.notes[0]!.authorName === "QA Admin",
+      "note shows up on the conversation, author attributed"
+    );
+    const emptyNote = await addInboxNote(
+      { conversationId: first.conversationId, adminId: "admin-pc", adminName: "QA Admin", body: "   " },
+      db
+    );
+    assert(emptyNote === null, "whitespace-only note is rejected, not silently saved");
+    const noteJson = JSON.stringify(withNote);
+    assert(!noteJson.includes("creds"), "note payload has no creds");
+
+    // --- inbox tags (round 3 Part B, additive) ---
+    const tagged = await addInboxTag({ conversationId: first.conversationId, tag: "عميل دائم" }, db);
+    assert(tagged.includes("عميل دائم"), "tag is added");
+    const taggedAgain = await addInboxTag({ conversationId: first.conversationId, tag: "عميل دائم" }, db);
+    assert(taggedAgain.length === tagged.length, "duplicate tag is not added twice");
+    const untagged = await removeInboxTag({ conversationId: first.conversationId, tag: "عميل دائم" }, db);
+    assert(!untagged.includes("عميل دائم"), "tag is removed");
 
     // --- display label privacy ---
     const masked = formatConversationDisplayLabel({
