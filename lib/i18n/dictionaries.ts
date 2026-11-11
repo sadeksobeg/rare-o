@@ -649,6 +649,11 @@ type Dict = {
     voiceCancel: string;
     voiceSend: string;
     voiceMicDenied: string;
+    voiceMicNoDevice: string;
+    voiceMicPolicyBlocked: string;
+    voiceMicSecureRequired: string;
+    voiceMicTest: string;
+    voiceMicTestOk: string;
     voiceRecording: string;
     qrSearchPlaceholder: string;
     qrManage: string;
@@ -2367,7 +2372,14 @@ const ar: Dict = {
     voiceStop: "إيقاف التسجيل",
     voiceCancel: "إلغاء التسجيل",
     voiceSend: "إرسال التسجيل",
-    voiceMicDenied: "لم يُسمح باستخدام الميكروفون",
+    voiceMicDenied:
+      "الميكروفون مرفوض. اضغط أيقونة القفل بجانب العنوان ← الميكروفون ← سماح، ثم أعد التحميل.",
+    voiceMicNoDevice: "لم يُعثر على ميكروفون متصل بهذا الجهاز.",
+    voiceMicPolicyBlocked:
+      "الموقع يمنع الميكروفون عبر ترويسة Permissions-Policy. راجع إعدادات الخادم.",
+    voiceMicSecureRequired: "التسجيل يحتاج HTTPS أو localhost.",
+    voiceMicTest: "اختبار الميكروفون",
+    voiceMicTestOk: "الميكروفون يعمل",
     voiceRecording: "جارٍ التسجيل…",
     qrSearchPlaceholder: "ابحث في الردود الجاهزة…",
     qrManage: "إدارة الردود",
@@ -4217,7 +4229,14 @@ const en: Dict = {
     voiceStop: "Stop recording",
     voiceCancel: "Cancel recording",
     voiceSend: "Send voice note",
-    voiceMicDenied: "Microphone permission denied",
+    voiceMicDenied:
+      "Microphone blocked. Click the lock icon by the URL → Microphone → Allow, then reload.",
+    voiceMicNoDevice: "No microphone found on this device.",
+    voiceMicPolicyBlocked:
+      "Microphone blocked by Permissions-Policy. Check the server header config.",
+    voiceMicSecureRequired: "Recording requires HTTPS or localhost.",
+    voiceMicTest: "Test microphone",
+    voiceMicTestOk: "Microphone works",
     voiceRecording: "Recording…",
     qrSearchPlaceholder: "Search quick replies…",
     qrManage: "Manage replies",

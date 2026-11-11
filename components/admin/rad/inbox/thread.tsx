@@ -17,7 +17,6 @@ import {
   ChevronDown,
   ChevronRight,
   CircleAlert,
-  Clock,
   Copy,
   EyeOff,
   Info,
@@ -974,7 +973,7 @@ function DeliveryTick({
   const props = { width: 14, height: 14, strokeWidth: 1.5 as const };
   switch (status) {
     case "pending":
-      return <Clock {...props} aria-label={inbox.statusPending} />;
+      return <LoaderCircle {...props} aria-label={inbox.statusPending} />;
     case "sending":
       return <LoaderCircle {...props} aria-label={inbox.statusSending} />;
     case "sent":
@@ -1030,12 +1029,20 @@ function Bubble({
   const bodyLabel = humanizeMessageBody(m.body, m.messageType, m.caption, labels);
   const inFlight = isOut && (m.status === "pending" || m.status === "sending");
   const showMedia = isRenderableMediaType(m.messageType);
+  const rawText = (m.caption || m.body || "").trim();
+  const emojiOnly =
+    !showMedia &&
+    Boolean(rawText) &&
+    /^[\p{Extended_Pictographic}\uFE0F\u200D]+$/u.test(rawText) &&
+    [...rawText].length <= 8;
 
   return (
     <div
       className={cn(
         "rad-bb",
         isOut ? "rad-out" : "rad-in",
+        showMedia && "rad-bb-media",
+        emojiOnly && "rad-bb-emoji",
         m.status === "failed" && "rad-bb-failed",
         inFlight && "rad-sending"
       )}

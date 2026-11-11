@@ -510,7 +510,8 @@
   font-size: 12px;
 }
 .rad-bb {
-  max-width: min(520px, 78%);
+  max-width: min(420px, 65%);
+  min-width: 72px;
   padding: 8px 12px 6px;
   border-radius: 14px;
   font-size: 14px;
@@ -527,16 +528,39 @@
 }
 .rad-bb.rad-in {
   align-self: flex-start;
-  background: var(--rad-surface);
+  background: var(--rad-bubble-in, var(--rad-surface));
   border: 1px solid var(--rad-bd);
   border-start-start-radius: 4px;
   box-shadow: var(--rad-sh);
 }
 .rad-bb.rad-out {
   align-self: flex-end;
-  background: var(--rad-out);
+  background: var(--rad-bubble-out, var(--rad-out));
   color: #f4e7d8;
   border-start-end-radius: 4px;
+}
+.rad-bb.rad-bb-media {
+  padding: 4px;
+  overflow: hidden;
+}
+.rad-bb.rad-bb-media .rad-bm {
+  padding-inline: 8px;
+  padding-block-end: 2px;
+}
+.rad-bb.rad-bb-emoji {
+  max-width: none;
+  min-width: 0;
+  padding: 2px 4px;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  font-size: 40px;
+  line-height: 1.2;
+}
+.rad-bb.rad-bb-emoji .rad-bm {
+  font-size: 11px;
+  justify-content: flex-end;
+  opacity: 0.55;
 }
 .rad-bb.rad-note {
   align-self: flex-end;
@@ -805,10 +829,13 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  max-height: 100%;
   border-inline-start: 1px solid var(--rad-bd);
   background: var(--rad-surface);
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   scrollbar-width: thin;
+  overscroll-behavior: contain;
 }
 .rad-xp section {
   padding: 18px;
@@ -1479,9 +1506,22 @@
   color: var(--rad-tx) !important;
 }
 
-/* ---------- WA-W2: overflow / search / media / voice / QR ---------- */
+/* ---------- WA-V: overlay host + menus (no clip by inbox shell) ---------- */
+.rad-overlay-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 200;
+}
+.rad-overlay-layer {
+  pointer-events: none;
+}
+.rad-overlay-layer > * {
+  pointer-events: auto;
+}
 .rad-ov,
-.rad-attach {
+.rad-attach,
+.rad-emoji {
   position: relative;
   display: inline-grid;
   overflow: visible;
@@ -1490,7 +1530,6 @@
 .rad-attach-menu {
   min-width: 220px;
 }
-/* Portaled to body — escape .rad-ibx overflow:hidden clipping */
 .rad-fixed-menu {
   position: fixed;
   z-index: 240;
@@ -1499,6 +1538,16 @@
 }
 .rad-fixed-menu.rad-menu {
   display: block;
+}
+/* CSS ::after tips clip / stick as gray slabs over header ⋯ — aria-label only */
+.rad-th .rad-ib[data-tip]:hover::after,
+.rad-cbr .rad-ib[data-tip]:hover::after,
+.rad-cmp .rad-ib[data-tip]:hover::after {
+  content: none !important;
+  display: none !important;
+}
+.rad-toast {
+  z-index: 280 !important;
 }
 .rad-ov-menu a.rad-ov-link,
 .rad-menu a.rad-ov-link {
@@ -1572,6 +1621,7 @@
   position: absolute;
   inset-block-start: -10px;
   inset-inline-end: 6px;
+  z-index: 2;
   gap: 2px;
   padding: 2px;
   border-radius: 999px;
@@ -1583,8 +1633,10 @@
 .rad-bb:focus-within .rad-bb-acts {
   display: flex;
 }
-
 .rad-quote-strip {
+  position: relative;
+  z-index: 1;
+  flex: none;
   display: flex;
   align-items: flex-start;
   gap: 8px;
@@ -1653,17 +1705,23 @@
   display: block;
   padding: 0;
   border: 0;
-  background: transparent;
+  background: color-mix(in srgb, var(--rad-surface3) 70%, transparent);
   cursor: zoom-in;
   max-width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  line-height: 0;
 }
 .rad-media-img img,
 .rad-media-video video {
   display: block;
-  max-width: min(280px, 100%);
+  width: auto;
+  height: auto;
+  max-width: min(320px, 100%);
   max-height: 320px;
-  border-radius: 10px;
-  object-fit: cover;
+  border-radius: 12px;
+  object-fit: contain;
+  background: var(--rad-surface3);
 }
 .rad-media-audio {
   display: flex;
@@ -1908,21 +1966,7 @@
   color: var(--rad-tx3);
   font-variant-numeric: tabular-nums;
 }
-.rad-media-img {
-  display: block;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: zoom-in;
-  max-width: 100%;
-}
-.rad-media-img img {
-  display: block;
-  max-width: min(280px, 100%);
-  max-height: 320px;
-  border-radius: 12px;
-  object-fit: cover;
-}
+/* (media-img rules live once above — WA-V) */
 .rad-mpv-stage img {
   display: block;
   width: auto;

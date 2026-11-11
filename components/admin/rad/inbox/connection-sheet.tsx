@@ -14,6 +14,11 @@ import {
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { KillSwitchBannerText } from "@/components/admin/rad/inbox/kill-switch-banner-text";
 import { cn } from "@/lib/utils";
+import {
+  classifyMicError,
+  micErrorMessage,
+} from "@/lib/whatsapp/messaging/mic-errors";
+import { Mic } from "lucide-react";
 
 function pillState(health: InboxHealthView): "connected" | "outbound-off" | "disconnected" | "reconnecting" {
   if (health.outboundKillSwitch) return "outbound-off";
@@ -83,6 +88,16 @@ export function RadConnectionSheet({
       toast.success(ib.rateLimitSaved);
       router.refresh();
     });
+  }
+
+  async function testMic() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((t) => t.stop());
+      toast.success(ib.voiceMicTestOk);
+    } catch (err) {
+      toast.error(micErrorMessage(classifyMicError(err), ib));
+    }
   }
 
   useEffect(() => {
@@ -234,6 +249,16 @@ export function RadConnectionSheet({
                   </button>
                 </div>
               </div>
+
+              <button
+                type="button"
+                className="rad-btn rad-gh"
+                style={{ marginBlockStart: 10 }}
+                onClick={() => void testMic()}
+              >
+                <Mic width={16} height={16} strokeWidth={1.5} aria-hidden />
+                {ib.voiceMicTest}
+              </button>
             </>
           ) : (
             <>

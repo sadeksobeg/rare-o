@@ -7,14 +7,18 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
-import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
+import {
+  InboxOverlayPortal,
+  INBOX_OVERLAY_Z,
+} from "@/components/admin/rad/inbox/overlay-root";
 
 export type FixedMenuPlacement = "below-end" | "above-start";
 
+const MENU_MIN_W = 220;
+
 /**
- * Portals a menu to document.body with position:fixed so inbox
- * overflow:hidden ancestors cannot clip it (⋯ header + attach composer).
+ * Viewport-fixed menu via OverlayRoot — flip/shift to stay inside the window.
  */
 export function FixedMenu({
   open,
@@ -32,11 +36,6 @@ export function FixedMenu({
   children: ReactNode;
 }) {
   const [style, setStyle] = useState<CSSProperties | null>(null);
-  const [mounted, setMounted] = useState(false);
-
-  useLayoutEffect(() => {
-    setMounted(true);
-  }, []);
 
   useLayoutEffect(() => {
     if (!open) {
@@ -51,32 +50,42 @@ export function FixedMenu({
       const pad = 8;
       const vw = window.innerWidth;
       const vh = window.innerHeight;
+      const preferBelow = placement === "below-end";
+      const spaceBelow = vh - r.bottom - pad;
+      const spaceAbove = r.top - pad;
+      const openBelow =
+        preferBelow
+          ? spaceBelow >= 120 || spaceBelow >= spaceAbove
+          : spaceAbove < 120 && spaceBelow > spaceAbove;
 
-      if (placement === "below-end") {
+      if (openBelow) {
         const top = Math.min(r.bottom + 6, vh - pad);
-        // Prefer aligning to the inline-end edge of the trigger (RTL-aware via right).
-        const right = Math.max(pad, vw - r.right);
+        const width = MENU_MIN_W;
+        let left = r.right - width;
+        left = Math.min(Math.max(pad, left), vw - width - pad);
         setStyle({
           position: "fixed",
           top,
-          right,
-          left: "auto",
+          left,
+          right: "auto",
           bottom: "auto",
-          maxHeight: Math.max(160, vh - top - pad),
+          width,
+          maxHeight: Math.max(120, vh - top - pad),
           overflowY: "auto",
         });
         return;
       }
 
-      // above-start — attach / emoji near composer
       const bottom = Math.max(pad, vh - r.top + 6);
-      const left = Math.min(Math.max(pad, r.left), vw - 240);
+      let left = r.left;
+      left = Math.min(Math.max(pad, left), vw - MENU_MIN_W - pad);
       setStyle({
         position: "fixed",
         bottom,
         left,
         top: "auto",
         right: "auto",
+        width: MENU_MIN_W,
         maxHeight: Math.max(120, r.top - pad * 2),
         overflowY: "auto",
       });
@@ -84,7 +93,6 @@ export function FixedMenu({
 
     place();
     window.addEventListener("resize", place);
-    // Capture scroll from inbox columns without missing nested scrollers.
     window.addEventListener("scroll", place, true);
     return () => {
       window.removeEventListener("resize", place);
@@ -92,16 +100,18 @@ export function FixedMenu({
     };
   }, [open, anchorRef, placement]);
 
-  if (!open || !mounted || !style) return null;
+  if (!open || !style) return null;
 
-  return createPortal(
-    <div
-      className={cn("rad-fixed-menu rad-on", className)}
-      role={role}
-      style={style}
-    >
-      {children}
-    </div>,
-    document.body
+  return (
+    <InboxOverlayPortal z={INBOX_OVERLAY_Z.menu}>
+      <div
+        className={cn("rad-fixed-menu rad-on", className)}
+        role={role}
+        style={style}
+        data-inbox-overlay-item="menu"
+      >
+        {children}
+      </div>
+    </InboxOverlayPortal>
   );
 }

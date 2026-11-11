@@ -5,6 +5,10 @@ import { Mic, Square, Trash2, Send } from "lucide-react";
 import { toast } from "sonner";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils";
+import {
+  classifyMicError,
+  micErrorMessage,
+} from "@/lib/whatsapp/messaging/mic-errors";
 
 function pickMime(): string | null {
   if (typeof MediaRecorder === "undefined") return null;
@@ -110,8 +114,8 @@ export function VoiceRecorder({
       }, 250);
       rec.start(200);
       setRecording(true);
-    } catch {
-      toast.error(ib.voiceMicDenied);
+    } catch (err) {
+      toast.error(micErrorMessage(classifyMicError(err), ib));
       stopTracks();
       setRecording(false);
     }

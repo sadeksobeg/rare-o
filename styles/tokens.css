@@ -356,8 +356,10 @@
   --rad-sh: 0 1px 0 rgba(255, 255, 255, 0.035) inset, 0 10px 30px -18px rgba(0, 0, 0, 0.8);
   --rad-glow: radial-gradient(900px 380px at 85% -10%, rgba(122, 68, 179, 0.22), transparent 60%);
   --rad-bg: var(--rad-c0);
-  /* Inbox (round 3): outgoing bubble + default avatar gradient. */
-  --rad-out: #3a1d57;
+  /* Inbox bubbles (WA-V): themed in/out — avoid solid purple slabs on media. */
+  --rad-bubble-in: var(--rad-surface2);
+  --rad-bubble-out: #2a1838;
+  --rad-out: var(--rad-bubble-out);
   --rad-g1: #7a44b3;
   --rad-g2: #32104f;
 
@@ -447,8 +449,10 @@
   --rad-sh: 0 1px 2px rgba(11, 8, 13, 0.05), 0 12px 28px -20px rgba(50, 16, 79, 0.35);
   --rad-glow: radial-gradient(900px 380px at 85% -10%, rgba(122, 68, 179, 0.14), transparent 60%);
   --rad-bg: var(--rad-c0);
-  /* Inbox (round 3): outgoing bubble + default avatar gradient. */
-  --rad-out: #32104f;
+  /* Inbox bubbles (WA-V): themed in/out. */
+  --rad-bubble-in: #ffffff;
+  --rad-bubble-out: #3d2458;
+  --rad-out: var(--rad-bubble-out);
   --rad-g1: #7a44b3;
   --rad-g2: #32104f;
 

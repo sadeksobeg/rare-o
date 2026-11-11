@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { InboxConversationListItem } from "@/lib/whatsapp/messaging/inbox";
+import { InboxOverlayProvider } from "@/components/admin/rad/inbox/overlay-root";
 
 type InboxUi = {
   ctxOpen: boolean;
@@ -79,16 +80,18 @@ export function RadInboxShell({
   }, [rows, activeId, threadVisible, ctxOpen, router]);
 
   return (
-    <InboxUiContext.Provider value={{ ctxOpen, setCtxOpen, searchRef }}>
-      <div className={`rad-ibx${threadVisible ? " rad-tv" : ""}${ctxOpen ? " rad-xo" : ""}`}>
-        {/* Single keyed slots — page fragments used to pass 2 unkeyed siblings and trip the Next.js "1 Issue" badge */}
-        <div key="inbox-list" className="rad-ib-list-slot">
-          {list}
+    <InboxOverlayProvider>
+      <InboxUiContext.Provider value={{ ctxOpen, setCtxOpen, searchRef }}>
+        <div className={`rad-ibx${threadVisible ? " rad-tv" : ""}${ctxOpen ? " rad-xo" : ""}`}>
+          {/* Single keyed slots — page fragments used to pass 2 unkeyed siblings and trip the Next.js "1 Issue" badge */}
+          <div key="inbox-list" className="rad-ib-list-slot">
+            {list}
+          </div>
+          <div key="inbox-thread" className="rad-ib-thread-slot">
+            {children}
+          </div>
         </div>
-        <div key="inbox-thread" className="rad-ib-thread-slot">
-          {children}
-        </div>
-      </div>
-    </InboxUiContext.Provider>
+      </InboxUiContext.Provider>
+    </InboxOverlayProvider>
   );
 }
