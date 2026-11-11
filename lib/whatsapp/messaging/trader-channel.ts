@@ -278,6 +278,7 @@ export async function ensureTraderConversation(
   // Empty / whitespace phone must never claim a WhatsApp JID or conflict badge.
   const phone = trader.phone?.trim() || null;
   const jid = phone ? normalizeUserJid(phone) : null;
+  const e164 = phone ? toE164Digits(phone) : null;
 
   if (jid) {
     const byChatId = await db.whatsAppConversation.findUnique({
@@ -290,7 +291,7 @@ export async function ensureTraderConversation(
           where: { id: byChatId.id },
           data: {
             traderId,
-            participantE164: toE164Digits(phone),
+            participantE164: e164,
             displayName: trader.displayName,
           },
         });
@@ -319,7 +320,7 @@ export async function ensureTraderConversation(
       data: {
         waChatId: jid,
         remoteJid: jid,
-        participantE164: toE164Digits(phone),
+        participantE164: e164,
         displayName: trader.displayName,
         traderId,
         unreadCount: 0,
