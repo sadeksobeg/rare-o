@@ -856,7 +856,7 @@ export async function adminSetOutboundGlobalRateAction(
 }
 
 
-/** W2 — mark conversation unread (desk). */
+/** W2 â€” mark conversation unread (desk). */
 export async function adminMarkInboxUnreadAction(
   formData: FormData
 ): Promise<ActionResult> {
@@ -874,7 +874,7 @@ export async function adminMarkInboxUnreadAction(
   return { ok: true };
 }
 
-/** W2 — archive / unarchive. */
+/** W2 â€” archive / unarchive. */
 export async function adminArchiveInboxConversationAction(
   formData: FormData
 ): Promise<ActionResult> {
@@ -894,7 +894,7 @@ export async function adminArchiveInboxConversationAction(
   return { ok: true };
 }
 
-/** W2 — mute 8h / unmute. */
+/** W2 â€” mute 8h / unmute. */
 export async function adminMuteInboxConversationAction(
   formData: FormData
 ): Promise<ActionResult> {
@@ -915,7 +915,7 @@ export async function adminMuteInboxConversationAction(
   return { ok: true };
 }
 
-/** W2 — desk block / unblock (outbound gate). */
+/** W2 â€” desk block / unblock (outbound gate). */
 export async function adminBlockInboxConversationAction(
   formData: FormData
 ): Promise<ActionResult> {
@@ -940,7 +940,7 @@ export async function adminBlockInboxConversationAction(
   return { ok: true };
 }
 
-/** W2 — delete-for-me (local hide). */
+/** W2 â€” delete-for-me (local hide). */
 export async function adminHideInboxMessageAction(
   formData: FormData
 ): Promise<ActionResult> {
@@ -957,7 +957,7 @@ export async function adminHideInboxMessageAction(
   return { ok: true };
 }
 
-/** W2 — reveal full phone (audited). */
+/** W2 â€” reveal full phone (audited). */
 export async function adminRevealInboxPhoneAction(
   formData: FormData
 ): Promise<ActionResult & { data?: { phone: string | null } }> {
@@ -974,7 +974,7 @@ export async function adminRevealInboxPhoneAction(
   return { ok: true, data: { phone: result.phone } };
 }
 
-/** W2 — list quick replies (seeds defaults once). */
+/** W2 â€” list quick replies (seeds defaults once). */
 export async function adminListQuickRepliesAction(
   locale: "ar" | "en" = "ar"
 ): Promise<
@@ -993,7 +993,7 @@ export async function adminListQuickRepliesAction(
   return { ok: true, data: { items } };
 }
 
-/** W2 — upsert quick reply template. */
+/** W2 â€” upsert quick reply template. */
 export async function adminUpsertQuickReplyAction(
   formData: FormData
 ): Promise<ActionResult & { data?: { id: string } }> {
@@ -1018,7 +1018,7 @@ export async function adminUpsertQuickReplyAction(
   return { ok: true, data: { id: result.id } };
 }
 
-/** W2 — delete quick reply. */
+/** W2 â€” delete quick reply. */
 export async function adminDeleteQuickReplyAction(
   formData: FormData
 ): Promise<ActionResult> {
@@ -1035,7 +1035,7 @@ export async function adminDeleteQuickReplyAction(
   return { ok: true };
 }
 
-/** W2 — fill template variables for insert (not send). */
+/** W2 â€” fill template variables for insert (not send). */
 export async function adminFillQuickReplyAction(
   formData: FormData
 ): Promise<ActionResult & { data?: { body: string } }> {
@@ -1053,7 +1053,7 @@ export async function adminFillQuickReplyAction(
   };
 }
 
-/** W2 — load / save composer draft. */
+/** W2 â€” load / save composer draft. */
 export async function adminGetComposerDraftAction(
   conversationId: string
 ): Promise<
