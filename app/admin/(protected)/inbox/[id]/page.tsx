@@ -33,13 +33,6 @@ export default async function AdminWhatsAppConversationPage({
     await markConversationRead(conversation.id);
   }
 
-  const ib = dict.ib;
-  const quickReplies = [
-    { title: ib.qr1Title, body: ib.qr1Body },
-    { title: ib.qr2Title, body: ib.qr2Body },
-    { title: ib.qr3Title, body: ib.qr3Body },
-  ];
-
   return (
     <>
       <RadThread
@@ -48,7 +41,6 @@ export default async function AdminWhatsAppConversationPage({
         health={health}
         dict={dict}
         locale={locale}
-        quickReplies={quickReplies}
       />
       <RadContextPanel
         key="context"

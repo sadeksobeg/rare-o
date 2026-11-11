@@ -464,6 +464,15 @@ model WhatsAppConversation {
   notes              WhatsAppConversationNote[]
   /// Free-form labels an admin attaches to the conversation (round 3 inbox).
   tags               String[]            @default([])
+  /// Desk archive (list filter) — not a WhatsApp-side archive.
+  archivedAt         DateTime?
+  /// Desk mute until; null = unmuted. Does not call WhatsApp mute API.
+  mutedUntil         DateTime?
+  /// Desk block flag — outbound enqueue refuses while set.
+  blockedAt          DateTime?
+  blockedByAdminId   String?
+  drafts             WhatsAppComposerDraft[]
+  phoneReveals       WhatsAppPhoneRevealAudit[]
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
 
@@ -472,6 +481,7 @@ model WhatsAppConversation {
   @@index([linkType, linkId])
   @@index([customerId])
   @@index([traderId])
+  @@index([archivedAt])
 }
 
 model WhatsAppMessage {
@@ -512,6 +522,14 @@ model WhatsAppMessage {
   /// WhatsApp-side timestamp when known
   waTimestamp      DateTime?
   adminId          String?
+  /// Quote / reply-to (same conversation). Null = not a reply.
+  replyToMessageId String?
+  replyTo          WhatsAppMessage?     @relation("MessageReplies", fields: [replyToMessageId], references: [id], onDelete: SetNull)
+  replies          WhatsAppMessage[]    @relation("MessageReplies")
+  /// Delete-for-me (local hide) — never deletes the row / never WA revoke.
+  hiddenAt         DateTime?
+  /// true = voice note (PTT); false = file audio / other media.
+  isPtt            Boolean              @default(false)
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
 
@@ -519,6 +537,49 @@ model WhatsAppMessage {
   @@index([status])
   @@index([direction])
   @@index([nextRetryAt])
+  @@index([replyToMessageId])
+}
+
+/// Admin quick-reply templates (W2) — editable; variables {name} {request_ref}.
+model WhatsAppQuickReplyTemplate {
+  id               String   @id @default(cuid())
+  titleAr          String
+  titleEn          String
+  bodyAr           String
+  bodyEn           String
+  category         String?
+  sortOrder        Int      @default(0)
+  createdByAdminId String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([sortOrder])
+}
+
+/// Per-admin composer draft (W2).
+model WhatsAppComposerDraft {
+  id               String               @id @default(cuid())
+  conversationId   String
+  conversation     WhatsAppConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  adminId          String
+  body             String               @default("")
+  replyToMessageId String?
+  updatedAt        DateTime             @updatedAt
+
+  @@unique([conversationId, adminId])
+  @@index([adminId])
+}
+
+/// Audit trail when an admin reveals a full phone (W2).
+model WhatsAppPhoneRevealAudit {
+  id             String               @id @default(cuid())
+  conversationId String
+  conversation   WhatsAppConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  adminId        String
+  createdAt      DateTime             @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([adminId])
 }
 
 /// Persisted mirror of the in-memory outbound anti-ban rate limiter

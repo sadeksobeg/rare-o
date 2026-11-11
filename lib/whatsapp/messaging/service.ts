@@ -48,6 +48,11 @@ import {
 } from "@/lib/whatsapp/types";
 import { publishInboxEvent } from "@/lib/whatsapp/messaging/inbox-events";
 import {
+  assertDeskAllowsOutbound,
+  deskOutboundBlockedReason,
+} from "@/lib/whatsapp/messaging/desk-actions";
+import { convertVoiceNoteToOggOpus } from "@/lib/whatsapp/messaging/voice-convert";
+import {
   assessEnqueueRateLimit,
   recordEnqueueAccepted,
 } from "@/lib/whatsapp/messaging/enqueue-rate-limit";
@@ -89,6 +94,8 @@ export type EnqueueOutboundTextInput = {
    * from a cold JID — blocks blast-to-unknown-number paths.
    */
   allowCreateConversation?: boolean;
+  /** Quote / reply-to same-conversation message id */
+  replyToMessageId?: string | null;
 };
 
 export type EnqueueOutboundMediaInput = {
@@ -100,6 +107,10 @@ export type EnqueueOutboundMediaInput = {
   mime: string;
   fileName?: string | null;
   caption?: string | null;
+  replyToMessageId?: string | null;
+  /** Voice note (PTT) when messageType is audio */
+  isPtt?: boolean;
+  mediaDurationSec?: number | null;
 };
 
 export type EnqueueOutboundTextResult =
@@ -912,6 +923,16 @@ export async function enqueueOutboundText(
       };
     }
   }
+  {
+    const desk = await assertDeskAllowsOutbound(jid, db);
+    if (!desk.ok) {
+      return {
+        ok: false,
+        code: "OUTBOUND_DISABLED",
+        error: `Conversation is ${desk.reason} on the desk`,
+      };
+    }
+  }
 
   try {
     const result = await db.$transaction(async (tx) => {
@@ -939,6 +960,7 @@ export async function enqueueOutboundText(
           });
 
       try {
+        const replyToMessageId = input.replyToMessageId?.trim() || null;
         const message = await tx.whatsAppMessage.create({
           data: {
             conversationId: conversation.id,
@@ -946,6 +968,7 @@ export async function enqueueOutboundText(
             messageType: "text",
             body: text,
             clientRequestId,
+            replyToMessageId,
             status: "pending",
             attemptCount: 0,
             nextRetryAt: null,
@@ -1054,6 +1077,15 @@ export async function enqueueOutboundMedia(
   }
 
   try {
+    const desk = await assertDeskAllowsOutbound(jid, db);
+    if (!desk.ok) {
+      return {
+        ok: false,
+        code: "OUTBOUND_DISABLED",
+        error: `Conversation is ${desk.reason} on the desk`,
+      };
+    }
+
     const conversation = await db.whatsAppConversation.upsert({
       where: { waChatId: jid },
       create: {
@@ -1085,6 +1117,8 @@ export async function enqueueOutboundMedia(
     }
 
     try {
+      const replyToMessageId = input.replyToMessageId?.trim() || null;
+      const isPtt = messageType === "audio" && input.isPtt !== false;
       const message = await db.whatsAppMessage.create({
         data: {
           conversationId: conversation.id,
@@ -1097,6 +1131,9 @@ export async function enqueueOutboundMedia(
           mediaFileName: input.fileName?.trim() || saved.saved.fileName,
           mediaSha256: saved.saved.sha256,
           storageKey: saved.saved.storageKey,
+          mediaDurationSec: input.mediaDurationSec ?? null,
+          isPtt,
+          replyToMessageId,
           clientRequestId,
           status: "pending",
           adminId,
@@ -1307,6 +1344,8 @@ export async function claimOutboundForSend(
       mediaMime: string | null;
       mediaFileName: string | null;
       storageKey: string | null;
+      isPtt: boolean;
+      deskBlocked: "blocked" | "archived" | "muted" | null;
     }
   | { ok: false; reason: "NOT_FOUND" | "NOT_CLAIMABLE" | "MAX_ATTEMPTS" }
 > {
@@ -1385,6 +1424,12 @@ export async function claimOutboundForSend(
     mediaMime: row.mediaMime,
     mediaFileName: row.mediaFileName,
     storageKey: row.storageKey,
+    isPtt: row.isPtt === true,
+    deskBlocked: deskOutboundBlockedReason({
+      blockedAt: row.conversation.blockedAt,
+      archivedAt: row.conversation.archivedAt,
+      mutedUntil: row.conversation.mutedUntil,
+    }),
   };
 }
 
@@ -1490,6 +1535,23 @@ export async function dispatchOutboundMessage(
     };
   }
 
+  if (claimed.deskBlocked) {
+    await db.whatsAppMessage.update({
+      where: { id: messageId },
+      data: {
+        status: "failed",
+        errorSafe: `Conversation is ${claimed.deskBlocked} on the desk`,
+      },
+    });
+    return {
+      ok: false,
+      messageId,
+      status: "failed",
+      code: "OUTBOUND_DISABLED",
+      error: `Conversation is ${claimed.deskBlocked} on the desk`,
+    };
+  }
+
   let send: Awaited<ReturnType<WhatsAppAdapter["sendText"]>>;
 
   if (
@@ -1497,7 +1559,7 @@ export async function dispatchOutboundMessage(
     claimed.messageType !== "sticker" &&
     claimed.storageKey
   ) {
-    const bytes = await readWhatsAppMediaByKey(claimed.storageKey);
+    let bytes = await readWhatsAppMediaByKey(claimed.storageKey);
     if (!bytes || !adapter.sendMedia) {
       await db.whatsAppMessage.update({
         where: { id: messageId },
@@ -1516,16 +1578,46 @@ export async function dispatchOutboundMessage(
         error: !bytes ? "Media file missing" : "Media send not supported",
       };
     }
+    let mime = claimed.mediaMime || "application/octet-stream";
+    let fileName = claimed.mediaFileName;
+    const asPtt = claimed.messageType === "audio" && claimed.isPtt;
+    if (asPtt) {
+      const converted = await convertVoiceNoteToOggOpus(bytes, {
+        inputMime: mime,
+      });
+      if (!converted.ok) {
+        await db.whatsAppMessage.update({
+          where: { id: messageId },
+          data: {
+            status: "pending",
+            errorSafe: `Voice convert failed (${converted.error}) — awaiting retry`,
+            nextRetryAt: new Date(Date.now() + outboundRetryDelayMs(claimed.attemptCount)),
+          },
+        });
+        return {
+          ok: false,
+          messageId,
+          status: "pending",
+          code: "SEND_FAILED",
+          error: converted.error,
+        };
+      }
+      bytes = converted.bytes;
+      mime = converted.mime;
+      if (!converted.skipped) {
+        fileName = (fileName || "voice").replace(/\.[^.]+$/, "") + ".ogg";
+      }
+    }
     send = await adapter.sendMedia({
       waChatId: claimed.waChatId,
       clientRequestId: claimed.clientRequestId,
       adminId: claimed.adminId ?? "unknown",
       messageType: claimed.messageType,
-      mime: claimed.mediaMime || "application/octet-stream",
-      fileName: claimed.mediaFileName,
+      mime,
+      fileName,
       caption: claimed.caption,
       bytes,
-      ptt: claimed.messageType === "audio",
+      ptt: asPtt,
     });
   } else {
     send = await adapter.sendText({

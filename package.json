@@ -44,6 +44,7 @@
     "test:session-invalidation": "node node_modules/tsx/dist/cli.mjs scripts/session-invalidation-checks.ts",
     "test:whatsapp-outbound-safety": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-outbound-safety-checks.ts",
     "test:whatsapp-w1": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-w1-checks.ts",
+    "test:whatsapp-w2": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-w2-checks.ts",
     "test:shipping-rates": "node node_modules/tsx/dist/cli.mjs scripts/shipping-rates-checks.ts",
     "test:whatsapp-media-store": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-media-store-checks.ts",
     "test:whatsapp-jid": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-jid-checks.ts",

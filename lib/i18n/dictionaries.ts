@@ -520,6 +520,7 @@ type Dict = {
     sendButton: string;
     saveNoteButton: string;
     attachLabel: string;
+    emojiPickerLabel: string;
     quickRepliesLabel: string;
     noteSystemLabel: string;
     contextUnlinkLabel: string;
@@ -603,6 +604,78 @@ type Dict = {
     previewReaction: string;
     previewUnsupported: string;
     previewEmpty: string;
+    markUnread: string;
+    archiveConversation: string;
+    unarchiveConversation: string;
+    mute8h: string;
+    unmute: string;
+    copyPhone: string;
+    phoneCopied: string;
+    revealPhone: string;
+    phoneRevealed: string;
+    revealPhoneFailed: string;
+    blockContact: string;
+    unblockContact: string;
+    openLinkedRecord: string;
+    unlinkRecord: string;
+    unlinkDone: string;
+    actionFailed: string;
+    archivedDone: string;
+    unarchivedDone: string;
+    mutedDone: string;
+    unmutedDone: string;
+    blockedDone: string;
+    unblockedDone: string;
+    markedUnreadDone: string;
+    threadSearchPlaceholder: string;
+    threadSearchPrev: string;
+    threadSearchNext: string;
+    threadSearchClose: string;
+    threadSearchCount: string;
+    threadSearchEmpty: string;
+    attachPhotoVideo: string;
+    attachDocument: string;
+    attachCamera: string;
+    mediaPreviewTitle: string;
+    mediaCaptionPlaceholder: string;
+    mediaSend: string;
+    mediaCancel: string;
+    mediaTooLarge: string;
+    mediaBadType: string;
+    mediaSendFailed: string;
+    dropToAttach: string;
+    voiceRecord: string;
+    voiceStop: string;
+    voiceCancel: string;
+    voiceSend: string;
+    voiceMicDenied: string;
+    voiceRecording: string;
+    qrSearchPlaceholder: string;
+    qrManage: string;
+    qrAdd: string;
+    qrEdit: string;
+    qrDelete: string;
+    qrSave: string;
+    qrTitleAr: string;
+    qrTitleEn: string;
+    qrBodyAr: string;
+    qrBodyEn: string;
+    qrEmpty: string;
+    qrVarsHint: string;
+    qrDeleted: string;
+    qrSaved: string;
+    replyToMessage: string;
+    cancelReply: string;
+    copyMessage: string;
+    messageCopied: string;
+    hideForMe: string;
+    hiddenForMe: string;
+    jumpToLatest: string;
+    openMap: string;
+    downloadMedia: string;
+    lightboxClose: string;
+    mediaDuration: string;
+    docSize: string;
   };
   adminUi: {
     colReference: string;
@@ -2162,6 +2235,7 @@ const ar: Dict = {
     sendButton: "إرسال",
     saveNoteButton: "حفظ الملاحظة",
     attachLabel: "إرفاق",
+    emojiPickerLabel: "إيموجي",
     quickRepliesLabel: "ردود جاهزة",
     noteSystemLabel: "ملاحظة داخلية · لا يراها العميل",
     contextUnlinkLabel: "فك الربط",
@@ -2249,6 +2323,78 @@ const ar: Dict = {
     previewReaction: "تفاعل",
     previewUnsupported: "رسالة غير مدعومة",
     previewEmpty: "—",
+    markUnread: "تعليم كغير مقروءة",
+    archiveConversation: "أرشفة المحادثة",
+    unarchiveConversation: "إلغاء الأرشفة",
+    mute8h: "كتم الإشعارات ٨ ساعات",
+    unmute: "إلغاء الكتم",
+    copyPhone: "نسخ الرقم المقنّع",
+    phoneCopied: "تم نسخ الرقم",
+    revealPhone: "إظهار الرقم الكامل",
+    phoneRevealed: "تم نسخ الرقم الكامل (مسجّل في التدقيق)",
+    revealPhoneFailed: "تعذّر إظهار الرقم",
+    blockContact: "حظر الإرسال لهذا الرقم",
+    unblockContact: "رفع الحظر",
+    openLinkedRecord: "فتح السجل المرتبط",
+    unlinkRecord: "فك الربط",
+    unlinkDone: "تم فك الربط",
+    actionFailed: "تعذّر تنفيذ الإجراء",
+    archivedDone: "تمت أرشفة المحادثة",
+    unarchivedDone: "أُخرجت المحادثة من الأرشيف",
+    mutedDone: "تم كتم الإشعارات ٨ ساعات",
+    unmutedDone: "أُلغي الكتم",
+    blockedDone: "تم حظر الإرسال",
+    unblockedDone: "رُفع الحظر",
+    markedUnreadDone: "وُسِمت كغير مقروءة",
+    threadSearchPlaceholder: "ابحث في الرسائل…",
+    threadSearchPrev: "السابق",
+    threadSearchNext: "التالي",
+    threadSearchClose: "إغلاق",
+    threadSearchCount: "{current} / {total}",
+    threadSearchEmpty: "لا نتائج",
+    attachPhotoVideo: "صورة أو فيديو",
+    attachDocument: "مستند",
+    attachCamera: "الكاميرا",
+    mediaPreviewTitle: "معاينة المرفق",
+    mediaCaptionPlaceholder: "تعليق (اختياري)…",
+    mediaSend: "إرسال المرفق",
+    mediaCancel: "إلغاء",
+    mediaTooLarge: "الملف أكبر من الحد المسموح",
+    mediaBadType: "نوع الملف غير مدعوم",
+    mediaSendFailed: "تعذّر إرسال المرفق",
+    dropToAttach: "أفلت الملف هنا للإرفاق",
+    voiceRecord: "تسجيل صوتي",
+    voiceStop: "إيقاف التسجيل",
+    voiceCancel: "إلغاء التسجيل",
+    voiceSend: "إرسال التسجيل",
+    voiceMicDenied: "لم يُسمح باستخدام الميكروفون",
+    voiceRecording: "جارٍ التسجيل…",
+    qrSearchPlaceholder: "ابحث في الردود الجاهزة…",
+    qrManage: "إدارة الردود",
+    qrAdd: "إضافة رد",
+    qrEdit: "تعديل",
+    qrDelete: "حذف",
+    qrSave: "حفظ",
+    qrTitleAr: "العنوان (عربي)",
+    qrTitleEn: "العنوان (إنجليزي)",
+    qrBodyAr: "النص (عربي)",
+    qrBodyEn: "النص (إنجليزي)",
+    qrEmpty: "لا ردود جاهزة",
+    qrVarsHint: "المتغيرات: {name} و {request_ref}",
+    qrDeleted: "تم حذف الرد",
+    qrSaved: "تم حفظ الرد",
+    replyToMessage: "رد على الرسالة",
+    cancelReply: "إلغاء الرد",
+    copyMessage: "نسخ النص",
+    messageCopied: "تم نسخ الرسالة",
+    hideForMe: "إخفاء عندي",
+    hiddenForMe: "أُخفيت الرسالة",
+    jumpToLatest: "أحدث الرسائل",
+    openMap: "فتح الخريطة",
+    downloadMedia: "تنزيل",
+    lightboxClose: "إغلاق المعاينة",
+    mediaDuration: "{time}",
+    docSize: "{size}",
   },
   adminUi: {
     colReference: "المرجع",
@@ -3939,6 +4085,7 @@ const en: Dict = {
     sendButton: "Send",
     saveNoteButton: "Save note",
     attachLabel: "Attach",
+    emojiPickerLabel: "Emoji",
     quickRepliesLabel: "Quick replies",
     noteSystemLabel: "Internal note · not visible to the customer",
     contextUnlinkLabel: "Unlink",
@@ -4026,6 +4173,78 @@ const en: Dict = {
     previewReaction: "Reaction",
     previewUnsupported: "Unsupported message",
     previewEmpty: "—",
+    markUnread: "Mark as unread",
+    archiveConversation: "Archive conversation",
+    unarchiveConversation: "Unarchive",
+    mute8h: "Mute notifications 8h",
+    unmute: "Unmute",
+    copyPhone: "Copy masked phone",
+    phoneCopied: "Phone copied",
+    revealPhone: "Reveal full phone",
+    phoneRevealed: "Full phone copied (audited)",
+    revealPhoneFailed: "Could not reveal phone",
+    blockContact: "Block outbound to this number",
+    unblockContact: "Unblock",
+    openLinkedRecord: "Open linked record",
+    unlinkRecord: "Unlink",
+    unlinkDone: "Unlinked",
+    actionFailed: "Action failed",
+    archivedDone: "Conversation archived",
+    unarchivedDone: "Conversation unarchived",
+    mutedDone: "Muted for 8 hours",
+    unmutedDone: "Unmuted",
+    blockedDone: "Outbound blocked",
+    unblockedDone: "Unblocked",
+    markedUnreadDone: "Marked unread",
+    threadSearchPlaceholder: "Search messages…",
+    threadSearchPrev: "Previous",
+    threadSearchNext: "Next",
+    threadSearchClose: "Close",
+    threadSearchCount: "{current} / {total}",
+    threadSearchEmpty: "No matches",
+    attachPhotoVideo: "Photo or video",
+    attachDocument: "Document",
+    attachCamera: "Camera",
+    mediaPreviewTitle: "Attachment preview",
+    mediaCaptionPlaceholder: "Caption (optional)…",
+    mediaSend: "Send attachment",
+    mediaCancel: "Cancel",
+    mediaTooLarge: "File exceeds the size limit",
+    mediaBadType: "Unsupported file type",
+    mediaSendFailed: "Could not send attachment",
+    dropToAttach: "Drop file here to attach",
+    voiceRecord: "Voice note",
+    voiceStop: "Stop recording",
+    voiceCancel: "Cancel recording",
+    voiceSend: "Send voice note",
+    voiceMicDenied: "Microphone permission denied",
+    voiceRecording: "Recording…",
+    qrSearchPlaceholder: "Search quick replies…",
+    qrManage: "Manage replies",
+    qrAdd: "Add reply",
+    qrEdit: "Edit",
+    qrDelete: "Delete",
+    qrSave: "Save",
+    qrTitleAr: "Title (Arabic)",
+    qrTitleEn: "Title (English)",
+    qrBodyAr: "Body (Arabic)",
+    qrBodyEn: "Body (English)",
+    qrEmpty: "No quick replies",
+    qrVarsHint: "Variables: {name} and {request_ref}",
+    qrDeleted: "Reply deleted",
+    qrSaved: "Reply saved",
+    replyToMessage: "Reply to message",
+    cancelReply: "Cancel reply",
+    copyMessage: "Copy text",
+    messageCopied: "Message copied",
+    hideForMe: "Hide for me",
+    hiddenForMe: "Message hidden",
+    jumpToLatest: "Latest messages",
+    openMap: "Open map",
+    downloadMedia: "Download",
+    lightboxClose: "Close preview",
+    mediaDuration: "{time}",
+    docSize: "{size}",
   },
   adminUi: {
     colReference: "Reference",

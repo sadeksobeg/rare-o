@@ -42,6 +42,13 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
+# WA-W2: ffmpeg required for voice-note → ogg/opus PTT in the WhatsApp worker
+# (same image as web). Exception to the “no apt-get” preference for this package only.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ffmpeg \
+  && rm -rf /var/lib/apt/lists/* \
+  && ffmpeg -version >/dev/null
+
 RUN groupadd --system --gid 1001 nodejs \
   && useradd --system --uid 1001 --gid nodejs nextjs
 

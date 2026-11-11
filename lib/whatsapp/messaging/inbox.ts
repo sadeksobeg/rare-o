@@ -16,6 +16,7 @@ import {
   type WhatsAppLinkType,
 } from "@/lib/whatsapp/messaging/link-constants";
 import { mediaUrl, parseStorageKey } from "@/lib/whatsapp/media";
+import { formatMaskedPhone } from "@/lib/whatsapp/messaging/phone-format";
 import {
   isOutboundEnvEnabled,
   primeOutboundKillSwitch,
@@ -32,16 +33,22 @@ export type InboxLinkSummary = {
 
 export type InboxConversationListItem = {
   id: string;
-  /** Privacy-conscious display label (E.164 or masked chat id) */
+  /** Privacy-conscious display label (never full phone until reveal) */
   displayLabel: string;
   /** Persisted name, when known — separate from displayLabel so the UI can
    *  show a masked phone alongside it rather than the full number. */
   name: string | null;
+  /** Masked phone only — full E.164 only via audited reveal action. */
   participantE164: string | null;
+  /** True when a full number exists server-side (enables reveal). */
+  hasPhone: boolean;
   lastMessagePreview: string;
   lastMessageAt: string | null;
   unreadCount: number;
   hasUnread: boolean;
+  archived: boolean;
+  muted: boolean;
+  blocked: boolean;
   /** Lightweight link hint only — no business context payload */
   link: InboxLinkSummary;
 };
@@ -56,7 +63,17 @@ export type InboxMessageItem = {
   caption: string | null;
   mediaMime: string | null;
   mediaFileName: string | null;
+  mediaSize: number | null;
+  mediaDurationSec: number | null;
   mediaUrl: string | null;
+  thumbnailUrl: string | null;
+  isPtt: boolean;
+  replyTo: {
+    id: string;
+    body: string;
+    messageType: string;
+    direction: string;
+  } | null;
   status: string;
   errorSafe: string | null;
   /** Outbound idempotency key — used to reconcile optimistic UI bubbles */
@@ -87,8 +104,13 @@ export type InboxConversationDetail = {
   displayLabel: string;
   name: string | null;
   waChatId: string;
+  /** Masked phone only — full E.164 only via audited reveal action. */
   participantE164: string | null;
+  hasPhone: boolean;
   unreadCount: number;
+  archived: boolean;
+  muted: boolean;
+  blocked: boolean;
   link: InboxLinkSummary;
   crm: InboxCrmParty;
   messages: InboxMessageItem[];
@@ -129,29 +151,38 @@ export type InboxHealthView = {
  * Build a privacy-conscious label from persisted identity fields only.
  * Does not invent customer names from business domains.
  */
+export function resolveConversationPhoneDigits(input: {
+  participantE164: string | null;
+  waChatId: string;
+}): string | null {
+  const server = (input.waChatId.split("@")[1] ?? "").toLowerCase();
+  const user = (input.waChatId.split("@")[0] ?? "").split(":")[0] ?? "";
+  const rawE164 = input.participantE164?.trim() || null;
+  // LID digits must never be treated as a phone number
+  const e164 =
+    rawE164 && !(server === "lid" && rawE164 === user.replace(/\D/g, ""))
+      ? rawE164.replace(/\D/g, "")
+      : server === "s.whatsapp.net" || server === "c.us"
+        ? user.replace(/\D/g, "") || null
+        : null;
+  if (!e164 || e164.length < 8 || e164.length > 15) return null;
+  return e164;
+}
+
 export function formatConversationDisplayLabel(input: {
   participantE164: string | null;
   displayName: string | null;
   waChatId: string;
 }): string {
   const name = input.displayName?.trim() || null;
-  const server = (input.waChatId.split("@")[1] ?? "").toLowerCase();
-  const user = (input.waChatId.split("@")[0] ?? "").split(":")[0] ?? "";
-  // LID digits must never be shown as a phone number
-  const rawE164 = input.participantE164?.trim() || null;
-  const e164 =
-    rawE164 && !(server === "lid" && rawE164 === user.replace(/\D/g, ""))
-      ? rawE164
-      : server === "s.whatsapp.net" || server === "c.us"
-        ? user.replace(/\D/g, "") || null
-        : null;
-  const phone =
-    e164 && e164.length >= 8 && e164.length <= 15 ? `+${e164}` : null;
+  const digits = resolveConversationPhoneDigits(input);
+  const phone = formatMaskedPhone(digits);
 
   if (name && phone) return `${name} · ${phone}`;
   if (name) return name;
   if (phone) return phone;
 
+  const user = (input.waChatId.split("@")[0] ?? "").split(":")[0] ?? "";
   const masked =
     user.length <= 4 ? user : `${user.slice(0, 2)}…${user.slice(-4)}`;
   return masked;
@@ -181,7 +212,9 @@ async function listInboxConversationsImpl(
   db: DbClient,
   take: number
 ): Promise<InboxConversationListItem[]> {
+  const now = new Date();
   const rows = await db.whatsAppConversation.findMany({
+    where: { archivedAt: null },
     orderBy: [{ lastMessageAt: "desc" }, { updatedAt: "desc" }],
     take,
     select: {
@@ -192,10 +225,14 @@ async function listInboxConversationsImpl(
       lastMessagePreview: true,
       lastMessageAt: true,
       unreadCount: true,
+      archivedAt: true,
+      mutedUntil: true,
+      blockedAt: true,
       linkType: true,
       linkId: true,
       // Fallback when denormalized preview/time are empty — latest message only.
       messages: {
+        where: { hiddenAt: null },
         orderBy: [{ waTimestamp: "desc" }, { createdAt: "desc" }],
         take: 1,
         select: {
@@ -226,6 +263,10 @@ async function listInboxConversationsImpl(
             : "")) ||
         "";
       const lastAt = r.lastMessageAt ?? latest?.waTimestamp ?? latest?.createdAt ?? null;
+      const phoneDigits = resolveConversationPhoneDigits({
+        participantE164: r.participantE164,
+        waChatId: r.waChatId,
+      });
       return {
         id: r.id,
         displayLabel: formatConversationDisplayLabel({
@@ -234,12 +275,16 @@ async function listInboxConversationsImpl(
           waChatId: r.waChatId,
         }),
         name: r.displayName?.trim() || null,
-        participantE164: r.participantE164,
+        participantE164: formatMaskedPhone(phoneDigits),
+        hasPhone: Boolean(phoneDigits),
         // Raw tags — UI humanizes via humanizeInboxPreview.
         lastMessagePreview: derivedPreview,
         lastMessageAt: toIso(lastAt),
         unreadCount: r.unreadCount,
         hasUnread: r.unreadCount > 0,
+        archived: Boolean(r.archivedAt),
+        muted: Boolean(r.mutedUntil && r.mutedUntil.getTime() > now.getTime()),
+        blocked: Boolean(r.blockedAt),
         link: toLinkSummary(r),
       };
     });
@@ -275,17 +320,34 @@ export async function getInboxConversation(
         select: { id: true, displayName: true, phone: true, companyName: true },
       },
       messages: {
+        where: { hiddenAt: null },
         orderBy: [
           { waTimestamp: "asc" },
           { createdAt: "asc" },
           { id: "asc" },
         ],
+        include: {
+          replyTo: {
+            select: {
+              id: true,
+              body: true,
+              caption: true,
+              messageType: true,
+              direction: true,
+            },
+          },
+        },
       },
       notes: { orderBy: { createdAt: "asc" } },
     },
   });
   if (!row) return null;
 
+  const now = new Date();
+  const phoneDigits = resolveConversationPhoneDigits({
+    participantE164: row.participantE164,
+    waChatId: row.waChatId,
+  });
   return {
     id: row.id,
     displayLabel: formatConversationDisplayLabel({
@@ -295,8 +357,12 @@ export async function getInboxConversation(
     }),
     name: row.displayName?.trim() || null,
     waChatId: row.waChatId,
-    participantE164: row.participantE164,
+    participantE164: formatMaskedPhone(phoneDigits),
+    hasPhone: Boolean(phoneDigits),
     unreadCount: row.unreadCount,
+    archived: Boolean(row.archivedAt),
+    muted: Boolean(row.mutedUntil && row.mutedUntil.getTime() > now.getTime()),
+    blocked: Boolean(row.blockedAt),
     link: toLinkSummary(row),
     crm: {
       customer: row.customer,
@@ -304,6 +370,7 @@ export async function getInboxConversation(
     },
     messages: row.messages.map((m) => {
       const parsed = m.storageKey ? parseStorageKey(m.storageKey) : null;
+      const thumb = m.thumbnailKey ? parseStorageKey(m.thumbnailKey) : null;
       return {
         id: m.id,
         direction: m.direction as "inbound" | "outbound",
@@ -313,8 +380,22 @@ export async function getInboxConversation(
         caption: m.caption,
         mediaMime: m.mediaMime,
         mediaFileName: m.mediaFileName,
+        mediaSize: m.mediaSize,
+        mediaDurationSec: m.mediaDurationSec,
         mediaUrl: parsed
           ? mediaUrl(parsed.conversationId, parsed.fileName)
+          : null,
+        thumbnailUrl: thumb
+          ? mediaUrl(thumb.conversationId, thumb.fileName)
+          : null,
+        isPtt: m.isPtt === true,
+        replyTo: m.replyTo
+          ? {
+              id: m.replyTo.id,
+              body: (m.replyTo.caption || m.replyTo.body || "").slice(0, 120),
+              messageType: m.replyTo.messageType,
+              direction: m.replyTo.direction,
+            }
           : null,
         status: m.status,
         errorSafe: m.errorSafe,

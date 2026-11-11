@@ -39,6 +39,7 @@ import {
   suggestCrmPartiesForConversation,
 } from "@/lib/whatsapp/messaging/linking";
 import {
+  maxBytesForMediaKind,
   mediaKindFromMime,
   normalizeOutboundMime,
   WHATSAPP_MAX_MEDIA_BYTES,
@@ -46,6 +47,25 @@ import {
 } from "@/lib/whatsapp/media-shared";
 import { prisma } from "@/lib/db/prisma";
 import { containsCI } from "@/lib/db/search";
+import {
+  hideMessageForMe,
+  markConversationUnread,
+  revealConversationPhone,
+  setConversationArchived,
+  setConversationBlocked,
+  setConversationMuted,
+} from "@/lib/whatsapp/messaging/desk-actions";
+import {
+  deleteQuickReplyTemplate,
+  ensureDefaultQuickReplies,
+  fillQuickReplyVariables,
+  listQuickReplyTemplates,
+  upsertQuickReplyTemplate,
+} from "@/lib/whatsapp/messaging/quick-replies";
+import {
+  getComposerDraft,
+  saveComposerDraft,
+} from "@/lib/whatsapp/messaging/drafts";
 
 /**
  * Admin WhatsApp actions â€” authorize every call server-side.
@@ -155,6 +175,9 @@ export async function adminSendWhatsAppTextAction(
     return { ok: false, error: "NOT_FOUND" };
   }
 
+  const replyToMessageId =
+    String(formData.get("replyToMessageId") || "").trim() || null;
+
   const result = await enqueueOutboundText({
     waChatId: conversation.waChatId,
     text,
@@ -162,6 +185,7 @@ export async function adminSendWhatsAppTextAction(
     adminId: session.sub,
     // W1: never invent a cold conversation from the admin composer
     allowCreateConversation: false,
+    replyToMessageId,
   });
 
   if (!result.ok) {
@@ -244,9 +268,6 @@ export async function adminSendWhatsAppMediaAction(
   if (!(file instanceof File) || file.size <= 0) {
     return { ok: false, error: "EMPTY_MEDIA" };
   }
-  if (file.size > WHATSAPP_MAX_MEDIA_BYTES) {
-    return { ok: false, error: "MEDIA_TOO_LARGE" };
-  }
 
   const mime = normalizeOutboundMime(file.type || "");
   if (!WHATSAPP_OUTBOUND_MIME[mime]) {
@@ -256,12 +277,27 @@ export async function adminSendWhatsAppMediaAction(
   if (!kind || kind === "sticker") {
     return { ok: false, error: "BAD_MIME" };
   }
+  if (file.size > maxBytesForMediaKind(kind)) {
+    return { ok: false, error: "MEDIA_TOO_LARGE" };
+  }
 
   const conversation = await prisma.whatsAppConversation.findUnique({
     where: { id: conversationId },
     select: { id: true, waChatId: true },
   });
   if (!conversation) return { ok: false, error: "NOT_FOUND" };
+
+  const replyToMessageId =
+    String(formData.get("replyToMessageId") || "").trim() || null;
+  const isPttRaw = String(formData.get("isPtt") || "").trim().toLowerCase();
+  const isPtt =
+    kind === "audio" &&
+    (isPttRaw === "1" || isPttRaw === "true" || isPttRaw === "yes" || isPttRaw === "");
+  const durationRaw = Number.parseInt(
+    String(formData.get("durationSec") || ""),
+    10
+  );
+  const mediaDurationSec = Number.isFinite(durationRaw) ? durationRaw : null;
 
   const bytes = Buffer.from(await file.arrayBuffer());
   const result = await enqueueOutboundMedia({
@@ -273,6 +309,9 @@ export async function adminSendWhatsAppMediaAction(
     mime,
     fileName: file.name || null,
     caption,
+    replyToMessageId,
+    isPtt,
+    mediaDurationSec,
   });
 
   if (!result.ok) {
@@ -816,3 +855,240 @@ export async function adminSetOutboundGlobalRateAction(
   return { ok: true, data: { perMin: result.perMin } };
 }
 
+
+/** W2 — mark conversation unread (desk). */
+export async function adminMarkInboxUnreadAction(
+  formData: FormData
+): Promise<ActionResult> {
+  try {
+    await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const conversationId = String(formData.get("conversationId") || "").trim();
+  if (!conversationId) return { ok: false, error: "INVALID_INPUT" };
+  const result = await markConversationUnread(conversationId);
+  if (!result.ok) return { ok: false, error: result.error };
+  revalidatePath("/admin/inbox");
+  revalidatePath(`/admin/inbox/${conversationId}`);
+  return { ok: true };
+}
+
+/** W2 — archive / unarchive. */
+export async function adminArchiveInboxConversationAction(
+  formData: FormData
+): Promise<ActionResult> {
+  try {
+    await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const conversationId = String(formData.get("conversationId") || "").trim();
+  const archived =
+    String(formData.get("archived") || "true").toLowerCase() !== "false";
+  if (!conversationId) return { ok: false, error: "INVALID_INPUT" };
+  const result = await setConversationArchived(conversationId, archived);
+  if (!result.ok) return { ok: false, error: result.error };
+  revalidatePath("/admin/inbox");
+  revalidatePath(`/admin/inbox/${conversationId}`);
+  return { ok: true };
+}
+
+/** W2 — mute 8h / unmute. */
+export async function adminMuteInboxConversationAction(
+  formData: FormData
+): Promise<ActionResult> {
+  try {
+    await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const conversationId = String(formData.get("conversationId") || "").trim();
+  const muted =
+    String(formData.get("muted") || "true").toLowerCase() !== "false";
+  if (!conversationId) return { ok: false, error: "INVALID_INPUT" };
+  const until = muted ? new Date(Date.now() + 8 * 60 * 60 * 1000) : null;
+  const result = await setConversationMuted(conversationId, until);
+  if (!result.ok) return { ok: false, error: result.error };
+  revalidatePath("/admin/inbox");
+  revalidatePath(`/admin/inbox/${conversationId}`);
+  return { ok: true };
+}
+
+/** W2 — desk block / unblock (outbound gate). */
+export async function adminBlockInboxConversationAction(
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const conversationId = String(formData.get("conversationId") || "").trim();
+  const blocked =
+    String(formData.get("blocked") || "true").toLowerCase() !== "false";
+  if (!conversationId) return { ok: false, error: "INVALID_INPUT" };
+  const result = await setConversationBlocked(
+    conversationId,
+    blocked,
+    session.sub
+  );
+  if (!result.ok) return { ok: false, error: result.error };
+  revalidatePath("/admin/inbox");
+  revalidatePath(`/admin/inbox/${conversationId}`);
+  return { ok: true };
+}
+
+/** W2 — delete-for-me (local hide). */
+export async function adminHideInboxMessageAction(
+  formData: FormData
+): Promise<ActionResult> {
+  try {
+    await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const messageId = String(formData.get("messageId") || "").trim();
+  if (!messageId) return { ok: false, error: "INVALID_INPUT" };
+  const result = await hideMessageForMe(messageId);
+  if (!result.ok) return { ok: false, error: result.error };
+  revalidatePath("/admin/inbox");
+  return { ok: true };
+}
+
+/** W2 — reveal full phone (audited). */
+export async function adminRevealInboxPhoneAction(
+  formData: FormData
+): Promise<ActionResult & { data?: { phone: string | null } }> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const conversationId = String(formData.get("conversationId") || "").trim();
+  if (!conversationId) return { ok: false, error: "INVALID_INPUT" };
+  const result = await revealConversationPhone(conversationId, session.sub);
+  if (!result.ok) return { ok: false, error: result.error };
+  return { ok: true, data: { phone: result.phone } };
+}
+
+/** W2 — list quick replies (seeds defaults once). */
+export async function adminListQuickRepliesAction(
+  locale: "ar" | "en" = "ar"
+): Promise<
+  ActionResult & {
+    data?: { items: Awaited<ReturnType<typeof listQuickReplyTemplates>> };
+  }
+> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  await ensureDefaultQuickReplies(session.sub);
+  const items = await listQuickReplyTemplates(locale);
+  return { ok: true, data: { items } };
+}
+
+/** W2 — upsert quick reply template. */
+export async function adminUpsertQuickReplyAction(
+  formData: FormData
+): Promise<ActionResult & { data?: { id: string } }> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const result = await upsertQuickReplyTemplate({
+    id: String(formData.get("id") || "").trim() || undefined,
+    titleAr: String(formData.get("titleAr") || ""),
+    titleEn: String(formData.get("titleEn") || ""),
+    bodyAr: String(formData.get("bodyAr") || ""),
+    bodyEn: String(formData.get("bodyEn") || ""),
+    category: String(formData.get("category") || "") || null,
+    sortOrder: Number.parseInt(String(formData.get("sortOrder") || "0"), 10) || 0,
+    adminId: session.sub,
+  });
+  if (!result.ok) return { ok: false, error: result.error };
+  revalidatePath("/admin/inbox");
+  return { ok: true, data: { id: result.id } };
+}
+
+/** W2 — delete quick reply. */
+export async function adminDeleteQuickReplyAction(
+  formData: FormData
+): Promise<ActionResult> {
+  try {
+    await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const id = String(formData.get("id") || "").trim();
+  if (!id) return { ok: false, error: "INVALID_INPUT" };
+  const result = await deleteQuickReplyTemplate(id);
+  if (!result.ok) return { ok: false, error: result.error };
+  revalidatePath("/admin/inbox");
+  return { ok: true };
+}
+
+/** W2 — fill template variables for insert (not send). */
+export async function adminFillQuickReplyAction(
+  formData: FormData
+): Promise<ActionResult & { data?: { body: string } }> {
+  try {
+    await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const template = String(formData.get("template") || "");
+  const name = String(formData.get("name") || "") || null;
+  const requestRef = String(formData.get("requestRef") || "") || null;
+  return {
+    ok: true,
+    data: { body: fillQuickReplyVariables(template, { name, requestRef }) },
+  };
+}
+
+/** W2 — load / save composer draft. */
+export async function adminGetComposerDraftAction(
+  conversationId: string
+): Promise<
+  ActionResult & {
+    data?: { body: string; replyToMessageId: string | null } | null;
+  }
+> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const id = conversationId.trim();
+  if (!id) return { ok: false, error: "INVALID_INPUT" };
+  const draft = await getComposerDraft(id, session.sub);
+  return { ok: true, data: draft };
+}
+
+export async function adminSaveComposerDraftAction(
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const conversationId = String(formData.get("conversationId") || "").trim();
+  if (!conversationId) return { ok: false, error: "INVALID_INPUT" };
+  await saveComposerDraft({
+    conversationId,
+    adminId: session.sub,
+    body: String(formData.get("body") || ""),
+    replyToMessageId: String(formData.get("replyToMessageId") || "") || null,
+  });
+  return { ok: true };
+}

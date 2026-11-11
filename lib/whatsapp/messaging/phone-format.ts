@@ -5,6 +5,10 @@
  * this one function doesn't drag a server-only module graph into the
  * browser bundle.
  */
+/**
+ * Canonical mask: `+CCC D•• ••• XXX` (e.g. `+964 7•• ••• 654`).
+ * Digits-only input preferred; already-masked strings are re-normalized.
+ */
 export function formatMaskedPhone(e164: string | null): string | null {
   if (!e164) return null;
   const digits = e164.replace(/\D/g, "");

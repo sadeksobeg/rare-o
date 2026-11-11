@@ -4,7 +4,28 @@
 
 export const WHATSAPP_MEDIA_URL_PREFIX = "/api/media/whatsapp/";
 
-export const WHATSAPP_MAX_MEDIA_BYTES = 16 * 1024 * 1024;
+/** Legacy flat cap — prefer per-kind helpers below (W2). */
+export const WHATSAPP_MAX_MEDIA_BYTES = 25 * 1024 * 1024;
+export const WHATSAPP_MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+export const WHATSAPP_MAX_VIDEO_BYTES = 16 * 1024 * 1024;
+export const WHATSAPP_MAX_AUDIO_BYTES = 16 * 1024 * 1024;
+export const WHATSAPP_MAX_DOCUMENT_BYTES = 25 * 1024 * 1024;
+
+export function maxBytesForMediaKind(kind: WhatsAppMediaKind): number {
+  switch (kind) {
+    case "image":
+    case "sticker":
+      return WHATSAPP_MAX_IMAGE_BYTES;
+    case "video":
+      return WHATSAPP_MAX_VIDEO_BYTES;
+    case "audio":
+      return WHATSAPP_MAX_AUDIO_BYTES;
+    case "document":
+      return WHATSAPP_MAX_DOCUMENT_BYTES;
+    default:
+      return WHATSAPP_MAX_MEDIA_BYTES;
+  }
+}
 
 /** Outbound attach allowlist (composer). */
 export const WHATSAPP_OUTBOUND_MIME: Readonly<Record<string, string>> = {

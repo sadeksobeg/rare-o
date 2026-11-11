@@ -56,6 +56,7 @@ export async function getTraderConversation(
     conversationId: row.id,
     messages: row.messages.map((m) => {
       const parsed = m.storageKey ? parseStorageKey(m.storageKey) : null;
+      const thumb = m.thumbnailKey ? parseStorageKey(m.thumbnailKey) : null;
       return {
         id: m.id,
         direction: m.direction as "inbound" | "outbound",
@@ -65,7 +66,14 @@ export async function getTraderConversation(
         caption: m.caption,
         mediaMime: m.mediaMime,
         mediaFileName: m.mediaFileName,
+        mediaSize: m.mediaSize ?? null,
+        mediaDurationSec: m.mediaDurationSec ?? null,
         mediaUrl: parsed ? mediaUrl(parsed.conversationId, parsed.fileName) : null,
+        thumbnailUrl: thumb
+          ? mediaUrl(thumb.conversationId, thumb.fileName)
+          : null,
+        isPtt: m.isPtt === true,
+        replyTo: null,
         status: m.status,
         errorSafe: m.errorSafe,
         clientRequestId: m.clientRequestId ?? null,

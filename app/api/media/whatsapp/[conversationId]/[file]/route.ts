@@ -8,52 +8,32 @@ import {
   isSafeWhatsAppMediaFileName,
   whatsappUploadsRoot,
 } from "@/lib/whatsapp/media";
+import {
+  isSafeWhatsAppConversationId,
+  resolveWhatsAppServeContentType,
+} from "@/lib/whatsapp/media-serve";
 
 function notFound() {
   return new NextResponse(null, { status: 404 });
-}
-
-function guessContentType(file: string): string {
-  const ext = file.split(".").pop()?.toLowerCase() ?? "";
-  switch (ext) {
-    case "jpg":
-    case "jpeg":
-      return "image/jpeg";
-    case "png":
-      return "image/png";
-    case "webp":
-      return "image/webp";
-    case "gif":
-      return "image/gif";
-    case "mp4":
-      return "video/mp4";
-    case "webm":
-      return "video/webm";
-    case "ogg":
-    case "opus":
-      return "audio/ogg";
-    case "mp3":
-      return "audio/mpeg";
-    case "m4a":
-      return "audio/mp4";
-    case "aac":
-      return "audio/aac";
-    case "pdf":
-      return "application/pdf";
-    default:
-      return "application/octet-stream";
-  }
 }
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ conversationId: string; file: string }> }
 ) {
-  const { conversationId, file } = await params;
+  const { conversationId: rawConv, file: rawFile } = await params;
+  // Decode once — reject encoded traversal (%2e%2e) after decode
+  let conversationId = rawConv;
+  let file = rawFile;
+  try {
+    conversationId = decodeURIComponent(rawConv);
+    file = decodeURIComponent(rawFile);
+  } catch {
+    return notFound();
+  }
 
   if (
-    !conversationId ||
-    conversationId.includes("..") ||
+    !isSafeWhatsAppConversationId(conversationId) ||
     !isSafeWhatsAppMediaFileName(file)
   ) {
     return notFound();
@@ -71,9 +51,18 @@ export async function GET(
   if (!message) return notFound();
 
   const root = whatsappUploadsRoot();
+  const rootResolved = path.resolve(root);
   const filePath = path.join(root, conversationId, file);
   const resolved = path.resolve(filePath);
-  if (!resolved.startsWith(path.resolve(root) + path.sep)) {
+  if (
+    resolved !== path.join(rootResolved, conversationId, file) &&
+    !resolved.startsWith(rootResolved + path.sep)
+  ) {
+    return notFound();
+  }
+  // Strict: file must live exactly under root/conversationId/
+  const expectedDir = path.resolve(root, conversationId);
+  if (!resolved.startsWith(expectedDir + path.sep)) {
     return notFound();
   }
 
@@ -84,16 +73,11 @@ export async function GET(
     return notFound();
   }
 
-  // Prefer the mime recorded at save time (verified, not guessed) — the
-  // file extension is a best-effort fallback for rows saved before mime
-  // was tracked, or an exotic subtype that didn't map to a known extension.
-  const contentType = message.mediaMime?.trim() || guessContentType(file);
-  const disposition =
-    contentType.startsWith("image/") ||
-    contentType.startsWith("video/") ||
-    contentType.startsWith("audio/")
-      ? "inline"
-      : `attachment; filename="${file}"`;
+  const { contentType, disposition } = resolveWhatsAppServeContentType(
+    bytes,
+    message.mediaMime,
+    file
+  );
 
   return new NextResponse(new Uint8Array(bytes), {
     status: 200,
@@ -102,6 +86,7 @@ export async function GET(
       "Cache-Control": "private, max-age=3600",
       "X-Content-Type-Options": "nosniff",
       "Content-Disposition": disposition,
+      "Content-Security-Policy": "default-src 'none'; sandbox",
     },
   });
 }
