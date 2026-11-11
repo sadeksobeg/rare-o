@@ -48,7 +48,12 @@ export function RadContextPanel({
 
       <section>
         <h3>{ib.tagsHeading}</h3>
-        <RadTagsSection conversationId={conversation.id} tags={conversation.tags} ib={ib} />
+        <RadTagsSection
+          conversationId={conversation.id}
+          tags={conversation.tags}
+          ib={ib}
+          inbox={dict.inbox}
+        />
       </section>
 
       <section>

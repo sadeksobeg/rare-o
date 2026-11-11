@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
   useTransition,
+  type ReactNode,
 } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -163,6 +164,8 @@ export function RadThread({
     whatsappDown ||
     conversation.blocked ||
     conversation.archived;
+  /** Text replies fall back to platform when WA outbound is unavailable. */
+  const replyUsesPlatform = sendingPaused || whatsappDown;
 
   const openSearch = useCallback(() => setSearchOpen(true), []);
   useThreadSearchHotkey(openSearch, true);
@@ -294,6 +297,10 @@ export function RadThread({
   }
 
   function queueFile(file: File) {
+    if (mediaBlocked) {
+      toast.error(dict.inbox.mediaRequiresWhatsApp);
+      return;
+    }
     const check = validateOutboundMedia(file, ib);
     if (!check.ok) {
       toast.error(check.error);
@@ -310,7 +317,11 @@ export function RadThread({
 
   function sendMedia(caption: string, file?: File, durationSec?: number, isPtt?: boolean) {
     const f = file ?? pendingMedia?.file;
-    if (!f || mediaBlocked) return;
+    if (!f) return;
+    if (mediaBlocked) {
+      toast.error(dict.inbox.mediaRequiresWhatsApp);
+      return;
+    }
     const clientRequestId = newClientRequestId();
     const nowIso = new Date().toISOString();
     const kindGuess = f.type.startsWith("image/")
@@ -505,10 +516,11 @@ export function RadThread({
     if (!v || pending) return;
     const clientRequestId = newClientRequestId();
     const nowIso = new Date().toISOString();
+    const optimisticChannel = replyUsesPlatform ? "platform" : "whatsapp";
     const optimisticRow: InboxMessageItem = {
       id: `opt-${clientRequestId}`,
       direction: "outbound",
-      channel: "whatsapp",
+      channel: optimisticChannel,
       messageType: "text",
       body: v,
       caption: null,
@@ -553,14 +565,21 @@ export function RadThread({
         return;
       }
       const messageId = result.data?.messageId;
+      const realChannel = result.data?.channel ?? optimisticChannel;
+      if (result.data?.platformFallback) {
+        toast.message(dict.inbox.platformFallbackNotice);
+      }
       if (messageId) {
+        const nextStatus = result.data?.status || "pending";
+        setStatusOverrides((prev) => ({ ...prev, [messageId]: nextStatus }));
         setOptimistic((prev) =>
           prev.map((m) =>
             m.clientRequestId === clientRequestId
               ? {
                   ...m,
                   id: messageId,
-                  status: result.data?.status || "pending",
+                  channel: realChannel,
+                  status: nextStatus,
                 }
               : m
           )
@@ -658,23 +677,18 @@ export function RadThread({
             <b>
               {conversation.name ? title : <bdi dir="ltr">{title}</bdi>}
             </b>
-            <small>
-              <bdi dir="ltr">{maskedPhone ?? ""}</bdi>
-              {conversation.link.linked ? (
-                <span className="rad-chipl rad-ok">
-                  {linkTypeLabel(conversation.link.linkType, dict)}{" "}
-                  <bdi dir="ltr">{conversation.link.linkId}</bdi>
-                </span>
-              ) : (
-                <span className="rad-chipl rad-no">{dict.inbox.notLinked}</span>
-              )}
-              {conversation.muted ? (
-                <span className="rad-chipl">{ib.mute8h}</span>
+            <div className="rad-th-meta">
+              {maskedPhone ? (
+                <bdi className="rad-th-phone" dir="ltr">
+                  {maskedPhone}
+                </bdi>
               ) : null}
-              {conversation.blocked ? (
-                <span className="rad-chipl rad-no">{ib.blockContact}</span>
-              ) : null}
-            </small>
+              <ThreadHeaderBadges
+                conversation={conversation}
+                dict={dict}
+                ib={ib}
+              />
+            </div>
           </div>
           <div className="rad-acts">
             <button
@@ -914,7 +928,21 @@ export function RadThread({
               {!voiceBarActive ? (
                 <>
                   <span className="sp" />
-                  <span className="rad-hint">{ib.composerSendHint}</span>
+                  {mode === "reply" ? (
+                    <span
+                      className={cn(
+                        "rad-hint rad-chipl",
+                        replyUsesPlatform ? "rad-warn-chip" : "rad-ok"
+                      )}
+                      data-channel={replyUsesPlatform ? "platform" : "whatsapp"}
+                    >
+                      {replyUsesPlatform
+                        ? dict.inbox.composerWillUsePlatform
+                        : dict.inbox.composerWillUseWhatsApp}
+                    </span>
+                  ) : (
+                    <span className="rad-hint">{ib.composerSendHint}</span>
+                  )}
                   <button
                     type="button"
                     className={cn(
@@ -965,6 +993,76 @@ function linkTypeLabel(linkType: string, dict: Dictionary): string {
   if (linkType === "wholesale_request") return dict.inbox.typeWholesale;
   if (linkType === "brokerage_request") return dict.inbox.typeBrokerage;
   return dict.inbox.notLinked;
+}
+
+/** Name stays on line 1; badges wrap on line 2 (max 2 visible, then +N). */
+function ThreadHeaderBadges({
+  conversation,
+  dict,
+  ib,
+}: {
+  conversation: InboxConversationDetail;
+  dict: Dictionary;
+  ib: Dictionary["ib"];
+}) {
+  const chips: ReactNode[] = [];
+  if (conversation.crm.trader) {
+    chips.push(
+      <span key="trader" className="rad-chipl rad-ok">
+        {dict.inbox.linkedTraderChip}{" "}
+        <bdi dir="ltr">{conversation.crm.trader.displayName}</bdi>
+      </span>
+    );
+  }
+  if (conversation.link.linked) {
+    chips.push(
+      <span key="link" className="rad-chipl rad-ok">
+        {linkTypeLabel(conversation.link.linkType, dict)}{" "}
+        <bdi dir="ltr">{conversation.link.linkId}</bdi>
+      </span>
+    );
+  } else {
+    chips.push(
+      <span key="unlinked" className="rad-chipl rad-no">
+        {dict.inbox.notLinked}
+      </span>
+    );
+  }
+  if (conversation.tags.includes("phone-conflict")) {
+    chips.push(
+      <span key="conflict" className="rad-chipl rad-no">
+        {dict.inbox.phoneConflictChip}
+      </span>
+    );
+  }
+  if (conversation.muted) {
+    chips.push(
+      <span key="muted" className="rad-chipl">
+        {ib.mute8h}
+      </span>
+    );
+  }
+  if (conversation.blocked) {
+    chips.push(
+      <span key="blocked" className="rad-chipl rad-no">
+        {ib.blockContact}
+      </span>
+    );
+  }
+
+  const visible = chips.slice(0, 2);
+  const overflow = chips.length - visible.length;
+
+  return (
+    <div className="rad-th-badges">
+      {visible}
+      {overflow > 0 ? (
+        <span className="rad-chipl rad-no" title={`${overflow} more`}>
+          +{overflow}
+        </span>
+      ) : null}
+    </div>
+  );
 }
 
 function DeliveryTick({
@@ -1062,6 +1160,16 @@ function Bubble({
             <span>{m.replyTo.body || m.replyTo.messageType}</span>
           </div>
         ) : null}
+        <span
+          className={cn(
+            "rad-chchip",
+            m.channel === "platform" ? "rad-chchip-plat" : "rad-chchip-wa"
+          )}
+        >
+          {m.channel === "platform"
+            ? inbox.channelPlatform
+            : inbox.channelWhatsApp}
+        </span>
         {showMedia ? <MediaBubbleBody m={m} ib={ib} /> : null}
         {!showMedia && bodyLabel !== labels.empty ? bodyLabel : null}
         <div className="rad-bm">

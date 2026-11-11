@@ -214,12 +214,17 @@
 }
 .rad-fl {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
+  max-width: 100%;
+  /* Column is narrow even at 1440 — wrap so «غير مرتبط» is never clipped.
+     Keep horizontal scroll+fade as fallback when wrap is constrained. */
   overflow-x: auto;
   overflow-y: hidden;
-  max-width: 100%;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  padding-inline: 2px;
+  box-sizing: border-box;
 }
 .rad-fl button {
   display: inline-flex;
@@ -233,6 +238,7 @@
   color: var(--rad-tx2);
   border: 1px solid var(--rad-bd);
   white-space: nowrap;
+  flex: none;
   transition: background-color 0.16s, color 0.16s, border-color 0.16s;
 }
 .rad-fl button em {
@@ -400,6 +406,10 @@
   flex: none;
   font-variant-numeric: tabular-nums;
 }
+.rad-ub-conflict {
+  background: var(--rad-danger, #b42318);
+  color: #fff;
+}
 @keyframes rad-rowin {
   from {
     opacity: 0;
@@ -422,8 +432,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 68px;
-  padding: 0 20px;
+  min-height: 68px;
+  height: auto;
+  padding: 10px 20px;
   border-bottom: 1px solid var(--rad-bd);
   overflow: visible;
   background: var(--rad-surface);
@@ -433,6 +444,9 @@
   min-width: 0;
   flex: 1;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 .rad-th b {
   display: block;
@@ -444,6 +458,31 @@
   white-space: nowrap;
   max-width: 100%;
 }
+.rad-th-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+}
+.rad-th-phone {
+  color: var(--rad-tx3);
+  font-size: 12.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  max-width: 100%;
+}
+.rad-th-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+}
 .rad-th small {
   display: flex;
   align-items: center;
@@ -452,13 +491,7 @@
   font-size: 12.5px;
   min-width: 0;
   overflow: hidden;
-  flex-wrap: nowrap;
-}
-.rad-th small > bdi {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
+  flex-wrap: wrap;
 }
 .rad-th .rad-acts {
   position: relative;
@@ -573,6 +606,35 @@
   background: var(--rad-bubble-out, var(--rad-out));
   color: #f4e7d8;
   border-start-end-radius: 4px;
+}
+.rad-chchip {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 4px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.4;
+}
+.rad-bb.rad-in .rad-chchip {
+  background: color-mix(in srgb, var(--rad-tx) 8%, transparent);
+  color: var(--rad-tx-muted, var(--rad-muted));
+}
+.rad-bb.rad-out .rad-chchip-wa {
+  background: color-mix(in srgb, #fffcf8 16%, transparent);
+  color: color-mix(in srgb, #fffcf8 88%, transparent);
+}
+.rad-bb.rad-out .rad-chchip-plat {
+  background: color-mix(in srgb, #fffcf8 22%, transparent);
+  color: #fffcf8;
+}
+.rad-hint.rad-chipl {
+  max-width: 14rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .rad-bb.rad-bb-media {
   padding: 4px;
@@ -1480,9 +1542,10 @@
     max-width: min(160px, 40vw);
   }
   .rad-th {
-    padding: 0;
+    padding: 8px;
     padding-inline: 8px 10px;
-    height: 56px;
+    min-height: 56px;
+    height: auto;
     gap: 8px;
     flex: none;
   }
@@ -1490,18 +1553,19 @@
     min-width: 0;
     overflow: hidden;
   }
-  .rad-th b,
-  .rad-th small {
+  .rad-th b {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     max-width: 100%;
   }
-  .rad-th small {
-    display: block;
+  .rad-th-meta,
+  .rad-th-badges {
+    flex-wrap: wrap;
   }
   .rad-th .rad-chipl {
-    display: none;
+    display: inline-flex;
+    max-width: 100%;
   }
   .rad-lc-h {
     padding-inline: 14px;

@@ -1586,6 +1586,30 @@
   padding: 30px 24px 96px;
   overflow-x: clip;
 }
+/* Bound the trader shell so the messages flex column can scroll internally. */
+.rad-tapp:has(.rad-tmsg) {
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.rad-tapp:has(.rad-tmsg) > div {
+  flex: 1;
+  height: auto;
+  min-height: 0 !important;
+  max-height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+/* Override shell min-h-dvh so content cannot grow past the viewport. */
+.rad-tapp:has(.rad-tmsg) .min-h-dvh {
+  min-height: 0 !important;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
 /*
  * Sticky / fixed chrome that must clear the mobile tab rail (≤900px).
  * Prefer this over Tailwind md: breakpoints — tabbar shows through 900px.
@@ -1663,4 +1687,94 @@
     /* Tab rail (68) + safe-area + 16px breathing room for primary submits */
     padding: 18px 16px calc(68px + env(safe-area-inset-bottom, 0px) + 16px);
   }
+  /*
+   * CHAT-F1.1: composer is a normal-flow footer inside a fixed-height
+   * flex column — never position:fixed. Page padding clears the tab rail only.
+   */
+  .rad-tpage:has(.rad-tmsg) {
+    /* Beat any higher-specificity portal padding (was collapsing to 24px).
+       Tab rail is 68px; keep an 8px gap so the composer never kisses the rail. */
+    padding: 12px 12px
+      calc(68px + env(safe-area-inset-bottom, 0px) + 8px) !important;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .rad-tpage:has(.rad-tmsg) > .ro-portal-stagger {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  /* space-y utilities fight flex fill — neutralize vertical margins here */
+  .rad-tpage:has(.rad-tmsg) > .ro-portal-stagger > * {
+    margin-block: 0 !important;
+  }
+  .rad-tmsg {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto !important;
+    max-height: none !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .rad-tmsg-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none !important;
+    overflow-y: auto;
+  }
+  .rad-tmsg-composer {
+    position: static !important;
+    inset: auto !important;
+    flex: none;
+    z-index: auto;
+    padding-bottom: 0.625rem;
+  }
+}
+
+/* Desktop / wide: same flex chain under trader chrome (no fixed composer). */
+@media (min-width: 901px) {
+  .rad-tpage:has(.rad-tmsg) {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    padding-bottom: 24px;
+  }
+  .rad-tpage:has(.rad-tmsg) > .ro-portal-stagger {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  .rad-tpage:has(.rad-tmsg) > .ro-portal-stagger > * {
+    margin-block: 0 !important;
+  }
+  .rad-tmsg {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .rad-tmsg-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+}
+
+/* Trader own-bubble: force light cream text in both themes (WCAG AA on #7a44b3). */
+.rad-tmsg-mine,
+.rad-tmsg-mine * {
+  color: #fffcf8 !important;
+}
+[data-theme="light"] .rad-tmsg-mine {
+  background: #32104f !important;
 }

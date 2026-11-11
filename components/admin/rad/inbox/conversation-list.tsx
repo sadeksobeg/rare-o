@@ -140,6 +140,11 @@ export function RadConversationList({
                   </div>
                   <div className="rad-cp">
                     <span className={cn(!hasPreview && "rad-cp-empty")}>{preview}</span>
+                    {r.phoneConflict ? (
+                      <i className="rad-ub rad-ub-conflict" aria-label={dict.inbox.phoneConflictChip}>
+                        !
+                      </i>
+                    ) : null}
                     {r.hasUnread ? (
                       <i className="rad-ub" aria-label={`${r.unreadCount}`}>
                         {r.unreadCount}

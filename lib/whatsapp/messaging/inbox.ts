@@ -51,6 +51,8 @@ export type InboxConversationListItem = {
   blocked: boolean;
   /** Lightweight link hint only — no business context payload */
   link: InboxLinkSummary;
+  /** CHAT-F1: same-phone ownership conflict — desk badge only */
+  phoneConflict: boolean;
 };
 
 export type InboxMessageItem = {
@@ -80,6 +82,8 @@ export type InboxMessageItem = {
   clientRequestId: string | null;
   waTimestamp: string | null;
   createdAt: string;
+  /** Trader portal: WhatsApp media exists but is not fetchable here */
+  whatsappMediaUnavailable?: boolean;
 };
 
 export type InboxCrmParty = {
@@ -230,6 +234,7 @@ async function listInboxConversationsImpl(
       blockedAt: true,
       linkType: true,
       linkId: true,
+      tags: true,
       // Fallback when denormalized preview/time are empty — latest message only.
       messages: {
         where: { hiddenAt: null },
@@ -286,6 +291,7 @@ async function listInboxConversationsImpl(
         muted: Boolean(r.mutedUntil && r.mutedUntil.getTime() > now.getTime()),
         blocked: Boolean(r.blockedAt),
         link: toLinkSummary(r),
+        phoneConflict: r.tags.includes("phone-conflict"),
       };
     });
 }

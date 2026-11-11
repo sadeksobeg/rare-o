@@ -40,9 +40,18 @@ function MediaBody({
   t: TraderDict;
 }) {
   const muted = isMine
-    ? "text-[color-mix(in_srgb,var(--ro-sand-100)_72%,transparent)]"
+    ? "text-[color-mix(in_srgb,#fffcf8_78%,transparent)]"
     : "text-ro-muted";
   const caption = message.caption?.trim() || null;
+
+  if (message.whatsappMediaUnavailable) {
+    return (
+      <p className={cn("inline-flex items-center gap-1.5 font-medium", muted)}>
+        <FileText className="size-4 shrink-0" strokeWidth={1.5} aria-hidden />
+        {t.messagesWhatsappMediaUnavailable}
+      </p>
+    );
+  }
 
   if (message.messageType === "image" || message.messageType === "sticker") {
     return (
@@ -92,7 +101,7 @@ function MediaBody({
         rel="noopener noreferrer"
         className={cn(
           "inline-flex items-center gap-2 font-semibold underline-offset-2 hover:underline",
-          isMine ? "text-[var(--ro-sand-50)]" : "text-ro-plum"
+          isMine ? "text-[#fffcf8]" : "text-ro-plum"
         )}
       >
         <FileText className="size-4 shrink-0" strokeWidth={1.5} aria-hidden />
@@ -136,7 +145,8 @@ export function TraderMessageBubble({
       className={cn(
         "group max-w-[min(28rem,85%)] px-3.5 py-2 text-[13.5px] leading-relaxed",
         isMine
-          ? "ms-auto rounded-[18px] rounded-ee-[6px] bg-[color:var(--ro-plum-700)] text-[var(--ro-sand-50)] shadow-[0_1px_2px_rgba(20,8,40,0.18)]"
+          ? // Explicit light-on-plum — portal themes remap --ro-sand-50 to dark surfaces.
+            "rad-tmsg-mine ms-auto rounded-[18px] rounded-ee-[6px] bg-[#7a44b3] text-[#fffcf8] shadow-[0_1px_2px_rgba(20,8,40,0.18)]"
           : "me-auto rounded-[18px] rounded-es-[6px] border border-ro-border bg-ro-paper text-ro-ink shadow-sm"
       )}
     >
@@ -157,7 +167,9 @@ export function TraderMessageBubble({
         <span
           className={cn(
             "text-[10px] font-medium",
-            isMine ? "text-[color-mix(in_srgb,var(--ro-sand-100)_70%,transparent)]" : "text-ro-muted"
+            isMine
+              ? "text-[color-mix(in_srgb,#fffcf8_78%,transparent)]"
+              : "text-ro-muted"
           )}
         >
           {isPlatform ? t.messagesChannelPlatform : t.messagesChannelWhatsapp}
@@ -170,7 +182,7 @@ export function TraderMessageBubble({
         className={cn(
           "mt-1 flex flex-wrap items-center justify-end gap-1 text-[10.5px] tabular-nums",
           isMine
-            ? "text-[color-mix(in_srgb,var(--ro-sand-100)_70%,transparent)]"
+            ? "text-[color-mix(in_srgb,#fffcf8_78%,transparent)]"
             : "text-ro-muted"
         )}
       >

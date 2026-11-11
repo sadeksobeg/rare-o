@@ -78,6 +78,13 @@ export async function traderSendMessageAction(
   }
 
   const text = String(formData.get("text") || "");
+  const { checkTraderSendRateLimit } = await import(
+    "@/lib/whatsapp/messaging/trader-send-rate-limit"
+  );
+  const rate = checkTraderSendRateLimit(session.sub);
+  if (!rate.ok) {
+    return { ok: false, error: "RATE_LIMITED" };
+  }
   const { sendTraderPlatformMessage } = await import(
     "@/lib/whatsapp/messaging/trader-channel"
   );
@@ -89,5 +96,6 @@ export async function traderSendMessageAction(
     return { ok: false, error: result.error };
   }
   revalidatePath("/trader/messages");
+  revalidatePath("/trader");
   return { ok: true };
 }

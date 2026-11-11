@@ -142,6 +142,8 @@ export async function adminSendWhatsAppTextAction(
       conversationId: string;
       status: string;
       duplicate: boolean;
+      channel: "whatsapp" | "platform";
+      platformFallback: boolean;
     };
   }
 > {
@@ -198,6 +200,7 @@ export async function adminSendWhatsAppTextAction(
         conversationId: conversation.id,
         adminId: session.sub,
         text,
+        clientRequestId,
       });
       if (!platformResult.ok) {
         return { ok: false, error: platformResult.error };
@@ -211,6 +214,8 @@ export async function adminSendWhatsAppTextAction(
           conversationId: platformResult.conversationId,
           status: "sent",
           duplicate: false,
+          channel: "platform",
+          platformFallback: true,
         },
       };
     }
@@ -234,6 +239,8 @@ export async function adminSendWhatsAppTextAction(
       conversationId: result.conversationId,
       status: result.status,
       duplicate: result.duplicate,
+      channel: "whatsapp",
+      platformFallback: false,
     },
   };
 }

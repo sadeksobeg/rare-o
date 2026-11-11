@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { TraderMessageBubble, TraderMessageDaySeparator } from "@/components/trader/message-bubble";
 import { TraderMessageComposer } from "@/components/trader/message-composer";
+import { useTraderMessagesPoll } from "@/components/trader/use-trader-messages-poll";
 import type { TraderDict } from "@/lib/ui/trader-labels";
 import type { InboxMessageItem } from "@/lib/whatsapp/messaging/inbox";
 
@@ -37,6 +38,7 @@ export function TraderMessageThread({
 }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const prevCount = useRef(messages.length);
+  useTraderMessagesPoll(true);
 
   useEffect(() => {
     const el = scrollerRef.current;
@@ -66,10 +68,10 @@ export function TraderMessageThread({
   }
 
   return (
-    <div className="rad-card flex h-[min(70vh,42rem)] flex-col overflow-hidden">
+    <div className="rad-tmsg rad-card flex flex-col overflow-hidden">
       <div
         ref={scrollerRef}
-        className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain px-3 py-3 sm:px-5"
+        className="rad-tmsg-scroll min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain px-3 py-3 sm:px-5"
       >
         {messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
@@ -84,7 +86,7 @@ export function TraderMessageThread({
           items
         )}
       </div>
-      <div className="shrink-0 border-t border-[color:var(--rad-bd)] bg-[color:var(--rad-surface3)] p-2.5">
+      <div className="rad-tmsg-composer shrink-0 border-t border-[color:var(--rad-bd)] bg-[color:var(--rad-surface3)] p-2.5">
         <TraderMessageComposer t={t} />
       </div>
     </div>

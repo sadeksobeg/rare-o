@@ -1390,7 +1390,9 @@ type Dict = {
     messagesChannelPlatform: string;
     messagesErrorEmpty: string;
     messagesErrorTooLong: string;
+    messagesErrorRateLimited: string;
     messagesErrorGeneric: string;
+    messagesWhatsappMediaUnavailable: string;
     offersTitle: string;
     offersLead: string;
     offersEmpty: string;
@@ -1507,6 +1509,12 @@ type Dict = {
     statusDelivered: string;
     statusRead: string;
     channelPlatform: string;
+    channelWhatsApp: string;
+    composerWillUsePlatform: string;
+    composerWillUseWhatsApp: string;
+    mediaRequiresWhatsApp: string;
+    linkedTraderChip: string;
+    phoneConflictChip: string;
     newMessages: string;
     linkRecord: string;
     unlinkConfirm: string;
@@ -3232,7 +3240,9 @@ const ar: Dict = {
     messagesChannelPlatform: "عبر المنصة",
     messagesErrorEmpty: "اكتب رسالة أولاً",
     messagesErrorTooLong: "الرسالة أطول من الحد المسموح",
+    messagesErrorRateLimited: "أرسلت كثيراً خلال دقيقة — انتظر قليلاً ثم أعد المحاولة",
     messagesErrorGeneric: "تعذّر إرسال الرسالة — حاول مرة أخرى",
+    messagesWhatsappMediaUnavailable: "مرفق من واتساب (غير متاح هنا)",
     offersTitle: "العروض العامة المختارة",
     offersLead: "عروض RARE OUD المنشورة فقط — وليست متاجر للتجّار.",
     offersEmpty: "لا توجد عروض منشورة بعد.",
@@ -3282,7 +3292,7 @@ const ar: Dict = {
     sendFailed: "لم تُرسل — إعادة المحاولة",
     sendBlocked: "لا يمكن الإرسال بينما الإرسال معطّل.",
     sendSuccess: "أُدرجت الرسالة في قائمة الإرسال.",
-    notLinked: "غير مرتبط",
+    notLinked: "بلا صفقة",
     healthDisconnected: "غير متصل",
     healthConnecting: "جارٍ الاتصال",
     healthConnected: "متصل",
@@ -3347,7 +3357,13 @@ const ar: Dict = {
     retry: "إعادة المحاولة",
     statusDelivered: "تم التسليم",
     statusRead: "تمت القراءة",
-    channelPlatform: "عبر منصة التاجر",
+    channelPlatform: "عبر المنصة",
+    channelWhatsApp: "عبر واتساب",
+    composerWillUsePlatform: "سيصل الرد عبر المنصة",
+    composerWillUseWhatsApp: "سيصل الرد عبر واتساب",
+    mediaRequiresWhatsApp: "إرسال الوسائط يحتاج واتساب متصلاً مع تفعيل الإرسال — لا يمكن الإرسال الآن.",
+    linkedTraderChip: "تاجر مرتبط",
+    phoneConflictChip: "تعارض هاتف",
     newMessages: "رسائل جديدة ↓",
     linkRecord: "ربط بسجل",
     unlinkConfirm: "إزالة الربط؟",
@@ -5097,7 +5113,9 @@ const en: Dict = {
     messagesChannelPlatform: "via platform",
     messagesErrorEmpty: "Write a message first",
     messagesErrorTooLong: "Message exceeds the limit",
+    messagesErrorRateLimited: "Too many messages this minute — wait a moment and try again",
     messagesErrorGeneric: "Couldn't send the message — try again",
+    messagesWhatsappMediaUnavailable: "WhatsApp attachment (not available here)",
     offersTitle: "Public curated offers",
     offersLead: "Published RARE OUD presentations only — not trader storefronts.",
     offersEmpty: "No published offers yet.",
@@ -5152,7 +5170,7 @@ const en: Dict = {
     sendFailed: "Not sent — retry",
     sendBlocked: "Cannot send while outbound is disabled.",
     sendSuccess: "Message queued for delivery.",
-    notLinked: "Not linked",
+    notLinked: "No deal",
     healthDisconnected: "Disconnected",
     healthConnecting: "Connecting",
     healthConnected: "Connected",
@@ -5218,7 +5236,14 @@ const en: Dict = {
     retry: "Retry",
     statusDelivered: "Delivered",
     statusRead: "Read",
-    channelPlatform: "via trader portal",
+    channelPlatform: "via platform",
+    channelWhatsApp: "via WhatsApp",
+    composerWillUsePlatform: "Reply will send via platform",
+    composerWillUseWhatsApp: "Reply will send via WhatsApp",
+    mediaRequiresWhatsApp:
+      "Media requires WhatsApp connected with outbound enabled — cannot send now.",
+    linkedTraderChip: "Linked trader",
+    phoneConflictChip: "Phone conflict",
     newMessages: "New messages ↓",
     linkRecord: "Link to record",
     unlinkConfirm: "Remove link?",

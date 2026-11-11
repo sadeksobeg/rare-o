@@ -1,0 +1,1 @@
+SEE: فقاعة «sent-gate-1794428890181» خرجت من الساعة إلى علامة إرسال خلال ≤3ث؛ hasCheck=true hasLoader=false label=أُرسلت
