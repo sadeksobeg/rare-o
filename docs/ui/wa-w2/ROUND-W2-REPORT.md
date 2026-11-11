@@ -1,7 +1,7 @@
 # WA-W2 — media + live controls (re-review)
 
-Branch: `wa/w2-media-actions`  
-Deploy: **not deployed** — stop for owner review
+Branch: `wa/w2-media-actions` @ `30344ba`  
+Deploy: **live on production** 2026-11-11 — see `ROUND-W2-DEPLOY.md`
 
 ## Principle
 **No dead buttons.** Every visible inbox control either works or was removed.
@@ -82,9 +82,9 @@ Docker: Images 23.58GB (reclaimable ~6.6GB), Build Cache 9.7GB.
 **Enough headroom for ffmpeg layer.** After successful deploy + rollback image confirmed: prune dangling images/cache.
 
 ## Safety
-- No production deploy until explicit owner OK
-- Deploy path when approved: `pg_dump` → additive migrate → build with rollback tag → owner hand-test (image, PDF, voice on phone, emoji, quick replies) on owner number only
+- Owner approved safe deploy 2026-11-11; executed with dump + rollback tag + additive migrate
 - Voice needs HTTPS + mic permission; worker image includes ffmpeg
+- No customer sends from deploy session; owner hand-test on owner number only
 
 ## Stop
-Await owner visual review of shots + explicit deploy approval.
+Deploy evidence in `ROUND-W2-DEPLOY.md`. Hand-test checklist owned by owner.
