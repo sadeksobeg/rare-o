@@ -7,9 +7,15 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import {
+  magicMatchesKind,
+  resolveWhatsAppMagicKind,
+} from "@/lib/whatsapp/media-magic";
+import {
   WHATSAPP_MAX_MEDIA_BYTES,
   WHATSAPP_OUTBOUND_MIME,
+  maxBytesForMediaKind,
   mediaKindFromMime,
+  normalizeOutboundMime,
   type WhatsAppMediaKind,
 } from "@/lib/whatsapp/media-shared";
 
@@ -49,7 +55,7 @@ export function isSafeWhatsAppMediaFileName(name: string): boolean {
 }
 
 function extFromMime(mime: string, fallback = "bin"): string {
-  const base = mime.trim().toLowerCase().split(";")[0]!.trim();
+  const base = normalizeOutboundMime(mime);
   const mapped = WHATSAPP_OUTBOUND_MIME[base];
   if (mapped) return mapped;
   const sub = base.split("/")[1]?.replace(/[^a-z0-9]/gi, "") ?? "";
@@ -71,6 +77,7 @@ export type SavedWhatsAppMedia = {
 /**
  * Persist bytes under storage/uploads/whatsapp/{conversationId}/.
  * storageKey is relative: `{conversationId}/{fileName}`.
+ * Validates size + magic bytes (not extension alone).
  */
 export async function saveWhatsAppMediaBytes(input: {
   conversationId: string;
@@ -80,21 +87,46 @@ export async function saveWhatsAppMediaBytes(input: {
   originalName?: string;
 }): Promise<
   | { ok: true; saved: SavedWhatsAppMedia }
-  | { ok: false; error: "TOO_LARGE" | "EMPTY" | "BAD_MIME" | "BAD_ID" }
+  | { ok: false; error: "TOO_LARGE" | "EMPTY" | "BAD_MIME" | "BAD_ID" | "BAD_MAGIC" }
 > {
   const conversationId = input.conversationId.trim();
-  if (!conversationId || conversationId.includes("..") || conversationId.includes("/") || conversationId.includes("\\")) {
+  if (
+    !conversationId ||
+    conversationId.includes("..") ||
+    conversationId.includes("/") ||
+    conversationId.includes("\\")
+  ) {
     return { ok: false, error: "BAD_ID" };
   }
   if (!input.bytes.length) return { ok: false, error: "EMPTY" };
-  if (input.bytes.length > WHATSAPP_MAX_MEDIA_BYTES) {
+
+  const declaredMime = normalizeOutboundMime(input.mime) || "application/octet-stream";
+  const kindFromMime = mediaKindFromMime(declaredMime);
+  const resolvedKind: WhatsAppMediaKind =
+    input.kind ?? kindFromMime ?? "document";
+
+  const cap = maxBytesForMediaKind(resolvedKind);
+  if (input.bytes.length > Math.min(cap, WHATSAPP_MAX_MEDIA_BYTES)) {
     return { ok: false, error: "TOO_LARGE" };
   }
 
-  const mime = input.mime.trim().toLowerCase() || "application/octet-stream";
-  const kind = input.kind ?? mediaKindFromMime(mime);
-  if (!kind && !mime) return { ok: false, error: "BAD_MIME" };
-  const resolvedKind: WhatsAppMediaKind = kind ?? "document";
+  const magic = resolveWhatsAppMagicKind(
+    input.bytes,
+    resolvedKind,
+    declaredMime
+  );
+  if (!magic || !magicMatchesKind(magic, resolvedKind)) {
+    return { ok: false, error: "BAD_MAGIC" };
+  }
+
+  // Prefer sniffed MIME when allowlisted; otherwise keep declared if allowlisted
+  const mime =
+    WHATSAPP_OUTBOUND_MIME[magic.mime]
+      ? magic.mime
+      : WHATSAPP_OUTBOUND_MIME[declaredMime]
+        ? declaredMime
+        : null;
+  if (!mime) return { ok: false, error: "BAD_MIME" };
 
   const ext = extFromMime(mime);
   if (!EXT_ALLOW.has(ext)) return { ok: false, error: "BAD_MIME" };
