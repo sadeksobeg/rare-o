@@ -31,6 +31,86 @@ export function fillQuickReplyVariables(
     .replaceAll("{request_ref}", (ctx.requestRef ?? "").trim() || "—");
 }
 
+/** Default catalog — seeded idempotently by titleAr (no migration). */
+export const DEFAULT_QUICK_REPLIES = [
+  {
+    titleAr: "ترحيب",
+    titleEn: "Greeting",
+    bodyAr: "مرحباً {name}، أهلاً بك في RARE OUD. كيف نقدر نساعدك؟",
+    bodyEn: "Hello {name}, welcome to RARE OUD. How can we help?",
+    category: "general",
+    sortOrder: 1,
+  },
+  {
+    titleAr: "استفسار سعر",
+    titleEn: "Price inquiry",
+    bodyAr:
+      "شكراً لاهتمامك، {name}. بخصوص السعر لطلب {request_ref}: نراجع التوفر ونرسل لك عرضاً خلال ساعات العمل.",
+    bodyEn:
+      "Thanks for your interest, {name}. For pricing on {request_ref}: we'll check availability and send an offer during business hours.",
+    category: "sales",
+    sortOrder: 2,
+  },
+  {
+    titleAr: "التوفر",
+    titleEn: "Availability",
+    bodyAr:
+      "{name}، نتحقق من توفّر القطعة المرتبطة بـ {request_ref} ونعود إليك بأقرب وقت.",
+    bodyEn:
+      "{name}, we're checking availability for {request_ref} and will get back shortly.",
+    category: "sales",
+    sortOrder: 3,
+  },
+  {
+    titleAr: "الشحن",
+    titleEn: "Shipping",
+    bodyAr:
+      "الشحن متاح حسب الوجهة والوزن. أخبرنا بمدينتك لـ {request_ref} لنقدّر المدة والتكلفة.",
+    bodyEn:
+      "Shipping depends on destination and weight. Share your city for {request_ref} and we'll estimate time and cost.",
+    category: "ops",
+    sortOrder: 4,
+  },
+  {
+    titleAr: "طرق الدفع",
+    titleEn: "Payment methods",
+    bodyAr:
+      "نعمل بالتحويل البنكي / واتساب فقط — لا دفع إلكتروني على الموقع. نرسل لك تفاصيل التحويل بعد تأكيد {request_ref}.",
+    bodyEn:
+      "We work via bank transfer / WhatsApp only — no online card checkout. We'll send transfer details after confirming {request_ref}.",
+    category: "ops",
+    sortOrder: 5,
+  },
+  {
+    titleAr: "ساعات العمل",
+    titleEn: "Working hours",
+    bodyAr:
+      "ساعات العمل: يومياً 10:00–22:00 (توقيت الرياض). نرد على {name} في أقرب نافذة متاحة.",
+    bodyEn:
+      "Hours: daily 10:00–22:00 (Riyadh time). We'll reply to {name} in the next available window.",
+    category: "general",
+    sortOrder: 6,
+  },
+  {
+    titleAr: "شكر",
+    titleEn: "Thanks",
+    bodyAr: "شكراً لتواصلك، {name}. نحن بخدمتك متى احتجت.",
+    bodyEn: "Thank you for reaching out, {name}. We're here whenever you need us.",
+    category: "general",
+    sortOrder: 7,
+  },
+  {
+    titleAr: "متابعة",
+    titleEn: "Follow-up",
+    bodyAr:
+      "مرحباً {name}، متابعة بخصوص {request_ref} — هل ما زلت مهتماً ونكمل التفاصيل؟",
+    bodyEn:
+      "Hi {name}, following up on {request_ref} — are you still interested so we can finish the details?",
+    category: "sales",
+    sortOrder: 8,
+  },
+] as const;
+
 export async function listQuickReplyTemplates(
   locale: Locale,
   db: typeof defaultPrisma = defaultPrisma
@@ -109,41 +189,31 @@ export async function deleteQuickReplyTemplate(
   }
 }
 
-/** Seed three defaults when the table is empty (first open). */
+/**
+ * Idempotent seed of the 8 default templates (by titleAr).
+ * No migration — safe to call on every list open / gate run.
+ */
 export async function ensureDefaultQuickReplies(
   adminId: string
-): Promise<void> {
-  const count = await defaultPrisma.whatsAppQuickReplyTemplate.count();
-  if (count > 0) return;
-  await defaultPrisma.whatsAppQuickReplyTemplate.createMany({
-    data: [
-      {
-        titleAr: "ترحيب",
-        titleEn: "Greeting",
-        bodyAr: "مرحباً {name}، كيف نقدر نساعدك؟",
-        bodyEn: "Hello {name}, how can we help?",
-        category: "general",
-        sortOrder: 1,
-        createdByAdminId: adminId,
-      },
-      {
-        titleAr: "متابعة طلب",
-        titleEn: "Follow-up",
-        bodyAr: "بخصوص طلبك {request_ref}، هل ما زلت مهتماً؟",
-        bodyEn: "Regarding your request {request_ref}, are you still interested?",
-        category: "general",
-        sortOrder: 2,
-        createdByAdminId: adminId,
-      },
-      {
-        titleAr: "شكر",
-        titleEn: "Thanks",
-        bodyAr: "شكراً لتواصلك، {name}. نحن بخدمتك.",
-        bodyEn: "Thank you for reaching out, {name}. We're here to help.",
-        category: "general",
-        sortOrder: 3,
-        createdByAdminId: adminId,
-      },
-    ],
+): Promise<{ added: number; total: number }> {
+  const existing = await defaultPrisma.whatsAppQuickReplyTemplate.findMany({
+    select: { titleAr: true },
   });
+  const have = new Set(existing.map((r) => r.titleAr));
+  const missing = DEFAULT_QUICK_REPLIES.filter((d) => !have.has(d.titleAr));
+  if (missing.length) {
+    await defaultPrisma.whatsAppQuickReplyTemplate.createMany({
+      data: missing.map((d) => ({
+        titleAr: d.titleAr,
+        titleEn: d.titleEn,
+        bodyAr: d.bodyAr,
+        bodyEn: d.bodyEn,
+        category: d.category,
+        sortOrder: d.sortOrder,
+        createdByAdminId: adminId,
+      })),
+    });
+  }
+  const total = await defaultPrisma.whatsAppQuickReplyTemplate.count();
+  return { added: missing.length, total };
 }

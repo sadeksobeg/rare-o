@@ -1,59 +1,60 @@
-# WA-V — visual repair (overlay + layout)
+# WA-V Round 5 — breakpoints + light ⋯ + voice nits + QR seed
 
-**Branch:** `wa/v-overlay-layout`  
-**Deploy:** **not deployed** — production stays on W2 hotfix until owner OK  
-**Method change:** verify on **real** `/admin/inbox` inside AdminShell — never `/dev` harness alone.
+**Branch:** `wa/v-overlay-layout` (no web deploy)  
+**Gate:** `scripts/wa-v-inbox-overlay-gate.mjs` → see `OVERLAY-GATE.json`  
+**Console:** `docs/ui/wa-v/console-gate.log` + `CONSOLE-GATE.json`
 
-## Root cause found (voice on production)
+## Verdict
 
-`curl -I https://rareoud.com/admin/inbox` returns **two** Permissions-Policy headers:
+Round 5 closes the 1100px layout break, the light header-⋯ dim (heavy shadow), voice overflow, and empty quick replies. Deploy plan remains prepared — **not run**; waiting for owner OK.
 
-1. Next.js (W2 hotfix): `camera=(self), microphone=(self), geolocation=()`
-2. nginx (`deploy/nginx-rareoud.com.conf`): `camera=(), microphone=(), geolocation=()`
+## Fixes
 
-Browsers intersect policies → **microphone stays denied**.  
-Repo fix (not applied on VPS yet): nginx line updated to `(self)`. Until that nginx config is reloaded on the server, **browser lock → Allow will not help** if the policy header blocks the feature.
+1. **Breakpoints (container query on inbox page)**  
+   - Content ≥1000px (≈ viewport ≥1280 with 268px sidebar): three columns  
+   - Below that: two columns; context = off-canvas drawer + scrim (header user icon)  
+   - &lt;768 viewport: single column (list ↔ thread)  
+   - Header name/phone: `min-width:0` + ellipsis (never vertical wrap)
 
-## What shipped on this branch (local)
+2. **Light header ⋯**  
+   - Softened `.rad-fixed-menu` shadow in light theme (was `rgba(0,0,0,0.85)` haze)  
+   - Renamed menu class to `rad-th-menu`; removed inline heavy boxShadow  
+   - Gate luma Δ search/composer = 0.0 before/after open
 
-### 1) OverlayRoot
-- `components/admin/rad/inbox/overlay-root.tsx` — body host + portal helper + z-index scale
-- `FixedMenu` routes through OverlayRoot with flip/shift viewport collision
-- Wired in `RadInboxShell` via `InboxOverlayProvider`
+3. **Voice bar**  
+   - Short button labels; Send clamped inside composer; level meter visible; label nowrap
 
-### 2) Layout / gray slab
-- Disabled CSS `data-tip` `::after` on thread header + composer (was the gray rectangle over ⋯)
-- Context panel: `max-height:100%`, `overflow-y:auto`, `overscroll-behavior:contain`
-- Quote strip `flex:none` so reply bar is not clipped by composer flex
+4. **Quick replies**  
+   - `ensureDefaultQuickReplies` idempotently seeds 8 Arabic defaults by `titleAr`  
+   - Script: `npx tsx scripts/wa-v-seed-quick-replies.ts` (no migration)
 
-### 3) Bubbles
-- Max width **65%**; media bubbles padded lightly (`rad-bb-media`)
-- Tokens `--rad-bubble-in` / `--rad-bubble-out` (theme-aware)
-- Images max 320px, `object-fit: contain`, rounded stage background (no solid purple slab)
-- Lone emoji → `rad-bb-emoji` (no bubble chrome, large glyph)
-- Pending/sending ticks use `LoaderCircle` (no Clock≈⏸ confusion)
+5. **Console**  
+   - Login via evaluate value-set (no Playwright `fill()`)  
+   - Remaining `caret-color` lines = Chromium automation focus inject; `realErrorCount=0`, no Issue badge
 
-### 4) Toasts
-- Sonner → `bottom-right` + offset 88px (clears composer); close button kept
+## Screenshots (≤12) — what I SEE
 
-### 5) Voice diagnosis
-- `lib/whatsapp/messaging/mic-errors.ts` — NotAllowed / NotFound / policy / insecure
-- Actionable Arabic/English copy in dictionaries
-- **Test microphone** button in connection sheet
-- nginx conf fixed in repo (pending prod reload)
+| File | SEE |
+|---|---|
+| `r5-thread-dark-1280.png` | 1280 three columns; name single-line; thread usable |
+| `r5-thread-dark-1366.png` | 1366 three columns intact |
+| `r5-thread-dark-1100.png` | 1100 two columns only; context off-canvas; no squeeze |
+| `r5-context-drawer-dark-1100.png` | Context drawer + scrim; list+thread underneath |
+| `r5-thread-dark-1024.png` | 1024 two-column drawer mode |
+| `r5-thread-dark-768.png` | 768 two-column; name single-line |
+| `r5-overflow-light-1440.png` | Light header ⋯; cards/composer/search undimmed |
+| `r5-voice-dark-1440.png` | Voice bar; Send inside; level meter; label one line |
+| `r5-quick-replies-dark-1440.png` | ⚡ populated templates (ترحيب/سعر/توفر/…) |
+| `r5-thread-dark-390.png` | Mobile fill; clearance above tab bar; no list peek |
 
-### 6) Verification gate (real `/admin/inbox`)
-- Script: `scripts/wa-v-inbox-overlay-gate.mjs`
-- Result: **`OVERLAY-GATE.json` → ok:true**
-- Checks: overflow menu dark/light in viewport; emoji dark/light in viewport; header tip slabs suppressed; thread shots @1440 + 390
-- Attach skipped locally (composer media controls disabled — WA disconnected / outbound gated in local env)
-- Shots: `gate-overflow-{dark,light}-1440.png`, `gate-emoji-{dark,light}-1440.png`, `gate-thread-*-1440.png`, `gate-thread-dark-390.png`
+## Deploy plan (PREPARED — DO NOT RUN)
 
-## Still open / next when owner continues
-- Portal **message hover actions** fully through OverlayRoot (still absolute on bubble)
-- ConfirmDialogs already use native `<dialog>` top-layer; audit any remaining non-dialog sheets
-- Attach/lightbox/toast rect asserts when local worker is CONNECTED + outbound on
-- **Prod:** reload nginx with updated Permissions-Policy (requires explicit deploy/ops OK) — this alone unblocks mic on rareoud.com
+UI-only, no migrations. Flags stay off.
 
-## Stop
-No production deploy from this round. Owner: review local shots + decide nginx+web ship.
+1. `pg_dump -Fc` → `/var/lib/rareoud/backups/rareoud-pre-wa-v-<STAMP>.dump`  
+2. Tag `rare-oud-web:prod` → `rare-oud-web:pre-wa-v-<STAMP>`  
+3. Build/ship this branch SHA; `compose up -d web worker`  
+4. Smoke: ready/health/login; inbox at 1440/1100/390 dark+light; QR list non-empty; flags `false`  
+5. Rollback: retag image; restore dump only if DB touched (should not be)
+
+**Mic on production (no deploy):** Ctrl+Shift+R → lock → Microphone → Allow.

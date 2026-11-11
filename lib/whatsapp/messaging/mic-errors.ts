@@ -4,6 +4,7 @@ export type MicErrorKind =
   | "no_device"
   | "policy"
   | "insecure"
+  | "unsupported"
   | "unknown";
 
 export function classifyMicError(err: unknown): MicErrorKind {
@@ -54,6 +55,8 @@ export function micErrorMessage(
       return ib.voiceMicPolicyBlocked;
     case "insecure":
       return ib.voiceMicSecureRequired;
+    case "unsupported":
+      return ib.voiceMicNoDevice;
     default:
       return ib.voiceMicDenied;
   }

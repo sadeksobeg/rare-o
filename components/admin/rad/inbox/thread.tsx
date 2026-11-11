@@ -17,8 +17,6 @@ import {
   ChevronDown,
   ChevronRight,
   CircleAlert,
-  Copy,
-  EyeOff,
   Info,
   LoaderCircle,
   MessageSquareText,
@@ -65,6 +63,7 @@ import {
   MediaBubbleBody,
   isRenderableMediaType,
 } from "@/components/admin/rad/inbox/media-bubble-body";
+import { MessageActionsMenu } from "@/components/admin/rad/inbox/message-actions-menu";
 import {
   adminAddInboxNoteAction,
   adminGetComposerDraftAction,
@@ -129,6 +128,7 @@ export function RadThread({
   const [text, setText] = useState("");
   const [pending, startTransition] = useTransition();
   const [qrOpen, setQrOpen] = useState(false);
+  const [voiceBarActive, setVoiceBarActive] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [replyTo, setReplyTo] = useState<InboxMessageItem | null>(null);
   const [pendingMedia, setPendingMedia] = useState<PendingMedia | null>(null);
@@ -861,15 +861,15 @@ export function RadThread({
                 }
               }}
             />
-            <div className="rad-cbr">
-              {mode === "reply" ? (
+            <div className={cn("rad-cbr", voiceBarActive && "rad-cbr-voice")}>
+              {mode === "reply" && !voiceBarActive ? (
                 <AttachMenu
                   ib={ib}
                   disabled={mediaBlocked || pending}
                   onPick={queueFile}
                 />
               ) : null}
-              {mode === "reply" ? (
+              {mode === "reply" && !voiceBarActive ? (
                 <EmojiPicker
                   ib={ib}
                   disabled={pending}
@@ -891,11 +891,10 @@ export function RadThread({
                   }}
                 />
               ) : null}
-              {mode === "reply" ? (
+              {mode === "reply" && !voiceBarActive ? (
                 <button
                   type="button"
                   className="rad-ib"
-                  data-tip={ib.quickRepliesLabel}
                   aria-label={ib.quickRepliesLabel}
                   onClick={() => setQrOpen((v) => !v)}
                 >
@@ -906,25 +905,30 @@ export function RadThread({
                 <VoiceRecorder
                   ib={ib}
                   disabled={mediaBlocked || pending}
+                  onActiveChange={setVoiceBarActive}
                   onRecorded={(file, durationSec) => {
                     sendMedia("", file, durationSec, true);
                   }}
                 />
               ) : null}
-              <span className="sp" />
-              <span className="rad-hint">{ib.composerSendHint}</span>
-              <button
-                type="button"
-                className={cn(
-                  "rad-sendb",
-                  text.trim() && !pending && "rad-sendb-ready"
-                )}
-                disabled={!text.trim() || pending}
-                onClick={mode === "reply" ? sendReply : saveNote}
-              >
-                {mode === "note" ? ib.saveNoteButton : ib.sendButton}
-                <Send width={16} height={16} strokeWidth={1.5} aria-hidden />
-              </button>
+              {!voiceBarActive ? (
+                <>
+                  <span className="sp" />
+                  <span className="rad-hint">{ib.composerSendHint}</span>
+                  <button
+                    type="button"
+                    className={cn(
+                      "rad-sendb",
+                      text.trim() && !pending && "rad-sendb-ready"
+                    )}
+                    disabled={!text.trim() || pending}
+                    onClick={mode === "reply" ? sendReply : saveNote}
+                  >
+                    {mode === "note" ? ib.saveNoteButton : ib.sendButton}
+                    <Send width={16} height={16} strokeWidth={1.5} aria-hidden />
+                  </button>
+                </>
+              ) : null}
             </div>
           </div>
           {qrOpen && mode === "reply" ? (
@@ -1038,73 +1042,57 @@ function Bubble({
 
   return (
     <div
-      className={cn(
-        "rad-bb",
-        isOut ? "rad-out" : "rad-in",
-        showMedia && "rad-bb-media",
-        emojiOnly && "rad-bb-emoji",
-        m.status === "failed" && "rad-bb-failed",
-        inFlight && "rad-sending"
-      )}
+      className={cn("rad-bb-row", isOut ? "rad-out" : "rad-in")}
       style={{ "--rad-i": i } as React.CSSProperties}
       data-msg-id={m.id}
     >
-      {m.replyTo ? (
-        <div className="rad-bb-quote">
-          <b>{ib.replyToMessage}</b>
-          <span>{m.replyTo.body || m.replyTo.messageType}</span>
-        </div>
-      ) : null}
-      {showMedia ? <MediaBubbleBody m={m} ib={ib} /> : null}
-      {!showMedia && bodyLabel !== labels.empty ? bodyLabel : null}
-      <div className="rad-bm">
-        {timeOf(m, locale)}
-        {isOut && m.status === "failed" && onRetry ? (
-          <button
-            type="button"
-            className="rad-retry"
-            onClick={onRetry}
-            aria-label={ib.retrySend}
-          >
-            <CircleAlert
-              width={14}
-              height={14}
-              strokeWidth={1.5}
-              aria-hidden
-              className="rad-retry-ic"
-            />
-            <span>{ib.retrySend}</span>
-          </button>
-        ) : isOut ? (
-          <DeliveryTick status={m.status} inbox={inbox} />
+      <div
+        className={cn(
+          "rad-bb",
+          isOut ? "rad-out" : "rad-in",
+          showMedia && "rad-bb-media",
+          emojiOnly && "rad-bb-emoji",
+          m.status === "failed" && "rad-bb-failed",
+          inFlight && "rad-sending"
+        )}
+      >
+        {m.replyTo ? (
+          <div className="rad-bb-quote">
+            <b>{ib.replyToMessage}</b>
+            <span>{m.replyTo.body || m.replyTo.messageType}</span>
+          </div>
         ) : null}
+        {showMedia ? <MediaBubbleBody m={m} ib={ib} /> : null}
+        {!showMedia && bodyLabel !== labels.empty ? bodyLabel : null}
+        <div className="rad-bm">
+          {timeOf(m, locale)}
+          {isOut && m.status === "failed" && onRetry ? (
+            <button
+              type="button"
+              className="rad-retry"
+              onClick={onRetry}
+              aria-label={ib.retrySend}
+            >
+              <CircleAlert
+                width={14}
+                height={14}
+                strokeWidth={1.5}
+                aria-hidden
+                className="rad-retry-ic"
+              />
+              <span>{ib.retrySend}</span>
+            </button>
+          ) : isOut ? (
+            <DeliveryTick status={m.status} inbox={inbox} />
+          ) : null}
+        </div>
       </div>
-      <div className="rad-bb-acts">
-        <button
-          type="button"
-          className="rad-ib"
-          aria-label={ib.replyToMessage}
-          onClick={onReply}
-        >
-          <Reply width={14} height={14} strokeWidth={1.5} aria-hidden />
-        </button>
-        <button
-          type="button"
-          className="rad-ib"
-          aria-label={ib.copyMessage}
-          onClick={onCopy}
-        >
-          <Copy width={14} height={14} strokeWidth={1.5} aria-hidden />
-        </button>
-        <button
-          type="button"
-          className="rad-ib"
-          aria-label={ib.hideForMe}
-          onClick={onHide}
-        >
-          <EyeOff width={14} height={14} strokeWidth={1.5} aria-hidden />
-        </button>
-      </div>
+      <MessageActionsMenu
+        ib={ib}
+        onReply={onReply}
+        onCopy={onCopy}
+        onHide={onHide}
+      />
     </div>
   );
 }

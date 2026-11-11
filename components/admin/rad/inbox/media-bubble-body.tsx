@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Download,
   FileText,
@@ -10,7 +10,10 @@ import {
 } from "lucide-react";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { InboxMessageItem } from "@/lib/whatsapp/messaging/inbox";
-import { Dialog } from "@/components/ui/dialog";
+import {
+  InboxOverlayPortal,
+  INBOX_OVERLAY_Z,
+} from "@/components/admin/rad/inbox/overlay-root";
 import { InboxAudioPlayer } from "@/components/admin/rad/inbox/audio-player";
 
 function formatBytes(n: number | null, ib: Dictionary["ib"]): string | null {
@@ -56,6 +59,73 @@ function parseJson<T>(raw: string): T | null {
   }
 }
 
+function ImageLightbox({
+  src,
+  alt,
+  fileName,
+  ib,
+  onClose,
+}: {
+  src: string;
+  alt: string;
+  fileName: string | null;
+  ib: Dictionary["ib"];
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    const prev = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      prev?.focus?.();
+    };
+  }, [onClose]);
+
+  return (
+    <InboxOverlayPortal z={INBOX_OVERLAY_Z.modal}>
+      <div
+        className="rad-lightbox-scrim"
+        role="dialog"
+        aria-modal="true"
+        aria-label={ib.previewImage}
+        data-inbox-overlay-item="lightbox"
+        onMouseDown={(e) => {
+          if (e.target === e.currentTarget) onClose();
+        }}
+      >
+        <button
+          type="button"
+          className="rad-ib rad-lightbox-x"
+          aria-label={ib.lightboxClose}
+          onClick={onClose}
+        >
+          <X width={20} height={20} strokeWidth={1.5} aria-hidden />
+        </button>
+        <div className="rad-lightbox-stage">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={src} alt={alt} />
+        </div>
+        <a
+          className="rad-btn rad-gh rad-lightbox-dl"
+          href={src}
+          download={fileName || true}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <Download width={14} height={14} strokeWidth={1.5} aria-hidden />
+          {ib.downloadMedia}
+        </a>
+      </div>
+    </InboxOverlayPortal>
+  );
+}
+
 export function MediaBubbleBody({
   m,
   ib,
@@ -90,38 +160,13 @@ export function MediaBubbleBody({
         </button>
         {m.caption ? <div className="rad-media-cap">{m.caption}</div> : null}
         {lightbox && m.mediaUrl ? (
-          <Dialog
-            open={lightbox}
+          <ImageLightbox
+            src={m.mediaUrl}
+            alt={m.caption || ib.previewImage}
+            fileName={m.mediaFileName}
+            ib={ib}
             onClose={() => setLightbox(false)}
-            title={ib.previewImage}
-            size="lg"
-            hideHeader
-          >
-            <div className="rad-lightbox">
-              <button
-                type="button"
-                className="rad-ib rad-lightbox-x"
-                aria-label={ib.lightboxClose}
-                onClick={() => setLightbox(false)}
-              >
-                <X width={18} height={18} strokeWidth={1.5} aria-hidden />
-              </button>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={m.mediaUrl} alt={m.caption || ib.previewImage} />
-              {m.mediaUrl ? (
-                <a
-                  className="rad-btn rad-gh"
-                  href={m.mediaUrl}
-                  download={m.mediaFileName || true}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <Download width={14} height={14} strokeWidth={1.5} aria-hidden />
-                  {ib.downloadMedia}
-                </a>
-              ) : null}
-            </div>
-          </Dialog>
+          />
         ) : null}
       </>
     );

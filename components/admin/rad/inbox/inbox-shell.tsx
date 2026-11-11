@@ -90,6 +90,14 @@ export function RadInboxShell({
           <div key="inbox-thread" className="rad-ib-thread-slot">
             {children}
           </div>
+          {ctxOpen ? (
+            <button
+              type="button"
+              className="rad-xp-scrim"
+              aria-label="Close"
+              onClick={() => setCtxOpen(false)}
+            />
+          ) : null}
         </div>
       </InboxUiContext.Provider>
     </InboxOverlayProvider>

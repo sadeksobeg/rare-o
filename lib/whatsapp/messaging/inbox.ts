@@ -548,7 +548,7 @@ async function getInboxHealthViewImpl(
   const ratePerMin = row?.outboundGlobalRatePerMin ?? 20;
   configureGlobalEnqueueRateLimit(ratePerMin);
 
-  return {
+  const view: InboxHealthView = {
     state,
     rawState,
     detailSafe: row?.detailSafe ?? null,
@@ -567,6 +567,27 @@ async function getInboxHealthViewImpl(
     pairingExpiresAt: toIso(row?.pairingExpiresAt ?? null),
     linkCommand: row?.linkCommand ?? "none",
   };
+
+  // Local gate only — never production. Does not touch Baileys / real WA.
+  if (
+    process.env.NODE_ENV !== "production" &&
+    process.env.WA_V_GATE_MOCK_CONNECTED === "1"
+  ) {
+    return {
+      ...view,
+      state: "CONNECTED",
+      rawState: "CONNECTED",
+      outboundEnabled: true,
+      outboundKillSwitch: false,
+      outboundKillSwitchAt: null,
+      outboundKillSwitchBy: null,
+      outboundKillSwitchReason: null,
+      lastHeartbeatAt: new Date().toISOString(),
+      detailSafe: "WA_V_GATE_MOCK_CONNECTED",
+    };
+  }
+
+  return view;
 }
 
 const getInboxHealthViewCached = cache(() =>

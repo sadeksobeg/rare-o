@@ -76,9 +76,10 @@ export function Dialog({
       ref={ref}
       aria-labelledby={titleId}
       className={cn(
-        "ro-dialog m-0 max-h-[min(90vh,100%)] border border-[color:var(--rad-bd,var(--ro-border-subtle))] bg-[color:var(--rad-surface2,var(--ro-bg-raised))] p-0 text-[color:var(--rad-tx,var(--ro-text))] shadow-[var(--ro-e3)] backdrop:bg-[color-mix(in_srgb,var(--rad-c0,var(--ro-ink-950))_60%,transparent)] open:flex open:flex-col",
-        "max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:top-auto max-md:w-full max-md:max-w-none max-md:rounded-t-[var(--ro-r-lg)] max-md:rounded-b-none",
-        "md:fixed md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-[14px]",
+        "ro-dialog max-h-[min(90vh,100%)] border border-[color:var(--rad-bd,var(--ro-border-subtle))] bg-[color:var(--rad-surface2,var(--ro-bg-raised))] p-0 text-[color:var(--rad-tx,var(--ro-text))] shadow-[var(--ro-e3)] backdrop:bg-[color-mix(in_srgb,var(--rad-c0,var(--ro-ink-950))_60%,transparent)] open:flex open:flex-col",
+        /* Viewport-centered: inset+margin beats translate tricks that fail under transformed ancestors */
+        "max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:top-auto max-md:m-0 max-md:w-full max-md:max-w-none max-md:rounded-t-[var(--ro-r-lg)] max-md:rounded-b-none",
+        "md:fixed md:inset-0 md:m-auto md:rounded-[14px]",
         sizeClass[size],
         "max-md:!w-full",
         className

@@ -813,6 +813,8 @@
 }
 .rad-mo.rad-on {
   display: grid;
+  place-items: center;
+  place-content: center;
   animation: rad-fade 0.18s var(--rad-ease);
 }
 .rad-mb {
@@ -824,10 +826,15 @@
   border-radius: 18px;
   padding: 24px;
   box-shadow: 0 40px 90px -30px #000;
-  animation: rad-pop 0.22s var(--rad-ease);
+  animation: rad-pop 0.22s var(--rad-ease) both;
   color: var(--rad-tx);
   position: relative;
   z-index: 1;
+  margin: auto;
+  justify-self: center;
+  align-self: center;
+  /* Settled geometry must be truly centered — no residual translate from enter anim */
+  transform: none;
 }
 .rad-mb h2 {
   font-family: var(--rad-font, var(--ro-font-ui, inherit));
@@ -852,6 +859,10 @@
   from {
     opacity: 0;
     transform: translateY(-8px) scale(0.975);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 @keyframes rad-fade {

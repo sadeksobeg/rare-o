@@ -12,6 +12,7 @@ import {
   adminSetOutboundKillSwitchAction,
 } from "@/app/whatsapp-actions";
 import { ConfirmDialog } from "@/components/ui/dialog";
+import { Modal } from "@/components/ui-kit/modal";
 import { KillSwitchBannerText } from "@/components/admin/rad/inbox/kill-switch-banner-text";
 import { cn } from "@/lib/utils";
 import {
@@ -130,9 +131,27 @@ export function RadConnectionSheet({
             ? ib.connReconnecting
             : ib.connDisconnected;
 
-  const heartbeatAgeS = health.lastHeartbeatAt
-    ? Math.max(0, Math.round((Date.now() - new Date(health.lastHeartbeatAt).getTime()) / 1000))
-    : null;
+  // Client-only age — SSR Date.now() vs client caused hydration "1 Issue"
+  const [heartbeatAgeS, setHeartbeatAgeS] = useState<number | null>(null);
+  useEffect(() => {
+    if (!health.lastHeartbeatAt) {
+      setHeartbeatAgeS(null);
+      return;
+    }
+    const tick = () => {
+      setHeartbeatAgeS(
+        Math.max(
+          0,
+          Math.round(
+            (Date.now() - new Date(health.lastHeartbeatAt!).getTime()) / 1000
+          )
+        )
+      );
+    };
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [health.lastHeartbeatAt]);
 
   return (
     <>
@@ -290,59 +309,51 @@ export function RadConnectionSheet({
         </div>
       </div>
 
-      {confirmKill ? (
-        <div
-          className="rad-sheet rad-on"
-          style={{ zIndex: 80 }}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="rad-kill-t"
-        >
-          <div
-            className="rad-scr"
-            onClick={() => {
-              setConfirmKill(false);
-              setReason("");
-            }}
+      <Modal
+        open={confirmKill}
+        onClose={() => {
+          setConfirmKill(false);
+          setReason("");
+        }}
+        title={ib.killConfirmTitle}
+        actions={
+          <>
+            <button
+              type="button"
+              className="rad-btn rad-gh"
+              disabled={pending}
+              onClick={() => {
+                setConfirmKill(false);
+                setReason("");
+              }}
+            >
+              {ib.killCancel}
+            </button>
+            <button
+              type="button"
+              className="rad-btn rad-dng"
+              disabled={pending}
+              onClick={() => applyKillSwitch(true)}
+            >
+              {pending ? "…" : ib.killConfirmAction}
+            </button>
+          </>
+        }
+      >
+        <p>{ib.killConfirmBody}</p>
+        <div className="rad-fld" style={{ marginBlockStart: 12 }}>
+          <label htmlFor="wa-kill-reason">{ib.killReasonLabel}</label>
+          <textarea
+            id="wa-kill-reason"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            rows={3}
+            maxLength={240}
+            placeholder={ib.killReasonPlaceholder}
+            style={{ resize: "none" }}
           />
-          <div className="rad-pn" style={{ maxWidth: 420 }}>
-            <h2 id="rad-kill-t">{ib.killConfirmTitle}</h2>
-            <p>{ib.killConfirmBody}</p>
-            <div className="rad-fld">
-              <label htmlFor="wa-kill-reason">{ib.killReasonLabel}</label>
-              <textarea
-                id="wa-kill-reason"
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                rows={3}
-                maxLength={240}
-                placeholder={ib.killReasonPlaceholder}
-              />
-            </div>
-            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-              <button
-                type="button"
-                className="rad-btn rad-gh"
-                disabled={pending}
-                onClick={() => {
-                  setConfirmKill(false);
-                  setReason("");
-                }}
-              >
-                {ib.killCancel}
-              </button>
-              <button
-                type="button"
-                className="rad-btn rad-dng"
-                disabled={pending}
-                onClick={() => applyKillSwitch(true)}
-              >
-                {pending ? "…" : ib.killConfirmAction}
-              </button>
-            </div>
-          </div>
         </div>
-      ) : null}
+      </Modal>
 
       <ConfirmDialog
         open={confirmResume}
