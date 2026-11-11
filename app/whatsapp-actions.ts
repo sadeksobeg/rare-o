@@ -22,6 +22,7 @@ import {
   enqueueOutboundText,
 } from "@/lib/whatsapp/messaging/service";
 import { sendAdminPlatformMessage } from "@/lib/whatsapp/messaging/trader-channel";
+import { previewManualTraderLink } from "@/lib/whatsapp/messaging/trader-unify";
 import {
   applyFakeLogout,
   applyFakePairing,
@@ -399,6 +400,29 @@ export async function adminSuggestWhatsAppCrmPartiesAction(
     return handleAdminSessionError(e, "UNAUTHORIZED");
   }
   const data = await suggestCrmPartiesForConversation(conversationId);
+  return { ok: true, data };
+}
+
+/** Read-only preview before a manual trader CRM link that may unify threads. */
+export async function adminPreviewWhatsAppTraderMergeAction(input: {
+  conversationId: string;
+  traderId: string;
+}): Promise<
+  ActionResult & {
+    data?: Awaited<ReturnType<typeof previewManualTraderLink>>;
+  }
+> {
+  try {
+    await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const conversationId = String(input.conversationId || "").trim();
+  const traderId = String(input.traderId || "").trim();
+  if (!conversationId || !traderId) {
+    return { ok: false, error: "INVALID_INPUT" };
+  }
+  const data = await previewManualTraderLink({ conversationId, traderId });
   return { ok: true, data };
 }
 

@@ -6,7 +6,11 @@ import { formatMaskedPhone } from "@/lib/whatsapp/messaging/phone-format";
 import { RadAvatar } from "@/components/admin/rad/inbox/rad-avatar";
 import { RadNotesSection } from "@/components/admin/rad/inbox/notes-section";
 import { RadTagsSection } from "@/components/admin/rad/inbox/tags-section";
-import type { BusinessContextView, CrmPartySuggestion, LinkAuditEntry } from "@/lib/whatsapp/messaging/linking";
+import type {
+  BusinessContextView,
+  CrmPartySuggestResult,
+  LinkAuditEntry,
+} from "@/lib/whatsapp/messaging/linking";
 
 /**
  * Profile header + notes + tags + linked-record panel (visual skin only on
@@ -22,13 +26,16 @@ export function RadContextPanel({
 }: {
   conversation: InboxConversationDetail;
   context: BusinessContextView;
-  suggestions: CrmPartySuggestion[];
+  suggestions: CrmPartySuggestResult;
   audits: LinkAuditEntry[];
   dict: Dictionary;
   locale: Locale;
 }) {
   const ib = dict.ib;
-  const title = conversation.name || formatMaskedPhone(conversation.participantE164) || conversation.displayLabel;
+  const title =
+    conversation.name ||
+    formatMaskedPhone(conversation.participantE164) ||
+    conversation.displayLabel;
   const maskedPhone = formatMaskedPhone(conversation.participantE164);
 
   return (
@@ -43,7 +50,12 @@ export function RadContextPanel({
 
       <section>
         <h3>{ib.notesHeading}</h3>
-        <RadNotesSection conversationId={conversation.id} notes={conversation.notes} ib={ib} locale={locale} />
+        <RadNotesSection
+          conversationId={conversation.id}
+          notes={conversation.notes}
+          ib={ib}
+          locale={locale}
+        />
       </section>
 
       <section>
@@ -63,7 +75,8 @@ export function RadContextPanel({
           link={conversation.link}
           context={context}
           crm={conversation.crm}
-          suggestions={suggestions}
+          suggestions={suggestions.suggestions}
+          sharedTraderPhone={suggestions.sharedTraderPhone}
           audits={audits}
           dict={dict}
           locale={locale}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   adminLinkWhatsAppConversationAction,
+  adminPreviewWhatsAppTraderMergeAction,
   adminSetWhatsAppCrmPartyAction,
   adminUnlinkWhatsAppConversationAction,
   type LinkableRecordHit,
@@ -21,6 +22,7 @@ import type {
 import { formatDate } from "@/lib/i18n/format";
 import type {
   BusinessContextView,
+  CrmPartySuggestResult,
   CrmPartySuggestion,
   LinkAuditEntry,
 } from "@/lib/whatsapp/messaging/linking";
@@ -44,6 +46,8 @@ function adminHref(link: InboxLinkSummary): string | null {
 /**
  * A16 — LinkedRecordPanel + confirm link/unlink via A17 picker.
  * Round 3.1: visual skin only (rad-rec / rad-btn) — linking logic unchanged.
+ * CHAT-F2: hide phone suggestions when trader-linked; shared-phone notice;
+ * confirm dialog before a trader link that would merge threads.
  */
 export function LinkedRecordPanel({
   conversationId,
@@ -51,6 +55,7 @@ export function LinkedRecordPanel({
   context,
   crm,
   suggestions = [],
+  sharedTraderPhone = false,
   audits = [],
   dict,
   locale,
@@ -60,6 +65,7 @@ export function LinkedRecordPanel({
   context: BusinessContextView;
   crm: InboxCrmParty;
   suggestions?: CrmPartySuggestion[];
+  sharedTraderPhone?: boolean;
   /** Recent link/unlink audit entries (newest first). */
   audits?: LinkAuditEntry[];
   dict: Dictionary;
@@ -68,10 +74,20 @@ export function LinkedRecordPanel({
   const i = dict.inbox;
   const [pickerOpen, setPickerOpen] = useState(false);
   const [unlinkOpen, setUnlinkOpen] = useState(false);
+  const [mergeOpen, setMergeOpen] = useState(false);
+  const [mergePreview, setMergePreview] = useState<{
+    traderId: string;
+    secondaryCount: number;
+    messageMoveCount: number;
+  } | null>(null);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const href = adminHref(link);
+
+  const showPhoneSuggest = !crm.trader;
+  const customerSuggestions = suggestions.filter((s) => s.kind === "customer");
+  const traderSuggestions = suggestions.filter((s) => s.kind === "trader");
 
   function linkTypeLabel(type: string): string {
     switch (type) {
@@ -88,7 +104,7 @@ export function LinkedRecordPanel({
     }
   }
 
-  function setCrm(kind: "customer" | "trader" | "clear", id?: string) {
+  function applyCrm(kind: "customer" | "trader" | "clear", id?: string) {
     const fd = new FormData();
     fd.set("conversationId", conversationId);
     if (kind === "clear") fd.set("clear", "1");
@@ -98,8 +114,44 @@ export function LinkedRecordPanel({
       setError(null);
       const res = await adminSetWhatsAppCrmPartyAction(fd);
       if (!res.ok) setError(i.linkErrorNotFound);
-      else router.refresh();
+      else {
+        setMergeOpen(false);
+        setMergePreview(null);
+        router.refresh();
+      }
     });
+  }
+
+  function requestTraderLink(traderId: string) {
+    startTransition(async () => {
+      setError(null);
+      const res = await adminPreviewWhatsAppTraderMergeAction({
+        conversationId,
+        traderId,
+      });
+      if (!res.ok || !res.data) {
+        setError(i.linkErrorNotFound);
+        return;
+      }
+      if (res.data.wouldMerge) {
+        setMergePreview({
+          traderId,
+          secondaryCount: res.data.secondaryCount,
+          messageMoveCount: res.data.messageMoveCount,
+        });
+        setMergeOpen(true);
+        return;
+      }
+      applyCrm("trader", traderId);
+    });
+  }
+
+  function setCrm(kind: "customer" | "trader" | "clear", id?: string) {
+    if (kind === "trader" && id) {
+      requestTraderLink(id);
+      return;
+    }
+    applyCrm(kind, id);
   }
 
   function onConfirmLink(hit: LinkableRecordHit) {
@@ -133,6 +185,12 @@ export function LinkedRecordPanel({
     });
   }
 
+  const mergeBody = mergePreview
+    ? i.crmMergeConfirmBody
+        .replace("{secondaryCount}", String(mergePreview.secondaryCount))
+        .replace("{messageCount}", String(mergePreview.messageMoveCount))
+    : "";
+
   return (
     <div data-inbox-pane="context" className="rad-link-panel">
       <section aria-label={i.crmParty} className="rad-rec rad-rec-static">
@@ -164,31 +222,57 @@ export function LinkedRecordPanel({
             {i.crmClear}
           </button>
         ) : null}
-        {suggestions.length > 0 ? (
-          <div className="rad-link-suggest">
+        {showPhoneSuggest && (sharedTraderPhone || suggestions.length > 0) ? (
+          <div className="rad-link-suggest" data-f2-phone-suggest="">
             <p>{i.crmSuggest}</p>
-            <ul>
-              {suggestions.map((s) => (
-                <li key={`${s.kind}-${s.id}`}>
-                  <span className="rad-tt">
-                    <b>{s.label}</b>
-                    <span>
-                      <bdi dir="ltr">{s.phone}</bdi>
+            {sharedTraderPhone ? (
+              <p className="rad-link-hint" role="status" data-f2-shared-phone="">
+                {i.crmSuggestSharedPhone}
+              </p>
+            ) : null}
+            {customerSuggestions.length > 0 || traderSuggestions.length > 0 ? (
+              <ul>
+                {customerSuggestions.map((s) => (
+                  <li key={`${s.kind}-${s.id}`}>
+                    <span className="rad-tt">
+                      <b>{s.label}</b>
+                      <span>
+                        <bdi dir="ltr">{s.phone}</bdi>
+                      </span>
                     </span>
-                  </span>
-                  <button
-                    type="button"
-                    className="rad-btn rad-gh rad-sm"
-                    disabled={pending}
-                    onClick={() =>
-                      setCrm(s.kind === "customer" ? "customer" : "trader", s.id)
-                    }
-                  >
-                    {s.kind === "customer" ? i.crmLinkCustomer : i.crmLinkTrader}
-                  </button>
-                </li>
-              ))}
-            </ul>
+                    <button
+                      type="button"
+                      className="rad-btn rad-gh rad-sm"
+                      disabled={pending}
+                      onClick={() => setCrm("customer", s.id)}
+                    >
+                      {i.crmLinkCustomer}
+                    </button>
+                  </li>
+                ))}
+                {!sharedTraderPhone
+                  ? traderSuggestions.map((s) => (
+                      <li key={`${s.kind}-${s.id}`}>
+                        <span className="rad-tt">
+                          <b>{s.label}</b>
+                          <span>
+                            <bdi dir="ltr">{s.phone}</bdi>
+                          </span>
+                        </span>
+                        <button
+                          type="button"
+                          className="rad-btn rad-gh rad-sm"
+                          disabled={pending}
+                          data-f2-link-trader=""
+                          onClick={() => setCrm("trader", s.id)}
+                        >
+                          {i.crmLinkTrader}
+                        </button>
+                      </li>
+                    ))
+                  : null}
+              </ul>
+            ) : null}
           </div>
         ) : null}
       </section>
@@ -299,6 +383,44 @@ export function LinkedRecordPanel({
           </button>
         </div>
       </Dialog>
+
+      <Dialog
+        open={mergeOpen}
+        onClose={() => {
+          setMergeOpen(false);
+          setMergePreview(null);
+        }}
+        title={i.crmMergeConfirmTitle}
+        description={mergeBody}
+        size="sm"
+      >
+        <div className="rad-link-dialog-actions" data-f2-merge-confirm="">
+          <button
+            type="button"
+            className="rad-btn rad-gh rad-sm"
+            onClick={() => {
+              setMergeOpen(false);
+              setMergePreview(null);
+            }}
+          >
+            {dict.common.cancel}
+          </button>
+          <button
+            type="button"
+            className="rad-btn rad-pri rad-sm"
+            disabled={pending || !mergePreview}
+            data-f2-merge-confirm-ok=""
+            onClick={() => {
+              if (mergePreview) applyCrm("trader", mergePreview.traderId);
+            }}
+          >
+            {i.crmMergeConfirm}
+          </button>
+        </div>
+      </Dialog>
     </div>
   );
 }
+
+/** Helper type re-export for callers passing suggest result. */
+export type { CrmPartySuggestResult };

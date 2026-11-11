@@ -911,6 +911,17 @@
   border-radius: 11px;
   font-size: 13px;
   border: 1px solid var(--rad-bd);
+  flex: none;
+  position: relative;
+  z-index: 2;
+}
+/* CHAT-F2: keep the first bubble clear of reconnect/status banners. */
+.rad-ct:has(> .rad-bn) > .rad-msgs {
+  padding-top: 28px;
+}
+.rad-bn + .rad-msgs,
+.rad-bn + .rad-bn + .rad-msgs {
+  margin-top: 4px;
 }
 .rad-bn.rad-warn {
   background: var(--rad-warns);

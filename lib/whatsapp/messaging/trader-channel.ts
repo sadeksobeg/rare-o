@@ -262,12 +262,28 @@ export async function ensureTraderConversation(
   traderId: string,
   db: DbClient = defaultPrisma
 ): Promise<{ id: string; phoneConflict: boolean }> {
-  const existing = await db.whatsAppConversation.findFirst({
+  const owned = await db.whatsAppConversation.findMany({
     where: { traderId },
-    select: { id: true },
+    select: { id: true, waChatId: true },
     orderBy: { createdAt: "asc" },
   });
-  if (existing) return { id: existing.id, phoneConflict: false };
+  if (owned.length > 0) {
+    // CHAT-F2: prefer the WhatsApp primary; collapse duplicates if any.
+    if (owned.length > 1) {
+      const { unifyTraderConversations, scoreWhatsAppPrimary } = await import(
+        "@/lib/whatsapp/messaging/trader-unify"
+      );
+      const unified = await unifyTraderConversations(traderId, { db });
+      if (unified.ok && "primaryId" in unified && unified.primaryId) {
+        return { id: unified.primaryId, phoneConflict: false };
+      }
+      const best = [...owned].sort(
+        (a, b) => scoreWhatsAppPrimary(b.waChatId) - scoreWhatsAppPrimary(a.waChatId)
+      )[0]!;
+      return { id: best.id, phoneConflict: false };
+    }
+    return { id: owned[0]!.id, phoneConflict: false };
+  }
 
   const trader = await db.traderAccount.findUnique({
     where: { id: traderId },

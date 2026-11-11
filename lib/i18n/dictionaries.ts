@@ -1540,6 +1540,10 @@ type Dict = {
     voiceDenied: string;
     crmParty: string;
     crmSuggest: string;
+    crmSuggestSharedPhone: string;
+    crmMergeConfirmTitle: string;
+    crmMergeConfirmBody: string;
+    crmMergeConfirm: string;
     crmLinkCustomer: string;
     crmLinkTrader: string;
     crmClear: string;
@@ -3402,6 +3406,11 @@ const ar: Dict = {
     voiceDenied: "لم يُسمح بالوصول إلى الميكروفون",
     crmParty: "سجل العميل / التاجر",
     crmSuggest: "اقتراحات من رقم الهاتف",
+    crmSuggestSharedPhone: "الهاتف مشترك بين أكثر من تاجر — اختر الربط يدوياً من البحث بلا زر مباشر.",
+    crmMergeConfirmTitle: "تأكيد دمج المحادثات",
+    crmMergeConfirmBody:
+      "سيُدمَج {secondaryCount} محادثة إضافية في الخيط الأساسي، مع نقل {messageCount} رسالة. لا رجعة إلا بنسخة احتياطية.",
+    crmMergeConfirm: "تأكيد",
     crmLinkCustomer: "ربط كعميل",
     crmLinkTrader: "ربط كتاجر",
     crmClear: "إزالة ربط السجل",
@@ -5282,6 +5291,12 @@ const en: Dict = {
     voiceDenied: "Microphone access was denied",
     crmParty: "Customer / trader record",
     crmSuggest: "Suggestions from phone number",
+    crmSuggestSharedPhone:
+      "This phone is shared by more than one trader — link manually via search; no direct button.",
+    crmMergeConfirmTitle: "Confirm conversation merge",
+    crmMergeConfirmBody:
+      "{secondaryCount} extra conversation(s) will merge into the primary thread, moving {messageCount} message(s). Only a backup can undo this.",
+    crmMergeConfirm: "Confirm",
     crmLinkCustomer: "Link as customer",
     crmLinkTrader: "Link as trader",
     crmClear: "Clear CRM link",
