@@ -656,6 +656,7 @@ export async function applyContactIdentity(
     select: { id: true, waChatId: true, participantE164: true, displayName: true },
   });
   let updated = 0;
+  const touchedIds: string[] = [];
   for (const row of rows) {
     const data: {
       participantE164?: string | null;
@@ -677,6 +678,27 @@ export async function applyContactIdentity(
     if (Object.keys(data).length === 0) continue;
     await db.whatsAppConversation.update({ where: { id: row.id }, data });
     updated += 1;
+    touchedIds.push(row.id);
+  }
+
+  // CHAT-F2: when a real E.164 resolves, auto-link + unify with the trader thread.
+  if (event.participantE164 && touchedIds.length > 0) {
+    const { autoLinkConversationByResolvedPhone } = await import(
+      "@/lib/whatsapp/messaging/trader-unify"
+    );
+    for (const conversationId of touchedIds) {
+      try {
+        await autoLinkConversationByResolvedPhone(
+          {
+            conversationId,
+            participantE164: event.participantE164,
+          },
+          db
+        );
+      } catch (e) {
+        console.error("auto_link_after_identity_failed", e);
+      }
+    }
   }
   return { updated };
 }

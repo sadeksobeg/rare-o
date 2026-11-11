@@ -22,16 +22,14 @@ export async function saveComposerDraft(input: {
   const body = input.body.slice(0, 8000);
   const replyToMessageId = input.replyToMessageId?.trim() || null;
   if (!body.trim() && !replyToMessageId) {
-    await defaultPrisma.whatsAppComposerDraft
-      .delete({
-        where: {
-          conversationId_adminId: {
-            conversationId: input.conversationId,
-            adminId: input.adminId,
-          },
-        },
-      })
-      .catch(() => undefined);
+    // deleteMany: no throw / no prisma:error when the row is already gone
+    // (empty draft clear races used to trip Next's "1 Issue" badge).
+    await defaultPrisma.whatsAppComposerDraft.deleteMany({
+      where: {
+        conversationId: input.conversationId,
+        adminId: input.adminId,
+      },
+    });
     return;
   }
   await defaultPrisma.whatsAppComposerDraft.upsert({

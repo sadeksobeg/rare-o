@@ -54,7 +54,7 @@ export function ThreadOverflowMenu({
       if (btnRef.current?.contains(t)) return;
       if (
         t instanceof Element &&
-        t.closest(".rad-fixed-menu, .rad-ov-menu")
+        t.closest(".rad-fixed-menu, .rad-th-menu, .rad-ov-menu")
       ) {
         return;
       }
@@ -88,12 +88,11 @@ export function ThreadOverflowMenu({
   }
 
   return (
-    <div className="rad-ov">
+    <div className="rad-th-ov">
       <button
         ref={btnRef}
         type="button"
         className="rad-ib"
-        data-tip={ib.moreActions}
         aria-label={ib.moreActions}
         aria-haspopup="menu"
         aria-expanded={open}
@@ -106,7 +105,7 @@ export function ThreadOverflowMenu({
         open={open}
         anchorRef={btnRef}
         placement="below-end"
-        className="rad-menu rad-ov-menu"
+        className="rad-menu rad-th-menu"
       >
         <button
           type="button"

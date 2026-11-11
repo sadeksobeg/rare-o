@@ -8,6 +8,7 @@
 import type { PrismaClient } from "@prisma/client";
 
 import { prisma as defaultPrisma } from "@/lib/db/prisma";
+import { toE164Digits } from "@/lib/whatsapp/jid";
 import {
   isWhatsAppActiveLinkType,
   isWhatsAppLinkType,
@@ -524,17 +525,28 @@ export type CrmPartySuggestion = {
   phone: string;
 };
 
+export type CrmPartySuggestResult = {
+  suggestions: CrmPartySuggestion[];
+  /** True when ≥2 traders share the conversation phone — no direct trader link buttons. */
+  sharedTraderPhone: boolean;
+};
+
 /** Suggest CRM parties from conversation E.164 (digits). Owner must confirm. */
 export async function suggestCrmPartiesForConversation(
   conversationId: string,
   db: DbClient = defaultPrisma
-): Promise<CrmPartySuggestion[]> {
+): Promise<CrmPartySuggestResult> {
   const conversation = await db.whatsAppConversation.findUnique({
     where: { id: conversationId.trim() },
-    select: { participantE164: true },
+    select: { participantE164: true, traderId: true },
   });
-  const phone = conversation?.participantE164?.replace(/\D/g, "") ?? "";
-  if (phone.length < 8) return [];
+  // Already linked to a trader — hide phone suggestions entirely (CHAT-F2).
+  if (!conversation || conversation.traderId) {
+    return { suggestions: [], sharedTraderPhone: false };
+  }
+
+  const phone = conversation.participantE164?.replace(/\D/g, "") ?? "";
+  if (phone.length < 8) return { suggestions: [], sharedTraderPhone: false };
 
   const [customers, traders] = await Promise.all([
     db.customer.findMany({
@@ -543,26 +555,40 @@ export async function suggestCrmPartiesForConversation(
       select: { id: true, name: true, phone: true },
     }),
     db.traderAccount.findMany({
-      where: { phone: { contains: phone.slice(-9) } },
-      take: 5,
+      where: {
+        AND: [{ phone: { not: "" } }, { NOT: { phone: { equals: "   " } } }],
+      },
       select: { id: true, displayName: true, companyName: true, phone: true },
     }),
   ]);
 
-  return [
+  const exactTraders = traders.filter((t) => {
+    const p = t.phone?.trim();
+    if (!p) return false;
+    return toE164Digits(p) === phone;
+  });
+  const sharedTraderPhone = exactTraders.length > 1;
+
+  const suggestions: CrmPartySuggestion[] = [
     ...customers.map((c) => ({
       kind: "customer" as const,
       id: c.id,
       label: c.name,
       phone: c.phone,
     })),
-    ...traders.map((t) => ({
-      kind: "trader" as const,
+  ];
+  // Direct «ربط كتاجر» only when exactly one trader matches the E.164.
+  if (exactTraders.length === 1) {
+    const t = exactTraders[0]!;
+    suggestions.push({
+      kind: "trader",
       id: t.id,
       label: t.displayName || t.companyName || t.id,
       phone: t.phone,
-    })),
-  ];
+    });
+  }
+
+  return { suggestions, sharedTraderPhone };
 }
 
 export async function setConversationCrmParty(
@@ -628,6 +654,18 @@ export async function setConversationCrmParty(
       where: { id: conversationId },
       data: { traderId: traderIdRaw, customerId: null },
     });
+    // CHAT-F2: manual «ربط بسجل» triggers the same unify as auto-link.
+    try {
+      const { onTraderLinkedToConversation } = await import(
+        "@/lib/whatsapp/messaging/trader-unify"
+      );
+      await onTraderLinkedToConversation(
+        { conversationId, traderId: traderIdRaw },
+        db
+      );
+    } catch (e) {
+      console.error("unify_after_manual_link_failed", e);
+    }
     return { ok: true };
   }
 

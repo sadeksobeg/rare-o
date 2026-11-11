@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import { ArrowUp } from "lucide-react";
+import { Send } from "lucide-react";
 import { traderSendMessageAction } from "@/app/trader-portal-actions";
 import { MAX_OUTBOUND_TEXT_LENGTH } from "@/lib/whatsapp/messaging/constants";
 import type { TraderDict } from "@/lib/ui/trader-labels";
@@ -24,6 +24,8 @@ export function TraderMessageComposer({ t }: { t: TraderDict }) {
         return t.messagesErrorEmpty;
       case "TEXT_TOO_LONG":
         return t.messagesErrorTooLong;
+      case "RATE_LIMITED":
+        return t.messagesErrorRateLimited;
       default:
         return t.messagesErrorGeneric;
     }
@@ -85,11 +87,15 @@ export function TraderMessageComposer({ t }: { t: TraderDict }) {
           className={cn(
             "inline-flex size-9 shrink-0 items-center justify-center rounded-full transition-[opacity,transform] duration-150 disabled:opacity-40",
             text.trim()
-              ? "bg-[var(--ro-plum-700)] text-[var(--ro-sand-50)] hover:opacity-90 active:scale-[0.96]"
+              ? "bg-[var(--ro-plum-700)] text-[#fffcf8] hover:opacity-90 active:scale-[0.96]"
               : "bg-ro-border text-ro-muted"
           )}
         >
-          <ArrowUp className="size-4 rtl:rotate-180" strokeWidth={1.75} aria-hidden />
+          <Send
+            className="size-4 rtl:-scale-x-100"
+            strokeWidth={1.75}
+            aria-hidden
+          />
         </button>
       </div>
       {error ? (

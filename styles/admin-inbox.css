@@ -20,16 +20,25 @@
   width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
-  height: calc(100dvh - 60px);
+  /* Topbar is 68px (not 60) — wrong value buried the composer under the tab bar */
+  height: calc(100dvh - 68px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   overflow-x: hidden;
+  /* Breakpoints for list/thread/context use content width (sidebar ~268px) */
+  container-type: inline-size;
+  container-name: rad-inbox;
 }
 @media (max-width: 900px) {
+  /* Topbar stays 60px; tabbar is 68px (border-box already includes safe-area).
+     Extra 10px = clearance above the tab rail so the list cannot peek.
+     !important beats the desktop 100dvh-68px rule (was leaving composer under tabs). */
+  .rad-main:has(.rad-ibx) > .rad-page,
   .rad-page:has(.rad-ibx) {
-    height: calc(100vh - 60px - 68px);
-    min-height: 420px;
+    height: calc(100dvh - 60px - 68px - 10px) !important;
+    max-height: calc(100dvh - 60px - 68px - 10px) !important;
+    min-height: 0 !important;
   }
 }
 .rad-ibx {
@@ -46,8 +55,14 @@
   grid-template-columns: minmax(0, 372px) minmax(0, 1fr);
   border-top: 0;
 }
+/*
+ * Default with thread open: TWO columns. Context is an off-canvas drawer.
+ * Three columns only when the inbox container is wide enough (≥1000px content
+ * ≈ viewport ≥1280 with the 268px sidebar). Viewport media alone was wrong:
+ * at 1280px viewport the thread was ~308px with a stuck third column.
+ */
 .rad-ibx.rad-tv {
-  grid-template-columns: minmax(0, 372px) minmax(0, 1fr) minmax(0, 332px);
+  grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
 }
 /* Keyed slots must not create extra grid items */
 .rad-ib-list-slot,
@@ -199,12 +214,17 @@
 }
 .rad-fl {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
+  max-width: 100%;
+  /* Column is narrow even at 1440 — wrap so «غير مرتبط» is never clipped.
+     Keep horizontal scroll+fade as fallback when wrap is constrained. */
   overflow-x: auto;
   overflow-y: hidden;
-  max-width: 100%;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  padding-inline: 2px;
+  box-sizing: border-box;
 }
 .rad-fl button {
   display: inline-flex;
@@ -218,6 +238,7 @@
   color: var(--rad-tx2);
   border: 1px solid var(--rad-bd);
   white-space: nowrap;
+  flex: none;
   transition: background-color 0.16s, color 0.16s, border-color 0.16s;
 }
 .rad-fl button em {
@@ -385,6 +406,10 @@
   flex: none;
   font-variant-numeric: tabular-nums;
 }
+.rad-ub-conflict {
+  background: var(--rad-danger, #b42318);
+  color: #fff;
+}
 @keyframes rad-rowin {
   from {
     opacity: 0;
@@ -407,8 +432,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 68px;
-  padding: 0 20px;
+  min-height: 68px;
+  height: auto;
+  padding: 10px 20px;
   border-bottom: 1px solid var(--rad-bd);
   overflow: visible;
   background: var(--rad-surface);
@@ -417,12 +443,45 @@
 .rad-th .rad-tt {
   min-width: 0;
   flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 .rad-th b {
   display: block;
   font-size: 15px;
   font-weight: 600;
   line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.rad-th-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+}
+.rad-th-phone {
+  color: var(--rad-tx3);
+  font-size: 12.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  max-width: 100%;
+}
+.rad-th-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
 }
 .rad-th small {
   display: flex;
@@ -430,6 +489,9 @@
   gap: 6px;
   color: var(--rad-tx3);
   font-size: 12.5px;
+  min-width: 0;
+  overflow: hidden;
+  flex-wrap: wrap;
 }
 .rad-th .rad-acts {
   position: relative;
@@ -510,7 +572,8 @@
   font-size: 12px;
 }
 .rad-bb {
-  max-width: min(520px, 78%);
+  max-width: min(420px, 65%);
+  min-width: 72px;
   padding: 8px 12px 6px;
   border-radius: 14px;
   font-size: 14px;
@@ -518,6 +581,12 @@
   position: relative;
   animation: rad-msgin 0.32s var(--rad-ease) both;
   animation-delay: calc(var(--rad-i) * 40ms);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+/* When inside rad-bb-row, row owns max-width / animation */
+.rad-bb-row > .rad-bb {
+  max-width: none;
 }
 @keyframes rad-msgin {
   from {
@@ -527,16 +596,73 @@
 }
 .rad-bb.rad-in {
   align-self: flex-start;
-  background: var(--rad-surface);
+  background: var(--rad-bubble-in, var(--rad-surface));
   border: 1px solid var(--rad-bd);
   border-start-start-radius: 4px;
   box-shadow: var(--rad-sh);
 }
 .rad-bb.rad-out {
   align-self: flex-end;
-  background: var(--rad-out);
+  background: var(--rad-bubble-out, var(--rad-out));
   color: #f4e7d8;
   border-start-end-radius: 4px;
+}
+.rad-chchip {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 4px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.4;
+}
+.rad-bb.rad-in .rad-chchip {
+  background: color-mix(in srgb, var(--rad-tx) 8%, transparent);
+  color: var(--rad-tx-muted, var(--rad-muted));
+}
+.rad-bb.rad-out .rad-chchip-wa {
+  background: color-mix(in srgb, #fffcf8 16%, transparent);
+  color: color-mix(in srgb, #fffcf8 88%, transparent);
+}
+.rad-bb.rad-out .rad-chchip-plat {
+  background: color-mix(in srgb, #fffcf8 22%, transparent);
+  color: #fffcf8;
+}
+.rad-hint.rad-chipl {
+  max-width: 14rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rad-bb.rad-bb-media {
+  padding: 4px;
+  /* Keep overflow visible so message-action trigger is not clipped */
+  overflow: visible;
+}
+.rad-bb.rad-bb-media .rad-media-img {
+  overflow: hidden;
+  border-radius: 12px;
+}
+.rad-bb.rad-bb-media .rad-bm {
+  padding-inline: 8px;
+  padding-block-end: 2px;
+}
+.rad-bb.rad-bb-emoji {
+  max-width: none;
+  min-width: 0;
+  padding: 2px 4px;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  font-size: 40px;
+  line-height: 1.2;
+}
+.rad-bb.rad-bb-emoji .rad-bm {
+  font-size: 11px;
+  justify-content: flex-end;
+  opacity: 0.55;
 }
 .rad-bb.rad-note {
   align-self: flex-end;
@@ -621,6 +747,18 @@
   flex: none;
   padding: 10px 20px 16px;
   background: linear-gradient(to top, var(--rad-c0) 70%, transparent);
+}
+/* Light: solid canvas — the transparent gradient read as a gray scrim */
+.ro-portal[data-theme="light"] .rad-cmp {
+  background: var(--rad-c0);
+}
+.ro-portal[data-theme="light"] .rad-sb2,
+.ro-portal[data-theme="light"] .rad-rec,
+.ro-portal[data-theme="light"] .rad-cbx {
+  background: var(--rad-surface);
+}
+.ro-portal[data-theme="light"] .rad-cbx.rad-isnote {
+  background: color-mix(in srgb, var(--rad-warn) 7%, var(--rad-surface));
 }
 .rad-cbx {
   border: 1px solid var(--rad-bd2);
@@ -773,6 +911,17 @@
   border-radius: 11px;
   font-size: 13px;
   border: 1px solid var(--rad-bd);
+  flex: none;
+  position: relative;
+  z-index: 2;
+}
+/* CHAT-F2: keep the first bubble clear of reconnect/status banners. */
+.rad-ct:has(> .rad-bn) > .rad-msgs {
+  padding-top: 28px;
+}
+.rad-bn + .rad-msgs,
+.rad-bn + .rad-bn + .rad-msgs {
+  margin-top: 4px;
 }
 .rad-bn.rad-warn {
   background: var(--rad-warns);
@@ -805,10 +954,13 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  max-height: 100%;
   border-inline-start: 1px solid var(--rad-bd);
   background: var(--rad-surface);
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   scrollbar-width: thin;
+  overscroll-behavior: contain;
 }
 .rad-xp section {
   padding: 18px;
@@ -1123,10 +1275,28 @@
   color: var(--rad-tx);
   padding: 0 12px;
   font: inherit;
+  font-size: 13.5px;
   direction: ltr;
   text-align: start;
 }
-.rad-fld input:focus {
+.rad-fld textarea,
+.rad-mb .rad-fld textarea {
+  width: 100%;
+  min-height: 72px;
+  border-radius: 11px;
+  border: 1px solid var(--rad-bd2);
+  background: var(--rad-surface2);
+  color: var(--rad-tx);
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 13.5px;
+  line-height: 1.5;
+  resize: none;
+  box-sizing: border-box;
+}
+.rad-fld input:focus,
+.rad-fld textarea:focus,
+.rad-mb .rad-fld textarea:focus {
   outline: 2px solid var(--rad-ac);
   outline-offset: 1px;
   border-color: transparent;
@@ -1221,35 +1391,76 @@
   --rad-avt-g2: #5e1b2e;
 }
 
-/* ---------- breakpoints ---------- */
-@media (max-width: 1320px) {
-  .rad-ibx {
-    grid-template-columns: 344px minmax(0, 1fr);
+/* ---------- breakpoints (container + viewport) ---------- */
+/* Context drawer default (narrow/mid inbox content) */
+.rad-ibx.rad-tv .rad-xp {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: min(340px, 92%);
+  max-width: 100%;
+  z-index: 30;
+  transform: translateX(-102%);
+  transition: transform 0.34s var(--rad-ease), visibility 0.34s;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  visibility: hidden;
+  background: var(--rad-surface);
+}
+[dir="rtl"] .rad-ibx.rad-tv .rad-xp {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+  transform: translateX(102%);
+}
+[dir="ltr"] .rad-ibx.rad-tv .rad-xp {
+  transform: translateX(-102%);
+}
+.rad-ibx.rad-tv.rad-xo .rad-xp {
+  transform: none;
+  pointer-events: auto;
+  visibility: visible;
+}
+.rad-ctxbtn {
+  display: grid;
+}
+.rad-ibx.rad-xo .rad-xp-scrim {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: rgba(11, 8, 13, 0.35);
+  cursor: pointer;
+}
+
+/* Wide inbox content (~viewport ≥1280 with sidebar): restore three columns */
+@container rad-inbox (min-width: 1000px) {
+  .rad-ibx.rad-tv {
+    grid-template-columns: minmax(0, 340px) minmax(0, 1fr) minmax(0, 300px);
   }
-  .rad-xp {
-    position: absolute;
-    inset-block: 0;
-    inset-inline-end: 0;
-    width: 340px;
-    z-index: 15;
-    transform: translateX(102%);
-    transition: transform 0.34s var(--rad-ease);
-    box-shadow: 0 0 60px rgba(0, 0, 0, 0.45);
-    /* Off-canvas / empty placeholder must not steal clicks from the list */
-    pointer-events: none;
-  }
-  [dir="ltr"] .rad-xp {
-    transform: translateX(-102%);
-  }
-  .rad-ibx.rad-xo .rad-xp {
-    transform: none;
+  .rad-ibx.rad-tv .rad-xp {
+    position: relative;
+    inset: auto;
+    width: auto;
+    max-width: none;
+    transform: none !important;
+    visibility: visible;
     pointer-events: auto;
+    box-shadow: none;
+    z-index: auto;
   }
+  .rad-ibx.rad-xo .rad-xp-scrim,
+  .rad-xp-scrim {
+    display: none !important;
+  }
+  /* Context always visible — header user icon still toggles on mid sizes only */
   .rad-ctxbtn {
-    display: grid;
+    display: none;
   }
 }
-@media (max-width: 900px) {
+@media (max-width: 767px) {
   .rad-ibmain {
     height: auto;
     min-height: 100vh;
@@ -1258,10 +1469,11 @@
   }
   .rad-ibx {
     display: block;
-    height: calc(100vh - 60px - 68px);
-    min-height: 520px;
+    height: 100% !important;
+    min-height: 100% !important;
     width: 100%;
     max-width: 100%;
+    overflow: hidden;
     overflow-x: hidden;
   }
   .rad-lc,
@@ -1271,12 +1483,16 @@
     width: 100%;
     max-width: 100%;
     min-width: 0;
+    height: 100%;
     overflow-x: hidden;
   }
   .rad-ct {
     transform: translateX(102%);
     transition: transform 0.34s var(--rad-ease);
     z-index: 12;
+    display: flex;
+    flex-direction: column;
+    background: var(--rad-c0);
   }
   [dir="ltr"] .rad-ct {
     transform: translateX(-102%);
@@ -1284,31 +1500,123 @@
   .rad-ibx.rad-tv .rad-ct {
     transform: none;
   }
+  /* List must not peek under the thread (composer↔tab gap) */
+  .rad-ibx.rad-tv .rad-lc {
+    visibility: hidden !important;
+    pointer-events: none !important;
+    opacity: 0;
+  }
   .rad-backb {
-    display: grid;
+    display: grid !important;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    flex: none;
   }
   .rad-msgs {
-    padding: 16px 14px 8px;
-    padding-inline: 14px;
+    padding: 16px 12px 8px;
+    padding-inline: 12px;
+    flex: 1;
+    min-height: 0;
+    overflow-x: hidden;
   }
   .rad-cmp {
     padding: 8px 12px 12px;
+    /* Clearance above the shell tab bar (page height already subtracts tabbar) */
+    padding-block-end: 12px;
     padding-inline: 12px;
+    flex: none;
+    position: relative;
+    z-index: 5;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    background: var(--rad-c0);
+  }
+  .rad-ct,
+  .rad-ct > * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .rad-cbx,
+  .rad-cbr {
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .rad-voice,
+  .rad-voice-preview {
+    max-width: 100%;
+  }
+  .rad-voice-preview audio {
+    max-width: min(160px, 40vw);
   }
   .rad-th {
-    padding: 0;
-    padding-inline: 12px;
-    height: 62px;
+    padding: 8px;
+    padding-inline: 8px 10px;
+    min-height: 56px;
+    height: auto;
+    gap: 8px;
+    flex: none;
+  }
+  .rad-th .rad-tt {
+    min-width: 0;
+    overflow: hidden;
+  }
+  .rad-th b {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  .rad-th-meta,
+  .rad-th-badges {
+    flex-wrap: wrap;
+  }
+  .rad-th .rad-chipl {
+    display: inline-flex;
+    max-width: 100%;
   }
   .rad-lc-h {
     padding-inline: 14px;
   }
-  .rad-bb {
-    max-width: 86%;
+  .rad-bb-row {
+    max-width: calc(100% - 8px);
   }
+  .rad-bb {
+    max-width: 100%;
+  }
+  /* Context = bottom sheet; hidden by default — no side peek */
   .rad-xp {
-    width: min(340px, 92vw);
-    max-width: 92vw;
+    position: fixed !important;
+    inset-inline: 0 !important;
+    inset-block-end: 0 !important;
+    inset-block-start: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: min(78dvh, 640px);
+    max-height: 78dvh;
+    transform: translateY(110%) !important;
+    border-radius: 18px 18px 0 0;
+    border-inline: 0;
+    border-block-start: 1px solid var(--rad-bd2);
+    z-index: 260;
+    box-shadow: 0 -24px 60px rgba(0, 0, 0, 0.55);
+    pointer-events: none;
+    visibility: hidden;
+    transition: transform 0.28s var(--rad-ease), visibility 0.28s;
+  }
+  [dir="ltr"] .rad-xp {
+    transform: translateY(110%) !important;
+  }
+  .rad-ibx.rad-xo .rad-xp {
+    transform: none !important;
+    pointer-events: auto;
+    visibility: visible;
+  }
+  .rad-ctxbtn {
+    display: grid;
   }
 }
 /* ---------- linked-record panel (visual skin only) ---------- */
@@ -1479,26 +1787,132 @@
   color: var(--rad-tx) !important;
 }
 
-/* ---------- WA-W2: overflow / search / media / voice / QR ---------- */
-.rad-ov,
-.rad-attach {
+/* ---------- WA-V: overlay host + menus (no clip by inbox shell) ---------- */
+/* Zero-size host: tokens only. Never a full-viewport box (that painted a
+   partial light-theme scrim over list/composer while topbar/sidebar stayed clean). */
+.rad-overlay-root {
+  position: fixed;
+  top: 0;
+  inset-inline-start: 0;
+  width: 0 !important;
+  height: 0 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: none;
+  max-height: none;
+  overflow: visible !important;
+  pointer-events: none;
+  z-index: 200;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  opacity: 1;
+}
+.rad-overlay-layer {
+  position: absolute;
+  top: 0;
+  inset-inline-start: 0;
+  width: 0;
+  height: 0;
+  overflow: visible;
+  pointer-events: none;
+  background: transparent !important;
+  background-image: none !important;
+}
+.rad-overlay-layer > * {
+  pointer-events: auto;
+}
+/* NEVER reuse .rad-ov here — that class is the command-palette scrim
+   (fixed inset:0 + rgba backdrop) in admin-dashboard.css and was the
+   gray vertical slab over the thread header ⋯. */
+.rad-th-ov,
+.rad-attach,
+.rad-emoji {
   position: relative;
+  inset: auto;
+  z-index: auto;
   display: inline-grid;
   overflow: visible;
+  background: transparent;
+  backdrop-filter: none;
+  padding: 0;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+}
+.rad-xp-scrim {
+  display: none;
 }
 .rad-ov-menu,
+.rad-th-menu,
 .rad-attach-menu {
   min-width: 220px;
 }
-/* Portaled to body — escape .rad-ibx overflow:hidden clipping */
 .rad-fixed-menu {
   position: fixed;
   z-index: 240;
   min-width: 220px;
   box-sizing: border-box;
+  /* Opaque fallbacks if tokens somehow missing */
+  background: var(--rad-surface, #15101a) !important;
+  border: 1px solid var(--rad-bd2, rgba(244, 231, 216, 0.16)) !important;
+  color: var(--rad-tx, #f4e7d8);
+  box-shadow: 0 24px 60px -16px rgba(0, 0, 0, 0.85) !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  /* Never paint a page-wide dim — menu is the only floating surface */
+  filter: none !important;
+}
+/* Light: heavy black shadow read as a gray scrim over cards/composer/search */
+.ro-portal[data-theme="light"] .rad-fixed-menu,
+.ro-portal[data-theme="light"] .rad-fixed-menu.rad-th-menu {
+  box-shadow:
+    0 1px 2px rgba(11, 8, 13, 0.06),
+    0 12px 28px -16px rgba(11, 8, 13, 0.22) !important;
 }
 .rad-fixed-menu.rad-menu {
   display: block;
+  padding: 6px;
+  border-radius: 14px;
+}
+.rad-fixed-menu.rad-menu button,
+.rad-fixed-menu.rad-menu a {
+  color: var(--rad-tx2, rgba(244, 231, 216, 0.78));
+  background: transparent;
+}
+.rad-fixed-menu.rad-menu button:hover,
+.rad-fixed-menu.rad-menu a:hover {
+  background: var(--rad-surface3, #231b29);
+  color: var(--rad-tx, #f4e7d8);
+}
+.rad-emoji-panel.rad-fixed-menu {
+  background: var(--rad-surface, #15101a) !important;
+}
+/* Kill CSS tip slabs entirely inside inbox — aria-label only */
+.rad-ibx [data-tip]::after,
+.rad-ibx [data-tip]:hover::after,
+.rad-th .rad-ib[data-tip]:hover::after,
+.rad-cbr .rad-ib[data-tip]:hover::after,
+.rad-cmp .rad-ib[data-tip]:hover::after,
+.rad-overlay-root [data-tip]::after {
+  content: none !important;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: none !important;
+}
+.rad-toast {
+  z-index: 280 !important;
 }
 .rad-ov-menu a.rad-ov-link,
 .rad-menu a.rad-ov-link {
@@ -1567,33 +1981,79 @@
   font-size: 11px;
   opacity: 0.85;
 }
-.rad-bb-acts {
-  display: none;
-  position: absolute;
-  inset-block-start: -10px;
-  inset-inline-end: 6px;
-  gap: 2px;
-  padding: 2px;
-  border-radius: 999px;
-  background: var(--rad-surface);
-  border: 1px solid var(--rad-bd2);
-  box-shadow: var(--rad-sh);
-}
-.rad-bb:hover .rad-bb-acts,
-.rad-bb:focus-within .rad-bb-acts {
+/* Message row: bubble + gutter ⋯ (never overlays text) */
+.rad-bb-row {
   display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  max-width: min(460px, 78%);
+  min-width: 0;
+  animation: rad-msgin 0.32s var(--rad-ease) both;
+  animation-delay: calc(var(--rad-i) * 40ms);
 }
-
+.rad-bb-row.rad-in {
+  align-self: flex-start;
+}
+.rad-bb-row.rad-out {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+.rad-bb-row .rad-bb {
+  max-width: none;
+  flex: 1 1 auto;
+  min-width: 0;
+  animation: none;
+}
+.rad-msg-acts {
+  position: static;
+  flex: none;
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  padding-block-start: 2px;
+  transition: opacity 0.12s var(--rad-ease);
+}
+.rad-bb-row:hover .rad-msg-acts,
+.rad-bb-row:focus-within .rad-msg-acts,
+.rad-msg-acts:focus-within {
+  opacity: 1;
+  pointer-events: auto;
+}
+@media (hover: none) {
+  .rad-msg-acts {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+.rad-msg-acts-trig {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--rad-surface, #15101a);
+  border: 1px solid var(--rad-bd2, rgba(244, 231, 216, 0.16));
+  box-shadow: var(--rad-sh);
+  color: var(--rad-tx2);
+}
+.rad-msg-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .rad-quote-strip {
+  position: relative;
+  z-index: 1;
+  flex: none;
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  margin-bottom: 8px;
+  margin: 0 0 8px;
   padding: 8px 10px;
   border-radius: 12px;
   background: var(--rad-surface2);
   border: 1px solid var(--rad-bd);
   font-size: 12.5px;
+  max-width: 100%;
+  overflow: visible;
 }
 .rad-quote-strip > div {
   flex: 1;
@@ -1653,17 +2113,23 @@
   display: block;
   padding: 0;
   border: 0;
-  background: transparent;
+  background: color-mix(in srgb, var(--rad-surface3) 70%, transparent);
   cursor: zoom-in;
   max-width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  line-height: 0;
 }
 .rad-media-img img,
 .rad-media-video video {
   display: block;
-  max-width: min(280px, 100%);
+  width: auto;
+  height: auto;
+  max-width: min(320px, 100%);
   max-height: 320px;
-  border-radius: 10px;
-  object-fit: cover;
+  border-radius: 12px;
+  object-fit: contain;
+  background: var(--rad-surface3);
 }
 .rad-media-audio {
   display: flex;
@@ -1691,6 +2157,68 @@
   font-weight: 600;
 }
 
+.rad-lightbox-scrim {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  min-height: 100vh;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  /* Fully opaque-enough scrim — underlying UI must not bleed */
+  background: rgba(8, 6, 10, 0.94);
+  box-sizing: border-box;
+}
+.rad-lightbox-stage {
+  display: grid;
+  place-items: center;
+  max-width: min(96vw, 1200px);
+  max-height: min(82dvh, 900px);
+  padding: 20px;
+  border-radius: 16px;
+  /* Neutral checkerboard so black/transparent PNGs stay visible */
+  background-color: #d8d2c8;
+  background-image:
+    linear-gradient(45deg, #c4bdb2 25%, transparent 25%),
+    linear-gradient(-45deg, #c4bdb2 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #c4bdb2 75%),
+    linear-gradient(-45deg, transparent 75%, #c4bdb2 75%);
+  background-size: 24px 24px;
+  background-position: 0 0, 0 12px, 12px -12px, -12px 0;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+}
+.rad-lightbox-scrim img,
+.rad-lightbox-stage img {
+  max-width: min(90vw, 1100px);
+  max-height: min(76dvh, 820px);
+  border-radius: 8px;
+  object-fit: contain;
+}
+.rad-lightbox-scrim .rad-lightbox-x {
+  position: fixed;
+  inset-block-start: 16px;
+  inset-inline-end: 16px;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 999px;
+  background: #f4e7d8;
+  color: #0b080d;
+  border: 1px solid rgba(11, 8, 13, 0.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+/* Keep download away from bottom-start (Next.js dev badge corner) */
+.rad-lightbox-scrim .rad-lightbox-dl {
+  position: fixed;
+  inset-block-start: 16px;
+  inset-inline-end: 68px;
+  inset-block-end: auto;
+  z-index: 2;
+}
 .rad-lightbox {
   display: flex;
   flex-direction: column;
@@ -1754,19 +2282,76 @@
 .rad-voice {
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 6px;
 }
+.rad-cbr.rad-cbr-voice {
+  display: flex;
+  width: 100%;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 10px;
+}
+.rad-voice-bar,
 .rad-voice.rad-on,
 .rad-voice-preview {
-  padding-inline: 6px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--rad-danger, #c44) 12%, transparent);
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 6px 8px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--rad-err, #c44) 12%, var(--rad-surface));
+  border: 1px solid var(--rad-bd2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.rad-cbr.rad-cbr-voice {
+  overflow: hidden;
+  max-width: 100%;
+  min-width: 0;
+  padding-inline: 0;
+}
+.rad-voice-bar .sp {
+  flex: 1 1 auto;
+  min-width: 4px;
+}
+.rad-voice-bar .rad-voice-level {
+  flex: 1 1 80px;
+  max-width: 160px;
+  min-width: 48px;
+  height: 10px;
+}
+.rad-voice-bar .rad-voice-label {
+  flex: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 9em;
+}
+.rad-voice-bar .rad-btn {
+  flex: none;
+  white-space: nowrap;
+  height: 36px;
+  padding: 0 10px;
+  font-size: 12.5px;
+  max-width: 100%;
+}
+.rad-voice-bar .rad-btn .rad-voice-btn-label {
+  max-width: 6.5em;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .rad-voice-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--rad-danger, #c44);
+  background: var(--rad-err, #c44);
   animation: rad-pulse 1s ease-in-out infinite;
 }
 @keyframes rad-pulse {
@@ -1777,6 +2362,33 @@
 .rad-voice-timer {
   font-variant-numeric: tabular-nums;
   font-size: 12px;
+}
+.rad-voice-level {
+  display: inline-block;
+  width: 48px;
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--rad-ac) 35%, var(--rad-surface3));
+  position: relative;
+  overflow: hidden;
+}
+.rad-voice-level::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: calc(var(--rad-voice-level, 0) * 100%);
+  background: var(--rad-ac);
+  border-radius: inherit;
+  transition: width 0.08s linear;
+}
+.rad-voice-err {
+  display: block;
+  width: 100%;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--rad-err);
+  padding-inline: 4px;
 }
 .rad-voice-label {
   font-size: 12px;
@@ -1804,27 +2416,47 @@
   position: relative;
   display: inline-grid;
 }
+/* Must beat .rad-menu.rad-on { display:block } — that caused the tall 1-col strip */
+.rad-fixed-menu.rad-emoji-panel,
 .rad-emoji-panel {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 2px;
-  width: 220px;
-  min-width: 220px;
-  padding: 8px;
+  display: grid !important;
+  grid-template-columns: repeat(8, 1fr);
+  grid-auto-rows: 36px;
+  align-content: start;
+  gap: 4px;
+  width: 320px !important;
+  max-width: 320px !important;
+  height: auto !important;
+  max-height: 280px !important;
+  min-width: 0;
+  min-height: 0 !important;
+  padding: 10px;
   border-radius: 14px;
   border: 1px solid var(--rad-bd2);
-  background: var(--rad-surface);
+  background: var(--rad-surface) !important;
   box-shadow: 0 24px 60px -20px #000;
   direction: rtl;
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
-.rad-emoji-btn {
-  display: grid;
+.rad-emoji-panel .rad-emoji-btn,
+.rad-fixed-menu.rad-emoji-panel button.rad-emoji-btn {
+  display: grid !important;
   place-items: center;
-  width: 100%;
-  aspect-ratio: 1;
+  width: 100% !important;
+  height: 36px;
+  min-height: 36px;
+  max-height: 36px;
+  padding: 0 !important;
+  margin: 0;
+  aspect-ratio: auto;
   border-radius: 9px;
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1;
+  gap: 0;
+  color: inherit;
+  background: transparent;
 }
 .rad-emoji-btn:hover {
   background: var(--rad-surface3);
@@ -1908,21 +2540,7 @@
   color: var(--rad-tx3);
   font-variant-numeric: tabular-nums;
 }
-.rad-media-img {
-  display: block;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: zoom-in;
-  max-width: 100%;
-}
-.rad-media-img img {
-  display: block;
-  max-width: min(280px, 100%);
-  max-height: 320px;
-  border-radius: 12px;
-  object-fit: cover;
-}
+/* (media-img rules live once above — WA-V) */
 .rad-mpv-stage img {
   display: block;
   width: auto;

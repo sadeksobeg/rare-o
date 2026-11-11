@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
   useTransition,
+  type ReactNode,
 } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -17,9 +18,6 @@ import {
   ChevronDown,
   ChevronRight,
   CircleAlert,
-  Clock,
-  Copy,
-  EyeOff,
   Info,
   LoaderCircle,
   MessageSquareText,
@@ -66,6 +64,7 @@ import {
   MediaBubbleBody,
   isRenderableMediaType,
 } from "@/components/admin/rad/inbox/media-bubble-body";
+import { MessageActionsMenu } from "@/components/admin/rad/inbox/message-actions-menu";
 import {
   adminAddInboxNoteAction,
   adminGetComposerDraftAction,
@@ -130,6 +129,7 @@ export function RadThread({
   const [text, setText] = useState("");
   const [pending, startTransition] = useTransition();
   const [qrOpen, setQrOpen] = useState(false);
+  const [voiceBarActive, setVoiceBarActive] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [replyTo, setReplyTo] = useState<InboxMessageItem | null>(null);
   const [pendingMedia, setPendingMedia] = useState<PendingMedia | null>(null);
@@ -164,6 +164,8 @@ export function RadThread({
     whatsappDown ||
     conversation.blocked ||
     conversation.archived;
+  /** Text replies fall back to platform when WA outbound is unavailable. */
+  const replyUsesPlatform = sendingPaused || whatsappDown;
 
   const openSearch = useCallback(() => setSearchOpen(true), []);
   useThreadSearchHotkey(openSearch, true);
@@ -295,6 +297,10 @@ export function RadThread({
   }
 
   function queueFile(file: File) {
+    if (mediaBlocked) {
+      toast.error(dict.inbox.mediaRequiresWhatsApp);
+      return;
+    }
     const check = validateOutboundMedia(file, ib);
     if (!check.ok) {
       toast.error(check.error);
@@ -311,7 +317,11 @@ export function RadThread({
 
   function sendMedia(caption: string, file?: File, durationSec?: number, isPtt?: boolean) {
     const f = file ?? pendingMedia?.file;
-    if (!f || mediaBlocked) return;
+    if (!f) return;
+    if (mediaBlocked) {
+      toast.error(dict.inbox.mediaRequiresWhatsApp);
+      return;
+    }
     const clientRequestId = newClientRequestId();
     const nowIso = new Date().toISOString();
     const kindGuess = f.type.startsWith("image/")
@@ -506,10 +516,11 @@ export function RadThread({
     if (!v || pending) return;
     const clientRequestId = newClientRequestId();
     const nowIso = new Date().toISOString();
+    const optimisticChannel = replyUsesPlatform ? "platform" : "whatsapp";
     const optimisticRow: InboxMessageItem = {
       id: `opt-${clientRequestId}`,
       direction: "outbound",
-      channel: "whatsapp",
+      channel: optimisticChannel,
       messageType: "text",
       body: v,
       caption: null,
@@ -554,14 +565,21 @@ export function RadThread({
         return;
       }
       const messageId = result.data?.messageId;
+      const realChannel = result.data?.channel ?? optimisticChannel;
+      if (result.data?.platformFallback) {
+        toast.message(dict.inbox.platformFallbackNotice);
+      }
       if (messageId) {
+        const nextStatus = result.data?.status || "pending";
+        setStatusOverrides((prev) => ({ ...prev, [messageId]: nextStatus }));
         setOptimistic((prev) =>
           prev.map((m) =>
             m.clientRequestId === clientRequestId
               ? {
                   ...m,
                   id: messageId,
-                  status: result.data?.status || "pending",
+                  channel: realChannel,
+                  status: nextStatus,
                 }
               : m
           )
@@ -659,23 +677,18 @@ export function RadThread({
             <b>
               {conversation.name ? title : <bdi dir="ltr">{title}</bdi>}
             </b>
-            <small>
-              <bdi dir="ltr">{maskedPhone ?? ""}</bdi>
-              {conversation.link.linked ? (
-                <span className="rad-chipl rad-ok">
-                  {linkTypeLabel(conversation.link.linkType, dict)}{" "}
-                  <bdi dir="ltr">{conversation.link.linkId}</bdi>
-                </span>
-              ) : (
-                <span className="rad-chipl rad-no">{dict.inbox.notLinked}</span>
-              )}
-              {conversation.muted ? (
-                <span className="rad-chipl">{ib.mute8h}</span>
+            <div className="rad-th-meta">
+              {maskedPhone ? (
+                <bdi className="rad-th-phone" dir="ltr">
+                  {maskedPhone}
+                </bdi>
               ) : null}
-              {conversation.blocked ? (
-                <span className="rad-chipl rad-no">{ib.blockContact}</span>
-              ) : null}
-            </small>
+              <ThreadHeaderBadges
+                conversation={conversation}
+                dict={dict}
+                ib={ib}
+              />
+            </div>
           </div>
           <div className="rad-acts">
             <button
@@ -862,15 +875,15 @@ export function RadThread({
                 }
               }}
             />
-            <div className="rad-cbr">
-              {mode === "reply" ? (
+            <div className={cn("rad-cbr", voiceBarActive && "rad-cbr-voice")}>
+              {mode === "reply" && !voiceBarActive ? (
                 <AttachMenu
                   ib={ib}
                   disabled={mediaBlocked || pending}
                   onPick={queueFile}
                 />
               ) : null}
-              {mode === "reply" ? (
+              {mode === "reply" && !voiceBarActive ? (
                 <EmojiPicker
                   ib={ib}
                   disabled={pending}
@@ -892,11 +905,10 @@ export function RadThread({
                   }}
                 />
               ) : null}
-              {mode === "reply" ? (
+              {mode === "reply" && !voiceBarActive ? (
                 <button
                   type="button"
                   className="rad-ib"
-                  data-tip={ib.quickRepliesLabel}
                   aria-label={ib.quickRepliesLabel}
                   onClick={() => setQrOpen((v) => !v)}
                 >
@@ -907,25 +919,44 @@ export function RadThread({
                 <VoiceRecorder
                   ib={ib}
                   disabled={mediaBlocked || pending}
+                  onActiveChange={setVoiceBarActive}
                   onRecorded={(file, durationSec) => {
                     sendMedia("", file, durationSec, true);
                   }}
                 />
               ) : null}
-              <span className="sp" />
-              <span className="rad-hint">{ib.composerSendHint}</span>
-              <button
-                type="button"
-                className={cn(
-                  "rad-sendb",
-                  text.trim() && !pending && "rad-sendb-ready"
-                )}
-                disabled={!text.trim() || pending}
-                onClick={mode === "reply" ? sendReply : saveNote}
-              >
-                {mode === "note" ? ib.saveNoteButton : ib.sendButton}
-                <Send width={16} height={16} strokeWidth={1.5} aria-hidden />
-              </button>
+              {!voiceBarActive ? (
+                <>
+                  <span className="sp" />
+                  {mode === "reply" ? (
+                    <span
+                      className={cn(
+                        "rad-hint rad-chipl",
+                        replyUsesPlatform ? "rad-warn-chip" : "rad-ok"
+                      )}
+                      data-channel={replyUsesPlatform ? "platform" : "whatsapp"}
+                    >
+                      {replyUsesPlatform
+                        ? dict.inbox.composerWillUsePlatform
+                        : dict.inbox.composerWillUseWhatsApp}
+                    </span>
+                  ) : (
+                    <span className="rad-hint">{ib.composerSendHint}</span>
+                  )}
+                  <button
+                    type="button"
+                    className={cn(
+                      "rad-sendb",
+                      text.trim() && !pending && "rad-sendb-ready"
+                    )}
+                    disabled={!text.trim() || pending}
+                    onClick={mode === "reply" ? sendReply : saveNote}
+                  >
+                    {mode === "note" ? ib.saveNoteButton : ib.sendButton}
+                    <Send width={16} height={16} strokeWidth={1.5} aria-hidden />
+                  </button>
+                </>
+              ) : null}
             </div>
           </div>
           {qrOpen && mode === "reply" ? (
@@ -964,6 +995,76 @@ function linkTypeLabel(linkType: string, dict: Dictionary): string {
   return dict.inbox.notLinked;
 }
 
+/** Name stays on line 1; badges wrap on line 2 (max 2 visible, then +N). */
+function ThreadHeaderBadges({
+  conversation,
+  dict,
+  ib,
+}: {
+  conversation: InboxConversationDetail;
+  dict: Dictionary;
+  ib: Dictionary["ib"];
+}) {
+  const chips: ReactNode[] = [];
+  if (conversation.crm.trader) {
+    chips.push(
+      <span key="trader" className="rad-chipl rad-ok">
+        {dict.inbox.linkedTraderChip}{" "}
+        <bdi dir="ltr">{conversation.crm.trader.displayName}</bdi>
+      </span>
+    );
+  }
+  if (conversation.link.linked) {
+    chips.push(
+      <span key="link" className="rad-chipl rad-ok">
+        {linkTypeLabel(conversation.link.linkType, dict)}{" "}
+        <bdi dir="ltr">{conversation.link.linkId}</bdi>
+      </span>
+    );
+  } else {
+    chips.push(
+      <span key="unlinked" className="rad-chipl rad-no">
+        {dict.inbox.notLinked}
+      </span>
+    );
+  }
+  if (conversation.tags.includes("phone-conflict")) {
+    chips.push(
+      <span key="conflict" className="rad-chipl rad-no">
+        {dict.inbox.phoneConflictChip}
+      </span>
+    );
+  }
+  if (conversation.muted) {
+    chips.push(
+      <span key="muted" className="rad-chipl">
+        {ib.mute8h}
+      </span>
+    );
+  }
+  if (conversation.blocked) {
+    chips.push(
+      <span key="blocked" className="rad-chipl rad-no">
+        {ib.blockContact}
+      </span>
+    );
+  }
+
+  const visible = chips.slice(0, 2);
+  const overflow = chips.length - visible.length;
+
+  return (
+    <div className="rad-th-badges">
+      {visible}
+      {overflow > 0 ? (
+        <span className="rad-chipl rad-no" title={`${overflow} more`}>
+          +{overflow}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
 function DeliveryTick({
   status,
   inbox,
@@ -974,7 +1075,7 @@ function DeliveryTick({
   const props = { width: 14, height: 14, strokeWidth: 1.5 as const };
   switch (status) {
     case "pending":
-      return <Clock {...props} aria-label={inbox.statusPending} />;
+      return <LoaderCircle {...props} aria-label={inbox.statusPending} />;
     case "sending":
       return <LoaderCircle {...props} aria-label={inbox.statusSending} />;
     case "sent":
@@ -1030,74 +1131,76 @@ function Bubble({
   const bodyLabel = humanizeMessageBody(m.body, m.messageType, m.caption, labels);
   const inFlight = isOut && (m.status === "pending" || m.status === "sending");
   const showMedia = isRenderableMediaType(m.messageType);
+  const rawText = (m.caption || m.body || "").trim();
+  const emojiOnly =
+    !showMedia &&
+    Boolean(rawText) &&
+    /^[\p{Extended_Pictographic}\uFE0F\u200D]+$/u.test(rawText) &&
+    [...rawText].length <= 8;
 
   return (
     <div
-      className={cn(
-        "rad-bb",
-        isOut ? "rad-out" : "rad-in",
-        m.status === "failed" && "rad-bb-failed",
-        inFlight && "rad-sending"
-      )}
+      className={cn("rad-bb-row", isOut ? "rad-out" : "rad-in")}
       style={{ "--rad-i": i } as React.CSSProperties}
       data-msg-id={m.id}
     >
-      {m.replyTo ? (
-        <div className="rad-bb-quote">
-          <b>{ib.replyToMessage}</b>
-          <span>{m.replyTo.body || m.replyTo.messageType}</span>
-        </div>
-      ) : null}
-      {showMedia ? <MediaBubbleBody m={m} ib={ib} /> : null}
-      {!showMedia && bodyLabel !== labels.empty ? bodyLabel : null}
-      <div className="rad-bm">
-        {timeOf(m, locale)}
-        {isOut && m.status === "failed" && onRetry ? (
-          <button
-            type="button"
-            className="rad-retry"
-            onClick={onRetry}
-            aria-label={ib.retrySend}
-          >
-            <CircleAlert
-              width={14}
-              height={14}
-              strokeWidth={1.5}
-              aria-hidden
-              className="rad-retry-ic"
-            />
-            <span>{ib.retrySend}</span>
-          </button>
-        ) : isOut ? (
-          <DeliveryTick status={m.status} inbox={inbox} />
+      <div
+        className={cn(
+          "rad-bb",
+          isOut ? "rad-out" : "rad-in",
+          showMedia && "rad-bb-media",
+          emojiOnly && "rad-bb-emoji",
+          m.status === "failed" && "rad-bb-failed",
+          inFlight && "rad-sending"
+        )}
+      >
+        {m.replyTo ? (
+          <div className="rad-bb-quote">
+            <b>{ib.replyToMessage}</b>
+            <span>{m.replyTo.body || m.replyTo.messageType}</span>
+          </div>
         ) : null}
+        <span
+          className={cn(
+            "rad-chchip",
+            m.channel === "platform" ? "rad-chchip-plat" : "rad-chchip-wa"
+          )}
+        >
+          {m.channel === "platform"
+            ? inbox.channelPlatform
+            : inbox.channelWhatsApp}
+        </span>
+        {showMedia ? <MediaBubbleBody m={m} ib={ib} /> : null}
+        {!showMedia && bodyLabel !== labels.empty ? bodyLabel : null}
+        <div className="rad-bm">
+          {timeOf(m, locale)}
+          {isOut && m.status === "failed" && onRetry ? (
+            <button
+              type="button"
+              className="rad-retry"
+              onClick={onRetry}
+              aria-label={ib.retrySend}
+            >
+              <CircleAlert
+                width={14}
+                height={14}
+                strokeWidth={1.5}
+                aria-hidden
+                className="rad-retry-ic"
+              />
+              <span>{ib.retrySend}</span>
+            </button>
+          ) : isOut ? (
+            <DeliveryTick status={m.status} inbox={inbox} />
+          ) : null}
+        </div>
       </div>
-      <div className="rad-bb-acts">
-        <button
-          type="button"
-          className="rad-ib"
-          aria-label={ib.replyToMessage}
-          onClick={onReply}
-        >
-          <Reply width={14} height={14} strokeWidth={1.5} aria-hidden />
-        </button>
-        <button
-          type="button"
-          className="rad-ib"
-          aria-label={ib.copyMessage}
-          onClick={onCopy}
-        >
-          <Copy width={14} height={14} strokeWidth={1.5} aria-hidden />
-        </button>
-        <button
-          type="button"
-          className="rad-ib"
-          aria-label={ib.hideForMe}
-          onClick={onHide}
-        >
-          <EyeOff width={14} height={14} strokeWidth={1.5} aria-hidden />
-        </button>
-      </div>
+      <MessageActionsMenu
+        ib={ib}
+        onReply={onReply}
+        onCopy={onCopy}
+        onHide={onHide}
+      />
     </div>
   );
 }

@@ -15,8 +15,9 @@ export default async function TraderMessagesPage() {
   const { locale, dict } = await getRequestDictionary();
   const t = dict.trader;
 
-  const conversation = await getTraderConversationCached(session.sub);
+  // Mark read first so this render (and the nav badge after refresh) see cleared state.
   await markTraderMessagesRead(session.sub);
+  const conversation = await getTraderConversationCached(session.sub);
 
   return (
     <section className="ro-portal-stagger space-y-5 sm:space-y-6">

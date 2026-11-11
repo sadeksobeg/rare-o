@@ -22,6 +22,7 @@ import {
   enqueueOutboundText,
 } from "@/lib/whatsapp/messaging/service";
 import { sendAdminPlatformMessage } from "@/lib/whatsapp/messaging/trader-channel";
+import { previewManualTraderLink } from "@/lib/whatsapp/messaging/trader-unify";
 import {
   applyFakeLogout,
   applyFakePairing,
@@ -142,6 +143,8 @@ export async function adminSendWhatsAppTextAction(
       conversationId: string;
       status: string;
       duplicate: boolean;
+      channel: "whatsapp" | "platform";
+      platformFallback: boolean;
     };
   }
 > {
@@ -198,6 +201,7 @@ export async function adminSendWhatsAppTextAction(
         conversationId: conversation.id,
         adminId: session.sub,
         text,
+        clientRequestId,
       });
       if (!platformResult.ok) {
         return { ok: false, error: platformResult.error };
@@ -211,6 +215,8 @@ export async function adminSendWhatsAppTextAction(
           conversationId: platformResult.conversationId,
           status: "sent",
           duplicate: false,
+          channel: "platform",
+          platformFallback: true,
         },
       };
     }
@@ -234,6 +240,8 @@ export async function adminSendWhatsAppTextAction(
       conversationId: result.conversationId,
       status: result.status,
       duplicate: result.duplicate,
+      channel: "whatsapp",
+      platformFallback: false,
     },
   };
 }
@@ -392,6 +400,29 @@ export async function adminSuggestWhatsAppCrmPartiesAction(
     return handleAdminSessionError(e, "UNAUTHORIZED");
   }
   const data = await suggestCrmPartiesForConversation(conversationId);
+  return { ok: true, data };
+}
+
+/** Read-only preview before a manual trader CRM link that may unify threads. */
+export async function adminPreviewWhatsAppTraderMergeAction(input: {
+  conversationId: string;
+  traderId: string;
+}): Promise<
+  ActionResult & {
+    data?: Awaited<ReturnType<typeof previewManualTraderLink>>;
+  }
+> {
+  try {
+    await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const conversationId = String(input.conversationId || "").trim();
+  const traderId = String(input.traderId || "").trim();
+  if (!conversationId || !traderId) {
+    return { ok: false, error: "INVALID_INPUT" };
+  }
+  const data = await previewManualTraderLink({ conversationId, traderId });
   return { ok: true, data };
 }
 

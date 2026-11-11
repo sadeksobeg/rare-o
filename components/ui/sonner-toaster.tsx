@@ -2,16 +2,20 @@
 
 import { Toaster } from "sonner";
 
-/** Optional Sonner mount for lab-port surfaces. Existing AppToast remains default. */
+/**
+ * Bottom-end toasts — never cover the inbox composer (bottom-center did).
+ * Offset clears the composer + safe area.
+ */
 export function SonnerToaster() {
   return (
     <Toaster
-      position="bottom-center"
+      position="bottom-right"
+      offset={88}
       richColors
       closeButton
-      theme="light"
+      theme="system"
       toastOptions={{
-        className: "font-[family-name:var(--font-plex-ar),sans-serif]",
+        className: "font-[family-name:var(--font-plex-ar),sans-serif] rad-toast",
       }}
     />
   );

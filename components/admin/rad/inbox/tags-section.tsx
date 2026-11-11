@@ -7,15 +7,27 @@ import { toast } from "sonner";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { adminAddInboxTagAction, adminRemoveInboxTagAction } from "@/app/whatsapp-actions";
 
+const SYSTEM_TAG_LABELS: Record<string, keyof Dictionary["inbox"]> = {
+  "phone-conflict": "phoneConflictChip",
+};
+
 export function RadTagsSection({
   conversationId,
   tags,
   ib,
+  inbox,
 }: {
   conversationId: string;
   tags: string[];
   ib: Dictionary["ib"];
+  inbox: Dictionary["inbox"];
 }) {
+  function tagLabel(slug: string): string {
+    const key = SYSTEM_TAG_LABELS[slug];
+    if (!key) return slug;
+    const label = inbox[key];
+    return typeof label === "string" ? label : slug;
+  }
   const router = useRouter();
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState("");
@@ -53,20 +65,23 @@ export function RadTagsSection({
   return (
     <div className="rad-tg">
       {tags.length === 0 && !adding ? <span style={{ color: "var(--rad-tx3)" }}>{ib.noTags}</span> : null}
-      {tags.map((t) => (
-        <span key={t}>
-          {t}
-          <button
-            type="button"
-            onClick={() => removeTag(t)}
-            aria-label={t}
-            style={{ marginInlineStart: 6, display: "inline-flex" }}
-            disabled={pending}
-          >
-            <X width={11} height={11} strokeWidth={2} aria-hidden />
-          </button>
-        </span>
-      ))}
+      {tags.map((t) => {
+        const label = tagLabel(t);
+        return (
+          <span key={t}>
+            {label}
+            <button
+              type="button"
+              onClick={() => removeTag(t)}
+              aria-label={label}
+              style={{ marginInlineStart: 6, display: "inline-flex" }}
+              disabled={pending}
+            >
+              <X width={11} height={11} strokeWidth={2} aria-hidden />
+            </button>
+          </span>
+        );
+      })}
       {adding ? (
         <input
           autoFocus

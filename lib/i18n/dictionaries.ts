@@ -649,6 +649,11 @@ type Dict = {
     voiceCancel: string;
     voiceSend: string;
     voiceMicDenied: string;
+    voiceMicNoDevice: string;
+    voiceMicPolicyBlocked: string;
+    voiceMicSecureRequired: string;
+    voiceMicTest: string;
+    voiceMicTestOk: string;
     voiceRecording: string;
     qrSearchPlaceholder: string;
     qrManage: string;
@@ -1385,7 +1390,9 @@ type Dict = {
     messagesChannelPlatform: string;
     messagesErrorEmpty: string;
     messagesErrorTooLong: string;
+    messagesErrorRateLimited: string;
     messagesErrorGeneric: string;
+    messagesWhatsappMediaUnavailable: string;
     offersTitle: string;
     offersLead: string;
     offersEmpty: string;
@@ -1502,6 +1509,12 @@ type Dict = {
     statusDelivered: string;
     statusRead: string;
     channelPlatform: string;
+    channelWhatsApp: string;
+    composerWillUsePlatform: string;
+    composerWillUseWhatsApp: string;
+    mediaRequiresWhatsApp: string;
+    linkedTraderChip: string;
+    phoneConflictChip: string;
     newMessages: string;
     linkRecord: string;
     unlinkConfirm: string;
@@ -1527,6 +1540,10 @@ type Dict = {
     voiceDenied: string;
     crmParty: string;
     crmSuggest: string;
+    crmSuggestSharedPhone: string;
+    crmMergeConfirmTitle: string;
+    crmMergeConfirmBody: string;
+    crmMergeConfirm: string;
     crmLinkCustomer: string;
     crmLinkTrader: string;
     crmClear: string;
@@ -2367,7 +2384,14 @@ const ar: Dict = {
     voiceStop: "إيقاف التسجيل",
     voiceCancel: "إلغاء التسجيل",
     voiceSend: "إرسال التسجيل",
-    voiceMicDenied: "لم يُسمح باستخدام الميكروفون",
+    voiceMicDenied:
+      "الميكروفون مرفوض. اضغط أيقونة القفل بجانب العنوان ← الميكروفون ← سماح، ثم أعد التحميل.",
+    voiceMicNoDevice: "لم يُعثر على ميكروفون متصل بهذا الجهاز.",
+    voiceMicPolicyBlocked:
+      "الموقع يمنع الميكروفون عبر ترويسة Permissions-Policy. راجع إعدادات الخادم.",
+    voiceMicSecureRequired: "التسجيل يحتاج HTTPS أو localhost.",
+    voiceMicTest: "اختبار الميكروفون",
+    voiceMicTestOk: "الميكروفون يعمل",
     voiceRecording: "جارٍ التسجيل…",
     qrSearchPlaceholder: "ابحث في الردود الجاهزة…",
     qrManage: "إدارة الردود",
@@ -3220,7 +3244,9 @@ const ar: Dict = {
     messagesChannelPlatform: "عبر المنصة",
     messagesErrorEmpty: "اكتب رسالة أولاً",
     messagesErrorTooLong: "الرسالة أطول من الحد المسموح",
+    messagesErrorRateLimited: "أرسلت كثيراً خلال دقيقة — انتظر قليلاً ثم أعد المحاولة",
     messagesErrorGeneric: "تعذّر إرسال الرسالة — حاول مرة أخرى",
+    messagesWhatsappMediaUnavailable: "مرفق من واتساب (غير متاح هنا)",
     offersTitle: "العروض العامة المختارة",
     offersLead: "عروض RARE OUD المنشورة فقط — وليست متاجر للتجّار.",
     offersEmpty: "لا توجد عروض منشورة بعد.",
@@ -3270,7 +3296,7 @@ const ar: Dict = {
     sendFailed: "لم تُرسل — إعادة المحاولة",
     sendBlocked: "لا يمكن الإرسال بينما الإرسال معطّل.",
     sendSuccess: "أُدرجت الرسالة في قائمة الإرسال.",
-    notLinked: "غير مرتبط",
+    notLinked: "بلا صفقة",
     healthDisconnected: "غير متصل",
     healthConnecting: "جارٍ الاتصال",
     healthConnected: "متصل",
@@ -3335,7 +3361,13 @@ const ar: Dict = {
     retry: "إعادة المحاولة",
     statusDelivered: "تم التسليم",
     statusRead: "تمت القراءة",
-    channelPlatform: "عبر منصة التاجر",
+    channelPlatform: "عبر المنصة",
+    channelWhatsApp: "عبر واتساب",
+    composerWillUsePlatform: "سيصل الرد عبر المنصة",
+    composerWillUseWhatsApp: "سيصل الرد عبر واتساب",
+    mediaRequiresWhatsApp: "إرسال الوسائط يحتاج واتساب متصلاً مع تفعيل الإرسال — لا يمكن الإرسال الآن.",
+    linkedTraderChip: "تاجر مرتبط",
+    phoneConflictChip: "تعارض هاتف",
     newMessages: "رسائل جديدة ↓",
     linkRecord: "ربط بسجل",
     unlinkConfirm: "إزالة الربط؟",
@@ -3374,6 +3406,11 @@ const ar: Dict = {
     voiceDenied: "لم يُسمح بالوصول إلى الميكروفون",
     crmParty: "سجل العميل / التاجر",
     crmSuggest: "اقتراحات من رقم الهاتف",
+    crmSuggestSharedPhone: "الهاتف مشترك بين أكثر من تاجر — اختر الربط يدوياً من البحث بلا زر مباشر.",
+    crmMergeConfirmTitle: "تأكيد دمج المحادثات",
+    crmMergeConfirmBody:
+      "سيُدمَج {secondaryCount} محادثة إضافية في الخيط الأساسي، مع نقل {messageCount} رسالة. لا رجعة إلا بنسخة احتياطية.",
+    crmMergeConfirm: "تأكيد",
     crmLinkCustomer: "ربط كعميل",
     crmLinkTrader: "ربط كتاجر",
     crmClear: "إزالة ربط السجل",
@@ -4217,7 +4254,14 @@ const en: Dict = {
     voiceStop: "Stop recording",
     voiceCancel: "Cancel recording",
     voiceSend: "Send voice note",
-    voiceMicDenied: "Microphone permission denied",
+    voiceMicDenied:
+      "Microphone blocked. Click the lock icon by the URL → Microphone → Allow, then reload.",
+    voiceMicNoDevice: "No microphone found on this device.",
+    voiceMicPolicyBlocked:
+      "Microphone blocked by Permissions-Policy. Check the server header config.",
+    voiceMicSecureRequired: "Recording requires HTTPS or localhost.",
+    voiceMicTest: "Test microphone",
+    voiceMicTestOk: "Microphone works",
     voiceRecording: "Recording…",
     qrSearchPlaceholder: "Search quick replies…",
     qrManage: "Manage replies",
@@ -5078,7 +5122,9 @@ const en: Dict = {
     messagesChannelPlatform: "via platform",
     messagesErrorEmpty: "Write a message first",
     messagesErrorTooLong: "Message exceeds the limit",
+    messagesErrorRateLimited: "Too many messages this minute — wait a moment and try again",
     messagesErrorGeneric: "Couldn't send the message — try again",
+    messagesWhatsappMediaUnavailable: "WhatsApp attachment (not available here)",
     offersTitle: "Public curated offers",
     offersLead: "Published RARE OUD presentations only — not trader storefronts.",
     offersEmpty: "No published offers yet.",
@@ -5133,7 +5179,7 @@ const en: Dict = {
     sendFailed: "Not sent — retry",
     sendBlocked: "Cannot send while outbound is disabled.",
     sendSuccess: "Message queued for delivery.",
-    notLinked: "Not linked",
+    notLinked: "No deal",
     healthDisconnected: "Disconnected",
     healthConnecting: "Connecting",
     healthConnected: "Connected",
@@ -5199,7 +5245,14 @@ const en: Dict = {
     retry: "Retry",
     statusDelivered: "Delivered",
     statusRead: "Read",
-    channelPlatform: "via trader portal",
+    channelPlatform: "via platform",
+    channelWhatsApp: "via WhatsApp",
+    composerWillUsePlatform: "Reply will send via platform",
+    composerWillUseWhatsApp: "Reply will send via WhatsApp",
+    mediaRequiresWhatsApp:
+      "Media requires WhatsApp connected with outbound enabled — cannot send now.",
+    linkedTraderChip: "Linked trader",
+    phoneConflictChip: "Phone conflict",
     newMessages: "New messages ↓",
     linkRecord: "Link to record",
     unlinkConfirm: "Remove link?",
@@ -5238,6 +5291,12 @@ const en: Dict = {
     voiceDenied: "Microphone access was denied",
     crmParty: "Customer / trader record",
     crmSuggest: "Suggestions from phone number",
+    crmSuggestSharedPhone:
+      "This phone is shared by more than one trader — link manually via search; no direct button.",
+    crmMergeConfirmTitle: "Confirm conversation merge",
+    crmMergeConfirmBody:
+      "{secondaryCount} extra conversation(s) will merge into the primary thread, moving {messageCount} message(s). Only a backup can undo this.",
+    crmMergeConfirm: "Confirm",
     crmLinkCustomer: "Link as customer",
     crmLinkTrader: "Link as trader",
     crmClear: "Clear CRM link",

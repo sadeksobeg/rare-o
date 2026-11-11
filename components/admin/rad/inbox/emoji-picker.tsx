@@ -84,6 +84,9 @@ export function EmojiPicker({
         open={open}
         anchorRef={btnRef}
         placement="above-start"
+        variant="panel"
+        width={320}
+        maxHeight={280}
         className="rad-emoji-panel"
         role="dialog"
       >
