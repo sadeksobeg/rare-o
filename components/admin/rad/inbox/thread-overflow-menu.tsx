@@ -15,7 +15,7 @@ import {
 } from "@/app/whatsapp-actions";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { InboxConversationDetail } from "@/lib/whatsapp/messaging/inbox";
-import { cn } from "@/lib/utils";
+import { FixedMenu } from "@/components/admin/rad/inbox/fixed-menu";
 
 function linkedHref(link: InboxConversationDetail["link"]): string | null {
   if (!link.linked || !link.linkId) return null;
@@ -43,14 +43,22 @@ export function ThreadOverflowMenu({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
-  const rootRef = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
   const masked = conversation.participantE164;
   const href = linkedHref(conversation.link);
 
   useEffect(() => {
     if (!open) return;
     const onDoc = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+      const t = e.target as Node;
+      if (btnRef.current?.contains(t)) return;
+      if (
+        t instanceof Element &&
+        t.closest(".rad-fixed-menu, .rad-ov-menu")
+      ) {
+        return;
+      }
+      setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
@@ -80,8 +88,9 @@ export function ThreadOverflowMenu({
   }
 
   return (
-    <div className="rad-ov" ref={rootRef}>
+    <div className="rad-ov">
       <button
+        ref={btnRef}
         type="button"
         className="rad-ib"
         data-tip={ib.moreActions}
@@ -93,7 +102,12 @@ export function ThreadOverflowMenu({
       >
         <Ellipsis width={18} height={18} strokeWidth={1.5} aria-hidden />
       </button>
-      <div className={cn("rad-menu rad-ov-menu", open && "rad-on")} role="menu">
+      <FixedMenu
+        open={open}
+        anchorRef={btnRef}
+        placement="below-end"
+        className="rad-menu rad-ov-menu"
+      >
         <button
           type="button"
           role="menuitem"
@@ -222,7 +236,7 @@ export function ThreadOverflowMenu({
             {ib.unlinkRecord}
           </button>
         ) : null}
-      </div>
+      </FixedMenu>
     </div>
   );
 }
