@@ -5,7 +5,7 @@ import { Camera, FileText, Image as ImageIcon, Paperclip } from "lucide-react";
 import { toast } from "sonner";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { validateOutboundMedia } from "@/components/admin/rad/inbox/media-preview-dialog";
-import { cn } from "@/lib/utils";
+import { FixedMenu } from "@/components/admin/rad/inbox/fixed-menu";
 
 const PHOTO_ACCEPT = "image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm";
 const DOC_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp,image/gif";
@@ -21,7 +21,7 @@ export function AttachMenu({
   onPick: (file: File) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
   const photoRef = useRef<HTMLInputElement>(null);
   const docRef = useRef<HTMLInputElement>(null);
   const camRef = useRef<HTMLInputElement>(null);
@@ -29,7 +29,15 @@ export function AttachMenu({
   useEffect(() => {
     if (!open) return;
     const onDoc = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+      const t = e.target as Node;
+      if (btnRef.current?.contains(t)) return;
+      if (
+        t instanceof Element &&
+        t.closest(".rad-fixed-menu, .rad-attach-menu")
+      ) {
+        return;
+      }
+      setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
@@ -55,8 +63,9 @@ export function AttachMenu({
   }
 
   return (
-    <div className="rad-attach" ref={rootRef}>
+    <div className="rad-attach">
       <button
+        ref={btnRef}
         type="button"
         className="rad-ib"
         data-tip={ib.attachLabel}
@@ -68,7 +77,12 @@ export function AttachMenu({
       >
         <Paperclip width={18} height={18} strokeWidth={1.5} aria-hidden />
       </button>
-      <div className={cn("rad-menu rad-attach-menu", open && "rad-on")} role="menu">
+      <FixedMenu
+        open={open}
+        anchorRef={btnRef}
+        placement="above-start"
+        className="rad-menu rad-attach-menu"
+      >
         <button
           type="button"
           role="menuitem"
@@ -93,7 +107,7 @@ export function AttachMenu({
           <Camera width={16} height={16} strokeWidth={1.5} aria-hidden />
           {ib.attachCamera}
         </button>
-      </div>
+      </FixedMenu>
       <input
         ref={photoRef}
         type="file"

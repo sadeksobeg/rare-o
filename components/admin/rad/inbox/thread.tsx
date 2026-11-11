@@ -360,28 +360,40 @@ export function RadThread({
       if (replyTo) fd.set("replyToMessageId", replyTo.id);
       if (isPtt) fd.set("isPtt", "true");
       if (durationSec != null) fd.set("durationSec", String(durationSec));
-      const result = await adminSendWhatsAppMediaAction(fd);
-      setMediaSending(false);
-      clearPendingMedia();
-      setReplyTo(null);
-      if (!result.ok) {
+      try {
+        const result = await adminSendWhatsAppMediaAction(fd);
+        setMediaSending(false);
+        clearPendingMedia();
+        setReplyTo(null);
+        if (!result.ok) {
+          setOptimistic((prev) =>
+            prev.map((m) =>
+              m.clientRequestId === clientRequestId
+                ? { ...m, status: "failed", errorSafe: result.error || "failed" }
+                : m
+            )
+          );
+          toast.error(
+            result.error === "MEDIA_TOO_LARGE"
+              ? ib.mediaTooLarge
+              : result.error === "BAD_MIME"
+                ? ib.mediaBadType
+                : ib.mediaSendFailed
+          );
+          return;
+        }
+        router.refresh();
+      } catch {
+        setMediaSending(false);
         setOptimistic((prev) =>
           prev.map((m) =>
             m.clientRequestId === clientRequestId
-              ? { ...m, status: "failed", errorSafe: result.error || "failed" }
+              ? { ...m, status: "failed", errorSafe: "upload_failed" }
               : m
           )
         );
-        toast.error(
-          result.error === "MEDIA_TOO_LARGE"
-            ? ib.mediaTooLarge
-            : result.error === "BAD_MIME"
-              ? ib.mediaBadType
-              : ib.mediaSendFailed
-        );
-        return;
+        toast.error(ib.mediaSendFailed);
       }
-      router.refresh();
     });
   }
 

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Smile } from "lucide-react";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
-import { cn } from "@/lib/utils";
+import { FixedMenu } from "@/components/admin/rad/inbox/fixed-menu";
 
 /** Compact, RTL-safe set — no remote CDN, no skin-tone panel. */
 const EMOJIS = [
@@ -39,12 +39,20 @@ export function EmojiPicker({
   onPick: (emoji: string) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!open) return;
     const onDoc = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+      const t = e.target as Node;
+      if (btnRef.current?.contains(t)) return;
+      if (
+        t instanceof Element &&
+        t.closest(".rad-fixed-menu, .rad-emoji-panel")
+      ) {
+        return;
+      }
+      setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
@@ -58,8 +66,9 @@ export function EmojiPicker({
   }, [open]);
 
   return (
-    <div className="rad-emoji" ref={rootRef}>
+    <div className="rad-emoji">
       <button
+        ref={btnRef}
         type="button"
         className="rad-ib"
         data-tip={ib.emojiPickerLabel}
@@ -71,11 +80,12 @@ export function EmojiPicker({
       >
         <Smile width={18} height={18} strokeWidth={1.5} aria-hidden />
       </button>
-      <div
-        className={cn("rad-emoji-panel", open && "rad-on")}
+      <FixedMenu
+        open={open}
+        anchorRef={btnRef}
+        placement="above-start"
+        className="rad-emoji-panel"
         role="dialog"
-        aria-label={ib.emojiPickerLabel}
-        hidden={!open}
       >
         {EMOJIS.map((emoji) => (
           <button
@@ -90,7 +100,7 @@ export function EmojiPicker({
             {emoji}
           </button>
         ))}
-      </div>
+      </FixedMenu>
     </div>
   );
 }

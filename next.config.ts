@@ -11,7 +11,8 @@ const securityHeaders = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   {
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=()",
+    // Inbox needs mic (PTT) + camera capture; geolocation stays off.
+    value: "camera=(self), microphone=(self), geolocation=()",
   },
   // CSP with nonces is applied in middleware.ts (PARTIAL on routes outside matcher).
 ];
@@ -22,6 +23,10 @@ const nextConfig: NextConfig = {
   // Tree-shake lucide icon imports (material LH unused-JS win on portal shells).
   experimental: {
     optimizePackageImports: ["lucide-react"],
+    // WA-W2 outbound media (images ≤10MB, docs ≤25MB) via server actions.
+    serverActions: {
+      bodySizeLimit: "25mb",
+    },
   },
   images: {
     formats: ["image/avif", "image/webp"],

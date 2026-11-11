@@ -1488,11 +1488,17 @@
 }
 .rad-ov-menu,
 .rad-attach-menu {
-  position: absolute;
-  z-index: 80;
-  inset-inline-end: 0;
-  top: calc(100% + 6px);
   min-width: 220px;
+}
+/* Portaled to body — escape .rad-ibx overflow:hidden clipping */
+.rad-fixed-menu {
+  position: fixed;
+  z-index: 240;
+  min-width: 220px;
+  box-sizing: border-box;
+}
+.rad-fixed-menu.rad-menu {
+  display: block;
 }
 .rad-ov-menu a.rad-ov-link,
 .rad-menu a.rad-ov-link {
@@ -1799,23 +1805,17 @@
   display: inline-grid;
 }
 .rad-emoji-panel {
-  position: absolute;
-  z-index: 70;
-  inset-inline-start: 0;
-  bottom: calc(100% + 8px);
-  display: none;
+  display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 2px;
   width: 220px;
+  min-width: 220px;
   padding: 8px;
   border-radius: 14px;
   border: 1px solid var(--rad-bd2);
   background: var(--rad-surface);
   box-shadow: 0 24px 60px -20px #000;
   direction: rtl;
-}
-.rad-emoji-panel.rad-on {
-  display: grid;
 }
 .rad-emoji-btn {
   display: grid;
