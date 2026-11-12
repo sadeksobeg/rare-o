@@ -192,7 +192,7 @@ export function RequestForm({
         <div className="flex items-center justify-between gap-4">
           <span className="text-ro-text-2">
             {labels.summaryTitle} ·{" "}
-            {labels.itemsCount.replace("{n}", pieces.toLocaleString(locale))}
+            {labels.itemsCount.replace("{n}", String(pieces))}
           </span>
           <Link
             href={href("/cart", locale)}
@@ -243,7 +243,7 @@ export function RequestForm({
           tabIndex={-1}
           autoComplete="off"
           aria-hidden="true"
-          className="absolute left-[-9999px] h-px w-px overflow-hidden opacity-0"
+          className="sr-only"
         />
 
         <TextField

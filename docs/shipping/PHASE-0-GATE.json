@@ -1,0 +1,93 @@
+{
+  "at": "2026-11-12T09:43:08.743Z",
+  "base": "http://127.0.0.1:3000",
+  "checks": [
+    {
+      "name": "cart seeded through the product page",
+      "pass": true,
+      "detail": {
+        "bytes": 184
+      }
+    },
+    {
+      "name": "/request no horizontal overflow @390",
+      "pass": true,
+      "detail": {
+        "scrollWidth": 390,
+        "innerWidth": 390
+      }
+    },
+    {
+      "name": "/request no horizontal overflow @768",
+      "pass": true,
+      "detail": {
+        "scrollWidth": 768,
+        "innerWidth": 768
+      }
+    },
+    {
+      "name": "/request no horizontal overflow @1280",
+      "pass": true,
+      "detail": {
+        "scrollWidth": 1280,
+        "innerWidth": 1280
+      }
+    },
+    {
+      "name": "/request no horizontal overflow @1440",
+      "pass": true,
+      "detail": {
+        "scrollWidth": 1440,
+        "innerWidth": 1440
+      }
+    },
+    {
+      "name": "/request shows the destination selector",
+      "pass": true
+    },
+    {
+      "name": "/request uses Western digits only",
+      "pass": true,
+      "detail": {
+        "arabicIndicDigits": 0,
+        "weightLine": "20 كغ",
+        "inquiryCard": false,
+        "hiddenInquiryField": false
+      }
+    },
+    {
+      "name": "DE with 1 oud (20 kg) prices normally, no inquiry card",
+      "pass": true,
+      "detail": {
+        "weight": "20 كغ"
+      }
+    },
+    {
+      "name": "/request raised no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "/admin/brokerage returns 200 on 6 consecutive loads (production build)",
+      "pass": true,
+      "detail": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ]
+    },
+    {
+      "name": "/admin/brokerage shows no JSON parse error",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "admin request detail shows no bare 2-letter country code",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

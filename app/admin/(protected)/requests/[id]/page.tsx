@@ -33,6 +33,7 @@ import {
 import { buildDetailSteps } from "@/lib/ui/detail-stepper";
 import { statusToneToPill } from "@/lib/ui/pill-tone";
 import { getStatusChipProps } from "@/lib/ui/status-labels";
+import { shippingDestinationParts } from "@/lib/shipping/countries";
 import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -241,11 +242,32 @@ export default async function AdminRequestDetailPage({
                       ),
                     },
                     { label: d.locale, value: localeLabel },
-                    { label: d.destination, value: request.destinationCountry },
+                    {
+                      label: d.destination,
+                      value: (() => {
+                        const dest = shippingDestinationParts(
+                          request.destinationCountry,
+                          request.destinationCode,
+                          locale
+                        );
+                        return dest.code && dest.label !== dest.code ? (
+                          <span>
+                            {dest.label}{" "}
+                            <bdi dir="ltr" className="tabular-nums opacity-70">
+                              ({dest.code})
+                            </bdi>
+                          </span>
+                        ) : (
+                          dest.label
+                        );
+                      })(),
+                    },
                     {
                       label: d.shippingMethod,
                       value:
-                        request.shippingMethodCode ?? d.shippingUnconfirmed,
+                        request.shippingMethodLabel ||
+                        request.shippingMethodCode ||
+                        d.shippingUnconfirmed,
                     },
                     {
                       label: d.customerNotes,
