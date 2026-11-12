@@ -765,6 +765,9 @@ type Dict = {
     notificationsLead: string;
     notificationsEmpty: string;
     notificationsUnreadInbox: string;
+    notificationsWaOutage: string;
+    notificationsWaRecovered: string;
+    notificationsDiskAlert: string;
     notificationsAwaiting: string;
     kanbanConfirmTitle: string;
     kanbanConfirmBody: string;
@@ -2515,6 +2518,9 @@ const ar: Dict = {
     notificationsLead: "ما ينتظر إجراءك الآن — من الطوابير وصندوق واتساب.",
     notificationsEmpty: "لا تنبيهات عاجلة الآن.",
     notificationsUnreadInbox: "محادثات غير مقروءة",
+    notificationsWaOutage: "انقطاع واتساب",
+    notificationsWaRecovered: "عودة اتصال واتساب",
+    notificationsDiskAlert: "مساحة القرص منخفضة",
     notificationsAwaiting: "بانتظار الإدارة",
     kanbanConfirmTitle: "نقل الطلب؟",
     kanbanConfirmBody: "سيُطبَّق الانتقال فقط إن كان مسموحاً في مسار الحالات.",
@@ -4385,6 +4391,9 @@ const en: Dict = {
     notificationsLead: "What needs you now — queues and WhatsApp unread.",
     notificationsEmpty: "Nothing urgent right now.",
     notificationsUnreadInbox: "Unread conversations",
+    notificationsWaOutage: "WhatsApp disconnect",
+    notificationsWaRecovered: "WhatsApp reconnected",
+    notificationsDiskAlert: "Disk space low",
     notificationsAwaiting: "Awaiting admin",
     kanbanConfirmTitle: "Move this request?",
     kanbanConfirmBody: "The status change applies only if the transition is allowed.",

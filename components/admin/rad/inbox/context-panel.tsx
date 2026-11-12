@@ -6,6 +6,7 @@ import { formatMaskedPhone } from "@/lib/whatsapp/messaging/phone-format";
 import { RadAvatar } from "@/components/admin/rad/inbox/rad-avatar";
 import { RadNotesSection } from "@/components/admin/rad/inbox/notes-section";
 import { RadTagsSection } from "@/components/admin/rad/inbox/tags-section";
+import { ContextCloseButton } from "@/components/admin/rad/inbox/context-close-btn";
 import type {
   BusinessContextView,
   CrmPartySuggestResult,
@@ -41,7 +42,12 @@ export function RadContextPanel({
   return (
     <aside className="rad-xp" aria-label={ib.moreInfo}>
       <section className="rad-pf2">
-        <RadAvatar id={conversation.id} name={conversation.name} size="lg" />
+        <div className="rad-pf2-top">
+          <ContextCloseButton label={dict.common.close} />
+        </div>
+        <div className="rad-pf2-av">
+          <RadAvatar id={conversation.id} name={conversation.name} size="lg" />
+        </div>
         <b>{conversation.name ? title : <bdi dir="ltr">{title}</bdi>}</b>
         <span>
           <bdi dir="ltr">{maskedPhone ?? ""}</bdi>

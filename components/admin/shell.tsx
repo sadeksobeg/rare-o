@@ -23,18 +23,23 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
   const ad2 = dict.ad2;
   const promoFeatures = isPromoFeaturesEnabled();
 
-  const [unreadInbox, retailAwaiting, activeBrokerage] = await Promise.all([
-    prisma.whatsAppConversation.count({ where: { unreadCount: { gt: 0 } } }),
-    prisma.retailRequest.count({
-      where: {
-        AND: [
-          uiVisibleRetailRequestWhere(),
-          { status: { in: statusesAwaitingAdmin("retail") } },
-        ],
-      },
-    }),
-    countActiveBrokerage(),
-  ]);
+  const [unreadInbox, retailAwaiting, activeBrokerage, opsAlerts] =
+    await Promise.all([
+      prisma.whatsAppConversation.count({ where: { unreadCount: { gt: 0 } } }),
+      prisma.retailRequest.count({
+        where: {
+          AND: [
+            uiVisibleRetailRequestWhere(),
+            { status: { in: statusesAwaitingAdmin("retail") } },
+          ],
+        },
+      }),
+      countActiveBrokerage(),
+      import("@/lib/whatsapp/messaging/ops-alerts")
+        .then((m) => m.listOpsAlertItems())
+        .catch(() => []),
+    ]);
+  const opsUnread = opsAlerts.filter((o) => o.unread).length;
 
   const groups: RadNavGroup[] = [
     {
@@ -114,7 +119,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
         searchPlaceholder={ad2.searchPlaceholder}
         searchLabel={dict.admin.commandSearch}
         notificationsLabel={ad2.notifications}
-        notificationsCount={0}
+        notificationsCount={opsUnread + (unreadInbox > 0 ? 1 : 0)}
         inboxLabel={a.inbox}
         inboxCount={unreadInbox}
         themeLabel={dict.common.themeLight}

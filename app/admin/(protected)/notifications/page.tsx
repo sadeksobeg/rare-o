@@ -4,6 +4,7 @@ import { Bell } from "lucide-react";
 import { AdminTableFilters } from "@/components/admin/table-filters";
 import { Card, EmptyState, Pill } from "@/components/ui-kit";
 import { getAdminHomeData } from "@/lib/admin/dashboard";
+import { listOpsAlertItems } from "@/lib/whatsapp/messaging/ops-alerts";
 import { formatRelative } from "@/lib/i18n/format";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { statusToneToPill } from "@/lib/ui/pill-tone";
@@ -37,7 +38,10 @@ export default async function AdminNotificationsPage({
   const q = qRaw?.trim().toLowerCase() ?? "";
   const { locale, dict } = await getRequestDictionary();
   const u = dict.adminUi;
-  const data = await getAdminHomeData();
+  const [data, ops] = await Promise.all([
+    getAdminHomeData(),
+    listOpsAlertItems().catch(() => []),
+  ]);
 
   const queueItems: AlertItem[] = data.actionQueue.map((row) => ({
     id: `action-${row.domain}-${row.id}`,
@@ -74,12 +78,35 @@ export default async function AdminNotificationsPage({
         ]
       : [];
 
-  const allItems = [...actionItems, ...inboxItems, ...tradeItems];
+  const opsItems: AlertItem[] = ops.map((o) => {
+    const title =
+      o.title === "__wa_outage__"
+        ? u.notificationsWaOutage
+        : o.title === "__wa_recovered__"
+          ? u.notificationsWaRecovered
+          : o.title === "__disk_alert__"
+            ? u.notificationsDiskAlert
+            : o.title;
+    return {
+      id: o.id,
+      section: "inbox" as const,
+      domain: "inbox" as const,
+      href: o.href,
+      title,
+      body: o.body ?? "",
+      subtitle: o.id.startsWith("disk") ? "disk" : "whatsapp",
+      ageAt: null,
+      status: null,
+    };
+  });
 
+  const allItems = [...opsItems, ...actionItems, ...inboxItems, ...tradeItems];
+
+  const inboxTabItems = [...opsItems, ...inboxItems];
   const counts = {
     all: allItems.length,
     action: actionItems.length,
-    inbox: inboxItems.length,
+    inbox: inboxTabItems.length,
     trade: tradeItems.length,
   };
 
@@ -87,7 +114,7 @@ export default async function AdminNotificationsPage({
     tab === "action"
       ? actionItems
       : tab === "inbox"
-        ? inboxItems
+        ? inboxTabItems
         : tab === "trade"
           ? tradeItems
           : allItems;

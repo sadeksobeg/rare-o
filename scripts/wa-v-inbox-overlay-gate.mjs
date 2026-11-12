@@ -98,9 +98,17 @@ async function main() {
       const vh = vp.height;
 
       // ⋯ overflow menu
-      const more = page.locator('.rad-th .rad-ov button[aria-haspopup="menu"]').first();
+      const more = page
+        .locator(
+          '.rad-th .rad-th-ov button[aria-haspopup="menu"], .rad-th .rad-ov button[aria-haspopup="menu"], .rad-th .rad-acts button[aria-haspopup="menu"]'
+        )
+        .first();
       await more.click();
-      const ovMenu = page.locator(".rad-fixed-menu.rad-ov-menu, .rad-overlay-layer .rad-ov-menu").first();
+      const ovMenu = page
+        .locator(
+          ".rad-fixed-menu.rad-th-menu, .rad-fixed-menu.rad-ov-menu, .rad-overlay-layer .rad-ov-menu, .rad-overlay-layer .rad-th-menu"
+        )
+        .first();
       await ovMenu.waitFor({ state: "visible", timeout: 5000 });
       assertInViewport(await ovMenu.boundingBox(), `overflow-menu-${theme}`, vw, vh);
       const shotOv = path.join(OUT, `gate-overflow-${theme}-1440.png`);

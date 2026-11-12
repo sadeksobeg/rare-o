@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/prisma";
 import { uiVisibleDealWhere, uiVisibleRetailRequestWhere } from "@/lib/admin/ui-hidden";
+import { listOpsAlertItems } from "@/lib/whatsapp/messaging/ops-alerts";
 
 export type AdminAlertPanelItem = {
   id: string;
@@ -14,7 +15,7 @@ export async function listAdminAlertPanelItems(limit = 8): Promise<{
   items: AdminAlertPanelItem[];
   unreadCount: number;
 }> {
-  const [unreadInbox, deals, retail] = await Promise.all([
+  const [unreadInbox, deals, retail, ops] = await Promise.all([
     prisma.whatsAppConversation.count({ where: { unreadCount: { gt: 0 } } }),
     prisma.dealProposal.findMany({
       where: {
@@ -35,9 +36,19 @@ export async function listAdminAlertPanelItems(limit = 8): Promise<{
       take: 4,
       select: { id: true, reference: true, status: true },
     }),
+    listOpsAlertItems().catch(() => []),
   ]);
 
   const items: AdminAlertPanelItem[] = [];
+  for (const o of ops) {
+    items.push({
+      id: o.id,
+      href: o.href,
+      title: o.title,
+      body: o.body,
+      unread: o.unread,
+    });
+  }
   if (unreadInbox > 0) {
     items.push({
       id: "inbox-unread",
@@ -66,8 +77,12 @@ export async function listAdminAlertPanelItems(limit = 8): Promise<{
     });
   }
 
+  const opsUnread = ops.filter((o) => o.unread).length;
   return {
     items: items.slice(0, limit),
-    unreadCount: unreadInbox + deals.filter((d) => d.status === "awaiting_payment").length,
+    unreadCount:
+      opsUnread +
+      unreadInbox +
+      deals.filter((d) => d.status === "awaiting_payment").length,
   };
 }

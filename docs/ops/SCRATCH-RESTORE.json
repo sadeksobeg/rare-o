@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "method": "fresh_pg_dump_then_scratch_restore",
+  "elapsedSec": 2,
+  "pgRestoreExit": 0,
+  "rowCounts": {
+    "prod": {"WhatsAppConversation": 12, "WhatsAppMessage": 245, "TraderAccount": 1},
+    "scratch": {"WhatsAppConversation": 12, "WhatsAppMessage": 245, "TraderAccount": 1}
+  },
+  "authVolumeFiles": 46,
+  "authVolumeBytes": 18121,
+  "authScratchCopyFiles": 46,
+  "authInPgDump": false,
+  "dailyBackupIncludesWaAuth": true,
+  "dailyRetentionDays": 14
+}

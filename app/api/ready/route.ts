@@ -24,6 +24,19 @@ export async function GET() {
   const dbUrl = process.env.DATABASE_URL?.trim();
   checks.databaseUrl = Boolean(dbUrl);
 
+  let whatsappState: "connected" | "disconnected" | "reconnecting" = "disconnected";
+  try {
+    const row = await prisma.whatsAppConnectionHealth.findUnique({
+      where: { id: "default" },
+      select: { state: true },
+    });
+    const s = (row?.state ?? "DISCONNECTED").toUpperCase();
+    if (s === "CONNECTED") whatsappState = "connected";
+    else if (s === "CONNECTING") whatsappState = "reconnecting";
+  } catch {
+    /* ignore */
+  }
+
   const ready =
     checks.db === true && checks.authSecret === true && checks.databaseUrl === true;
 
@@ -31,6 +44,7 @@ export async function GET() {
     {
       ready,
       checks,
+      whatsapp: { state: whatsappState },
       ms: Date.now() - started,
       ts: new Date().toISOString(),
     },

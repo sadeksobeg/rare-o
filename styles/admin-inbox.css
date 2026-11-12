@@ -483,6 +483,22 @@
   min-width: 0;
   max-width: 100%;
 }
+@media (max-width: 1280px) {
+  .rad-th-badges {
+    row-gap: 4px;
+  }
+  .rad-th {
+    align-items: flex-start;
+  }
+}
+@media (max-width: 768px) {
+  .rad-th-badges {
+    width: 100%;
+  }
+  .rad-th .rad-acts {
+    flex-wrap: wrap;
+  }
+}
 .rad-th small {
   display: flex;
   align-items: center;
@@ -962,6 +978,63 @@
   scrollbar-width: thin;
   overscroll-behavior: contain;
 }
+.rad-pf2-top {
+  position: absolute;
+  inset-block-start: 10px;
+  inset-inline-end: 10px;
+  z-index: 2;
+}
+.rad-xp-close {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--rad-bd2);
+  background: var(--rad-surface2);
+  color: var(--rad-tx);
+}
+.rad-xp-close:hover {
+  background: var(--rad-surface3);
+}
+.rad-xp-close:focus-visible {
+  outline: 2px solid var(--rad-ac);
+  outline-offset: 2px;
+}
+.rad-pf2-av {
+  position: relative;
+  overflow: visible;
+  padding: 4px;
+}
+.rad-pf2-av .rad-avt.rad-lg .rad-lk {
+  inset-inline-end: 0;
+  bottom: 0;
+}
+/* Merge confirm — high-contrast primary (avoid pale grey on dialog surface) */
+.rad-link-dialog-actions [data-f2-merge-confirm-ok] {
+  background: #4a1d6a;
+  color: #f7efe6;
+  border: 1px solid #4a1d6a;
+  font-weight: 600;
+}
+.rad-link-dialog-actions [data-f2-merge-confirm-ok]:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.rad-link-dialog-actions [data-f2-merge-confirm-ok]:disabled {
+  opacity: 0.55;
+}
+/* Banner must never cover message text */
+.rad-bn {
+  position: relative;
+  z-index: 2;
+  flex: none;
+}
+.rad-msgs {
+  position: relative;
+  z-index: 1;
+}
 .rad-xp section {
   padding: 18px;
   border-bottom: 1px solid var(--rad-bd);
@@ -977,12 +1050,14 @@
   justify-content: space-between;
 }
 .rad-pf2 {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   gap: 4px;
   padding-top: 22px !important;
+  overflow: visible;
 }
 .rad-pf2 b {
   font-size: 16px;

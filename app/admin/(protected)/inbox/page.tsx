@@ -8,7 +8,7 @@ import { getRequestDictionary } from "@/lib/i18n/server";
 export default async function AdminWhatsAppInboxPage() {
   const { locale, dict } = await getRequestDictionary();
   const ib = dict.ib;
-  const keyJoin = locale === "ar" ? " و " : " and ";
+  const keyChord = locale === "ar" ? "J / K" : "J and K";
 
   return (
     <>
@@ -28,9 +28,10 @@ export default async function AdminWhatsAppInboxPage() {
             <b>{ib.selectConvTitle}</b>
             <p>
               {ib.selectConvHintBefore}{" "}
-              <bdi dir="ltr">J</bdi>
-              {keyJoin}
-              <bdi dir="ltr">K</bdi> {ib.selectConvHintAfter}
+              <bdi dir="ltr" className="rad-keychord">
+                {keyChord}
+              </bdi>{" "}
+              {ib.selectConvHintAfter}
             </p>
           </div>
         </div>
