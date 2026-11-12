@@ -1,8 +1,8 @@
 # Release provenance — WhatsApp closure RC1
 
-**Tag:** `wa-closure-rc1` → `bbcd7bfeed910c3ea034c81c737747a67c3c928c`  
-**Branch tip:** `wa/closure-rc1` / `main` / `master` (same SHA at provenance write)  
-**Message:** `merge: WA-V + CHAT-F1.1 + CHAT-F2 for WhatsApp closure RC.`
+**Tag:** `wa-closure-rc1` → `bfd34ddf8fdf34120523d526c1b2ba71debc8d58`  
+**Branch tip:** `wa/closure-rc1` / `main` / `master` (same SHA)  
+**Messages:** merge `bbcd7bf` (WA-V+F1.1+F2) + `bfd34dd` (closure ops/polish)
 
 ## Ancestors included
 
@@ -13,13 +13,13 @@
 | CHAT-F2 | `4e7a8c4` | unify + merge confirm + audit snapshots |
 | Merge | `bbcd7bf` | parents `1b1f07b` + `4e7a8c4` |
 
-## Production at provenance check (before final §5 release)
+## Production after §5 final release
 
 | Field | Value |
 |-------|--------|
-| `DEPLOY_SHA.txt` | `chat-f2-unify-local` (lean patch label — **not** the git tag) |
-| Image | `rare-oud-web:prod` id `9c4c7d15c92c` (built ~2026-11-11T23:05Z) |
-| Rollback tags present | `pre-chat-f2-20261111-230022`, `pre-chat-f1-20261111-204224`, `pre-wa-v-20261111-134847` |
+| `DEPLOY_SHA.txt` | `bfd34ddf8fdf34120523d526c1b2ba71debc8d58` (= `wa-closure-rc1`) |
+| Rollback | `rare-oud-web:pre-wa-closure-20261112-055023` |
+| Prior rollbacks kept | `pre-chat-f2-…`, `pre-chat-f1-…`, `pre-wa-v-…` |
 
 ### Diff vs `wa-closure-rc1`
 

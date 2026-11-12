@@ -19,7 +19,7 @@
 | W-H | DONE | Contrast confirm btn; J/K LTR; context close + avatar; badge wrap; banner z-index; shots under `docs/ui/wa-closure/shots/` |
 | W-I | DONE | `docs/ops/WHATSAPP-RUNBOOK.md` + this report |
 | W-J | DONE | Gates below |
-| §5 | DONE | Final image deploy (see deploy section) |
+| §5 | DONE | Deployed `bfd34dd` — dump `rareoud-pre-wa-closure-20261112-055023.dump`; rollback `pre-wa-closure-20261112-055023` |
 
 ## Gates
 
@@ -54,4 +54,22 @@ Cloud API migration, virtualized lists, shortcut set, categorized templates, des
 
 ## Deploy (§5)
 
-Recorded in `docs/ops/RELEASE-PROVENANCE.md` and deploy log after apply. Preconditions: no prisma migrations; `CONNECT_ON_START=false`; nginx unchanged; no WhatsApp sends from smoke.
+| Field | Value |
+|-------|--------|
+| SHA / `DEPLOY_SHA` | `bfd34ddf8fdf34120523d526c1b2ba71debc8d58` |
+| Tag | `wa-closure-rc1` |
+| Dump | `/var/lib/rareoud/backups/rareoud-pre-wa-closure-20261112-055023.dump` |
+| Rollback | `rare-oud-web:pre-wa-closure-20261112-055023` |
+| Migrations | none |
+| CONNECT | `false` (web+worker) |
+| health | 200 + `whatsapp.state=disconnected` |
+| PP | once; `microphone=(self)` |
+| Quick replies | 8 |
+| `/trader/messages` | 307 |
+| dry-run | `mergesNeeded=0` |
+| Logs ~5 min | clean |
+| Prod shots | `shots/prod-inbox-1440-after-closure.png`, `shots/prod-inbox-390-after-closure.png` |
+
+## READY FOR OWNER TESTS
+
+Owner next: personal WA-V connect test (mic/images/voice); optional `TEST_PHONE` sim; decide when to set `CONNECT_ON_START=true` after 24–48h.
