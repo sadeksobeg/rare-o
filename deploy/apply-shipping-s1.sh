@@ -66,9 +66,14 @@ curl -sS -o /dev/null -w "health=%{http_code}\n" https://rareoud.com/api/health
 curl -sS -o /dev/null -w "admin_login=%{http_code}\n" https://rareoud.com/admin/login
 curl -sS -o /dev/null -w "admin_shipping=%{http_code}\n" https://rareoud.com/admin/shipping
 
-# Migrate + import inside the new web container (additive only)
+# Migrate + import inside the new web container (additive only).
+# docs/ is dockerignored — copy the seed into the image FS before import.
 docker compose -p rare-oud-prod -f docker-compose.prod.yml --env-file .env.production exec -T web \
   npx prisma migrate deploy
+docker compose -p rare-oud-prod -f docker-compose.prod.yml --env-file .env.production exec -u root -T web \
+  mkdir -p /app/docs/shipping
+docker compose -p rare-oud-prod -f docker-compose.prod.yml --env-file .env.production cp \
+  docs/shipping/shipping-rates-seed.json web:/app/docs/shipping/shipping-rates-seed.json
 docker compose -p rare-oud-prod -f docker-compose.prod.yml --env-file .env.production exec -T web \
   npm run shipping:import
 

@@ -47,9 +47,18 @@ Live admin shipping screens: capture after deploy smoke (hub + rates + simulator
 2. Full ISO country list imported including Israel — disable from admin UI if needed.
 3. Seed file is §1b reconstruction (original attachment never compared).
 
-## Deploy intent (this STOP-A ship)
+## Deploy record (rareoud.com)
 
-- Web-only image rebuild + restart `web`
-- Apply additive migration + run idempotent `shipping:import` on prod DB
-- Do **not** restart/rebuild worker
-- Do **not** change `WHATSAPP_CONNECT_ON_START` / outbound flags
+| Item | Value |
+|---|---|
+| SHA | `83ee2ea` |
+| Dump | `/var/lib/rareoud/backups/rareoud-pre-ship-s1-20261112-102936.dump` |
+| Rollback image | `rare-oud-web:pre-ship-s1-20261112-102936` |
+| Web | rebuilt + restarted (healthy on `:3010`) |
+| Worker | untouched (previous image still running) |
+| `WHATSAPP_CONNECT_ON_START` | `false` (web + worker) |
+| Migration | `20261112120000_shipping_s1_additive` applied |
+| Import | 259 countries · 39 methods · 88 verified · 7 unverified |
+| Smoke | `/api/health` 200 · `/api/ready` 200 · `/admin/login` 200 · `/admin/shipping` 307 (login redirect) |
+
+Note: seed JSON is excluded by `.dockerignore`; import was completed by copying the file into the running web container after migrate.
