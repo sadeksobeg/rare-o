@@ -34,31 +34,31 @@ export default async function NewTraderDealPage({
   });
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 pb-[calc(68px+env(safe-area-inset-bottom,0px)+24px)] min-[901px]:pb-0">
       <TraderPageHeader
         title={t.newDealTitle}
         description={t.newDealLead}
-        icon={<Handshake className="size-5" strokeWidth={2} />}
+        icon={<Handshake className="size-5" strokeWidth={1.5} />}
         backHref="/trader/deals"
         backLabel={t.deals}
       />
       <Reveal>
-      <NewDealForm
-        products={products.map((p) => ({
-          id: p.id,
-          slug: p.slug,
-          nameEn: p.nameEn,
-          nameAr: p.nameAr,
-          currency: p.currency,
-          categorySlug: p.category.slug,
-          categoryNameEn: p.category.nameEn,
-          categoryNameAr: p.category.nameAr,
-          imagePath: p.images[0]?.path ?? null,
-        }))}
-        labels={t}
-        locale={locale}
-        initialTitle={typeof title === "string" ? title : ""}
-      />
+        <NewDealForm
+          products={products.map((p) => ({
+            id: p.id,
+            slug: p.slug,
+            nameEn: p.nameEn,
+            nameAr: p.nameAr,
+            currency: p.currency,
+            categorySlug: p.category.slug,
+            categoryNameEn: p.category.nameEn,
+            categoryNameAr: p.category.nameAr,
+            imagePath: p.images[0]?.path ?? null,
+          }))}
+          labels={t}
+          locale={locale}
+          initialTitle={typeof title === "string" ? title : ""}
+        />
       </Reveal>
     </section>
   );

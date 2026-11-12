@@ -11,7 +11,8 @@ import {
   XCircle,
 } from "lucide-react";
 import { NegotiationForm } from "@/components/deals/negotiation-form";
-import { Timeline, type TimelineEvent } from "@/components/ui/timeline";
+import { Card, CardHeader } from "@/components/ui-kit/card";
+import { Timeline } from "@/components/ui-kit/detail";
 import type { Locale } from "@/lib/i18n/config";
 import { formatDate, formatRelative } from "@/lib/i18n/format";
 import type { TraderDict } from "@/lib/ui/trader-labels";
@@ -32,40 +33,33 @@ function actionIcon(action: string): ReactNode {
   switch (action) {
     case "propose":
     case "counter":
-      return <RefreshCw className="size-4" strokeWidth={2} aria-hidden />;
+      return <RefreshCw className="size-4" strokeWidth={1.5} aria-hidden />;
     case "continue":
-      return <MessageSquare className="size-4" strokeWidth={2} aria-hidden />;
+      return <MessageSquare className="size-4" strokeWidth={1.5} aria-hidden />;
     case "accept":
-      return <CheckCircle2 className="size-4" strokeWidth={2} aria-hidden />;
+      return <CheckCircle2 className="size-4" strokeWidth={1.5} aria-hidden />;
     case "reject":
-      return <XCircle className="size-4" strokeWidth={2} aria-hidden />;
+      return <XCircle className="size-4" strokeWidth={1.5} aria-hidden />;
     case "close":
-      return <Ban className="size-4" strokeWidth={2} aria-hidden />;
+      return <Ban className="size-4" strokeWidth={1.5} aria-hidden />;
     default:
-      return <Handshake className="size-4" strokeWidth={2} aria-hidden />;
+      return <Handshake className="size-4" strokeWidth={1.5} aria-hidden />;
   }
 }
 
-function actorTone(actorRole: string): TimelineEvent["tone"] {
-  if (actorRole === "admin") return "admin";
-  if (actorRole === "trader") return "trader";
-  return "deal";
-}
-
-function actorLeading(actorRole: string): ReactNode {
+function actorIcon(actorRole: string): ReactNode {
   if (actorRole === "admin") {
-    return <Shield className="size-4" strokeWidth={2} aria-hidden />;
+    return <Shield className="size-4" strokeWidth={1.5} aria-hidden />;
   }
   if (actorRole === "trader") {
-    return <Store className="size-4" strokeWidth={2} aria-hidden />;
+    return <Store className="size-4" strokeWidth={1.5} aria-hidden />;
   }
   return actionIcon("continue");
 }
 
 /**
- * A19 — NegotiationThread: Timeline of entries + structured action bar
+ * NegotiationThread: timeline of entries + structured action bar
  * (shared by admin AD-05 and trader TR-05).
- * Message / notes render as React text children only (escaped) — never HTML.
  */
 export function NegotiationThread({
   entries,
@@ -92,105 +86,105 @@ export function NegotiationThread({
   termsLabel: string;
   qtyLabel: string;
   currency?: string | null;
-  /** Skip outer heading + card chrome when wrapped in ui-kit Card. */
   bare?: boolean;
 }) {
-  const events: TimelineEvent[] = entries.map((e) => {
-    const textBits: string[] = [];
-    if (e.message) textBits.push(e.message);
-    if (e.conditionsNotes) textBits.push(e.conditionsNotes);
+  const events = entries.map((e) => {
+    const when = formatRelative(e.createdAt, locale);
+    const absolute = formatDate(e.createdAt, locale, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+    const actor = labels.actorRole[e.actorRole] ?? e.actorRole;
+    const actionTitle = labels.dealAction[e.action] ?? e.action;
 
+    const termBits: string[] = [];
+    if (e.proposedPrice != null) termBits.push(money(e.proposedPrice, e.currency));
+    if (e.quantity != null) termBits.push(`${qtyLabel} ${e.quantity}`);
     const termsLine =
-      e.proposedPrice != null || e.quantity != null
-        ? [
-            termsLabel,
-            e.proposedPrice != null ? money(e.proposedPrice, e.currency) : "",
-            e.quantity != null ? `${qtyLabel} ${e.quantity}` : "",
-          ]
-            .filter(Boolean)
-            .join(" · ")
-        : null;
+      termBits.length > 0 ? `${termsLabel} · ${termBits.join(" · ")}` : null;
+
+    const message = e.message?.trim() || null;
+    const notes = e.conditionsNotes?.trim() || null;
+
+    const meta = (
+      <span className="block min-w-0 space-y-1 whitespace-normal break-words">
+        <span className="block text-[color:var(--rad-tx3)]">
+          {[actor, when].filter(Boolean).join(" · ")}
+        </span>
+        {termsLine ? (
+          <span className="block text-[color:var(--rad-tx2)]">{termsLine}</span>
+        ) : null}
+        {message ? (
+          <span className="block whitespace-pre-wrap text-[color:var(--rad-tx)]">
+            {message}
+          </span>
+        ) : null}
+        {notes ? (
+          <span className="block whitespace-pre-wrap text-[color:var(--rad-tx2)]">
+            {notes}
+          </span>
+        ) : null}
+        <span className="sr-only"> ({absolute})</span>
+      </span>
+    );
 
     return {
-      id: e.id,
-      title: labels.dealAction[e.action] ?? e.action,
-      actor: labels.actorRole[e.actorRole] ?? e.actorRole,
-      relativeTime: formatRelative(e.createdAt, locale),
-      absoluteTime: formatDate(e.createdAt, locale, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      }),
-      icon: e.actorRole === "admin" || e.actorRole === "trader"
-        ? actorLeading(e.actorRole)
-        : actionIcon(e.action),
-      tone: actorTone(e.actorRole),
-      detail:
-        textBits.length || termsLine ? (
-          <div className="space-y-2">
-            {termsLine ? (
-              <p className="text-xs font-medium tracking-wide text-[color:var(--rad-tx2)]">
-                {termsLine}
-              </p>
-            ) : null}
-            {textBits.length ? (
-              <div className="ro-portal-message-panel mt-0">
-                {/* Text-only: React escapes any script/markup from seeds or users */}
-                {textBits.join("\n")}
-              </div>
-            ) : null}
-          </div>
-        ) : undefined,
+      icon:
+        e.actorRole === "admin" || e.actorRole === "trader"
+          ? actorIcon(e.actorRole)
+          : actionIcon(e.action),
+      title: actionTitle,
+      meta,
     };
   });
 
   const body =
     events.length === 0 ? (
-      <p
-        className={
-          bare
-            ? "text-sm"
-            : "ro-portal-card border p-4 text-sm font-semibold text-ro-muted"
-        }
-        style={bare ? { color: "var(--rad-tx3)" } : undefined}
-      >
-        —
-      </p>
-    ) : bare ? (
-      <Timeline label={title} events={events} />
+      <p className="text-sm text-[color:var(--rad-tx3)]">—</p>
     ) : (
-      <div className="ro-portal-card border p-3 md:p-4">
-        <Timeline label={title} events={events} />
-      </div>
+      <Timeline events={events} />
     );
 
-  return (
-    <div className="space-y-6" data-component="negotiation-thread">
-      <div className="space-y-3">
-        {bare ? null : (
-          <h2 className="ro-portal-section-title flex items-center gap-2">
-            <span
-              className="ro-portal-icon-well size-8 [&>svg]:size-4"
-              aria-hidden
-            >
-              <MessagesSquare className="size-4" strokeWidth={2} />
-            </span>
-            {title}
-          </h2>
-        )}
+  const form = open ? (
+    <NegotiationForm
+      dealId={dealId}
+      mode={mode}
+      labels={labels}
+      currency={currency}
+    />
+  ) : null;
+
+  if (bare) {
+    return (
+      <div className="min-w-0 space-y-6" data-component="negotiation-thread">
         {body}
+        {form}
       </div>
-      {open ? (
-        <NegotiationForm
-          dealId={dealId}
-          mode={mode}
-          labels={labels}
-          currency={currency}
+    );
+  }
+
+  return (
+    <div className="min-w-0 space-y-6" data-component="negotiation-thread">
+      <Card padded={false} className="min-w-0 overflow-hidden">
+        <CardHeader
+          title={
+            <span className="inline-flex min-w-0 items-center gap-2">
+              <MessagesSquare
+                className="size-4 shrink-0"
+                strokeWidth={1.5}
+                aria-hidden
+              />
+              <span className="min-w-0 truncate">{title}</span>
+            </span>
+          }
         />
-      ) : null}
+        <div className="rad-cb2 min-w-0 overflow-x-clip">{body}</div>
+      </Card>
+      {form}
     </div>
   );
 }

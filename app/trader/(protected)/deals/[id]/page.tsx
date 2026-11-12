@@ -1,21 +1,27 @@
+import type { ReactNode } from "react";
 import { NegotiationThread } from "@/components/deals/negotiation-thread";
-import { TraderPageHeader } from "@/components/trader/page-header";
 import { PaymentHandoffCard } from "@/components/trader/payment-handoff-card";
 import { Banner } from "@/components/ui/banner";
-import { Pill } from "@/components/ui-kit/pill";
-import { StatusStepper } from "@/components/ui/status-stepper";
+import { Card, CardHeader } from "@/components/ui-kit/card";
+import {
+  DetailBack,
+  DetailHeader,
+  DetailStepper,
+  KeyValue,
+  type DetailStep,
+} from "@/components/ui-kit/detail";
 import { requireTraderSession } from "@/lib/auth/trader-session";
 import { getDealForTrader } from "@/lib/deals/service";
 import { isOpenDealStatus, isDealStatus } from "@/lib/deals/constants";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { statusToneToPill } from "@/lib/ui/pill-tone";
-import { dealNextActor, getStatusMeta } from "@/lib/ui/status";
+import { dealNextActor, getStatusMeta, getStatusSequence } from "@/lib/ui/status";
+import { getStatusLabel } from "@/lib/ui/status-labels";
 import {
   dealStatusLabel,
   fmt,
   formatMoney,
 } from "@/lib/ui/trader-labels";
-import { Handshake, Hash, Package, Tags } from "lucide-react";
 import { notFound } from "next/navigation";
 
 export default async function TraderDealDetailPage({
@@ -35,8 +41,7 @@ export default async function TraderDealDetailPage({
     notFound();
   }
 
-  const open =
-    isDealStatus(deal.status) && isOpenDealStatus(deal.status);
+  const open = isDealStatus(deal.status) && isOpenDealStatus(deal.status);
   const lastActor = (deal.entries[deal.entries.length - 1]?.actorRole ??
     null) as "trader" | "admin" | null;
   const nextActor = dealNextActor(deal.status, lastActor);
@@ -47,24 +52,49 @@ export default async function TraderDealDetailPage({
       : deal.product.nameEn || deal.product.nameAr
     : null;
 
+  const sequence = getStatusSequence("deal");
+  const index = sequence.indexOf(deal.status);
+  const offPath = index === -1;
+  const steps: DetailStep[] = sequence.map((value, i) => ({
+    value,
+    label: getStatusLabel(dict, "deal", value),
+    state: offPath
+      ? "upcoming"
+      : i < index
+        ? "done"
+        : i === index
+          ? "current"
+          : "upcoming",
+  }));
+  if (offPath) {
+    steps.push({
+      value: deal.status,
+      label: statusText,
+      state: "blocked",
+    });
+  }
+
   return (
-    <section className="ro-portal-stagger space-y-8">
-      <TraderPageHeader
-        title={deal.title}
-        description={deal.reference}
-        icon={<Handshake className="size-5" strokeWidth={2} />}
-        backHref="/trader/deals"
-        backLabel={t.deals}
-        action={
-          <Pill tone={statusToneToPill(getStatusMeta("deal", deal.status).tone)}>
-            {statusText}
-          </Pill>
+    <section className="space-y-6 pb-[calc(68px+env(safe-area-inset-bottom,0px)+24px)] min-[901px]:pb-0">
+      <DetailBack href="/trader/deals">{t.deals}</DetailBack>
+      <DetailHeader
+        reference={deal.title}
+        mono={false}
+        status={statusText}
+        statusTone={statusToneToPill(getStatusMeta("deal", deal.status).tone)}
+        meta={
+          <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="rad-mono">{deal.reference}</span>
+            <span aria-hidden>·</span>
+            <span>{t.dealKind[deal.dealKind] ?? deal.dealKind}</span>
+          </span>
         }
       />
-      <p className="text-sm font-semibold text-ro-muted">
-        {t.dealKind[deal.dealKind] ?? deal.dealKind}
-      </p>
-      <StatusStepper domain="deal" current={deal.status} dict={dict} />
+
+      <DetailStepper
+        aria-label={dict.adminUi.detail.stepperLabel}
+        steps={steps}
+      />
 
       {open && nextActor === "trader" ? (
         <Banner tone="attention">{t.dealWaitingBanner}</Banner>
@@ -90,60 +120,63 @@ export default async function TraderDealDetailPage({
           })()
         : null}
 
-      <div className="rad-card grid gap-4 p-4 text-sm md:grid-cols-2 md:p-5">
-        <div className="flex items-start gap-2.5">
-          <span className="ro-portal-icon-well size-8 [&>svg]:size-3.5" aria-hidden>
-            <Package className="size-3.5" strokeWidth={2} />
-          </span>
-          <div>
-            <p className="text-xs font-bold text-[color:var(--rad-tx3)]">
-              {t.dealProduct}
-            </p>
-            <p className="mt-0.5 font-semibold text-[color:var(--rad-tx)]">
-              {deal.product ? productName : t.dealNonCatalog}
-            </p>
-          </div>
+      <Card padded={false}>
+        <CardHeader title={t.dealSnapshot} />
+        <div className="rad-cb2">
+          <KeyValue
+            items={(() => {
+              const items: {
+                label: string;
+                value: React.ReactNode;
+                full?: boolean;
+                nowrap?: boolean;
+              }[] = [
+                {
+                  label: t.dealProduct,
+                  value: deal.product ? productName : t.dealNonCatalog,
+                },
+              ];
+              if (deal.modelNumber?.trim()) {
+                items.push({
+                  label: t.modelNumberLabel,
+                  value: <bdi dir="ltr">{deal.modelNumber}</bdi>,
+                  nowrap: true,
+                });
+              }
+              if (deal.proposedPrice != null) {
+                items.push({
+                  label: t.dealTotal,
+                  value: (
+                    <>
+                      {formatMoney(
+                        deal.proposedPrice,
+                        deal.currency,
+                        locale
+                      )}
+                      {deal.quantity != null
+                        ? ` · ${t.dealQtyShort} ${deal.quantity}`
+                        : ""}
+                    </>
+                  ),
+                });
+              } else if (deal.quantity != null) {
+                items.push({
+                  label: t.dealQtyShort,
+                  value: String(deal.quantity),
+                });
+              }
+              if (deal.conditionsNotes?.trim()) {
+                items.push({
+                  label: t.dealConditions,
+                  value: deal.conditionsNotes,
+                  full: true,
+                });
+              }
+              return items;
+            })()}
+          />
         </div>
-        <div className="flex items-start gap-2.5">
-          <span className="ro-portal-icon-well size-8 [&>svg]:size-3.5" aria-hidden>
-            <Hash className="size-3.5" strokeWidth={2} />
-          </span>
-          <div>
-            <p className="text-xs font-bold text-[color:var(--rad-tx3)]">
-              {t.modelNumberLabel}
-            </p>
-            <p className="mt-0.5 font-semibold text-[color:var(--rad-tx)]" dir="ltr">
-              <bdi dir="ltr">{deal.modelNumber || "—"}</bdi>
-            </p>
-          </div>
-        </div>
-        <div className="flex items-start gap-2.5">
-          <span className="ro-portal-icon-well size-8 [&>svg]:size-3.5" aria-hidden>
-            <Tags className="size-3.5" strokeWidth={2} />
-          </span>
-          <div>
-            <p className="text-xs font-bold text-[color:var(--rad-tx3)]">
-              {t.dealSnapshot}
-            </p>
-            <p className="mt-0.5 font-semibold text-[color:var(--rad-tx)]">
-              {deal.proposedPrice != null
-                ? formatMoney(deal.proposedPrice, deal.currency, locale)
-                : "—"}
-              {deal.quantity != null
-                ? ` · ${t.dealQtyShort} ${deal.quantity}`
-                : ""}
-            </p>
-          </div>
-        </div>
-        <div className="md:col-span-2">
-          <p className="text-xs font-bold text-[color:var(--rad-tx3)]">
-            {t.dealConditions}
-          </p>
-          <div className="ro-portal-message-panel mt-1">
-            {deal.conditionsNotes || "—"}
-          </div>
-        </div>
-      </div>
+      </Card>
 
       {deal.status === "awaiting_payment" ? (
         <PaymentHandoffCard
@@ -179,7 +212,7 @@ export default async function TraderDealDetailPage({
       {!open &&
       deal.status !== "awaiting_payment" &&
       deal.status !== "payment_confirmed" ? (
-        <p className="ro-portal-muted">
+        <p className="text-sm text-[color:var(--rad-tx3)]">
           {fmt(t.dealClosed, { status: statusText })}
         </p>
       ) : null}

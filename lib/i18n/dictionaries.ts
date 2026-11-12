@@ -1231,6 +1231,11 @@ type Dict = {
     dealsEmptyBody: string;
     dealsTabList: string;
     dealsTabAll: string;
+    dealsTabOpen: string;
+    dealsTabPayment: string;
+    dealsTabDone: string;
+    dealsActionWaiting: string;
+    /** @deprecated use dealsActionWaiting — kept for older call sites */
     dealsTabWaiting: string;
     dealsTabNegotiating: string;
     dealsTabClosed: string;
@@ -1245,6 +1250,9 @@ type Dict = {
     colTitle: string;
     colKind: string;
     colStatus: string;
+    colUpdated: string;
+    colAmount: string;
+    colMessages: string;
     colEntries: string;
     newDealTitle: string;
     newDealLead: string;
@@ -1307,6 +1315,7 @@ type Dict = {
     dealProduct: string;
     dealNonCatalog: string;
     dealSnapshot: string;
+    dealTotal: string;
     dealQtyShort: string;
     dealConditions: string;
     dealHistory: string;
@@ -3094,7 +3103,11 @@ const ar: Dict = {
     dealsEmptyBody: "ابدأ بتقديم أول مقترح صفقة إلى RARE OUD.",
     dealsTabList: "تصفية الصفقات",
     dealsTabAll: "الكل",
-    dealsTabWaiting: "بانتظاري",
+    dealsTabOpen: "مفتوحة",
+    dealsTabPayment: "بانتظار الدفع",
+    dealsTabDone: "منتهية",
+    dealsActionWaiting: "بانتظارك",
+    dealsTabWaiting: "بانتظارك",
     dealsTabNegotiating: "قيد التفاوض",
     dealsTabClosed: "مغلقة",
     wsTabList: "تصفية طلبات الجملة",
@@ -3108,7 +3121,10 @@ const ar: Dict = {
     colTitle: "العنوان",
     colKind: "النوع",
     colStatus: "الحالة",
-    colEntries: "الإدخالات",
+    colUpdated: "آخر تحديث",
+    colAmount: "المبلغ",
+    colMessages: "الرسائل",
+    colEntries: "الرسائل",
     newDealTitle: "اقتراح صفقة",
     newDealLead:
       "اقترح صفقة على قطعة من الكتالوج أو فرصة جديدة؛ يراجعها الفريق.",
@@ -3178,6 +3194,7 @@ const ar: Dict = {
     dealProduct: "المنتج",
     dealNonCatalog: "خارج الكتالوج (بلا ربط بمنتج)",
     dealSnapshot: "الملخص التجاري",
+    dealTotal: "الإجمالي",
     dealQtyShort: "الكمية",
     dealConditions: "الشروط / ملاحظات",
     dealHistory: "سجل التفاوض",
@@ -3199,7 +3216,7 @@ const ar: Dict = {
     negQty: "الكمية",
     negConditions: "الشروط / ملاحظات",
     negRecorded: "تم تسجيل إدخال التفاوض.",
-    negSubmit: "إرسال الإدخال",
+    negSubmit: "إرسال الرد",
     wsTitle: "طلب بالجملة",
     wsLead: "اختر القطع والكميات من مخزون RARE OUD.",
     wsMyRequests: "طلباتي بالجملة",
@@ -4994,7 +5011,11 @@ const en: Dict = {
     dealsEmptyBody: "Start by sending your first deal proposal to RARE OUD.",
     dealsTabList: "Filter deals",
     dealsTabAll: "All",
-    dealsTabWaiting: "Waiting on me",
+    dealsTabOpen: "Open",
+    dealsTabPayment: "Awaiting payment",
+    dealsTabDone: "Finished",
+    dealsActionWaiting: "Needs you",
+    dealsTabWaiting: "Needs you",
     dealsTabNegotiating: "Negotiating",
     dealsTabClosed: "Closed",
     wsTabList: "Filter wholesale requests",
@@ -5008,7 +5029,10 @@ const en: Dict = {
     colTitle: "Title",
     colKind: "Kind",
     colStatus: "Status",
-    colEntries: "Entries",
+    colUpdated: "Updated",
+    colAmount: "Amount",
+    colMessages: "Messages",
+    colEntries: "Messages",
     newDealTitle: "Propose a deal",
     newDealLead:
       "Propose a deal on a catalog piece or a new opportunity; the team will review it.",
@@ -5078,6 +5102,7 @@ const en: Dict = {
     dealProduct: "Product",
     dealNonCatalog: "Non-catalog (no product link)",
     dealSnapshot: "Commercial snapshot",
+    dealTotal: "Total",
     dealQtyShort: "qty",
     dealConditions: "Conditions / notes",
     dealHistory: "Negotiation history",
@@ -5101,7 +5126,7 @@ const en: Dict = {
     negQty: "Quantity",
     negConditions: "Conditions / notes",
     negRecorded: "Negotiation entry recorded.",
-    negSubmit: "Submit entry",
+    negSubmit: "Send reply",
     wsTitle: "Wholesale request",
     wsLead: "Choose pieces and quantities from RARE OUD stock.",
     wsMyRequests: "My wholesale requests",

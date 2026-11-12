@@ -742,6 +742,14 @@
 .rad-kv .rad-full {
   grid-column: 1 / -1;
 }
+/* Odd last cell spans full row so the card doesn't look half-empty. */
+.rad-kv > div:last-child:nth-child(odd):not(.rad-full) {
+  grid-column: 1 / -1;
+}
+.rad-cb2 .rad-kv dd {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
 
 /* ---------- card header padding helpers ---------- */
 .rad-cpad {
@@ -1108,8 +1116,13 @@
 .rad-stp {
   display: flex;
   padding: 22px 22px 20px;
-  min-width: max-content;
   width: 100%;
+  min-width: 0;
+}
+.rad-stp-scroll:focus-visible {
+  outline: 2px solid var(--rad-ac);
+  outline-offset: 2px;
+  border-radius: 10px;
 }
 .rad-stp .rad-s {
   flex: 1;
@@ -1397,11 +1410,70 @@
     justify-content: center;
   }
   .rad-stp {
+    padding: 14px 12px;
+    flex-wrap: nowrap;
+    gap: 0;
+    min-width: 0;
     overflow-x: auto;
-    padding: 18px 12px;
   }
   .rad-stp .rad-s {
-    min-width: 92px;
+    min-width: 4.25rem;
+    flex: 0 0 auto;
+  }
+  .rad-stp-scroll {
+    overflow-x: auto;
+  }
+}
+
+/* Compact single-row progress at phone widths (owner R8 #7). */
+@media (max-width: 480px) {
+  .rad-stp-scroll {
+    overflow: visible;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+  .rad-stp {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    min-width: 0;
+    overflow: visible;
+  }
+  .rad-stp .rad-s {
+    display: none;
+    flex: none;
+    min-width: 0;
+    padding: 0;
+  }
+  .rad-stp .rad-s::before {
+    display: none;
+  }
+  .rad-stp .rad-s.rad-cur,
+  .rad-stp .rad-s.rad-blocked {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+  }
+  .rad-stp .rad-s.rad-cur .rad-n,
+  .rad-stp .rad-s.rad-blocked .rad-n {
+    flex: none;
+  }
+  .rad-stp .rad-s.rad-cur .rad-n::after {
+    display: none;
+  }
+  .rad-stp::after {
+    content: attr(data-progress);
+    margin-inline-start: auto;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--rad-tx3);
+    font-variant-numeric: tabular-nums;
+    flex: none;
   }
 }
 

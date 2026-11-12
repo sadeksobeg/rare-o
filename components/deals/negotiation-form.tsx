@@ -5,8 +5,8 @@ import {
   traderNegotiateAction,
 } from "@/app/deal-actions";
 import type { ActionResult } from "@/app/actions";
-import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import {
   AlertTriangle,
   Ban,
@@ -22,7 +22,7 @@ import { toastErr, toastOk } from "@/lib/portal/toast";
 import { traderActionMessage, type TraderDict } from "@/lib/ui/trader-labels";
 
 const fieldClass =
-  "w-full rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-paper px-3 py-2.5 text-sm font-medium text-ro-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]";
+  "w-full rounded-[10px] border border-[color:var(--rad-bd2)] bg-[color:var(--rad-surface)] px-3 py-2.5 text-sm font-medium text-[color:var(--rad-tx)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--rad-ac)]";
 
 type ConflictWarning = {
   reference: string;
@@ -33,15 +33,15 @@ type ConflictWarning = {
 function actionLeading(action: string): ReactNode {
   switch (action) {
     case "counter":
-      return <RefreshCw className="size-4" strokeWidth={2} aria-hidden />;
+      return <RefreshCw className="size-4" strokeWidth={1.5} aria-hidden />;
     case "accept":
-      return <CheckCircle2 className="size-4" strokeWidth={2} aria-hidden />;
+      return <CheckCircle2 className="size-4" strokeWidth={1.5} aria-hidden />;
     case "reject":
-      return <XCircle className="size-4" strokeWidth={2} aria-hidden />;
+      return <XCircle className="size-4" strokeWidth={1.5} aria-hidden />;
     case "close":
-      return <Ban className="size-4" strokeWidth={2} aria-hidden />;
+      return <Ban className="size-4" strokeWidth={1.5} aria-hidden />;
     default:
-      return <MessageSquare className="size-4" strokeWidth={2} aria-hidden />;
+      return <MessageSquare className="size-4" strokeWidth={1.5} aria-hidden />;
   }
 }
 
@@ -87,7 +87,7 @@ export function NegotiationForm({
   return (
     <form
       ref={formRef}
-      className="ro-portal-card space-y-4 border p-4 pb-6 md:p-5 max-[900px]:mb-[calc(12px+env(safe-area-inset-bottom,0px))]"
+      className="rad-card space-y-4 p-4 pb-6 md:p-5 max-[900px]:mb-[calc(12px+env(safe-area-inset-bottom,0px))]"
       data-component="negotiation-action-bar"
       onSubmit={(e) => {
         if (needsConfirm && !skipConfirm.current) {
@@ -120,20 +120,25 @@ export function NegotiationForm({
       }}
     >
       <div className="space-y-1">
-        <h3 className="ro-portal-section-title flex items-center gap-2 text-base">
-          <span className="ro-portal-icon-well size-8 [&>svg]:size-4" aria-hidden>
+        <h3 className="flex items-center gap-2 text-base font-semibold text-[color:var(--rad-tx)]">
+          <span
+            className="inline-flex size-8 items-center justify-center rounded-[10px] bg-[color:var(--rad-surface3)] text-[color:var(--rad-tx2)]"
+            aria-hidden
+          >
             {actionLeading(action)}
           </span>
           {labels?.negTitle ?? "Negotiation response"}
         </h3>
-        <p className="ro-portal-muted">
+        <p className="text-sm text-[color:var(--rad-tx3)]">
           {labels?.negHint ??
             "Structured negotiation — not chat. Choose continue, counter, accept, reject, or close."}
         </p>
       </div>
       <input type="hidden" name="dealId" value={dealId} />
       <label className="block space-y-1.5 text-sm font-semibold">
-        <span className="text-ro-muted">{labels?.negAction ?? "Action"}</span>
+        <span className="text-[color:var(--rad-tx2)]">
+          {labels?.negAction ?? "Action"}
+        </span>
         <select
           name="action"
           value={action}
@@ -158,7 +163,7 @@ export function NegotiationForm({
         </select>
       </label>
       <label className="block space-y-1.5 text-sm font-semibold">
-        <span className="text-ro-muted">
+        <span className="text-[color:var(--rad-tx2)]">
           {action === "reject"
             ? (labels?.negRejectReason ?? "Reject reason (optional)")
             : (labels?.negMessage ?? "Message")}
@@ -177,7 +182,7 @@ export function NegotiationForm({
       </label>
       {action === "counter" ? (
         <div className="grid gap-3 sm:grid-cols-2">
-          <p className="sm:col-span-2 text-xs leading-snug text-ro-muted">
+          <p className="sm:col-span-2 text-xs leading-snug text-[color:var(--rad-tx3)]">
             {labels?.negCounterPriceLocked ??
               "Price stays fixed after the trader’s proposal — counter can adjust quantity or notes only."}
           </p>
@@ -185,7 +190,9 @@ export function NegotiationForm({
             <input type="hidden" name="currency" value={currency} />
           ) : null}
           <label className="block space-y-1.5 text-sm font-semibold">
-            <span className="text-ro-muted">{labels?.negQty ?? "Quantity"}</span>
+            <span className="text-[color:var(--rad-tx2)]">
+              {labels?.negQty ?? "Quantity"}
+            </span>
             <input
               name="quantity"
               type="number"
@@ -194,7 +201,7 @@ export function NegotiationForm({
             />
           </label>
           <label className="block space-y-1.5 text-sm font-semibold sm:col-span-2">
-            <span className="text-ro-muted">
+            <span className="text-[color:var(--rad-tx2)]">
               {labels?.negConditions ?? "Conditions / notes"}
             </span>
             <textarea name="conditionsNotes" rows={2} className={fieldClass} />
@@ -205,19 +212,19 @@ export function NegotiationForm({
         <div
           role="status"
           data-conflict-warning="1"
-          className="flex gap-2.5 border border-[color-mix(in_srgb,var(--ro-amber-800)_28%,transparent)] bg-[var(--ro-amber-100)] p-3 text-sm"
+          className="flex gap-2.5 rounded-[10px] border border-[color:color-mix(in_srgb,var(--rad-warn)_28%,transparent)] bg-[color:var(--rad-warns)] p-3 text-sm"
         >
           <AlertTriangle
-            className="mt-0.5 size-4 shrink-0 text-[var(--ro-amber-800)]"
-            strokeWidth={2}
+            className="mt-0.5 size-4 shrink-0 text-[color:var(--rad-warn)]"
+            strokeWidth={1.5}
             aria-hidden
           />
           <div className="space-y-1">
-            <p className="font-bold text-[var(--ro-amber-800)]">
+            <p className="font-bold text-[color:var(--rad-warn)]">
               {labels?.conflictWarningTitle ??
                 "Warning: other active catalog deals on this product"}
             </p>
-            <ul className="list-inside list-disc font-medium text-ro-muted">
+            <ul className="list-inside list-disc font-medium text-[color:var(--rad-tx2)]">
               {warnings.map((w) => (
                 <li key={w.reference}>
                   {w.reference} · {w.traderDisplayName} · {w.status}
@@ -228,18 +235,24 @@ export function NegotiationForm({
         </div>
       ) : null}
       {result && !result.ok ? (
-        <p className="text-sm font-semibold text-[var(--ro-danger-700)]" role="alert">
+        <p className="text-sm font-semibold text-[color:var(--rad-err)]" role="alert">
           {labels ? traderActionMessage(labels, result.error) : result.error}
         </p>
       ) : null}
       {result?.ok ? (
-        <p className="text-sm font-semibold text-ro-muted">
+        <p className="text-sm font-semibold text-[color:var(--rad-tx3)]">
           {labels?.negRecorded ?? "Negotiation entry recorded."}
         </p>
       ) : null}
-      <Button type="submit" variant="primary" size="md" disabled={pending}>
-        <Send className="size-4" strokeWidth={2} aria-hidden />
-        {labels?.negSubmit ?? "Submit entry"}
+      <Button
+        type="submit"
+        variant="primary"
+        size="md"
+        disabled={pending}
+        className="inline-flex flex-row items-center gap-2 !whitespace-nowrap"
+      >
+        <Send className="size-4 shrink-0" strokeWidth={1.5} aria-hidden />
+        <span>{labels?.negSubmit ?? "Send reply"}</span>
       </Button>
       <ConfirmDialog
         open={confirmOpen}

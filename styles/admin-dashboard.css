@@ -1041,12 +1041,18 @@
   display: flex;
   gap: 14px;
   padding: 7px 0 11px;
+  min-width: 0;
   animation: rad-rowin 0.45s var(--rad-ease) both;
   animation-delay: calc(var(--rad-i) * 60ms + 250ms);
+}
+.rad-ev > div {
+  min-width: 0;
+  flex: 1;
 }
 .rad-ev .rad-chip {
   width: 31px;
   height: 31px;
+  flex: none;
   border-radius: 50%;
   box-shadow: 0 0 0 4px var(--rad-surface);
 }
@@ -1057,8 +1063,13 @@
   line-height: 1.5;
 }
 .rad-ev span {
+  display: block;
   color: var(--rad-tx3);
   font-size: 12px;
+  overflow: visible;
+  text-overflow: unset;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .rad-rise {

@@ -1,88 +1,108 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { Handshake, Plus } from "lucide-react";
-import {
-  DataTable,
-  DataTableHead,
-  RowHit,
-  Td,
-  Th,
-  Tr,
-} from "@/components/admin/data-table";
 import { PressRipple } from "@/components/motion/press-ripple";
-import { PressLink } from "@/components/portal/press-link";
-import { DealCard } from "@/components/trader/deal-card";
+import { DealsFilterTabs } from "@/components/trader/deals-filter-tabs";
+import { DealsTable } from "@/components/trader/deals-table";
 import { TraderPageHeader } from "@/components/trader/page-header";
-import { ListFilterTabs } from "@/components/ui/list-filter-tabs";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Pill } from "@/components/ui-kit/pill";
 import { isFresh } from "@/lib/ui/fresh";
 import { requireTraderSession } from "@/lib/auth/trader-session";
-import { isOpenDealStatus, isDealStatus } from "@/lib/deals/constants";
+import { isDealStatus } from "@/lib/deals/constants";
 import { listDealsForTrader } from "@/lib/deals/service";
 import { getRequestDictionary } from "@/lib/i18n/server";
-import { statusToneToPill } from "@/lib/ui/pill-tone";
+import { formatRelative } from "@/lib/i18n/format";
 import { dealNextActor, getStatusMeta } from "@/lib/ui/status";
-import { dealStatusLabel, fmt } from "@/lib/ui/trader-labels";
+import { dealStatusLabel, formatMoney } from "@/lib/ui/trader-labels";
 
-type TabId = "all" | "waiting" | "negotiating" | "closed";
+/** True status partition — counts sum to «الكل». */
+type StatusTab = "all" | "open" | "payment" | "done";
+
+function statusBucket(status: string): Exclude<StatusTab, "all"> {
+  if (status === "proposed" || status === "negotiating") return "open";
+  if (status === "accepted" || status === "awaiting_payment") return "payment";
+  return "done";
+}
 
 export default async function TraderDealsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; waiting?: string }>;
 }) {
   const session = await requireTraderSession();
-  const { tab: tabRaw } = await searchParams;
-  const { dict } = await getRequestDictionary();
+  const { tab: tabRaw, waiting: waitingRaw } = await searchParams;
+  const { dict, locale } = await getRequestDictionary();
   const t = dict.trader;
   const deals = await listDealsForTrader(session.sub);
 
   const rows = deals.map((d) => {
     const last = (d.entries[0]?.actorRole ?? null) as "trader" | "admin" | null;
     const waiting = dealNextActor(d.status, last) === "trader";
-    const open = isDealStatus(d.status) && isOpenDealStatus(d.status);
+    const bucket = isDealStatus(d.status)
+      ? statusBucket(d.status)
+      : ("done" as const);
     return {
       deal: d,
       tone: getStatusMeta("deal", d.status).tone,
       statusLabel: dealStatusLabel(t, d.status),
       kindLabel: t.dealKind[d.dealKind] ?? d.dealKind,
       waiting,
-      open,
-      negotiating: d.status === "negotiating",
-      closed: !open,
+      bucket,
+      amount:
+        d.proposedPrice != null
+          ? formatMoney(d.proposedPrice, d.currency, locale)
+          : "—",
+      updatedLabel: formatRelative(d.updatedAt, locale),
     };
   });
 
   const counts = {
     all: rows.length,
+    open: rows.filter((r) => r.bucket === "open").length,
+    payment: rows.filter((r) => r.bucket === "payment").length,
+    done: rows.filter((r) => r.bucket === "done").length,
     waiting: rows.filter((r) => r.waiting).length,
-    negotiating: rows.filter((r) => r.negotiating).length,
-    closed: rows.filter((r) => r.closed).length,
   };
 
   const tab = (
-    ["all", "waiting", "negotiating", "closed"].includes(tabRaw || "")
+    ["all", "open", "payment", "done"].includes(tabRaw || "")
       ? tabRaw
       : "all"
-  ) as TabId;
+  ) as StatusTab;
+  const waitingOnly = waitingRaw === "1";
 
   const filtered = rows.filter((r) => {
-    if (tab === "waiting") return r.waiting;
-    if (tab === "negotiating") return r.negotiating;
-    if (tab === "closed") return r.closed;
+    if (tab !== "all" && r.bucket !== tab) return false;
+    if (waitingOnly && !r.waiting) return false;
     return true;
   });
 
+  const tableRows = filtered.map(
+    ({ deal: d, tone, statusLabel, kindLabel, waiting, amount, updatedLabel }) => ({
+      id: d.id,
+      href: `/trader/deals/${d.id}`,
+      reference: d.reference,
+      title: d.title,
+      kindLabel,
+      statusLabel,
+      waitingLabel: waiting ? t.waitingOnYou : null,
+      tone,
+      amount,
+      updatedLabel,
+      messages: d._count.entries,
+      flash: isFresh(d.updatedAt),
+    })
+  );
+
   return (
-    <section className="ro-portal-stagger relative space-y-6 pb-20 md:pb-0">
+    <section className="relative space-y-6 pb-[calc(68px+56px+env(safe-area-inset-bottom,0px)+28px)] min-[901px]:pb-0">
       <TraderPageHeader
         title={t.dealsTitle}
-        icon={<Handshake className="size-5" strokeWidth={2} />}
+        icon={<Handshake className="size-5" strokeWidth={1.5} />}
         action={
           <Link
             href="/trader/deals/new"
-            className="rad-btn rad-pri rad-sm hidden md:inline-flex"
+            className="rad-btn rad-pri rad-sm hidden min-[901px]:inline-flex"
           >
             <Plus className="size-4" aria-hidden />
             {t.newDeal}
@@ -91,18 +111,22 @@ export default async function TraderDealsPage({
       />
 
       <Suspense fallback={null}>
-        <ListFilterTabs
+        <DealsFilterTabs
           label={t.dealsTabList}
           tabs={[
             { id: "all", label: t.dealsTabAll, count: counts.all },
-            { id: "waiting", label: t.dealsTabWaiting, count: counts.waiting },
+            { id: "open", label: t.dealsTabOpen, count: counts.open },
             {
-              id: "negotiating",
-              label: t.dealsTabNegotiating,
-              count: counts.negotiating,
+              id: "payment",
+              label: t.dealsTabPayment,
+              count: counts.payment,
             },
-            { id: "closed", label: t.dealsTabClosed, count: counts.closed },
+            { id: "done", label: t.dealsTabDone, count: counts.done },
           ]}
+          waiting={{
+            label: t.dealsActionWaiting,
+            count: counts.waiting,
+          }}
         />
       </Suspense>
 
@@ -114,80 +138,22 @@ export default async function TraderDealsPage({
           actionLabel={t.newDeal}
         />
       ) : (
-        <>
-          <ul className="space-y-3 md:hidden">
-            {filtered.map(
-              ({ deal: d, tone, statusLabel, kindLabel, waiting }) => (
-                <li key={d.id}>
-                  <DealCard
-                    href={`/trader/deals/${d.id}`}
-                    reference={d.reference}
-                    title={d.title}
-                    tone={tone}
-                    statusLabel={statusLabel}
-                    waitingLabel={waiting ? t.waitingOnYou : null}
-                    meta={`${kindLabel} · ${fmt(t.entriesCount, { n: d._count.entries })}`}
-                    className={isFresh(d.updatedAt) ? "ro-s10-flash" : undefined}
-                  />
-                </li>
-              )
-            )}
-          </ul>
-
-          <div className="hidden md:block">
-            <DataTable>
-              <DataTableHead>
-                <Th>{t.colReference}</Th>
-                <Th>{t.colTitle}</Th>
-                <Th>{t.colKind}</Th>
-                <Th>{t.colStatus}</Th>
-                <Th>{t.colEntries}</Th>
-                <Th />
-              </DataTableHead>
-              <tbody>
-                {filtered.map(
-                  ({ deal: d, tone, statusLabel, kindLabel, waiting }) => (
-                    <Tr
-                      key={d.id}
-                      href={`/trader/deals/${d.id}`}
-                      flash={isFresh(d.updatedAt)}
-                    >
-                      <Td>
-                        <RowHit href={`/trader/deals/${d.id}`}>
-                          {d.reference}
-                        </RowHit>
-                      </Td>
-                      <Td>{d.title}</Td>
-                      <Td>{kindLabel}</Td>
-                      <Td>
-                        <span className="flex flex-wrap items-center gap-2">
-                          <Pill tone={statusToneToPill(tone)}>
-                            {statusLabel}
-                          </Pill>
-                          {waiting ? (
-                            <Pill tone="warn">{t.waitingOnYou}</Pill>
-                          ) : null}
-                        </span>
-                      </Td>
-                      <Td className="tabular-nums">{d._count.entries}</Td>
-                      <Td>
-                        <PressLink
-                          href={`/trader/deals/${d.id}`}
-                          className="text-sm font-semibold text-[color:var(--rad-ac)] hover:underline"
-                        >
-                          {t.openRecord}
-                        </PressLink>
-                      </Td>
-                    </Tr>
-                  )
-                )}
-              </tbody>
-            </DataTable>
-          </div>
-        </>
+        <DealsTable
+          rows={tableRows}
+          labels={{
+            reference: t.colReference,
+            title: t.colTitle,
+            kind: t.colKind,
+            status: t.colStatus,
+            updated: t.colUpdated,
+            amount: t.colAmount,
+            messages: t.colMessages,
+          }}
+        />
       )}
 
-      <PressRipple className="fixed end-4 bottom-[calc(68px+env(safe-area-inset-bottom,0px)+12px)] z-30 rounded-full min-[901px]:hidden">
+      {/* Single mobile CTA: FAB only ≤900px (header CTA ≥901px) */}
+      <PressRipple className="fixed end-4 bottom-[calc(68px+env(safe-area-inset-bottom,0px)+12px)] z-30 rounded-full max-[900px]:inline-flex min-[901px]:hidden">
         <Link
           href="/trader/deals/new"
           aria-label={t.newDeal}
