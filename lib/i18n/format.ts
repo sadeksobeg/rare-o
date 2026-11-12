@@ -116,3 +116,30 @@ export function formatRelative(value: Date | string, locale: Locale) {
   if (abs < 604800) return rtf.format(Math.round(diffSec / 86400), "day");
   return formatDate(date, locale, { dateStyle: "medium" });
 }
+
+/**
+ * Trader list dates — always `yyyy/mm/dd` with Western digits (owner R9.1).
+ */
+export function formatListDate(value: Date | string): string {
+  const date = typeof value === "string" ? new Date(value) : value;
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const y = parts.find((p) => p.type === "year")?.value ?? "0000";
+  const m = parts.find((p) => p.type === "month")?.value ?? "00";
+  const d = parts.find((p) => p.type === "day")?.value ?? "00";
+  return `${y}/${m}/${d}`;
+}
+
+/** Age label for brokerage cards — always relative days (e.g. «قبل 14 يوماً»). */
+export function formatAgeDays(value: Date | string, locale: Locale): string {
+  const date = typeof value === "string" ? new Date(value) : value;
+  const diffDays = Math.round((date.getTime() - Date.now()) / 86_400_000);
+  return new Intl.RelativeTimeFormat(locale, { numeric: "always" }).format(
+    diffDays,
+    "day"
+  );
+}

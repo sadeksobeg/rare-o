@@ -1113,6 +1113,40 @@
   display: none;
   height: 0;
 }
+/* Brokerage lifecycle: always clip/scroll — never inherit DetailStepper phone
+   compact rules that set .rad-stp-scroll { overflow: visible }. */
+.rad-br-rail-scroll {
+  position: relative;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  mask-image: linear-gradient(
+    to left,
+    transparent 0,
+    #000 12px,
+    #000 calc(100% - 12px),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to left,
+    transparent 0,
+    #000 12px,
+    #000 calc(100% - 12px),
+    transparent 100%
+  );
+}
+.rad-br-rail-scroll::-webkit-scrollbar {
+  display: none;
+  height: 0;
+}
+.rad-br-rail-scroll:focus-visible {
+  outline: 2px solid var(--rad-ac);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
 .rad-stp {
   display: flex;
   padding: 22px 22px 20px;

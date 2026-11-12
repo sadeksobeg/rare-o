@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { traderMarkNotificationReadAction } from "@/app/trader-portal-actions";
-import { formatDayKey, formatRelative } from "@/lib/i18n/format";
+import { formatDate, formatDayKey } from "@/lib/i18n/format";
 import type { Locale } from "@/lib/i18n/config";
 import { cn, localizedName } from "@/lib/utils";
 
@@ -59,7 +60,6 @@ function collapse(items: TraderNotificationRow[]) {
     prev.count += 1;
     prev.ids.push(n.id);
     if (!n.readAt) prev.readAt = null;
-    // Keep newest createdAt (list is desc, first wins — skip)
   }
   return [...map.values()];
 }
@@ -94,9 +94,8 @@ export function TraderNotificationsList({
   const visible = expanded ? flat : flat.slice(0, INITIAL);
   const hidden = Math.max(0, flat.length - INITIAL);
 
-  // Rebuild day sections from visible slice so headings stay correct.
   const visibleGroups = useMemo(() => {
-    const map = new Map<string, typeof groups[0]["rows"]>();
+    const map = new Map<string, (typeof groups)[0]["rows"]>();
     for (const { day, row } of visible) {
       const list = map.get(day) ?? [];
       list.push(row);
@@ -117,59 +116,74 @@ export function TraderNotificationsList({
               const title = localizedName(locale, n.titleAr, n.titleEn);
               const body = localizedName(locale, n.bodyAr, n.bodyEn);
               const unreadRow = !n.readAt;
+              const timeLabel = formatDate(new Date(n.createdAt), locale, {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              });
               return (
                 <li key={n.ids[0] ?? n.id}>
                   <div
                     className={cn(
-                      "flex min-h-11 flex-wrap items-start gap-3 px-4 py-3.5 transition-[background-color] duration-[var(--ro-dur-fast)]",
+                      "flex min-h-11 items-stretch gap-2 transition-[background-color] duration-[var(--ro-dur-fast)]",
                       unreadRow &&
                         "ro-row-flash bg-[color-mix(in_srgb,var(--rad-ac)_10%,transparent)]"
                     )}
                   >
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <p
-                        className={
-                          unreadRow
-                            ? "font-bold text-[color:var(--rad-tx)]"
-                            : "font-semibold text-[color:var(--rad-tx)]"
-                        }
-                      >
-                        {title}
-                        {n.count > 1 ? (
-                          <span className="ms-2 text-xs font-medium text-[color:var(--rad-tx3)]">
-                            {labels.groupedCount.replace("{n}", String(n.count))}
-                          </span>
-                        ) : null}
-                      </p>
-                      {body ? (
-                        <p className="text-sm text-[color:var(--rad-tx3)]">
-                          {body}
+                    <Link
+                      href={n.href}
+                      className="flex min-w-0 flex-1 items-start gap-3 px-4 py-3.5 text-start hover:bg-[color:var(--rad-surface2)]"
+                    >
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <p
+                          className={cn(
+                            "flex flex-wrap items-center gap-2",
+                            unreadRow
+                              ? "font-bold text-[color:var(--rad-tx)]"
+                              : "font-semibold text-[color:var(--rad-tx)]"
+                          )}
+                        >
+                          <span className="min-w-0 break-words">{title}</span>
+                          {n.count > 1 ? (
+                            <span className="inline-flex shrink-0 items-center rounded-full border border-[color:var(--rad-bd2)] bg-[color:var(--rad-surface2)] px-2 py-0.5 text-[11px] font-semibold tabular-nums text-[color:var(--rad-tx2)]">
+                              · {labels.groupedCount.replace("{n}", String(n.count))}
+                            </span>
+                          ) : null}
                         </p>
-                      ) : null}
-                      <p className="text-xs text-[color:var(--rad-tx3)]">
-                        {formatRelative(new Date(n.createdAt), locale)}
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 flex-wrap items-center gap-2">
-                      <Link
-                        href={n.href}
-                        className="text-sm font-semibold text-[color:var(--rad-ac)] hover:underline"
+                        {body ? (
+                          <p className="text-sm text-[color:var(--rad-tx3)]">
+                            {body}
+                          </p>
+                        ) : null}
+                        <p className="text-xs tabular-nums text-[color:var(--rad-tx3)]">
+                          <bdi dir="ltr">{timeLabel}</bdi>
+                        </p>
+                      </div>
+                      <ChevronLeft
+                        className="mt-1 size-4 shrink-0 text-[color:var(--rad-tx3)] rtl:-scale-x-100"
+                        strokeWidth={1.5}
+                        aria-hidden
+                      />
+                      <span className="sr-only">{labels.open}</span>
+                    </Link>
+                    {unreadRow ? (
+                      <form
+                        action={traderMarkNotificationReadAction}
+                        className="flex items-center pe-3"
                       >
-                        {labels.open}
-                      </Link>
-                      {unreadRow ? (
-                        <form action={traderMarkNotificationReadAction}>
-                          <input
-                            type="hidden"
-                            name="notificationId"
-                            value={n.id}
-                          />
-                          <button type="submit" className="rad-btn rad-gh rad-sm">
-                            {labels.markRead}
-                          </button>
-                        </form>
-                      ) : null}
-                    </div>
+                        <input
+                          type="hidden"
+                          name="notificationId"
+                          value={n.id}
+                        />
+                        <button
+                          type="submit"
+                          className="rad-btn rad-gh rad-sm"
+                        >
+                          {labels.markRead}
+                        </button>
+                      </form>
+                    ) : null}
                   </div>
                 </li>
               );

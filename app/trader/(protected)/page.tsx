@@ -24,7 +24,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import { requireTraderSession } from "@/lib/auth/trader-session";
 import { nextActor as brokerageNextActor } from "@/lib/brokerage/status";
 import { listDealsForTrader } from "@/lib/deals/service";
-import { formatDate, formatRelative } from "@/lib/i18n/format";
+import { formatDate, formatListDate, formatRelative } from "@/lib/i18n/format";
 import { greetingHeadline } from "@/lib/i18n/greeting";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
@@ -671,14 +671,7 @@ async function ActivityBlock({
               title: ev.title,
               actor: ev.status,
               relativeTime: formatRelative(ev.at, locale),
-              absoluteTime: formatDate(ev.at, locale, {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: false,
-              }),
+              absoluteTime: formatListDate(ev.at),
               icon:
                 ev.kind === "wholesale" ? (
                   <Package className="size-3.5" strokeWidth={1.5} aria-hidden />

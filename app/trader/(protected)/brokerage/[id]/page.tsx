@@ -38,7 +38,7 @@ export default async function TraderBrokerageDetailPage({
   const inspectionPhotos = parsePhotoPaths(row.inspection?.photoPaths);
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 pb-[calc(120px+env(safe-area-inset-bottom,0px))] min-[901px]:pb-0">
       <Link
         href="/trader/brokerage"
         className="inline-flex min-h-11 items-center gap-1.5 text-sm text-[color:var(--rad-ac)] underline-offset-2 hover:underline"
@@ -49,18 +49,17 @@ export default async function TraderBrokerageDetailPage({
 
       <BrokerageHeroStrip
         eyebrow={t.brokerageYourRequest}
-        title={
-          <span className="font-mono" dir="ltr">
-            <bdi dir="ltr">{row.reference}</bdi>
+        title={localizedName(locale, row.descriptionAr, row.descriptionEn)}
+        subtitle={
+          <span className="inline-flex flex-wrap items-center gap-2">
+            <span className="font-mono" dir="ltr">
+              <bdi dir="ltr">{row.reference}</bdi>
+            </span>
+            <BrokerageStatusBadge
+              status={row.status}
+              label={brokerageStatusLabel(row.status, locale)}
+            />
           </span>
-        }
-        subtitle={localizedName(locale, row.descriptionAr, row.descriptionEn)}
-        actions={
-          <BrokerageStatusBadge
-            status={row.status}
-            label={brokerageStatusLabel(row.status, locale)}
-            className="px-3 py-1 text-sm"
-          />
         }
       />
 
@@ -77,31 +76,38 @@ export default async function TraderBrokerageDetailPage({
         <BrokerageLifecycleRail status={row.status} locale={locale} />
       </div>
 
-      <div className="rad-card grid gap-3 p-5 text-sm sm:grid-cols-2">
-        <div>
-          <p className="text-[0.65rem] text-[color:var(--rad-tx3)]">
-            {t.modelNumberLabel}
-          </p>
-          <p className="mt-1 font-semibold text-[color:var(--rad-tx)]" dir="ltr">
-            <bdi dir="ltr">{row.modelNumber || "—"}</bdi>
-          </p>
+      {row.modelNumber?.trim() || row.statedPriceUsd != null ? (
+        <div className="rad-card grid gap-3 p-5 text-sm sm:grid-cols-2">
+          {row.modelNumber?.trim() ? (
+            <div>
+              <p className="text-[0.65rem] text-[color:var(--rad-tx3)]">
+                {t.modelNumberLabel}
+              </p>
+              <p
+                className="mt-1 font-semibold text-[color:var(--rad-tx)]"
+                dir="ltr"
+              >
+                <bdi dir="ltr">{row.modelNumber}</bdi>
+              </p>
+            </div>
+          ) : null}
+          {row.statedPriceUsd != null ? (
+            <div>
+              <p className="text-[0.65rem] text-[color:var(--rad-tx3)]">
+                {t.brokerageFieldBudgetMin}
+              </p>
+              <p
+                className="mt-1 font-semibold tabular-nums text-[color:var(--rad-tx)]"
+                dir="ltr"
+              >
+                <bdi dir="ltr">
+                  {formatMoney(row.statedPriceUsd, "USD", locale)}
+                </bdi>
+              </p>
+            </div>
+          ) : null}
         </div>
-        <div>
-          <p className="text-[0.65rem] text-[color:var(--rad-tx3)]">
-            {t.brokerageFieldBudgetMin}
-          </p>
-          <p
-            className="mt-1 font-semibold tabular-nums text-[color:var(--rad-tx)]"
-            dir="ltr"
-          >
-            {row.statedPriceUsd != null ? (
-              <bdi dir="ltr">{formatMoney(row.statedPriceUsd, "USD", locale)}</bdi>
-            ) : (
-              "—"
-            )}
-          </p>
-        </div>
-      </div>
+      ) : null}
 
       {row.status === "AWAITING_PAYMENT" ? (
         <PaymentHandoffCard
@@ -251,6 +257,10 @@ export default async function TraderBrokerageDetailPage({
         events={row.events}
         locale={locale}
         title={t.brokerageTimeline}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none h-[calc(96px+env(safe-area-inset-bottom,0px))] min-[901px]:hidden"
       />
     </section>
   );

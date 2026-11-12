@@ -65,9 +65,11 @@ export default async function TraderProfilePage() {
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
+  const currentLang = locale === "ar" ? "العربية" : "English";
+  const otherLang = locale === "ar" ? "English" : "العربية";
 
   return (
-    <section className="ro-portal-stagger space-y-8">
+    <section className="space-y-8 pb-[calc(68px+env(safe-area-inset-bottom,0px)+24px)] min-[901px]:pb-0">
       <TraderPageHeader
         title={t.profileTitle}
         description={t.profileNote}
@@ -75,7 +77,7 @@ export default async function TraderProfilePage() {
       />
       <AppearanceCard
         title={dict.common.themeGroup}
-        description={t.profileNote}
+        description={t.profileAppearanceDesc}
         lightLabel={dict.common.themeLight}
         darkLabel={dict.common.themeDark}
       />
@@ -88,21 +90,25 @@ export default async function TraderProfilePage() {
             {dict.common.language}
           </h2>
           <p className="mt-1 text-sm text-[color:var(--rad-tx2)]">
-            {locale === "ar" ? "العربية / English" : "English / العربية"}
+            {t.profileLanguageCurrent}:{" "}
+            <strong className="text-[color:var(--rad-tx)]">{currentLang}</strong>
+          </p>
+          <p className="mt-0.5 text-xs text-[color:var(--rad-tx3)]">
+            {t.profileLanguageSwitch} {otherLang}
           </p>
         </div>
         <AdminLocaleToggle
           locale={locale}
-          label={dict.common.language}
+          label={`${t.profileLanguageSwitch} ${otherLang}`}
           tone="auto"
           className="rad-ib"
         />
       </div>
       <div className="rad-card overflow-hidden">
-        <div className="flex flex-wrap items-center gap-5 border-b border-[color:var(--rad-bd)] bg-[color:var(--rad-sb)] px-5 py-7 text-[color:var(--rad-cream,#f4e7d8)] sm:px-6">
+        <div className="flex flex-wrap items-center gap-5 border-b border-[color:color-mix(in_srgb,var(--rad-ac)_35%,var(--rad-bd))] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--rad-ac)_88%,#1a0f22)_0%,color-mix(in_srgb,var(--rad-ac)_55%,#0b080d)_100%)] px-5 py-7 text-[color:var(--rad-cream,#f4e7d8)] sm:px-6">
           <span
             aria-hidden
-            className="flex size-[4.5rem] items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--rad-cream,#f4e7d8)_16%,transparent)] text-[color:var(--rad-cream,#f4e7d8)] shadow-[0_0_0_1px_color-mix(in_srgb,var(--rad-cream,#f4e7d8)_28%,transparent)]"
+            className="flex size-[4.5rem] items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--rad-cream,#f4e7d8)_18%,transparent)] text-[color:var(--rad-cream,#f4e7d8)] shadow-[0_0_0_1px_color-mix(in_srgb,var(--rad-cream,#f4e7d8)_28%,transparent)]"
           >
             <UserRound className="size-8" strokeWidth={1.5} />
           </span>
@@ -110,11 +116,13 @@ export default async function TraderProfilePage() {
             <p className="text-2xl font-semibold tracking-tight sm:text-3xl">
               {trader.displayName}
             </p>
-            <p className="text-sm text-[color:var(--rad-sb-tx)]">
+            <p className="text-sm text-[color:color-mix(in_srgb,var(--rad-cream,#f4e7d8)_78%,transparent)]">
               <bdi dir="ltr">{trader.email}</bdi>
             </p>
           </div>
-          <Pill tone={statusToneToPill(statusTone)}>{statusLabel}</Pill>
+          <span className="inline-flex rounded-full bg-[color-mix(in_srgb,#fff_92%,transparent)] px-0.5 py-0.5 shadow-[0_0_0_1px_color-mix(in_srgb,#fff_35%,transparent)]">
+            <Pill tone={statusToneToPill(statusTone)}>{statusLabel}</Pill>
+          </span>
         </div>
 
         <div>

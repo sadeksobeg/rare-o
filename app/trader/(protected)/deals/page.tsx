@@ -11,7 +11,7 @@ import { requireTraderSession } from "@/lib/auth/trader-session";
 import { isDealStatus } from "@/lib/deals/constants";
 import { listDealsForTrader } from "@/lib/deals/service";
 import { getRequestDictionary } from "@/lib/i18n/server";
-import { formatRelative } from "@/lib/i18n/format";
+import { formatListDate } from "@/lib/i18n/format";
 import { dealNextActor, getStatusMeta } from "@/lib/ui/status";
 import { dealStatusLabel, formatMoney } from "@/lib/ui/trader-labels";
 
@@ -50,9 +50,13 @@ export default async function TraderDealsPage({
       bucket,
       amount:
         d.proposedPrice != null
-          ? formatMoney(d.proposedPrice, d.currency, locale)
+          ? formatMoney(
+              d.proposedPrice,
+              d.currency?.trim() || "USD",
+              locale
+            )
           : "—",
-      updatedLabel: formatRelative(d.updatedAt, locale),
+      updatedLabel: formatListDate(d.updatedAt),
     };
   });
 
@@ -95,7 +99,7 @@ export default async function TraderDealsPage({
   );
 
   return (
-    <section className="relative space-y-6 pb-[calc(68px+56px+env(safe-area-inset-bottom,0px)+28px)] min-[901px]:pb-0">
+    <section className="relative space-y-6 pb-[calc(120px+80px+env(safe-area-inset-bottom,0px))] min-[901px]:pb-0">
       <TraderPageHeader
         title={t.dealsTitle}
         icon={<Handshake className="size-5" strokeWidth={1.5} />}
@@ -152,16 +156,22 @@ export default async function TraderDealsPage({
         />
       )}
 
-      {/* Single mobile CTA: FAB only ≤900px (header CTA ≥901px) */}
-      <PressRipple className="fixed end-4 bottom-[calc(68px+env(safe-area-inset-bottom,0px)+12px)] z-30 rounded-full max-[900px]:inline-flex min-[901px]:hidden">
-        <Link
-          href="/trader/deals/new"
-          aria-label={t.newDeal}
-          className="inline-flex size-14 items-center justify-center rounded-full bg-[color:var(--rad-btn)] text-[color:var(--rad-btn-tx)] shadow-[0_12px_32px_-8px_color-mix(in_srgb,var(--rad-btn)_70%,transparent)] transition-transform duration-[var(--ro-dur-fast)] hover:scale-105 active:scale-95"
-        >
-          <Plus className="size-6" aria-hidden />
-        </Link>
-      </PressRipple>
+      {/* Mobile: inline CTA below list (avoids FAB covering last status). Desktop: header CTA. */}
+      <div className="max-[900px]:block min-[901px]:hidden">
+        <PressRipple className="block rounded-[12px]">
+          <Link
+            href="/trader/deals/new"
+            className="rad-btn rad-pri flex w-full min-h-12 items-center justify-center gap-2"
+          >
+            <Plus className="size-4" aria-hidden />
+            {t.newDeal}
+          </Link>
+        </PressRipple>
+      </div>
+      <div
+        aria-hidden
+        className="pointer-events-none h-[calc(88px+env(safe-area-inset-bottom,0px))] min-[901px]:hidden"
+      />
     </section>
   );
 }

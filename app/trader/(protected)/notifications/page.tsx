@@ -1,6 +1,7 @@
-import Link from "next/link";
+import { Suspense } from "react";
 import { Bell } from "lucide-react";
 import { traderMarkAllNotificationsReadAction } from "@/app/trader-portal-actions";
+import { DealsFilterTabs } from "@/components/trader/deals-filter-tabs";
 import { TraderPageHeader } from "@/components/trader/page-header";
 import {
   TraderNotificationsList,
@@ -10,7 +11,6 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { requireTraderSession } from "@/lib/auth/trader-session";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { listTraderNotifications } from "@/lib/trader/notifications";
-import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -38,11 +38,11 @@ export default async function TraderNotificationsPage({
       : items.filter((n) => n.domain === domainFilter);
   const unread = items.filter((n) => !n.readAt).length;
 
-  const filterLabels: Record<Filter, string> = {
-    all: t.notificationsFilterAll,
-    deal: t.notificationsFilterDeal,
-    wholesale: t.notificationsFilterWholesale,
-    brokerage: t.notificationsFilterBrokerage,
+  const counts = {
+    all: items.length,
+    deal: items.filter((n) => n.domain === "deal").length,
+    wholesale: items.filter((n) => n.domain === "wholesale").length,
+    brokerage: items.filter((n) => n.domain === "brokerage").length,
   };
 
   const rows: TraderNotificationRow[] = filtered.map((n) => ({
@@ -58,11 +58,11 @@ export default async function TraderNotificationsPage({
   }));
 
   return (
-    <section className="space-y-8">
+    <section className="space-y-8 pb-[calc(68px+env(safe-area-inset-bottom,0px)+24px)] min-[901px]:pb-0">
       <TraderPageHeader
         title={t.notificationsTitle}
         description={t.notificationsLead}
-        icon={<Bell className="size-5" strokeWidth={2} />}
+        icon={<Bell className="size-5" strokeWidth={1.5} />}
         action={
           unread > 0 ? (
             <form action={traderMarkAllNotificationsReadAction}>
@@ -74,35 +74,34 @@ export default async function TraderNotificationsPage({
         }
       />
 
-      <div
-        role="tablist"
-        aria-label={t.notificationsTitle}
-        className="flex gap-2 overflow-x-auto pb-1"
-      >
-        {FILTERS.map((key) => {
-          const href =
-            key === "all"
-              ? "/trader/notifications"
-              : `/trader/notifications?domain=${key}`;
-          const active = domainFilter === key;
-          return (
-            <Link
-              key={key}
-              href={href}
-              role="tab"
-              aria-selected={active}
-              className={cn(
-                "min-h-11 shrink-0 rounded-full border px-3 py-2 text-xs font-semibold transition-[color,background-color,border-color] duration-[var(--ro-dur-fast)]",
-                active
-                  ? "border-[color:var(--rad-ac)] bg-[color-mix(in_srgb,var(--rad-ac)_14%,var(--rad-surface2))] text-[color:var(--rad-ac)]"
-                  : "border-[color:var(--rad-bd)] text-[color:var(--rad-tx3)] hover:bg-[color:var(--rad-surface3)]"
-              )}
-            >
-              {filterLabels[key]}
-            </Link>
-          );
-        })}
-      </div>
+      <Suspense fallback={null}>
+        <DealsFilterTabs
+          label={t.notificationsTitle}
+          param="domain"
+          tabs={[
+            {
+              id: "all",
+              label: t.notificationsFilterAll,
+              count: counts.all,
+            },
+            {
+              id: "deal",
+              label: t.notificationsFilterDeal,
+              count: counts.deal,
+            },
+            {
+              id: "wholesale",
+              label: t.notificationsFilterWholesale,
+              count: counts.wholesale,
+            },
+            {
+              id: "brokerage",
+              label: t.notificationsFilterBrokerage,
+              count: counts.brokerage,
+            },
+          ]}
+        />
+      </Suspense>
 
       {rows.length === 0 ? (
         <EmptyState

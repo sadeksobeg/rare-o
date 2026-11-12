@@ -57,7 +57,7 @@ export default async function TraderOfferDetailPage({
 
       {offer.product && productName ? (
         <div className="rad-card max-w-2xl p-5">
-          <p className="ro-type-overline text-[color:var(--rad-ac)]">
+          <p className="text-[11px] font-bold tracking-[0.08em] text-[color:var(--rad-ac)]">
             {t.offersRelatedProduct}
           </p>
           <p className="mt-2 text-xl font-semibold text-[color:var(--rad-tx)]" style={{ fontFamily: "var(--rad-font, inherit)" }}>

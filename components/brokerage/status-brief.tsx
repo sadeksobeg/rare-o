@@ -1,10 +1,8 @@
-import { BrokerageStatusBadge } from "@/components/brokerage/status-badge";
 import {
   brokerageActorLabel,
   brokerageMeaning,
   brokerageNextHint,
   brokeragePhaseLabel,
-  brokerageStatusLabel,
   getBrokerageStatusMeta,
   type BrokerageAudience,
 } from "@/components/brokerage/labels";
@@ -55,11 +53,6 @@ export function BrokerageStatusBrief({
         <span className="text-xs font-medium" style={{ color: "var(--rad-ac)" }}>
           {brokeragePhaseLabel(meta.phase, locale)}
         </span>
-        <BrokerageStatusBadge
-          status={status}
-          label={brokerageStatusLabel(status, locale)}
-          className="ms-auto"
-        />
       </div>
 
       <p

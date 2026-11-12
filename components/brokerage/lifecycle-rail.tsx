@@ -55,18 +55,32 @@ export function BrokerageLifecycleRail({
     status === "DECLINED" ||
     status === "REJECTED" ||
     status === "CANCELLED";
-  const terminalDone = status === "CLOSED";
   const scrollerRef = useRef<HTMLOListElement>(null);
 
   useEffect(() => {
     const root = scrollerRef.current;
     if (!root) return;
-    const cur = root.querySelector<HTMLElement>("[data-rail-current]");
-    cur?.scrollIntoView({
-      inline: "center",
-      block: "nearest",
-      behavior: "smooth",
+    const frame = requestAnimationFrame(() => {
+      const cur = root.querySelector<HTMLElement>("[data-rail-current]");
+      if (!cur) return;
+      const scroller = root.closest(".rad-br-rail-scroll") as HTMLElement | null;
+      if (scroller) {
+        const curBox = cur.getBoundingClientRect();
+        const scBox = scroller.getBoundingClientRect();
+        const delta =
+          curBox.left +
+          curBox.width / 2 -
+          (scBox.left + scBox.width / 2);
+        scroller.scrollBy({ left: delta, behavior: "smooth" });
+      } else {
+        cur.scrollIntoView({
+          inline: "center",
+          block: "nearest",
+          behavior: "smooth",
+        });
+      }
     });
+    return () => cancelAnimationFrame(frame);
   }, [status]);
 
   return (
@@ -89,19 +103,6 @@ export function BrokerageLifecycleRail({
                 ? "منتهٍ — "
                 : "Ended — "}
           </span>
-          {brokerageStatusLabel(status, locale)}
-        </div>
-      ) : null}
-
-      {terminalDone ? (
-        <div
-          className="rounded-[14px] border px-3 py-2.5 text-sm font-semibold"
-          style={{
-            borderColor: "var(--rad-ok)",
-            background: "var(--rad-oks)",
-            color: "var(--rad-ok)",
-          }}
-        >
           {brokerageStatusLabel(status, locale)}
         </div>
       ) : null}
@@ -142,11 +143,15 @@ export function BrokerageLifecycleRail({
         })}
       </div>
 
-      <div className="rad-stp-scroll">
+      <div
+        className="rad-br-rail-scroll"
+        tabIndex={0}
+        role="region"
+        aria-label={ar ? "مراحل الوساطة" : "Brokerage lifecycle"}
+      >
         <ol
           ref={scrollerRef}
-          className="relative flex items-start gap-0 overflow-x-auto pb-1"
-          style={{ scrollbarWidth: "none" }}
+          className="relative flex min-w-max items-start gap-0 pb-1"
         >
           {RAIL.map((s, i) => {
             const done = stepIdx >= 0 && i <= stepIdx && !side;

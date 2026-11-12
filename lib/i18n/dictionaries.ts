@@ -1390,6 +1390,10 @@ type Dict = {
     profilePhone: string;
     profileStatus: string;
     profileNote: string;
+    profileAppearanceDesc: string;
+    profileLanguageCurrent: string;
+    profileLanguageSwitch: string;
+    profileLinesLabel: string;
     prefsTitle: string;
     prefsLead: string;
     prefsCategories: string;
@@ -2514,7 +2518,7 @@ const ar: Dict = {
     traderInterests: "اهتمامات التصنيف",
     categoriesLead:
       "إدارة فئات الكتالوج: إنشاء وتعديل الأسماء والترتيب. لا يمكن حذف فئة تحتوي على منتجات.",
-    offersLead: "عروض عامة منسّقة من الإدارة — ليست متاجر للتجّار.",
+    offersLead: "عروض منشورة من RARE OUD فقط — ليست واجهات متاجر للتجّار.",
     newOffer: "عرض جديد",
     promosLead:
       "شرائط ترويجية للصفحة الرئيسية — تظهر فقط عندما تكون منشورة وضمن الفترة إن وُجدت.",
@@ -3245,7 +3249,7 @@ const ar: Dict = {
     wsTraderResponse: "ردّك على العرض",
     wsModeLabel: "نمط الطلب",
     wsFormHint:
-      "لا تفرض المنصة سعر جملة. استخدم «طلب عرض سعر» إلا إذا كنت تقترح سعر وحدة خاصاً بك. سعر التجزئة المعروض مرجع فقط وليس سعر جملة. الحد الأدنى للطلب غير مفروض، والحد الأقصى للكمية ({max}) حدّ أمان تقني فقط.",
+      "لا تفرض المنصة سعر جملة. استخدم «طلب عرض سعر» إلا إذا كنت تقترح سعر وحدة خاصاً بك. سعر التجزئة المعروض مرجع فقط وليس سعر جملة. لا حد أدنى للكمية، وأقصى كمية لكل قطعة هي {max}.",
     wsColProduct: "المنتج",
     wsColRetail: "تجزئة الكتالوج (مرجع)",
     wsColQty: "الكمية",
@@ -3271,6 +3275,10 @@ const ar: Dict = {
     profileStatus: "الحالة",
     profileNote:
       "تغييرات الحساب تتم عبر إدارة RARE OUD. حدّث تفضيلات الصفقات أدناه لمساعدة المطابقة.",
+    profileAppearanceDesc: "اختر المظهر الفاتح أو الداكن لهذه البوابة فقط.",
+    profileLanguageCurrent: "اللغة الحالية",
+    profileLanguageSwitch: "التبديل إلى",
+    profileLinesLabel: "بنود",
     prefsTitle: "تفضيلات الصفقات",
     prefsLead:
       "أخبر الإدارة بأنواع المنتجات التي تهمّك — لا يظهر هذا للمتسوقين.",
@@ -3307,7 +3315,7 @@ const ar: Dict = {
     messagesErrorGeneric: "تعذّر إرسال الرسالة — حاول مرة أخرى",
     messagesWhatsappMediaUnavailable: "مرفق من واتساب (غير متاح هنا)",
     offersTitle: "العروض العامة المختارة",
-    offersLead: "عروض RARE OUD المنشورة فقط — وليست متاجر للتجّار.",
+    offersLead: "عروض منشورة من RARE OUD فقط — ليست واجهات متاجر للتجّار.",
     offersEmpty: "لا توجد عروض منشورة بعد.",
     offersBack: "العودة إلى العروض",
     offersRelatedProduct: "المنتج المرتبط",
@@ -3604,7 +3612,7 @@ const ar: Dict = {
     sessionsTab: "الجلسات",
     activeSessions: "الجلسات النشطة",
     activeSessionsDesc:
-      "لا نخزّن قائمة أجهزة مفصّلة. تسجيل الخروج من الأجهزة الأخرى يعتمد على إبطال الجلسات عبر إصدار كلمة المرور (pwv).",
+      "لا نخزّن قائمة أجهزة مفصّلة. يمكنك إنهاء جلسات الدخول على الأجهزة الأخرى من هنا، وتبقى جلستك الحالية كما هي.",
     currentSession: "هذه الجلسة",
     signOutOthers: "تسجيل الخروج من الأجهزة الأخرى",
     signOutOthersTitle: "تسجيل الخروج من كل الجلسات الأخرى؟",
@@ -5155,7 +5163,7 @@ const en: Dict = {
     wsTraderResponse: "Your response to the quote",
     wsModeLabel: "Request mode",
     wsFormHint:
-      "No wholesale list price is invented by the platform. Use “Request quote” unless you are proposing your own unit price. Catalog retail shown below is a reference only — not wholesale pricing. MOQ is not enforced. Quantity max {max} is a technical safety limit only.",
+      "No wholesale list price is invented by the platform. Use “Request quote” unless you are proposing your own unit price. Catalog retail shown below is a reference only — not wholesale pricing. There is no minimum order quantity; the maximum per piece is {max}.",
     wsColProduct: "Product",
     wsColRetail: "Catalog retail (ref.)",
     wsColQty: "Qty",
@@ -5181,6 +5189,10 @@ const en: Dict = {
     profileStatus: "Status",
     profileNote:
       "Profile changes are managed by RARE OUD admin. Update deal preferences below to help matching.",
+    profileAppearanceDesc: "Choose light or dark appearance for this portal only.",
+    profileLanguageCurrent: "Current language",
+    profileLanguageSwitch: "Switch to",
+    profileLinesLabel: "Lines",
     prefsTitle: "Deal preferences",
     prefsLead:
       "Tell admin which product types interest you — never shown to shoppers.",
@@ -5218,6 +5230,7 @@ const en: Dict = {
     messagesWhatsappMediaUnavailable: "WhatsApp attachment (not available here)",
     offersTitle: "Public curated offers",
     offersLead: "Published RARE OUD presentations only — not trader storefronts.",
+
     offersEmpty: "No published offers yet.",
     offersBack: "Back to offers",
     offersRelatedProduct: "Related product",
@@ -5522,7 +5535,7 @@ const en: Dict = {
     sessionsTab: "Sessions",
     activeSessions: "Active sessions",
     activeSessionsDesc:
-      "We do not store a detailed device list. Signing out other devices invalidates sessions via the password version (pwv).",
+      "We do not store a detailed device list. You can end sign-in sessions on other devices here; your current session stays active.",
     currentSession: "This session",
     signOutOthers: "Sign out other devices",
     signOutOthersTitle: "Sign out of all other sessions?",

@@ -29,11 +29,11 @@ export default async function TraderOffersPage() {
   );
 
   return (
-    <section className="ro-portal-stagger space-y-6">
+    <section className="space-y-6 pb-[calc(68px+env(safe-area-inset-bottom,0px)+24px)] min-[901px]:pb-0">
       <TraderPageHeader
         title={t.offersTitle}
         description={t.offersLead}
-        icon={<Sparkles className="size-5" strokeWidth={2} />}
+        icon={<Sparkles className="size-5" strokeWidth={1.5} />}
       />
 
       {ranked.length === 0 ? (
@@ -68,13 +68,13 @@ export default async function TraderOffersPage() {
                 key={o.id}
                 className="rad-card flex h-full flex-col overflow-hidden"
               >
-                <div className="relative h-36 bg-[color:var(--rad-surface3)]">
+                <div className="relative aspect-[4/3] bg-[color:var(--rad-surface3)]">
                   {imagePath ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={imagePath}
                       alt=""
-                      className="size-full object-cover"
+                      className="size-full object-contain object-center"
                     />
                   ) : (
                     <div className="flex size-full items-center justify-center bg-[color:var(--rad-surface2)] text-xs text-[color:var(--rad-tx3)]">
@@ -113,14 +113,6 @@ export default async function TraderOffersPage() {
           })}
         </Stagger>
       )}
-      <p className="text-center text-sm text-[color:var(--rad-tx3)]">
-        <Link
-          href="/trader"
-          className="font-medium text-[color:var(--rad-ac)] hover:underline"
-        >
-          {t.overview}
-        </Link>
-      </p>
     </section>
   );
 }

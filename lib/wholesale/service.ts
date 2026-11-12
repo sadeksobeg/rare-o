@@ -341,8 +341,9 @@ export async function getWholesaleRequestForTrader(
 }
 
 export async function listWholesaleRequestsForTrader(traderId: string) {
+  // Trader always sees their own requests. Admin lists keep uiVisibleWholesaleWhere().
   return prisma.wholesaleRequest.findMany({
-    where: { AND: [{ traderId }, uiVisibleWholesaleWhere()] },
+    where: { traderId },
     orderBy: { updatedAt: "desc" },
     include: {
       lines: true,
