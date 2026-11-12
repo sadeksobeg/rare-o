@@ -2,62 +2,36 @@
 
 **Date:** 2026-11-12  
 **Deployed SHA:** `44768d8565452b81ec9872f9e956549e735cb30d`  
-**Immutable tag:** `wa-closure-deployed-44768d8` (= production)  
-**Prior immutable tag:** `wa-closure-deployed-bfd34dd` (first closure image)  
-**Note:** `wa-closure-rc1` left untouched (still at docs tip `68ee9fd`). Tags are no longer moved.
+**Immutable tag:** `wa-closure-deployed-44768d8` (= production `DEPLOY_SHA`)  
+**Prior immutable tag:** `wa-closure-deployed-bfd34dd`  
+**`wa-closure-rc1`:** left untouched at `68ee9fd` (docs tip) — tags are no longer moved.
 
-## 1. Provenance
+## Summary table
 
-`git diff --stat bfd34dd..68ee9fd` → **docs/shots only** (6 files):
-
-- `docs/ops/RELEASE-PROVENANCE.md`
-- `docs/ui/wa-closure/CLOSURE-REPORT.md`
-- `docs/ui/wa-closure/shots/prod-inbox-*.png` + `.SEE.txt`
-
-No runtime/code files between those SHAs. Production now equals `wa-closure-deployed-44768d8`.
-
-## 2. Outage alert logic (fixed)
-
-| Case | Result |
+| Item | Result |
 |------|--------|
-| Never connected (`lastConnectedAt` null) | no alert |
-| Owner Disconnect/Logout (clears `lastConnectedAt` + marker) | no alert |
-| Kill switch on | no alert |
-| Was CONNECTED, down > N min | outage alert |
-| Down < N min (worker restart window) | no alert |
-| Reconnect after recorded outage | recovery notice |
-| `CONNECT_ON_START=false` + unexpected drop | **still alerts** |
+| Provenance `bfd34dd..68ee9fd` | docs/shots only (6 files); no runtime |
+| Outage alert | alerts on unexpected drop even if `CONNECT_ON_START=false`; suppress only never-connected / intentional logout / kill switch |
+| Ops alert tests | 11 passed |
+| Disk | 77% → 44% after prune; ~55% after R2 build |
+| Perms | wa-auth 700/600; backups 700/600 |
+| Smoke | health 200; PP once; 8 QR; trader 307; mergesNeeded=0; CONNECT=false |
+| Rollback | `rare-oud-web:pre-wa-r2-20261112-063057` |
 
-`chat-ops-alerts-checks.ts`: **11 passed**.  
-Worker restart that reconnects within N minutes is treated as a short drop → **not** an outage.
+## Screenshots (folder `docs/ui/wa-closure/r2/`)
 
-## 3. Disk
+| File | What I SEE |
+|------|------------|
+| `r2-prod-inbox-1440.png` | «صندوق واتساب» @1440؛ غير متصل؛ الكل 12 |
+| `r2-prod-inbox-390.png` | نفس الـ12 محادثة @390؛ شريط تبويب سفلي |
+| `r2-context-drawer-close.png` | درج السياق مفتوح؛ زر إغلاق (X) أعلى الدرج؛ أفاتار غير مقصوص |
+| `r2-merge-confirm.png` | حوار تأكيد الدمج؛ 1 محادثة + 2 رسالة؛ تأكيد بلون أوضح |
+| `r2-thread-1280.png` | خيط @1280؛ الشارات تلتف؛ بانر فوق الفقاعات بلا تغطية |
 
-| | |
-|--|--|
-| Before | **77%** (74G/96G) |
-| After | **44%** after prune; **~55%** after R2 image build (52G/96G) |
-| Freed | build cache ~24GB + old `rare-oud-web` rollback tags |
-| Kept images | `prod`, `pre-wa-closure-*`, `pre-chat-f2-*`, plus new `pre-wa-r2-*` |
-| Log rotation | already `max-size=10m` / `max-file=3` |
-| journald | `SystemMaxUse=1G` (vacuum OK) |
+Full SEE: `docs/ui/wa-closure/r2/SEE.md`.
 
-## 4. Permissions
+## Worker restart note
 
-| Path | Mode |
-|------|------|
-| `/var/lib/rareoud/wa-auth` | **700** (files **600**) |
-| `/var/lib/rareoud/backups` | **700** (files **600**) |
-
-## 5. Screenshots
-
-See `docs/ui/wa-closure/r2/` + `SEE.md` (five files).
-
-## Smoke
-
-health 200 · `whatsapp.state=disconnected` · PP once `microphone=(self)` · quick_replies=8 · trader 307 · mergesNeeded=0 · CONNECT=false
-
-**Rollback:** `rare-oud-web:pre-wa-r2-20261112-063057`  
-**Dump:** `/var/lib/rareoud/backups/rareoud-pre-wa-r2-20261112-063057.dump`
+If the worker restarts and reconnects within N minutes (default 5), heartbeat age stays under the threshold → **no outage alert**. Only a drop lasting longer than N minutes fires one de-duplicated alert.
 
 ## READY FOR OWNER TESTS (R2)
