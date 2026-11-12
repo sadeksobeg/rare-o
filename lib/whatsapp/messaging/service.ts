@@ -51,7 +51,10 @@ import {
   assertDeskAllowsOutbound,
   deskOutboundBlockedReason,
 } from "@/lib/whatsapp/messaging/desk-actions";
-import { convertVoiceNoteToOggOpus } from "@/lib/whatsapp/messaging/voice-convert";
+import {
+  convertVoiceNoteToOggOpus,
+  WHATSAPP_PTT_MIME,
+} from "@/lib/whatsapp/messaging/voice-convert";
 import {
   assessEnqueueRateLimit,
   recordEnqueueAccepted,
@@ -1136,12 +1139,35 @@ export async function enqueueOutboundMedia(
       },
     });
 
+    const isPtt = messageType === "audio" && input.isPtt !== false;
+    let outboundBytes = input.bytes;
+    let outboundMime = input.mime;
+    let outboundName = input.fileName ?? null;
+    // Convert browser webm (etc.) to Ogg/Opus before persist — WhatsApp PTT
+    // will not play raw webm even when Baileys returns a waMessageId.
+    if (isPtt) {
+      const converted = await convertVoiceNoteToOggOpus(outboundBytes, {
+        inputMime: outboundMime,
+      });
+      if (!converted.ok) {
+        return {
+          ok: false,
+          code: "INVALID_INPUT",
+          error: `Voice convert failed (${converted.error})`,
+        };
+      }
+      outboundBytes = converted.bytes;
+      outboundMime = WHATSAPP_PTT_MIME;
+      outboundName =
+        (outboundName || "voice").replace(/\.[^.]+$/, "") + ".ogg";
+    }
+
     const saved = await saveWhatsAppMediaBytes({
       conversationId: conversation.id,
-      bytes: input.bytes,
-      mime: input.mime,
+      bytes: outboundBytes,
+      mime: outboundMime,
       kind: messageType,
-      originalName: input.fileName ?? undefined,
+      originalName: outboundName ?? undefined,
     });
     if (!saved.ok) {
       return {
@@ -1153,7 +1179,6 @@ export async function enqueueOutboundMedia(
 
     try {
       const replyToMessageId = input.replyToMessageId?.trim() || null;
-      const isPtt = messageType === "audio" && input.isPtt !== false;
       const message = await db.whatsAppMessage.create({
         data: {
           conversationId: conversation.id,
@@ -1161,9 +1186,9 @@ export async function enqueueOutboundMedia(
           messageType,
           body: caption ?? "",
           caption,
-          mediaMime: saved.saved.mime,
+          mediaMime: isPtt ? WHATSAPP_PTT_MIME : saved.saved.mime,
           mediaSize: saved.saved.size,
-          mediaFileName: input.fileName?.trim() || saved.saved.fileName,
+          mediaFileName: outboundName?.trim() || saved.saved.fileName,
           mediaSha256: saved.saved.sha256,
           storageKey: saved.saved.storageKey,
           mediaDurationSec: input.mediaDurationSec ?? null,
@@ -1379,6 +1404,7 @@ export async function claimOutboundForSend(
       mediaMime: string | null;
       mediaFileName: string | null;
       storageKey: string | null;
+      mediaDurationSec: number | null;
       isPtt: boolean;
       deskBlocked: "blocked" | "archived" | "muted" | null;
     }
@@ -1459,6 +1485,7 @@ export async function claimOutboundForSend(
     mediaMime: row.mediaMime,
     mediaFileName: row.mediaFileName,
     storageKey: row.storageKey,
+    mediaDurationSec: row.mediaDurationSec ?? null,
     isPtt: row.isPtt === true,
     deskBlocked: deskOutboundBlockedReason({
       blockedAt: row.conversation.blockedAt,
@@ -1638,9 +1665,25 @@ export async function dispatchOutboundMessage(
         };
       }
       bytes = converted.bytes;
-      mime = converted.mime;
-      if (!converted.skipped) {
+      mime = WHATSAPP_PTT_MIME;
+      if (!converted.skipped || !/\.ogg$/i.test(fileName || "")) {
         fileName = (fileName || "voice").replace(/\.[^.]+$/, "") + ".ogg";
+      }
+      // Persist the playable form so admin preview + retries match what left.
+      if (!converted.skipped) {
+        await db.whatsAppMessage.update({
+          where: { id: messageId },
+          data: {
+            mediaMime: WHATSAPP_PTT_MIME,
+            mediaFileName: fileName,
+            mediaSize: bytes.length,
+          },
+        });
+      } else if (claimed.mediaMime !== WHATSAPP_PTT_MIME) {
+        await db.whatsAppMessage.update({
+          where: { id: messageId },
+          data: { mediaMime: WHATSAPP_PTT_MIME, mediaFileName: fileName },
+        });
       }
     }
     send = await adapter.sendMedia({
@@ -1653,6 +1696,7 @@ export async function dispatchOutboundMessage(
       caption: claimed.caption,
       bytes,
       ptt: asPtt,
+      seconds: claimed.mediaDurationSec,
     });
   } else {
     send = await adapter.sendText({

@@ -63,7 +63,7 @@ export function ConfigForm({
       </Field>
       <TextField
         name="packagingKg"
-        label={ar ? "وزن التغليف (كغ/طرد)" : "Packaging kg / parcel"}
+        label={ar ? "وزن التغليف (كيلو حجمي/طرد)" : "Packaging vol. kg / parcel"}
         type="number"
         step="0.01"
         defaultValue={values.packagingKg}

@@ -164,12 +164,12 @@ export function ShippingCostSelector({
         <div className="flex items-center justify-between gap-2">
           <span className="flex items-center gap-1.5 text-xs font-medium text-ro-muted">
             <Package className="size-3.5" strokeWidth={1.5} aria-hidden />
-            {t(locale, "وزن الشحنة التقديري", "Estimated shipment weight")}
+            {t(locale, "الوزن الحجمي التقديري", "Estimated volumetric weight")}
           </span>
           <span className="text-base font-semibold tabular-nums text-ro-ink">
             <bdi dir="ltr">
               <AnimatedValue value={weightKg} durationMs={lite ? 1 : 550} />{" "}
-              {t(locale, "كغ", "kg")}
+              {t(locale, "كيلو حجمي", "vol. kg")}
             </bdi>
           </span>
         </div>
@@ -189,7 +189,7 @@ export function ShippingCostSelector({
                 }}
                 className="inline-flex items-center gap-1 rounded-[var(--ro-r-full)] border border-[var(--ro-border-control)] bg-ro-sunken px-2.5 py-1 text-[11px] font-medium tabular-nums text-ro-ink"
               >
-                <bdi dir="ltr">2 × {t(locale, "عود", "oud")} = 25 {t(locale, "كغ", "kg")}</bdi>
+                <bdi dir="ltr">2 × {t(locale, "عود", "oud")} = 25 {t(locale, "كيلو حجمي", "vol. kg")}</bdi>
               </m.span>
             ))}
             {boxes.remainder ? (
@@ -206,7 +206,7 @@ export function ShippingCostSelector({
                 }}
                 className="inline-flex items-center gap-1 rounded-[var(--ro-r-full)] border border-dashed border-[var(--ro-border-control)] px-2.5 py-1 text-[11px] font-medium tabular-nums text-ro-muted"
               >
-                <bdi dir="ltr">1 × {t(locale, "عود", "oud")} = 20 {t(locale, "كغ", "kg")}</bdi>
+                <bdi dir="ltr">1 × {t(locale, "عود", "oud")} = 20 {t(locale, "كيلو حجمي", "vol. kg")}</bdi>
               </m.span>
             ) : null}
           </AnimatePresence>

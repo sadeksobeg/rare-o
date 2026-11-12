@@ -326,10 +326,10 @@ export function RatesManager({
                 ))}
               </Select>
             </Field>
-            <TextField name="firstKgAmount" label={ar ? "أول كغ" : "First kg"} type="number" step="0.01" defaultValue="" dense dir="ltr" />
-            <TextField name="additionalKgAmount" label={ar ? "كل كغ إضافي" : "Additional kg"} type="number" step="0.01" defaultValue="" dense dir="ltr" />
+            <TextField name="firstKgAmount" label={ar ? "أول كيلو حجمي" : "First vol. kg"} type="number" step="0.01" defaultValue="" dense dir="ltr" />
+            <TextField name="additionalKgAmount" label={ar ? "كل كيلو حجمي إضافي" : "Each extra vol. kg"} type="number" step="0.01" defaultValue="" dense dir="ltr" />
             <TextField name="minCharge" label={ar ? "حد أدنى" : "Min charge"} type="number" step="0.01" defaultValue="" dense dir="ltr" />
-            <TextField name="maxWeightKg" label={ar ? "أقصى وزن" : "Max weight"} type="number" step="0.01" defaultValue={draft?.maxWeightKg ?? ""} dense dir="ltr" />
+            <TextField name="maxWeightKg" label={ar ? "أقصى كيلو حجمي" : "Max vol. kg"} type="number" step="0.01" defaultValue={draft?.maxWeightKg ?? ""} dense dir="ltr" />
             <TextField name="handlingFee" label={ar ? "رسوم مناولة" : "Handling"} type="number" step="0.01" defaultValue="" dense dir="ltr" />
             <TextField name="freeShippingOver" label={ar ? "شحن مجاني فوق" : "Free over"} type="number" step="0.01" defaultValue="" dense dir="ltr" />
             <TextField name="note" label={ar ? "ملاحظة" : "Note"} defaultValue={draft?.note ?? ""} dense className="sm:col-span-2" />

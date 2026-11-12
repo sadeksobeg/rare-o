@@ -706,13 +706,27 @@ export class BaileysWhatsAppAdapter implements WhatsAppAdapter {
             mimetype: mime,
           });
           break;
-        case "audio":
+        case "audio": {
+          const asPtt = input.ptt !== false;
+          // WhatsApp voice notes must declare Opus codecs; bare audio/ogg or
+          // browser webm often get a waMessageId then never play on the phone.
+          const audioMime = asPtt
+            ? "audio/ogg; codecs=opus"
+            : mime.startsWith("audio/")
+              ? mime
+              : "audio/ogg; codecs=opus";
           result = await this.sock.sendMessage(jid, {
             audio: input.bytes,
-            mimetype: mime,
-            ptt: input.ptt !== false,
+            mimetype: audioMime,
+            ptt: asPtt,
+            ...(input.seconds != null &&
+            Number.isFinite(input.seconds) &&
+            input.seconds > 0
+              ? { seconds: Math.max(1, Math.round(input.seconds)) }
+              : {}),
           });
           break;
+        }
         case "document":
           result = await this.sock.sendMessage(jid, {
             document: input.bytes,
