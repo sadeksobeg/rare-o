@@ -44,7 +44,10 @@ export default async function TraderOffersPage() {
           actionLabel={dict.trader.overview}
         />
       ) : (
-        <Stagger stepMs={70} className="grid gap-4 sm:grid-cols-2">
+        <Stagger
+          stepMs={70}
+          className="grid grid-cols-1 items-start gap-4 min-[640px]:grid-cols-2"
+        >
           {ranked.map((o) => {
             const title =
               locale === "ar"
@@ -66,18 +69,23 @@ export default async function TraderOffersPage() {
             return (
               <article
                 key={o.id}
-                className="rad-card flex h-full flex-col overflow-hidden"
+                className="rad-card flex w-full flex-col overflow-hidden self-start"
               >
-                <div className="relative aspect-[4/3] bg-[color:var(--rad-surface3)]">
+                {/* Padding-bottom 75% locks 4:3 even when abspos img has a tall intrinsic size. */}
+                <div
+                  className="relative w-full overflow-hidden bg-[color:var(--rad-surface3)]"
+                  data-offer-media
+                  style={{ height: 0, paddingBottom: "75%" }}
+                >
                   {imagePath ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={imagePath}
                       alt=""
-                      className="size-full object-contain object-center"
+                      className="absolute inset-0 size-full object-contain object-center"
                     />
                   ) : (
-                    <div className="flex size-full items-center justify-center bg-[color:var(--rad-surface2)] text-xs text-[color:var(--rad-tx3)]">
+                    <div className="absolute inset-0 flex items-center justify-center bg-[color:var(--rad-surface2)] text-xs text-[color:var(--rad-tx3)]">
                       RARE OUD
                     </div>
                   )}
