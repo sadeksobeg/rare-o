@@ -139,6 +139,9 @@ export default async function EditProductPage({
                   badgeNew: product.badgeNew,
                   badgeFeatured: product.badgeFeatured,
                   badgeSale: product.badgeSale,
+                  weightKg:
+                    product.weightKg != null ? String(product.weightKg) : "",
+                  shippingClass: product.shippingClass ?? "other",
                   oudSpecs: oudSpecsFormDefaults(
                     parseOudSpecs(product.oudSpecs)
                   ),

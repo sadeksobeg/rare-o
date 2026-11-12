@@ -1,0 +1,70 @@
+{
+  "capturedAt": "2026-11-12T08:30:08.721Z",
+  "base": "http://127.0.0.1:3000",
+  "consoleErrorsSample": [
+    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+    "Unexpected end of JSON input"
+  ],
+  "notes": [
+    {
+      "file": "sh0-storefront-request-empty-1440-ar.png",
+      "see": "Storefront /request empty cart RTL: 'لا توجد قطع في طلبك' — shipping calculator hidden until cart has items"
+    },
+    {
+      "file": "sh0-storefront-request-shipping-1440-ar.png",
+      "see": "Storefront /request DE: 20kg oud heuristic; land 130 USD / air 150 USD cards with EUR alternate"
+    },
+    {
+      "file": "sh0-storefront-request-shipping-390-ar.png",
+      "see": "Storefront /request DE 390: method cards stacked; sticky تقدير الشحن 130 USD"
+    },
+    {
+      "file": "sh0-admin-request-detail-1440-ar.png",
+      "see": "Admin retail RO detail dark RTL: shipping method shows 'غير محددة — يُؤكَّد مع الفريق' — no carrier/tracking block"
+    },
+    {
+      "file": "sh0-admin-wholesale-list-1440-ar.png",
+      "see": "Admin wholesale list empty/local — no rows; carrier/tracking only appears on detail when data exists"
+    },
+    {
+      "file": "sh0-admin-deal-list-1440-ar.png",
+      "see": "Admin deals list — no shipping columns/fields on deals (expected gap)"
+    },
+    {
+      "file": "sh0-admin-brokerage-detail-1440-ar.png",
+      "see": "Admin brokerage detail: shippingUsd/carrier/tracking if present — manual quote fields not rate engine"
+    },
+    {
+      "file": "sh0-admin-request-detail-390-ar.png",
+      "see": "Admin retail detail 390: same unconfirmed shipping line; handoff timeline not shipment lifecycle"
+    },
+    {
+      "file": "sh0-admin-wholesale-list-390-ar.png",
+      "see": "Admin wholesale list empty/local — no rows; carrier/tracking only appears on detail when data exists"
+    },
+    {
+      "file": "sh0-admin-deal-list-390-ar.png",
+      "see": "Admin deals list — no shipping columns/fields on deals (expected gap)"
+    },
+    {
+      "file": "sh0-admin-brokerage-list-390-ar.png",
+      "see": "Admin brokerage list — no detail row in local DB"
+    },
+    {
+      "file": "sh0-trader-wholesale-form-1440-ar.png",
+      "see": "Trader wholesale first viewport: product picker only; ShippingCostSelector exists lower in form after qty — not visible here; Next.js 1 Issue badge"
+    },
+    {
+      "file": "sh0-trader-deal-detail-1440-ar.png",
+      "see": "Trader deal detail: no shipping destination/method/cost UI"
+    },
+    {
+      "file": "sh0-trader-wholesale-form-390-ar.png",
+      "see": "Trader wholesale 390: product picker first; shipping selector below fold"
+    },
+    {
+      "file": "sh0-trader-deal-detail-390-ar.png",
+      "see": "Trader deal detail: no shipping destination/method/cost UI"
+    }
+  ]
+}

@@ -181,6 +181,8 @@ export async function createProduct(input: ProductUpsertInput) {
       badgeNew: input.badgeNew,
       badgeFeatured: input.badgeFeatured,
       badgeSale: input.badgeSale,
+      weightKg: input.weightKg,
+      shippingClass: input.shippingClass,
     },
   });
 }
@@ -217,6 +219,8 @@ export async function updateProduct(id: string, input: ProductUpsertInput) {
       badgeNew: input.badgeNew,
       badgeFeatured: input.badgeFeatured,
       badgeSale: input.badgeSale,
+      weightKg: input.weightKg,
+      shippingClass: input.shippingClass,
     },
   });
 }

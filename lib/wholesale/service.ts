@@ -2,8 +2,10 @@ import { uiVisibleWholesaleWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { notifyTrader } from "@/lib/trader/notifications";
-import { calculateOudShipmentWeightKg } from "@/lib/shipping/rates";
-import { resolveAvailableMethods } from "@/lib/shipping/resolve-available-methods";
+import {
+  buildQuoteSnapshot,
+  quote,
+} from "@/lib/shipping/engine";
 import {
   WHOLESALE_QTY_TECHNICAL_MAX,
   canTransitionWholesale,
@@ -217,24 +219,41 @@ export async function createWholesaleRequest(input: CreateWholesaleRequestInput)
   const reference = buildReference();
   const status: WholesaleStatus = "submitted";
 
-  const totalQty = resolved.reduce((sum, l) => sum + l.quantity, 0);
-  const shippingWeightKg = calculateOudShipmentWeightKg(Math.max(1, totalQty));
+  const declaredValue = resolved.reduce((sum, l) => {
+    if (l.proposedUnitPrice == null) return sum;
+    return sum + l.proposedUnitPrice * l.quantity;
+  }, 0);
+  const quoteResult = input.destinationCode
+    ? await quote({
+        destinationCode: input.destinationCode,
+        items: resolved.map((l) => ({
+          productId: l.productId,
+          qty: l.quantity,
+        })),
+        declaredValue: declaredValue > 0 ? declaredValue : null,
+        audience: "TRADER",
+      })
+    : null;
+  const shippingWeightKg = quoteResult?.weightKg ?? null;
   let shippingMethodCode: string | null = null;
   let shippingMethodLabel: string | null = null;
   let shippingCostAmount: number | null = null;
   let shippingCostCurrency: string | null = null;
+  let shippingQuoteSnapshot: ReturnType<typeof buildQuoteSnapshot> | undefined;
 
   if (input.destinationCode && input.shippingMethodCode) {
-    const available = resolveAvailableMethods(
-      input.destinationCode,
-      shippingWeightKg
+    const match = quoteResult?.methods.find(
+      (m) => m.methodCode === input.shippingMethodCode
     );
-    const match = available.find((m) => m.code === input.shippingMethodCode);
     if (!match) throw new Error("SHIPPING_METHOD_NOT_AVAILABLE");
-    shippingMethodCode = match.code;
-    shippingMethodLabel = input.shippingMethodLabel?.trim() || match.labelAr;
-    shippingCostAmount = match.amount;
-    shippingCostCurrency = match.currency;
+    shippingMethodCode = match.methodCode;
+    shippingMethodLabel =
+      input.shippingMethodLabel?.trim() || match.labelAr;
+    shippingCostAmount = match.price.total;
+    shippingCostCurrency = match.price.currency;
+    shippingQuoteSnapshot = buildQuoteSnapshot(quoteResult!, shippingMethodCode);
+  } else if (quoteResult) {
+    shippingQuoteSnapshot = buildQuoteSnapshot(quoteResult, null);
   }
 
   return prisma.wholesaleRequest.create({
@@ -251,6 +270,7 @@ export async function createWholesaleRequest(input: CreateWholesaleRequestInput)
       shippingCostAmount,
       shippingCostCurrency,
       shippingWeightKg,
+      shippingQuoteSnapshot,
       lines: {
         create: resolved.map((l) => ({
           productId: l.productId,

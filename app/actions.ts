@@ -429,6 +429,8 @@ export async function upsertProductAction(
     badgeNew: formData.get("badgeNew") === "on",
     badgeFeatured: formData.get("badgeFeatured") === "on",
     badgeSale: formData.get("badgeSale") === "on",
+    weightKg: formData.get("weightKg") ?? "",
+    shippingClass: formData.get("shippingClass") || "other",
   });
 
   if (!parsed.success) {

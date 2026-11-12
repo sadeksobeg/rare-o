@@ -301,6 +301,7 @@ type Dict = {
     deals: string;
     wholesale: string;
     brokerage: string;
+    shipping: string;
     offers: string;
     promos: string;
     kpiRetail: string;
@@ -2044,6 +2045,7 @@ const ar: Dict = {
     deals: "الصفقات",
     wholesale: "الجملة",
     brokerage: "الوساطة",
+    shipping: "الشحن",
     offers: "العروض",
     promos: "الترويج",
     kpiRetail: "طلبات تجزئة جديدة",
@@ -3932,6 +3934,7 @@ const en: Dict = {
     deals: "Deals",
     wholesale: "Wholesale",
     brokerage: "Brokerage",
+    shipping: "Shipping",
     offers: "Offers",
     promos: "Promos",
     kpiRetail: "New retail requests",

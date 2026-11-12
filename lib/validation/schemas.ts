@@ -63,6 +63,13 @@ export const productUpsertSchema = z.object({
   badgeNew: z.coerce.boolean().default(false),
   badgeFeatured: z.coerce.boolean().default(false),
   badgeSale: z.coerce.boolean().default(false),
+  weightKg: z
+    .union([z.literal(""), z.coerce.number().positive().max(500)])
+    .optional()
+    .transform((v) => (v === "" || v === undefined ? null : v)),
+  shippingClass: z
+    .enum(["oud", "oil", "accessory", "instrument", "other"])
+    .default("other"),
 }).superRefine((data, ctx) => {
   const hasPrice = data.retailPrice != null;
   const hasCurrency = !!data.currency;

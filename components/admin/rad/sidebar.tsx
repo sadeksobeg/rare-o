@@ -20,6 +20,7 @@ import {
   ShoppingBag,
   Store,
   Tags,
+  Truck,
   UserCog,
   Users,
   type LucideProps,
@@ -46,6 +47,7 @@ const NAV_ICONS: Record<string, IconComp> = {
   "/admin/customers": Users,
   "/admin/traders": Store,
   "/admin/team": UserCog,
+  "/admin/shipping": Truck,
   "/admin/notifications": BellRing,
   "/admin/settings": Settings,
 };

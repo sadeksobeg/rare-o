@@ -73,6 +73,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
     {
       title: dict.common.navSystem,
       items: [
+        { href: "/admin/shipping", label: a.shipping },
         { href: "/admin/notifications", label: dict.adminUi.notificationsTitle },
         { href: "/admin/settings", label: dict.adminUi.settingsHubTitle },
       ],
@@ -92,6 +93,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
     "/admin/customers": a.customers,
     "/admin/traders": a.traders,
     "/admin/team": a.team,
+    "/admin/shipping": a.shipping,
     "/admin/settings": dict.adminUi.settingsHubTitle,
     "/admin/notifications": dict.adminUi.notificationsTitle,
   };
