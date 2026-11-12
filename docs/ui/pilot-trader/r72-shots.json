@@ -1,0 +1,330 @@
+{
+  "at": "2026-11-12T14:45:05.165Z",
+  "base": "http://localhost:3000",
+  "evidence": {
+    "r72-trader-login-light-1440-ar.png": "login form · light@1440",
+    "r72-trader-login-light-1280-ar.png": "login form · light@1280",
+    "r72-trader-login-light-768-ar.png": "login form · light@768",
+    "r72-trader-login-light-390-ar.png": "login form · light@390",
+    "r72-trader-login-dark-1440-ar.png": "login form · dark@1440",
+    "r72-trader-login-dark-1280-ar.png": "login form · dark@1280",
+    "r72-trader-login-dark-768-ar.png": "login form · dark@768",
+    "r72-trader-login-dark-390-ar.png": "login form · dark@390",
+    "r72-trader-home-light-1440-ar.png": "home hero+kpi+waiting · light@1440 · hero:\"أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر\" · waitLink:\"عرض الكل (1)\" · kpiCols=3 · offers=2 · localeLum=rgb(75, 65, 80)",
+    "r72-trader-home-light-1280-ar.png": "home hero+kpi+waiting · light@1280 · hero:\"أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر\" · waitLink:\"عرض الكل (1)\" · kpiCols=3 · offers=2 · localeLum=rgb(75, 65, 80)",
+    "r72-trader-home-light-768-ar.png": "home hero+kpi+waiting · light@768 · hero:\"أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر\" · waitLink:\"عرض الكل (1)\" · kpiCols=3 · offers=2 · localeLum=rgb(75, 65, 80)",
+    "r72-trader-home-light-390-ar.png": "home hero+kpi+waiting · light@390 · hero:\"أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر\" · waitLink:\"عرض الكل (1)\" · kpiCols=3 · offers=2 · localeLum=rgb(75, 65, 80)",
+    "r72-trader-home-dark-1440-ar.png": "home hero+kpi+waiting · dark@1440 · hero:\"أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر\" · waitLink:\"عرض الكل (1)\" · kpiCols=3 · offers=2 · localeLum=color(srgb 0.956863 0.905882 0.847059 / 0.88)",
+    "r72-trader-home-dark-1280-ar.png": "home hero+kpi+waiting · dark@1280 · hero:\"أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر\" · waitLink:\"عرض الكل (1)\" · kpiCols=3 · offers=2 · localeLum=color(srgb 0.956863 0.905882 0.847059 / 0.88)",
+    "r72-trader-home-dark-768-ar.png": "home hero+kpi+waiting · dark@768 · hero:\"أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر\" · waitLink:\"عرض الكل (1)\" · kpiCols=3 · offers=2 · localeLum=color(srgb 0.956863 0.905882 0.847059 / 0.88)",
+    "r72-trader-home-dark-390-ar.png": "home hero+kpi+waiting · dark@390 · hero:\"أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر\" · waitLink:\"عرض الكل (1)\" · kpiCols=3 · offers=2 · localeLum=color(srgb 0.956863 0.905882 0.847059 / 0.88)"
+  },
+  "gates": {
+    "overflowFail": [],
+    "consoleFail": [],
+    "axeFail": [],
+    "pluralOk": true,
+    "waitingLinkOk": true,
+    "kpi390Ok": true
+  },
+  "results": [
+    {
+      "route": "/trader/login",
+      "theme": "light",
+      "w": 1440,
+      "file": "r72-trader-login-light-1440-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "themeAttr": "light",
+      "see": "login form · light@1440"
+    },
+    {
+      "route": "/trader/login",
+      "theme": "light",
+      "w": 1280,
+      "file": "r72-trader-login-light-1280-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1280,
+        "clientWidth": 1280
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "themeAttr": "light",
+      "see": "login form · light@1280"
+    },
+    {
+      "route": "/trader/login",
+      "theme": "light",
+      "w": 768,
+      "file": "r72-trader-login-light-768-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 768,
+        "clientWidth": 768
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "themeAttr": "light",
+      "see": "login form · light@768"
+    },
+    {
+      "route": "/trader/login",
+      "theme": "light",
+      "w": 390,
+      "file": "r72-trader-login-light-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "themeAttr": "light",
+      "see": "login form · light@390"
+    },
+    {
+      "route": "/trader/login",
+      "theme": "dark",
+      "w": 1440,
+      "file": "r72-trader-login-dark-1440-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "themeAttr": "light",
+      "see": "login form · dark@1440"
+    },
+    {
+      "route": "/trader/login",
+      "theme": "dark",
+      "w": 1280,
+      "file": "r72-trader-login-dark-1280-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1280,
+        "clientWidth": 1280
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "themeAttr": "light",
+      "see": "login form · dark@1280"
+    },
+    {
+      "route": "/trader/login",
+      "theme": "dark",
+      "w": 768,
+      "file": "r72-trader-login-dark-768-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 768,
+        "clientWidth": 768
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "themeAttr": "light",
+      "see": "login form · dark@768"
+    },
+    {
+      "route": "/trader/login",
+      "theme": "dark",
+      "w": 390,
+      "file": "r72-trader-login-dark-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "themeAttr": "light",
+      "see": "login form · dark@390"
+    },
+    {
+      "route": "/trader",
+      "theme": "light",
+      "w": 1440,
+      "file": "r72-trader-home-light-1440-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "heroText": "أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر",
+      "waitingLink": "عرض الكل (1)",
+      "kpiCols": 3,
+      "offerCount": 2,
+      "localeContrast": "rgb(75, 65, 80)",
+      "waitingMinH": "0px",
+      "see": "home hero+kpi+waiting · light@1440 · hero:\"أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر\" · waitLink:\"عرض الكل (1)\" · kpiCols=3 · offers=2 · localeLum=rgb(75, 65, 80)"
+    },
+    {
+      "route": "/trader",
+      "theme": "light",
+      "w": 1280,
+      "file": "r72-trader-home-light-1280-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1280,
+        "clientWidth": 1280
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "heroText": "أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر",
+      "waitingLink": "عرض الكل (1)",
+      "kpiCols": 3,
+      "offerCount": 2,
+      "localeContrast": "rgb(75, 65, 80)",
+      "waitingMinH": "0px",
+      "see": "home hero+kpi+waiting · light@1280 · hero:\"أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر\" · waitLink:\"عرض الكل (1)\" · kpiCols=3 · offers=2 · localeLum=rgb(75, 65, 80)"
+    },
+    {
+      "route": "/trader",
+      "theme": "light",
+      "w": 768,
+      "file": "r72-trader-home-light-768-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 768,
+        "clientWidth": 768
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "heroText": "أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر",
+      "waitingLink": "عرض الكل (1)",
+      "kpiCols": 3,
+      "offerCount": 2,
+      "localeContrast": "rgb(75, 65, 80)",
+      "waitingMinH": "0px",
+      "see": "home hero+kpi+waiting · light@768 · hero:\"أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر\" · waitLink:\"عرض الكل (1)\" · kpiCols=3 · offers=2 · localeLum=rgb(75, 65, 80)"
+    },
+    {
+      "route": "/trader",
+      "theme": "light",
+      "w": 390,
+      "file": "r72-trader-home-light-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "heroText": "أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر",
+      "waitingLink": "عرض الكل (1)",
+      "kpiCols": 3,
+      "offerCount": 2,
+      "localeContrast": "rgb(75, 65, 80)",
+      "waitingMinH": "0px",
+      "see": "home hero+kpi+waiting · light@390 · hero:\"أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر\" · waitLink:\"عرض الكل (1)\" · kpiCols=3 · offers=2 · localeLum=rgb(75, 65, 80)"
+    },
+    {
+      "route": "/trader",
+      "theme": "dark",
+      "w": 1440,
+      "file": "r72-trader-home-dark-1440-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "heroText": "أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر",
+      "waitingLink": "عرض الكل (1)",
+      "kpiCols": 3,
+      "offerCount": 2,
+      "localeContrast": "color(srgb 0.956863 0.905882 0.847059 / 0.88)",
+      "waitingMinH": "0px",
+      "see": "home hero+kpi+waiting · dark@1440 · hero:\"أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر\" · waitLink:\"عرض الكل (1)\" · kpiCols=3 · offers=2 · localeLum=color(srgb 0.956863 0.905882 0.847059 / 0.88)"
+    },
+    {
+      "route": "/trader",
+      "theme": "dark",
+      "w": 1280,
+      "file": "r72-trader-home-dark-1280-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1280,
+        "clientWidth": 1280
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "heroText": "أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر",
+      "waitingLink": "عرض الكل (1)",
+      "kpiCols": 3,
+      "offerCount": 2,
+      "localeContrast": "color(srgb 0.956863 0.905882 0.847059 / 0.88)",
+      "waitingMinH": "0px",
+      "see": "home hero+kpi+waiting · dark@1280 · hero:\"أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر\" · waitLink:\"عرض الكل (1)\" · kpiCols=3 · offers=2 · localeLum=color(srgb 0.956863 0.905882 0.847059 / 0.88)"
+    },
+    {
+      "route": "/trader",
+      "theme": "dark",
+      "w": 768,
+      "file": "r72-trader-home-dark-768-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 768,
+        "clientWidth": 768
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "heroText": "أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر",
+      "waitingLink": "عرض الكل (1)",
+      "kpiCols": 3,
+      "offerCount": 2,
+      "localeContrast": "color(srgb 0.956863 0.905882 0.847059 / 0.88)",
+      "waitingMinH": "0px",
+      "see": "home hero+kpi+waiting · dark@768 · hero:\"أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر\" · waitLink:\"عرض الكل (1)\" · kpiCols=3 · offers=2 · localeLum=color(srgb 0.956863 0.905882 0.847059 / 0.88)"
+    },
+    {
+      "route": "/trader",
+      "theme": "dark",
+      "w": 390,
+      "file": "r72-trader-home-dark-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "heroText": "أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر",
+      "waitingLink": "عرض الكل (1)",
+      "kpiCols": 3,
+      "offerCount": 2,
+      "localeContrast": "color(srgb 0.956863 0.905882 0.847059 / 0.88)",
+      "waitingMinH": "0px",
+      "see": "home hero+kpi+waiting · dark@390 · hero:\"أمر واحد بانتظارك اليوم · الخميس، 12 نوفمبر\" · waitLink:\"عرض الكل (1)\" · kpiCols=3 · offers=2 · localeLum=color(srgb 0.956863 0.905882 0.847059 / 0.88)"
+    }
+  ],
+  "files": [
+    "r72-trader-home-dark-1280-ar.png",
+    "r72-trader-home-dark-1440-ar.png",
+    "r72-trader-home-dark-390-ar.png",
+    "r72-trader-home-dark-768-ar.png",
+    "r72-trader-home-light-1280-ar.png",
+    "r72-trader-home-light-1440-ar.png",
+    "r72-trader-home-light-390-ar.png",
+    "r72-trader-home-light-768-ar.png",
+    "r72-trader-login-dark-1280-ar.png",
+    "r72-trader-login-dark-1440-ar.png",
+    "r72-trader-login-dark-390-ar.png",
+    "r72-trader-login-dark-768-ar.png",
+    "r72-trader-login-light-1280-ar.png",
+    "r72-trader-login-light-1440-ar.png",
+    "r72-trader-login-light-390-ar.png",
+    "r72-trader-login-light-768-ar.png"
+  ]
+}

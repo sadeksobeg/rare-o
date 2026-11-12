@@ -11,6 +11,7 @@ export function AdminLocaleToggle({
   label,
   tone = "auto",
   chrome = false,
+  className,
 }: {
   locale: Locale;
   label: string;
@@ -18,6 +19,7 @@ export function AdminLocaleToggle({
   tone?: "on-light" | "on-dark" | "auto";
   /** Linear header cluster style (admin shell only). */
   chrome?: boolean;
+  className?: string;
 }) {
   const nextLocale: Locale = locale === "ar" ? "en" : "ar";
   const { theme } = usePortalTheme();
@@ -25,20 +27,22 @@ export function AdminLocaleToggle({
     tone === "on-dark" || (tone === "auto" && theme === "dark");
 
   return (
-    <form action={setLocaleAction}>
+    <form action={setLocaleAction} className="contents">
       <input type="hidden" name="locale" value={nextLocale} />
       <button
         type="submit"
         aria-label={label}
         className={cn(
-          chrome
-            ? cn("ro-chrome-icon", onDark && "ro-chrome-icon--on-dark")
-            : cn(
-                "inline-flex size-11 min-h-11 items-center justify-center rounded-[var(--ro-r-sm)] border transition-[transform,background-color,border-color,color] duration-[var(--ro-dur-fast)] active:scale-[0.98]",
-                onDark
-                  ? "border-[color-mix(in_srgb,var(--ro-sand-100)_35%,transparent)] bg-[color-mix(in_srgb,var(--ro-sand-100)_10%,transparent)] text-[var(--ro-sand-100)] hover:border-[var(--ro-sand-100)] hover:bg-[color-mix(in_srgb,var(--ro-sand-100)_18%,transparent)]"
-                  : "border-[color:var(--ro-border)] bg-[color:var(--ro-bg-raised)] text-[color:var(--ro-text)] hover:border-[color:var(--ro-border)] hover:bg-[color-mix(in_srgb,var(--ro-plum-700)_10%,var(--ro-bg-raised))]"
-              )
+          className
+            ? className
+            : chrome
+              ? cn("ro-chrome-icon", onDark && "ro-chrome-icon--on-dark")
+              : cn(
+                  "inline-flex size-11 min-h-11 items-center justify-center rounded-[var(--ro-r-sm)] border transition-[transform,background-color,border-color,color] duration-[var(--ro-dur-fast)] active:scale-[0.98]",
+                  onDark
+                    ? "border-[color-mix(in_srgb,var(--ro-sand-100)_35%,transparent)] bg-[color-mix(in_srgb,var(--ro-sand-100)_10%,transparent)] text-[var(--ro-sand-100)] hover:border-[var(--ro-sand-100)] hover:bg-[color-mix(in_srgb,var(--ro-sand-100)_18%,transparent)]"
+                    : "border-[color:var(--ro-border)] bg-[color:var(--ro-bg-raised)] text-[color:var(--ro-text)] hover:border-[color:var(--ro-border)] hover:bg-[color-mix(in_srgb,var(--ro-plum-700)_10%,var(--ro-bg-raised))]"
+                )
         )}
       >
         <span className={chrome ? "ro-chrome-icon-glyph" : undefined}>

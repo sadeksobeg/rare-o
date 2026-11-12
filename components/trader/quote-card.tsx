@@ -39,8 +39,11 @@ export function QuoteCard({
   const priced = lines.filter((l) => l.quotedUnitPrice != null);
   return (
     <div className="rad-card space-y-4 border-[color-mix(in_srgb,var(--ro-amber-600)_28%,var(--rad-bd))] p-5 text-sm">
-      <h2 className="ro-portal-section-title flex items-center gap-2">
-        <span className="ro-portal-icon-well size-8 [&>svg]:size-4" aria-hidden>
+      <h2
+        className="flex items-center gap-2 text-[15px] font-semibold text-[color:var(--rad-tx)]"
+        style={{ fontFamily: "var(--rad-font, inherit)" }}
+      >
+        <span className="rad-chip rad-c-warn [&>svg]:size-4" aria-hidden>
           <FileText className="size-4" strokeWidth={1.5} />
         </span>
         {title}

@@ -86,24 +86,29 @@ export function Timeline({
               )}
             </span>
             {compact ? (
-              <div className="flex min-w-0 flex-1 items-center gap-2">
-                <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-0.5">
-                  <p className="truncate text-sm font-bold leading-snug text-[color:var(--rad-tx,var(--ro-ink))]">
+              <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
+                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <p
+                    className="truncate text-sm font-bold leading-snug text-[color:var(--rad-tx,var(--ro-ink))]"
+                    title={event.title}
+                  >
                     {event.title}
                   </p>
-                  {event.actor ? (
-                    <span className="inline-flex items-center rounded-[var(--rad-r-sm,var(--ro-r-sm))] bg-[color:var(--rad-surface3,var(--ro-sunken))] px-1.5 py-0.5 text-[0.6875rem] font-bold text-[color:var(--rad-tx2,var(--ro-text-2))]">
-                      {event.actor}
-                    </span>
-                  ) : null}
-                  <time
-                    className="text-xs font-semibold text-[color:var(--rad-tx3,var(--ro-muted))]"
-                    dateTime={event.absoluteTime}
-                    title={event.absoluteTime}
-                  >
-                    <span>{event.relativeTime}</span>
-                    <span className="sr-only"> ({event.absoluteTime})</span>
-                  </time>
+                  <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
+                    {event.actor ? (
+                      <span className="inline-flex max-w-full truncate items-center rounded-[var(--rad-r-sm,var(--ro-r-sm))] bg-[color:var(--rad-surface3,var(--ro-sunken))] px-1.5 py-0.5 text-[0.6875rem] font-bold text-[color:var(--rad-tx2,var(--ro-text-2))]">
+                        {event.actor}
+                      </span>
+                    ) : null}
+                    <time
+                      className="shrink-0 text-xs font-semibold text-[color:var(--rad-tx3,var(--ro-muted))]"
+                      dateTime={event.absoluteTime}
+                      title={event.absoluteTime}
+                    >
+                      <span>{event.relativeTime}</span>
+                      <span className="sr-only"> ({event.absoluteTime})</span>
+                    </time>
+                  </div>
                 </div>
                 {event.detail ? (
                   <div className="shrink-0 text-sm font-medium text-[color:var(--rad-tx2,var(--ro-text-2))]">

@@ -9,6 +9,7 @@ import { TraderPreferencesForm } from "@/components/trader/preferences-form";
 import { TraderPasswordSettings } from "@/components/trader/password-settings";
 import { TraderSignOutOthers } from "@/components/trader/sign-out-others";
 import { TraderPageHeader } from "@/components/trader/page-header";
+import { AdminLocaleToggle } from "@/components/admin/locale-toggle";
 import { AppearanceCard } from "@/components/portal/appearance-card";
 import { Pill } from "@/components/ui-kit/pill";
 import { requireTraderSession } from "@/lib/auth/trader-session";
@@ -78,6 +79,25 @@ export default async function TraderProfilePage() {
         lightLabel={dict.common.themeLight}
         darkLabel={dict.common.themeDark}
       />
+      <div className="rad-card flex flex-wrap items-center justify-between gap-3 p-5 sm:p-6">
+        <div className="min-w-0">
+          <h2
+            className="text-[15px] font-semibold text-[color:var(--rad-tx)]"
+            style={{ fontFamily: "var(--rad-font, inherit)" }}
+          >
+            {dict.common.language}
+          </h2>
+          <p className="mt-1 text-sm text-[color:var(--rad-tx2)]">
+            {locale === "ar" ? "العربية / English" : "English / العربية"}
+          </p>
+        </div>
+        <AdminLocaleToggle
+          locale={locale}
+          label={dict.common.language}
+          tone="auto"
+          className="rad-ib"
+        />
+      </div>
       <div className="rad-card overflow-hidden">
         <div className="flex flex-wrap items-center gap-5 border-b border-[color:var(--rad-bd)] bg-[color:var(--rad-sb)] px-5 py-7 text-[color:var(--rad-cream,#f4e7d8)] sm:px-6">
           <span

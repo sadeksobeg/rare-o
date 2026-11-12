@@ -74,7 +74,7 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
       <SonnerToaster />
       <PortalShellFrame
         surface="trader"
-        defaultTheme="dark"
+        defaultTheme="light"
         className="ro-portal ro-portal-trader rad-tapp relative min-h-dvh overflow-x-clip"
       >
         <Suspense fallback={null}>
@@ -128,19 +128,17 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
                   </i>
                 ) : null}
               </Link>
-              <span className="hidden sm:contents">
-                <PortalThemeToggle
-                  lightLabel={dict.common.themeLight}
-                  darkLabel={dict.common.themeDark}
-                  chrome
-                />
-                <AdminLocaleToggle
-                  locale={locale}
-                  label={dict.common.language}
-                  tone="auto"
-                  chrome
-                />
-              </span>
+              <PortalThemeToggle
+                lightLabel={dict.common.themeLight}
+                darkLabel={dict.common.themeDark}
+                className="rad-ib"
+              />
+              <AdminLocaleToggle
+                locale={locale}
+                label={dict.common.language}
+                tone="auto"
+                className="rad-ib"
+              />
               <Link href="/trader/profile" className="rad-tme" aria-label={dict.trader.profile}>
                 <span className="rad-tme-av" aria-hidden>
                   {initial}

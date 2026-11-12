@@ -1,0 +1,27 @@
+{
+  "at": "2026-11-12T12:40:17.065Z",
+  "base": "http://localhost:3000",
+  "evidence": {
+    "loginDark1440": "r7-trader-login-dark-1440-ar.png",
+    "loginDark390": "r7-trader-login-dark-390-ar.png",
+    "homelight1440": "r7-trader-home-light-1440-ar.png",
+    "homelight390": "r7-trader-home-light-390-ar.png",
+    "homedark1440": "r7-trader-home-dark-1440-ar.png",
+    "homedark390": "r7-trader-home-dark-390-ar.png"
+  },
+  "probes": {
+    "theme": "dark",
+    "hero": true,
+    "tabbarDisplay": "grid",
+    "desktopNavChildren": 5,
+    "defaultLightOk": true
+  },
+  "files": [
+    "r7-trader-home-dark-1440-ar.png",
+    "r7-trader-home-dark-390-ar.png",
+    "r7-trader-home-light-1440-ar.png",
+    "r7-trader-home-light-390-ar.png",
+    "r7-trader-login-dark-1440-ar.png",
+    "r7-trader-login-dark-390-ar.png"
+  ]
+}

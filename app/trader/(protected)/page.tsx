@@ -3,18 +3,19 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   Activity,
+  Bell,
   Compass,
   Handshake,
-  Home,
   Package,
+  Plus,
   Sparkles,
 } from "lucide-react";
+import { Rings } from "@/components/brand/rings";
 import { CountUp } from "@/components/motion/count-up";
 import { DrawIn, RosetteMark } from "@/components/motion/draw-in";
 import { PressLink } from "@/components/portal/press-link";
 import { DealCard } from "@/components/trader/deal-card";
 import { TaskCard } from "@/components/trader/task-card";
-import { TraderPageHeader } from "@/components/trader/page-header";
 import { PortalReveal } from "@/components/portal/reveal";
 import { Timeline } from "@/components/ui/timeline";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -35,6 +36,7 @@ import {
 } from "@/lib/offers/rank-by-interest";
 import { listWholesaleRequestsForTrader } from "@/lib/wholesale/service";
 import { getRequestDictionary } from "@/lib/i18n/server";
+import { plural } from "@/lib/i18n/plural";
 import { dealNextActor, getStatusMeta } from "@/lib/ui/status";
 import {
   dealStatusLabel,
@@ -42,6 +44,41 @@ import {
   wholesaleStatusLabel,
 } from "@/lib/ui/trader-labels";
 import { brokerageStatusLabel } from "@/components/brokerage/labels";
+import { countUnreadTraderNotifications } from "@/lib/trader/notifications";
+import { cn } from "@/lib/utils";
+
+function waitingTodayLine(
+  count: number,
+  today: string,
+  locale: Locale,
+  t: Dictionary["trader"]
+) {
+  if (count === 0) return t.waitingTodayZero.replace("{date}", today);
+  return plural(count, locale, {
+    one: t.waitingTodayOne,
+    two: t.waitingTodayTwo,
+    few: t.waitingTodayFew,
+    many: t.waitingTodayMany,
+    other: t.waitingTodayOther,
+  }).replace("{date}", today);
+}
+
+/** Drop week3 regression fixtures that must never surface to traders. */
+function isRegressionOfferFixture(o: {
+  slug: string;
+  titleAr?: string | null;
+  titleEn?: string | null;
+  summaryAr?: string | null;
+  summaryEn?: string | null;
+}) {
+  if (o.slug.startsWith("reg-gate-")) return true;
+  const title = `${o.titleAr ?? ""} ${o.titleEn ?? ""}`;
+  const summary = `${o.summaryAr ?? ""} ${o.summaryEn ?? ""}`;
+  if (title.includes("فحص البوابة") || /gate check/i.test(title)) return true;
+  if (summary.includes("يجب نشره") || /must publish/i.test(summary)) return true;
+  if (summary.includes("يجب رفضه") || /must be rejected/i.test(summary)) return true;
+  return false;
+}
 
 type Ok<T> = { ok: true; data: T };
 type Err = { ok: false };
@@ -86,6 +123,9 @@ const loadTraderInterests = cache((traderId: string) =>
     })
   )
 );
+const loadUnread = cache((traderId: string) =>
+  settle(countUnreadTraderNotifications(traderId))
+);
 
 function BlockError({
   dict,
@@ -106,7 +146,7 @@ function BlockError({
   );
 }
 
-async function HomeGreeting({
+async function HomeHero({
   traderId,
   traderName,
   locale,
@@ -132,9 +172,11 @@ async function HomeGreeting({
 
   let waitingCount = 0;
   let recordsOk = false;
+  let totalRecords = 0;
 
   if (dealsR.ok) {
     recordsOk = true;
+    totalRecords += dealsR.data.length;
     waitingCount += dealsR.data.filter((d) => {
       const last = d.entries[0]?.actorRole as "trader" | "admin" | undefined;
       return dealNextActor(d.status, last ?? null) === "trader";
@@ -142,31 +184,127 @@ async function HomeGreeting({
   }
   if (wholesaleR.ok) {
     recordsOk = true;
+    totalRecords += wholesaleR.data.length;
     waitingCount += wholesaleR.data.filter(
       (w) => getStatusMeta("wholesale", w.status).nextActor === "trader"
     ).length;
   }
   if (brokerageR.ok) {
     recordsOk = true;
+    totalRecords += brokerageR.data.length;
     waitingCount += brokerageR.data.filter(
       (b) => brokerageNextActor(b.status) === "trader"
     ).length;
   }
 
+  const isNew = recordsOk && totalRecords === 0;
   const waitingLine = !recordsOk
     ? t.lead
-    : waitingCount === 0
-      ? t.waitingTodayZero.replace("{date}", today)
-      : t.waitingToday
-          .replace("{n}", String(waitingCount))
-          .replace("{date}", today);
+    : isNew
+      ? t.lead
+      : waitingTodayLine(waitingCount, today, locale, t);
+
+  const waitingPhrase = waitingLine.includes("·")
+    ? waitingLine.split("·")[0]?.trim()
+    : waitingLine;
+  const waitingRest = waitingLine.includes("·")
+    ? waitingLine.split("·").slice(1).join("·").trim()
+    : null;
 
   return (
-    <TraderPageHeader
-      title={greetingHeadline(traderName, dict.common)}
-      description={`${waitingLine} — ${t.lead}`}
-      icon={<Home className="size-5" strokeWidth={1.5} />}
-    />
+    <section className="rad-thero">
+      <Rings className="rad-thero-rings" idle />
+      <h1>{greetingHeadline(traderName, dict.common)}</h1>
+      <p>
+        {waitingCount > 0 ? (
+          <>
+            <b>{waitingPhrase}</b>
+            {waitingRest ? ` · ${waitingRest}` : null}
+          </>
+        ) : (
+          waitingLine
+        )}
+      </p>
+      <div className="rad-thero-actions">
+        <Link href="/trader/deals/new" className="rad-thero-btn-cr">
+          <Plus width={16} height={16} strokeWidth={1.5} aria-hidden />
+          {t.newDeal}
+        </Link>
+        <Link href="/trader/wholesale" className="rad-thero-btn-ol">
+          <Package width={16} height={16} strokeWidth={1.5} aria-hidden />
+          {t.wholesale}
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+async function StatsBlock({
+  traderId,
+  dict,
+}: {
+  traderId: string;
+  dict: Dictionary;
+}) {
+  const t = dict.trader;
+  const [dealsR, wholesaleR, unreadR] = await Promise.all([
+    loadDeals(traderId),
+    loadWholesale(traderId),
+    loadUnread(traderId),
+  ]);
+
+  if (!dealsR.ok && !wholesaleR.ok) {
+    return <BlockError dict={dict} compact />;
+  }
+
+  const deals = dealsR.ok ? dealsR.data : [];
+  const wholesale = wholesaleR.ok ? wholesaleR.data : [];
+  const unread = unreadR.ok ? unreadR.data : 0;
+
+  const openDeals = deals.filter(
+    (d) => !["accepted", "rejected", "closed", "cancelled"].includes(d.status)
+  ).length;
+  const openWholesale = wholesale.filter(
+    (w) => !["completed", "cancelled"].includes(w.status)
+  ).length;
+
+  const items = [
+    {
+      label: t.homeStatDeals,
+      value: openDeals,
+      tone: "rad-c-warn" as const,
+      Icon: Handshake,
+    },
+    {
+      label: t.homeStatWholesale,
+      value: openWholesale,
+      tone: "rad-c-info" as const,
+      Icon: Package,
+    },
+    {
+      label: t.notifications,
+      value: unread,
+      tone: "rad-c-ac" as const,
+      Icon: Bell,
+    },
+  ];
+
+  return (
+    <div className="rad-tstat">
+      {items.map((stat) => (
+        <div key={stat.label} className="rad-card rad-tstat-item">
+          <span className={`rad-chip rad-chip-lg ${stat.tone}`}>
+            <stat.Icon width={22} height={22} strokeWidth={1.5} aria-hidden />
+          </span>
+          <div>
+            <b>
+              <CountUp value={stat.value} durationMs={520} />
+            </b>
+            <span>{stat.label}</span>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -188,13 +326,10 @@ async function WaitingBlock({
 
   if (!dealsR.ok && !wholesaleR.ok && !brokerageR.ok) {
     return (
-      <div className="flex flex-col space-y-3">
-        <h2 className="ro-portal-section-title flex items-center gap-2">
-          <span className="ro-portal-icon-well size-8 [&>svg]:size-4" aria-hidden>
-            <Handshake className="size-4" strokeWidth={1.5} />
-          </span>
-          {t.waitingTitle}
-        </h2>
+      <div>
+        <div className="rad-tsh">
+          <h2>{t.waitingTitle}</h2>
+        </div>
         <BlockError dict={dict} compact />
       </div>
     );
@@ -218,6 +353,7 @@ async function WaitingBlock({
   const waiting = [
     ...waitingDeals.map((d) => ({
       key: `deal-${d.id}`,
+      kind: "deal" as const,
       href: `/trader/deals/${d.id}`,
       reference: d.reference,
       title: d.title,
@@ -226,6 +362,7 @@ async function WaitingBlock({
     })),
     ...waitingWholesale.map((w) => ({
       key: `ws-${w.id}`,
+      kind: "wholesale" as const,
       href: `/trader/wholesale/${w.id}`,
       reference: w.reference,
       title: undefined as string | undefined,
@@ -234,6 +371,7 @@ async function WaitingBlock({
     })),
     ...waitingBrokerage.map((b) => ({
       key: `br-${b.id}`,
+      kind: "brokerage" as const,
       href: `/trader/brokerage/${b.id}`,
       reference: b.reference,
       title: b.descriptionAr || undefined,
@@ -242,39 +380,46 @@ async function WaitingBlock({
     })),
   ];
 
-  const myDeals = t.myDeals.replace("{n}", String(deals.length));
+  const kinds = new Set(waiting.map((w) => w.kind));
+  const viewAllHref =
+    kinds.size === 1 && kinds.has("brokerage")
+      ? "/trader/brokerage"
+      : kinds.size === 1 && kinds.has("wholesale")
+        ? "/trader/wholesale/requests"
+        : kinds.size === 1 && kinds.has("deal")
+          ? "/trader/deals"
+          : waitingDeals.length >= waitingWholesale.length &&
+              waitingDeals.length >= waitingBrokerage.length
+            ? "/trader/deals"
+            : waitingWholesale.length >= waitingBrokerage.length
+              ? "/trader/wholesale/requests"
+              : "/trader/brokerage";
+  const viewAllLabel = `${t.viewAllOffers} (${waiting.length})`;
 
   return (
-    <div className="flex flex-col space-y-3">
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 className="ro-portal-section-title flex items-center gap-2">
-          <span className="ro-portal-icon-well size-8 [&>svg]:size-4" aria-hidden>
-            <Handshake className="size-4" strokeWidth={1.5} />
-          </span>
-          {t.waitingTitle}
-        </h2>
+    <div>
+      <div className="rad-tsh">
+        <h2>{t.waitingTitle}</h2>
         {waiting.length > 0 ? (
-          <span className="text-xs tabular-nums text-ro-muted">
-            <CountUp value={waiting.length} durationMs={420} />
-          </span>
+          <Link href={viewAllHref}>{viewAllLabel}</Link>
         ) : null}
       </div>
-      <div className="rad-card flex min-h-[12rem] flex-1 flex-col p-4 sm:p-5">
+      <div className="rad-card p-1.5 sm:p-2">
         {waiting.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
+          <div className="flex flex-col items-center justify-center gap-3 px-4 py-8 text-center">
             <DrawIn durationMs={900} className="size-16">
               <RosetteMark width={64} height={64} />
             </DrawIn>
-            <p className="text-sm font-medium text-[var(--ro-success-700)]">
+            <p className="text-sm font-medium text-[color:var(--rad-ok)]">
               {t.waitingIdle}
             </p>
             <p className="text-sm text-[color:var(--rad-tx3)]">{t.lead}</p>
             <Link href="/trader/deals" className="rad-btn rad-gh rad-sm">
-              {myDeals}
+              {t.myDeals.replace("{n}", String(deals.length))}
             </Link>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div>
             {waiting.map((item) => (
               <DealCard
                 key={item.key}
@@ -296,105 +441,23 @@ async function WaitingBlock({
 function TasksBlock({ dict }: { dict: Dictionary }) {
   const t = dict.trader;
   return (
-    <div className="flex flex-col space-y-2">
-      <h2 className="ro-portal-section-title flex items-center gap-2">
-        <span className="ro-portal-icon-well size-8 [&>svg]:size-4" aria-hidden>
-          <Sparkles className="size-4" strokeWidth={1.5} />
-        </span>
-        {t.homeTasksTitle}
-      </h2>
-      <div className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-2">
+    <div>
+      <div className="rad-tsh">
+        <h2>{t.homeTasksTitle}</h2>
+      </div>
+      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
         <TaskCard
           href="/trader/deals/new"
           title={t.taskDealTitle}
           body={t.taskDealBody}
           icon="handshake"
-          imageSrc="/brand/hero-oud-majestic.jpg"
         />
         <TaskCard
           href="/trader/wholesale"
           title={t.taskWholesaleTitle}
           body={t.taskWholesaleBody}
           icon="package"
-          imageSrc="/brand/hero-oud-atelier-a.jpg"
         />
-        <TaskCard
-          href="/trader/brokerage/new"
-          title={t.taskBrokerageTitle}
-          body={t.taskBrokerageBody}
-          icon="compass"
-          imageSrc="/brand/hero-oud-resonance.jpg"
-        />
-      </div>
-    </div>
-  );
-}
-
-async function StatsBlock({
-  traderId,
-  dict,
-}: {
-  traderId: string;
-  dict: Dictionary;
-}) {
-  const t = dict.trader;
-  const [dealsR, wholesaleR, brokerageR] = await Promise.all([
-    loadDeals(traderId),
-    loadWholesale(traderId),
-    loadBrokerage(traderId),
-  ]);
-
-  if (!dealsR.ok && !wholesaleR.ok && !brokerageR.ok) {
-    return <BlockError dict={dict} compact />;
-  }
-
-  const deals = dealsR.ok ? dealsR.data : [];
-  const wholesale = wholesaleR.ok ? wholesaleR.data : [];
-  const brokerage = brokerageR.ok ? brokerageR.data : [];
-
-  const openDeals = deals.filter(
-    (d) => !["accepted", "rejected", "closed", "cancelled"].includes(d.status)
-  ).length;
-  const openWholesale = wholesale.filter(
-    (w) => !["completed", "cancelled"].includes(w.status)
-  ).length;
-  const openBrokerage = brokerage.filter(
-    (b) =>
-      !["CLOSED", "DECLINED", "REJECTED", "CANCELLED"].includes(b.status)
-  ).length;
-
-  return (
-    <div className="space-y-2">
-      <h2 className="ro-portal-section-title">{t.homeStatsTitle}</h2>
-      <div className="grid grid-cols-3 gap-3 border-b border-[color:var(--rad-bd)] pb-4 lg:border-b-0 lg:pb-0">
-        {[
-          {
-            label: t.homeStatDeals,
-            value: openDeals,
-            hint: t.homeStatOpen,
-          },
-          {
-            label: t.homeStatWholesale,
-            value: openWholesale,
-            hint: t.homeStatOpen,
-          },
-          {
-            label: t.homeStatBrokerage,
-            value: openBrokerage,
-            hint: t.homeStatOpen,
-          },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            className="border-s-2 border-[color:var(--rad-ac)]/40 ps-3"
-          >
-            <p className="text-xs text-[color:var(--rad-tx3)]">{stat.label}</p>
-            <p className="text-2xl font-bold tabular-nums text-[color:var(--rad-tx)] lg:text-3xl">
-              <CountUp value={stat.value} durationMs={520} />
-            </p>
-            <p className="text-xs text-[color:var(--rad-tx3)]">{stat.hint}</p>
-          </div>
-        ))}
       </div>
     </div>
   );
@@ -416,33 +479,49 @@ async function OffersBlock({
   ]);
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="ro-portal-section-title font-semibold">{t.offersNow}</h2>
-        <Link
-          href="/trader/offers"
-          className="text-sm font-medium text-[color:var(--rad-ac)] transition-colors hover:underline"
-        >
-          {t.viewAllOffers}
-        </Link>
+    <div>
+      <div className="rad-tsh">
+        <h2>{t.offersNow}</h2>
+        <Link href="/trader/offers">{t.viewAllOffers}</Link>
       </div>
 
       {!offersR.ok ? (
         <BlockError dict={dict} compact />
       ) : (
         (() => {
+          const cleaned = offersR.data.filter((o) => !isRegressionOfferFixture(o));
           const rankedOffers = rankOffersByInterest(
-            offersR.data,
+            cleaned,
             parseInterestSlugs(
               traderR.ok ? traderR.data?.interestCategorySlugs : null
             )
           );
-          const offerPreview = rankedOffers.slice(0, 4);
+          const seenTitles = new Set<string>();
+          const offerPreview = rankedOffers
+            .filter((o) => {
+              const key = (
+                locale === "ar"
+                  ? o.titleAr || o.titleEn || o.slug
+                  : o.titleEn || o.titleAr || o.slug
+              )
+                .trim()
+                .toLowerCase();
+              if (seenTitles.has(key)) return false;
+              seenTitles.add(key);
+              return true;
+            })
+            .slice(0, 3);
           if (offerPreview.length === 0) {
             return null;
           }
+          const cols =
+            offerPreview.length >= 3
+              ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+              : offerPreview.length === 2
+                ? "grid-cols-1 sm:grid-cols-2"
+                : "grid-cols-1";
           return (
-            <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-2">
+            <ul className={cn("grid gap-3.5", cols)}>
               {offerPreview.map((o) => {
                 const title =
                   locale === "ar"
@@ -452,25 +531,20 @@ async function OffersBlock({
                   locale === "ar"
                     ? o.summaryAr || o.summaryEn
                     : o.summaryEn || o.summaryAr;
-                const productName = o.product
-                  ? locale === "ar"
-                    ? o.product.nameAr || o.product.nameEn
-                    : o.product.nameEn || o.product.nameAr
-                  : null;
                 const imagePath = o.product?.images?.[0]?.path ?? null;
                 return (
                   <li key={o.id}>
                     <PressLink
                       href={`/trader/offers/${o.slug}`}
-                      className="rad-card group flex overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ro-focus)]"
+                      className="rad-card rad-tocard block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--rad-ac)]"
                     >
-                      <div className="relative h-20 w-20 shrink-0 bg-[color:var(--rad-surface3)] sm:h-24 sm:w-24">
+                      <div className="rad-tocard-im">
                         {imagePath ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={imagePath}
                             alt=""
-                            className="size-full object-cover"
+                            className="absolute inset-0 size-full object-cover"
                           />
                         ) : (
                           <Image
@@ -478,24 +552,22 @@ async function OffersBlock({
                             alt=""
                             fill
                             className="object-cover opacity-80"
-                            sizes="96px"
+                            sizes="(max-width:640px) 100vw, 33vw"
                           />
                         )}
+                        <span className="absolute start-3 top-3 inline-flex h-6 items-center gap-1.5 rounded-full bg-[rgba(11,8,13,.62)] px-2.5 text-[11.5px] font-semibold text-[#F4E7D8] backdrop-blur-[6px]">
+                          <Sparkles width={13} height={13} strokeWidth={1.5} aria-hidden />
+                          {t.offers}
+                        </span>
                       </div>
-                      <div className="min-w-0 flex-1 space-y-1 p-3">
-                        <p className="line-clamp-2 text-sm font-semibold leading-snug text-[color:var(--rad-tx)] transition-colors group-hover:text-[color:var(--rad-ac)]" style={{ fontFamily: "var(--rad-font, inherit)" }}>
-                          {title}
-                        </p>
-                        {summary ? (
-                          <p className="line-clamp-1 text-xs text-[color:var(--rad-tx3)]">
-                            {summary}
-                          </p>
-                        ) : null}
-                        {productName ? (
-                          <p className="line-clamp-1 text-xs font-semibold text-[color:var(--rad-ac)]">
-                            {productName}
-                          </p>
-                        ) : null}
+                      <div className="rad-tocard-bd">
+                        <b>{title}</b>
+                        {summary ? <p className="line-clamp-2">{summary}</p> : null}
+                        <div className="mt-3.5">
+                          <span className="rad-btn rad-gh rad-sm inline-flex">
+                            {t.offersViewDetails}
+                          </span>
+                        </div>
                       </div>
                     </PressLink>
                   </li>
@@ -527,13 +599,10 @@ async function ActivityBlock({
 
   if (!dealsR.ok && !wholesaleR.ok && !brokerageR.ok) {
     return (
-      <div className="space-y-3">
-        <h2 className="ro-portal-section-title flex items-center gap-2">
-          <span className="ro-portal-icon-well size-8 [&>svg]:size-4" aria-hidden>
-            <Activity className="size-4" strokeWidth={1.5} />
-          </span>
-          {t.recentActivity}
-        </h2>
+      <div>
+        <div className="rad-tsh">
+          <h2>{t.recentActivity}</h2>
+        </div>
         <BlockError dict={dict} compact />
       </div>
     );
@@ -547,8 +616,10 @@ async function ActivityBlock({
     ...deals.map((d) => ({
       id: `deal-${d.id}`,
       at: d.updatedAt,
-      title: fmt(t.activityDeal, { ref: d.reference }),
-      actor: t.actorRole.trader,
+      title: d.title
+        ? `${d.reference} · ${d.title}`
+        : fmt(t.activityDeal, { ref: d.reference }),
+      status: dealStatusLabel(t, d.status),
       href: `/trader/deals/${d.id}`,
       kind: "deal" as const,
     })),
@@ -556,15 +627,17 @@ async function ActivityBlock({
       id: `ws-${w.id}`,
       at: w.updatedAt,
       title: fmt(t.activityWholesale, { ref: w.reference }),
-      actor: t.actorRole.trader,
+      status: wholesaleStatusLabel(t, w.status),
       href: `/trader/wholesale/${w.id}`,
       kind: "wholesale" as const,
     })),
     ...brokerage.map((b) => ({
       id: `br-${b.id}`,
       at: b.updatedAt,
-      title: b.reference,
-      actor: t.actorRole.trader,
+      title: b.descriptionAr
+        ? `${b.reference} · ${b.descriptionAr}`
+        : b.reference,
+      status: brokerageStatusLabel(b.status, locale),
       href: `/trader/brokerage/${b.id}`,
       kind: "brokerage" as const,
     })),
@@ -573,13 +646,13 @@ async function ActivityBlock({
     .slice(0, 5);
 
   return (
-    <div className="space-y-2">
-      <h2 className="ro-portal-section-title flex items-center gap-2">
-        <span className="ro-portal-icon-well size-8 [&>svg]:size-4" aria-hidden>
-          <Activity className="size-4" strokeWidth={1.5} />
-        </span>
-        {t.recentActivity}
-      </h2>
+    <div>
+      <div className="rad-tsh">
+        <h2 className="flex items-center gap-2">
+          <Activity className="size-4" strokeWidth={1.5} aria-hidden />
+          {t.recentActivity}
+        </h2>
+      </div>
       {activity.length === 0 ? (
         <EmptyState
           variant="first-use"
@@ -589,14 +662,14 @@ async function ActivityBlock({
           actionLabel={t.taskDealTitle}
         />
       ) : (
-        <div className="rad-card p-2 md:p-3">
+        <div className="rad-card min-w-0 overflow-x-clip p-2 md:p-3">
           <Timeline
             compact
             label={t.recentActivity}
             events={activity.map((ev) => ({
               id: ev.id,
               title: ev.title,
-              actor: ev.actor,
+              actor: ev.status,
               relativeTime: formatRelative(ev.at, locale),
               absoluteTime: formatDate(ev.at, locale, {
                 year: "numeric",
@@ -636,8 +709,8 @@ async function ActivityBlock({
   );
 }
 
-function HeaderSkeleton() {
-  return <Skeleton className="h-16 w-full max-w-xl" />;
+function HeroSkeleton() {
+  return <Skeleton className="mb-5 h-48 w-full rounded-[22px]" />;
 }
 
 function WaitingSkeleton() {
@@ -661,49 +734,41 @@ export default async function TraderHomePage() {
   const { locale, dict } = await getRequestDictionary();
 
   return (
-    <section data-trader-home className="relative space-y-4">
-      <div className="relative space-y-4 md:space-y-5">
-        <Suspense fallback={<HeaderSkeleton />}>
-          <HomeGreeting
+    <section data-trader-home className="relative">
+      <Suspense fallback={<HeroSkeleton />}>
+        <HomeHero
+          traderId={session.sub}
+          traderName={session.displayName}
+          locale={locale}
+          dict={dict}
+        />
+      </Suspense>
+
+      <PortalReveal eager>
+        <Suspense fallback={<StatsSkeleton />}>
+          <StatsBlock traderId={session.sub} dict={dict} />
+        </Suspense>
+      </PortalReveal>
+
+      <PortalReveal eager>
+        <Suspense fallback={<WaitingSkeleton />}>
+          <WaitingBlock
             traderId={session.sub}
-            traderName={session.displayName}
             locale={locale}
             dict={dict}
           />
         </Suspense>
+      </PortalReveal>
 
-        <PortalReveal eager>
-          <Suspense fallback={<WaitingSkeleton />}>
-            <WaitingBlock
-              traderId={session.sub}
-              locale={locale}
-              dict={dict}
-            />
-          </Suspense>
-        </PortalReveal>
+      <PortalReveal eager>
+        <TasksBlock dict={dict} />
+      </PortalReveal>
 
-        {/* Start-here + recent activity: tight 2-col on desktop */}
-        <PortalReveal
-          eager
-          className="grid items-start gap-3 lg:grid-cols-2 lg:gap-4"
-        >
-          <TasksBlock dict={dict} />
-          <Suspense fallback={<ActivitySkeleton />}>
-            <ActivityBlock
-              traderId={session.sub}
-              locale={locale}
-              dict={dict}
-            />
-          </Suspense>
-        </PortalReveal>
-
-        <PortalReveal
-          eager
-          className="grid items-start gap-3 lg:grid-cols-2 lg:gap-4"
-        >
-          <Suspense fallback={<StatsSkeleton />}>
-            <StatsBlock traderId={session.sub} dict={dict} />
-          </Suspense>
+      <PortalReveal
+        eager
+        className="grid min-w-0 items-start gap-4 lg:grid-cols-2"
+      >
+        <div className="min-w-0">
           <Suspense fallback={<OffersSkeleton />}>
             <OffersBlock
               traderId={session.sub}
@@ -711,8 +776,17 @@ export default async function TraderHomePage() {
               dict={dict}
             />
           </Suspense>
-        </PortalReveal>
-      </div>
+        </div>
+        <div className="min-w-0" data-trader-activity>
+          <Suspense fallback={<ActivitySkeleton />}>
+            <ActivityBlock
+              traderId={session.sub}
+              locale={locale}
+              dict={dict}
+            />
+          </Suspense>
+        </div>
+      </PortalReveal>
     </section>
   );
 }

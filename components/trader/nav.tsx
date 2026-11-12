@@ -45,7 +45,7 @@ export function TraderDesktopNav({
 }) {
   const pathname = usePathname();
   return (
-    <nav aria-label={navLabel} className="rad-tn hidden items-center gap-1 md:flex">
+    <nav aria-label={navLabel} className="rad-tn">
       {tabs.map((tab) => {
         const active = isActive(pathname, tab);
         const Icon = icons[tab.icon];
@@ -77,7 +77,7 @@ export function TraderBottomTabs({
 }) {
   const pathname = usePathname();
   return (
-    <nav aria-label={navLabel} className="rad-tabbar md:hidden">
+    <nav aria-label={navLabel} className="rad-tabbar">
       {tabs.map((tab) => {
         const active = isActive(pathname, tab);
         const Icon = icons[tab.icon];

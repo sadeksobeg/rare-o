@@ -1123,6 +1123,12 @@ type Dict = {
     welcome: string;
     waitingToday: string;
     waitingTodayZero: string;
+    /** Arabic plural: 1 أمر واحد / 2 أمران / 3–10 أمور / 11+ أمراً */
+    waitingTodayOne: string;
+    waitingTodayTwo: string;
+    waitingTodayFew: string;
+    waitingTodayMany: string;
+    waitingTodayOther: string;
     lead: string;
     homeTasksTitle: string;
     taskDealTitle: string;
@@ -2944,6 +2950,11 @@ const ar: Dict = {
     welcome: "أهلاً، {name}",
     waitingToday: "{n} أمور بانتظارك اليوم · {date}",
     waitingTodayZero: "لا شيء بانتظارك اليوم · {date}",
+    waitingTodayOne: "أمر واحد بانتظارك اليوم · {date}",
+    waitingTodayTwo: "أمران بانتظارك اليوم · {date}",
+    waitingTodayFew: "{n} أمور بانتظارك اليوم · {date}",
+    waitingTodayMany: "{n} أمراً بانتظارك اليوم · {date}",
+    waitingTodayOther: "{n} أمر بانتظارك اليوم · {date}",
     lead: "فاوض على الصفقات وقدّم طلبات الجملة من مخزون RARE OUD — هذه البوابة ليست متجراً.",
     homeTasksTitle: "ابدأ من هنا",
     taskDealTitle: "اقترح صفقة",
@@ -4838,6 +4849,11 @@ const en: Dict = {
     welcome: "Welcome, {name}",
     waitingToday: "{n} items waiting today · {date}",
     waitingTodayZero: "Nothing waiting today · {date}",
+    waitingTodayOne: "1 item waiting today · {date}",
+    waitingTodayTwo: "2 items waiting today · {date}",
+    waitingTodayFew: "{n} items waiting today · {date}",
+    waitingTodayMany: "{n} items waiting today · {date}",
+    waitingTodayOther: "{n} items waiting today · {date}",
     lead: "Negotiate deals and submit wholesale requests against RARE OUD stock — this is not a storefront.",
     homeTasksTitle: "Start here",
     taskDealTitle: "Propose a deal",

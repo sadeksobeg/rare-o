@@ -34,13 +34,13 @@ export default async function TraderLoginPage({
       tagline={a.tagline}
       headline={a.headline}
       title={a.traderTitle}
-      subtitle={a.traderSubtitle}
+      subtitle={`${a.traderSubtitle} — ${a.traderHint}`}
       footer={
         <a
           href={accountRequestHref}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-medium text-[color:var(--rad-ac,var(--ro-plum-900))] underline-offset-4 hover:underline"
+          className="font-medium text-[color:var(--rad-ac)] underline-offset-4 hover:underline"
         >
           {dict.trader.accountRequestHelp}
         </a>

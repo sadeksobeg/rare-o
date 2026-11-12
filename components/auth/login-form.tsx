@@ -139,7 +139,6 @@ export function LoginForm({
   }, [lockedCountdown]);
 
   const locked = lockLeft > 0 || forcedState === "lock";
-  const headlineWords = (headline ?? title).split(/\s+/).filter(Boolean);
 
   const errorText =
     forcedState === "error"
@@ -166,21 +165,26 @@ export function LoginForm({
             : null;
 
   const showTotp = Boolean(totpLabel) || forcedState === "2fa";
-  /* Login ceremony is dark-first for both portals — cream light theme caused
-     trader form mismatch against the ink brand panel (same Input/Button chrome). */
-  const authTheme = "dark";
+  /* Admin stays dark-ceremony. Trader form follows portal light default;
+     brand panel remains ink cinematic on both. */
+  const authTheme = role === "trader" ? "light" : "dark";
 
   return (
     <MotionProvider surface={role === "admin" ? "admin" : "trader"}>
     <main
       data-portal={role === "admin" ? "admin" : "trader"}
       data-theme={authTheme}
-      className="ro-portal grid min-h-[100dvh] w-full max-w-[100vw] grid-cols-1 overflow-x-hidden bg-[color:var(--rad-c0,#0B080D)] md:grid-cols-[1.15fr_1fr]"
+      className={cn(
+        "ro-portal grid min-h-[100dvh] w-full max-w-[100vw] grid-cols-1 overflow-x-hidden min-[901px]:grid-cols-[1.15fr_1fr]",
+        role === "trader"
+          ? "bg-[color:var(--rad-c0,#F5EFE6)]"
+          : "bg-[color:var(--rad-c0,#0B080D)]"
+      )}
     >
-      {/* Living brand scene — compact ≤120px on phone so form stays reachable */}
-      <section className="relative flex max-h-[120px] min-h-[100px] flex-col justify-between overflow-hidden bg-[var(--ro-ink-950)] p-4 text-[var(--ro-sand-100)] md:max-h-none md:min-h-[100dvh] md:p-8">
+      {/* Living brand scene — compact ≤120px on phone; stacks below 901px */}
+      <section className="relative flex max-h-[120px] min-h-[100px] flex-col justify-between overflow-hidden bg-[#0B080D] p-4 text-[var(--ro-sand-100)] min-[901px]:max-h-none min-[901px]:min-h-[100dvh] min-[901px]:self-stretch min-[901px]:p-8">
         <div
-          className="pointer-events-none absolute inset-[-10%] motion-safe:animate-[ro-portal-ambient_9s_var(--ro-ease-resonance)_infinite]"
+          className="pointer-events-none absolute inset-0 motion-safe:animate-[ro-portal-ambient_9s_var(--ro-ease-resonance)_infinite]"
           aria-hidden
           style={{
             background: [
@@ -190,7 +194,7 @@ export function LoginForm({
             ].join(","),
           }}
         />
-        <div className="absolute inset-x-0 top-[8%] bottom-[34%] hidden md:block">
+        <div className="absolute inset-x-0 top-[8%] bottom-[34%] hidden min-[901px]:block">
           <LogoSceneMount className="h-full w-full" />
         </div>
         <div className="relative z-10 flex items-center justify-between gap-3">
@@ -216,30 +220,50 @@ export function LoginForm({
           </div>
           {children}
         </div>
-        <div className="relative z-10 hidden rounded-t-2xl bg-gradient-to-t from-[var(--ro-ink-950)] via-[color-mix(in_srgb,var(--ro-ink-950)_70%,transparent)] to-transparent px-2 pb-2 pt-16 text-center md:block">
+        <div className="relative z-10 hidden px-2 pb-2 pt-16 text-center min-[901px]:block">
           {tagline ? (
             <p className="ro-login-fade-up mb-2 text-sm text-[var(--ro-plum-300)]">
               {tagline}
             </p>
           ) : null}
-          <h2 className="mx-auto max-w-[16ch] font-display text-3xl font-semibold text-[var(--ro-sand-100)] sm:text-4xl">
-            {headlineWords.map((word, i) => (
-              <span
-                key={`${word}-${i}`}
-                className="ro-login-word-in inline-block"
-                style={{ animationDelay: `${300 + i * 80}ms` }}
-              >
-                {word}
-                {i < headlineWords.length - 1 ? "\u00a0" : null}
-              </span>
-            ))}
+          <h2
+            className="mx-auto max-w-[22ch] text-balance font-display text-3xl font-semibold leading-snug text-[var(--ro-sand-100)] sm:max-w-[26ch] sm:text-4xl"
+            style={{ textWrap: "balance" }}
+          >
+            {(() => {
+              const text = headline ?? title;
+              const parts = text.trim().split(/\s+/);
+              if (parts.length < 2) return text;
+              const last = parts.pop()!;
+              return (
+                <>
+                  {parts.join(" ")}
+                  {"\u00A0"}
+                  {last}
+                </>
+              );
+            })()}
           </h2>
         </div>
       </section>
 
-      {/* Form panel — ui-kit auth (rad tokens; admin dark-first) */}
-      <section className="relative flex min-h-0 flex-1 items-start justify-center bg-[color:var(--rad-c0,#0B080D)] p-5 md:min-h-[100dvh] md:items-center md:p-10">
-        <div className="w-full max-w-sm rounded-[18px] border border-[color:var(--rad-bd2)] bg-[color:var(--rad-surface,#15101A)] p-6 shadow-[var(--rad-sh,0_24px_60px_-28px_rgba(0,0,0,.7))] sm:p-8">
+      {/* Form panel — trader light default; admin dark ceremony */}
+      <section
+        className={cn(
+          "relative flex min-h-0 flex-1 items-start justify-center p-5 min-[901px]:min-h-[100dvh] min-[901px]:items-center min-[901px]:p-10",
+          role === "trader"
+            ? "bg-[color:var(--rad-c0,#F5EFE6)]"
+            : "bg-[color:var(--rad-c0,#0B080D)]"
+        )}
+      >
+        <div
+          className={cn(
+            "w-full max-w-md rounded-[18px] border border-[color:var(--rad-bd2)] p-6 sm:max-w-sm sm:p-8",
+            role === "trader"
+              ? "bg-[color:var(--rad-surface,#FFFFFF)] shadow-[var(--rad-sh,0_1px_2px_rgba(11,8,13,.05),0_12px_28px_-20px_rgba(50,16,79,.35))]"
+              : "bg-[color:var(--rad-surface,#15101A)] shadow-[var(--rad-sh,0_24px_60px_-28px_rgba(0,0,0,.7))]"
+          )}
+        >
           <div
             role="tablist"
             aria-label={brand}
