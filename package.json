@@ -50,6 +50,7 @@
     "test:whatsapp-jid": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-jid-checks.ts",
     "test:whatsapp-phase-a": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-phase-a-checks.ts",
     "test:whatsapp-phase-b": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-phase-b-checks.ts",
+    "test:whatsapp-reply-route": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-reply-route-checks.ts",
     "test:whatsapp-phase-c": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-phase-c-checks.ts",
     "test:whatsapp-phase-d": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-phase-d-checks.ts",
     "test:whatsapp-phase-e": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-phase-e-checks.ts",

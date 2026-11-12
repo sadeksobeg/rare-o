@@ -555,6 +555,15 @@ type Dict = {
     connSheetPhoneLabel: string;
     connSheetShowQrButton: string;
     connSheetNoSendNotice: string;
+    pairShowQr: string;
+    pairWaitingWorker: string;
+    pairCodeLabel: string;
+    pairCodeHint: string;
+    pairInvalidPhone: string;
+    pairFailed: string;
+    reconnectSaved: string;
+    reconnectPending: string;
+    reconnectHint: string;
     killActivePill: string;
     killSheetBody: string;
     killEngageLabel: string;
@@ -1514,6 +1523,9 @@ type Dict = {
     channelPlatform: string;
     channelWhatsApp: string;
     composerWillUsePlatform: string;
+    composerNoChannel: string;
+    composerNoChannelPlaceholder: string;
+    composerNoChannelToast: string;
     composerWillUseWhatsApp: string;
     mediaRequiresWhatsApp: string;
     linkedTraderChip: string;
@@ -2288,9 +2300,20 @@ const ar: Dict = {
     connSheetStep1: "افتح واتساب على هاتف المؤسسة",
     connSheetStep2: "الأجهزة المرتبطة ← ربط جهاز",
     connSheetStep3: "امسح الرمز الذي سيظهر هنا",
-    connSheetPhoneLabel: "رقم الهاتف (اختياري، للربط بالرمز)",
+    connSheetPhoneLabel: "رقم هاتف المؤسسة مع رمز الدولة",
     connSheetShowQrButton: "إظهار رمز الربط",
     connSheetNoSendNotice: "لن يُرسل أي شيء إلى عملائك أثناء الربط.",
+    pairShowQr: "عرض رمز QR بدلاً من ذلك",
+    pairWaitingWorker: "جارٍ طلب الرمز من واتساب… يظهر هنا خلال ثوانٍ.",
+    pairCodeLabel: "رمز الربط",
+    pairCodeHint:
+      "في واتساب: الأجهزة المرتبطة ← ربط جهاز ← الربط برقم الهاتف، ثم أدخل هذا الرمز.",
+    pairInvalidPhone: "أدخل الرقم كاملاً مع رمز الدولة (مثال: 963912345678).",
+    pairFailed: "تعذّر تنفيذ الطلب. حاول مرة أخرى.",
+    reconnectSaved: "إعادة الاتصال بالجلسة المحفوظة",
+    reconnectPending: "جارٍ إعادة الاتصال…",
+    reconnectHint:
+      "جرّب هذا أولاً إن كان الرقم مربوطاً من قبل. إن لم ينجح خلال دقيقة، اربط من جديد بالرمز أدناه.",
     killActivePill: "إيقاف طارئ",
     killSheetBody:
       "الإرسال من الصندوق موقوف طارئاً من لوحة الإدارة. الرسائل الواردة تصل، والملاحظات الداخلية متاحة، ولن يغادر أي رد واتساب حتى يُرفع الإيقاف.",
@@ -3369,7 +3392,11 @@ const ar: Dict = {
     statusRead: "تمت القراءة",
     channelPlatform: "عبر المنصة",
     channelWhatsApp: "عبر واتساب",
-    composerWillUsePlatform: "سيصل الرد عبر المنصة",
+    composerWillUsePlatform: "سيصل الرد عبر المنصة (حساب تاجر)",
+    composerNoChannel: "لا قناة للرد حالياً",
+    composerNoChannelPlaceholder: "الرد غير متاح الآن — استخدم ملاحظة داخلية",
+    composerNoChannelToast:
+      "لم يُرسل الرد: واتساب غير متصل، وصاحب هذا الرقم ليس له حساب على المنصة.",
     composerWillUseWhatsApp: "سيصل الرد عبر واتساب",
     mediaRequiresWhatsApp: "إرسال الوسائط يحتاج واتساب متصلاً مع تفعيل الإرسال — لا يمكن الإرسال الآن.",
     linkedTraderChip: "تاجر مرتبط",
@@ -4161,9 +4188,20 @@ const en: Dict = {
     connSheetStep1: "Open WhatsApp on the business phone",
     connSheetStep2: "Linked devices → Link a device",
     connSheetStep3: "Scan the code that will appear here",
-    connSheetPhoneLabel: "Phone number (optional, for code pairing)",
+    connSheetPhoneLabel: "Business phone number with country code",
     connSheetShowQrButton: "Show pairing code",
     connSheetNoSendNotice: "Nothing is sent to your customers while pairing.",
+    pairShowQr: "Show a QR code instead",
+    pairWaitingWorker: "Requesting the code from WhatsApp… it appears here within seconds.",
+    pairCodeLabel: "Pairing code",
+    pairCodeHint:
+      "In WhatsApp: Linked devices → Link a device → Link with phone number, then enter this code.",
+    pairInvalidPhone: "Enter the full number with country code (e.g. 963912345678).",
+    pairFailed: "Could not complete the request. Try again.",
+    reconnectSaved: "Reconnect with the saved session",
+    reconnectPending: "Reconnecting…",
+    reconnectHint:
+      "Try this first if the number was linked before. If it does not work within a minute, link again with the code below.",
     killActivePill: "Emergency stop",
     killSheetBody:
       "Outbound from the inbox is emergency-paused by an admin. Inbound still arrives and notes work; no WhatsApp reply leaves until the stop is lifted.",
@@ -5256,7 +5294,11 @@ const en: Dict = {
     statusRead: "Read",
     channelPlatform: "via platform",
     channelWhatsApp: "via WhatsApp",
-    composerWillUsePlatform: "Reply will send via platform",
+    composerWillUsePlatform: "Reply will send via platform (trader account)",
+    composerNoChannel: "No reply channel right now",
+    composerNoChannelPlaceholder: "Reply unavailable right now — use an internal note",
+    composerNoChannelToast:
+      "Reply not sent: WhatsApp is disconnected and this number has no platform account.",
     composerWillUseWhatsApp: "Reply will send via WhatsApp",
     mediaRequiresWhatsApp:
       "Media requires WhatsApp connected with outbound enabled — cannot send now.",
