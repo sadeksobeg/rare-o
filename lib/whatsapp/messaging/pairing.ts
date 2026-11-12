@@ -81,6 +81,20 @@ export async function setLinkCommand(
   const resetsDisplay = command === "pair" || command === "qr";
   const phoneDigits = phone ? normalizePairingPhone(phone) : null;
 
+  // Owner Disconnect/Logout: clear lastConnectedAt immediately so ops alerts
+  // treat this as intentional (soak test still alerts on unexpected drops).
+  if (command === "logout") {
+    const { markIntentionalDisconnect } = await import(
+      "@/lib/whatsapp/messaging/ops-alerts"
+    );
+    await markIntentionalDisconnect("Logged out - pairing required");
+    await db.whatsAppConnectionHealth.updateMany({
+      where: { id: WHATSAPP_CONNECTION_HEALTH_ID },
+      data: { linkCommand: "logout" },
+    });
+    return;
+  }
+
   await db.whatsAppConnectionHealth.upsert({
     where: { id: WHATSAPP_CONNECTION_HEALTH_ID },
     create: {
@@ -304,17 +318,29 @@ export async function applyFakeReconnect(
 export async function applyFakeLogout(
   db: DbClient = defaultPrisma
 ): Promise<void> {
+  const { markIntentionalDisconnect } = await import(
+    "@/lib/whatsapp/messaging/ops-alerts"
+  );
+  // markIntentionalDisconnect uses default prisma; for fake/E2E paths the
+  // process DATABASE_URL already points at the active DB.
+  if (db === defaultPrisma) {
+    await markIntentionalDisconnect("Logged out - pairing required");
+    return;
+  }
+  const { INTENTIONAL_DISCONNECT_MARKER } = await import(
+    "@/lib/whatsapp/messaging/ops-alerts"
+  );
   await db.whatsAppConnectionHealth.upsert({
     where: { id: WHATSAPP_CONNECTION_HEALTH_ID },
     create: {
       id: WHATSAPP_CONNECTION_HEALTH_ID,
       state: "AUTHENTICATION_REQUIRED",
-      detailSafe: "Logged out - pairing required",
+      detailSafe: `${INTENTIONAL_DISCONNECT_MARKER}: Logged out - pairing required`,
       linkCommand: "none",
     },
     update: {
       state: "AUTHENTICATION_REQUIRED",
-      detailSafe: "Logged out - pairing required",
+      detailSafe: `${INTENTIONAL_DISCONNECT_MARKER}: Logged out - pairing required`,
       lastConnectedAt: null,
       linkCommand: "none",
       pairingPhone: null,

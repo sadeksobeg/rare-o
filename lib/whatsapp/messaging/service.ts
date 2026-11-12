@@ -816,17 +816,30 @@ export async function upsertConnectionHealth(
     ? parseWaTimestamp(health.lastConnectedAt)
     : null;
 
+  // On successful connect, drop intentional-disconnect marker so a later
+  // unexpected drop can alert again (R2 soak-test behaviour).
+  let detailSafe = health.detail?.slice(0, 300) ?? null;
+  if (
+    health.state === "CONNECTED" &&
+    detailSafe &&
+    detailSafe.toLowerCase().includes("intentional_disconnect")
+  ) {
+    detailSafe = health.detail?.replace(/intentional_disconnect:?\s*/i, "").slice(0, 300) ?? null;
+  } else if (health.state === "CONNECTED") {
+    detailSafe = health.detail?.slice(0, 300) ?? null;
+  }
+
   const row = await db.whatsAppConnectionHealth.upsert({
     where: { id: WHATSAPP_CONNECTION_HEALTH_ID },
     create: {
       id: WHATSAPP_CONNECTION_HEALTH_ID,
       state: health.state,
-      detailSafe: health.detail?.slice(0, 300) ?? null,
+      detailSafe,
       lastConnectedAt,
     },
     update: {
       state: health.state,
-      detailSafe: health.detail?.slice(0, 300) ?? null,
+      detailSafe,
       ...(lastConnectedAt ? { lastConnectedAt } : {}),
     },
     select: { state: true, outboundKillSwitch: true },
