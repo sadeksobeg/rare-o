@@ -44,22 +44,27 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "ro-portal-card ro-portal-empty flex flex-col items-center border px-6 text-center",
+        "rad-card flex flex-col items-center px-6 py-10 text-center",
         className
       )}
       data-variant={variant}
+      data-empty="1"
     >
       <div
         className={cn(
-          "mb-6 text-[color:var(--ro-accent-fg,var(--ro-plum-800))]",
-          large ? "" : "ro-portal-icon-well size-14 [&>svg]:size-7"
+          "mb-6 text-[color:var(--rad-ac,var(--ro-plum-800))]",
+          large
+            ? ""
+            : "inline-flex size-14 items-center justify-center rounded-[11px] bg-[color:var(--rad-surface3)] text-[color:var(--rad-tx2)] [&>svg]:size-7"
         )}
       >
         {mark}
       </div>
-      <h3 className="ro-portal-section-title text-balance">{title}</h3>
+      <h3 className="text-balance text-lg font-semibold text-[color:var(--rad-tx)]">
+        {title}
+      </h3>
       {body ? (
-        <p className="ro-portal-muted mt-2.5 max-w-lg text-pretty leading-relaxed">
+        <p className="mt-2.5 max-w-lg text-pretty text-sm leading-relaxed text-[color:var(--rad-tx3)]">
           {body}
         </p>
       ) : null}

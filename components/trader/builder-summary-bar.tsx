@@ -23,13 +23,13 @@ export function BuilderSummaryBar({
         className
       )}
     >
-      <div className="mx-auto flex max-w-[45rem] items-center justify-end gap-4">
-        <p className="text-sm font-medium text-[color:var(--rad-tx)]">
+      <div className="flex w-full items-center justify-between gap-4">
+        <p className="min-w-0 flex-1 text-sm font-medium text-[color:var(--rad-tx)]">
           {countLabel}
         </p>
         <button
           type="button"
-          className="rad-btn rad-pri"
+          className="rad-btn rad-pri shrink-0"
           onClick={onReview}
           disabled={disabled}
         >

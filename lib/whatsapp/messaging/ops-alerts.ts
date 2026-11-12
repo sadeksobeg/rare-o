@@ -1,23 +1,28 @@
 /**
  * WhatsApp / disk ops alerts for the admin notification panel.
  * No migration: de-dupe via AdminAuditLog actions.
+ *
+ * Outage rules (R2):
+ * - Alert when the session *was* CONNECTED (lastConnectedAt set) and then stays
+ *   down longer than N minutes — independent of CONNECT_ON_START.
+ * - Suppress when: never connected (no lastConnectedAt), owner intentional
+ *   disconnect (lastConnectedAt cleared + marker), or kill switch on.
+ * - Worker restart that reconnects within N minutes must not alert.
  */
 import { prisma } from "@/lib/db/prisma";
-import { writeAdminAudit } from "@/lib/auth/admin-audit";
 import fs from "node:fs";
 import path from "node:path";
 
-const OUTAGE_ACTION = "whatsapp.outage_alert";
-const RECOVERY_ACTION = "whatsapp.recovered_alert";
+export const OUTAGE_ACTION = "whatsapp.outage_alert";
+export const RECOVERY_ACTION = "whatsapp.recovered_alert";
 const DISK_ACTION = "ops.disk_alert";
+
+/** Stored in detailSafe when the owner presses Disconnect / Logout. */
+export const INTENTIONAL_DISCONNECT_MARKER = "intentional_disconnect";
 
 export function disconnectAlertMinutes(): number {
   const raw = Number(process.env.WHATSAPP_DISCONNECT_ALERT_MINUTES ?? "5");
   return Number.isFinite(raw) && raw > 0 ? raw : 5;
-}
-
-function connectOnStartEnabled(): boolean {
-  return String(process.env.WHATSAPP_CONNECT_ON_START ?? "false").toLowerCase() === "true";
 }
 
 export type OpsAlertItem = {
@@ -28,70 +33,112 @@ export type OpsAlertItem = {
   unread?: boolean;
 };
 
-/** Evaluate disconnect outage; write at most one audit row per outage window. */
-export async function syncWhatsAppOutageAlert(): Promise<OpsAlertItem | null> {
-  if (!connectOnStartEnabled()) return null;
+type HealthRow = {
+  state: string;
+  detailSafe: string | null;
+  lastConnectedAt: Date | null;
+  lastHeartbeatAt: Date | null;
+  updatedAt: Date;
+  outboundKillSwitch: boolean;
+};
 
+function isIntentionalDisconnect(row: HealthRow): boolean {
+  if (!row.lastConnectedAt) return true; // never connected OR cleared on logout
+  const detail = (row.detailSafe ?? "").toLowerCase();
+  return detail.includes(INTENTIONAL_DISCONNECT_MARKER);
+}
+
+async function writeOpsAudit(action: string, target: string, meta: Record<string, unknown>) {
+  await prisma.adminAuditLog.create({
+    data: {
+      adminId: null,
+      action,
+      target,
+      metaJson: JSON.stringify(meta),
+      ip: "",
+    },
+  });
+}
+
+/**
+ * Pure decision helper (unit-testable): should we surface an outage / recovery?
+ * Returns null = silent.
+ */
+export function evaluateWhatsAppOutageAlert(
+  row: HealthRow | null,
+  nowMs: number,
+  minutes: number
+): { kind: "outage" | "recovery"; outageKey: string } | null {
+  if (!row) return null;
+  if (row.outboundKillSwitch) return null;
+  if (isIntentionalDisconnect(row)) return null;
+
+  const state = row.state.toUpperCase();
+  const thresholdMs = minutes * 60_000;
+  const outageKey = row.lastConnectedAt!.toISOString();
+
+  if (state === "CONNECTED" || state === "CONNECTING") {
+    return { kind: "recovery", outageKey };
+  }
+
+  // DISCONNECTED / ERROR / AUTHENTICATION_REQUIRED after a prior connection
+  const anchor = row.lastHeartbeatAt ?? row.updatedAt;
+  if (!anchor) return null;
+  const age = nowMs - anchor.getTime();
+  if (age < thresholdMs) return null; // includes worker restart that reconnects soon
+  return { kind: "outage", outageKey };
+}
+
+/** Evaluate disconnect outage; write at most one audit row per outage window. */
+export async function syncWhatsAppOutageAlert(
+  nowMs: number = Date.now()
+): Promise<OpsAlertItem | null> {
   const row = await prisma.whatsAppConnectionHealth.findUnique({
     where: { id: "default" },
   });
   if (!row) return null;
-  if (row.outboundKillSwitch) return null;
-  if (!row.lastConnectedAt) return null;
 
-  const state = row.state.toUpperCase();
   const minutes = disconnectAlertMinutes();
-  const thresholdMs = minutes * 60_000;
+  const decision = evaluateWhatsAppOutageAlert(row, nowMs, minutes);
+  if (!decision) return null;
 
-  if (state === "CONNECTED" || state === "CONNECTING") {
+  if (decision.kind === "recovery") {
     const open = await prisma.adminAuditLog.findFirst({
       where: { action: OUTAGE_ACTION },
       orderBy: { createdAt: "desc" },
     });
-    if (open) {
-      const alreadyRecovered = await prisma.adminAuditLog.findFirst({
-        where: {
-          action: RECOVERY_ACTION,
-          createdAt: { gt: open.createdAt },
-        },
-      });
-      if (!alreadyRecovered) {
-        await writeAdminAudit({
-          action: RECOVERY_ACTION,
-          target: open.target || "default",
-          meta: { state, recoveredAt: new Date().toISOString() },
-        });
-        return {
-          id: "wa-recovered",
-          href: "/admin/inbox",
-          title: "__wa_recovered__",
-          body: state,
-          unread: true,
-        };
-      }
-    }
-    return null;
+    if (!open) return null;
+    const alreadyRecovered = await prisma.adminAuditLog.findFirst({
+      where: {
+        action: RECOVERY_ACTION,
+        createdAt: { gt: open.createdAt },
+      },
+    });
+    if (alreadyRecovered) return null;
+    await writeOpsAudit(RECOVERY_ACTION, open.target || decision.outageKey, {
+      state: row.state,
+      recoveredAt: new Date(nowMs).toISOString(),
+    });
+    return {
+      id: "wa-recovered",
+      href: "/admin/inbox",
+      title: "__wa_recovered__",
+      body: row.state,
+      unread: true,
+    };
   }
 
-  // DISCONNECTED / ERROR / AUTHENTICATION_REQUIRED
-  const anchor = row.lastHeartbeatAt ?? row.updatedAt;
-  if (!anchor) return null;
-  const age = Date.now() - anchor.getTime();
-  if (age < thresholdMs) return null;
-
-  const outageKey = (row.lastConnectedAt ?? anchor).toISOString();
   const prior = await prisma.adminAuditLog.findFirst({
-    where: { action: OUTAGE_ACTION, target: outageKey },
+    where: { action: OUTAGE_ACTION, target: decision.outageKey },
   });
   if (!prior) {
-    await writeAdminAudit({
-      action: OUTAGE_ACTION,
-      target: outageKey,
-      meta: {
-        state,
-        minutes,
-        ageMinutes: Math.round(age / 60_000),
-      },
+    const anchor = row.lastHeartbeatAt ?? row.updatedAt;
+    await writeOpsAudit(OUTAGE_ACTION, decision.outageKey, {
+      state: row.state,
+      minutes,
+      ageMinutes: anchor
+        ? Math.round((nowMs - anchor.getTime()) / 60_000)
+        : null,
     });
   }
 
@@ -102,6 +149,36 @@ export async function syncWhatsAppOutageAlert(): Promise<OpsAlertItem | null> {
     body: String(minutes),
     unread: true,
   };
+}
+
+/**
+ * Mark an owner-initiated disconnect so soak-test manual connect still alerts
+ * on unexpected drops, but Disconnect/Logout does not.
+ */
+export async function markIntentionalDisconnect(
+  detail = "Logged out - pairing required"
+): Promise<void> {
+  const detailSafe = `${INTENTIONAL_DISCONNECT_MARKER}: ${detail}`.slice(0, 300);
+  await prisma.whatsAppConnectionHealth.upsert({
+    where: { id: "default" },
+    create: {
+      id: "default",
+      state: "AUTHENTICATION_REQUIRED",
+      detailSafe,
+      lastConnectedAt: null,
+      linkCommand: "none",
+    },
+    update: {
+      state: "AUTHENTICATION_REQUIRED",
+      detailSafe,
+      lastConnectedAt: null,
+      linkCommand: "none",
+      pairingPhone: null,
+      pairingCode: null,
+      qrDataUrl: null,
+      pairingExpiresAt: null,
+    },
+  });
 }
 
 function diskRoots(): string[] {
@@ -153,11 +230,7 @@ export async function syncDiskAlerts(): Promise<OpsAlertItem[]> {
         where: { action: DISK_ACTION, target },
       });
       if (!prior) {
-        await writeAdminAudit({
-          action: DISK_ACTION,
-          target,
-          meta: { pct, threshold, root },
-        });
+        await writeOpsAudit(DISK_ACTION, target, { pct, threshold, root });
       }
       items.push({
         id: `disk-${threshold}-${root}`,
@@ -166,7 +239,7 @@ export async function syncDiskAlerts(): Promise<OpsAlertItem[]> {
         body: `${threshold}|${pct}`,
         unread: true,
       });
-      break; // one item per root (highest threshold wins)
+      break;
     }
   }
   return items;

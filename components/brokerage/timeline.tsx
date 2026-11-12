@@ -1,6 +1,6 @@
 import { brokerageEventMessage } from "@/components/brokerage/labels";
-import { formatAdminDate } from "@/lib/i18n/admin-format";
 import type { Locale } from "@/lib/i18n/config";
+import { formatDateTime } from "@/lib/ui/trader-labels";
 
 type EventRow = {
   id: string;
@@ -65,10 +65,7 @@ export function BrokerageTimeline({
                   className="text-[0.7rem] tabular-nums text-[color:var(--rad-tx3)]"
                   dateTime={e.createdAt.toISOString()}
                 >
-                  {formatAdminDate(e.createdAt, loc, {
-                    withTime: true,
-                    forceAbsolute: true,
-                  })}
+                  {formatDateTime(loc, e.createdAt)}
                 </time>
                 <p className="mt-0.5 text-sm text-[color:var(--rad-tx)]">{msg}</p>
               </div>

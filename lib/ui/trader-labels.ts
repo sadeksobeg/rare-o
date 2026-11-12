@@ -42,16 +42,22 @@ export function fmt(template: string, vars: Record<string, string | number>) {
   return template.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? `{${k}}`));
 }
 
-/** Same calendar + Latin digits + 24h as admin shared `formatDate`. */
+/**
+ * Trader detail / timeline datetimes — e.g. «17 أكتوبر 2026، 16:31»
+ * (Western digits; owner R9.1).
+ */
 export function formatDateTime(locale: Locale, d: Date): string {
-  return formatDate(d, locale, {
+  const datePart = formatDate(d, locale, {
     year: "numeric",
-    month: "short",
+    month: "long",
     day: "numeric",
+  });
+  const timePart = formatDate(d, locale, {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
   });
+  return `${datePart}، ${timePart}`;
 }
 
 /** Consistent `USD 1,800` (code then amount, Latin digits). */

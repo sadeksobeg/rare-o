@@ -742,6 +742,14 @@
 .rad-kv .rad-full {
   grid-column: 1 / -1;
 }
+/* Odd last cell spans full row so the card doesn't look half-empty. */
+.rad-kv > div:last-child:nth-child(odd):not(.rad-full) {
+  grid-column: 1 / -1;
+}
+.rad-cb2 .rad-kv dd {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
 
 /* ---------- card header padding helpers ---------- */
 .rad-cpad {
@@ -1105,11 +1113,50 @@
   display: none;
   height: 0;
 }
+/* Brokerage lifecycle: always clip/scroll — never inherit DetailStepper phone
+   compact rules that set .rad-stp-scroll { overflow: visible }. */
+.rad-br-rail-scroll {
+  position: relative;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  mask-image: linear-gradient(
+    to left,
+    transparent 0,
+    #000 12px,
+    #000 calc(100% - 12px),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to left,
+    transparent 0,
+    #000 12px,
+    #000 calc(100% - 12px),
+    transparent 100%
+  );
+}
+.rad-br-rail-scroll::-webkit-scrollbar {
+  display: none;
+  height: 0;
+}
+.rad-br-rail-scroll:focus-visible {
+  outline: 2px solid var(--rad-ac);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
 .rad-stp {
   display: flex;
   padding: 22px 22px 20px;
-  min-width: max-content;
   width: 100%;
+  min-width: 0;
+}
+.rad-stp-scroll:focus-visible {
+  outline: 2px solid var(--rad-ac);
+  outline-offset: 2px;
+  border-radius: 10px;
 }
 .rad-stp .rad-s {
   flex: 1;
@@ -1397,11 +1444,70 @@
     justify-content: center;
   }
   .rad-stp {
+    padding: 14px 12px;
+    flex-wrap: nowrap;
+    gap: 0;
+    min-width: 0;
     overflow-x: auto;
-    padding: 18px 12px;
   }
   .rad-stp .rad-s {
-    min-width: 92px;
+    min-width: 4.25rem;
+    flex: 0 0 auto;
+  }
+  .rad-stp-scroll {
+    overflow-x: auto;
+  }
+}
+
+/* Compact single-row progress at phone widths (owner R8 #7). */
+@media (max-width: 480px) {
+  .rad-stp-scroll {
+    overflow: visible;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+  .rad-stp {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    min-width: 0;
+    overflow: visible;
+  }
+  .rad-stp .rad-s {
+    display: none;
+    flex: none;
+    min-width: 0;
+    padding: 0;
+  }
+  .rad-stp .rad-s::before {
+    display: none;
+  }
+  .rad-stp .rad-s.rad-cur,
+  .rad-stp .rad-s.rad-blocked {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+  }
+  .rad-stp .rad-s.rad-cur .rad-n,
+  .rad-stp .rad-s.rad-blocked .rad-n {
+    flex: none;
+  }
+  .rad-stp .rad-s.rad-cur .rad-n::after {
+    display: none;
+  }
+  .rad-stp::after {
+    content: attr(data-progress);
+    margin-inline-start: auto;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--rad-tx3);
+    font-variant-numeric: tabular-nums;
+    flex: none;
   }
 }
 
@@ -1476,6 +1582,17 @@
   font-weight: 700;
   color: var(--rad-tx);
 }
+/* Desktop trader nav — pair with .rad-tabbar (≤900px). */
+.rad-tn {
+  display: none;
+  align-items: center;
+  gap: 4px;
+}
+@media (min-width: 901px) {
+  .rad-tn {
+    display: flex;
+  }
+}
 .rad-tn-a {
   height: 40px;
   padding: 0 14px;
@@ -1522,8 +1639,10 @@
 }
 .rad-ib {
   position: relative;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 10px;
   display: grid;
   place-items: center;
@@ -1533,6 +1652,13 @@
 .rad-ib:hover {
   background: var(--rad-surface3);
   color: var(--rad-tx);
+}
+[data-theme="dark"] .rad-ib {
+  color: color-mix(in srgb, var(--rad-tx) 88%, transparent);
+}
+[data-theme="dark"] .rad-ib:hover {
+  color: var(--rad-tx);
+  background: var(--rad-surface3);
 }
 .rad-ib-dot {
   position: absolute;
@@ -1578,6 +1704,9 @@
   font-weight: 600;
   font-size: 13px;
 }
+.rad-tapp {
+  background: var(--rad-c0);
+}
 .rad-tpage {
   position: relative;
   max-width: 1200px;
@@ -1585,6 +1714,18 @@
   margin: 0 auto;
   padding: 30px 24px 96px;
   overflow-x: clip;
+  background: var(--rad-c0);
+}
+/* Activity column must keep the same horizontal gutter as sibling cards. */
+[data-trader-home] [data-trader-activity] {
+  min-width: 0;
+  max-width: 100%;
+  padding-inline: 0;
+}
+[data-trader-home] [data-trader-activity] .rad-card {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 /* Bound the trader shell so the messages flex column can scroll internally. */
 .rad-tapp:has(.rad-tmsg) {
@@ -1684,8 +1825,12 @@
     padding: 3px;
   }
   .rad-tpage {
-    /* Tab rail (68) + safe-area + 16px breathing room for primary submits */
-    padding: 18px 16px calc(68px + env(safe-area-inset-bottom, 0px) + 16px);
+    /* Tab rail (68) + safe-area + 24px so last activity row clears the rail */
+    padding: 18px 16px calc(68px + env(safe-area-inset-bottom, 0px) + 24px);
+  }
+  [data-trader-home] {
+    padding-inline: 0;
+    max-width: 100%;
   }
   /*
    * CHAT-F1.1: composer is a normal-flow footer inside a fixed-height
@@ -1777,4 +1922,272 @@
 }
 [data-theme="light"] .rad-tmsg-mine {
   background: #32104f !important;
+}
+
+/* ---------- Trader home (ui-kit trader-home.html) ---------- */
+.rad-thero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  padding: 38px;
+  margin-bottom: 22px;
+  background: linear-gradient(135deg, #3a1560 0%, #1d0b2e 55%, #0b080d 100%);
+  color: #f4e7d8;
+  box-shadow: 0 30px 60px -34px rgba(50, 16, 79, 0.7);
+}
+.rad-thero-rings {
+  position: absolute;
+  inset-inline-end: -80px;
+  top: -100px;
+  width: 420px;
+  height: 420px;
+  color: #c4a0ea;
+  opacity: 0.34;
+  pointer-events: none;
+}
+.rad-thero h1 {
+  position: relative;
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  font-family: var(--rad-font, inherit);
+  color: #f4e7d8;
+}
+.rad-thero p {
+  position: relative;
+  margin-top: 8px;
+  max-width: 520px;
+  font-size: 15px;
+  line-height: 1.8;
+  color: rgba(244, 231, 216, 0.74);
+}
+.rad-thero p b {
+  color: #fff;
+  font-weight: 600;
+}
+.rad-thero-actions {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+.rad-thero-btn-cr {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 11px;
+  font-weight: 600;
+  font-size: 13.5px;
+  background: #f4e7d8;
+  color: #0b080d;
+  transition: transform 0.12s var(--rad-ease), filter 0.16s var(--rad-ease);
+}
+.rad-thero-btn-cr:hover {
+  filter: brightness(0.93);
+}
+.rad-thero-btn-cr:active {
+  transform: scale(0.97);
+}
+.rad-thero-btn-ol {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 11px;
+  font-weight: 600;
+  font-size: 13.5px;
+  border: 1px solid rgba(244, 231, 216, 0.3);
+  color: #f4e7d8;
+  transition: transform 0.12s var(--rad-ease), background-color 0.16s var(--rad-ease);
+}
+.rad-thero-btn-ol:hover {
+  background: rgba(244, 231, 216, 0.1);
+}
+.rad-thero-btn-ol:active {
+  transform: scale(0.97);
+}
+.rad-tstat {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.rad-tstat-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 72px;
+  max-height: 88px;
+  padding: 12px 14px;
+  transition: border-color 0.2s var(--rad-ease), transform 0.2s var(--rad-ease);
+}
+.rad-tstat-item:hover {
+  border-color: var(--rad-bd2);
+  transform: translateY(-2px);
+}
+.rad-tstat-item b {
+  display: block;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--rad-tx);
+  font-family: var(--rad-font, inherit);
+}
+.rad-tstat-item span {
+  color: var(--rad-tx3);
+  font-size: 11.5px;
+  line-height: 1.3;
+}
+.rad-chip-lg {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+}
+.rad-tsh {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 26px 0 14px;
+}
+.rad-tsh h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--rad-tx);
+  font-family: var(--rad-font, inherit);
+}
+.rad-tsh a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--rad-acf, var(--rad-ac));
+  font-weight: 600;
+  font-size: 13px;
+}
+[data-theme="dark"] .rad-tsh a {
+  /* #D9BEF5 on #0B080D ≥ 7:1 — axe failed muted plum on dark home */
+  color: #d9bef5;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, #d9bef5 45%, transparent);
+  text-underline-offset: 3px;
+}
+.rad-tsh a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.rad-tstart {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 22px;
+  transition: border-color 0.2s var(--rad-ease), transform 0.2s var(--rad-ease);
+}
+.rad-tstart:hover {
+  border-color: var(--rad-ac);
+  transform: translateY(-2px);
+}
+.rad-tstart b {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--rad-tx);
+  font-family: var(--rad-font, inherit);
+}
+.rad-tstart p {
+  color: var(--rad-tx2);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+.rad-tocard {
+  overflow: hidden;
+  transition: border-color 0.2s var(--rad-ease), transform 0.25s var(--rad-ease);
+}
+.rad-tocard:hover {
+  border-color: var(--rad-bd2);
+  transform: translateY(-3px);
+}
+.rad-tocard-im {
+  position: relative;
+  height: 150px;
+  background: radial-gradient(circle at 70% 20%, #7a44b3, #1d0b2e 70%);
+  display: grid;
+  place-items: center;
+  color: #f4e7d8;
+  overflow: hidden;
+}
+.rad-tocard-bd {
+  padding: 16px 18px 18px;
+}
+.rad-tocard-bd b {
+  display: block;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--rad-tx);
+  font-family: var(--rad-font, inherit);
+}
+.rad-tocard-bd p {
+  color: var(--rad-tx3);
+  font-size: 12.5px;
+  margin-top: 3px;
+}
+.rad-ticon {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+@media (max-width: 900px) {
+  .rad-thero {
+    padding: 26px 22px;
+    border-radius: 18px;
+  }
+  .rad-thero h1 {
+    font-size: 24px;
+  }
+  .rad-thero-rings {
+    width: 280px;
+    height: 280px;
+    inset-inline-end: -60px;
+    top: -80px;
+  }
+  .rad-tstat {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .rad-tstat-item {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 6px;
+    min-height: 72px;
+    max-height: 88px;
+    padding: 10px 10px;
+  }
+  .rad-tstat-item .rad-chip-lg {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+  }
+  .rad-tstat-item .rad-chip-lg svg {
+    width: 15px;
+    height: 15px;
+  }
+  .rad-tstat-item b {
+    font-size: 18px;
+  }
+  .rad-tstat-item span {
+    font-size: 10.5px;
+  }
+  .rad-tsh h2 {
+    font-size: 16px;
+  }
 }

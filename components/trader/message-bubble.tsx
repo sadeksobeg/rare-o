@@ -138,7 +138,13 @@ export function TraderMessageBubble({
   t: TraderDict;
 }) {
   const isMine = message.direction === "inbound";
-  const isPlatform = message.channel === "platform";
+  // A team reply still queued for WhatsApp has only reached the trader here,
+  // on the platform — never label it "via WhatsApp" before it was delivered.
+  const waDelivered = ["sent", "delivered", "read", "received"].includes(
+    message.status
+  );
+  const isPlatform =
+    message.channel === "platform" || (!isMine && !waDelivered);
 
   return (
     <article

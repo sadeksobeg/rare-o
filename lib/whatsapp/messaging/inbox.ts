@@ -93,6 +93,8 @@ export type InboxCrmParty = {
     displayName: string;
     phone: string;
     companyName: string;
+    /** active | … — only an active account can read platform replies */
+    status: string;
   } | null;
 };
 
@@ -323,7 +325,7 @@ export async function getInboxConversation(
     include: {
       customer: { select: { id: true, name: true, phone: true } },
       trader: {
-        select: { id: true, displayName: true, phone: true, companyName: true },
+        select: { id: true, displayName: true, phone: true, companyName: true, status: true },
       },
       messages: {
         where: { hiddenAt: null },

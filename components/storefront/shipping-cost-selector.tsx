@@ -137,7 +137,7 @@ export function ShippingCostSelector({
             required
             value={destinationCode}
             onChange={(e) => selectDestination(e.target.value)}
-            className="h-12 w-full appearance-none rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-paper ps-10 pe-3 text-ro-ink outline-none transition-colors duration-[var(--ro-dur-fast)] focus:border-[var(--ro-plum-900)] focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-[var(--ro-focus)]"
+            className="h-12 max-w-full w-full appearance-none rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-paper ps-10 pe-3 text-ro-ink outline-none transition-colors duration-[var(--ro-dur-fast)] focus:border-[var(--ro-plum-900)] focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-[var(--ro-focus)]"
           >
             <option value="">
               {t(locale, "اختر الدولة أو المحافظة…", "Choose a country or governorate…")}
@@ -164,12 +164,12 @@ export function ShippingCostSelector({
         <div className="flex items-center justify-between gap-2">
           <span className="flex items-center gap-1.5 text-xs font-medium text-ro-muted">
             <Package className="size-3.5" strokeWidth={1.5} aria-hidden />
-            {t(locale, "وزن الشحنة التقديري", "Estimated shipment weight")}
+            {t(locale, "الوزن الحجمي التقديري", "Estimated volumetric weight")}
           </span>
-          <span className="font-display text-xl font-semibold tabular-nums text-ro-ink">
+          <span className="text-base font-semibold tabular-nums text-ro-ink">
             <bdi dir="ltr">
               <AnimatedValue value={weightKg} durationMs={lite ? 1 : 550} />{" "}
-              {t(locale, "كغ", "kg")}
+              {t(locale, "كيلو حجمي", "vol. kg")}
             </bdi>
           </span>
         </div>
@@ -187,9 +187,9 @@ export function ShippingCostSelector({
                   delay: lite ? 0 : i * 0.05,
                   ease: [0.22, 1, 0.36, 1],
                 }}
-                className="inline-flex items-center gap-1 rounded-[var(--ro-r-full)] border border-[var(--ro-border-control)] bg-ro-sunken px-2.5 py-1 text-[11px] font-medium text-ro-ink"
+                className="inline-flex items-center gap-1 rounded-[var(--ro-r-full)] border border-[var(--ro-border-control)] bg-ro-sunken px-2.5 py-1 text-[11px] font-medium tabular-nums text-ro-ink"
               >
-                <bdi dir="ltr">٢ × {t(locale, "عود", "oud")} = ٢٥ {t(locale, "كغ", "kg")}</bdi>
+                <bdi dir="ltr">2 × {t(locale, "عود", "oud")} = 25 {t(locale, "كيلو حجمي", "vol. kg")}</bdi>
               </m.span>
             ))}
             {boxes.remainder ? (
@@ -204,9 +204,9 @@ export function ShippingCostSelector({
                   delay: lite ? 0 : boxes.pairs * 0.05,
                   ease: [0.22, 1, 0.36, 1],
                 }}
-                className="inline-flex items-center gap-1 rounded-[var(--ro-r-full)] border border-dashed border-[var(--ro-border-control)] px-2.5 py-1 text-[11px] font-medium text-ro-muted"
+                className="inline-flex items-center gap-1 rounded-[var(--ro-r-full)] border border-dashed border-[var(--ro-border-control)] px-2.5 py-1 text-[11px] font-medium tabular-nums text-ro-muted"
               >
-                <bdi dir="ltr">١ × {t(locale, "عود", "oud")} = ٢٠ {t(locale, "كغ", "kg")}</bdi>
+                <bdi dir="ltr">1 × {t(locale, "عود", "oud")} = 20 {t(locale, "كيلو حجمي", "vol. kg")}</bdi>
               </m.span>
             ) : null}
           </AnimatePresence>
@@ -214,13 +214,22 @@ export function ShippingCostSelector({
       </div>
 
       {destinationCode && options.length === 0 ? (
-        <p className="rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-sunken px-3 py-2.5 text-xs text-ro-muted">
-          {t(
-            locale,
-            "سيتم تأكيد تكلفة الشحن لهذه الوجهة مع فريق RARE OUD عبر واتساب.",
-            "Shipping cost for this destination will be confirmed with the RARE OUD team over WhatsApp."
-          )}
-        </p>
+        <div
+          role="status"
+          className="rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-sunken px-3.5 py-3 text-sm text-ro-ink"
+        >
+          <p className="font-medium">
+            {t(locale, "اطلب عرض سعر", "Request a quote")}
+          </p>
+          <p className="mt-1 text-xs text-ro-muted">
+            {t(
+              locale,
+              "نجهّز لك عرضاً خاصاً لهذه الوجهة أو الوزن — أكمل الطلب وسنتواصل عبر واتساب.",
+              "We'll prepare a custom quote for this destination or weight — complete the request and we'll follow up on WhatsApp."
+            )}
+          </p>
+          <input type="hidden" name="shippingInquiry" value="1" />
+        </div>
       ) : null}
 
       {options.length > 0 ? (

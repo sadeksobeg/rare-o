@@ -14,11 +14,11 @@ export default async function TraderWholesaleCatalogPage() {
   const products = await listWholesaleEligibleProducts();
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 pb-[calc(68px+env(safe-area-inset-bottom,0px)+24px)] min-[901px]:pb-0">
       <TraderPageHeader
         title={t.wsTitle}
         description={t.wsLead}
-        icon={<Package className="size-5" strokeWidth={2} />}
+        icon={<Package className="size-5" strokeWidth={1.5} />}
         action={
           <Link
             href="/trader/wholesale/requests"

@@ -56,6 +56,8 @@ type ProductValues = {
   badgeNew?: boolean;
   badgeFeatured?: boolean;
   badgeSale?: boolean;
+  weightKg?: string;
+  shippingClass?: string;
   oudSpecs?: OudSpecsFormValues;
 };
 
@@ -452,6 +454,51 @@ export function ProductForm({
           </span>
         </span>
       </label>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <TextField
+          name="weightKg"
+          label={ar ? "وزن الوحدة (كيلو حجمي)" : "Unit weight (vol. kg)"}
+          helper={
+            ar
+              ? "اختياري — إن تُرك فارغاً يُقدَّر الكيلو الحجمي للشحن من عدد وحدات العود."
+              : "Optional — if empty, volumetric shipping weight uses the oud-unit heuristic."
+          }
+          type="number"
+          step="0.01"
+          min="0.01"
+          max="500"
+          dir="ltr"
+          defaultValue={product?.weightKg ?? ""}
+          dense
+        />
+        <Field
+          label={ar ? "فئة الشحن" : "Shipping class"}
+          hint={
+            ar
+              ? "تُستخدم لتقييد طرق الشحن (مثلاً سوائل بالطيران)."
+              : "Used to restrict methods (e.g. liquids by air)."
+          }
+        >
+          <Select
+            name="shippingClass"
+            defaultValue={product?.shippingClass ?? "other"}
+          >
+            {(
+              [
+                ["oud", ar ? "عود" : "Oud"],
+                ["oil", ar ? "زيت / دهن" : "Oil"],
+                ["accessory", ar ? "إكسسوار" : "Accessory"],
+                ["instrument", ar ? "آلة" : "Instrument"],
+                ["other", ar ? "أخرى" : "Other"],
+              ] as const
+            ).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </Select>
+        </Field>
+      </div>
       {errorText ? (
         <p role="alert" className={formErrorClass}>
           {errorText}

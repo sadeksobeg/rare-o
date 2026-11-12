@@ -20,6 +20,7 @@ export const dynamic = "force-dynamic";
 
 const COL_ACCENT: Record<string, string> = {
   SUBMITTED: "border-t-[color:var(--rad-acf)]",
+  NEEDS_INFO: "border-t-[color:var(--rad-warn)]",
   AWAITING_PAYMENT: "border-t-[color:var(--rad-warn)]",
   PAYMENT_CONFIRMED: "border-t-[color:var(--rad-ok)]",
   ACCEPTED: "border-t-[color:var(--rad-info)]",
@@ -31,6 +32,9 @@ const COL_ACCENT: Record<string, string> = {
   SHIPPED: "border-t-[color:var(--rad-info)]",
   DELIVERED: "border-t-[color:var(--rad-ok)]",
   CLOSED: "border-t-[color:var(--rad-tx3)]",
+  DECLINED: "border-t-[color:var(--rad-err)]",
+  REJECTED: "border-t-[color:var(--rad-err)]",
+  CANCELLED: "border-t-[color:var(--rad-tx3)]",
 };
 
 function isStaleRow(r: { createdAt: Date; status: string }) {

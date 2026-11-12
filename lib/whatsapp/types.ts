@@ -131,6 +131,8 @@ export type WhatsAppSendMediaInput = {
   bytes: Buffer;
   /** Voice note (PTT) when audio */
   ptt?: boolean;
+  /** Voice/video duration in whole seconds (WhatsApp PTT uses this). */
+  seconds?: number | null;
 };
 
 /** Own-device / history echo (message sent from phone or prior sync). */

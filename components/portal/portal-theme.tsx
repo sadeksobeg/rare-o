@@ -66,6 +66,27 @@ export function PortalThemeProvider({
     setReady(true);
   }, [defaultTheme]);
 
+  /* Keep body paint in sync so axe/contrast sampling and overscroll match portal. */
+  useEffect(() => {
+    if (!ready || !dataPortal) return;
+    const node = document.querySelector(
+      `.ro-portal[data-portal="${dataPortal}"]`
+    );
+    const fromToken = node
+      ? getComputedStyle(node).getPropertyValue("--rad-c0").trim()
+      : "";
+    const fallback = theme === "dark" ? "#0B080D" : "#F5EFE6";
+    const bg = fromToken || fallback;
+    const prevBody = document.body.style.backgroundColor;
+    const prevHtml = document.documentElement.style.backgroundColor;
+    document.body.style.backgroundColor = bg;
+    document.documentElement.style.backgroundColor = bg;
+    return () => {
+      document.body.style.backgroundColor = prevBody;
+      document.documentElement.style.backgroundColor = prevHtml;
+    };
+  }, [theme, dataPortal, ready]);
+
   const setTheme = useCallback((next: PortalThemeMode) => {
     setThemeState(next);
     try {
@@ -130,8 +151,11 @@ export function PortalThemeToggle({
     <button
       type="button"
       className={cn(
-        chrome ? "ro-chrome-icon" : "ro-icon-btn size-11 min-h-11 px-0",
         className
+          ? className
+          : chrome
+            ? "ro-chrome-icon"
+            : "ro-icon-btn size-11 min-h-11 px-0"
       )}
       aria-label={isDark ? lightLabel : darkLabel}
       aria-pressed={isDark}

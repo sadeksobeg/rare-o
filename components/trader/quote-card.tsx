@@ -24,6 +24,7 @@ export function QuoteCard({
   linesLabel,
   qtyLabel,
   lines,
+  showLines = true,
 }: {
   title: string;
   quotedAtLabel: string;
@@ -35,39 +36,48 @@ export function QuoteCard({
   linesLabel: string;
   qtyLabel: string;
   lines: QuoteCardLine[];
+  /** When false, omit unit-price rows (e.g. wholesale detail has a lines table). */
+  showLines?: boolean;
 }) {
   const priced = lines.filter((l) => l.quotedUnitPrice != null);
+  const metaBits: string[] = [];
+  if (quotedAt) metaBits.push(`${quotedAtLabel}: ${quotedAt}`);
+  if (currency) metaBits.push(`${currencyLabel}: ${currency}`);
+
   return (
     <div className="rad-card space-y-4 border-[color-mix(in_srgb,var(--ro-amber-600)_28%,var(--rad-bd))] p-5 text-sm">
-      <h2 className="ro-portal-section-title flex items-center gap-2">
-        <span className="ro-portal-icon-well size-8 [&>svg]:size-4" aria-hidden>
+      <h2
+        className="flex items-center gap-2 text-[15px] font-semibold text-[color:var(--rad-tx)]"
+        style={{ fontFamily: "var(--rad-font, inherit)" }}
+      >
+        <span className="rad-chip rad-c-warn [&>svg]:size-4" aria-hidden>
           <FileText className="size-4" strokeWidth={1.5} />
         </span>
         {title}
       </h2>
-      <dl className="grid gap-3 sm:grid-cols-2">
-        {quotedAt ? (
-          <div>
-            <dt className="text-[color:var(--rad-tx3)]">{quotedAtLabel}</dt>
-            <dd className="text-[color:var(--rad-tx)]">{quotedAt}</dd>
-          </div>
-        ) : null}
-        {currency ? (
-          <div>
-            <dt className="text-[color:var(--rad-tx3)]">{currencyLabel}</dt>
-            <dd className="text-[color:var(--rad-tx)]">{currency}</dd>
-          </div>
-        ) : null}
-        {message ? (
-          <div className="sm:col-span-2">
-            <dt className="text-[color:var(--rad-tx3)]">{messageLabel}</dt>
-            <dd className="whitespace-pre-wrap text-[color:var(--rad-tx)]">
-              {message}
-            </dd>
-          </div>
-        ) : null}
-      </dl>
-      {priced.length > 0 ? (
+      {metaBits.length > 0 ? (
+        <p className="text-[color:var(--rad-tx2)]">
+          {metaBits.map((bit, i) => (
+            <span key={bit}>
+              {i > 0 ? (
+                <span className="mx-2 text-[color:var(--rad-tx3)]" aria-hidden>
+                  ·
+                </span>
+              ) : null}
+              {bit}
+            </span>
+          ))}
+        </p>
+      ) : null}
+      {message ? (
+        <div>
+          <p className="text-[color:var(--rad-tx3)]">{messageLabel}</p>
+          <p className="mt-1 whitespace-pre-wrap text-[color:var(--rad-tx)]">
+            {message}
+          </p>
+        </div>
+      ) : null}
+      {showLines && priced.length > 0 ? (
         <div className="space-y-2">
           <p className="text-[color:var(--rad-tx3)]">{linesLabel}</p>
           <ul className="divide-y divide-[color:var(--rad-bd)] border border-[color:var(--rad-bd)] rounded-[var(--rad-r-sm)]">
@@ -84,7 +94,10 @@ export function QuoteCard({
                 </span>
                 <span className="font-semibold text-[color:var(--rad-tx)]">
                   <bdi dir="ltr">
-                    {formatMoney(l.quotedUnitPrice as number, currency || l.currency)}
+                    {formatMoney(
+                      l.quotedUnitPrice as number,
+                      currency || l.currency || "USD"
+                    )}
                   </bdi>
                 </span>
               </li>

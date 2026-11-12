@@ -13,6 +13,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
+  isPlatformOnlyChatId,
+  isWhatsAppLive,
+  resolveReplyRoute,
+} from "@/lib/whatsapp/messaging/reply-route";
+import {
   Check,
   CheckCheck,
   ChevronDown,
@@ -164,8 +169,15 @@ export function RadThread({
     whatsappDown ||
     conversation.blocked ||
     conversation.archived;
-  /** Text replies fall back to platform when WA outbound is unavailable. */
-  const replyUsesPlatform = sendingPaused || whatsappDown;
+  // Same resolver the send action uses — the chip below is a promise the
+  // server keeps, not a guess.
+  const replyRoute = resolveReplyRoute({
+    whatsappLive: isWhatsAppLive(health),
+    hasPlatformAccount: conversation.crm.trader?.status === "active",
+    platformOnly: isPlatformOnlyChatId(conversation.waChatId),
+  });
+  const replyUsesPlatform = replyRoute.channel === "platform";
+  const replyBlocked = replyRoute.channel === "none";
 
   const openSearch = useCallback(() => setSearchOpen(true), []);
   useThreadSearchHotkey(openSearch, true);
@@ -513,7 +525,7 @@ export function RadThread({
 
   function sendReply() {
     const v = text.trim();
-    if (!v || pending) return;
+    if (!v || pending || replyBlocked) return;
     const clientRequestId = newClientRequestId();
     const nowIso = new Date().toISOString();
     const optimisticChannel = replyUsesPlatform ? "platform" : "whatsapp";
@@ -561,14 +573,15 @@ export function RadThread({
               : m
           )
         );
-        toast.error(dict.inbox.sendFailed);
+        toast.error(
+          result.error === "NO_DELIVERY_CHANNEL"
+            ? dict.inbox.composerNoChannelToast
+            : dict.inbox.sendFailed
+        );
         return;
       }
       const messageId = result.data?.messageId;
       const realChannel = result.data?.channel ?? optimisticChannel;
-      if (result.data?.platformFallback) {
-        toast.message(dict.inbox.platformFallbackNotice);
-      }
       if (messageId) {
         const nextStatus = result.data?.status || "pending";
         setStatusOverrides((prev) => ({ ...prev, [messageId]: nextStatus }));
@@ -610,8 +623,13 @@ export function RadThread({
     });
   }
 
+  const replyDisabled = mode === "reply" && replyBlocked;
   const placeholder =
-    mode === "note" ? ib.composerNotePlaceholder : ib.composerReplyPlaceholder;
+    mode === "note"
+      ? ib.composerNotePlaceholder
+      : replyBlocked
+        ? dict.inbox.composerNoChannelPlaceholder
+        : ib.composerReplyPlaceholder;
 
   const requestRef = conversation.link.linked ? conversation.link.linkId : null;
 
@@ -854,7 +872,7 @@ export function RadThread({
               rows={1}
               placeholder={placeholder}
               value={text}
-              disabled={pending}
+              disabled={pending || replyDisabled}
               aria-label={placeholder}
               onChange={(e) => {
                 setText(e.target.value);
@@ -932,13 +950,20 @@ export function RadThread({
                     <span
                       className={cn(
                         "rad-hint rad-chipl",
-                        replyUsesPlatform ? "rad-warn-chip" : "rad-ok"
+                        replyBlocked
+                          ? "rad-no"
+                          : replyUsesPlatform
+                            ? "rad-warn-chip"
+                            : "rad-ok"
                       )}
-                      data-channel={replyUsesPlatform ? "platform" : "whatsapp"}
+                      data-channel={replyRoute.channel}
+                      title={replyBlocked ? dict.inbox.composerNoChannelToast : undefined}
                     >
-                      {replyUsesPlatform
-                        ? dict.inbox.composerWillUsePlatform
-                        : dict.inbox.composerWillUseWhatsApp}
+                      {replyBlocked
+                        ? dict.inbox.composerNoChannel
+                        : replyUsesPlatform
+                          ? dict.inbox.composerWillUsePlatform
+                          : dict.inbox.composerWillUseWhatsApp}
                     </span>
                   ) : (
                     <span className="rad-hint">{ib.composerSendHint}</span>
@@ -949,7 +974,7 @@ export function RadThread({
                       "rad-sendb",
                       text.trim() && !pending && "rad-sendb-ready"
                     )}
-                    disabled={!text.trim() || pending}
+                    disabled={!text.trim() || pending || replyDisabled}
                     onClick={mode === "reply" ? sendReply : saveNote}
                   >
                     {mode === "note" ? ib.saveNoteButton : ib.sendButton}

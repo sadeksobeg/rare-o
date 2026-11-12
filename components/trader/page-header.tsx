@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/** Trader page chrome — display title + lead + action, never bare h1. */
+/** Trader page chrome — title + lead + action (non-home routes). */
 export function TraderPageHeader({
   title,
   description,
@@ -26,13 +26,13 @@ export function TraderPageHeader({
   return (
     <header
       className={cn(
-        "ro-portal-main-enter flex flex-wrap items-end justify-between gap-4 border-b border-[color:var(--rad-bd,var(--ro-border-subtle))] pb-6",
+        "mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-[color:var(--rad-bd)] pb-6",
         className
       )}
     >
       <div className="flex min-w-0 items-start gap-3">
         {icon ? (
-          <span className="ro-portal-icon-well mt-1 hidden sm:inline-flex [&>svg]:size-5">
+          <span className="rad-chip rad-c-ac mt-1 hidden sm:inline-grid [&>svg]:size-5">
             {icon}
           </span>
         ) : null}
@@ -40,7 +40,7 @@ export function TraderPageHeader({
           {backHref && backLabel ? (
             <Link
               href={backHref}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[color:var(--rad-ac,var(--ro-plum-900))] hover:underline"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[color:var(--rad-ac)] hover:underline"
             >
               <ArrowLeft
                 className="size-4 rtl:-scale-x-100"
@@ -51,15 +51,18 @@ export function TraderPageHeader({
             </Link>
           ) : null}
           {overline ? (
-            <p className="ro-type-overline font-bold text-[color:var(--rad-ac,var(--ro-plum-800))]">
+            <p className="text-[11px] font-bold tracking-[0.08em] text-[color:var(--rad-ac)]">
               {overline}
             </p>
           ) : null}
-          <h1 className="ro-portal-page-title text-3xl tracking-tight text-[color:var(--rad-tx,var(--ro-text))] sm:text-[2.15rem]">
+          <h1
+            className="text-3xl font-semibold tracking-tight text-[color:var(--rad-tx)] sm:text-[2.15rem]"
+            style={{ fontFamily: "var(--rad-font, inherit)" }}
+          >
             {title}
           </h1>
           {description ? (
-            <p className="ro-portal-muted max-w-2xl leading-relaxed text-[color:var(--rad-tx2,var(--ro-text-muted))]">
+            <p className="max-w-2xl leading-relaxed text-[color:var(--rad-tx2)]">
               {description}
             </p>
           ) : null}

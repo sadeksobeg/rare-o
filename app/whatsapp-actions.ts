@@ -22,6 +22,11 @@ import {
   enqueueOutboundText,
 } from "@/lib/whatsapp/messaging/service";
 import { sendAdminPlatformMessage } from "@/lib/whatsapp/messaging/trader-channel";
+import {
+  isPlatformOnlyChatId,
+  isWhatsAppLive,
+  resolveReplyRoute,
+} from "@/lib/whatsapp/messaging/reply-route";
 import { previewManualTraderLink } from "@/lib/whatsapp/messaging/trader-unify";
 import {
   applyFakeLogout,
@@ -172,7 +177,11 @@ export async function adminSendWhatsAppTextAction(
 
   const conversation = await prisma.whatsAppConversation.findUnique({
     where: { id: conversationId },
-    select: { id: true, waChatId: true },
+    select: {
+      id: true,
+      waChatId: true,
+      trader: { select: { id: true, status: true } },
+    },
   });
   if (!conversation) {
     return { ok: false, error: "NOT_FOUND" };
@@ -180,6 +189,48 @@ export async function adminSendWhatsAppTextAction(
 
   const replyToMessageId =
     String(formData.get("replyToMessageId") || "").trim() || null;
+
+  // Route once, server-side, with the same resolver the composer shows the
+  // admin — a reply only falls back to the platform when a trader account
+  // exists to read it, and is refused (not silently parked) otherwise.
+  const hasPlatformAccount = conversation.trader?.status === "active";
+  const route = resolveReplyRoute({
+    whatsappLive: isWhatsAppLive(await getInboxHealthView()),
+    hasPlatformAccount,
+    platformOnly: isPlatformOnlyChatId(conversation.waChatId),
+  });
+
+  const sendViaPlatform = async () => {
+    const platformResult = await sendAdminPlatformMessage({
+      conversationId: conversation.id,
+      adminId: session.sub,
+      text,
+      clientRequestId,
+    });
+    if (!platformResult.ok) {
+      return { ok: false as const, error: platformResult.error };
+    }
+    revalidatePath("/admin/inbox");
+    revalidatePath(`/admin/inbox/${conversationId}`);
+    return {
+      ok: true as const,
+      data: {
+        messageId: platformResult.messageId,
+        conversationId: platformResult.conversationId,
+        status: "sent",
+        duplicate: false,
+        channel: "platform" as const,
+        platformFallback: true,
+      },
+    };
+  };
+
+  if (route.channel === "none") {
+    return { ok: false, error: "NO_DELIVERY_CHANNEL" };
+  }
+  if (route.channel === "platform") {
+    return sendViaPlatform();
+  }
 
   const result = await enqueueOutboundText({
     waChatId: conversation.waChatId,
@@ -193,32 +244,10 @@ export async function adminSendWhatsAppTextAction(
 
   if (!result.ok) {
     if (result.code === "OUTBOUND_DISABLED") {
-      // Real WhatsApp send is unavailable (kill switch or no connection) —
-      // fall back to the same platform channel the trader portal already
-      // writes into, so the admin can still reply. Same conversation, same
-      // thread the trader already reads; never a second inbox.
-      const platformResult = await sendAdminPlatformMessage({
-        conversationId: conversation.id,
-        adminId: session.sub,
-        text,
-        clientRequestId,
-      });
-      if (!platformResult.ok) {
-        return { ok: false, error: platformResult.error };
-      }
-      revalidatePath("/admin/inbox");
-      revalidatePath(`/admin/inbox/${conversationId}`);
-      return {
-        ok: true,
-        data: {
-          messageId: platformResult.messageId,
-          conversationId: platformResult.conversationId,
-          status: "sent",
-          duplicate: false,
-          channel: "platform",
-          platformFallback: true,
-        },
-      };
+      // Lost the race with a kill switch flipped after routing.
+      return hasPlatformAccount
+        ? sendViaPlatform()
+        : { ok: false, error: "NO_DELIVERY_CHANNEL" };
     }
     if (
       result.code === "RATE_LIMITED" ||

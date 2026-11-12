@@ -301,6 +301,7 @@ type Dict = {
     deals: string;
     wholesale: string;
     brokerage: string;
+    shipping: string;
     offers: string;
     promos: string;
     kpiRetail: string;
@@ -555,6 +556,15 @@ type Dict = {
     connSheetPhoneLabel: string;
     connSheetShowQrButton: string;
     connSheetNoSendNotice: string;
+    pairShowQr: string;
+    pairWaitingWorker: string;
+    pairCodeLabel: string;
+    pairCodeHint: string;
+    pairInvalidPhone: string;
+    pairFailed: string;
+    reconnectSaved: string;
+    reconnectPending: string;
+    reconnectHint: string;
     killActivePill: string;
     killSheetBody: string;
     killEngageLabel: string;
@@ -1113,6 +1123,12 @@ type Dict = {
     welcome: string;
     waitingToday: string;
     waitingTodayZero: string;
+    /** Arabic plural: 1 أمر واحد / 2 أمران / 3–10 أمور / 11+ أمراً */
+    waitingTodayOne: string;
+    waitingTodayTwo: string;
+    waitingTodayFew: string;
+    waitingTodayMany: string;
+    waitingTodayOther: string;
     lead: string;
     homeTasksTitle: string;
     taskDealTitle: string;
@@ -1215,6 +1231,11 @@ type Dict = {
     dealsEmptyBody: string;
     dealsTabList: string;
     dealsTabAll: string;
+    dealsTabOpen: string;
+    dealsTabPayment: string;
+    dealsTabDone: string;
+    dealsActionWaiting: string;
+    /** @deprecated use dealsActionWaiting — kept for older call sites */
     dealsTabWaiting: string;
     dealsTabNegotiating: string;
     dealsTabClosed: string;
@@ -1229,6 +1250,9 @@ type Dict = {
     colTitle: string;
     colKind: string;
     colStatus: string;
+    colUpdated: string;
+    colAmount: string;
+    colMessages: string;
     colEntries: string;
     newDealTitle: string;
     newDealLead: string;
@@ -1291,6 +1315,7 @@ type Dict = {
     dealProduct: string;
     dealNonCatalog: string;
     dealSnapshot: string;
+    dealTotal: string;
     dealQtyShort: string;
     dealConditions: string;
     dealHistory: string;
@@ -1365,6 +1390,10 @@ type Dict = {
     profilePhone: string;
     profileStatus: string;
     profileNote: string;
+    profileAppearanceDesc: string;
+    profileLanguageCurrent: string;
+    profileLanguageSwitch: string;
+    profileLinesLabel: string;
     prefsTitle: string;
     prefsLead: string;
     prefsCategories: string;
@@ -1514,6 +1543,9 @@ type Dict = {
     channelPlatform: string;
     channelWhatsApp: string;
     composerWillUsePlatform: string;
+    composerNoChannel: string;
+    composerNoChannelPlaceholder: string;
+    composerNoChannelToast: string;
     composerWillUseWhatsApp: string;
     mediaRequiresWhatsApp: string;
     linkedTraderChip: string;
@@ -2032,6 +2064,7 @@ const ar: Dict = {
     deals: "الصفقات",
     wholesale: "الجملة",
     brokerage: "الوساطة",
+    shipping: "الشحن",
     offers: "العروض",
     promos: "الترويج",
     kpiRetail: "طلبات تجزئة جديدة",
@@ -2288,9 +2321,20 @@ const ar: Dict = {
     connSheetStep1: "افتح واتساب على هاتف المؤسسة",
     connSheetStep2: "الأجهزة المرتبطة ← ربط جهاز",
     connSheetStep3: "امسح الرمز الذي سيظهر هنا",
-    connSheetPhoneLabel: "رقم الهاتف (اختياري، للربط بالرمز)",
+    connSheetPhoneLabel: "رقم هاتف المؤسسة مع رمز الدولة",
     connSheetShowQrButton: "إظهار رمز الربط",
     connSheetNoSendNotice: "لن يُرسل أي شيء إلى عملائك أثناء الربط.",
+    pairShowQr: "عرض رمز QR بدلاً من ذلك",
+    pairWaitingWorker: "جارٍ طلب الرمز من واتساب… يظهر هنا خلال ثوانٍ.",
+    pairCodeLabel: "رمز الربط",
+    pairCodeHint:
+      "في واتساب: الأجهزة المرتبطة ← ربط جهاز ← الربط برقم الهاتف، ثم أدخل هذا الرمز.",
+    pairInvalidPhone: "أدخل الرقم كاملاً مع رمز الدولة (مثال: 963912345678).",
+    pairFailed: "تعذّر تنفيذ الطلب. حاول مرة أخرى.",
+    reconnectSaved: "إعادة الاتصال بالجلسة المحفوظة",
+    reconnectPending: "جارٍ إعادة الاتصال…",
+    reconnectHint:
+      "جرّب هذا أولاً إن كان الرقم مربوطاً من قبل. إن لم ينجح خلال دقيقة، اربط من جديد بالرمز أدناه.",
     killActivePill: "إيقاف طارئ",
     killSheetBody:
       "الإرسال من الصندوق موقوف طارئاً من لوحة الإدارة. الرسائل الواردة تصل، والملاحظات الداخلية متاحة، ولن يغادر أي رد واتساب حتى يُرفع الإيقاف.",
@@ -2474,7 +2518,7 @@ const ar: Dict = {
     traderInterests: "اهتمامات التصنيف",
     categoriesLead:
       "إدارة فئات الكتالوج: إنشاء وتعديل الأسماء والترتيب. لا يمكن حذف فئة تحتوي على منتجات.",
-    offersLead: "عروض عامة منسّقة من الإدارة — ليست متاجر للتجّار.",
+    offersLead: "عروض منشورة من RARE OUD فقط — ليست واجهات متاجر للتجّار.",
     newOffer: "عرض جديد",
     promosLead:
       "شرائط ترويجية للصفحة الرئيسية — تظهر فقط عندما تكون منشورة وضمن الفترة إن وُجدت.",
@@ -2919,6 +2963,11 @@ const ar: Dict = {
     welcome: "أهلاً، {name}",
     waitingToday: "{n} أمور بانتظارك اليوم · {date}",
     waitingTodayZero: "لا شيء بانتظارك اليوم · {date}",
+    waitingTodayOne: "أمر واحد بانتظارك اليوم · {date}",
+    waitingTodayTwo: "أمران بانتظارك اليوم · {date}",
+    waitingTodayFew: "{n} أمور بانتظارك اليوم · {date}",
+    waitingTodayMany: "{n} أمراً بانتظارك اليوم · {date}",
+    waitingTodayOther: "{n} أمر بانتظارك اليوم · {date}",
     lead: "فاوض على الصفقات وقدّم طلبات الجملة من مخزون RARE OUD — هذه البوابة ليست متجراً.",
     homeTasksTitle: "ابدأ من هنا",
     taskDealTitle: "اقترح صفقة",
@@ -3058,7 +3107,11 @@ const ar: Dict = {
     dealsEmptyBody: "ابدأ بتقديم أول مقترح صفقة إلى RARE OUD.",
     dealsTabList: "تصفية الصفقات",
     dealsTabAll: "الكل",
-    dealsTabWaiting: "بانتظاري",
+    dealsTabOpen: "مفتوحة",
+    dealsTabPayment: "بانتظار الدفع",
+    dealsTabDone: "منتهية",
+    dealsActionWaiting: "بانتظارك",
+    dealsTabWaiting: "بانتظارك",
     dealsTabNegotiating: "قيد التفاوض",
     dealsTabClosed: "مغلقة",
     wsTabList: "تصفية طلبات الجملة",
@@ -3072,7 +3125,10 @@ const ar: Dict = {
     colTitle: "العنوان",
     colKind: "النوع",
     colStatus: "الحالة",
-    colEntries: "الإدخالات",
+    colUpdated: "آخر تحديث",
+    colAmount: "المبلغ",
+    colMessages: "الرسائل",
+    colEntries: "الرسائل",
     newDealTitle: "اقتراح صفقة",
     newDealLead:
       "اقترح صفقة على قطعة من الكتالوج أو فرصة جديدة؛ يراجعها الفريق.",
@@ -3142,6 +3198,7 @@ const ar: Dict = {
     dealProduct: "المنتج",
     dealNonCatalog: "خارج الكتالوج (بلا ربط بمنتج)",
     dealSnapshot: "الملخص التجاري",
+    dealTotal: "الإجمالي",
     dealQtyShort: "الكمية",
     dealConditions: "الشروط / ملاحظات",
     dealHistory: "سجل التفاوض",
@@ -3163,7 +3220,7 @@ const ar: Dict = {
     negQty: "الكمية",
     negConditions: "الشروط / ملاحظات",
     negRecorded: "تم تسجيل إدخال التفاوض.",
-    negSubmit: "إرسال الإدخال",
+    negSubmit: "إرسال الرد",
     wsTitle: "طلب بالجملة",
     wsLead: "اختر القطع والكميات من مخزون RARE OUD.",
     wsMyRequests: "طلباتي بالجملة",
@@ -3192,7 +3249,7 @@ const ar: Dict = {
     wsTraderResponse: "ردّك على العرض",
     wsModeLabel: "نمط الطلب",
     wsFormHint:
-      "لا تفرض المنصة سعر جملة. استخدم «طلب عرض سعر» إلا إذا كنت تقترح سعر وحدة خاصاً بك. سعر التجزئة المعروض مرجع فقط وليس سعر جملة. الحد الأدنى للطلب غير مفروض، والحد الأقصى للكمية ({max}) حدّ أمان تقني فقط.",
+      "لا تفرض المنصة سعر جملة. استخدم «طلب عرض سعر» إلا إذا كنت تقترح سعر وحدة خاصاً بك. سعر التجزئة المعروض مرجع فقط وليس سعر جملة. لا حد أدنى للكمية، وأقصى كمية لكل قطعة هي {max}.",
     wsColProduct: "المنتج",
     wsColRetail: "تجزئة الكتالوج (مرجع)",
     wsColQty: "الكمية",
@@ -3218,6 +3275,10 @@ const ar: Dict = {
     profileStatus: "الحالة",
     profileNote:
       "تغييرات الحساب تتم عبر إدارة RARE OUD. حدّث تفضيلات الصفقات أدناه لمساعدة المطابقة.",
+    profileAppearanceDesc: "اختر المظهر الفاتح أو الداكن لهذه البوابة فقط.",
+    profileLanguageCurrent: "اللغة الحالية",
+    profileLanguageSwitch: "التبديل إلى",
+    profileLinesLabel: "بنود",
     prefsTitle: "تفضيلات الصفقات",
     prefsLead:
       "أخبر الإدارة بأنواع المنتجات التي تهمّك — لا يظهر هذا للمتسوقين.",
@@ -3254,7 +3315,7 @@ const ar: Dict = {
     messagesErrorGeneric: "تعذّر إرسال الرسالة — حاول مرة أخرى",
     messagesWhatsappMediaUnavailable: "مرفق من واتساب (غير متاح هنا)",
     offersTitle: "العروض العامة المختارة",
-    offersLead: "عروض RARE OUD المنشورة فقط — وليست متاجر للتجّار.",
+    offersLead: "عروض منشورة من RARE OUD فقط — ليست واجهات متاجر للتجّار.",
     offersEmpty: "لا توجد عروض منشورة بعد.",
     offersBack: "العودة إلى العروض",
     offersRelatedProduct: "المنتج المرتبط",
@@ -3369,7 +3430,11 @@ const ar: Dict = {
     statusRead: "تمت القراءة",
     channelPlatform: "عبر المنصة",
     channelWhatsApp: "عبر واتساب",
-    composerWillUsePlatform: "سيصل الرد عبر المنصة",
+    composerWillUsePlatform: "سيصل الرد عبر المنصة (حساب تاجر)",
+    composerNoChannel: "لا قناة للرد حالياً",
+    composerNoChannelPlaceholder: "الرد غير متاح الآن — استخدم ملاحظة داخلية",
+    composerNoChannelToast:
+      "لم يُرسل الرد: واتساب غير متصل، وصاحب هذا الرقم ليس له حساب على المنصة.",
     composerWillUseWhatsApp: "سيصل الرد عبر واتساب",
     mediaRequiresWhatsApp: "إرسال الوسائط يحتاج واتساب متصلاً مع تفعيل الإرسال — لا يمكن الإرسال الآن.",
     linkedTraderChip: "تاجر مرتبط",
@@ -3547,7 +3612,7 @@ const ar: Dict = {
     sessionsTab: "الجلسات",
     activeSessions: "الجلسات النشطة",
     activeSessionsDesc:
-      "لا نخزّن قائمة أجهزة مفصّلة. تسجيل الخروج من الأجهزة الأخرى يعتمد على إبطال الجلسات عبر إصدار كلمة المرور (pwv).",
+      "لا نخزّن قائمة أجهزة مفصّلة. يمكنك إنهاء جلسات الدخول على الأجهزة الأخرى من هنا، وتبقى جلستك الحالية كما هي.",
     currentSession: "هذه الجلسة",
     signOutOthers: "تسجيل الخروج من الأجهزة الأخرى",
     signOutOthersTitle: "تسجيل الخروج من كل الجلسات الأخرى؟",
@@ -3905,6 +3970,7 @@ const en: Dict = {
     deals: "Deals",
     wholesale: "Wholesale",
     brokerage: "Brokerage",
+    shipping: "Shipping",
     offers: "Offers",
     promos: "Promos",
     kpiRetail: "New retail requests",
@@ -4161,9 +4227,20 @@ const en: Dict = {
     connSheetStep1: "Open WhatsApp on the business phone",
     connSheetStep2: "Linked devices → Link a device",
     connSheetStep3: "Scan the code that will appear here",
-    connSheetPhoneLabel: "Phone number (optional, for code pairing)",
+    connSheetPhoneLabel: "Business phone number with country code",
     connSheetShowQrButton: "Show pairing code",
     connSheetNoSendNotice: "Nothing is sent to your customers while pairing.",
+    pairShowQr: "Show a QR code instead",
+    pairWaitingWorker: "Requesting the code from WhatsApp… it appears here within seconds.",
+    pairCodeLabel: "Pairing code",
+    pairCodeHint:
+      "In WhatsApp: Linked devices → Link a device → Link with phone number, then enter this code.",
+    pairInvalidPhone: "Enter the full number with country code (e.g. 963912345678).",
+    pairFailed: "Could not complete the request. Try again.",
+    reconnectSaved: "Reconnect with the saved session",
+    reconnectPending: "Reconnecting…",
+    reconnectHint:
+      "Try this first if the number was linked before. If it does not work within a minute, link again with the code below.",
     killActivePill: "Emergency stop",
     killSheetBody:
       "Outbound from the inbox is emergency-paused by an admin. Inbound still arrives and notes work; no WhatsApp reply leaves until the stop is lifted.",
@@ -4797,6 +4874,11 @@ const en: Dict = {
     welcome: "Welcome, {name}",
     waitingToday: "{n} items waiting today · {date}",
     waitingTodayZero: "Nothing waiting today · {date}",
+    waitingTodayOne: "1 item waiting today · {date}",
+    waitingTodayTwo: "2 items waiting today · {date}",
+    waitingTodayFew: "{n} items waiting today · {date}",
+    waitingTodayMany: "{n} items waiting today · {date}",
+    waitingTodayOther: "{n} items waiting today · {date}",
     lead: "Negotiate deals and submit wholesale requests against RARE OUD stock — this is not a storefront.",
     homeTasksTitle: "Start here",
     taskDealTitle: "Propose a deal",
@@ -4937,7 +5019,11 @@ const en: Dict = {
     dealsEmptyBody: "Start by sending your first deal proposal to RARE OUD.",
     dealsTabList: "Filter deals",
     dealsTabAll: "All",
-    dealsTabWaiting: "Waiting on me",
+    dealsTabOpen: "Open",
+    dealsTabPayment: "Awaiting payment",
+    dealsTabDone: "Finished",
+    dealsActionWaiting: "Needs you",
+    dealsTabWaiting: "Needs you",
     dealsTabNegotiating: "Negotiating",
     dealsTabClosed: "Closed",
     wsTabList: "Filter wholesale requests",
@@ -4951,7 +5037,10 @@ const en: Dict = {
     colTitle: "Title",
     colKind: "Kind",
     colStatus: "Status",
-    colEntries: "Entries",
+    colUpdated: "Updated",
+    colAmount: "Amount",
+    colMessages: "Messages",
+    colEntries: "Messages",
     newDealTitle: "Propose a deal",
     newDealLead:
       "Propose a deal on a catalog piece or a new opportunity; the team will review it.",
@@ -5021,6 +5110,7 @@ const en: Dict = {
     dealProduct: "Product",
     dealNonCatalog: "Non-catalog (no product link)",
     dealSnapshot: "Commercial snapshot",
+    dealTotal: "Total",
     dealQtyShort: "qty",
     dealConditions: "Conditions / notes",
     dealHistory: "Negotiation history",
@@ -5044,7 +5134,7 @@ const en: Dict = {
     negQty: "Quantity",
     negConditions: "Conditions / notes",
     negRecorded: "Negotiation entry recorded.",
-    negSubmit: "Submit entry",
+    negSubmit: "Send reply",
     wsTitle: "Wholesale request",
     wsLead: "Choose pieces and quantities from RARE OUD stock.",
     wsMyRequests: "My wholesale requests",
@@ -5073,7 +5163,7 @@ const en: Dict = {
     wsTraderResponse: "Your response to the quote",
     wsModeLabel: "Request mode",
     wsFormHint:
-      "No wholesale list price is invented by the platform. Use “Request quote” unless you are proposing your own unit price. Catalog retail shown below is a reference only — not wholesale pricing. MOQ is not enforced. Quantity max {max} is a technical safety limit only.",
+      "No wholesale list price is invented by the platform. Use “Request quote” unless you are proposing your own unit price. Catalog retail shown below is a reference only — not wholesale pricing. There is no minimum order quantity; the maximum per piece is {max}.",
     wsColProduct: "Product",
     wsColRetail: "Catalog retail (ref.)",
     wsColQty: "Qty",
@@ -5099,6 +5189,10 @@ const en: Dict = {
     profileStatus: "Status",
     profileNote:
       "Profile changes are managed by RARE OUD admin. Update deal preferences below to help matching.",
+    profileAppearanceDesc: "Choose light or dark appearance for this portal only.",
+    profileLanguageCurrent: "Current language",
+    profileLanguageSwitch: "Switch to",
+    profileLinesLabel: "Lines",
     prefsTitle: "Deal preferences",
     prefsLead:
       "Tell admin which product types interest you — never shown to shoppers.",
@@ -5136,6 +5230,7 @@ const en: Dict = {
     messagesWhatsappMediaUnavailable: "WhatsApp attachment (not available here)",
     offersTitle: "Public curated offers",
     offersLead: "Published RARE OUD presentations only — not trader storefronts.",
+
     offersEmpty: "No published offers yet.",
     offersBack: "Back to offers",
     offersRelatedProduct: "Related product",
@@ -5256,7 +5351,11 @@ const en: Dict = {
     statusRead: "Read",
     channelPlatform: "via platform",
     channelWhatsApp: "via WhatsApp",
-    composerWillUsePlatform: "Reply will send via platform",
+    composerWillUsePlatform: "Reply will send via platform (trader account)",
+    composerNoChannel: "No reply channel right now",
+    composerNoChannelPlaceholder: "Reply unavailable right now — use an internal note",
+    composerNoChannelToast:
+      "Reply not sent: WhatsApp is disconnected and this number has no platform account.",
     composerWillUseWhatsApp: "Reply will send via WhatsApp",
     mediaRequiresWhatsApp:
       "Media requires WhatsApp connected with outbound enabled — cannot send now.",
@@ -5436,7 +5535,7 @@ const en: Dict = {
     sessionsTab: "Sessions",
     activeSessions: "Active sessions",
     activeSessionsDesc:
-      "We do not store a detailed device list. Signing out other devices invalidates sessions via the password version (pwv).",
+      "We do not store a detailed device list. You can end sign-in sessions on other devices here; your current session stays active.",
     currentSession: "This session",
     signOutOthers: "Sign out other devices",
     signOutOthersTitle: "Sign out of all other sessions?",

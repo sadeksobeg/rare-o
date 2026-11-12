@@ -1,7 +1,9 @@
 import { prisma } from "@/lib/db/prisma";
 import type { RetailRequestCreateInput } from "@/lib/validation/schemas";
-import { resolveAvailableMethods } from "@/lib/shipping/resolve-available-methods";
-import { calculateOudShipmentWeightKg } from "@/lib/shipping/rates";
+import {
+  buildQuoteSnapshot,
+  quote,
+} from "@/lib/shipping/engine";
 import {
   assertNoWhatsAppBusinessApiSend,
   prepareWhatsAppHandoff,
@@ -50,14 +52,6 @@ export async function createRetailRequestFromCart(
     where: { id: { in: productIds } },
   });
   const byId = new Map(products.map((p) => [p.id, p]));
-  const categorySlugs = await prisma.product.findMany({
-    where: { id: { in: productIds } },
-    select: { id: true, category: { select: { slug: true } } },
-  });
-  const categorySlugById = new Map(
-    categorySlugs.map((p) => [p.id, p.category.slug])
-  );
-
   const resolvedLines: Array<{
     productId: string;
     productNameAr: string;
@@ -97,33 +91,45 @@ export async function createRetailRequestFromCart(
   const currency = resolvedLines[0].currency;
   const subtotal = resolvedLines.reduce((s, l) => s + l.lineTotal, 0);
 
-  const oudUnitCount = input.lines.reduce((sum, line) => {
-    const isOud = categorySlugById.get(line.productId) !== "accessories";
-    return isOud ? sum + line.quantity : sum;
-  }, 0);
-  const shippingWeightKg = calculateOudShipmentWeightKg(
-    oudUnitCount > 0 ? oudUnitCount : 1
-  );
-  const availableMethods = input.destinationCode
-    ? resolveAvailableMethods(input.destinationCode, shippingWeightKg)
-    : [];
+  const quoteResult = input.destinationCode
+    ? await quote({
+        destinationCode: input.destinationCode,
+        items: resolvedLines.map((l) => ({
+          productId: l.productId,
+          qty: l.quantity,
+        })),
+        declaredValue: subtotal,
+        audience: "CUSTOMER",
+      })
+    : null;
+  const shippingWeightKg = quoteResult?.weightKg ?? null;
   let shippingMethodCode: string | null = null;
   let shippingMethodLabel: string | null = null;
   let shippingCostAmount: number | null = null;
   let shippingCostCurrency: string | null = null;
+  let shippingQuoteSnapshot: Prisma.InputJsonValue | undefined;
 
   if (input.shippingMethodCode) {
-    const match = availableMethods.find(
-      (m) => m.code === input.shippingMethodCode
+    const match = quoteResult?.methods.find(
+      (m) => m.methodCode === input.shippingMethodCode
     );
     if (!match) {
       throw new Error("SHIPPING_METHOD_NOT_AVAILABLE");
     }
-    shippingMethodCode = match.code;
+    shippingMethodCode = match.methodCode;
     shippingMethodLabel =
       input.locale === "ar" ? match.labelAr : match.labelEn;
-    shippingCostAmount = match.amount;
-    shippingCostCurrency = match.currency;
+    shippingCostAmount = match.price.total;
+    shippingCostCurrency = match.price.currency;
+    shippingQuoteSnapshot = buildQuoteSnapshot(
+      quoteResult!,
+      shippingMethodCode
+    ) as Prisma.InputJsonValue;
+  } else if (quoteResult) {
+    shippingQuoteSnapshot = buildQuoteSnapshot(
+      quoteResult,
+      null
+    ) as Prisma.InputJsonValue;
   }
 
   const customer = await prisma.customer.create({
@@ -208,6 +214,7 @@ export async function createRetailRequestFromCart(
           shippingCostAmount,
           shippingCostCurrency,
           shippingWeightKg,
+          shippingQuoteSnapshot,
           subtotal,
           currency,
           handoffPayloadJson: JSON.stringify(handoffPayload),

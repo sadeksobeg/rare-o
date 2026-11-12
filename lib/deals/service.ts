@@ -408,8 +408,9 @@ export async function getDealForTrader(dealId: string, traderId: string) {
 }
 
 export async function listDealsForTrader(traderId: string) {
+  // Trader always sees their own deals. Admin lists keep uiVisibleDealWhere().
   return prisma.dealProposal.findMany({
-    where: { AND: [{ traderId }, uiVisibleDealWhere()] },
+    where: { traderId },
     orderBy: { updatedAt: "desc" },
     include: {
       product: { select: { id: true, slug: true, nameEn: true, nameAr: true } },

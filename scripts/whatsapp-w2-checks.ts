@@ -325,7 +325,10 @@ async function main() {
     });
     assert(converted.ok, "convert ok");
     if (converted.ok) {
-      assert(converted.mime === "audio/ogg", "ogg mime");
+      assert(
+        converted.mime === "audio/ogg; codecs=opus",
+        "ogg+opus mime"
+      );
       assert(converted.bytes.length > 0, "ogg bytes");
     }
 

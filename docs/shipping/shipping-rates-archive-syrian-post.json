@@ -1,0 +1,8 @@
+{
+  "_meta": {
+    "archivedAt": "2026-11-12",
+    "reason": "Owner decision: ALL Syrian Post (البريد السوري) options removed from the notebook import and must never be imported.",
+    "platformFinding": "SH0 found ZERO Syrian Post / البريد السوري carriers in lib/shipping or Prisma. Domestic Syria uses bus / babel / al-mufti only."
+  },
+  "archivedRates": []
+}

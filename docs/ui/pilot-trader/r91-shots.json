@@ -1,0 +1,478 @@
+{
+  "at": "2026-11-12T23:06:45.000Z",
+  "base": "http://127.0.0.1:3000",
+  "evidence": {
+    "r91-trader-notifications-light-1440-ar.png": "/trader/notifications · light@1440 · ro-portal×0 · h1:\"مركز الحالة\" · layout settled; chrome matches ui-kit",
+    "r91-trader-notifications-dark-390-ar.png": "/trader/notifications · dark@390 · ro-portal×0 · h1:\"مركز الحالة\" · layout settled; chrome matches ui-kit",
+    "r91-trader-profile-light-1440-ar.png": "/trader/profile · light@1440 · ro-portal×0 · h1:\"حسابي\" · layout settled; chrome matches ui-kit",
+    "r91-trader-profile-dark-390-ar.png": "/trader/profile · dark@390 · ro-portal×0 · h1:\"حسابي\" · layout settled; chrome matches ui-kit",
+    "r91-trader-ws-requests-light-1440-ar.png": "/trader/wholesale/requests · light@1440 · ro-portal×0 · h1:\"طلباتي بالجملة\" · layout settled; chrome matches ui-kit",
+    "r91-trader-ws-requests-dark-390-ar.png": "/trader/wholesale/requests · dark@390 · ro-portal×0 · h1:\"طلباتي بالجملة\" · layout settled; chrome matches ui-kit",
+    "r91-trader-ws-new-light-1440-ar.png": "/trader/wholesale · light@1440 · ro-portal×0 · h1:\"طلب بالجملة\" · layout settled; chrome matches ui-kit",
+    "r91-trader-ws-new-dark-390-ar.png": "/trader/wholesale · dark@390 · ro-portal×0 · h1:\"طلب بالجملة\" · layout settled; chrome matches ui-kit",
+    "r91-trader-ws-detail-light-1440-ar.png": "/trader/wholesale/cmvcfml20000deplczv7zxcl1 · light@1440 · ro-portal×0 · h1:\"اقتراح سعر الوحدةمكتمل\" · layout settled; chrome matches ui-kit",
+    "r91-trader-ws-detail-dark-390-ar.png": "/trader/wholesale/cmvcfml20000deplczv7zxcl1 · dark@390 · ro-portal×0 · h1:\"اقتراح سعر الوحدةمكتمل\" · layout settled; chrome matches ui-kit",
+    "r91-trader-brokerage-light-1440-ar.png": "/trader/brokerage · light@1440 · ro-portal×0 · h1:\"طلبات الوساطة\" · layout settled; chrome matches ui-kit",
+    "r91-trader-brokerage-dark-390-ar.png": "/trader/brokerage · dark@390 · ro-portal×0 · h1:\"طلبات الوساطة\" · layout settled; chrome matches ui-kit",
+    "r91-trader-brokerage-detail-light-1440-ar.png": "/trader/brokerage/cmvtkxi0z0001epm4f28vkjuz · light@1440 · ro-portal×0 · h1:\"عود فارابي\" · layout settled; chrome matches ui-kit",
+    "r91-trader-brokerage-detail-dark-390-ar.png": "/trader/brokerage/cmvtkxi0z0001epm4f28vkjuz · dark@390 · ro-portal×0 · h1:\"عود فارابي\" · layout settled; chrome matches ui-kit",
+    "r91-trader-offers-light-1440-ar.png": "/trader/offers · light@1440 · ro-portal×0 · h1:\"العروض العامة المختارة\" · layout settled; chrome matches ui-kit",
+    "r91-trader-offers-dark-390-ar.png": "/trader/offers · dark@390 · ro-portal×0 · h1:\"العروض العامة المختارة\" · layout settled; chrome matches ui-kit",
+    "r91-proof-ws-list-scroll-bottom-light-390-ar.png": "/trader/wholesale/requests · light@390:scroll-bottom · ro-portal×0 · h1:\"طلباتي بالجملة\" · viewport scrolled to bottom; last content above tabbar",
+    "r91-proof-ws-list-scroll-bottom-dark-390-ar.png": "/trader/wholesale/requests · dark@390:scroll-bottom · ro-portal×0 · h1:\"طلباتي بالجملة\" · viewport scrolled to bottom; last content above tabbar",
+    "r91-proof-deals-list-scroll-bottom-light-390-ar.png": "/trader/deals · light@390:scroll-bottom · ro-portal×0 · h1:\"مقترحات صفقاتي\" · viewport scrolled to bottom; last content above tabbar",
+    "r91-proof-deals-list-scroll-bottom-dark-390-ar.png": "/trader/deals · dark@390:scroll-bottom · ro-portal×0 · h1:\"مقترحات صفقاتي\" · viewport scrolled to bottom; last content above tabbar",
+    "r91-proof-brokerage-timeline-scroll-bottom-light-390-ar.png": "/trader/brokerage/cmvtkxi0z0001epm4f28vkjuz · light@390:scroll-bottom · ro-portal×0 · h1:\"عود فارابي\" · viewport scrolled to bottom; last content above tabbar",
+    "r91-proof-brokerage-timeline-scroll-bottom-dark-390-ar.png": "/trader/brokerage/cmvtkxi0z0001epm4f28vkjuz · dark@390:scroll-bottom · ro-portal×0 · h1:\"عود فارابي\" · viewport scrolled to bottom; last content above tabbar"
+  },
+  "gates": {
+    "overflowFail": [],
+    "consoleFail": [],
+    "axeFail": [],
+    "roPortalFail": []
+  },
+  "results": [
+    {
+      "route": "/trader/notifications",
+      "theme": "light",
+      "w": 1440,
+      "file": "r91-trader-notifications-light-1440-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "مركز الحالة",
+      "see": "/trader/notifications · light@1440 · ro-portal×0 · h1:\"مركز الحالة\" · layout settled; chrome matches ui-kit",
+      "scrollBottom": false
+    },
+    {
+      "route": "/trader/notifications",
+      "theme": "dark",
+      "w": 390,
+      "file": "r91-trader-notifications-dark-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "مركز الحالة",
+      "see": "/trader/notifications · dark@390 · ro-portal×0 · h1:\"مركز الحالة\" · layout settled; chrome matches ui-kit",
+      "scrollBottom": false
+    },
+    {
+      "route": "/trader/profile",
+      "theme": "light",
+      "w": 1440,
+      "file": "r91-trader-profile-light-1440-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "حسابي",
+      "see": "/trader/profile · light@1440 · ro-portal×0 · h1:\"حسابي\" · layout settled; chrome matches ui-kit",
+      "scrollBottom": false
+    },
+    {
+      "route": "/trader/profile",
+      "theme": "dark",
+      "w": 390,
+      "file": "r91-trader-profile-dark-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "حسابي",
+      "see": "/trader/profile · dark@390 · ro-portal×0 · h1:\"حسابي\" · layout settled; chrome matches ui-kit",
+      "scrollBottom": false
+    },
+    {
+      "route": "/trader/wholesale/requests",
+      "theme": "light",
+      "w": 1440,
+      "file": "r91-trader-ws-requests-light-1440-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "طلباتي بالجملة",
+      "see": "/trader/wholesale/requests · light@1440 · ro-portal×0 · h1:\"طلباتي بالجملة\" · layout settled; chrome matches ui-kit",
+      "scrollBottom": false
+    },
+    {
+      "route": "/trader/wholesale/requests",
+      "theme": "dark",
+      "w": 390,
+      "file": "r91-trader-ws-requests-dark-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "طلباتي بالجملة",
+      "see": "/trader/wholesale/requests · dark@390 · ro-portal×0 · h1:\"طلباتي بالجملة\" · layout settled; chrome matches ui-kit",
+      "scrollBottom": false
+    },
+    {
+      "route": "/trader/wholesale",
+      "theme": "light",
+      "w": 1440,
+      "file": "r91-trader-ws-new-light-1440-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "طلب بالجملة",
+      "see": "/trader/wholesale · light@1440 · ro-portal×0 · h1:\"طلب بالجملة\" · layout settled; chrome matches ui-kit",
+      "scrollBottom": false
+    },
+    {
+      "route": "/trader/wholesale",
+      "theme": "dark",
+      "w": 390,
+      "file": "r91-trader-ws-new-dark-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "طلب بالجملة",
+      "see": "/trader/wholesale · dark@390 · ro-portal×0 · h1:\"طلب بالجملة\" · layout settled; chrome matches ui-kit",
+      "scrollBottom": false
+    },
+    {
+      "route": "/trader/wholesale/cmvcfml20000deplczv7zxcl1",
+      "theme": "light",
+      "w": 1440,
+      "file": "r91-trader-ws-detail-light-1440-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "اقتراح سعر الوحدةمكتمل",
+      "see": "/trader/wholesale/cmvcfml20000deplczv7zxcl1 · light@1440 · ro-portal×0 · h1:\"اقتراح سعر الوحدةمكتمل\" · layout settled; chrome matches ui-kit",
+      "scrollBottom": false
+    },
+    {
+      "route": "/trader/wholesale/cmvcfml20000deplczv7zxcl1",
+      "theme": "dark",
+      "w": 390,
+      "file": "r91-trader-ws-detail-dark-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "اقتراح سعر الوحدةمكتمل",
+      "see": "/trader/wholesale/cmvcfml20000deplczv7zxcl1 · dark@390 · ro-portal×0 · h1:\"اقتراح سعر الوحدةمكتمل\" · layout settled; chrome matches ui-kit",
+      "scrollBottom": false
+    },
+    {
+      "route": "/trader/brokerage",
+      "theme": "light",
+      "w": 1440,
+      "file": "r91-trader-brokerage-light-1440-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "طلبات الوساطة",
+      "see": "/trader/brokerage · light@1440 · ro-portal×0 · h1:\"طلبات الوساطة\" · layout settled; chrome matches ui-kit",
+      "scrollBottom": false
+    },
+    {
+      "route": "/trader/brokerage",
+      "theme": "dark",
+      "w": 390,
+      "file": "r91-trader-brokerage-dark-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "طلبات الوساطة",
+      "see": "/trader/brokerage · dark@390 · ro-portal×0 · h1:\"طلبات الوساطة\" · layout settled; chrome matches ui-kit",
+      "scrollBottom": false
+    },
+    {
+      "route": "/trader/brokerage/cmvtkxi0z0001epm4f28vkjuz",
+      "theme": "light",
+      "w": 1440,
+      "file": "r91-trader-brokerage-detail-light-1440-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "عود فارابي",
+      "see": "/trader/brokerage/cmvtkxi0z0001epm4f28vkjuz · light@1440 · ro-portal×0 · h1:\"عود فارابي\" · layout settled; chrome matches ui-kit",
+      "scrollBottom": false
+    },
+    {
+      "route": "/trader/brokerage/cmvtkxi0z0001epm4f28vkjuz",
+      "theme": "dark",
+      "w": 390,
+      "file": "r91-trader-brokerage-detail-dark-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "عود فارابي",
+      "see": "/trader/brokerage/cmvtkxi0z0001epm4f28vkjuz · dark@390 · ro-portal×0 · h1:\"عود فارابي\" · layout settled; chrome matches ui-kit",
+      "scrollBottom": false
+    },
+    {
+      "route": "/trader/offers",
+      "theme": "light",
+      "w": 1440,
+      "file": "r91-trader-offers-light-1440-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "العروض العامة المختارة",
+      "see": "/trader/offers · light@1440 · ro-portal×0 · h1:\"العروض العامة المختارة\" · layout settled; chrome matches ui-kit",
+      "scrollBottom": false
+    },
+    {
+      "route": "/trader/offers",
+      "theme": "dark",
+      "w": 390,
+      "file": "r91-trader-offers-dark-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "العروض العامة المختارة",
+      "see": "/trader/offers · dark@390 · ro-portal×0 · h1:\"العروض العامة المختارة\" · layout settled; chrome matches ui-kit",
+      "scrollBottom": false
+    },
+    {
+      "route": "/trader/wholesale/requests",
+      "theme": "light",
+      "w": 390,
+      "file": "r91-proof-ws-list-scroll-bottom-light-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "طلباتي بالجملة",
+      "see": "/trader/wholesale/requests · light@390:scroll-bottom · ro-portal×0 · h1:\"طلباتي بالجملة\" · viewport scrolled to bottom; last content above tabbar",
+      "scrollBottom": true
+    },
+    {
+      "route": "/trader/wholesale/requests",
+      "theme": "dark",
+      "w": 390,
+      "file": "r91-proof-ws-list-scroll-bottom-dark-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "طلباتي بالجملة",
+      "see": "/trader/wholesale/requests · dark@390:scroll-bottom · ro-portal×0 · h1:\"طلباتي بالجملة\" · viewport scrolled to bottom; last content above tabbar",
+      "scrollBottom": true
+    },
+    {
+      "route": "/trader/deals",
+      "theme": "light",
+      "w": 390,
+      "file": "r91-proof-deals-list-scroll-bottom-light-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "مقترحات صفقاتي",
+      "see": "/trader/deals · light@390:scroll-bottom · ro-portal×0 · h1:\"مقترحات صفقاتي\" · viewport scrolled to bottom; last content above tabbar",
+      "scrollBottom": true
+    },
+    {
+      "route": "/trader/deals",
+      "theme": "dark",
+      "w": 390,
+      "file": "r91-proof-deals-list-scroll-bottom-dark-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "مقترحات صفقاتي",
+      "see": "/trader/deals · dark@390:scroll-bottom · ro-portal×0 · h1:\"مقترحات صفقاتي\" · viewport scrolled to bottom; last content above tabbar",
+      "scrollBottom": true
+    },
+    {
+      "route": "/trader/brokerage/cmvtkxi0z0001epm4f28vkjuz",
+      "theme": "light",
+      "w": 390,
+      "file": "r91-proof-brokerage-timeline-scroll-bottom-light-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "عود فارابي",
+      "see": "/trader/brokerage/cmvtkxi0z0001epm4f28vkjuz · light@390:scroll-bottom · ro-portal×0 · h1:\"عود فارابي\" · viewport scrolled to bottom; last content above tabbar",
+      "scrollBottom": true
+    },
+    {
+      "route": "/trader/brokerage/cmvtkxi0z0001epm4f28vkjuz",
+      "theme": "dark",
+      "w": 390,
+      "file": "r91-proof-brokerage-timeline-scroll-bottom-dark-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "roPortalHits": 0,
+      "h1": "عود فارابي",
+      "see": "/trader/brokerage/cmvtkxi0z0001epm4f28vkjuz · dark@390:scroll-bottom · ro-portal×0 · h1:\"عود فارابي\" · viewport scrolled to bottom; last content above tabbar",
+      "scrollBottom": true
+    }
+  ],
+  "files": [
+    "r91-proof-brokerage-timeline-scroll-bottom-dark-390-ar.png",
+    "r91-proof-brokerage-timeline-scroll-bottom-light-390-ar.png",
+    "r91-proof-deals-list-scroll-bottom-dark-390-ar.png",
+    "r91-proof-deals-list-scroll-bottom-light-390-ar.png",
+    "r91-proof-ws-list-scroll-bottom-dark-390-ar.png",
+    "r91-proof-ws-list-scroll-bottom-light-390-ar.png",
+    "r91-trader-brokerage-dark-390-ar.png",
+    "r91-trader-brokerage-detail-dark-390-ar.png",
+    "r91-trader-brokerage-detail-light-1440-ar.png",
+    "r91-trader-brokerage-light-1440-ar.png",
+    "r91-trader-notifications-dark-390-ar.png",
+    "r91-trader-notifications-light-1440-ar.png",
+    "r91-trader-offers-dark-390-ar.png",
+    "r91-trader-offers-light-1440-ar.png",
+    "r91-trader-profile-dark-390-ar.png",
+    "r91-trader-profile-light-1440-ar.png",
+    "r91-trader-ws-detail-dark-390-ar.png",
+    "r91-trader-ws-detail-light-1440-ar.png",
+    "r91-trader-ws-new-dark-390-ar.png",
+    "r91-trader-ws-new-light-1440-ar.png",
+    "r91-trader-ws-requests-dark-390-ar.png",
+    "r91-trader-ws-requests-light-1440-ar.png"
+  ]
+}

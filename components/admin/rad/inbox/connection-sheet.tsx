@@ -3,13 +3,15 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ChevronDown, OctagonX, QrCode, Unlink, X } from "lucide-react";
+import { ChevronDown, KeyRound, LoaderCircle, OctagonX, QrCode, RefreshCw, Unlink, X } from "lucide-react";
 import type { InboxHealthView } from "@/lib/whatsapp/messaging/inbox";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 import {
+  adminRequestWhatsAppPairingAction,
   adminSetOutboundGlobalRateAction,
   adminSetOutboundKillSwitchAction,
+  adminWhatsAppReconnectAction,
 } from "@/app/whatsapp-actions";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { Modal } from "@/components/ui-kit/modal";
@@ -31,8 +33,9 @@ function pillState(health: InboxHealthView): "connected" | "outbound-off" | "dis
 }
 
 /**
- * Connection pill (opens the sheet) + the sheet itself. Pairing/reconnect/logout
- * buttons stay inert (no real linkCommand without separate owner approval).
+ * Connection pill (opens the sheet) + the sheet itself. Pairing is live
+ * (owner-requested 2026-11-12): it queues a linkCommand the worker executes
+ * and shows the code/QR it reports back. Disconnect stays inert.
  * Emergency outbound kill is live — DB flag, confirm dialog, reversible.
  */
 export function RadConnectionSheet({
@@ -51,6 +54,41 @@ export function RadConnectionSheet({
   const [reason, setReason] = useState("");
   const [rateDraft, setRateDraft] = useState(String(health.outboundGlobalRatePerMin || 20));
   const router = useRouter();
+  const [phone, setPhone] = useState(health.pairingPhone ?? "");
+  const [pairError, setPairError] = useState<string | null>(null);
+  const phoneDigits = phone.replace(/\D/g, "");
+  const pairingShown = Boolean(health.pairingCode || health.qrDataUrl);
+  const awaitingWorker =
+    health.linkCommand === "pair" || health.linkCommand === "qr";
+
+  function requestPairing(wantQr: boolean) {
+    setPairError(null);
+    startTransition(async () => {
+      const result = await adminRequestWhatsAppPairingAction(phone, wantQr);
+      if (!result.ok) {
+        setPairError(
+          result.error === "INVALID_PHONE" ? ib.pairInvalidPhone : ib.pairFailed
+        );
+        return;
+      }
+      router.refresh();
+    });
+  }
+
+  const reconnecting = health.linkCommand === "reconnect";
+
+  function requestReconnect() {
+    setPairError(null);
+    startTransition(async () => {
+      const result = await adminWhatsAppReconnectAction();
+      if (!result.ok) {
+        setPairError(ib.pairFailed);
+        return;
+      }
+      router.refresh();
+    });
+  }
+
   const triggerRef = useRef<Element | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const state = pillState(health);
@@ -110,6 +148,13 @@ export function RadConnectionSheet({
     if (triggerRef.current instanceof HTMLElement) triggerRef.current.focus();
     triggerRef.current = null;
   }, [open]);
+
+  // The worker writes the code/QR back asynchronously — poll while waiting.
+  useEffect(() => {
+    if (!open || !(awaitingWorker || pairingShown || reconnecting)) return;
+    const id = window.setInterval(() => router.refresh(), 3000);
+    return () => window.clearInterval(id);
+  }, [open, awaitingWorker, pairingShown, reconnecting, router]);
 
   useEffect(() => {
     if (!open) return;
@@ -295,14 +340,92 @@ export function RadConnectionSheet({
                   {ib.connSheetStep3}
                 </div>
               </div>
-              <div className="rad-fld">
-                <label>{ib.connSheetPhoneLabel}</label>
-                <input type="text" placeholder="+963 …" inputMode="tel" disabled />
-              </div>
-              <button type="button" className="rad-btn rad-pri" disabled title={ib.connSheetNoSendNotice}>
-                <QrCode width={16} height={16} strokeWidth={1.5} aria-hidden />
-                {ib.connSheetShowQrButton}
+              <button
+                type="button"
+                className="rad-btn rad-gh"
+                disabled={pending || reconnecting}
+                onClick={requestReconnect}
+              >
+                <RefreshCw width={16} height={16} strokeWidth={1.5} aria-hidden />
+                {reconnecting ? ib.reconnectPending : ib.reconnectSaved}
               </button>
+              <p style={{ fontSize: 12.5, color: "var(--rad-tx3)" }}>{ib.reconnectHint}</p>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (phoneDigits.length >= 8 && !pending) requestPairing(false);
+                }}
+                style={{ display: "flex", flexDirection: "column", gap: 12 }}
+              >
+                <div className="rad-fld">
+                  <label htmlFor="wa-pair-phone">{ib.connSheetPhoneLabel}</label>
+                  <input
+                    id="wa-pair-phone"
+                    type="text"
+                    dir="ltr"
+                    inputMode="tel"
+                    autoComplete="off"
+                    placeholder="+963 9XX XXX XXX"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    disabled={pending}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="rad-btn rad-pri"
+                  disabled={pending || phoneDigits.length < 8}
+                >
+                  <KeyRound width={16} height={16} strokeWidth={1.5} aria-hidden />
+                  {ib.connSheetShowQrButton}
+                </button>
+                <button
+                  type="button"
+                  className="rad-btn rad-gh"
+                  disabled={pending || phoneDigits.length < 8}
+                  onClick={() => requestPairing(true)}
+                >
+                  <QrCode width={16} height={16} strokeWidth={1.5} aria-hidden />
+                  {ib.pairShowQr}
+                </button>
+              </form>
+
+              {pairError ? (
+                <p role="alert" style={{ color: "var(--rad-err)" }}>
+                  {pairError}
+                </p>
+              ) : null}
+
+              {awaitingWorker && !pairingShown ? (
+                <div className="rad-bn rad-warn" role="status" style={{ margin: 0 }}>
+                  <span className="rad-spin">
+                    <LoaderCircle width={18} height={18} strokeWidth={1.5} aria-hidden />
+                  </span>
+                  <span>{ib.pairWaitingWorker}</span>
+                </div>
+              ) : null}
+
+              {health.pairingCode ? (
+                <div className="rad-pair-code" role="status">
+                  <span>{ib.pairCodeLabel}</span>
+                  <bdi dir="ltr" data-pairing-code>
+                    {health.pairingCode}
+                  </bdi>
+                  <small>{ib.pairCodeHint}</small>
+                </div>
+              ) : null}
+
+              {health.qrDataUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element -- data URL
+                <img
+                  data-pairing-qr
+                  src={health.qrDataUrl}
+                  alt={ib.pairShowQr}
+                  width={220}
+                  height={220}
+                  className="rad-pair-qr"
+                />
+              ) : null}
             </>
           )}
           <p style={{ fontSize: 12.5, color: "var(--rad-tx3)" }}>{ib.connSheetNoSendNotice}</p>

@@ -1,0 +1,529 @@
+{
+  "at": "2026-11-12T21:47:32.914Z",
+  "base": "http://127.0.0.1:3000",
+  "evidence": {
+    "r8-trader-deals-light-1440-ar.png": "/trader/deals · light@1440 · ro-portal×0 · rows=4 · layout settled; chrome matches ui-kit",
+    "r8-trader-deals-light-1280-ar.png": "/trader/deals · light@1280 · ro-portal×0 · rows=4 · layout settled; chrome matches ui-kit",
+    "r8-trader-deals-light-768-ar.png": "/trader/deals · light@768 · ro-portal×0 · rows=4 · layout settled; chrome matches ui-kit",
+    "r8-trader-deals-light-390-ar.png": "/trader/deals · light@390 · ro-portal×0 · rows=4 · layout settled; chrome matches ui-kit",
+    "r8-trader-deals-dark-1440-ar.png": "/trader/deals · dark@1440 · ro-portal×0 · rows=4 · layout settled; chrome matches ui-kit",
+    "r8-trader-deals-dark-1280-ar.png": "/trader/deals · dark@1280 · ro-portal×0 · rows=4 · layout settled; chrome matches ui-kit",
+    "r8-trader-deals-dark-768-ar.png": "/trader/deals · dark@768 · ro-portal×0 · rows=4 · layout settled; chrome matches ui-kit",
+    "r8-trader-deals-dark-390-ar.png": "/trader/deals · dark@390 · ro-portal×0 · rows=4 · layout settled; chrome matches ui-kit",
+    "r8-trader-deals-new-light-1440-ar.png": "/trader/deals/new · light@1440 · ro-portal×0 · wizard:\"الطلب\" · layout settled; chrome matches ui-kit",
+    "r8-trader-deals-new-light-1280-ar.png": "/trader/deals/new · light@1280 · ro-portal×0 · wizard:\"الطلب\" · layout settled; chrome matches ui-kit",
+    "r8-trader-deals-new-light-768-ar.png": "/trader/deals/new · light@768 · ro-portal×0 · wizard:\"الطلب\" · layout settled; chrome matches ui-kit",
+    "r8-trader-deals-new-light-390-ar.png": "/trader/deals/new · light@390 · ro-portal×0 · wizard:\"الطلب\" · layout settled; chrome matches ui-kit",
+    "r8-trader-deals-new-dark-1440-ar.png": "/trader/deals/new · dark@1440 · ro-portal×0 · wizard:\"الطلب\" · layout settled; chrome matches ui-kit",
+    "r8-trader-deals-new-dark-1280-ar.png": "/trader/deals/new · dark@1280 · ro-portal×0 · wizard:\"الطلب\" · layout settled; chrome matches ui-kit",
+    "r8-trader-deals-new-dark-768-ar.png": "/trader/deals/new · dark@768 · ro-portal×0 · wizard:\"الطلب\" · layout settled; chrome matches ui-kit",
+    "r8-trader-deals-new-dark-390-ar.png": "/trader/deals/new · dark@390 · ro-portal×0 · wizard:\"الطلب\" · layout settled; chrome matches ui-kit",
+    "r8-trader-deal-detail-light-1440-ar.png": "/trader/deals/cmv6bzq50000vepug2i578xqz · light@1440 · ro-portal×0 · steps=4 · title:\"عرض مقابل على عود ورشةقيد التفاوض\" · layout settled; chrome matches ui-kit",
+    "r8-trader-deal-detail-light-1280-ar.png": "/trader/deals/cmv6bzq50000vepug2i578xqz · light@1280 · ro-portal×0 · steps=4 · title:\"عرض مقابل على عود ورشةقيد التفاوض\" · layout settled; chrome matches ui-kit",
+    "r8-trader-deal-detail-light-768-ar.png": "/trader/deals/cmv6bzq50000vepug2i578xqz · light@768 · ro-portal×0 · steps=4 · title:\"عرض مقابل على عود ورشةقيد التفاوض\" · layout settled; chrome matches ui-kit",
+    "r8-trader-deal-detail-light-390-ar.png": "/trader/deals/cmv6bzq50000vepug2i578xqz · light@390 · ro-portal×0 · steps=4 · title:\"عرض مقابل على عود ورشةقيد التفاوض\" · layout settled; chrome matches ui-kit",
+    "r8-trader-deal-detail-dark-1440-ar.png": "/trader/deals/cmv6bzq50000vepug2i578xqz · dark@1440 · ro-portal×0 · steps=4 · title:\"عرض مقابل على عود ورشةقيد التفاوض\" · layout settled; chrome matches ui-kit",
+    "r8-trader-deal-detail-dark-1280-ar.png": "/trader/deals/cmv6bzq50000vepug2i578xqz · dark@1280 · ro-portal×0 · steps=4 · title:\"عرض مقابل على عود ورشةقيد التفاوض\" · layout settled; chrome matches ui-kit",
+    "r8-trader-deal-detail-dark-768-ar.png": "/trader/deals/cmv6bzq50000vepug2i578xqz · dark@768 · ro-portal×0 · steps=4 · title:\"عرض مقابل على عود ورشةقيد التفاوض\" · layout settled; chrome matches ui-kit",
+    "r8-trader-deal-detail-dark-390-ar.png": "/trader/deals/cmv6bzq50000vepug2i578xqz · dark@390 · ro-portal×0 · steps=4 · title:\"عرض مقابل على عود ورشةقيد التفاوض\" · layout settled; chrome matches ui-kit"
+  },
+  "gates": {
+    "overflowFail": [],
+    "consoleFail": [],
+    "axeFail": [],
+    "roPortalFail": [],
+    "dealId": "/trader/deals/new"
+  },
+  "results": [
+    {
+      "route": "/trader/deals",
+      "theme": "light",
+      "w": 1440,
+      "file": "r8-trader-deals-light-1440-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "rowCount": 4,
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals · light@1440 · ro-portal×0 · rows=4 · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals",
+      "theme": "light",
+      "w": 1280,
+      "file": "r8-trader-deals-light-1280-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "rowCount": 4,
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals · light@1280 · ro-portal×0 · rows=4 · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals",
+      "theme": "light",
+      "w": 768,
+      "file": "r8-trader-deals-light-768-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "rowCount": 4,
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals · light@768 · ro-portal×0 · rows=4 · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals",
+      "theme": "light",
+      "w": 390,
+      "file": "r8-trader-deals-light-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "rowCount": 4,
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals · light@390 · ro-portal×0 · rows=4 · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals",
+      "theme": "dark",
+      "w": 1440,
+      "file": "r8-trader-deals-dark-1440-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "rowCount": 4,
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals · dark@1440 · ro-portal×0 · rows=4 · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals",
+      "theme": "dark",
+      "w": 1280,
+      "file": "r8-trader-deals-dark-1280-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "rowCount": 4,
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals · dark@1280 · ro-portal×0 · rows=4 · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals",
+      "theme": "dark",
+      "w": 768,
+      "file": "r8-trader-deals-dark-768-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "rowCount": 4,
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals · dark@768 · ro-portal×0 · rows=4 · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals",
+      "theme": "dark",
+      "w": 390,
+      "file": "r8-trader-deals-dark-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "rowCount": 4,
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals · dark@390 · ro-portal×0 · rows=4 · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals/new",
+      "theme": "light",
+      "w": 1440,
+      "file": "r8-trader-deals-new-light-1440-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "wizardStep": "الطلب",
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals/new · light@1440 · ro-portal×0 · wizard:\"الطلب\" · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals/new",
+      "theme": "light",
+      "w": 1280,
+      "file": "r8-trader-deals-new-light-1280-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "wizardStep": "الطلب",
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals/new · light@1280 · ro-portal×0 · wizard:\"الطلب\" · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals/new",
+      "theme": "light",
+      "w": 768,
+      "file": "r8-trader-deals-new-light-768-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "wizardStep": "الطلب",
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals/new · light@768 · ro-portal×0 · wizard:\"الطلب\" · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals/new",
+      "theme": "light",
+      "w": 390,
+      "file": "r8-trader-deals-new-light-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "wizardStep": "الطلب",
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals/new · light@390 · ro-portal×0 · wizard:\"الطلب\" · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals/new",
+      "theme": "dark",
+      "w": 1440,
+      "file": "r8-trader-deals-new-dark-1440-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "wizardStep": "الطلب",
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals/new · dark@1440 · ro-portal×0 · wizard:\"الطلب\" · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals/new",
+      "theme": "dark",
+      "w": 1280,
+      "file": "r8-trader-deals-new-dark-1280-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "wizardStep": "الطلب",
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals/new · dark@1280 · ro-portal×0 · wizard:\"الطلب\" · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals/new",
+      "theme": "dark",
+      "w": 768,
+      "file": "r8-trader-deals-new-dark-768-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "wizardStep": "الطلب",
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals/new · dark@768 · ro-portal×0 · wizard:\"الطلب\" · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals/new",
+      "theme": "dark",
+      "w": 390,
+      "file": "r8-trader-deals-new-dark-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "wizardStep": "الطلب",
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals/new · dark@390 · ro-portal×0 · wizard:\"الطلب\" · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals/cmv6bzq50000vepug2i578xqz",
+      "theme": "light",
+      "w": 1440,
+      "file": "r8-trader-deal-detail-light-1440-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "titleText": "عرض مقابل على عود ورشةقيد التفاوض",
+      "stepperSteps": 4,
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals/cmv6bzq50000vepug2i578xqz · light@1440 · ro-portal×0 · steps=4 · title:\"عرض مقابل على عود ورشةقيد التفاوض\" · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals/cmv6bzq50000vepug2i578xqz",
+      "theme": "light",
+      "w": 1280,
+      "file": "r8-trader-deal-detail-light-1280-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "titleText": "عرض مقابل على عود ورشةقيد التفاوض",
+      "stepperSteps": 4,
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals/cmv6bzq50000vepug2i578xqz · light@1280 · ro-portal×0 · steps=4 · title:\"عرض مقابل على عود ورشةقيد التفاوض\" · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals/cmv6bzq50000vepug2i578xqz",
+      "theme": "light",
+      "w": 768,
+      "file": "r8-trader-deal-detail-light-768-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "titleText": "عرض مقابل على عود ورشةقيد التفاوض",
+      "stepperSteps": 4,
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals/cmv6bzq50000vepug2i578xqz · light@768 · ro-portal×0 · steps=4 · title:\"عرض مقابل على عود ورشةقيد التفاوض\" · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals/cmv6bzq50000vepug2i578xqz",
+      "theme": "light",
+      "w": 390,
+      "file": "r8-trader-deal-detail-light-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "titleText": "عرض مقابل على عود ورشةقيد التفاوض",
+      "stepperSteps": 4,
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals/cmv6bzq50000vepug2i578xqz · light@390 · ro-portal×0 · steps=4 · title:\"عرض مقابل على عود ورشةقيد التفاوض\" · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals/cmv6bzq50000vepug2i578xqz",
+      "theme": "dark",
+      "w": 1440,
+      "file": "r8-trader-deal-detail-dark-1440-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "titleText": "عرض مقابل على عود ورشةقيد التفاوض",
+      "stepperSteps": 4,
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals/cmv6bzq50000vepug2i578xqz · dark@1440 · ro-portal×0 · steps=4 · title:\"عرض مقابل على عود ورشةقيد التفاوض\" · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals/cmv6bzq50000vepug2i578xqz",
+      "theme": "dark",
+      "w": 1280,
+      "file": "r8-trader-deal-detail-dark-1280-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "titleText": "عرض مقابل على عود ورشةقيد التفاوض",
+      "stepperSteps": 4,
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals/cmv6bzq50000vepug2i578xqz · dark@1280 · ro-portal×0 · steps=4 · title:\"عرض مقابل على عود ورشةقيد التفاوض\" · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals/cmv6bzq50000vepug2i578xqz",
+      "theme": "dark",
+      "w": 768,
+      "file": "r8-trader-deal-detail-dark-768-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "titleText": "عرض مقابل على عود ورشةقيد التفاوض",
+      "stepperSteps": 4,
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals/cmv6bzq50000vepug2i578xqz · dark@768 · ro-portal×0 · steps=4 · title:\"عرض مقابل على عود ورشةقيد التفاوض\" · layout settled; chrome matches ui-kit"
+    },
+    {
+      "route": "/trader/deals/cmv6bzq50000vepug2i578xqz",
+      "theme": "dark",
+      "w": 390,
+      "file": "r8-trader-deal-detail-dark-390-ar.png",
+      "overflow": {
+        "ok": true,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "cardFails": []
+      },
+      "consoleErrors": [],
+      "axeViolations": 0,
+      "axeIds": [],
+      "titleText": "عرض مقابل على عود ورشةقيد التفاوض",
+      "stepperSteps": 4,
+      "roPortalHits": 0,
+      "seeNote": "layout settled; chrome matches ui-kit",
+      "see": "/trader/deals/cmv6bzq50000vepug2i578xqz · dark@390 · ro-portal×0 · steps=4 · title:\"عرض مقابل على عود ورشةقيد التفاوض\" · layout settled; chrome matches ui-kit"
+    }
+  ],
+  "files": [
+    "r8-trader-deal-detail-dark-1280-ar.png",
+    "r8-trader-deal-detail-dark-1440-ar.png",
+    "r8-trader-deal-detail-dark-390-ar.png",
+    "r8-trader-deal-detail-dark-768-ar.png",
+    "r8-trader-deal-detail-light-1280-ar.png",
+    "r8-trader-deal-detail-light-1440-ar.png",
+    "r8-trader-deal-detail-light-390-ar.png",
+    "r8-trader-deal-detail-light-768-ar.png",
+    "r8-trader-deals-dark-1280-ar.png",
+    "r8-trader-deals-dark-1440-ar.png",
+    "r8-trader-deals-dark-390-ar.png",
+    "r8-trader-deals-dark-768-ar.png",
+    "r8-trader-deals-light-1280-ar.png",
+    "r8-trader-deals-light-1440-ar.png",
+    "r8-trader-deals-light-390-ar.png",
+    "r8-trader-deals-light-768-ar.png",
+    "r8-trader-deals-new-dark-1280-ar.png",
+    "r8-trader-deals-new-dark-1440-ar.png",
+    "r8-trader-deals-new-dark-390-ar.png",
+    "r8-trader-deals-new-dark-768-ar.png",
+    "r8-trader-deals-new-light-1280-ar.png",
+    "r8-trader-deals-new-light-1440-ar.png",
+    "r8-trader-deals-new-light-390-ar.png",
+    "r8-trader-deals-new-light-768-ar.png"
+  ]
+}

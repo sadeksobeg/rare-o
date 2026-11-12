@@ -123,12 +123,21 @@ export function DetailStepper({
   }, [steps]);
 
   return (
-    <div className={cn("rad-stp-scroll", className)}>
+    <div
+      className={cn("rad-stp-scroll", className)}
+      tabIndex={0}
+      role="region"
+      aria-label={ariaLabel}
+    >
       <div
         ref={rootRef}
         className="rad-stp"
         role="list"
         aria-label={ariaLabel}
+        data-progress={`${Math.max(
+          1,
+          steps.findIndex((s) => s.state === "current" || s.state === "blocked") + 1
+        )}/${steps.length}`}
       >
         {steps.map((step, i) => (
           <div
