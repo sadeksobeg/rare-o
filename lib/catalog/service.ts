@@ -68,7 +68,14 @@ export type PublishedProductFilters = {
   sort?: CatalogSort;
   /** Max rows returned (omit for all). */
   limit?: number;
+  /** Only pieces marked available. */
+  availableOnly?: boolean;
+  /** Admin badges; a piece matches when it has ANY of the listed badges. */
+  badges?: CatalogBadge[];
 };
+
+import type { CatalogBadge } from "@/lib/catalog/badges";
+export type { CatalogBadge };
 
 function publishedWhere(
   filters?: PublishedProductFilters
@@ -78,6 +85,18 @@ function publishedWhere(
   const hasMax = typeof filters?.maxPrice === "number";
   return {
     status: "published",
+    ...(filters?.availableOnly ? { availability: "available" } : {}),
+    ...(filters?.badges?.length
+      ? {
+          OR: filters.badges.map((b) =>
+            b === "new"
+              ? { badgeNew: true }
+              : b === "featured"
+                ? { badgeFeatured: true }
+                : { badgeSale: true }
+          ),
+        }
+      : {}),
     ...(filters?.categorySlug
       ? { category: { slug: filters.categorySlug } }
       : {}),
@@ -91,14 +110,79 @@ function publishedWhere(
       : {}),
     ...(q
       ? {
-          OR: [
-            { nameAr: containsCI(q) },
-            { nameEn: containsCI(q) },
-            { descriptionAr: containsCI(q) },
-            { descriptionEn: containsCI(q) },
+          AND: [
+            {
+              OR: [
+                { nameAr: containsCI(q) },
+                { nameEn: containsCI(q) },
+                { descriptionAr: containsCI(q) },
+                { descriptionEn: containsCI(q) },
+              ],
+            },
           ],
         }
       : {}),
+  };
+}
+
+export type CatalogFacets = {
+  categoryCounts: Record<string, number>;
+  price: { min: number; max: number } | null;
+  availableCount: number;
+  badgeCounts: Record<CatalogBadge, number>;
+};
+
+/**
+ * Facet numbers for the filter sidebar. Each facet is counted with every
+ * OTHER filter applied (so counts predict what a click would show).
+ */
+export async function getCatalogFacets(
+  filters: Omit<PublishedProductFilters, "sort" | "limit">
+): Promise<CatalogFacets> {
+  const without = (k: "categorySlug" | "availableOnly" | "badges") => {
+    const f: Omit<PublishedProductFilters, "sort" | "limit"> = { ...filters };
+    delete f[k];
+    return f;
+  };
+  const [cats, launch, priceAgg, availableCount, nNew, nFeat, nSale] =
+    await Promise.all([
+      prisma.product.groupBy({
+        by: ["categoryId"],
+        where: publishedWhere(without("categorySlug")),
+        _count: { _all: true },
+      }),
+      prisma.category.findMany({ select: { id: true, slug: true } }),
+      prisma.product.aggregate({
+        where: { status: "published", retailPrice: { not: null } },
+        _min: { retailPrice: true },
+        _max: { retailPrice: true },
+      }),
+      prisma.product.count({
+        where: publishedWhere({ ...without("availableOnly"), availableOnly: true }),
+      }),
+      prisma.product.count({
+        where: publishedWhere({ ...without("badges"), badges: ["new"] }),
+      }),
+      prisma.product.count({
+        where: publishedWhere({ ...without("badges"), badges: ["featured"] }),
+      }),
+      prisma.product.count({
+        where: publishedWhere({ ...without("badges"), badges: ["sale"] }),
+      }),
+    ]);
+  const slugById = new Map(launch.map((c) => [c.id, c.slug]));
+  const categoryCounts: Record<string, number> = {};
+  for (const row of cats) {
+    const slug = slugById.get(row.categoryId);
+    if (slug) categoryCounts[slug] = row._count._all;
+  }
+  const lo = priceAgg._min.retailPrice;
+  const hi = priceAgg._max.retailPrice;
+  return {
+    categoryCounts,
+    price: lo != null && hi != null ? { min: Math.floor(Number(lo)), max: Math.ceil(Number(hi)) } : null,
+    availableCount,
+    badgeCounts: { new: nNew, featured: nFeat, sale: nSale },
   };
 }
 

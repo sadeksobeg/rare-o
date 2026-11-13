@@ -1,3 +1,4 @@
+import { MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /** Local MIT geometric flag mark — falls back to ISO letters if file missing. */
@@ -57,4 +58,33 @@ export function CountryFlagWithFallback({
       </span>
     </span>
   );
+}
+
+/** Flag for countries; a pin for Syrian governorates (a governorate has no flag). */
+export function DestinationMark({
+  code,
+  kind,
+  title,
+  className,
+}: {
+  code: string;
+  kind: "syria" | "intl";
+  title?: string;
+  className?: string;
+}) {
+  if (kind === "syria") {
+    return (
+      <span
+        className={cn(
+          "inline-flex h-4 w-6 shrink-0 items-center justify-center rounded-[2px] bg-ro-sunken text-ro-muted",
+          className
+        )}
+        title={title}
+        aria-hidden
+      >
+        <MapPin className="size-3" strokeWidth={1.75} />
+      </span>
+    );
+  }
+  return <CountryFlagWithFallback code={code} title={title} className={className} />;
 }

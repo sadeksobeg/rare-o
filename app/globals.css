@@ -4248,3 +4248,48 @@ body:has(.ro-portal-admin) {
     max-width: 100% !important;
   }
 }
+
+/* Storefront inner pages: clean paper surface — wallpaper reads as a demo. */
+body:not(:has([data-page="home"])) .ro-sf-wallpaper {
+  display: none;
+}
+
+/* Catalog dual-handle price range (two native inputs over one track). */
+.ro-range {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  margin: 0;
+  background: transparent;
+  pointer-events: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.ro-range::-webkit-slider-runnable-track { background: transparent; height: 32px; }
+.ro-range::-moz-range-track { background: transparent; height: 32px; }
+.ro-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: auto;
+  width: 22px;
+  height: 22px;
+  margin-top: 5px;
+  border-radius: 9999px;
+  background: var(--ro-paper, #fff);
+  border: 2px solid var(--ro-plum-900, #2a1340);
+  box-shadow: 0 1px 4px rgba(11, 8, 13, 0.25);
+  cursor: grab;
+}
+.ro-range::-moz-range-thumb {
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: var(--ro-paper, #fff);
+  border: 2px solid var(--ro-plum-900, #2a1340);
+  box-shadow: 0 1px 4px rgba(11, 8, 13, 0.25);
+  cursor: grab;
+}
+.ro-range:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--ro-focus, #6b3fa0);
+  outline-offset: 2px;
+}

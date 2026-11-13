@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { ChevronDown, Search } from "lucide-react";
-import { CountryFlagWithFallback } from "@/components/storefront/shipping/flag";
+import { DestinationMark } from "@/components/storefront/shipping/flag";
 import {
   listDestinationOptions,
   type DestinationOption,
@@ -140,8 +140,9 @@ export function DestinationCombobox({
         className={triggerClass}
       >
         {selected ? (
-          <CountryFlagWithFallback
+          <DestinationMark
             code={selected.flag}
+            kind={selected.kind}
             title={selected.nameEn}
             className="shrink-0"
           />
@@ -245,7 +246,7 @@ export function DestinationCombobox({
                   onMouseEnter={() => setActiveIdx(i)}
                   onClick={() => pick(d)}
                 >
-                  <CountryFlagWithFallback code={d.flag} />
+                  <DestinationMark code={d.flag} kind={d.kind} />
                   <span className="min-w-0 flex-1 truncate font-medium text-ro-ink">
                     {t(locale, d.nameAr, d.nameEn)}
                   </span>

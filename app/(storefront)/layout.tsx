@@ -20,11 +20,14 @@ export default async function StorefrontLayout({
       <GlobalSearchMount dict={dict} locale={locale} products={discoveryProducts} />
       {/* No overflow-x-clip here: it forces y-clip and crops hero instruments */}
       <div className="relative flex min-h-screen flex-col bg-[var(--ro-sand-100)] text-ro-ink">
-        <DeferredBrandWallpaper
-          tone="cream"
-          patternId="ro-sf-wallpaper"
-          className="z-0 opacity-[0.85]"
-        />
+        {/* Music-note wallpaper only behind the home page (see globals.css) */}
+        <div className="ro-sf-wallpaper">
+          <DeferredBrandWallpaper
+            tone="cream"
+            patternId="ro-sf-wallpaper"
+            className="z-0 opacity-[0.85]"
+          />
+        </div>
         <div className="relative z-10 flex min-h-screen flex-col">
           <OfflineBanner />
           <StorefrontHeader dict={dict} locale={locale} />

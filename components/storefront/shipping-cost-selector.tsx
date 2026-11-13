@@ -6,6 +6,7 @@ import { Package } from "lucide-react";
 import { useMotion } from "@/components/motion/provider";
 import { AnimatedValue } from "@/components/portal/animated-value";
 import { DestinationCombobox } from "@/components/storefront/shipping/destination-combobox";
+import { VolumetricNote } from "@/components/storefront/shipping/volumetric-note";
 import { MethodCard } from "@/components/storefront/shipping/method-card";
 import {
   OudWeightChip,
@@ -112,12 +113,6 @@ export function ShippingCostSelector({
     weightKind === "oud-box"
       ? t(locale, "الوزن المحتسب للصندوق", "Billable box weight")
       : t(locale, "الوزن المحتسب", "Billable weight");
-  const weightHelp = t(
-    locale,
-    "تقدير وزن الشحن بحسب حجم صناديق العود (زوج = 25 كغ، فرد = 20 كغ).",
-    "Shipping weight estimate based on oud box sizes (pair = 25 kg, single = 20 kg)."
-  );
-
   function emit(
     nextMethodCode: string | null,
     list: QuoteMethodUi[] = options,
@@ -277,7 +272,11 @@ export function ShippingCostSelector({
           {weightKind === "oud-box" && weightKgOverride == null ? (
             <>
               <p className="mt-1.5 text-[11px] leading-relaxed text-ro-muted">
-                {weightHelp}
+                {t(
+                  locale,
+                  "الوزن المحتسب هو الوزن الحجمي لصناديق العود — كل عودين في صندوق واحد.",
+                  "Billable weight is the volumetric weight of the oud cases — two ouds per case."
+                )}
               </p>
               <div
                 className="mt-2.5 flex flex-wrap items-center gap-1.5"
@@ -306,6 +305,8 @@ export function ShippingCostSelector({
           ) : null}
         </div>
       ) : null}
+
+      <VolumetricNote locale={locale} defaultOpen={!compact} />
 
       {loading ? (
         <p className="text-sm text-ro-muted" role="status">

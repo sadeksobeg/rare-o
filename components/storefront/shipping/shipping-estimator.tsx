@@ -29,20 +29,12 @@ export function ShippingEstimator({
   const [open, setOpen] = useState(true);
   const [selection, setSelection] = useState<ShippingSelection | null>(null);
   const [oudCount, setOudCount] = useState(Math.max(1, oudUnitCount));
-  const [manualKg, setManualKg] = useState<string>(
-    initialWeightKg != null ? String(initialWeightKg) : ""
-  );
-
   const weightOverride = useMemo(() => {
-    if (mode === "page" && manualKg.trim()) {
-      const n = Number(manualKg);
-      if (Number.isFinite(n) && n >= 0) return n;
-    }
     if (initialWeightKg != null && Number.isFinite(initialWeightKg)) {
       return initialWeightKg;
     }
     return null;
-  }, [mode, manualKg, initialWeightKg]);
+  }, [initialWeightKg]);
 
   const title = locale === "ar" ? "احسب الشحن" : "Estimate shipping";
   const lead =
@@ -90,39 +82,48 @@ export function ShippingEstimator({
       {open || mode === "page" ? (
         <div className="space-y-3 px-4 pb-4 pt-1">
           {mode === "page" ? (
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="block space-y-1 text-sm">
-                <span className="font-medium text-ro-ink">
-                  {locale === "ar" ? "عدد صناديق العود" : "Oud box count"}
-                </span>
-                <input
-                  type="number"
-                  min={1}
-                  max={40}
-                  value={oudCount}
-                  onChange={(e) =>
-                    setOudCount(Math.max(1, Math.min(40, Number(e.target.value) || 1)))
-                  }
-                  className="h-11 w-full rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-paper px-3 tabular-nums"
-                />
-              </label>
-              <label className="block space-y-1 text-sm">
-                <span className="font-medium text-ro-ink">
-                  {locale === "ar"
-                    ? "وزن يدوي (كغ، اختياري)"
-                    : "Manual weight (kg, optional)"}
-                </span>
-                <input
-                  type="number"
-                  min={0}
-                  step="0.1"
-                  value={manualKg}
-                  onChange={(e) => setManualKg(e.target.value)}
-                  placeholder="—"
-                  className="h-11 w-full rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-paper px-3 tabular-nums"
+            <div className="space-y-2">
+              <span className="block text-sm font-medium text-ro-ink">
+                {locale === "ar" ? "عدد الأعواد" : "Number of ouds"}
+              </span>
+              <div className="flex items-center gap-3">
+                <div
                   dir="ltr"
-                />
-              </label>
+                  role="group"
+                  aria-label={locale === "ar" ? "عدد الأعواد" : "Number of ouds"}
+                  className="inline-flex items-center rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)]"
+                >
+                  <button
+                    type="button"
+                    aria-label={locale === "ar" ? "أنقص" : "Decrease"}
+                    disabled={oudCount <= 1}
+                    onClick={() => setOudCount((n) => Math.max(1, n - 1))}
+                    className="flex size-11 items-center justify-center text-lg text-ro-ink disabled:opacity-35"
+                  >
+                    −
+                  </button>
+                  <output
+                    className="min-w-12 text-center text-base font-semibold tabular-nums text-ro-ink"
+                    aria-live="polite"
+                  >
+                    {oudCount}
+                  </output>
+                  <button
+                    type="button"
+                    aria-label={locale === "ar" ? "زد" : "Increase"}
+                    disabled={oudCount >= 40}
+                    onClick={() => setOudCount((n) => Math.min(40, n + 1))}
+                    className="flex size-11 items-center justify-center text-lg text-ro-ink disabled:opacity-35"
+                  >
+                    +
+                  </button>
+                </div>
+                <p className="text-xs leading-relaxed text-ro-muted">
+                  {locale === "ar"
+                    ? "كل عودين يُشحنان في صندوق واحد."
+                    : "Every two ouds ship in one case."}
+                </p>
+              </div>
             </div>
           ) : null}
 

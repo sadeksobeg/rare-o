@@ -107,19 +107,30 @@ export function MethodCard({
             ))}
           </span>
         ) : null}
-        <span className="relative block h-[1.375rem] overflow-hidden text-base font-semibold tabular-nums text-ro-ink">
-          <bdi dir="ltr">
-            {opt.amount} {opt.currency}
-          </bdi>
-        </span>
-        {opt.alternate ? (
-          <span className="block text-[11px] text-ro-muted">
-            {t(locale, "عند التسديد هناك", "or paid there")}{" "}
-            <bdi dir="ltr">
-              {opt.alternate.amount} {opt.alternate.currency}
-            </bdi>
+        <span className="mt-1 block space-y-1 border-t border-dashed border-[var(--ro-border-control)] pt-2">
+          <span className="flex items-baseline justify-between gap-3">
+            <span className="text-[11px] text-ro-muted">
+              {t(locale, "الدفع في سوريا", "Pay in Syria")}
+            </span>
+            <span className="text-base font-semibold tabular-nums text-ro-ink">
+              <bdi dir="ltr">
+                {opt.amount} {opt.currency}
+              </bdi>
+            </span>
           </span>
-        ) : null}
+          {opt.alternate ? (
+            <span className="flex items-baseline justify-between gap-3">
+              <span className="text-[11px] text-ro-muted">
+                {t(locale, "الدفع في بلد الوجهة", "Pay in destination country")}
+              </span>
+              <span className="text-sm font-medium tabular-nums text-ro-text-2">
+                <bdi dir="ltr">
+                  {opt.alternate.amount} {opt.alternate.currency}
+                </bdi>
+              </span>
+            </span>
+          ) : null}
+        </span>
         {opt.consolidation ? (
           <span className="group/consol relative inline-flex items-center gap-1 text-[11px] text-ro-muted">
             <Info className="size-3 shrink-0" strokeWidth={1.5} aria-hidden />

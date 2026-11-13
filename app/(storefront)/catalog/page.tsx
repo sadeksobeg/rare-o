@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import {
   countPublishedProducts,
+  getCatalogFacets,
   listLaunchCategories,
   listPublishedProducts,
 } from "@/lib/catalog/service";
@@ -16,10 +17,13 @@ import { localizedName } from "@/lib/utils";
 import { storefrontMetadata, withDefaultOgImage } from "@/lib/seo";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HandoffExplainer } from "@/components/storefront/handoff-explainer";
-import { FilterBar } from "@/components/storefront/catalog/filter-bar";
+import {
+  CatalogFilters,
+  CatalogToolbar,
+} from "@/components/storefront/catalog/catalog-filters";
+import { parseBadges } from "@/lib/catalog/badges";
 import { LoadMore } from "@/components/storefront/catalog/load-more";
 import { ProductGrid } from "@/components/storefront/catalog/product-grid";
-import { Reveal } from "@/components/storefront/motion/reveal";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { locale, dict } = await getRequestDictionary();
@@ -42,6 +46,8 @@ type SearchParams = {
   max?: string;
   sort?: string;
   limit?: string;
+  avail?: string;
+  flags?: string;
 };
 
 function parsePrice(value: string | undefined): number | undefined {
@@ -72,13 +78,30 @@ export default async function CatalogPage({
     ? Math.min(Math.max(requestedLimit, CATALOG_PAGE_SIZE), CATALOG_MAX_LIMIT)
     : CATALOG_PAGE_SIZE;
 
-  const filters = { categorySlug: type, q, minPrice: min, maxPrice: max };
-  const hasFilters = !!(type || q || min != null || max != null);
+  const availableOnly = params.avail === "1";
+  const badges = parseBadges(params.flags);
+  const filters = {
+    categorySlug: type,
+    q,
+    minPrice: min,
+    maxPrice: max,
+    availableOnly,
+    badges,
+  };
+  const hasFilters = !!(
+    type ||
+    q ||
+    min != null ||
+    max != null ||
+    availableOnly ||
+    badges.length
+  );
 
-  const [products, total, totalAll] = await Promise.all([
+  const [products, total, totalAll, facets] = await Promise.all([
     listPublishedProducts({ ...filters, sort, limit }),
     countPublishedProducts(filters),
     hasFilters ? countPublishedProducts() : Promise.resolve(-1),
+    getCatalogFacets(filters),
   ]);
   const catalogTotal = hasFilters ? totalAll : total;
 
@@ -88,38 +111,37 @@ export default async function CatalogPage({
   if (q) nextParams.set("q", q);
   if (min != null) nextParams.set("min", String(min));
   if (max != null) nextParams.set("max", String(max));
+  if (availableOnly) nextParams.set("avail", "1");
+  if (badges.length) nextParams.set("flags", badges.join(","));
   if (sort !== "new") nextParams.set("sort", sort);
   nextParams.set(
     "limit",
     String(Math.min(limit + CATALOG_PAGE_SIZE, CATALOG_MAX_LIMIT))
   );
 
+  const facetCategories = categories.map((c) => ({
+    slug: c.slug,
+    name: localizedName(locale, c.nameAr, c.nameEn, c.slug),
+    count: facets.categoryCounts[c.slug] ?? 0,
+  }));
+  const currentValues = {
+    type,
+    min,
+    max,
+    sort,
+    q,
+    availableOnly,
+    badges,
+  };
+
   return (
-    <div className="relative space-y-6 md:space-y-8">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 -top-6 h-56 opacity-70"
-        style={{
-          background:
-            "radial-gradient(ellipse 50% 70% at 90% 0%, rgba(82,39,124,0.08), transparent 70%)",
-        }}
-      />
-      <Reveal>
-        <header className="ro-section-accent relative space-y-3 pt-3">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div className="space-y-3">
-              <p className="ro-type-overline text-ro-plum">{dict.nav.catalog}</p>
-              <h1 className="ro-type-h1 md:text-5xl">{dict.catalog.title}</h1>
-              <p className="max-w-[52ch] text-ro-text-2 md:text-lg">
-                {dict.catalog.lead}
-              </p>
-            </div>
-            <p className="text-sm text-ro-muted tabular-nums">
-              {formatNumber(total, locale)} {dict.home.pieces}
-            </p>
-          </div>
-        </header>
-      </Reveal>
+    <div className="space-y-8 md:space-y-10">
+      <header className="max-w-3xl space-y-2 pt-2">
+        <h1 className="ro-type-h1 md:text-5xl">{dict.catalog.title}</h1>
+        <p className="max-w-[56ch] text-ro-text-2 md:text-lg">
+          {dict.catalog.lead}
+        </p>
+      </header>
 
       {catalogTotal === 0 ? (
         <EmptyState
@@ -129,42 +151,53 @@ export default async function CatalogPage({
           actionLabel={dict.product.contactUs}
         />
       ) : (
-        <>
-          <FilterBar
+        <div className="grid items-start gap-6 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-10">
+          <CatalogFilters
             locale={locale}
-            labels={dict.catalog}
-            piecesLabel={dict.home.pieces}
             basePath={catalogHref}
-            categories={categories.map((c) => ({
-              slug: c.slug,
-              name: localizedName(locale, c.nameAr, c.nameEn, c.slug),
-            }))}
-            current={{ type, min, max, sort, q }}
+            categories={facetCategories}
+            current={currentValues}
+            bounds={facets.price}
+            availableCount={facets.availableCount}
+            badgeCounts={facets.badgeCounts}
             total={total}
           />
-
-          {products.length === 0 ? (
-            <EmptyState
-              title={dict.catalog.noResults}
-              body={dict.catalog.noResultsHint}
-              actionHref={catalogHref}
-              actionLabel={dict.catalog.clearFilters}
+          <section className="min-w-0 space-y-5" aria-label={dict.catalog.title}>
+            <CatalogToolbar
+              locale={locale}
+              basePath={catalogHref}
+              categories={facetCategories}
+              current={currentValues}
+              total={total}
             />
-          ) : (
-            <>
-              <ProductGrid products={products} locale={locale} dict={dict} />
-              <LoadMore
-                href={`${catalogHref}?${nextParams.toString()}`}
-                shown={products.length}
-                total={total}
-                label={dict.catalog.loadMore}
-                progressLabel={dict.catalog.showing
-                  .replace("{shown}", formatNumber(products.length, locale))
-                  .replace("{total}", formatNumber(total, locale))}
+            {products.length === 0 ? (
+              <EmptyState
+                title={dict.catalog.noResults}
+                body={dict.catalog.noResultsHint}
+                actionHref={catalogHref}
+                actionLabel={dict.catalog.clearFilters}
               />
-            </>
-          )}
-        </>
+            ) : (
+              <>
+                <ProductGrid
+                  products={products}
+                  locale={locale}
+                  dict={dict}
+                  className="lg:grid-cols-2 xl:grid-cols-3"
+                />
+                <LoadMore
+                  href={`${catalogHref}?${nextParams.toString()}`}
+                  shown={products.length}
+                  total={total}
+                  label={dict.catalog.loadMore}
+                  progressLabel={dict.catalog.showing
+                    .replace("{shown}", formatNumber(products.length, locale))
+                    .replace("{total}", formatNumber(total, locale))}
+                />
+              </>
+            )}
+          </section>
+        </div>
       )}
 
       <HandoffExplainer dict={dict} compact />
