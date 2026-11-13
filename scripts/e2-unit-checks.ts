@@ -72,6 +72,13 @@ async function main() {
     "formatCurrency USD"
   );
   assert(
+    formatCurrency(21832, "USD", "ar", "عند الطلب").includes("21,832.00") &&
+      formatCurrency(21832, "USD", "ar", "عند الطلب").includes("US$") &&
+      !formatCurrency(21832, "USD", "ar", "عند الطلب").includes("$US") &&
+      !formatCurrency(21832, "USD", "ar", "عند الطلب").includes("USD$"),
+    "formatCurrency stable US$ order"
+  );
+  assert(
     formatCurrency(100, "TEST", "en", "On request") === "On request",
     "formatCurrency hides TEST code"
   );

@@ -86,13 +86,15 @@ export function RequestForm({
   };
   notesDefault?: string;
 }) {
-  const { items, clear } = useCart();
+  const { items, clear, removeItem, hydrated } = useCart();
   const [result, setResult] = useState<ActionResult | null>(null);
   const [restoring, setRestoring] = useState(true);
   const [pending, startTransition] = useTransition();
   const [opening, setOpening] = useState(false);
   const [openError, setOpenError] = useState<string | null>(null);
   const [shipping, setShipping] = useState<ShippingSelection | null>(null);
+  const [cartNotice, setCartNotice] = useState<string | null>(null);
+  const validatedRef = useRef(false);
   const showMobileSticky =
     Boolean(shipping && !shipping.inquiry && shipping.amount > 0);
 
@@ -101,6 +103,43 @@ export function RequestForm({
     if (stored) setResult(stored);
     setRestoring(false);
   }, []);
+
+  /** Drop draft / missing / unpublished cart lines with a clear Arabic notice. */
+  useEffect(() => {
+    if (!hydrated || restoring || validatedRef.current) return;
+    if (items.length === 0) {
+      validatedRef.current = true;
+      return;
+    }
+    const ids = items.map((i) => i.productId);
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/cart/validate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productIds: ids }),
+        });
+        if (!res.ok || cancelled) return;
+        const data = (await res.json()) as { removed?: string[] };
+        const removed = Array.isArray(data.removed) ? data.removed : [];
+        validatedRef.current = true;
+        if (removed.length === 0) return;
+        for (const id of removed) removeItem(id);
+        setCartNotice(
+          locale === "ar"
+            ? "أزلنا من السلة منتجات لم تعد متاحة للطلب. يمكنك المتابعة بما تبقّى."
+            : "We removed unavailable products from your cart. You can continue with what remains."
+        );
+      } catch {
+        validatedRef.current = true;
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [hydrated, restoring, items, removeItem, locale]);
+
   /** One idempotency key per mount — double-submit / retry reuses it. */
   const idempotencyKeyRef = useRef<string | null>(null);
 
@@ -190,6 +229,15 @@ export function RequestForm({
         <h1 className="ro-type-h1">{labels.title}</h1>
         <p className="text-sm text-ro-muted">{labels.shippingNote}</p>
       </header>
+
+      {cartNotice ? (
+        <p
+          role="status"
+          className="rounded-[var(--ro-r-sm)] border border-[color-mix(in_srgb,var(--ro-warn)_40%,var(--ro-border))] bg-[color-mix(in_srgb,var(--ro-warn)_8%,var(--ro-paper))] px-4 py-3 text-sm text-ro-ink"
+        >
+          {cartNotice}
+        </p>
+      ) : null}
 
       <div className="space-y-2 rounded-[var(--ro-r-sm)] border border-ro-border bg-ro-surface/60 px-4 py-3 text-sm">
         <div className="flex items-center justify-between gap-4">

@@ -52,6 +52,7 @@ export function ShippingEstimator({
 
   return (
     <div
+      data-testid="ro-shipping-estimator"
       className={cn(
         "rounded-[var(--ro-r-md)] border border-[var(--ro-border-control)] bg-ro-paper",
         className

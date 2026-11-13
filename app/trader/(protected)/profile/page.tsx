@@ -1,8 +1,10 @@
+import Link from "next/link";
 import {
   Building2,
   Mail,
   Phone,
   ShieldCheck,
+  Truck,
   UserRound,
 } from "lucide-react";
 import { TraderPreferencesForm } from "@/components/trader/preferences-form";
@@ -75,6 +77,18 @@ export default async function TraderProfilePage() {
         description={t.profileNote}
         icon={<UserRound className="size-5" strokeWidth={1.5} />}
       />
+      <Link
+        href="/trader/shipments"
+        className="flex items-center gap-3 rounded-2xl border border-[color:var(--rad-bd)] bg-[color:var(--rad-c0)] px-5 py-4 text-sm font-semibold text-[color:var(--rad-tx)] shadow-[0_12px_40px_-28px_rgba(0,0,0,0.4)] transition-colors hover:bg-[color:var(--rad-c1)]"
+      >
+        <Truck className="size-5 text-[color:var(--rad-ac)]" strokeWidth={1.5} aria-hidden />
+        <span className="flex-1">
+          {locale === "ar" ? "شحناتي" : "My shipments"}
+        </span>
+        <span className="text-xs font-medium text-[color:var(--rad-tx-2)]">
+          {locale === "ar" ? "فتح" : "Open"}
+        </span>
+      </Link>
       <AppearanceCard
         title={dict.common.themeGroup}
         description={t.profileAppearanceDesc}

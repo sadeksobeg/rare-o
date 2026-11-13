@@ -54,15 +54,18 @@ export function formatCurrency(
   locale: Locale,
   onRequest: string
 ) {
-  const code = currency?.trim();
+  const code = currency?.trim()?.toUpperCase();
   // No currency, or non-display fixture code — never show "TEST" in UI.
   if (value == null || !code || code === TEST_CURRENCY_CODE) return onRequest;
   try {
-    return new Intl.NumberFormat(localeTag(locale), {
-      style: "currency",
-      currency: code,
+    // Stable bidi-safe form: "21,832.00 US$" (never locale "$US …" quirks).
+    const amount = new Intl.NumberFormat(localeTag(locale), {
+      minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(value);
+    const suffix = code === "USD" ? "US$" : code;
+    // LRI … PDI isolate so Arabic RTL pages don't reverse "$" / code order.
+    return `\u2066${amount}\u00A0${suffix}\u2069`;
   } catch {
     // Unknown / non-ISO code — treat as missing currency for storefront display.
     return onRequest;

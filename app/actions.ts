@@ -862,20 +862,15 @@ export async function createRetailRequestAction(
       },
     };
   } catch (e) {
+    const { retailRequestErrorCopy } = await import(
+      "@/lib/retail-request/error-copy"
+    );
     const msg = e instanceof Error ? e.message : "Request failed";
-    if (msg === "WHATSAPP_BUSINESS_E164_MISSING") {
-      return {
-        ok: false,
-        error: "WhatsApp business number is not configured",
-      };
-    }
-    if (msg === "WHATSAPP_BUSINESS_E164_INVALID") {
-      return {
-        ok: false,
-        error: "WhatsApp business number is invalid",
-      };
-    }
-    return { ok: false, error: msg };
+    const locale = (parsed.data.locale === "en" ? "en" : "ar") as "ar" | "en";
+    return {
+      ok: false,
+      error: retailRequestErrorCopy(msg, locale),
+    };
   }
 }
 

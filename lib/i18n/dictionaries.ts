@@ -2037,7 +2037,7 @@ const ar: Dict = {
     messagePreview: "نص الرسالة المعدّة:",
     listEmpty: "قائمة الطلب فارغة.",
     privacyConsent:
-      "بتجهيز الطلب فإنك توافق على استخدام بياناتك للتواصل معك عبر واتساب فقط، وفق {link}.",
+      "بتجهيز الطلب فإنك توافق على استخدام بياناتك للرد على طلبك أو استفسارك (بما في ذلك عبر واتساب عند الحاجة)، وفق {link}. تحديثات حالة الشحن عبر واتساب اختيارية ولا تُفعَّل إلا إذا وضعت علامة في الخانة أعلاه.",
     privacyLink: "سياسة الخصوصية",
     successTitle: "تم تجهيز طلبك",
     referenceLabel: "المرجع",
@@ -3944,7 +3944,7 @@ const en: Dict = {
     messagePreview: "Prepared message:",
     listEmpty: "Your request list is empty.",
     privacyConsent:
-      "By preparing this request you agree that your details are used only to contact you on WhatsApp, as described in our {link}.",
+      "By preparing this request you agree we may use your details to reply to your order or inquiry (including via WhatsApp when needed), as described in our {link}. Shipping-status updates on WhatsApp are optional and only enabled if you tick the box above.",
     privacyLink: "privacy policy",
     successTitle: "Your request is ready",
     referenceLabel: "Reference",

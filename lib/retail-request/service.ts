@@ -64,14 +64,11 @@ export async function createRetailRequestFromCart(
 
   for (const line of input.lines) {
     const product = byId.get(line.productId);
-    if (!product) throw new Error("INVALID_PRODUCT");
-    if (product.status !== "published") throw new Error("PRODUCT_NOT_PUBLISHED");
-    if (product.availability !== "available") {
-      throw new Error("PRODUCT_UNAVAILABLE");
-    }
-    if (product.retailPrice == null || !product.currency) {
-      throw new Error("PRODUCT_PRICE_ON_REQUEST");
-    }
+    // Soft-skip unavailable / draft / missing — client cart validate removes them too.
+    if (!product) continue;
+    if (product.status !== "published") continue;
+    if (product.availability !== "available") continue;
+    if (product.retailPrice == null || !product.currency) continue;
     const unit = Number(product.retailPrice);
     resolvedLines.push({
       productId: product.id,
@@ -82,6 +79,12 @@ export async function createRetailRequestFromCart(
       lineTotal: unit * line.quantity,
       currency: product.currency,
     });
+  }
+
+  if (resolvedLines.length === 0) {
+    throw new Error(
+      input.lines.length === 0 ? "EMPTY_CART" : "CART_ITEMS_UNAVAILABLE"
+    );
   }
 
   const currencies = new Set(resolvedLines.map((l) => l.currency));

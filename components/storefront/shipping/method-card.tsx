@@ -40,6 +40,7 @@ export function MethodCard({
       type="button"
       role="radio"
       aria-checked={active}
+      aria-label={t(locale, opt.labelAr, opt.labelEn)}
       onClick={onSelect}
       initial={lite ? false : { opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
@@ -120,16 +121,20 @@ export function MethodCard({
           </span>
         ) : null}
         {opt.consolidation ? (
-          <span className="inline-flex items-center gap-1 text-[11px] text-ro-muted">
+          <span className="group/consol relative inline-flex items-center gap-1 text-[11px] text-ro-muted">
             <Info className="size-3 shrink-0" strokeWidth={1.5} aria-hidden />
+            <span className="underline decoration-dotted underline-offset-2">
+              {t(locale, "تجميع شحنات", "Consolidation")}
+            </span>
             <span
-              title={t(
+              data-testid="ro-consolidation-tooltip"
+              className="pointer-events-none absolute start-0 bottom-[calc(100%+6px)] z-20 hidden w-56 rounded-md border border-[var(--ro-border-control)] bg-ro-paper px-2.5 py-2 text-start text-[11px] leading-snug text-ro-ink shadow-md group-hover/consol:block"
+            >
+              {t(
                 locale,
                 "يُجمَّع الشحن مع طرود أخرى قبل الخروج من سورية — قد يزيد زمن التسليم قليلاً.",
                 "Shipment may consolidate with others before leaving Syria — delivery can take a little longer."
               )}
-            >
-              {t(locale, "تجميع شحنات", "Consolidation")}
             </span>
           </span>
         ) : null}

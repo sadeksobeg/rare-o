@@ -1,0 +1,77 @@
+{
+  "priceNote": "qanun-select / qanun-select retailPrice=21832 USD — seed catalog data (instrument demo), not a shipping weight formula.",
+  "shots": [
+    {
+      "file": "s2c-lb-confirm-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0,
+      "textBad": []
+    },
+    {
+      "file": "s2c-lb-confirm-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0,
+      "textBad": []
+    },
+    {
+      "file": "s2c-pdp-estimator-open-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0,
+      "textBad": []
+    },
+    {
+      "file": "s2c-picker-open-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0,
+      "textBad": []
+    },
+    {
+      "file": "s2c-sim-jo-cards-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0,
+      "textBad": []
+    },
+    {
+      "file": "s2c-sim-sa-consol-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0,
+      "textBad": []
+    },
+    {
+      "file": "s2c-sim-ae-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0,
+      "textBad": []
+    },
+    {
+      "file": "s2c-sim-lb-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0,
+      "textBad": []
+    },
+    {
+      "file": "s2c-admin-inquiries-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0,
+      "textBad": []
+    }
+  ],
+  "see": [
+    "SEE s2c-lb-confirm-1440-ar.png: LB inquiry confirmation (no raw codes); cart purged stale item",
+    "SEE s2c-lb-confirm-390-ar.png: LB inquiry confirmation mobile; Arabic success/handoff only",
+    "PRICE SEE: slug=qanun-select raw=21832 USD; page has $US? false; has US$? true",
+    "SEE s2c-pdp-estimator-open-390-ar.png: PDP@390 open estimator cards visible; price format not $US; seed price 21832 USD",
+    "SEE s2c-picker-open-390-ar.png: Picker open@390: search field visible, flag beside Arabic name, JO red triangle in list",
+    "SEE s2c-sim-jo-cards-1440-ar.png: Sim JO scrolled: flag+Arabic name only (no JO code); 3 cards الأرخص/الأسرع/الأعلى أماناً",
+    "SEE s2c-sim-sa-consol-1440-ar.png: Sim SA scrolled: consolidation tooltip open; no raw SA in title; FAST card visible",
+    "SEE s2c-sim-ae-1440-ar.png: Sim AE: legacy air + 60 flat; Arabic name only",
+    "SEE s2c-sim-lb-1440-ar.png: Sim LB: inquiry/unverified customer preview; Arabic name only",
+    "SEE s2c-admin-inquiries-1440-ar.png: Admin Inquiries inbox includes LB inquiry row from E2E submit"
+  ],
+  "fails": [],
+  "textGates": {
+    "pass": 9,
+    "fail": 0,
+    "notes": []
+  }
+}

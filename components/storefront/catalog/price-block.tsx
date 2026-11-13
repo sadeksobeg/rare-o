@@ -65,11 +65,12 @@ export function PriceBlock({
             size === "pdp" ? "font-display text-2xl md:text-3xl" : "text-sm"
           )}
         >
-          <span className="font-semibold text-ro-ink">
+          <bdi dir="ltr" className="font-semibold text-ro-ink">
             <span className="sr-only">{nowLabel}: </span>
             {formatCurrency(retail, displayCurrency, locale, onRequestLabel)}
-          </span>
-          <span
+          </bdi>
+          <bdi
+            dir="ltr"
             className={cn(
               "text-ro-muted line-through",
               size === "pdp" ? "text-base font-normal md:text-lg" : "text-xs"
@@ -77,7 +78,7 @@ export function PriceBlock({
           >
             <span className="sr-only">{wasLabel}: </span>
             {formatCurrency(compareAt, displayCurrency, locale, onRequestLabel)}
-          </span>
+          </bdi>
         </p>
       </div>
     );
@@ -93,7 +94,9 @@ export function PriceBlock({
         className
       )}
     >
-      {formatCurrency(retail, displayCurrency, locale, onRequestLabel)}
+      <bdi dir="ltr">
+        {formatCurrency(retail, displayCurrency, locale, onRequestLabel)}
+      </bdi>
     </p>
   );
 }

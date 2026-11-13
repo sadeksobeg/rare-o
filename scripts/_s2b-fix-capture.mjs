@@ -33,10 +33,21 @@ console.log("[s2b-fix] base", BASE);
 const prisma = new PrismaClient();
 const admin = await prisma.adminUser.findFirst({ orderBy: { createdAt: "asc" } });
 const product = await prisma.product.findFirst({
-  where: { status: "published", NOT: { slug: "shipping-calc-demo-oud" } },
-  select: { slug: true },
+  where: {
+    status: "published",
+    availability: "available",
+    retailPrice: { not: null },
+    NOT: { slug: "shipping-calc-demo-oud" },
+  },
+  select: {
+    id: true,
+    slug: true,
+    nameAr: true,
+    retailPrice: true,
+    currency: true,
+  },
 });
-if (!admin) throw new Error("no admin");
+if (!admin || !product) throw new Error("no admin or published product");
 
 // Local hygiene: draft the demo product; tidy AE legacy label duplication.
 await prisma.product.updateMany({
@@ -67,11 +78,11 @@ await prisma.$disconnect();
 
 const cart = [
   {
-    productId: "s2b-fixture",
-    slug: "s2b-fixture",
-    name: "عود اختبار",
-    price: 100,
-    currency: "USD",
+    productId: product.id,
+    slug: product.slug,
+    name: product.nameAr,
+    price: Number(product.retailPrice),
+    currency: product.currency || "USD",
     quantity: 1,
     imagePath: null,
   },
@@ -139,10 +150,12 @@ async function shot(page, name, theme, w, see) {
 }
 
 async function selectDest(page, label) {
-  const input = page.getByTestId("ro-shipping-destination").first();
-  await input.waitFor({ state: "visible", timeout: 45_000 });
-  await input.click();
-  await input.fill(label);
+  const trigger = page.getByTestId("ro-shipping-destination").first();
+  await trigger.waitFor({ state: "visible", timeout: 45_000 });
+  await trigger.click();
+  const search = page.getByTestId("ro-shipping-destination-search").first();
+  await search.waitFor({ state: "visible", timeout: 10_000 });
+  await search.fill(label);
   await page.waitForTimeout(400);
   const opt = page.getByRole("option").filter({ hasText: label }).first();
   if (await opt.count()) await opt.click();

@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { shippingSimulateQuoteAction } from "@/app/shipping-admin-actions";
 import { DestinationCombobox } from "@/components/storefront/shipping/destination-combobox";
+import { CountryFlagWithFallback } from "@/components/storefront/shipping/flag";
 import { MethodCard } from "@/components/storefront/shipping/method-card";
 import { WeightText } from "@/components/storefront/shipping/weight-text";
 import { Button } from "@/components/ui/button";
@@ -150,14 +151,30 @@ export function SimulatorPanel({ locale }: { locale: string }) {
 
       {result ? (
         <div className="space-y-3 rounded-lg border border-[color:var(--rad-bd)] p-4">
-          <p className="text-sm text-[color:var(--rad-tx-2)]">
-            <bdi dir="ltr">{result.destinationCode}</bdi>
-            {result.destination
-              ? ` · ${ar ? result.destination.nameAr : result.destination.nameEn || result.destination.nameAr}`
-              : ""}
-            {" · "}
+          <p
+            data-testid="ro-sim-result-header"
+            className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-[color:var(--rad-tx-2)]"
+          >
+            <span className="inline-flex items-center gap-1.5 font-medium text-[color:var(--rad-tx)]">
+              <CountryFlagWithFallback
+                code={result.destinationCode}
+                title={
+                  result.destination
+                    ? result.destination.nameEn || result.destination.nameAr
+                    : result.destinationCode
+                }
+              />
+              {result.destination
+                ? ar
+                  ? result.destination.nameAr
+                  : result.destination.nameEn || result.destination.nameAr
+                : ar
+                  ? "وجهة غير معروفة"
+                  : "Unknown destination"}
+            </span>
+            <span aria-hidden>·</span>
             <WeightText kg={result.weightKg} locale={loc} className="inline-flex" />
-            {" · "}
+            <span aria-hidden>·</span>
             {weightSourceLabel(result.weightSource, loc)}
           </p>
 

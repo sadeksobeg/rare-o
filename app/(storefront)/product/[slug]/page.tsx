@@ -146,10 +146,12 @@ export default async function ProductPage({
     product.id
   );
 
-  const featureItems = [
-    ...parseFeatureLines(specs),
-    ...parseFeatureLines(descriptionText),
-  ].filter((v, i, arr) => arr.indexOf(v) === i);
+  // Specs only — merging description caused the short descriptor to repeat as a bullet.
+  const featureItems = parseFeatureLines(specs).filter(
+    (v, i, arr) =>
+      arr.findIndex((x) => x.replace(/\s+/g, " ").trim() === v.replace(/\s+/g, " ").trim()) ===
+      i
+  );
 
   const aPlusBlocks = [
     {
