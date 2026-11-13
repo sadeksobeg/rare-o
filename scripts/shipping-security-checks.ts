@@ -4,7 +4,7 @@
  * Expects PLAYWRIGHT_BASE_URL or http://127.0.0.1:3000
  */
 const BASE = process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:3000";
-const URL = `${BASE}/api/shipping/quote`;
+const QUOTE_URL = `${BASE}/api/shipping/quote`;
 
 type Check = { name: string; ok: boolean; detail: string };
 const results: Check[] = [];
