@@ -15,7 +15,7 @@ function note(name: string, ok: boolean, detail: string) {
 }
 
 async function post(body: unknown, headers: Record<string, string> = {}) {
-  const res = await fetch(URL, {
+  const res = await fetch(QUOTE_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...headers },
     body: typeof body === "string" ? body : JSON.stringify(body),
