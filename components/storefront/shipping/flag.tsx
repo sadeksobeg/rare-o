@@ -12,7 +12,8 @@ export function CountryFlag({
   title?: string;
 }) {
   const iso = code.trim().toUpperCase().slice(0, 2);
-  const src = `/brand/flags/${iso}.svg`;
+  // ?v=2 busts the 7-day cache of the old hand-drawn flags
+  const src = `/brand/flags/${iso}.svg?v=2`;
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
