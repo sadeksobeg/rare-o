@@ -1,0 +1,93 @@
+{
+  "routes": [
+    {
+      "route": "/trader",
+      "status": 200,
+      "url": "/trader",
+      "ok": true,
+      "cons": []
+    },
+    {
+      "route": "/trader/deals",
+      "status": 200,
+      "url": "/trader/deals",
+      "ok": true,
+      "cons": []
+    },
+    {
+      "route": "/trader/wholesale",
+      "status": 200,
+      "url": "/trader/wholesale",
+      "ok": true,
+      "cons": []
+    },
+    {
+      "route": "/trader/wholesale/new",
+      "status": 200,
+      "url": "/trader/wholesale/new",
+      "ok": true,
+      "cons": []
+    },
+    {
+      "route": "/trader/brokerage",
+      "status": 200,
+      "url": "/trader/brokerage",
+      "ok": true,
+      "cons": []
+    },
+    {
+      "route": "/trader/offers",
+      "status": 200,
+      "url": "/trader/offers",
+      "ok": true,
+      "cons": []
+    },
+    {
+      "route": "/trader/notifications",
+      "status": 200,
+      "url": "/trader/notifications",
+      "ok": true,
+      "cons": []
+    },
+    {
+      "route": "/trader/profile",
+      "status": 200,
+      "url": "/trader/profile",
+      "ok": true,
+      "cons": []
+    },
+    {
+      "route": "wholesale-detail",
+      "status": 200,
+      "url": "/trader/wholesale",
+      "ok": true,
+      "cons": []
+    }
+  ],
+  "shots": {
+    "request1440": {
+      "has130": true,
+      "has150": true,
+      "hasNeutral": true,
+      "hasInternal": false,
+      "alt110": true,
+      "weight20": true,
+      "cons": []
+    },
+    "traderSelector": {
+      "has130": false,
+      "has150": false
+    }
+  },
+  "see": [
+    "SEE prod-request-de20-light-1440-ar.png: I SEE Germany selected, weight 20 كغ, land 130 USD / air 150 USD, alt \"عند التسديد هناك 110 EUR\", neutral box-weight help — internal=false",
+    "SEE prod-request-de20-light-390-ar.png: I SEE same selector stacked on mobile 390",
+    "SEE prod-trader-wholesale-new-de-light-1440-ar.png: I SEE trader wholesale/new with DE quotes 130/150=false"
+  ],
+  "errors": [
+    {
+      "route": "/admin/shipping",
+      "error": "Error: page.goto: net::ERR_ADDRESS_INVALID at https://rareoud.com/admin/shipping\nCall log:\n  - navigating to \"https://rareoud.com/admin/shipping\", waiting until \"domcontentloaded\"\n"
+    }
+  ]
+}
