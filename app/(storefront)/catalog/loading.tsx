@@ -9,7 +9,7 @@ export default function CatalogLoading() {
         <Skeleton className="h-10 w-48 max-w-full" />
         <Skeleton className="h-4 w-full max-w-lg" />
       </div>
-      <div className="sticky top-[65px] z-10 -mx-4 border-b border-ro-border bg-ro-canvas/95 px-4 py-3">
+      <div className="sticky top-[65px] z-10 -mx-3 border-b border-ro-border bg-ro-canvas/95 px-3 sm:-mx-4 sm:px-4 py-3">
         <div className="flex flex-wrap items-end gap-3">
           <Skeleton className="h-11 w-28" />
           <Skeleton className="h-11 w-28" />

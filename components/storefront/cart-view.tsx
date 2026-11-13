@@ -226,7 +226,7 @@ export function CartView({
       </div>
 
       {/* Mobile / tablet sticky summary bar */}
-      <div className="sticky bottom-0 z-30 -mx-4 border-t border-ro-border bg-ro-cream/95 px-4 py-3 backdrop-blur-md lg:hidden">
+      <div className="sticky bottom-0 z-30 -mx-3 border-t border-ro-border bg-ro-cream/95 px-3 sm:-mx-4 sm:px-4 py-3 backdrop-blur-md lg:hidden">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
           <div className="min-w-0">
             <p className="text-xs text-ro-muted">{piecesText}</p>

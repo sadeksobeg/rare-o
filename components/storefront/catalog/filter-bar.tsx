@@ -126,7 +126,7 @@ export function FilterBar({
 
   return (
     <div
-      className="sticky top-[65px] z-30 -mx-4 border-b border-ro-border bg-ro-canvas/95 px-4 py-4 shadow-[0_10px_30px_-24px_rgba(11,8,13,0.35)] backdrop-blur-md"
+      className="sticky top-[65px] z-30 -mx-3 border-b border-ro-border bg-ro-canvas/95 px-3 sm:-mx-4 sm:px-4 py-4 shadow-[0_10px_30px_-24px_rgba(11,8,13,0.35)] backdrop-blur-md"
       aria-busy={pending || undefined}
     >
       <p role="status" aria-live="polite" className="sr-only">
