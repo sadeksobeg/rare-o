@@ -298,6 +298,8 @@ export function WholesaleRequestForm({
 
           <ShippingCostSelector
             locale={locale}
+            audience="TRADER"
+            weightKind="oud-box"
             oudUnitCount={selected.reduce((s, x) => s + x.quantity, 0)}
           />
 

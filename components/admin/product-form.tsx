@@ -457,11 +457,11 @@ export function ProductForm({
       <div className="grid gap-3 sm:grid-cols-2">
         <TextField
           name="weightKg"
-          label={ar ? "وزن الوحدة (كيلو حجمي)" : "Unit weight (vol. kg)"}
+          label={ar ? "وزن الوحدة (كغ)" : "Unit weight (kg)"}
           helper={
             ar
-              ? "اختياري — إن تُرك فارغاً يُقدَّر الكيلو الحجمي للشحن من عدد وحدات العود."
-              : "Optional — if empty, volumetric shipping weight uses the oud-unit heuristic."
+              ? "اختياري — إن تُرك فارغاً يُستخدم الوزن المحتسب للصندوق (قاعدة العود)."
+              : "Optional — if empty, billable box weight uses the oud-unit heuristic."
           }
           type="number"
           step="0.01"

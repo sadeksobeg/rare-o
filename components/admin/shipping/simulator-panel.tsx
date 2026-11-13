@@ -50,7 +50,7 @@ export function SimulatorPanel({ locale }: { locale: string }) {
         }}
       >
         <TextField name="destinationCode" label={ar ? "الوجهة" : "Destination"} placeholder="JO" required dense dir="ltr" />
-        <TextField name="weightKg" label={ar ? "الوزن الحجمي (كيلو حجمي)" : "Volumetric weight (vol. kg)"} type="number" step="0.1" defaultValue="5" dense dir="ltr" />
+        <TextField name="weightKg" label={ar ? "الوزن المحتسب (كغ)" : "Billable weight (kg)"} type="number" step="0.1" defaultValue="5" dense dir="ltr" />
         <Field label={ar ? "الجمهور" : "Audience"}>
           <Select name="audience" defaultValue="CUSTOMER">
             <option value="CUSTOMER">{ar ? "عميل" : "Customer"}</option>
@@ -82,7 +82,7 @@ export function SimulatorPanel({ locale }: { locale: string }) {
               ? ` · ${ar ? result.destination.nameAr : result.destination.nameEn || result.destination.nameAr}`
               : ""}
             {" · "}
-            {ar ? "كيلو حجمي" : "vol. kg"}{" "}
+            {ar ? "كغ" : "kg"}{" "}
             <bdi dir="ltr">{result.weightKg ?? "—"}</bdi> ({result.weightSource})
           </p>
           {result.inquiry ? (

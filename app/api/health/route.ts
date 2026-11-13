@@ -1,3 +1,4 @@
+import { getBuildInfo } from "@/lib/build-info";
 import { prisma } from "@/lib/db/prisma";
 import { NextResponse } from "next/server";
 
@@ -27,19 +28,23 @@ export async function GET() {
     } catch {
       /* health must still answer if WA row missing */
     }
+    const build = getBuildInfo();
     return NextResponse.json({
       ok: true,
       db: "up",
       whatsapp,
+      build: { sha: build.sha, builtAt: build.builtAt },
       ms: Date.now() - started,
       ts: new Date().toISOString(),
     });
   } catch {
+    const build = getBuildInfo();
     return NextResponse.json(
       {
         ok: false,
         db: "down",
         whatsapp: { state: "disconnected" as const },
+        build: { sha: build.sha, builtAt: build.builtAt },
         ms: Date.now() - started,
         ts: new Date().toISOString(),
       },

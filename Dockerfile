@@ -25,9 +25,15 @@ ENV DATABASE_URL=$DATABASE_URL
 ARG SITE_URL=https://rareoud.com
 ARG SECURITY_EMAIL=security@rareoud.com
 ARG NEXT_PUBLIC_SITE_URL=https://rareoud.com
+ARG GIT_SHA=unknown
+ARG BUILD_TIME=unknown
 ENV SITE_URL=$SITE_URL
 ENV SECURITY_EMAIL=$SECURITY_EMAIL
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+ENV RO_GIT_SHA=$GIT_SHA
+ENV RO_BUILD_TIME=$BUILD_TIME
+ENV GIT_SHA=$GIT_SHA
+ENV BUILD_TIME=$BUILD_TIME
 RUN npx prisma generate
 RUN npm run build
 # Keep tsx for the WhatsApp worker entry (TypeScript). Prune other devDeps.
@@ -41,6 +47,13 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
+# Echoed on /api/health; also baked into the Next build via builder ENVs.
+ARG GIT_SHA=unknown
+ARG BUILD_TIME=unknown
+ENV RO_GIT_SHA=$GIT_SHA
+ENV RO_BUILD_TIME=$BUILD_TIME
+ENV GIT_SHA=$GIT_SHA
+ENV BUILD_TIME=$BUILD_TIME
 
 # WA-W2: ffmpeg required for voice-note → ogg/opus PTT in the WhatsApp worker
 # (same image as web). Exception to the “no apt-get” preference for this package only.

@@ -1,9 +1,29 @@
 import type { NextConfig } from "next";
 import bundleAnalyzer from "@next/bundle-analyzer";
+import { execSync } from "node:child_process";
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
+
+function resolveGitSha(): string {
+  const fromEnv =
+    process.env.RO_GIT_SHA?.trim() ||
+    process.env.GIT_SHA?.trim() ||
+    process.env.VERCEL_GIT_COMMIT_SHA?.trim();
+  if (fromEnv) return fromEnv.slice(0, 40);
+  try {
+    return execSync("git rev-parse HEAD", { stdio: ["ignore", "pipe", "ignore"] })
+      .toString()
+      .trim()
+      .slice(0, 40);
+  } catch {
+    return "unknown";
+  }
+}
+
+const RO_GIT_SHA = resolveGitSha();
+const RO_BUILD_TIME = process.env.RO_BUILD_TIME?.trim() || new Date().toISOString();
 
 const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
@@ -35,8 +55,11 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 60 * 60 * 24 * 30,
   },
   // Expose the promo UI gate to client components (PriceBlock in client trees).
+  // Build identity is also available server-side via process.env for /api/health.
   env: {
     RO_PROMO_FEATURES: process.env.RO_PROMO_FEATURES ?? "",
+    RO_GIT_SHA,
+    RO_BUILD_TIME,
   },
   async headers() {
     const isProd = process.env.NODE_ENV === "production";

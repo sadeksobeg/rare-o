@@ -11,7 +11,6 @@ import {
   INTERNATIONAL_ZONES,
   SYRIA_GOVERNORATES,
 } from "@/lib/shipping/rates";
-import { resolveAvailableMethods } from "@/lib/shipping/resolve-available-methods";
 import type { Locale } from "@/lib/i18n/config";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +21,22 @@ export type ShippingSelection = {
   methodLabel: string;
   amount: number;
   currency: string;
+};
+
+type QuoteMethod = {
+  code: string;
+  labelAr: string;
+  labelEn: string;
+  amount: number;
+  currency: string;
+  alternate: { amount: number; currency: string } | null;
+};
+
+type QuoteOk = {
+  ok: true;
+  methods: QuoteMethod[];
+  inquiry: boolean;
+  weightKg: number | null;
 };
 
 const SYRIA_GROUP = SYRIA_GOVERNORATES.map((g) => ({
@@ -37,25 +52,31 @@ const INTL_GROUP = INTERNATIONAL_ZONES.flatMap((z) =>
 const t = (locale: Locale, ar: string, en: string) => (locale === "ar" ? ar : en);
 
 /**
- * World-class, zero-round-trip shipping picker: the rate sheet is static
- * data imported straight into this client component, so selecting a
- * destination computes real prices instantly — no server call, no spinner.
- * Writes hidden form fields (`destinationCountry`, `destinationCode`,
- * `shippingMethodCode`, `shippingMethodLabel`) that the existing retail
- * request action/schema already expect.
+ * Destination picker that quotes through the server engine
+ * (`POST /api/shipping/quote`). Display amounts are advisory — submit
+ * handlers re-quote and store an immutable snapshot.
  */
 export function ShippingCostSelector({
   locale,
   oudUnitCount,
+  audience = "CUSTOMER",
+  weightKind = "oud-box",
   onChange,
 }: {
   locale: Locale;
-  /** Count of oud-category items in the cart — drives billable weight. */
+  /** Count of oud-category items — drives the local box-weight estimate sent to the API. */
   oudUnitCount: number;
+  audience?: "CUSTOMER" | "TRADER";
+  /** Label: oud-box heuristic vs generic billable weight (no volumetric claim). */
+  weightKind?: "oud-box" | "generic";
   onChange?: (selection: ShippingSelection | null) => void;
 }) {
   const [destinationCode, setDestinationCode] = useState("");
   const [methodCode, setMethodCode] = useState<string | null>(null);
+  const [options, setOptions] = useState<QuoteMethod[]>([]);
+  const [inquiry, setInquiry] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [quoteError, setQuoteError] = useState(false);
 
   const { lite } = useMotion();
   const safeOudCount = Math.max(1, oudUnitCount);
@@ -68,12 +89,6 @@ export function ShippingCostSelector({
     [safeOudCount]
   );
 
-  const options = useMemo(
-    () =>
-      destinationCode ? resolveAvailableMethods(destinationCode, weightKg) : [],
-    [destinationCode, weightKg]
-  );
-
   const selectedOption =
     options.find((o) => o.code === methodCode) ?? options[0] ?? null;
 
@@ -82,8 +97,19 @@ export function ShippingCostSelector({
     INTL_GROUP.find((c) => c.code === destinationCode) ??
     null;
 
-  function emit(nextMethodCode: string | null) {
-    const picked = options.find((o) => o.code === nextMethodCode) ?? null;
+  const weightTitle =
+    weightKind === "oud-box"
+      ? t(locale, "الوزن المحتسب للصندوق", "Billable box weight")
+      : t(locale, "الوزن المحتسب", "Billable weight");
+  const weightUnit = t(locale, "كغ", "kg");
+  const weightHelp = t(
+    locale,
+    "تقدير من قاعدة صناديق العود الحالية (زوج = 25 كغ، فرد = 20 كغ). ليس وزناً حجمياً حتى يُضبط مقسوم الحجم في الإدارة.",
+    "Estimate from the current oud-box rule (pair = 25 kg, single = 20 kg). Not volumetric until an admin sets a volumetric divisor."
+  );
+
+  function emit(nextMethodCode: string | null, list: QuoteMethod[] = options) {
+    const picked = list.find((o) => o.code === nextMethodCode) ?? null;
     if (!picked || !destinationEntry) {
       onChange?.(null);
       return;
@@ -101,6 +127,9 @@ export function ShippingCostSelector({
   function selectDestination(code: string) {
     setDestinationCode(code);
     setMethodCode(null);
+    setOptions([]);
+    setInquiry(false);
+    setQuoteError(false);
     onChange?.(null);
   }
 
@@ -109,17 +138,54 @@ export function ShippingCostSelector({
     emit(code);
   }
 
-  // Auto-pick the cheapest option (options[0] — resolveAvailableMethods
-  // already sorts domestic carriers by price; international land/air are
-  // listed land-first, generally the cheaper of the two) so the order
-  // summary always has a real number, even if the shopper never touches
-  // the method cards.
   useEffect(() => {
-    if (options.length > 0 && methodCode == null) {
-      emit(options[0]!.code);
-    }
+    if (!destinationCode) return;
+    const ac = new AbortController();
+    setLoading(true);
+    setQuoteError(false);
+    fetch("/api/shipping/quote", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        destinationCode,
+        weightKg,
+        audience,
+      }),
+      signal: ac.signal,
+    })
+      .then(async (res) => {
+        const data = (await res.json()) as QuoteOk | { ok: false };
+        if (!res.ok || !data.ok) throw new Error("quote");
+        return data;
+      })
+      .then((data) => {
+        setOptions(data.methods);
+        setInquiry(data.inquiry && data.methods.length === 0);
+        if (data.methods.length > 0) {
+          setMethodCode((prev) => {
+            const keep = prev && data.methods.some((m) => m.code === prev);
+            const next = keep ? prev : data.methods[0]!.code;
+            emit(next, data.methods);
+            return next;
+          });
+        } else {
+          setMethodCode(null);
+          onChange?.(null);
+        }
+      })
+      .catch(() => {
+        if (ac.signal.aborted) return;
+        setOptions([]);
+        setInquiry(false);
+        setQuoteError(true);
+        onChange?.(null);
+      })
+      .finally(() => {
+        if (!ac.signal.aborted) setLoading(false);
+      });
+    return () => ac.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [options]);
+  }, [destinationCode, weightKg, audience]);
 
   return (
     <div className="space-y-3">
@@ -164,56 +230,79 @@ export function ShippingCostSelector({
         <div className="flex items-center justify-between gap-2">
           <span className="flex items-center gap-1.5 text-xs font-medium text-ro-muted">
             <Package className="size-3.5" strokeWidth={1.5} aria-hidden />
-            {t(locale, "الوزن الحجمي التقديري", "Estimated volumetric weight")}
+            {weightTitle}
           </span>
           <span className="text-base font-semibold tabular-nums text-ro-ink">
             <bdi dir="ltr">
               <AnimatedValue value={weightKg} durationMs={lite ? 1 : 550} />{" "}
-              {t(locale, "كيلو حجمي", "vol. kg")}
+              {weightUnit}
             </bdi>
           </span>
         </div>
-        <div className="mt-2.5 flex flex-wrap items-center gap-1.5" aria-hidden>
-          <AnimatePresence initial={false}>
-            {Array.from({ length: boxes.pairs }).map((_, i) => (
-              <m.span
-                key={`pair-${i}`}
-                layout={!lite}
-                initial={lite ? false : { opacity: 0, scale: 0.85 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={lite ? undefined : { opacity: 0, scale: 0.85 }}
-                transition={{
-                  duration: lite ? 0 : 0.22,
-                  delay: lite ? 0 : i * 0.05,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
-                className="inline-flex items-center gap-1 rounded-[var(--ro-r-full)] border border-[var(--ro-border-control)] bg-ro-sunken px-2.5 py-1 text-[11px] font-medium tabular-nums text-ro-ink"
-              >
-                <bdi dir="ltr">2 × {t(locale, "عود", "oud")} = 25 {t(locale, "كيلو حجمي", "vol. kg")}</bdi>
-              </m.span>
-            ))}
-            {boxes.remainder ? (
-              <m.span
-                key="single"
-                layout={!lite}
-                initial={lite ? false : { opacity: 0, scale: 0.85 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={lite ? undefined : { opacity: 0, scale: 0.85 }}
-                transition={{
-                  duration: lite ? 0 : 0.22,
-                  delay: lite ? 0 : boxes.pairs * 0.05,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
-                className="inline-flex items-center gap-1 rounded-[var(--ro-r-full)] border border-dashed border-[var(--ro-border-control)] px-2.5 py-1 text-[11px] font-medium tabular-nums text-ro-muted"
-              >
-                <bdi dir="ltr">1 × {t(locale, "عود", "oud")} = 20 {t(locale, "كيلو حجمي", "vol. kg")}</bdi>
-              </m.span>
-            ) : null}
-          </AnimatePresence>
-        </div>
+        <p className="mt-1.5 text-[11px] leading-relaxed text-ro-muted">{weightHelp}</p>
+        {weightKind === "oud-box" ? (
+          <div className="mt-2.5 flex flex-wrap items-center gap-1.5" aria-hidden>
+            <AnimatePresence initial={false}>
+              {Array.from({ length: boxes.pairs }).map((_, i) => (
+                <m.span
+                  key={`pair-${i}`}
+                  layout={!lite}
+                  initial={lite ? false : { opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={lite ? undefined : { opacity: 0, scale: 0.85 }}
+                  transition={{
+                    duration: lite ? 0 : 0.22,
+                    delay: lite ? 0 : i * 0.05,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                  className="inline-flex items-center gap-1 rounded-[var(--ro-r-full)] border border-[var(--ro-border-control)] bg-ro-sunken px-2.5 py-1 text-[11px] font-medium tabular-nums text-ro-ink"
+                >
+                  <bdi dir="ltr">
+                    2 × {t(locale, "عود", "oud")} = 25 {weightUnit}
+                  </bdi>
+                </m.span>
+              ))}
+              {boxes.remainder ? (
+                <m.span
+                  key="single"
+                  layout={!lite}
+                  initial={lite ? false : { opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={lite ? undefined : { opacity: 0, scale: 0.85 }}
+                  transition={{
+                    duration: lite ? 0 : 0.22,
+                    delay: lite ? 0 : boxes.pairs * 0.05,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                  className="inline-flex items-center gap-1 rounded-[var(--ro-r-full)] border border-dashed border-[var(--ro-border-control)] px-2.5 py-1 text-[11px] font-medium tabular-nums text-ro-muted"
+                >
+                  <bdi dir="ltr">
+                    1 × {t(locale, "عود", "oud")} = 20 {weightUnit}
+                  </bdi>
+                </m.span>
+              ) : null}
+            </AnimatePresence>
+          </div>
+        ) : null}
       </div>
 
-      {destinationCode && options.length === 0 ? (
+      {loading ? (
+        <p className="text-sm text-ro-muted" role="status">
+          {t(locale, "جاري حساب الشحن…", "Calculating shipping…")}
+        </p>
+      ) : null}
+
+      {quoteError ? (
+        <p className="text-sm text-[var(--ro-danger-700)]" role="alert">
+          {t(
+            locale,
+            "تعذّر حساب الشحن الآن — أعد المحاولة أو أكمل الطلب لعرض سعر يدوي.",
+            "Could not quote shipping right now — retry or complete the request for a manual quote."
+          )}
+        </p>
+      ) : null}
+
+      {destinationCode && !loading && (inquiry || options.length === 0) && !quoteError ? (
         <div
           role="status"
           className="rounded-[var(--ro-r-sm)] border border-[var(--ro-border-control)] bg-ro-sunken px-3.5 py-3 text-sm text-ro-ink"
@@ -233,7 +322,11 @@ export function ShippingCostSelector({
       ) : null}
 
       {options.length > 0 ? (
-        <div role="radiogroup" aria-label={t(locale, "طريقة الشحن", "Shipping method")} className="grid gap-2 sm:grid-cols-2">
+        <div
+          role="radiogroup"
+          aria-label={t(locale, "طريقة الشحن", "Shipping method")}
+          className="grid gap-2 sm:grid-cols-2"
+        >
           {options.map((opt, i) => {
             const active = (methodCode ?? options[0]?.code) === opt.code;
             return (
@@ -319,7 +412,15 @@ export function ShippingCostSelector({
         </div>
       ) : null}
 
-      <input type="hidden" name="destinationCountry" value={destinationEntry ? t(locale, destinationEntry.nameAr, destinationEntry.nameEn) : ""} />
+      <input
+        type="hidden"
+        name="destinationCountry"
+        value={
+          destinationEntry
+            ? t(locale, destinationEntry.nameAr, destinationEntry.nameEn)
+            : ""
+        }
+      />
       <input type="hidden" name="destinationCode" value={destinationCode} />
       <input
         type="hidden"
@@ -329,7 +430,11 @@ export function ShippingCostSelector({
       <input
         type="hidden"
         name="shippingMethodLabel"
-        value={selectedOption ? t(locale, selectedOption.labelAr, selectedOption.labelEn) : ""}
+        value={
+          selectedOption
+            ? t(locale, selectedOption.labelAr, selectedOption.labelEn)
+            : ""
+        }
       />
     </div>
   );
