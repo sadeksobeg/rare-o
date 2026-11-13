@@ -49,24 +49,97 @@ export type SeedRate = {
   packageLabel: string | null;
 };
 
-export type NotebookSeedFile = {
-  rates: {
-    countryCode: string;
-    methodCode: string;
+/** Denormalized row shape (STOP-A reconstruction). */
+type NotebookSeedRowFlat = {
+  countryCode: string;
+  methodCode: string;
+  labelAr: string;
+  carrierLabel: string;
+  mode: string;
+  speed: string | null;
+  security: string | null;
+  consolidation: boolean;
+  basis: string;
+  amount: number;
+  currency: string;
+  maxWeightKg: number | null;
+  verified: boolean;
+  source: string;
+};
+
+/**
+ * Owner attachment shape (MASTER-EXECUTION §1b / shipping-rates-seed.json).
+ * `methods[]` carries labels; `rates[]` references method codes + optional speedOverride.
+ */
+type NotebookSeedOwner = {
+  _meta?: {
+    currency?: string;
+    basis?: string;
+    maxWeightKgDefault?: number;
+    verifiedDefault?: boolean;
+  };
+  methods: {
+    code: string;
     labelAr: string;
-    carrierLabel: string;
     mode: string;
     speed: string | null;
     security: string | null;
     consolidation: boolean;
-    basis: string;
+    carrierLabel: string;
+  }[];
+  rates: {
+    code: string;
+    method: string;
     amount: number;
-    currency: string;
-    maxWeightKg: number | null;
-    verified: boolean;
-    source: string;
+    speedOverride?: string | null;
   }[];
 };
+
+export type NotebookSeedFile =
+  | { rates: NotebookSeedRowFlat[] }
+  | NotebookSeedOwner;
+
+function isOwnerSeed(file: NotebookSeedFile): file is NotebookSeedOwner {
+  return Array.isArray((file as NotebookSeedOwner).methods);
+}
+
+/** Normalize either seed shape into the flat rows `buildNotebookCatalog` consumes. */
+export function normalizeNotebookSeed(file: NotebookSeedFile): NotebookSeedRowFlat[] {
+  if (!isOwnerSeed(file)) return file.rates;
+  const meta = file._meta ?? {};
+  const currency = meta.currency ?? "USD";
+  const basis = meta.basis ?? "PER_PARCEL";
+  const maxWeightKg =
+    meta.maxWeightKgDefault === undefined ? 50 : meta.maxWeightKgDefault;
+  const byCode = new Map(file.methods.map((m) => [m.code, m]));
+  return file.rates.map((r) => {
+    const m = byCode.get(r.method);
+    if (!m) throw new Error(`Notebook rate references unknown method ${r.method}`);
+    const speed =
+      r.speedOverride !== undefined && r.speedOverride !== null
+        ? r.speedOverride
+        : m.speed;
+    return {
+      countryCode: r.code,
+      methodCode: r.method,
+      labelAr:
+        speed === "FAST" && r.method === "LAND_PASSENGER_CAR"
+          ? "شحن بري سريع مع سيارة ركاب"
+          : m.labelAr,
+      carrierLabel: m.carrierLabel,
+      mode: m.mode,
+      speed,
+      security: m.security,
+      consolidation: m.consolidation,
+      basis,
+      amount: r.amount,
+      currency,
+      maxWeightKg,
+      verified: false,
+      source: "NOTEBOOK",
+    };
+  });
+}
 
 /** Region for a governorate row — domestic Syria lives in the same table. */
 export const DOMESTIC_REGION = "syria";
@@ -219,7 +292,7 @@ export function buildNotebookCatalog(file: NotebookSeedFile): {
   const methods = new Map<string, SeedMethod>();
   const rates: SeedRate[] = [];
 
-  file.rates.forEach((row, i) => {
+  normalizeNotebookSeed(file).forEach((row, i) => {
     const known = NOTEBOOK_COUNTRIES[row.countryCode];
     if (!known) throw new Error(`Unknown notebook country ${row.countryCode}`);
     countries.set(row.countryCode, { code: row.countryCode, ...known });
