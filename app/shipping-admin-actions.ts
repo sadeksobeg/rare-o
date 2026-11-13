@@ -418,6 +418,63 @@ export async function shippingExportCsvAction(): Promise<ActionResult> {
   return out as ActionResult;
 }
 
+export async function shippingCreateShipmentAction(
+  formData: FormData
+): Promise<ActionResult> {
+  const out = await withAdmin(async (actor, adminId) => {
+    const [parent, parentId] = String(formData.get("request") || "").split(":");
+    if ((parent !== "wholesale" && parent !== "brokerage") || !parentId) {
+      return { ok: false as const, error: "VALIDATION" };
+    }
+    const { createShipment } = await import("@/lib/shipping/shipments");
+    const res = await createShipment({
+      parent,
+      parentId,
+      methodLabel: String(formData.get("methodLabel") || ""),
+      carrierLabel: String(formData.get("carrierLabel") || ""),
+      destCountry: String(formData.get("destCountry") || ""),
+      destCity: String(formData.get("destCity") || ""),
+      destAddress: String(formData.get("destAddress") || ""),
+      recipientName: String(formData.get("recipientName") || ""),
+      recipientPhone: String(formData.get("recipientPhone") || ""),
+      trackingNumber: String(formData.get("trackingNumber") || ""),
+      priceCharged: numOrNull(formData.get("priceCharged")) ?? 0,
+      currency: String(formData.get("currency") || "USD"),
+      actor,
+    });
+    if (!res.ok) return { ok: false as const, error: res.error };
+    await audit(adminId, "shipping.shipment.create", "Shipment", res.id, { actor });
+    revalidateShipping("/admin/shipping/shipments");
+    revalidatePath("/trader/shipments");
+    return { ok: true as const, data: { id: res.id } };
+  });
+  return out as ActionResult;
+}
+
+export async function shippingTransitionShipmentAction(
+  formData: FormData
+): Promise<ActionResult> {
+  const out = await withAdmin(async (actor, adminId) => {
+    const id = String(formData.get("id") || "");
+    const to = String(formData.get("to") || "");
+    if (!id || !to) return { ok: false as const, error: "VALIDATION" };
+    const { transitionShipment } = await import("@/lib/shipping/shipments");
+    const res = await transitionShipment({
+      id,
+      to,
+      note: String(formData.get("note") || ""),
+      trackingNumber: String(formData.get("trackingNumber") || ""),
+      actor,
+    });
+    if (!res.ok) return { ok: false as const, error: res.error };
+    await audit(adminId, "shipping.shipment.transition", "Shipment", id, { to });
+    revalidateShipping("/admin/shipping/shipments");
+    revalidatePath("/trader/shipments");
+    return { ok: true as const, data: { id } };
+  });
+  return out as ActionResult;
+}
+
 export async function shippingSimulateQuoteAction(
   formData: FormData
 ): Promise<ActionResult> {

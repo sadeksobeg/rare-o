@@ -11,6 +11,7 @@ const LINKS = [
   { href: "/admin/shipping/rates", labelAr: "الأسعار", labelEn: "Rates" },
   { href: "/admin/shipping/simulator", labelAr: "جرّب السعر", labelEn: "Simulator" },
   { href: "/admin/shipping/import", labelAr: "استيراد", labelEn: "Import" },
+  { href: "/admin/shipping/shipments", labelAr: "الشحنات", labelEn: "Shipments" },
   { href: "/admin/shipping/inquiries", labelAr: "الاستفسارات", labelEn: "Inquiries" },
   { href: "/admin/shipping/config", labelAr: "الإعدادات", labelEn: "Config" },
 ] as const;

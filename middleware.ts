@@ -283,6 +283,7 @@ export const config = {
     "/terms",
     "/cookies",
     "/forbidden",
+    "/track/:path*",
     "/admin/:path*",
     "/trader/:path*",
     "/dev",
