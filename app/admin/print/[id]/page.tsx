@@ -107,7 +107,7 @@ export default async function PrintShipmentPage({
                   <td>{l.productNameAr} / {l.productNameEn}</td>
                   <td><bdi dir="ltr">{l.quantity}</bdi></td>
                   {doc === "invoice" ? (
-                    <td><bdi dir="ltr">{l.quotedUnitPrice != null ? `${Number(l.quotedUnitPrice)} ${l.currency ?? ""}` : "—"}</bdi></td>
+                    <td><bdi dir="ltr">{l.quotedUnitPrice != null && l.currency && l.currency !== "TEST" ? `${Number(l.quotedUnitPrice)} ${l.currency}` : "—"}</bdi></td>
                   ) : null}
                 </tr>
               ))
@@ -124,9 +124,14 @@ export default async function PrintShipmentPage({
 
       {doc === "invoice" ? (
         <p style={{ marginTop: 12 }}>
-          الشحن · Shipping: <bdi dir="ltr">{Number(s.priceCharged)} {s.currency}</bdi>
+          <span>الشحن · Shipping</span>{" "}
+          <bdi dir="ltr">{Number(s.priceCharged)} {s.currency}</bdi>
           {s.declaredValue != null ? (
-            <> · القيمة المصرّح بها · Declared: <bdi dir="ltr">{Number(s.declaredValue)} {s.currency}</bdi></>
+            <>
+              {" — "}
+              <span>القيمة المصرّح بها · Declared value</span>{" "}
+              <bdi dir="ltr">{Number(s.declaredValue)} {s.currency}</bdi>
+            </>
           ) : null}
         </p>
       ) : null}
