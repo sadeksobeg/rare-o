@@ -14,7 +14,7 @@ export default async function AdminShipmentsPage({
   searchParams: Promise<{ status?: string }>;
 }) {
   const { status } = await searchParams;
-  const filter = status && status in SHIPMENT_STATUS_AR ? status : "ALL";
+  const filter = status === "EXCEPTIONS" || (status && status in SHIPMENT_STATUS_AR) ? status! : "ALL";
   const { locale } = await getRequestDictionary();
   const [rows, requests] = await Promise.all([
     listAdminShipments(filter),

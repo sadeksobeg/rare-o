@@ -214,7 +214,21 @@ export async function listAdminShipments(
   status?: string
 ): Promise<AdminShipmentRow[]> {
   const rows = await prisma.shipment.findMany({
-    where: status && status !== "ALL" ? { status } : undefined,
+    where:
+      status === "EXCEPTIONS"
+        ? {
+            OR: [
+              { status: "FAILED" },
+              {
+                status: { in: ["HANDED_OVER", "IN_TRANSIT"] },
+                updatedAt: { lt: new Date(Date.now() - 14 * 86_400_000) },
+              },
+              { status: "CONFIRMED", createdAt: { lt: new Date(Date.now() - 7 * 86_400_000) } },
+            ],
+          }
+        : status && status !== "ALL"
+          ? { status }
+          : undefined,
     orderBy: { createdAt: "desc" },
     take: 200,
     select: {

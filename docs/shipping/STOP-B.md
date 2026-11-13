@@ -26,8 +26,12 @@ Branch `shipping/phase-2` @ `3a68715` · prod currently `7be0c38` (web-only, Wha
 ## Migrations
 Only `20261112120000_shipping_s1_additive` (additive: new shipping tables). No new migration in this pass. No DROP/ALTER of existing data. Take the usual `pg_dump` before apply.
 
-## NOT done in 2c (explicitly deferred, owner decision needed)
-Printable waybill/packing slip/commercial invoice, exceptions queue + bulk ops, photo on events, WhatsApp opt-in notifications, backfill dry-run, `COMPLIANCE-NOTES.md`, `SHIPPING-RUNBOOK.md`. The deployable surface above works without them; they are additive follow-ups.
+## Also added in the follow-up pass
+Print documents (`/admin/print/<id>?doc=waybill|packing|invoice`, A4, QR to /track, admin-session only — unauthenticated → 307 to login, verified), Exceptions filter (FAILED / in-transit >14d / confirmed >7d), read-only backfill dry-run (`scripts/shipping-backfill-dryrun.ts`; local DB: 53 wholesale candidates, 0 brokerage, 0 existing shipments; recommendation: do NOT auto-backfill), `COMPLIANCE-NOTES.md`, `docs/ops/SHIPPING-RUNBOOK.md`.
+**Not visually verified:** the print page layout and admin Shipments UI (my attempt to mint a local admin session for a screenshot was blocked by the permission layer; owner should open them once after deploy, or approve a screenshot run).
+
+## Still not built
+Photo attachment on events; WhatsApp opt-in notifications (deliberately left out — needs owner policy).
 
 ## Release plan (when `DEPLOY NOW` arrives)
 1. Web-only: `--no-deps web` so the WhatsApp worker/session is not restarted. Worker does not use shipping tables → old worker + new web is compatible.

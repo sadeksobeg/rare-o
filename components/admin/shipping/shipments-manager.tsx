@@ -33,7 +33,7 @@ export function ShipmentsManager({
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
-  const statuses = ["ALL", ...Object.keys(SHIPMENT_STATUS_AR)];
+  const statuses = ["ALL", "EXCEPTIONS", ...Object.keys(SHIPMENT_STATUS_AR)];
 
   return (
     <div className="space-y-6">
@@ -63,7 +63,7 @@ export function ShipmentsManager({
                 : "bg-[color:var(--rad-c1)] text-[color:var(--rad-tx)]")
             }
           >
-            {s === "ALL" ? (ar ? "الكل" : "All") : L[s]}
+            {s === "ALL" ? (ar ? "الكل" : "All") : s === "EXCEPTIONS" ? (ar ? "استثناءات" : "Exceptions") : L[s]}
           </Link>
         ))}
       </nav>
@@ -152,6 +152,22 @@ export function ShipmentsManager({
                   </>
                 ) : null}
                 {" · "}
+                {(["waybill", "packing", "invoice"] as const).map((d) => (
+                  <span key={d}>
+                    <Link
+                      href={`/admin/print/${r.id}?doc=${d}`}
+                      className="underline"
+                      target="_blank"
+                    >
+                      {d === "waybill"
+                        ? ar ? "بوليصة" : "Waybill"
+                        : d === "packing"
+                          ? ar ? "تعبئة" : "Packing"
+                          : ar ? "فاتورة" : "Invoice"}
+                    </Link>
+                    {" · "}
+                  </span>
+                ))}
                 <Link
                   href={`/track/${r.publicToken}`}
                   className="underline"
