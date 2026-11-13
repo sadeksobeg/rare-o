@@ -1,0 +1,272 @@
+{
+  "shots": [
+    {
+      "file": "s2b-shipping-page-light-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-shipping-page-light-1280-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-shipping-page-light-768-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-shipping-page-light-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-shipping-page-dark-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-shipping-page-dark-1280-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-shipping-page-dark-768-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-shipping-page-dark-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-pdp-estimator-light-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-pdp-estimator-light-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-pdp-estimator-dark-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-pdp-estimator-dark-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-de-light-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-de-light-1280-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-de-light-768-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-de-light-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-de-dark-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-de-dark-1280-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-de-dark-768-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-de-dark-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-lb-inquiry-light-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-lb-inquiry-light-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-lb-inquiry-dark-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-lb-inquiry-dark-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-lb-confirm-light-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-preview-lb-light-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-preview-lb-dark-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-preview-lb-light-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-preview-lb-dark-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-preview-jo-light-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-preview-jo-dark-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-preview-jo-light-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-preview-jo-dark-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-preview-sa-light-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-preview-sa-dark-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-preview-sa-light-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-preview-sa-dark-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-preview-ae-light-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-preview-ae-dark-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-preview-ae-light-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-preview-ae-dark-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-admin-inquiries-light-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    }
+  ],
+  "see": [
+    "SEE s2b-shipping-page-light-1440-ar.png: DE cards badges; flag in field; 20 كغ bidi; بري/جوي",
+    "SEE s2b-shipping-page-light-1280-ar.png: DE cards badges; flag in field; 20 كغ bidi; بري/جوي",
+    "SEE s2b-shipping-page-light-768-ar.png: DE cards badges; flag in field; 20 كغ bidi; بري/جوي",
+    "SEE s2b-shipping-page-light-390-ar.png: DE cards badges; flag in field; 20 كغ bidi; بري/جوي",
+    "SEE s2b-shipping-page-dark-1440-ar.png: DE cards badges; flag in field; 20 كغ bidi; بري/جوي",
+    "SEE s2b-shipping-page-dark-1280-ar.png: DE cards badges; flag in field; 20 كغ bidi; بري/جوي",
+    "SEE s2b-shipping-page-dark-768-ar.png: DE cards badges; flag in field; 20 كغ bidi; بري/جوي",
+    "SEE s2b-shipping-page-dark-390-ar.png: DE cards badges; flag in field; 20 كغ bidi; بري/جوي",
+    "SEE s2b-pdp-estimator-light-1440-ar.png: PDP estimator open in buy box",
+    "SEE s2b-pdp-estimator-light-390-ar.png: PDP estimator open in buy box",
+    "SEE s2b-pdp-estimator-dark-1440-ar.png: PDP estimator open in buy box",
+    "SEE s2b-pdp-estimator-dark-390-ar.png: PDP estimator open in buy box",
+    "SEE s2b-request-de-light-1440-ar.png: request DE; sticky border; top estimate hidden on 390 when sticky",
+    "SEE s2b-request-de-light-1280-ar.png: request DE; sticky border; top estimate hidden on 390 when sticky",
+    "SEE s2b-request-de-light-768-ar.png: request DE; sticky border; top estimate hidden on 390 when sticky",
+    "SEE s2b-request-de-light-390-ar.png: request DE; sticky border; top estimate hidden on 390 when sticky",
+    "SEE s2b-request-de-dark-1440-ar.png: request DE; sticky border; top estimate hidden on 390 when sticky",
+    "SEE s2b-request-de-dark-1280-ar.png: request DE; sticky border; top estimate hidden on 390 when sticky",
+    "SEE s2b-request-de-dark-768-ar.png: request DE; sticky border; top estimate hidden on 390 when sticky",
+    "SEE s2b-request-de-dark-390-ar.png: request DE; sticky border; top estimate hidden on 390 when sticky",
+    "SEE s2b-request-lb-inquiry-light-1440-ar.png: LB inquiry: يُحدَّد بعرض سعر; Arabic reason; no NO_METHOD; WA off",
+    "SEE s2b-request-lb-inquiry-light-390-ar.png: LB inquiry: يُحدَّد بعرض سعر; Arabic reason; no NO_METHOD; WA off",
+    "SEE s2b-request-lb-inquiry-dark-1440-ar.png: LB inquiry: يُحدَّد بعرض سعر; Arabic reason; no NO_METHOD; WA off",
+    "SEE s2b-request-lb-inquiry-dark-390-ar.png: LB inquiry: يُحدَّد بعرض سعر; Arabic reason; no NO_METHOD; WA off",
+    "SEE s2b-request-lb-confirm-light-1440-ar.png: LB inquiry submit confirmation / handoff success",
+    "SEE s2b-sim-preview-lb-light-1440-ar.png: customer cards LB $20 unverified watermark",
+    "SEE s2b-sim-preview-lb-dark-1440-ar.png: customer cards LB $20 unverified watermark",
+    "SEE s2b-sim-preview-lb-light-390-ar.png: customer cards LB $20 unverified watermark",
+    "SEE s2b-sim-preview-lb-dark-390-ar.png: customer cards LB $20 unverified watermark",
+    "SEE s2b-sim-preview-jo-light-1440-ar.png: JO×3 cards badges الأرخص/الأسرع/الأعلى أماناً",
+    "SEE s2b-sim-preview-jo-dark-1440-ar.png: JO×3 cards badges الأرخص/الأسرع/الأعلى أماناً",
+    "SEE s2b-sim-preview-jo-light-390-ar.png: JO×3 cards badges الأرخص/الأسرع/الأعلى أماناً",
+    "SEE s2b-sim-preview-jo-dark-390-ar.png: JO×3 cards badges الأرخص/الأسرع/الأعلى أماناً",
+    "SEE s2b-sim-preview-sa-light-1440-ar.png: SA consolidation tooltip + FAST",
+    "SEE s2b-sim-preview-sa-dark-1440-ar.png: SA consolidation tooltip + FAST",
+    "SEE s2b-sim-preview-sa-light-390-ar.png: SA consolidation tooltip + FAST",
+    "SEE s2b-sim-preview-sa-dark-390-ar.png: SA consolidation tooltip + FAST",
+    "SEE s2b-sim-preview-ae-light-1440-ar.png: AE legacy air + مندوب $60; tidy label",
+    "SEE s2b-sim-preview-ae-dark-1440-ar.png: AE legacy air + مندوب $60; tidy label",
+    "SEE s2b-sim-preview-ae-light-390-ar.png: AE legacy air + مندوب $60; tidy label",
+    "SEE s2b-sim-preview-ae-dark-390-ar.png: AE legacy air + مندوب $60; tidy label",
+    "SEE s2b-admin-inquiries-light-1440-ar.png: admin Inquiries inbox shows LB inquiry row"
+  ],
+  "fails": [],
+  "beforeAfter": [
+    "LB summary: was 0 USD → now يُحدَّد بعرض سعر; NO_METHOD hidden → Arabic reason",
+    "Mode enums: LAND/AIR → بري/جوي on cards; explicit → وزن مُدخل",
+    "Bidi: كغ 20 → 20 كغ; chip 1 × عود = 20 كغ",
+    "Flags: DE gold + LB white restored; flag in field; no raw DE line",
+    "Picker: native datalist → searchable combobox (AR/EN + flags)",
+    "Simulator: ISO text field → combobox + معاينة كما يراها العميل cards",
+    "PDP: estimator in buy box, open by default",
+    "Mobile checkout: one estimate (sticky only on small); sticky has top border/shadow",
+    "Wording: تضمين غير المعتمد; AE label de-duplicated",
+    "Gates: next build && next start; document-title enabled; contact sheets contain (no crop)"
+  ],
+  "excludedAxeRules": []
+}

@@ -1,0 +1,267 @@
+{
+  "shots": [
+    {
+      "file": "s2b-shipping-page-light-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-shipping-page-light-1280-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-shipping-page-light-768-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-shipping-page-light-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-shipping-page-dark-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-shipping-page-dark-1280-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-shipping-page-dark-768-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-shipping-page-dark-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-pdp-estimator-light-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-pdp-estimator-light-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-pdp-estimator-dark-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-pdp-estimator-dark-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-de-light-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-de-light-1280-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-de-light-768-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-de-light-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-de-dark-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-de-dark-1280-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-de-dark-768-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-de-dark-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-lb-inquiry-light-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-lb-inquiry-light-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-lb-inquiry-dark-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-request-lb-inquiry-dark-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-lb-w20-light-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-lb-w20-dark-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-jo-w20-light-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-jo-w20-dark-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-jo-contact-light-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-jo-contact-light-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-jo-contact-dark-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-jo-contact-dark-390-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-sa-w20-light-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-sa-w20-dark-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-ae-w20-light-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    },
+    {
+      "file": "s2b-sim-ae-w20-dark-1440-ar.png",
+      "overflow": 0,
+      "axeSerious": 0
+    }
+  ],
+  "see": [
+    "SEE s2b-shipping-page-light-1440-ar.png: standalone /shipping with DE quote cards + badges; no cart required",
+    "SEE s2b-shipping-page-light-1280-ar.png: standalone /shipping with DE quote cards + badges; no cart required",
+    "SEE s2b-shipping-page-light-768-ar.png: standalone /shipping with DE quote cards + badges; no cart required",
+    "SEE s2b-shipping-page-light-390-ar.png: standalone /shipping with DE quote cards + badges; no cart required",
+    "SEE s2b-shipping-page-dark-1440-ar.png: standalone /shipping with DE quote cards + badges; no cart required",
+    "SEE s2b-shipping-page-dark-1280-ar.png: standalone /shipping with DE quote cards + badges; no cart required",
+    "SEE s2b-shipping-page-dark-768-ar.png: standalone /shipping with DE quote cards + badges; no cart required",
+    "SEE s2b-shipping-page-dark-390-ar.png: standalone /shipping with DE quote cards + badges; no cart required",
+    "SEE s2b-pdp-estimator-light-1440-ar.png: PDP احسب الشحن open with DE methods",
+    "SEE s2b-pdp-estimator-light-390-ar.png: PDP احسب الشحن open with DE methods",
+    "SEE s2b-pdp-estimator-dark-1440-ar.png: PDP احسب الشحن open with DE methods",
+    "SEE s2b-pdp-estimator-dark-390-ar.png: PDP احسب الشحن open with DE methods",
+    "SEE s2b-request-de-light-1440-ar.png: request DE cards with badges + WA opt-in unchecked + sticky on 390",
+    "SEE s2b-request-de-light-1280-ar.png: request DE cards with badges + WA opt-in unchecked + sticky on 390",
+    "SEE s2b-request-de-light-768-ar.png: request DE cards with badges + WA opt-in unchecked + sticky on 390",
+    "SEE s2b-request-de-light-390-ar.png: request DE cards with badges + WA opt-in unchecked + sticky on 390",
+    "SEE s2b-request-de-dark-1440-ar.png: request DE cards with badges + WA opt-in unchecked + sticky on 390",
+    "SEE s2b-request-de-dark-1280-ar.png: request DE cards with badges + WA opt-in unchecked + sticky on 390",
+    "SEE s2b-request-de-dark-768-ar.png: request DE cards with badges + WA opt-in unchecked + sticky on 390",
+    "SEE s2b-request-de-dark-390-ar.png: request DE cards with badges + WA opt-in unchecked + sticky on 390",
+    "SEE s2b-request-lb-inquiry-light-1440-ar.png: LB public → inquiry card اطلب عرض سعر (notebook hidden); WA opt-in unchecked",
+    "SEE s2b-request-lb-inquiry-light-390-ar.png: LB public → inquiry card اطلب عرض سعر (notebook hidden); WA opt-in unchecked",
+    "SEE s2b-request-lb-inquiry-dark-1440-ar.png: LB public → inquiry card اطلب عرض سعر (notebook hidden); WA opt-in unchecked",
+    "SEE s2b-request-lb-inquiry-dark-390-ar.png: LB public → inquiry card اطلب عرض سعر (notebook hidden); WA opt-in unchecked",
+    "SEE s2b-sim-lb-w20-light-1440-ar.png: admin simulator unverified ON — LB @ 20kg; notebook LAND_PASSENGER_CAR $20",
+    "SEE s2b-sim-lb-w20-dark-1440-ar.png: admin simulator dark — LB @ 20kg",
+    "SEE s2b-sim-jo-w20-light-1440-ar.png: admin simulator unverified ON — JO @ 20kg; JO×3 notebook flats (30/70/100) + speed/security",
+    "SEE s2b-sim-jo-w20-dark-1440-ar.png: admin simulator dark — JO @ 20kg",
+    "SEE s2b-sim-jo-contact-light-1440-ar.png: admin simulator JO unverified ON — contact-sheet cell",
+    "SEE s2b-sim-jo-contact-light-390-ar.png: admin simulator JO unverified ON — contact-sheet cell",
+    "SEE s2b-sim-jo-contact-dark-1440-ar.png: admin simulator JO unverified ON — contact-sheet cell",
+    "SEE s2b-sim-jo-contact-dark-390-ar.png: admin simulator JO unverified ON — contact-sheet cell",
+    "SEE s2b-sim-sa-w20-light-1440-ar.png: admin simulator unverified ON — SA @ 20kg; SA×2 incl consolidation (الراقي) + FAST passenger",
+    "SEE s2b-sim-sa-w20-dark-1440-ar.png: admin simulator dark — SA @ 20kg",
+    "SEE s2b-sim-ae-w20-light-1440-ar.png: admin simulator unverified ON — AE @ 20kg; AE مندوب الشارقة $60 + legacy air if present",
+    "SEE s2b-sim-ae-w20-dark-1440-ar.png: admin simulator dark — AE @ 20kg"
+  ],
+  "fails": [],
+  "publicNotebook": {
+    "LB": {
+      "methods": [],
+      "inquiry": true
+    },
+    "JO": {
+      "methods": [],
+      "inquiry": true
+    },
+    "SA": {
+      "methods": [],
+      "inquiry": true
+    },
+    "AE": {
+      "methods": [
+        "intl:uae:air:150"
+      ],
+      "inquiry": false
+    }
+  },
+  "sim_LB_20": {
+    "hasUnverified": true,
+    "hasConsolidation": false,
+    "hasSpeed": false,
+    "snippet": "ARE OUD\nلوحة الإدارة\nالتشغيل\nلوحة التحكم\nصندوق واتساب\n1\nطلبات التجزئة\n19\nالصفقات\nالجملة\nالوساطة\n1\nالكتالوج\nالمنتجات\nالفئات\nالعروض\nالأشخاص\nالعملاء\nالتجّار\nالفريق\nالنظام\nالشحن\nمركز التنبيهات\nالإعدادات\nR\nRARE OUD Admin\nمدير النظام\nطيّ القائمة\nالإدارة\nلوحة التحكم\nبحث أو أمر…\nCtrl K\n3\n1\nالشحن\n\nتحكم كامل بالدول والطرق والأسعار والاعتماد والمحاكاة.\n\nنظرة عامة\nالدول\nالطرق\nالأسعار\nجرّب السعر\nاستيراد\nالاستفسارات\nالإعدادات\nالوجهة *\nالوزن المحتسب (كغ)\nالجمهور\nعميل\nتاجر\nشمل غير المعتمد\nجرّب السعر\n\nLB · لبنان · كغ 20 (explicit)\n\nشحن بري مع سيارة ركاب\nLAND_PASSENGER_CAR · LAND · غير معتمد · UNVERIFIED\n20 USD"
+  },
+  "sim_JO_20": {
+    "hasUnverified": true,
+    "hasConsolidation": false,
+    "hasSpeed": true,
+    "snippet": "طيّ القائمة\nالإدارة\nلوحة التحكم\nبحث أو أمر…\nCtrl K\n3\n1\nالشحن\n\nتحكم كامل بالدول والطرق والأسعار والاعتماد والمحاكاة.\n\nنظرة عامة\nالدول\nالطرق\nالأسعار\nجرّب السعر\nاستيراد\nالاستفسارات\nالإعدادات\nالوجهة *\nالوزن المحتسب (كغ)\nالجمهور\nعميل\nتاجر\nشمل غير المعتمد\nجرّب السعر\n\nJO · الأردن · كغ 20 (explicit)\n\nشحن بري بطيء مع شركة المصري\nLAND_SLOW_MASRI · LAND · SLOW · غير معتمد · UNVERIFIED\n30 USD\nشحن بري سريع مع باص ركاب\nLAND_FAST_PASSENGER_BUS · LAND · FAST · غير معتمد · UNVERIFIED\n70 USD\nشحن بري سريع عالي الأمان مع سيارة خاصة\nLAND_FAST_SECURE_PRIVATE_CAR · LAND · FAST · HIGH · غير معتمد · UNVERIFIED\n100 USD"
+  },
+  "sim_SA_20": {
+    "hasUnverified": true,
+    "hasConsolidation": true,
+    "hasSpeed": true,
+    "snippet": "ار\nالفريق\nالنظام\nالشحن\nمركز التنبيهات\nالإعدادات\nR\nRARE OUD Admin\nمدير النظام\nبحث أو أمر…\nالشحن\n\nتحكم كامل بالدول والطرق والأسعار والاعتماد والمحاكاة.\n\nنظرة عامة\nالدول\nالطرق\nالأسعار\nجرّب السعر\nاستيراد\nالاستفسارات\nالإعدادات\nالوجهة *\nالوزن المحتسب (كغ)\nالجمهور\nعميل\nتاجر\nشمل غير المعتمد\nجرّب السعر\n\nSA · السعودية · كغ 20 (explicit)\n\nشحن بري بطيء وتجميع شركة الراقي\nLAND_SLOW_CONSOLIDATED_RAQI · LAND · SLOW · تجميع · غير معتمد · UNVERIFIED\n50 USD\nشحن بري سريع مع سيارة ركاب\nLAND_FAST_PASSENGER_CAR · LAND · FAST · غير معتمد · UNVERIFIED\n100 USD\nلوحة التحكم\nصندوق واتساب\n1\nطلبات التجزئة\n19\nالصفقات\nالمزيد"
+  },
+  "sim_AE_20": {
+    "hasUnverified": true,
+    "hasConsolidation": false,
+    "hasSpeed": false,
+    "snippet": "اب\n1\nطلبات التجزئة\n19\nالصفقات\nالجملة\nالوساطة\n1\nالكتالوج\nالمنتجات\nالفئات\nالعروض\nالأشخاص\nالعملاء\nالتجّار\nالفريق\nالنظام\nالشحن\nمركز التنبيهات\nالإعدادات\nR\nRARE OUD Admin\nمدير النظام\nطيّ القائمة\nالإدارة\nلوحة التحكم\nبحث أو أمر…\nCtrl K\n3\n1\nالشحن\n\nتحكم كامل بالدول والطرق والأسعار والاعتماد والمحاكاة.\n\nنظرة عامة\nالدول\nالطرق\nالأسعار\nجرّب السعر\nاستيراد\nالاستفسارات\nالإعدادات\nالوجهة *\nالوزن المحتسب (كغ)\nالجمهور\nعميل\nتاجر\nشمل غير المعتمد\nجرّب السعر\n\nAE · الإمارات · كغ 20 (explicit)\n\nالإمارات (شحن جوي) — شحن جوي\nintl:uae:air · AIR\n150 AED\nشحن مع مندوب الشارقة\nSHARJAH_REP · LAND · غير معتمد · UNVERIFIED\n60 USD"
+  }
+}

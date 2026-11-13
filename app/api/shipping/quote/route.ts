@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { consumeRateLimit } from "@/lib/auth/public-rate-limit";
 import { quote, type QuoteAudience } from "@/lib/shipping/engine";
+import { tidyMethodLabel } from "@/lib/shipping/quote-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -90,8 +91,8 @@ export async function POST(req: Request) {
       inquiryNote: result.inquiryNote,
       methods: result.methods.map((m) => ({
         code: m.methodCode,
-        labelAr: m.labelAr,
-        labelEn: m.labelEn,
+        labelAr: tidyMethodLabel(m.labelAr),
+        labelEn: tidyMethodLabel(m.labelEn),
         mode: m.mode,
         speed: m.speed,
         security: m.security,

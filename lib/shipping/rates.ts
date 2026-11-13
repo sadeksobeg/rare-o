@@ -164,7 +164,7 @@ export const INTERNATIONAL_ZONES: InternationalZone[] = [
   },
   {
     id: "uae",
-    nameAr: "الإمارات (شحن جوي)",
+    nameAr: "الإمارات",
     nameEn: "UAE (air)",
     countries: [{ code: "AE", nameAr: "الإمارات", nameEn: "United Arab Emirates" }],
     air: flat({ AED: 7.5 }),

@@ -816,6 +816,10 @@ export async function createRetailRequestAction(
     destinationCode: formData.get("destinationCode") || null,
     shippingMethodCode: formData.get("shippingMethodCode") || null,
     shippingMethodLabel: formData.get("shippingMethodLabel") || null,
+    whatsappShippingOptIn: formData.get("whatsappShippingOptIn") === "on",
+    shippingInquiry:
+      formData.get("shippingInquiry") === "1" ||
+      formData.get("shippingInquiry") === "on",
     lines,
     status: "ready_for_handoff",
     idempotencyKey: formData.get("idempotencyKey") || undefined,

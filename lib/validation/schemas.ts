@@ -180,6 +180,10 @@ export const retailRequestCreateSchema = z.object({
   destinationCode: z.string().trim().max(40).nullable().optional(),
   shippingMethodCode: z.string().trim().max(40).nullable().optional(),
   shippingMethodLabel: z.string().trim().max(120).nullable().optional(),
+  /** Customer WhatsApp shipping updates — omit/false when unchecked. */
+  whatsappShippingOptIn: z.boolean().optional(),
+  /** When true, destination/weight needs a manual quote (no public methods). */
+  shippingInquiry: z.boolean().optional(),
   lines: z.array(cartLineSchema).min(1),
   status: z.enum(RETAIL_REQUEST_CREATE_STATUSES).default("ready_for_handoff"),
   /** Client-generated UUID — duplicate submits return the same request */

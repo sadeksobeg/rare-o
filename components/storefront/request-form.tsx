@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { TextField } from "@/components/ui/text-field";
 import { href } from "@/lib/href";
+import { shippingEstimateDisplay } from "@/lib/shipping/quote-ui";
 import type { Locale } from "@/lib/i18n/config";
 
 type SuccessData = {
@@ -92,6 +93,8 @@ export function RequestForm({
   const [opening, setOpening] = useState(false);
   const [openError, setOpenError] = useState<string | null>(null);
   const [shipping, setShipping] = useState<ShippingSelection | null>(null);
+  const showMobileSticky =
+    Boolean(shipping && !shipping.inquiry && shipping.amount > 0);
 
   useEffect(() => {
     const stored = readStoredSuccess();
@@ -182,7 +185,7 @@ export function RequestForm({
   const pieces = items.reduce((n, i) => n + i.quantity, 0);
 
   return (
-    <section className="mx-auto max-w-xl space-y-6">
+    <section className="mx-auto max-w-xl space-y-6 pb-20 md:pb-0">
       <header className="space-y-2">
         <h1 className="ro-type-h1">{labels.title}</h1>
         <p className="text-sm text-ro-muted">{labels.shippingNote}</p>
@@ -202,11 +205,21 @@ export function RequestForm({
           </Link>
         </div>
         {shipping ? (
-          <div className="flex items-center justify-between gap-4 border-t border-ro-border pt-2 text-ro-text-2">
+          <div
+            className={`flex items-center justify-between gap-4 border-t border-ro-border pt-2 text-ro-text-2 ${
+              showMobileSticky ? "max-md:hidden" : ""
+            }`}
+          >
             <span>{locale === "ar" ? "تقدير الشحن" : "Shipping estimate"}</span>
-            <bdi dir="ltr" className="font-medium text-ro-ink">
-              {shipping.amount} {shipping.currency}
-            </bdi>
+            {shipping.inquiry || shipping.amount <= 0 ? (
+              <span className="font-medium text-ro-ink">
+                {shippingEstimateDisplay(shipping, locale)}
+              </span>
+            ) : (
+              <bdi dir="ltr" className="font-medium text-ro-ink">
+                {shipping.amount} {shipping.currency}
+              </bdi>
+            )}
           </div>
         ) : null}
       </div>
@@ -267,7 +280,21 @@ export function RequestForm({
           locale={locale}
           oudUnitCount={pieces}
           onChange={setShipping}
+          showStickyHint
         />
+        <label className="flex items-start gap-2.5 text-sm text-ro-ink">
+          <input
+            type="checkbox"
+            name="whatsappShippingOptIn"
+            className="mt-1 size-4 rounded border-[var(--ro-border-control)]"
+            defaultChecked={false}
+          />
+          <span className="leading-relaxed text-ro-muted">
+            {locale === "ar"
+              ? "أرغب بتلقّي تحديثات الشحن عبر واتساب (اختياري)."
+              : "I want shipping updates on WhatsApp (optional)."}
+          </span>
+        </label>
         <label className="block space-y-1.5 text-sm">
           <span className="font-medium text-ro-ink">{labels.notes}</span>
           <textarea

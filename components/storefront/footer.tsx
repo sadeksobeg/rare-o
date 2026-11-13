@@ -55,6 +55,7 @@ export function StorefrontFooter({
                   ["/", dict.nav.home],
                   ["/catalog", dict.nav.catalog],
                   ["/offers", dict.nav.offers],
+                  ["/shipping", dict.nav.shipping],
                   ["/contact", dict.nav.contact],
                   ["/privacy", dict.privacy.title],
                 ] as const

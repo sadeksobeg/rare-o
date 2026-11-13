@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="36" height="24" role="img" aria-label="LB">
+  <rect width="900" height="600" fill="#FFFFFF"/>
+  <rect width="900" height="150" fill="#EE161F"/>
+  <rect y="450" width="900" height="150" fill="#EE161F"/>
+  <g fill="#00A651" transform="translate(450 300)">
+    <path d="M0,-90 L18,-20 H55 L25,10 L40,80 L0,40 L-40,80 L-25,10 L-55,-20 H-18 Z"/>
+    <rect x="-8" y="40" width="16" height="55"/>
+  </g>
+</svg>

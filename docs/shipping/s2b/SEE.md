@@ -1,0 +1,36 @@
+- SEE s2b-shipping-page-light-1440-ar.png: standalone /shipping with DE quote cards + badges; no cart required
+- SEE s2b-shipping-page-light-1280-ar.png: standalone /shipping with DE quote cards + badges; no cart required
+- SEE s2b-shipping-page-light-768-ar.png: standalone /shipping with DE quote cards + badges; no cart required
+- SEE s2b-shipping-page-light-390-ar.png: standalone /shipping with DE quote cards + badges; no cart required
+- SEE s2b-shipping-page-dark-1440-ar.png: standalone /shipping with DE quote cards + badges; no cart required
+- SEE s2b-shipping-page-dark-1280-ar.png: standalone /shipping with DE quote cards + badges; no cart required
+- SEE s2b-shipping-page-dark-768-ar.png: standalone /shipping with DE quote cards + badges; no cart required
+- SEE s2b-shipping-page-dark-390-ar.png: standalone /shipping with DE quote cards + badges; no cart required
+- SEE s2b-pdp-estimator-light-1440-ar.png: PDP احسب الشحن open with DE methods
+- SEE s2b-pdp-estimator-light-390-ar.png: PDP احسب الشحن open with DE methods
+- SEE s2b-pdp-estimator-dark-1440-ar.png: PDP احسب الشحن open with DE methods
+- SEE s2b-pdp-estimator-dark-390-ar.png: PDP احسب الشحن open with DE methods
+- SEE s2b-request-de-light-1440-ar.png: request DE cards with badges + WA opt-in unchecked + sticky on 390
+- SEE s2b-request-de-light-1280-ar.png: request DE cards with badges + WA opt-in unchecked + sticky on 390
+- SEE s2b-request-de-light-768-ar.png: request DE cards with badges + WA opt-in unchecked + sticky on 390
+- SEE s2b-request-de-light-390-ar.png: request DE cards with badges + WA opt-in unchecked + sticky on 390
+- SEE s2b-request-de-dark-1440-ar.png: request DE cards with badges + WA opt-in unchecked + sticky on 390
+- SEE s2b-request-de-dark-1280-ar.png: request DE cards with badges + WA opt-in unchecked + sticky on 390
+- SEE s2b-request-de-dark-768-ar.png: request DE cards with badges + WA opt-in unchecked + sticky on 390
+- SEE s2b-request-de-dark-390-ar.png: request DE cards with badges + WA opt-in unchecked + sticky on 390
+- SEE s2b-request-lb-inquiry-light-1440-ar.png: LB public → inquiry card اطلب عرض سعر (notebook hidden); WA opt-in unchecked
+- SEE s2b-request-lb-inquiry-light-390-ar.png: LB public → inquiry card اطلب عرض سعر (notebook hidden); WA opt-in unchecked
+- SEE s2b-request-lb-inquiry-dark-1440-ar.png: LB public → inquiry card اطلب عرض سعر (notebook hidden); WA opt-in unchecked
+- SEE s2b-request-lb-inquiry-dark-390-ar.png: LB public → inquiry card اطلب عرض سعر (notebook hidden); WA opt-in unchecked
+- SEE s2b-sim-lb-w20-light-1440-ar.png: admin simulator unverified ON — LB @ 20kg; notebook LAND_PASSENGER_CAR $20
+- SEE s2b-sim-lb-w20-dark-1440-ar.png: admin simulator dark — LB @ 20kg
+- SEE s2b-sim-jo-w20-light-1440-ar.png: admin simulator unverified ON — JO @ 20kg; JO×3 notebook flats (30/70/100) + speed/security
+- SEE s2b-sim-jo-w20-dark-1440-ar.png: admin simulator dark — JO @ 20kg
+- SEE s2b-sim-jo-contact-light-1440-ar.png: admin simulator JO unverified ON — contact-sheet cell
+- SEE s2b-sim-jo-contact-light-390-ar.png: admin simulator JO unverified ON — contact-sheet cell
+- SEE s2b-sim-jo-contact-dark-1440-ar.png: admin simulator JO unverified ON — contact-sheet cell
+- SEE s2b-sim-jo-contact-dark-390-ar.png: admin simulator JO unverified ON — contact-sheet cell
+- SEE s2b-sim-sa-w20-light-1440-ar.png: admin simulator unverified ON — SA @ 20kg; SA×2 incl consolidation (الراقي) + FAST passenger
+- SEE s2b-sim-sa-w20-dark-1440-ar.png: admin simulator dark — SA @ 20kg
+- SEE s2b-sim-ae-w20-light-1440-ar.png: admin simulator unverified ON — AE @ 20kg; AE مندوب الشارقة $60 + legacy air if present
+- SEE s2b-sim-ae-w20-dark-1440-ar.png: admin simulator dark — AE @ 20kg

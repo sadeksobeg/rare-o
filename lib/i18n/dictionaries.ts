@@ -11,6 +11,7 @@ type Dict = {
     admin: string;
     story: string;
     traders: string;
+    shipping: string;
     primaryAria: string;
     mobileAria: string;
     languageAria: string;
@@ -1771,6 +1772,7 @@ const ar: Dict = {
     admin: "الإدارة",
     story: "قصتنا",
     traders: "التجّار",
+    shipping: "الشحن",
     primaryAria: "التنقل الرئيسي",
     mobileAria: "قائمة الجوال",
     languageAria: "التبديل إلى الإنجليزية",
@@ -3678,6 +3680,7 @@ const en: Dict = {
     admin: "Admin",
     story: "Our story",
     traders: "Traders",
+    shipping: "Shipping",
     primaryAria: "Primary navigation",
     mobileAria: "Mobile navigation",
     languageAria: "Switch to Arabic",

@@ -215,6 +215,7 @@ export async function createRetailRequestFromCart(
           shippingCostCurrency,
           shippingWeightKg,
           shippingQuoteSnapshot,
+          whatsappShippingOptIn: Boolean(input.whatsappShippingOptIn),
           subtotal,
           currency,
           handoffPayloadJson: JSON.stringify(handoffPayload),
@@ -289,6 +290,25 @@ export async function createRetailRequestFromCart(
     // Unreachable in practice (the loop always either returns or throws),
     // but keeps this function's return type honest for TypeScript.
     throw new Error("RETAIL_REQUEST_CREATE_FAILED");
+  }
+
+  if (input.shippingInquiry) {
+    await prisma.shippingInquiry.create({
+      data: {
+        destination: input.destinationCountry,
+        countryCode: input.destinationCode ?? null,
+        contactName: input.customerName,
+        contactPhone: input.customerPhone,
+        notes: input.customerNotes || "",
+        audience: "CUSTOMER",
+        status: "NEW",
+        itemsJson: resolvedLines.map((l) => ({
+          productId: l.productId,
+          qty: l.quantity,
+          reference: request.reference,
+        })),
+      },
+    });
   }
 
   return { request, handoffPayload: parsePayload(request.handoffPayloadJson) };

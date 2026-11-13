@@ -17,6 +17,7 @@ import {
 } from "@/components/storefront/product-feature-bullets";
 import { ProductGallery } from "@/components/storefront/product-gallery";
 import { StickyCtaBar } from "@/components/storefront/sticky-cta-bar";
+import { ShippingEstimator } from "@/components/storefront/shipping/shipping-estimator";
 import { AvailabilityChip } from "@/components/storefront/catalog/availability-chip";
 import { PriceBlock } from "@/components/storefront/catalog/price-block";
 import { ProductBadges } from "@/components/storefront/catalog/product-badges";
@@ -353,6 +354,15 @@ export default async function ProductPage({
                 </ButtonLink>
               </div>
             )}
+
+            <ShippingEstimator
+              locale={locale}
+              mode="pdp"
+              initialWeightKg={
+                product.weightKg != null ? Number(product.weightKg) : null
+              }
+              oudUnitCount={1}
+            />
           </ProductBuyBox>
 
           <HandoffExplainer dict={dict} compact />

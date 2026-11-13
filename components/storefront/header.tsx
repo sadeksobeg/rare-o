@@ -69,6 +69,11 @@ export function StorefrontHeader({
     { key: "catalog", href: href("/catalog", locale), label: dict.nav.catalog },
     { key: "offers", href: href("/offers", locale), label: dict.nav.offers },
     {
+      key: "shipping",
+      href: href("/shipping", locale),
+      label: dict.nav.shipping,
+    },
+    {
       key: "story",
       href: isHome ? "#story" : `${href("/", locale)}#story`,
       label: dict.nav.story,
