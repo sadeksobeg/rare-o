@@ -104,8 +104,8 @@ export function ShippingCostSelector({
   const weightUnit = t(locale, "كغ", "kg");
   const weightHelp = t(
     locale,
-    "تقدير من قاعدة صناديق العود الحالية (زوج = 25 كغ، فرد = 20 كغ). ليس وزناً حجمياً حتى يُضبط مقسوم الحجم في الإدارة.",
-    "Estimate from the current oud-box rule (pair = 25 kg, single = 20 kg). Not volumetric until an admin sets a volumetric divisor."
+    "تقدير وزن الشحن بحسب حجم صناديق العود (زوج = 25 كغ، فرد = 20 كغ).",
+    "Shipping weight estimate based on oud box sizes (pair = 25 kg, single = 20 kg)."
   );
 
   function emit(nextMethodCode: string | null, list: QuoteMethod[] = options) {
@@ -232,11 +232,9 @@ export function ShippingCostSelector({
             <Package className="size-3.5" strokeWidth={1.5} aria-hidden />
             {weightTitle}
           </span>
-          <span className="text-base font-semibold tabular-nums text-ro-ink">
-            <bdi dir="ltr">
-              <AnimatedValue value={weightKg} durationMs={lite ? 1 : 550} />{" "}
-              {weightUnit}
-            </bdi>
+          <span className="text-base font-semibold tabular-nums text-ro-ink" dir="ltr">
+            <AnimatedValue value={weightKg} durationMs={lite ? 1 : 550} />
+            <span className="ms-1">{weightUnit}</span>
           </span>
         </div>
         <p className="mt-1.5 text-[11px] leading-relaxed text-ro-muted">{weightHelp}</p>
@@ -255,11 +253,12 @@ export function ShippingCostSelector({
                     delay: lite ? 0 : i * 0.05,
                     ease: [0.22, 1, 0.36, 1],
                   }}
-                  className="inline-flex items-center gap-1 rounded-[var(--ro-r-full)] border border-[var(--ro-border-control)] bg-ro-sunken px-2.5 py-1 text-[11px] font-medium tabular-nums text-ro-ink"
+                  className="inline-flex items-center gap-1.5 rounded-[var(--ro-r-full)] border border-[var(--ro-border-control)] bg-ro-sunken px-2.5 py-1 text-[11px] font-medium tabular-nums text-ro-ink"
                 >
-                  <bdi dir="ltr">
-                    2 × {t(locale, "عود", "oud")} = 25 {weightUnit}
-                  </bdi>
+                  <span>{t(locale, "عود", "oud")}</span>
+                  <span dir="ltr">× 2</span>
+                  <span dir="ltr">= 25</span>
+                  <span>{weightUnit}</span>
                 </m.span>
               ))}
               {boxes.remainder ? (
@@ -274,11 +273,12 @@ export function ShippingCostSelector({
                     delay: lite ? 0 : boxes.pairs * 0.05,
                     ease: [0.22, 1, 0.36, 1],
                   }}
-                  className="inline-flex items-center gap-1 rounded-[var(--ro-r-full)] border border-dashed border-[var(--ro-border-control)] px-2.5 py-1 text-[11px] font-medium tabular-nums text-ro-muted"
+                  className="inline-flex items-center gap-1.5 rounded-[var(--ro-r-full)] border border-dashed border-[var(--ro-border-control)] px-2.5 py-1 text-[11px] font-medium tabular-nums text-ro-muted"
                 >
-                  <bdi dir="ltr">
-                    1 × {t(locale, "عود", "oud")} = 20 {weightUnit}
-                  </bdi>
+                  <span>{t(locale, "عود", "oud")}</span>
+                  <span dir="ltr">× 1</span>
+                  <span dir="ltr">= 20</span>
+                  <span>{weightUnit}</span>
                 </m.span>
               ) : null}
             </AnimatePresence>
@@ -398,10 +398,9 @@ export function ShippingCostSelector({
                   </span>
                   {opt.alternate ? (
                     <span className="block text-[11px] text-ro-muted">
+                      {t(locale, "عند التسديد هناك", "or paid there")}{" "}
                       <bdi dir="ltr">
-                        {t(locale, "أو ", "or ")}
-                        {opt.alternate.amount} {opt.alternate.currency}{" "}
-                        {t(locale, "عند التسديد هناك", "paid there")}
+                        {opt.alternate.amount} {opt.alternate.currency}
                       </bdi>
                     </span>
                   ) : null}

@@ -65,7 +65,7 @@ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMchRi0w514Fzdt6i/dreqovKxxLTRj0311JpUy6Uhmq
 ```
 
 File: `~/.ssh/id_ed25519_rareoud.pub`  
-**Add that single line** to the VPS deploy user’s `~/.authorized_keys` (same user you used for prior rareoud deploys). After that, deploy from this machine with that key.  
+**Add that single line** to the VPS deploy user’s `~/.ssh/authorized_keys` (same user you used for prior rareoud deploys). After that, deploy from this machine with that key.  
 Do not use alternate routes (Hostinger file panel, temporary passwords) for app deploys.
 
 (There is also `tenegta_vps_ed25519.pub` for other Hostinger work — **not** the rareoud deploy key.)

@@ -12,5 +12,6 @@ export function getBuildInfo(): { sha: string; builtAt: string } {
     process.env.RO_BUILD_TIME?.trim() ||
     process.env.BUILD_TIME?.trim() ||
     "unknown";
-  return { sha: sha.slice(0, 40), builtAt };
+  // Public health: short SHA only (no full commit hash).
+  return { sha: sha === "unknown" ? "unknown" : sha.slice(0, 7), builtAt };
 }

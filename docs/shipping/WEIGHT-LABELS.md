@@ -9,9 +9,12 @@
 | Oud-box heuristic carts (storefront request, current trader wholesale picker) | **الوزن المحتسب للصندوق** | Billable box weight |
 | Everything else (generic / product weights later) | **الوزن المحتسب** | Billable weight |
 
-Unit suffix: **كغ** / **kg** (Western digits). Do not use «كيلو حجمي» / «vol. kg» in customer/trader surfaces while `ShippingConfig.volumetricDivisor` is null.
+Customer/trader help (neutral — no admin/config jargon):  
+«تقدير وزن الشحن بحسب حجم صناديق العود (زوج = 25 كغ، فرد = 20 كغ).»
 
-Admin fields that still say «حجمي» in config/rate editors refer to the future volumetric path; the divisor remains blank by default (MASTER-EXECUTION §1).
+Unit suffix: **كغ** / **kg** (Western digits). Do not use «كيلو حجمي» / «vol. kg» / «مقسوم» on storefront or trader surfaces.
+
+Admin-only screens may still expose the volumetric divisor field (blank by default — MASTER-EXECUTION §1).
 
 ## Formula (current)
 

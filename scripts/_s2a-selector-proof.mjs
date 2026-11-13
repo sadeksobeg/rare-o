@@ -53,21 +53,46 @@ await page.waitForTimeout(1500);
 await hideNextDevIndicator(page);
 const text = await page.evaluate(() => document.body.innerText);
 const hasLabel = text.includes("الوزن المحتسب للصندوق");
-const hasVolClaim = text.includes("كيلو حجمي") || text.includes("الوزن الحجمي");
-const has130 = /\b130\b/.test(text) && /USD|دولار|بري/.test(text);
+const hasNeutralHelp = text.includes("تقدير وزن الشحن بحسب حجم صناديق العود");
+const hasInternal =
+  text.includes("مقسوم") ||
+  text.includes("كيلو حجمي") ||
+  text.includes("الوزن الحجمي") ||
+  /حتى يُضبط|في الإدارة/.test(text);
+const has130 = /\b130\b/.test(text);
 const has150 = /\b150\b/.test(text);
+const altOk =
+  /عند التسديد هناك\s*110\s*EUR/.test(text) &&
+  /عند التسديد هناك\s*130\s*EUR/.test(text);
+const weightChipOk = /=\s*20\s*كغ/.test(text) || /20\s*كغ/.test(text);
+const altBad = /EUR\s*أو\s*110|EUR أو 110/.test(text);
 await page.screenshot({
   path: path.join(OUT, "s2a-request-de20-selector-light-1440-ar.png"),
   fullPage: false,
 });
 const see = {
   hasLabel,
-  hasVolClaim,
+  hasNeutralHelp,
+  hasInternal,
   has130,
   has150,
-  snippet: text.replace(/\s+/g, " ").slice(0, 400),
+  altOk,
+  altBad,
+  weightChipOk,
+  snippet: text.replace(/\s+/g, " ").slice(0, 500),
 };
 fs.writeFileSync(path.join(OUT, "s2a-selector-proof.json"), JSON.stringify(see, null, 2));
 console.log(JSON.stringify(see, null, 2));
 await browser.close();
-if (!hasLabel || hasVolClaim || !has130 || !has150) process.exit(1);
+if (
+  !hasLabel ||
+  !hasNeutralHelp ||
+  hasInternal ||
+  !has130 ||
+  !has150 ||
+  !altOk ||
+  altBad ||
+  !weightChipOk
+) {
+  process.exit(1);
+}
