@@ -1,3 +1,6 @@
+import { randomInt } from "node:crypto";
+import { publishInboxEvent } from "@/lib/whatsapp/messaging/inbox-events";
+import { notifyTraderChannels, traderPortalUrl } from "@/lib/trader/notify-channels";
 import { uiVisibleDealWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
 import { findCatalogDealConflicts } from "@/lib/deals/conflict";
@@ -14,10 +17,14 @@ import {
 import { hashPassword } from "@/lib/auth/trader-session";
 import { notifyTrader } from "@/lib/trader/notifications";
 
+const REFERENCE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+
+/** DP-YYYY-XXXXXX — unguessable, collision-safe (the old 4-digit form had only 9000 values). */
 function buildDealReference(now = new Date()): string {
   const y = now.getUTCFullYear();
-  const n = Math.floor(Math.random() * 9000) + 1000;
-  return `DP-${y}-${n}`;
+  let code = "";
+  for (let i = 0; i < 6; i += 1) code += REFERENCE_ALPHABET[randomInt(REFERENCE_ALPHABET.length)];
+  return `DP-${y}-${code}`;
 }
 
 export type CreateTraderInput = {
@@ -111,10 +118,10 @@ export async function createDealProposal(input: CreateDealInput) {
     productId = null;
   }
 
-  const reference = buildDealReference();
   const status: DealStatus = "proposed";
 
-  return prisma.dealProposal.create({
+  const createOnce = (reference: string) =>
+    prisma.dealProposal.create({
     data: {
       reference,
       traderId: input.traderId,
@@ -142,6 +149,24 @@ export async function createDealProposal(input: CreateDealInput) {
     },
     select: { id: true, reference: true, status: true, productId: true },
   });
+
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      const created = await createOnce(buildDealReference());
+      void publishInboxEvent("conversation.updated", {
+        kind: "deal_proposed",
+        domain: "deal",
+        requestId: created.id,
+        title: created.reference,
+      });
+      return created;
+    } catch (e) {
+      if ((e as { code?: string }).code !== "P2002") throw e;
+      lastErr = e;
+    }
+  }
+  throw lastErr;
 }
 
 export type AddNegotiationInput = {
@@ -296,6 +321,23 @@ export async function addNegotiationEntry(input: AddNegotiationInput) {
     }
   }
 
+  // Live toast for the admin team when the trader acts.
+  if (input.actorRole === "trader") {
+    void publishInboxEvent("conversation.updated", {
+      kind:
+        input.action === "accept"
+          ? "deal_trader_accepted"
+          : input.action === "reject"
+            ? "deal_trader_rejected"
+            : input.action === "close"
+              ? "deal_trader_closed"
+              : "deal_trader_reply",
+      domain: "deal",
+      requestId: updated.id,
+      title: updated.reference,
+    });
+  }
+
   // Notify the trader when admin acts (status center — §3.4).
   if (input.actorRole === "admin") {
     const actionLabelAr =
@@ -333,6 +375,21 @@ export async function addNegotiationEntry(input: AddNegotiationInput) {
         : updated.title,
       href: `/trader/deals/${updated.id}`,
     });
+    // Platform inbox + WhatsApp, so a WhatsApp outage never leaves the trader unaware.
+    if (input.actorAdminId) {
+      const tr = await prisma.traderAccount.findUnique({
+        where: { id: updated.traderId },
+        select: { displayName: true },
+      });
+      const first = (tr?.displayName ?? "").trim().split(/\s+/)[0];
+      await notifyTraderChannels({
+        traderId: updated.traderId,
+        adminId: input.actorAdminId,
+        text: `أهلاً ${first || ""}، ${actionLabelAr} — صفقة ${updated.reference}${rejectReason ? `
+السبب: ${rejectReason}` : ""}
+التفاصيل: ${traderPortalUrl(`/trader/deals/${updated.id}`)}`,
+      });
+    }
   }
 
   return { deal: updated, conflictWarnings };
@@ -364,6 +421,12 @@ export async function confirmDealPayment(input: {
     bodyAr: "أكدت الإدارة استلام الدفع واكتمال الطلب.",
     bodyEn: "Admin confirmed payment and completed the order.",
     href: `/trader/deals/${deal.id}`,
+  });
+  await notifyTraderChannels({
+    traderId: deal.traderId,
+    adminId: input.adminId,
+    text: `تم تأكيد استلام دفعة صفقتك ${deal.reference}. شكراً لك!
+التفاصيل: ${traderPortalUrl(`/trader/deals/${deal.id}`)}`,
   });
 
   return updated;

@@ -111,8 +111,14 @@ export function RadShellClient({
         wholesale_submitted: "طلب جملة جديد من تاجر",
         wholesale_quote_accepted: "التاجر قبل عرض السعر",
         wholesale_quote_declined: "التاجر رفض عرض السعر",
+        deal_proposed: "صفقة جديدة من تاجر",
+        deal_trader_reply: "ردّ التاجر على الصفقة",
+        deal_trader_accepted: "التاجر قبل شروط الصفقة",
+        deal_trader_rejected: "التاجر رفض الصفقة",
+        deal_trader_closed: "التاجر أغلق الصفقة",
       };
-      const base = p.domain === "wholesale" ? "/admin/wholesale" : "/admin/requests";
+      const base =
+        p.domain === "wholesale" ? "/admin/wholesale" : p.domain === "deal" ? "/admin/deals" : "/admin/requests";
       if (!text[p.kind]) return;
       playInboxChime();
       toast(text[p.kind], {
