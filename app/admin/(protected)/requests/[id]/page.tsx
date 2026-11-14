@@ -149,6 +149,16 @@ export default async function AdminRequestDetailPage({
     formatAdminDate(request.updatedAt, locale),
   ].join(" ");
 
+  // Stage gating — show the admin only what applies right now.
+  const isClosed = request.status === "completed" || request.status === "cancelled";
+  const isConfirmed = request.customerResponse === "confirmed";
+  const inHandoffStage =
+    request.status === "draft" ||
+    request.status === "ready_for_handoff" ||
+    request.status === "handoff_opened";
+  const fulfilmentUnlocked =
+    isConfirmed || Boolean(shipmentRow) || Boolean(request.paymentMode);
+
   const initial = (request.customerName.trim()[0] || "?").toUpperCase();
 
   return (
@@ -343,14 +353,19 @@ export default async function AdminRequestDetailPage({
               </div>
             </Card>
 
-            <Card
-              padded={false}
-              className="rad-rise"
-              style={{ ["--rad-s" as string]: "3" }}
-            >
-              <CardHeader title={ar ? "تأكيد البيانات مع العميل" : "Confirm details with the customer"} />
-              <div className="rad-cb2">
-                <RetailConfirmationPanel
+            {isClosed ? null : isConfirmed ? (
+              <Card padded={false} className="rad-rise" style={{ ["--rad-s" as string]: "3" }}>
+                <CardHeader title={ar ? "تأكيد البيانات مع العميل" : "Confirm details with the customer"} />
+                <div className="rad-cb2">
+                  <p className="text-sm">
+                    <b>✓ {ar ? "العميل أكّد صحة بياناته" : "The customer confirmed the details"}</b>
+                  </p>
+                  <details className="mt-3">
+                    <summary className="cursor-pointer text-sm opacity-80">
+                      {ar ? "تعديل البيانات أو إعادة الإرسال" : "Edit details or resend"}
+                    </summary>
+                    <div className="mt-3">
+                      <RetailConfirmationPanel
                   requestId={request.id}
                   closed={request.status === "completed" || request.status === "cancelled"}
                   customer={{
@@ -375,9 +390,44 @@ export default async function AdminRequestDetailPage({
                       : null
                   }
                 />
-              </div>
-            </Card>
+                    </div>
+                  </details>
+                </div>
+              </Card>
+            ) : (
+              <Card padded={false} className="rad-rise" style={{ ["--rad-s" as string]: "3" }}>
+                <CardHeader title={ar ? "الخطوة التالية: تأكيد البيانات مع العميل" : "Next: confirm details with the customer"} />
+                <div className="rad-cb2">
+                  <RetailConfirmationPanel
+                  requestId={request.id}
+                  closed={request.status === "completed" || request.status === "cancelled"}
+                  customer={{
+                    name: request.customerName,
+                    phone: request.customerPhone,
+                    destination: request.destinationCountry,
+                    notes: request.customerNotes,
+                  }}
+                  response={
+                    request.customerResponse === "confirmed" ||
+                    request.customerResponse === "changes_requested"
+                      ? request.customerResponse
+                      : null
+                  }
+                  responseNote={request.customerResponseNote ?? ""}
+                  respondedAtLabel={
+                    request.customerRespondedAt
+                      ? formatAdminDate(request.customerRespondedAt, locale, {
+                          forceAbsolute: true,
+                          withTime: true,
+                        })
+                      : null
+                  }
+                />
+                </div>
+              </Card>
+            )}
 
+            {isClosed && !shipmentRow ? null : fulfilmentUnlocked ? (
             <Card
               padded={false}
               className="rad-rise"
@@ -414,6 +464,52 @@ export default async function AdminRequestDetailPage({
                 />
               </div>
             </Card>
+            ) : (
+              <Card padded={false} className="rad-rise" style={{ ["--rad-s" as string]: "3" }}>
+                <CardHeader title={ar ? "الدفع والشحن" : "Payment & shipping"} />
+                <div className="rad-cb2">
+                  <p className="text-sm opacity-80">
+                    {ar
+                      ? "يُفتح الدفع والشحن بعد أن يؤكّد العميل صحة بياناته."
+                      : "Payment and shipping unlock once the customer confirms their details."}
+                  </p>
+                  <details className="mt-3">
+                    <summary className="cursor-pointer text-sm opacity-80">
+                      {ar ? "تأكّدتُ من العميل خارج الصفحة — افتحهما الآن" : "Confirmed elsewhere — open now"}
+                    </summary>
+                    <div className="mt-3">
+                      <RetailFulfillmentPanel
+                  requestId={request.id}
+                  closed={request.status === "completed" || request.status === "cancelled"}
+                  paymentMode={request.paymentMode === "prepaid" || request.paymentMode === "cod" ? request.paymentMode : null}
+                  paymentConfirmed={Boolean(request.paymentConfirmedAt)}
+                  etaLabel={formatEta(request.etaMinDays, request.etaMaxDays, ar)}
+                  methodLabel={request.shippingMethodLabel ?? ""}
+                  canNotify={canNotify}
+                  optedIn={request.whatsappShippingOptIn}
+                  defaultPrice={request.shippingCostAmount != null ? String(Number(request.shippingCostAmount)) : ""}
+                  shipment={
+                    shipmentRow
+                      ? {
+                          id: shipmentRow.id,
+                          status: shipmentRow.status,
+                          carrierLabel: shipmentRow.carrierLabel,
+                          trackingNumber: shipmentRow.trackingNumber,
+                          next: allowedNextStatuses(shipmentRow.status),
+                          recent: shipmentRow.events.map((e) => ({
+                            status: e.status,
+                            note: e.note,
+                            at: formatAdminDate(e.at, locale, { forceAbsolute: true, withTime: true }) as string,
+                          })),
+                        }
+                      : null
+                  }
+                />
+                    </div>
+                  </details>
+                </div>
+              </Card>
+            )}
 
             <Card
               padded={false}
@@ -473,7 +569,7 @@ export default async function AdminRequestDetailPage({
               </div>
             </Card>
 
-            {request.handoffMessageText ? (
+            {request.handoffMessageText && inHandoffStage ? (
               <Card padded={false}>
                 <CardHeader title={d.storedMessage} />
                 <div className="rad-cb2">
@@ -622,6 +718,7 @@ export default async function AdminRequestDetailPage({
               </div>
             </Card>
 
+            {inHandoffStage ? (
             <Card
               padded={false}
               className="rad-rise"
@@ -651,6 +748,7 @@ export default async function AdminRequestDetailPage({
                 />
               </div>
             </Card>
+            ) : null}
           </>
         }
       />
