@@ -152,6 +152,12 @@ model RetailRequest {
   idempotencyKey       String?              @unique
   handoffPreparedAt    DateTime?
   handoffOpenedAt      DateTime?
+  /// Unguessable key of the customer-facing order page (/order/<token>); lazily created for old rows.
+  publicToken          String?              @unique
+  /// confirmed | changes_requested — the customer's answer to the confirmation message
+  customerResponse     String?
+  customerResponseNote String?
+  customerRespondedAt  DateTime?
   customerId           String?
   customer             Customer?            @relation(fields: [customerId], references: [id])
   lines                RetailRequestLine[]

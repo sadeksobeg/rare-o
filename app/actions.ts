@@ -936,7 +936,58 @@ export async function adminTransitionRetailRequestAction(
     revalidatePath(`/admin/requests/${parsed.data.requestId}`);
     revalidatePath("/admin/requests");
     revalidatePath("/admin");
-    return { ok: true };
+
+    // Optional, explicit: tell the customer about the new status on WhatsApp.
+    let notified: "sent" | "skipped" | string = "skipped";
+    if (
+      formData.get("notifyCustomer") === "1" &&
+      ["in_follow_up", "completed", "cancelled"].includes(parsed.data.toStatus)
+    ) {
+      try {
+        const { ensureOrderToken, orderPageUrl, buildStatusUpdateMessage } = await import(
+          "@/lib/retail-request/order-page"
+        );
+        const { sendRetailCustomerMessage } = await import(
+          "@/lib/retail-request/customer-channel"
+        );
+        const req = await prisma.retailRequest.findUnique({
+          where: { id: parsed.data.requestId },
+          select: { id: true, reference: true, customerName: true, customerPhone: true, customerId: true, locale: true },
+        });
+        const token = req ? await ensureOrderToken(req.id) : null;
+        if (req && token) {
+          const sent = await sendRetailCustomerMessage({
+            request: req,
+            text: buildStatusUpdateMessage({
+              locale: req.locale === "en" ? "en" : "ar",
+              name: req.customerName,
+              reference: req.reference,
+              status: parsed.data.toStatus,
+              link: orderPageUrl(token),
+            }),
+            adminId: session.sub,
+          });
+          if (sent.ok) {
+            notified = "sent";
+            await prisma.retailHandoffEvent.create({
+              data: {
+                requestId: req.id,
+                eventType: "status_notified",
+                toStatus: parsed.data.toStatus,
+                actor: "admin",
+                actorAdminId: session.sub,
+                note: "أُرسل تحديث الحالة للعميل عبر واتساب",
+              },
+            });
+          } else {
+            notified = sent.error;
+          }
+        }
+      } catch {
+        notified = "FAILED";
+      }
+    }
+    return { ok: true, data: { notified } };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Transition failed";
     return { ok: false, error: msg };

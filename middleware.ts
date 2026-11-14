@@ -284,6 +284,7 @@ export const config = {
     "/cookies",
     "/forbidden",
     "/track/:path*",
+    "/order/:path*",
     "/admin/:path*",
     "/trader/:path*",
     "/dev",

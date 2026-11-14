@@ -1,4 +1,7 @@
+import { randomInt } from "node:crypto";
 import { prisma } from "@/lib/db/prisma";
+import { normalizePhoneDigits } from "@/lib/validation/customer-identity";
+import { newOrderToken } from "@/lib/retail-request/order-page";
 import type { RetailRequestCreateInput } from "@/lib/validation/schemas";
 import {
   buildQuoteSnapshot,
@@ -18,10 +21,23 @@ import type { HandoffPayload } from "@/lib/retail-request/types";
 
 export type { HandoffPayload } from "@/lib/retail-request/types";
 
+/** No 0/O/1/I/L — a reference read aloud or typed from a screenshot stays unambiguous. */
+const REFERENCE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+
+/**
+ * RO-YYYY-XXXXXX — 6 random characters (≈ 887 M combinations per year,
+ * crypto-random). The DB unique index is the real guarantee; the retry loop
+ * below absorbs the astronomically rare collision. Being unguessable also
+ * makes the reference safe to use as a link key from WhatsApp messages.
+ * (Legacy refs were RO-YYYY-NNNN and stay valid.)
+ */
 function buildReference(now = new Date()): string {
   const y = now.getUTCFullYear();
-  const n = Math.floor(Math.random() * 9000) + 1000;
-  return `RO-${y}-${n}`;
+  let code = "";
+  for (let i = 0; i < 6; i += 1) {
+    code += REFERENCE_ALPHABET[randomInt(REFERENCE_ALPHABET.length)];
+  }
+  return `RO-${y}-${code}`;
 }
 
 function parsePayload(json: string): HandoffPayload {
@@ -135,13 +151,38 @@ export async function createRetailRequestFromCart(
     ) as Prisma.InputJsonValue;
   }
 
-  const customer = await prisma.customer.create({
-    data: {
-      name: input.customerName,
-      phone: input.customerPhone,
-      notes: input.customerNotes || null,
-    },
-  });
+  // Same person ordering again later → same Customer record (matched on the
+  // phone's last 9 digits), so the history, the WhatsApp chat and the CRM
+  // suggestions all point at ONE customer instead of a new duplicate per order.
+  const phoneDigits = normalizePhoneDigits(input.customerPhone);
+  const tail = phoneDigits.slice(-9);
+  let customer = tail.length >= 8
+    ? (await prisma.customer.findMany({
+        where: { phone: { contains: tail } },
+        orderBy: { createdAt: "asc" },
+        take: 5,
+      })).find((c) => normalizePhoneDigits(c.phone).slice(-9) === tail) ?? null
+    : null;
+  const customerWasCreated = !customer;
+  if (customer) {
+    // Keep the record fresh without losing history: adopt the newer name only when it is fuller.
+    const longer = input.customerName.trim().split(/\s+/).length > customer.name.trim().split(/\s+/).length;
+    if (longer) {
+      customer = await prisma.customer.update({
+        where: { id: customer.id },
+        data: { name: input.customerName },
+      });
+    }
+  } else {
+    customer = await prisma.customer.create({
+      data: {
+        name: input.customerName,
+        phone: input.customerPhone,
+        notes: input.customerNotes || null,
+      },
+    });
+  }
+  const customerId = customer.id;
 
   const status = input.status as RetailRequestStatus;
   const createdAt = new Date();
@@ -226,7 +267,8 @@ export async function createRetailRequestFromCart(
           whatsAppDeepLink,
           handoffPreparedAt,
           idempotencyKey: input.idempotencyKey ?? null,
-          customerId: customer.id,
+          publicToken: newOrderToken(),
+          customerId,
           lines: {
             create: resolvedLines.map((l) => ({
               productId: l.productId,
@@ -271,9 +313,11 @@ export async function createRetailRequestFromCart(
           include: { lines: true },
         });
         if (winner) {
-          await prisma.customer
-            .delete({ where: { id: customer.id } })
-            .catch(() => {});
+          if (customerWasCreated) {
+            await prisma.customer
+              .delete({ where: { id: customerId } })
+              .catch(() => {});
+          }
           request = winner;
           break;
         }
@@ -282,9 +326,11 @@ export async function createRetailRequestFromCart(
       if (isUniqueViolation && targetsReference && attempt < MAX_REFERENCE_ATTEMPTS) {
         continue; // draw a new reference and retry
       }
-      await prisma.customer
-        .delete({ where: { id: customer.id } })
-        .catch(() => {});
+      if (customerWasCreated) {
+        await prisma.customer
+          .delete({ where: { id: customerId } })
+          .catch(() => {});
+      }
       throw e;
     }
   }

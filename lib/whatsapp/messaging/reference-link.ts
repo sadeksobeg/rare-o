@@ -16,7 +16,14 @@ import { publishInboxEvent } from "@/lib/whatsapp/messaging/inbox-events";
 
 export const RETAIL_REFERENCE_ACTOR = "system:reference";
 
-const REF_RE = /\bRO-\d{4}-\d{4}\b/gi;
+// RO-YYYY-XXXXXX (new, unguessable) and legacy RO-YYYY-NNNN (4 digits, guessable)
+const REF_RE = /\bRO-\d{4}-[A-Z0-9]{4,8}\b/gi;
+const LEGACY_REF_RE = /^RO-\d{4}-\d{4}$/;
+
+/** Legacy 4-digit references can be guessed, so they never link without a phone match. */
+export function isLegacyReference(ref: string): boolean {
+  return LEGACY_REF_RE.test(ref);
+}
 
 export function extractRetailReferences(text: string | null | undefined): string[] {
   if (!text) return [];
@@ -64,13 +71,17 @@ export async function autoLinkConversationByRetailReference(
   });
   if (!conversation) return { linked: false, reason: "NO_CONVERSATION" };
   if (conversation.traderId) return { linked: false, reason: "TRADER_CONVERSATION" };
-  if (conversation.linkType !== "none" || conversation.linkId) {
-    return { linked: false, reason: "ALREADY_LINKED" };
-  }
+  const alreadyLinked = conversation.linkType !== "none" || Boolean(conversation.linkId);
 
   const matches = await db.retailRequest.findMany({
     where: { reference: refs[0]! },
-    select: { id: true, reference: true, customerPhone: true, customerId: true },
+    select: {
+      id: true,
+      reference: true,
+      customerPhone: true,
+      customerId: true,
+      createdAt: true,
+    },
     take: 2,
   });
   if (matches.length !== 1) return { linked: false, reason: "NO_UNIQUE_REQUEST" };
@@ -78,6 +89,33 @@ export async function autoLinkConversationByRetailReference(
 
   if (phonesContradict(conversation.participantE164, request.customerPhone)) {
     return { linked: false, reason: "PHONE_MISMATCH" };
+  }
+  const phoneKnown = digits(conversation.participantE164).length >= 8;
+  if (isLegacyReference(request.reference) && !phoneKnown) {
+    return { linked: false, reason: "LEGACY_REFERENCE_NEEDS_PHONE" };
+  }
+
+  if (alreadyLinked) {
+    // A returning customer sends a NEW request's reference: move the link to it,
+    // but only when the current link is an older retail request of the same
+    // person — never steal a chat that an admin tied to a deal/wholesale/etc.
+    if (conversation.linkType !== "retail_request" || !conversation.linkId) {
+      return { linked: false, reason: "ALREADY_LINKED" };
+    }
+    if (conversation.linkId === request.id) {
+      return { linked: false, reason: "ALREADY_LINKED_SAME" };
+    }
+    const current = await db.retailRequest.findUnique({
+      where: { id: conversation.linkId },
+      select: { customerId: true, customerPhone: true, createdAt: true, status: true },
+    });
+    const samePerson =
+      !!current &&
+      ((current.customerId && current.customerId === request.customerId) ||
+        !phonesContradict(current.customerPhone, request.customerPhone));
+    if (!current || !samePerson || request.createdAt <= current.createdAt) {
+      return { linked: false, reason: "ALREADY_LINKED" };
+    }
   }
 
   const res = await linkConversationToBusinessRecord(

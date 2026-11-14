@@ -274,7 +274,12 @@ export function RequestForm({
 
       <form
         className="space-y-5"
-        action={(formData) => {
+        // onSubmit (not the `action` prop): React 19 resets every field after a
+        // form action finishes — even a failed one — so a validation error used
+        // to wipe the customer's name, phone, destination and notes.
+        onSubmit={(e) => {
+          e.preventDefault();
+          const formData = new FormData(e.currentTarget);
           if (!idempotencyKeyRef.current) {
             idempotencyKeyRef.current = crypto.randomUUID();
           }
@@ -312,6 +317,8 @@ export function RequestForm({
           name="customerName"
           required
           autoComplete="name"
+          minLength={8}
+          helper={locale === "ar" ? "الاسم الثلاثي: الاسم واسم الأب والكنية" : "Full name: first, father's and family name"}
         />
         <TextField
           label={labels.phone}

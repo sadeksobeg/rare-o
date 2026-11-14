@@ -1,3 +1,9 @@
+import {
+  FULL_NAME_MESSAGE,
+  PHONE_MESSAGE,
+  isFullName,
+  isValidPhone,
+} from "@/lib/validation/customer-identity";
 import { z } from "zod";
 import {
   PRODUCT_AVAILABILITIES,
@@ -170,7 +176,8 @@ export const cartLineSchema = z.object({
   quantity: z.coerce.number().int().min(1).max(99),
 });
 
-export const retailRequestCreateSchema = z.object({
+export const retailRequestCreateSchema = z
+  .object({
   locale: z.enum(["ar", "en"]),
   customerName: z.string().trim().min(1).max(120),
   customerPhone: z.string().trim().min(5).max(40),
@@ -188,7 +195,25 @@ export const retailRequestCreateSchema = z.object({
   status: z.enum(RETAIL_REQUEST_CREATE_STATUSES).default("ready_for_handoff"),
   /** Client-generated UUID — duplicate submits return the same request */
   idempotencyKey: z.string().uuid().optional(),
-});
+})
+  .superRefine((val, ctx) => {
+    if (!isFullName(val.customerName)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["customerName"],
+        message: FULL_NAME_MESSAGE[val.locale],
+      });
+    }
+    if (!isValidPhone(val.customerPhone)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["customerPhone"],
+        message: PHONE_MESSAGE[val.locale],
+      });
+    }
+  });
+
+
 
 export const retailRequestTransitionSchema = z.object({
   requestId: z.string().min(1),

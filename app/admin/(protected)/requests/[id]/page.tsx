@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { RevealPhone } from "@/components/admin/reveal-phone";
 import { RequestStatusMenu } from "@/components/admin/rad/request-status-menu";
+import { RetailConfirmationPanel } from "@/components/admin/rad/retail-confirmation-panel";
+import { findRetailCustomerConversation } from "@/lib/retail-request/customer-channel";
 import {
   Avatar,
   Card,
@@ -78,6 +80,8 @@ export default async function AdminRequestDetailPage({
     },
   });
 
+  const canNotify = !!(await findRetailCustomerConversation(request));
+
   const current = isRetailRequestStatus(request.status)
     ? request.status
     : null;
@@ -143,6 +147,8 @@ export default async function AdminRequestDetailPage({
                 ? `/admin/inbox/${linkedConversation.id}`
                 : null
             }
+            canNotify={canNotify}
+            customerOptedIn={request.whatsappShippingOptIn}
             labels={u}
             openConversationLabel={d.linkedConversationOpen}
             changeStatusLabel={u.form.moveTo}
@@ -305,6 +311,41 @@ export default async function AdminRequestDetailPage({
                       full: true,
                     },
                   ]}
+                />
+              </div>
+            </Card>
+
+            <Card
+              padded={false}
+              className="rad-rise"
+              style={{ ["--rad-s" as string]: "3" }}
+            >
+              <CardHeader title={ar ? "تأكيد البيانات مع العميل" : "Confirm details with the customer"} />
+              <div className="rad-cb2">
+                <RetailConfirmationPanel
+                  requestId={request.id}
+                  closed={request.status === "completed" || request.status === "cancelled"}
+                  customer={{
+                    name: request.customerName,
+                    phone: request.customerPhone,
+                    destination: request.destinationCountry,
+                    notes: request.customerNotes,
+                  }}
+                  response={
+                    request.customerResponse === "confirmed" ||
+                    request.customerResponse === "changes_requested"
+                      ? request.customerResponse
+                      : null
+                  }
+                  responseNote={request.customerResponseNote ?? ""}
+                  respondedAtLabel={
+                    request.customerRespondedAt
+                      ? formatAdminDate(request.customerRespondedAt, locale, {
+                          forceAbsolute: true,
+                          withTime: true,
+                        })
+                      : null
+                  }
                 />
               </div>
             </Card>

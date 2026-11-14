@@ -41,6 +41,8 @@ export function RequestStatusMenu({
   confirmLabel,
   cancelLabel,
   modalLead,
+  canNotify = false,
+  customerOptedIn = false,
 }: {
   requestId: string;
   nextStatuses: RetailRequestStatus[];
@@ -53,6 +55,10 @@ export function RequestStatusMenu({
   confirmLabel: string;
   cancelLabel: string;
   modalLead: string;
+  /** A customer chat exists, so a WhatsApp update can be sent from here. */
+  canNotify?: boolean;
+  /** Customer ticked «WhatsApp updates» on the storefront → default on. */
+  customerOptedIn?: boolean;
 }) {
   const f = labels.form;
   const router = useRouter();
@@ -60,6 +66,7 @@ export function RequestStatusMenu({
   const [pendingStatus, setPendingStatus] =
     useState<RetailRequestStatus | null>(null);
   const [note, setNote] = useState("");
+  const [notify, setNotify] = useState(customerOptedIn);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [link, setLink] = useState<string | null>(whatsAppDeepLink);
@@ -81,6 +88,8 @@ export function RequestStatusMenu({
     fd.set("requestId", requestId);
     fd.set("toStatus", pendingStatus);
     if (note.trim()) fd.set("note", note.trim());
+    const notifiable = ["in_follow_up", "completed", "cancelled"].includes(pendingStatus);
+    if (notify && canNotify && notifiable) fd.set("notifyCustomer", "1");
     startTransition(async () => {
       setError(null);
       setMessage(null);
@@ -91,7 +100,14 @@ export function RequestStatusMenu({
       }
       setPendingStatus(null);
       setNote("");
-      setMessage(f.statusUpdated);
+      const outcome = (res as { data?: { notified?: string } }).data?.notified;
+      setMessage(
+        outcome === "sent"
+          ? `${f.statusUpdated} — أُرسل التحديث للعميل عبر واتساب`
+          : outcome && outcome !== "skipped"
+            ? `${f.statusUpdated} — لم يُرسل التحديث (${outcome === "WHATSAPP_DOWN" ? "واتساب غير متصل" : outcome === "NO_CONVERSATION" ? "لا محادثة للعميل" : "تعذّر الإرسال"})`
+            : f.statusUpdated
+      );
       router.refresh();
     });
   };
@@ -267,6 +283,25 @@ export function RequestStatusMenu({
             style={{ minHeight: 80 }}
           />
         </div>
+        {pendingStatus &&
+        ["in_follow_up", "completed", "cancelled"].includes(pendingStatus) ? (
+          <label
+            className="rad-fx"
+            style={{ marginTop: 14, display: "flex", gap: 10, alignItems: "center", opacity: canNotify ? 1 : 0.55 }}
+          >
+            <input
+              type="checkbox"
+              checked={notify && canNotify}
+              disabled={!canNotify}
+              onChange={(e) => setNotify(e.target.checked)}
+              style={{ width: 18, height: 18 }}
+            />
+            <span>
+              إرسال تحديث للعميل عبر واتساب (مع رابط طلبه)
+              {!canNotify ? " — لا توجد محادثة مرتبطة بالعميل" : customerOptedIn ? " — العميل وافق على التحديثات" : ""}
+            </span>
+          </label>
+        ) : null}
         {error ? (
           <p role="alert" style={{ color: "var(--rad-err)", marginTop: 10 }}>
             {error}
