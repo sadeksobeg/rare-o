@@ -27,6 +27,48 @@ import {
   traderRespondToWholesaleQuote,
 } from "@/lib/wholesale/service";
 import { isWholesaleStatus } from "@/lib/wholesale/constants";
+import { prisma } from "@/lib/db/prisma";
+import {
+  buildWholesaleTraderMessage,
+  sendWholesaleTraderWhatsApp,
+  traderRequestUrl,
+  type WholesaleWaEvent,
+} from "@/lib/wholesale/trader-wa";
+
+/** Optional WhatsApp nudge to the trader (explicit admin choice). Returns "sent" | error code | "skipped". */
+async function maybeNotifyTrader(
+  formData: FormData,
+  requestId: string,
+  adminId: string,
+  event: WholesaleWaEvent,
+  shipping?: { carrier: string; tracking: string } | null
+): Promise<string> {
+  if (String(formData.get("notifyTrader") || "") !== "1") return "skipped";
+  const r = await prisma.wholesaleRequest.findUnique({
+    where: { id: requestId },
+    select: { reference: true, traderId: true, trader: { select: { displayName: true } } },
+  });
+  if (!r) return "skipped";
+  const res = await sendWholesaleTraderWhatsApp({
+    traderId: r.traderId,
+    adminId,
+    text: buildWholesaleTraderMessage({
+      event,
+      name: r.trader.displayName,
+      reference: r.reference,
+      link: traderRequestUrl(requestId),
+      shipping,
+    }),
+  });
+  return res.ok ? "sent" : res.error;
+}
+
+const STATUS_EVENT: Record<string, WholesaleWaEvent> = {
+  under_review: "review",
+  confirmed: "confirmed",
+  completed: "completed",
+  cancelled: "cancelled",
+};
 
 /** Keep admin dashboard queue/KPIs in sync when wholesale records change. */
 function revalidateWholesaleSurfaces(requestId?: string) {
@@ -210,7 +252,9 @@ export async function adminTransitionWholesaleAction(
       note: parsed.data.note || undefined,
     });
     revalidateWholesaleSurfaces(updated.id);
-    return { ok: true };
+    const ev = STATUS_EVENT[parsed.data.toStatus];
+    const notified = ev ? await maybeNotifyTrader(formData, updated.id, session.sub, ev) : "skipped";
+    return { ok: true, data: { notified } };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Transition failed";
     return { ok: false, error: msg };
@@ -265,7 +309,8 @@ export async function adminProvideWholesaleQuoteAction(
       lineQuotes,
     });
     revalidateWholesaleSurfaces(updated.id);
-    return { ok: true, data: { status: updated.status } };
+    const notified = await maybeNotifyTrader(formData, updated.id, session.sub, "quote");
+    return { ok: true, data: { status: updated.status, notified } };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Quote failed";
     return { ok: false, error: msg };
@@ -298,7 +343,11 @@ export async function adminUpdateWholesaleShippingAction(
       shippedAt: new Date(),
     });
     revalidateWholesaleSurfaces(updated.id);
-    return { ok: true };
+    const notified = await maybeNotifyTrader(formData, updated.id, session.sub, "shipped", {
+      carrier,
+      tracking: trackingReference,
+    });
+    return { ok: true, data: { notified } };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Shipping update failed";
     return { ok: false, error: msg };

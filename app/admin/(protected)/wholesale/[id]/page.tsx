@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, Package, Store, Truck } from "lucide-react";
+import { ArrowRight, Package, Store } from "lucide-react";
 import { AdminWholesaleControls } from "@/components/admin/wholesale-controls";
 import { RevealPhone } from "@/components/admin/reveal-phone";
 import {
@@ -88,6 +88,25 @@ export default async function AdminWholesaleDetailPage({
               <DetailStepper steps={steps} aria-label={d.stepperLabel} />
             </Card>
 
+            <Card padded={false}>
+              <CardHeader title={u.form.operations} />
+              <div className="rad-cb2">
+                <AdminWholesaleControls
+                  bare
+                  requestId={request.id}
+                  status={request.status}
+                  requestMode={request.requestMode}
+                  lines={request.lines.map((l) => ({
+                    id: l.id,
+                    productName: productName(l),
+                    quantity: l.quantity,
+                  }))}
+                  quoteCurrencyDefault={defaultCurrency}
+                  labels={u}
+                />
+              </div>
+            </Card>
+
             <Card
               padded={false}
               className="rad-rise"
@@ -134,6 +153,7 @@ export default async function AdminWholesaleDetailPage({
               </div>
             </Card>
 
+            {request.carrier || request.trackingReference || request.shippedAt ? (
             <Card padded={false}>
               <CardHeader title={u.form.shippingTitle} />
               <div className="rad-cb2">
@@ -162,31 +182,13 @@ export default async function AdminWholesaleDetailPage({
                     },
                   ]}
                 />
-                <button type="button" className="rad-btn rad-gh rad-sm mt-3">
-                  <Truck width={15} height={15} strokeWidth={1.5} aria-hidden />
-                  {u.shippingTracker}
-                </button>
               </div>
             </Card>
+            ) : null}
 
-            <Card padded={false}>
-              <CardHeader title={u.form.operations} />
-              <div className="rad-cb2">
-                <AdminWholesaleControls
-                  bare
-                  requestId={request.id}
-                  status={request.status}
-                  requestMode={request.requestMode}
-                  lines={request.lines.map((l) => ({
-                    id: l.id,
-                    productName: productName(l),
-                    quantity: l.quantity,
-                  }))}
-                  quoteCurrencyDefault={defaultCurrency}
-                  labels={u}
-                />
-              </div>
-            </Card>
+
+
+
 
             <Card padded={false}>
               <CardHeader title={d.auditEvents} />

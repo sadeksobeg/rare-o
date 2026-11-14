@@ -6,13 +6,28 @@ import {
   adminUpdateWholesaleShippingAction,
 } from "@/app/wholesale-actions";
 import { CurrencySelect } from "@/components/ui/currency-select";
-import { Select } from "@/components/ui/select";
 import { TextField, Textarea } from "@/components/ui/text-field";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { formErrorClass } from "@/lib/ui/form-classes";
-import { WHOLESALE_TRANSITIONS, type WholesaleStatus } from "@/lib/wholesale/constants";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
+
+const ERR_AR: Record<string, string> = {
+  QUOTE_REQUIRED_BEFORE_CONFIRM: "قدّم عرض سعر أولاً قبل التأكيد",
+  INVALID_TRANSITION: "هذا الانتقال غير متاح في المرحلة الحالية",
+  REQUEST_NOT_FOUND: "الطلب غير موجود",
+  INVALID_QUOTE_PRICE: "سعر غير صالح",
+  LINE_QUOTES_REQUIRED: "أدخل سعراً لكل صنف",
+};
+const WA_ERR_AR: Record<string, string> = {
+  NO_CONVERSATION: "لا توجد محادثة واتساب مع التاجر",
+  WHATSAPP_DOWN: "واتساب غير متصل",
+  BLOCKED: "محادثة التاجر محظورة",
+  RATE_LIMITED: "حد الإرسال — حاول لاحقاً",
+  FAILED: "تعذّر الإرسال",
+};
+
+type Stage = "submitted" | "under_review" | "quote_provided" | "confirmed" | "closed";
 
 export function AdminWholesaleControls({
   requestId,
@@ -39,190 +54,209 @@ export function AdminWholesaleControls({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [prices, setPrices] = useState<Record<string, string>>({});
+  const [notify, setNotify] = useState(true);
+  const [reQuote, setReQuote] = useState(false);
 
-  const nextStatuses = useMemo(() => {
-    const current = status as WholesaleStatus;
-    return WHOLESALE_TRANSITIONS[current] ?? [];
-  }, [status]);
+  const stage: Stage =
+    status === "submitted" || status === "under_review" || status === "quote_provided" || status === "confirmed"
+      ? status
+      : "closed";
 
   const lineQuotesJson = JSON.stringify(
-    lines.map((l) => ({
-      lineId: l.id,
-      quotedUnitPrice: Number(prices[l.id] || 0),
-    }))
+    lines.map((l) => ({ lineId: l.id, quotedUnitPrice: Number(prices[l.id] || 0) }))
   );
 
-  const canQuote =
-    status === "submitted" ||
-    status === "under_review" ||
-    status === "quote_provided";
+  function report(res: { ok: boolean; error?: string; data?: unknown }, okText: string) {
+    if (!res.ok) {
+      setError(ERR_AR[res.error ?? ""] ?? res.error ?? "تعذّر التنفيذ");
+      return;
+    }
+    const n = (res.data as { notified?: string } | undefined)?.notified;
+    setMessage(
+      n === "sent"
+        ? `${okText} — وأُرسلت رسالة واتساب للتاجر`
+        : n && n !== "skipped"
+          ? `${okText} (لم تُرسل رسالة واتساب: ${WA_ERR_AR[n] ?? n})`
+          : okText
+    );
+    router.refresh();
+  }
+
+  /** One-click status move (no select): the button says exactly what it does. */
+  function move(toStatus: string, okText: string, note = "") {
+    const fd = new FormData();
+    fd.set("requestId", requestId);
+    fd.set("toStatus", toStatus);
+    fd.set("note", note);
+    if (notify) fd.set("notifyTrader", "1");
+    startTransition(async () => {
+      setError(null);
+      setMessage(null);
+      report(await adminTransitionWholesaleAction(fd), okText);
+    });
+  }
+
+  const quoteForm = (
+    <form
+      className="space-y-3"
+      action={(fd) => {
+        if (notify) fd.set("notifyTrader", "1");
+        startTransition(async () => {
+          setError(null);
+          setMessage(null);
+          const res = await adminProvideWholesaleQuoteAction(null, fd);
+          if (res.ok) setReQuote(false);
+          report(res, f.quoteSaved);
+        });
+      }}
+    >
+      <h3 className="text-base font-semibold">{f.provideQuote}</h3>
+      <p className="text-sm text-ro-muted">{f.quoteHint}</p>
+      <input type="hidden" name="requestId" value={requestId} />
+      <input type="hidden" name="lineQuotesJson" value={lineQuotesJson} />
+      <CurrencySelect
+        name="quoteCurrency"
+        required
+        defaultValue={quoteCurrencyDefault}
+        labels={{ currency: f.quoteCurrency, currencyUsd: f.currencyUsd, currencySyp: f.currencySyp }}
+        className="max-w-xs"
+      />
+      <div className="space-y-2">
+        {lines.map((l) => (
+          <TextField
+            key={l.id}
+            name={`price-${l.id}`}
+            type="number"
+            min={0}
+            step="0.01"
+            required
+            dir="ltr"
+            label={`${l.productName} × ${l.quantity}`}
+            placeholder={f.quotedUnitPrice}
+            value={prices[l.id] ?? ""}
+            onChange={(e) => setPrices((prev) => ({ ...prev, [l.id]: e.target.value }))}
+            dense
+            className="max-w-sm"
+          />
+        ))}
+      </div>
+      <Textarea name="quoteMessage" label={f.quoteMessage} rows={3} dense />
+      <button type="submit" className="rad-btn rad-pri rad-sm" disabled={pending}>
+        {f.saveQuote}
+      </button>
+    </form>
+  );
+
+  const cancelBtn = (
+    <button
+      type="button"
+      className="rad-btn rad-gh rad-sm"
+      disabled={pending}
+      onClick={() => {
+        if (window.confirm("إلغاء هذا الطلب؟")) move("cancelled", "أُلغي الطلب");
+      }}
+    >
+      إلغاء الطلب
+    </button>
+  );
 
   return (
-    <div
-      className={
-        bare ? "space-y-6" : "space-y-6 border border-ro-line p-4"
-      }
-    >
-      {bare ? null : (
-        <h2 className="text-lg font-semibold">{f.adminOperations}</h2>
-      )}
+    <div className={bare ? "space-y-5" : "space-y-5 border border-ro-line p-4"}>
+      {bare ? null : <h2 className="text-lg font-semibold">{f.adminOperations}</h2>}
 
-      {nextStatuses.length > 0 ? (
-        <form
-          className="flex flex-wrap items-end gap-3"
-          action={(fd) => {
-            startTransition(async () => {
-              setError(null);
-              setMessage(null);
-              const res = await adminTransitionWholesaleAction(fd);
-              if (!res.ok) setError(res.error);
-              else {
-                setMessage(f.statusUpdated);
-                router.refresh();
-              }
-            });
-          }}
-        >
-          <input type="hidden" name="requestId" value={requestId} />
-          <Select
-            name="toStatus"
-            label={f.moveTo}
-            required
-            dense
-            className="min-w-[12rem]"
-            options={nextStatuses.map((s) => ({
-              value: s,
-              label:
-                (labels.status.wholesale[s] ?? s) +
-                (s === "confirmed" &&
-                status === "under_review" &&
-                requestMode === "request_quote"
-                  ? ` ${f.blockedUntilQuote}`
-                  : ""),
-            }))}
-          />
-          <TextField
-            name="note"
-            label={f.note}
-            dense
-            className="min-w-[12rem] flex-1"
-          />
-          <button
-            type="submit"
-            className="rad-btn rad-pri rad-sm"
-            disabled={pending}
+      {stage !== "closed" ? (
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={notify} onChange={(e) => setNotify(e.target.checked)} className="size-4" />
+          أبلِغ التاجر على واتساب مع كل خطوة (إضافة إلى إشعار البوابة)
+        </label>
+      ) : null}
+
+      {stage === "submitted" ? (
+        <div className="space-y-3">
+          <p className="text-sm">الطلب جديد. ابدأ المراجعة ليظهر للتاجر أنه قيد الدراسة.</p>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" className="rad-btn rad-pri rad-sm" disabled={pending} onClick={() => move("under_review", "بدأت المراجعة")}>
+              بدء المراجعة
+            </button>
+            {cancelBtn}
+          </div>
+        </div>
+      ) : null}
+
+      {stage === "under_review" ? (
+        <div className="space-y-4">
+          {quoteForm}
+          <div className="flex flex-wrap gap-2 border-t border-ro-line pt-4">
+            {requestMode === "propose_price" ? (
+              <button
+                type="button"
+                className="rad-btn rad-gh rad-sm"
+                disabled={pending}
+                onClick={() => move("confirmed", "تم تأكيد الطلب بسعر التاجر المقترح")}
+              >
+                قبول سعر التاجر المقترح وتأكيد الطلب
+              </button>
+            ) : null}
+            {cancelBtn}
+          </div>
+        </div>
+      ) : null}
+
+      {stage === "quote_provided" ? (
+        <div className="space-y-3">
+          <p className="text-sm">
+            <b>أُرسل عرض السعر — بانتظار رد التاجر.</b> سيصلك إشعار فور قبوله أو رفضه.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" className="rad-btn rad-gh rad-sm" disabled={pending} onClick={() => setReQuote((v) => !v)}>
+              {reQuote ? "إخفاء تعديل العرض" : "تعديل عرض السعر"}
+            </button>
+            <button type="button" className="rad-btn rad-gh rad-sm" disabled={pending} onClick={() => move("confirmed", "تم تأكيد الطلب")}>
+              تأكيد الطلب مباشرة (اتفاق خارج المنصة)
+            </button>
+            {cancelBtn}
+          </div>
+          {reQuote ? <div className="border-t border-ro-line pt-4">{quoteForm}</div> : null}
+        </div>
+      ) : null}
+
+      {stage === "confirmed" ? (
+        <div className="space-y-4">
+          <p className="text-sm">
+            <b>الطلب مؤكد.</b> سجّل الشحن عند خروج الشحنة، ثم أتمم الطلب عند التسليم.
+          </p>
+          <form
+            className="space-y-3"
+            action={(fd) => {
+              if (notify) fd.set("notifyTrader", "1");
+              startTransition(async () => {
+                setError(null);
+                setMessage(null);
+                report(await adminUpdateWholesaleShippingAction(fd), f.shippingSaved);
+              });
+            }}
           >
-            {f.apply}
-          </button>
-        </form>
-      ) : (
+            <h3 className="text-base font-semibold">{f.shippingTitle}</h3>
+            <input type="hidden" name="requestId" value={requestId} />
+            <TextField name="carrier" label={f.carrier} required dense />
+            <TextField name="trackingReference" label={f.trackingReference} required dir="ltr" dense />
+            <button type="submit" className="rad-btn rad-pri rad-sm" disabled={pending}>
+              {f.saveShipping}
+            </button>
+          </form>
+          <div className="flex flex-wrap gap-2 border-t border-ro-line pt-4">
+            <button type="button" className="rad-btn rad-pri rad-sm" disabled={pending} onClick={() => move("completed", "اكتمل الطلب")}>
+              إتمام الطلب (تم التسليم)
+            </button>
+            {cancelBtn}
+          </div>
+        </div>
+      ) : null}
+
+      {stage === "closed" ? (
         <p className="text-sm" style={{ color: "var(--rad-tx3)" }}>
           {f.terminalStatus}
         </p>
-      )}
-
-      {canQuote ? (
-        <form
-          className="space-y-3 border-t border-ro-line pt-4"
-          action={(fd) => {
-            startTransition(async () => {
-              setError(null);
-              setMessage(null);
-              const res = await adminProvideWholesaleQuoteAction(null, fd);
-              if (!res.ok) setError(res.error);
-              else {
-                setMessage(f.quoteSaved);
-                router.refresh();
-              }
-            });
-          }}
-        >
-          <h3 className="text-base font-semibold">{f.provideQuote}</h3>
-          <p className="text-sm text-ro-muted">{f.quoteHint}</p>
-          <input type="hidden" name="requestId" value={requestId} />
-          <input type="hidden" name="lineQuotesJson" value={lineQuotesJson} />
-          <CurrencySelect
-            name="quoteCurrency"
-            required
-            defaultValue={quoteCurrencyDefault}
-            labels={{
-              currency: f.quoteCurrency,
-              currencyUsd: f.currencyUsd,
-              currencySyp: f.currencySyp,
-            }}
-            className="max-w-xs"
-          />
-          <div className="space-y-2">
-            {lines.map((l) => (
-              <TextField
-                key={l.id}
-                name={`price-${l.id}`}
-                type="number"
-                min={0}
-                step="0.01"
-                required
-                dir="ltr"
-                label={`${l.productName} × ${l.quantity}`}
-                placeholder={f.quotedUnitPrice}
-                value={prices[l.id] ?? ""}
-                onChange={(e) =>
-                  setPrices((prev) => ({ ...prev, [l.id]: e.target.value }))
-                }
-                dense
-                className="max-w-sm"
-              />
-            ))}
-          </div>
-          <Textarea
-            name="quoteMessage"
-            label={f.quoteMessage}
-            rows={3}
-            dense
-          />
-          <button
-            type="submit"
-            className="rad-btn rad-pri rad-sm"
-            disabled={pending}
-          >
-            {f.saveQuote}
-          </button>
-        </form>
-      ) : null}
-
-      {status === "confirmed" || status === "completed" ? (
-        <form
-          className="space-y-3 border-t border-ro-line pt-4"
-          action={(fd) => {
-            startTransition(async () => {
-              setError(null);
-              setMessage(null);
-              const res = await adminUpdateWholesaleShippingAction(fd);
-              if (!res.ok) setError(res.error);
-              else {
-                setMessage(f.shippingSaved);
-                router.refresh();
-              }
-            });
-          }}
-        >
-          <h3 className="text-base font-semibold">{f.shippingTitle}</h3>
-          <input type="hidden" name="requestId" value={requestId} />
-          <TextField name="carrier" label={f.carrier} required dense />
-          <TextField
-            name="trackingReference"
-            label={f.trackingReference}
-            required
-            dir="ltr"
-            dense
-          />
-          <button
-            type="submit"
-            className="rad-btn rad-pri rad-sm"
-            disabled={pending}
-          >
-            {f.saveShipping}
-          </button>
-        </form>
       ) : null}
 
       {message ? (
