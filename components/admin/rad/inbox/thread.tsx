@@ -349,23 +349,28 @@ export function RadThread({
       const status = statusOverrides[m.id] ?? m.status;
       byId.set(m.id, { ...m, status });
     }
-    for (const m of liveInbound) {
-      if (!byId.has(m.id)) byId.set(m.id, m);
-    }
-    for (const m of optimistic) {
-      if (m.clientRequestId) {
-        const serverHit = conversation.messages.find(
-          (s) => s.clientRequestId === m.clientRequestId
-        );
-        if (serverHit) continue;
-      }
-      byId.set(m.id, m);
-    }
-    return Array.from(byId.values()).sort((a, b) => {
+    const sortedServer = Array.from(byId.values()).sort((a, b) => {
       const ta = new Date(a.waTimestamp ?? a.createdAt).getTime();
       const tb = new Date(b.waTimestamp ?? b.createdAt).getTime();
       return ta - tb;
     });
+    // Not-yet-confirmed bubbles (optimistic sends, live inbound ghosts) are the
+    // newest by definition. Never sort them by the browser clock: a PC clock a
+    // few minutes behind the server would hide a fresh send above older rows.
+    const tail: InboxMessageItem[] = [];
+    for (const m of liveInbound) {
+      if (!byId.has(m.id)) tail.push(m);
+    }
+    for (const m of optimistic) {
+      if (m.clientRequestId) {
+        const serverHit = conversation.messages.find(
+          (sm) => sm.clientRequestId === m.clientRequestId
+        );
+        if (serverHit) continue;
+      }
+      if (!byId.has(m.id)) tail.push(m);
+    }
+    return [...sortedServer, ...tail];
   }, [conversation.messages, optimistic, statusOverrides, liveInbound]);
 
   function onMsgsScroll() {
@@ -635,7 +640,7 @@ export function RadThread({
 
   function sendReply() {
     const v = text.trim();
-    if (!v || pending || replyBlocked) return;
+    if (!v || replyBlocked) return;
     const clientRequestId = newClientRequestId();
     const nowIso = new Date().toISOString();
     const optimisticChannel = replyUsesPlatform ? "platform" : "whatsapp";
@@ -668,7 +673,9 @@ export function RadThread({
     setText("");
     const replyId = replyTo?.id ?? null;
     setReplyTo(null);
-    startTransition(async () => {
+    // Plain async call (not a transition): the composer must stay usable while
+    // the server action and the follow-up refresh run in the background.
+    void (async () => {
       const fd = new FormData();
       fd.set("conversationId", conversation.id);
       fd.set("text", v);
@@ -713,7 +720,7 @@ export function RadThread({
       clearFd.set("body", "");
       void adminSaveComposerDraftAction(clearFd);
       router.refresh();
-    });
+    })();
   }
 
   function saveNote() {
@@ -982,7 +989,7 @@ export function RadThread({
               rows={1}
               placeholder={placeholder}
               value={text}
-              disabled={pending || replyDisabled}
+              disabled={replyDisabled}
               aria-label={placeholder}
               onChange={(e) => {
                 setText(e.target.value);
