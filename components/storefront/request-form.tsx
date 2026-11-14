@@ -34,12 +34,25 @@ type SuccessData = {
 
 const SUCCESS_STORAGE_KEY = "ro-request-success";
 
+function clearStoredSuccess() {
+  try {
+    sessionStorage.removeItem(SUCCESS_STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 function readStoredSuccess(): ActionResult | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = sessionStorage.getItem(SUCCESS_STORAGE_KEY);
     if (!raw) return null;
-    const data = JSON.parse(raw) as SuccessData;
+    const data = JSON.parse(raw) as SuccessData & { savedAt?: number };
+    // Stale after 6 hours — a returning customer should see a fresh form.
+    if (!data.savedAt || Date.now() - data.savedAt > 6 * 3600 * 1000) {
+      sessionStorage.removeItem(SUCCESS_STORAGE_KEY);
+      return null;
+    }
     return { ok: true, data };
   } catch {
     return null;
@@ -101,7 +114,16 @@ export function RequestForm({
 
   useEffect(() => {
     const stored = readStoredSuccess();
-    if (stored) setResult(stored);
+    // New items in the cart = a NEW request: never show the old success screen.
+    let cartHasItems = false;
+    try {
+      const rawCart = localStorage.getItem("ro_cart_v1");
+      cartHasItems = Boolean(rawCart && rawCart !== "[]" && rawCart !== "{}");
+    } catch {
+      /* ignore */
+    }
+    if (stored && !cartHasItems) setResult(stored);
+    else if (stored) clearStoredSuccess();
     setRestoring(false);
   }, []);
 
@@ -186,7 +208,9 @@ export function RequestForm({
       catalog: labels.catalog,
     };
 
+    const ar = locale === "ar";
     return (
+      <>
       <HandoffSuccess
         locale={locale}
         labels={successLabels}
@@ -218,6 +242,28 @@ export function RequestForm({
           });
         }}
       />
+      <div className="mx-auto mt-4 flex max-w-xl flex-wrap items-center justify-center gap-3 text-sm">
+        <button
+          type="button"
+          className="rounded-full border border-ro-border px-4 py-2 text-ro-ink hover:bg-ro-surface"
+          onClick={() => {
+            clearStoredSuccess();
+            idempotencyKeyRef.current = null;
+            setResult(null);
+          }}
+        >
+          {ar ? "ابدأ طلباً جديداً" : "Start a new request"}
+        </button>
+        {data.publicToken ? (
+          <a
+            className="rounded-full border border-ro-border px-4 py-2 text-ro-ink hover:bg-ro-surface"
+            href={`/order/${data.publicToken}`}
+          >
+            {ar ? "تعديل بياناتي أو متابعة طلبي" : "Edit my details / track"}
+          </a>
+        ) : null}
+      </div>
+      </>
     );
   }
 
@@ -294,7 +340,7 @@ export function RequestForm({
               try {
                 sessionStorage.setItem(
                   SUCCESS_STORAGE_KEY,
-                  JSON.stringify(res.data ?? {})
+                  JSON.stringify({ ...(res.data as object), savedAt: Date.now() })
                 );
               } catch {
                 /* ignore */
