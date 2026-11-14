@@ -200,6 +200,36 @@ export default async function AdminRequestDetailPage({
                   <span>{d.subtotal}</span>
                   <bdi dir="ltr">{money(request.subtotal, request.currency)}</bdi>
                 </div>
+                {request.shippingCostAmount != null && request.shippingCostCurrency ? (
+                  <>
+                    <div className="rad-tot">
+                      <span>
+                        {ar ? "الشحن (تقدير)" : "Shipping (estimate)"}
+                        {request.shippingMethodLabel
+                          ? ` — ${request.shippingMethodLabel}`
+                          : ""}
+                      </span>
+                      <bdi dir="ltr">
+                        {money(
+                          request.shippingCostAmount,
+                          request.shippingCostCurrency
+                        )}
+                      </bdi>
+                    </div>
+                    {request.shippingCostCurrency === request.currency ? (
+                      <div className="rad-tot rad-tot-grand">
+                        <span>{ar ? "الإجمالي التقديري" : "Estimated total"}</span>
+                        <bdi dir="ltr">
+                          {money(
+                            Number(request.subtotal) +
+                              Number(request.shippingCostAmount),
+                            request.currency
+                          )}
+                        </bdi>
+                      </div>
+                    ) : null}
+                  </>
+                ) : null}
                 <p className="rad-note-s">
                   <Info width={15} height={15} strokeWidth={1.5} aria-hidden />
                   {ar
@@ -319,7 +349,15 @@ export default async function AdminRequestDetailPage({
                               withTime: true,
                             })}
                           </span>
-                          {e.note ? ` — «${e.note}»` : ""}
+                          {e.note
+                            ? ` — «${
+                                e.note === "Initial handoff prepared from storefront"
+                                  ? ar
+                                    ? "جُهّز التحويل الأولي من المتجر"
+                                    : e.note
+                                  : e.note
+                              }»`
+                            : ""}
                         </>
                       ),
                     }))}

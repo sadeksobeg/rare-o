@@ -1388,3 +1388,5 @@
     transition-duration: 0.001ms !important;
   }
 }
+
+.rad-tot.rad-tot-grand { font-weight: 700; border-top: 1px solid var(--rad-bd); margin-top: 6px; padding-top: 10px; }
