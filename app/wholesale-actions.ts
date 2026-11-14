@@ -29,6 +29,10 @@ import {
 import { isWholesaleStatus } from "@/lib/wholesale/constants";
 import { prisma } from "@/lib/db/prisma";
 import {
+  ensureTraderConversation,
+  sendAdminPlatformMessage,
+} from "@/lib/whatsapp/messaging/trader-channel";
+import {
   buildWholesaleTraderMessage,
   sendWholesaleTraderWhatsApp,
   traderRequestUrl,
@@ -49,18 +53,25 @@ async function maybeNotifyTrader(
     select: { reference: true, traderId: true, trader: { select: { displayName: true } } },
   });
   if (!r) return "skipped";
-  const res = await sendWholesaleTraderWhatsApp({
-    traderId: r.traderId,
-    adminId,
-    text: buildWholesaleTraderMessage({
-      event,
-      name: r.trader.displayName,
-      reference: r.reference,
-      link: traderRequestUrl(requestId),
-      shipping,
-    }),
+  const text = buildWholesaleTraderMessage({
+    event,
+    name: r.trader.displayName,
+    reference: r.reference,
+    link: traderRequestUrl(requestId),
+    shipping,
   });
-  return res.ok ? "sent" : res.error;
+  // Platform message first: it always works, so a WhatsApp outage never leaves the trader unnotified.
+  let platform = false;
+  try {
+    const conv = await ensureTraderConversation(r.traderId);
+    const sent = await sendAdminPlatformMessage({ conversationId: conv.id, adminId, text });
+    platform = sent.ok;
+  } catch {
+    platform = false;
+  }
+  const res = await sendWholesaleTraderWhatsApp({ traderId: r.traderId, adminId, text });
+  const wa = res.ok ? "sent" : res.error;
+  return `${platform ? "platform" : "noplatform"}:${wa}`;
 }
 
 const STATUS_EVENT: Record<string, WholesaleWaEvent> = {

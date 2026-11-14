@@ -72,13 +72,14 @@ export function AdminWholesaleControls({
       return;
     }
     const n = (res.data as { notified?: string } | undefined)?.notified;
-    setMessage(
-      n === "sent"
-        ? `${okText} — وأُرسلت رسالة واتساب للتاجر`
-        : n && n !== "skipped"
-          ? `${okText} (لم تُرسل رسالة واتساب: ${WA_ERR_AR[n] ?? n})`
-          : okText
-    );
+    let tail = "";
+    if (n && n !== "skipped") {
+      const [plat, wa] = n.split(":");
+      const platText = plat === "platform" ? "وصلته رسالة في رسائل المنصة" : "تعذّرت رسالة المنصة";
+      const waText = wa === "sent" ? "وعلى واتساب" : `(واتساب: ${WA_ERR_AR[wa ?? ""] ?? wa})`;
+      tail = ` — ${platText} ${waText}`;
+    }
+    setMessage(okText + tail);
     router.refresh();
   }
 
