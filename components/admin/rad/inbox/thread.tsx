@@ -17,7 +17,7 @@ import {
   isWhatsAppLive,
   resolveReplyRoute,
 } from "@/lib/whatsapp/messaging/reply-route";
-import {
+import { AppWindow, MessageCircle,
   Check,
   CheckCheck,
   ChevronDown,
@@ -498,6 +498,8 @@ export function RadThread({
   const rows = useMemo(() => {
     const out: React.ReactNode[] = [];
     let lastDay: string | null = null;
+    let lastChannel: string | null = null;
+    let prevBubble: InboxMessageItem | null = null;
     const unreadFrom =
       conversation.unreadCount > 0
         ? mergedMessages.length - conversation.unreadCount
@@ -516,6 +518,27 @@ export function RadThread({
           </div>
         );
       }
+      if (m.messageType !== "system" && m.channel !== lastChannel) {
+        lastChannel = m.channel;
+        const plat = m.channel === "platform";
+        out.push(
+          <div
+            className={cn("rad-chsep", plat ? "rad-chsep-plat" : "rad-chsep-wa")}
+            key={`c-${m.id}`}
+            role="separator"
+          >
+            {plat ? (
+              <AppWindow width={13} height={13} strokeWidth={1.75} aria-hidden />
+            ) : (
+              <MessageCircle width={13} height={13} strokeWidth={1.75} aria-hidden />
+            )}
+            <span>
+              {plat ? dict.inbox.channelPlatform : dict.inbox.channelWhatsApp}
+            </span>
+          </div>
+        );
+        prevBubble = null;
+      }
       if (i === unreadFrom && m.direction === "inbound") {
         out.push(
           <div className="rad-nsep" key={`n-${m.id}`}>
@@ -530,11 +553,22 @@ export function RadThread({
           </div>
         );
       }
+      const grouped =
+        prevBubble !== null &&
+        prevBubble.direction === m.direction &&
+        prevBubble.channel === m.channel &&
+        m.messageType !== "system" &&
+        Math.abs(
+          new Date(m.waTimestamp ?? m.createdAt).getTime() -
+            new Date(prevBubble.waTimestamp ?? prevBubble.createdAt).getTime()
+        ) < 3 * 60_000;
+      prevBubble = m.messageType === "system" ? null : m;
       out.push(
         <Bubble
           key={m.id}
           m={m}
           i={i}
+          grouped={grouped}
           locale={locale}
           ib={ib}
           inbox={dict.inbox}
@@ -1201,6 +1235,7 @@ function DeliveryTick({
 function Bubble({
   m,
   i,
+  grouped,
   locale,
   ib,
   inbox,
@@ -1211,6 +1246,7 @@ function Bubble({
 }: {
   m: InboxMessageItem;
   i: number;
+  grouped?: boolean;
   locale: Locale;
   ib: Dictionary["ib"];
   inbox: Dictionary["inbox"];
@@ -1241,7 +1277,7 @@ function Bubble({
 
   return (
     <div
-      className={cn("rad-bb-row", isOut ? "rad-out" : "rad-in")}
+      className={cn("rad-bb-row", isOut ? "rad-out" : "rad-in", grouped && "rad-grp")}
       style={{ "--rad-i": i } as React.CSSProperties}
       data-msg-id={m.id}
     >
@@ -1261,19 +1297,32 @@ function Bubble({
             <span>{m.replyTo.body || m.replyTo.messageType}</span>
           </div>
         ) : null}
-        <span
-          className={cn(
-            "rad-chchip",
-            m.channel === "platform" ? "rad-chchip-plat" : "rad-chchip-wa"
-          )}
-        >
-          {m.channel === "platform"
-            ? inbox.channelPlatform
-            : inbox.channelWhatsApp}
-        </span>
         {showMedia ? <MediaBubbleBody m={m} ib={ib} /> : null}
         {!showMedia && bodyLabel !== labels.empty ? bodyLabel : null}
         <div className="rad-bm">
+          <span
+            className={cn(
+              "rad-bm-ch",
+              m.channel === "platform" ? "rad-bm-ch-plat" : "rad-bm-ch-wa"
+            )}
+            title={
+              m.channel === "platform"
+                ? inbox.channelPlatform
+                : inbox.channelWhatsApp
+            }
+            role="img"
+            aria-label={
+              m.channel === "platform"
+                ? inbox.channelPlatform
+                : inbox.channelWhatsApp
+            }
+          >
+            {m.channel === "platform" ? (
+              <AppWindow width={12} height={12} strokeWidth={1.75} aria-hidden />
+            ) : (
+              <MessageCircle width={12} height={12} strokeWidth={1.75} aria-hidden />
+            )}
+          </span>
           {timeOf(m, locale)}
           {isOut && m.status === "failed" && onRetry ? (
             <button

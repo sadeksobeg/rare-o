@@ -362,9 +362,11 @@ export class BaileysWhatsAppAdapter implements WhatsAppAdapter {
     } catch {
       /* presence is cosmetic — never fail the send over it */
     }
-    const base = kind === "recording" ? 400 : 250;
-    const perUnit = kind === "recording" ? 60 : 18;
-    const duration = Math.min(2_500, base + contentLength * perUnit);
+    // Short "typing…" beat (cosmetic anti-spam realism) — kept brief so a
+    // reply leaves in about a second, not several.
+    const base = kind === "recording" ? 300 : 200;
+    const perUnit = kind === "recording" ? 40 : 8;
+    const duration = Math.min(1_000, base + contentLength * perUnit);
     await new Promise((resolve) => setTimeout(resolve, duration));
     try {
       await this.sock.sendPresenceUpdate("paused", jid);

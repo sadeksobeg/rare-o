@@ -27,11 +27,13 @@
  */
 
 import path from "node:path";
+import { Client as PgClient } from "pg";
 
 import { prisma } from "@/lib/db/prisma";
 import { BaileysWhatsAppAdapter } from "@/lib/whatsapp/baileys-adapter";
 import { createFakeAdapter } from "@/lib/whatsapp/fake-adapter";
 import { WHATSAPP_CONNECTION_HEALTH_ID } from "@/lib/whatsapp/messaging/constants";
+import { INBOX_NOTIFY_CHANNEL } from "@/lib/whatsapp/messaging/inbox-events";
 import {
   buildQrDataUrl,
   clearPairingDisplay,
@@ -70,7 +72,8 @@ import {
   type WhatsAppAdapterEvents,
 } from "@/lib/whatsapp/types";
 
-const OUTBOUND_POLL_MS = 5_000;
+// Safety-net poll only: outbound messages are pushed via Postgres NOTIFY (below).
+const OUTBOUND_POLL_MS = 2_000;
 const LINK_COMMAND_POLL_MS = 2_000;
 const HEARTBEAT_MS = 45_000;
 /** Stuck `sending` watchdog — same 2min threshold as STALE_SENDING_MS. */
@@ -434,9 +437,66 @@ async function main(): Promise<void> {
     }
   };
 
+  // One drain at a time; a request that arrives mid-drain runs once more after.
+  let draining = false;
+  let drainAgain = false;
+  const drainNow = async () => {
+    if (draining) {
+      drainAgain = true;
+      return;
+    }
+    draining = true;
+    try {
+      do {
+        drainAgain = false;
+        await drainOutbound();
+      } while (drainAgain);
+    } finally {
+      draining = false;
+    }
+  };
+
   outboundTimer = setInterval(() => {
-    void drainOutbound();
+    void drainNow();
   }, OUTBOUND_POLL_MS);
+
+  // Push path: the admin action NOTIFYs the inbox channel when it enqueues a
+  // message, so sends start immediately instead of waiting for the next poll.
+  let listenClient: PgClient | null = null;
+  let listenRetry: ReturnType<typeof setTimeout> | null = null;
+  let listenStopped = false;
+  let kickTimer: ReturnType<typeof setTimeout> | null = null;
+  const kickDrain = () => {
+    if (kickTimer) return;
+    kickTimer = setTimeout(() => {
+      kickTimer = null;
+      void drainNow();
+    }, 30);
+  };
+  const connectListen = async () => {
+    if (listenStopped || fake || !process.env.DATABASE_URL) return;
+    const client = new PgClient({ connectionString: process.env.DATABASE_URL });
+    try {
+      await client.connect();
+      await client.query(`LISTEN ${INBOX_NOTIFY_CHANNEL}`);
+      client.on("notification", () => kickDrain());
+      client.on("error", () => {
+        void client.end().catch(() => undefined);
+      });
+      client.on("end", () => {
+        if (listenClient === client) listenClient = null;
+        if (!listenStopped) listenRetry = setTimeout(() => void connectListen(), 3_000);
+      });
+      listenClient = client;
+      console.log("[whatsapp-worker] outbound push listener ready");
+    } catch (err) {
+      await client.end().catch(() => undefined);
+      if (!listenStopped) listenRetry = setTimeout(() => void connectListen(), 5_000);
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`[whatsapp-worker] push listener error: ${message.slice(0, 160)}`);
+    }
+  };
+  void connectListen();
 
   linkTimer = setInterval(() => {
     void pollLinkCommands();
@@ -491,6 +551,10 @@ async function main(): Promise<void> {
 
   const shutdown = async (signal: string) => {
     console.log(`[whatsapp-worker] ${signal} - stopping`);
+    listenStopped = true;
+    if (listenRetry) clearTimeout(listenRetry);
+    if (kickTimer) clearTimeout(kickTimer);
+    await listenClient?.end().catch(() => undefined);
     if (outboundTimer) clearInterval(outboundTimer);
     if (linkTimer) clearInterval(linkTimer);
     if (heartbeatTimer) clearInterval(heartbeatTimer);
