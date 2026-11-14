@@ -86,9 +86,14 @@ export async function GET(req: Request): Promise<Response> {
       };
 
       try {
-        const missed = await listInboxEventsAfter(afterParam, 200);
-        for (const ev of missed) {
-          send(sseFormat(ev));
+        // Only replay what a returning client actually missed. A brand-new
+        // connection (no cursor) used to receive the OLDEST 200 events ever
+        // stored — stale history that fired chimes and refreshes on page load.
+        if (afterParam) {
+          const missed = await listInboxEventsAfter(afterParam, 200);
+          for (const ev of missed) {
+            send(sseFormat(ev));
+          }
         }
 
         client = new Client({ connectionString: databaseUrl });

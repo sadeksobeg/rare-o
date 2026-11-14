@@ -90,6 +90,16 @@ export type WhatsAppInboundMediaEvent = {
   structuredBody: string | null;
 };
 
+/** Message being replied to — lets the recipient's phone show a real quote. */
+export type WhatsAppQuotedRef = {
+  /** WhatsApp id of the quoted message (must exist on the phone side). */
+  waMessageId: string;
+  /** true when the quoted message was sent by us. */
+  fromMe: boolean;
+  /** Plain preview text shown inside the quote bubble. */
+  text: string;
+};
+
 export type WhatsAppSendTextInput = {
   /** WhatsApp chat JID or E.164 digits — worker normalizes */
   waChatId: string;
@@ -97,6 +107,8 @@ export type WhatsAppSendTextInput = {
   /** Idempotency key from admin action */
   clientRequestId: string;
   adminId: string;
+  /** Optional reply-to (quoted message). */
+  quoted?: WhatsAppQuotedRef | null;
 };
 
 export type WhatsAppSendResult =
@@ -133,6 +145,7 @@ export type WhatsAppSendMediaInput = {
   ptt?: boolean;
   /** Voice/video duration in whole seconds (WhatsApp PTT uses this). */
   seconds?: number | null;
+  quoted?: WhatsAppQuotedRef | null;
 };
 
 /** Own-device / history echo (message sent from phone or prior sync). */

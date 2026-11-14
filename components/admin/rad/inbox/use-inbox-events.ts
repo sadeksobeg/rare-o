@@ -4,102 +4,134 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { InboxEventPayload } from "@/lib/whatsapp/messaging/inbox-events";
 
+type WithId = InboxEventPayload & { eventId: string; createdAt?: string };
+
 export type InboxLiveHandlers = {
-  onMessageNew?: (payload: InboxEventPayload & { eventId: string }) => void;
-  onMessageStatus?: (payload: InboxEventPayload & { eventId: string }) => void;
-  onConversationUpdated?: (payload: InboxEventPayload & { eventId: string }) => void;
-  onConnectionState?: (payload: InboxEventPayload & { eventId: string }) => void;
+  onMessageNew?: (payload: WithId) => void;
+  onMessageStatus?: (payload: WithId) => void;
+  onConversationUpdated?: (payload: WithId) => void;
+  onConnectionState?: (payload: WithId) => void;
 };
 
 /**
+ * One shared EventSource for the whole tab (ref-counted). The inbox shell and
+ * the open thread both subscribe; they must not each open their own stream
+ * (server caps SSE slots per admin and a second stream doubles DB listeners).
+ */
+const subscribers = new Set<{ current: InboxLiveHandlers }>();
+let es: EventSource | null = null;
+let retryTimer: ReturnType<typeof setTimeout> | null = null;
+let lastEventId: string | null = null;
+let attempt = 0;
+let started = false;
+
+function dispatch(kind: keyof InboxLiveHandlers, payload: WithId) {
+  for (const sub of subscribers) {
+    try {
+      sub.current[kind]?.(payload);
+    } catch {
+      /* one bad handler must not break the others */
+    }
+  }
+}
+
+function connect() {
+  if (!started || typeof window === "undefined" || !window.EventSource) return;
+  const qs = lastEventId ? `?after=${encodeURIComponent(lastEventId)}` : "";
+  es = new EventSource(`/api/admin/inbox/events${qs}`);
+
+  const wrap =
+    (kind: keyof InboxLiveHandlers) => (ev: MessageEvent) => {
+      try {
+        const data = JSON.parse(String(ev.data)) as {
+          id: string;
+          payload: InboxEventPayload;
+          createdAt?: string;
+        };
+        if (data.id?.trim()) lastEventId = data.id.trim();
+        dispatch(kind, {
+          ...data.payload,
+          eventId: data.id,
+          createdAt: data.createdAt,
+        });
+      } catch {
+        /* ignore malformed */
+      }
+    };
+
+  es.addEventListener("message.new", wrap("onMessageNew"));
+  es.addEventListener("message.status", wrap("onMessageStatus"));
+  es.addEventListener("conversation.updated", wrap("onConversationUpdated"));
+  es.addEventListener("connection.state", wrap("onConnectionState"));
+
+  es.onopen = () => {
+    attempt = 0;
+  };
+  es.onerror = () => {
+    es?.close();
+    es = null;
+    if (!started) return;
+    attempt += 1;
+    // Fast first retries: a dropped stream must not leave the inbox stale for 3s+.
+    const delay = Math.min(500 * 2 ** Math.min(attempt - 1, 5), 15_000);
+    retryTimer = setTimeout(connect, delay);
+  };
+}
+
+function start() {
+  if (started) return;
+  started = true;
+  connect();
+}
+
+function stop() {
+  started = false;
+  if (retryTimer) clearTimeout(retryTimer);
+  retryTimer = null;
+  es?.close();
+  es = null;
+}
+
+/** When the tab becomes visible again, reconnect immediately if the stream died. */
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && started && !es) {
+      if (retryTimer) clearTimeout(retryTimer);
+      attempt = 0;
+      connect();
+    }
+  });
+}
+
+/**
  * Subscribe to admin inbox SSE. Soft-fails if EventSource unavailable.
- * Tracks last event id and reconnects with `?after=` (Last-Event-ID resume).
+ * Resumes from the last seen event id after a reconnect.
  */
 export function useInboxEvents(handlers: InboxLiveHandlers, enabled = true) {
   const router = useRouter();
-  const handlersRef = useRef(handlers);
-  handlersRef.current = handlers;
+  const handlersRef = useRef<InboxLiveHandlers>(handlers);
+  handlersRef.current = {
+    ...handlers,
+    onConversationUpdated: (p) => {
+      handlers.onConversationUpdated?.(p);
+      router.refresh();
+    },
+    onConnectionState: (p) => {
+      handlers.onConnectionState?.(p);
+      router.refresh();
+    },
+  };
 
   useEffect(() => {
     if (!enabled || typeof window === "undefined" || !window.EventSource) {
       return;
     }
-
-    let es: EventSource | null = null;
-    let closed = false;
-    let retryTimer: ReturnType<typeof setTimeout> | null = null;
-    let lastEventId: string | null = null;
-    let attempt = 0;
-
-    const rememberId = (id: string | undefined) => {
-      if (id && id.trim()) lastEventId = id.trim();
-    };
-
-    const connect = () => {
-      if (closed) return;
-      const qs = lastEventId
-        ? `?after=${encodeURIComponent(lastEventId)}`
-        : "";
-      es = new EventSource(`/api/admin/inbox/events${qs}`);
-
-      const wrap =
-        (fn: ((p: InboxEventPayload & { eventId: string }) => void) | undefined) =>
-        (ev: MessageEvent) => {
-          try {
-            const data = JSON.parse(String(ev.data)) as {
-              id: string;
-              payload: InboxEventPayload;
-            };
-            rememberId(data.id);
-            fn?.({ ...data.payload, eventId: data.id });
-          } catch {
-            /* ignore malformed */
-          }
-        };
-
-      es.addEventListener(
-        "message.new",
-        wrap((p) => handlersRef.current.onMessageNew?.(p))
-      );
-      es.addEventListener(
-        "message.status",
-        wrap((p) => handlersRef.current.onMessageStatus?.(p))
-      );
-      es.addEventListener(
-        "conversation.updated",
-        wrap((p) => {
-          handlersRef.current.onConversationUpdated?.(p);
-          router.refresh();
-        })
-      );
-      es.addEventListener(
-        "connection.state",
-        wrap((p) => {
-          handlersRef.current.onConnectionState?.(p);
-          router.refresh();
-        })
-      );
-
-      es.onopen = () => {
-        attempt = 0;
-      };
-
-      es.onerror = () => {
-        es?.close();
-        es = null;
-        if (closed) return;
-        attempt += 1;
-        const delay = Math.min(3_000 * 2 ** Math.min(attempt - 1, 3), 30_000);
-        retryTimer = setTimeout(connect, delay);
-      };
-    };
-
-    connect();
-
+    const sub = handlersRef;
+    subscribers.add(sub);
+    start();
     return () => {
-      closed = true;
-      if (retryTimer) clearTimeout(retryTimer);
-      es?.close();
+      subscribers.delete(sub);
+      if (subscribers.size === 0) stop();
     };
-  }, [enabled, router]);
+  }, [enabled]);
 }

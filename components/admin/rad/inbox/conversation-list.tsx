@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search } from "lucide-react";
+import { Bell, BellOff, Search } from "lucide-react";
 import type { InboxConversationListItem } from "@/lib/whatsapp/messaging/inbox";
 import type { InboxHealthView } from "@/lib/whatsapp/messaging/inbox";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -15,6 +15,11 @@ import { inboxPreviewLabels } from "@/lib/whatsapp/messaging/preview-labels-from
 import { RadAvatar } from "@/components/admin/rad/inbox/rad-avatar";
 import { RadConnectionSheet } from "@/components/admin/rad/inbox/connection-sheet";
 import { useInboxUi } from "@/components/admin/rad/inbox/inbox-shell";
+import {
+  isInboxSoundMuted,
+  playInboxChime,
+  setInboxSoundMuted,
+} from "@/components/admin/rad/inbox/inbox-sound";
 import { cn } from "@/lib/utils";
 
 type FilterKey = "all" | "un" | "lk" | "nl";
@@ -37,6 +42,8 @@ export function RadConversationList({
   const activeId = pathname.match(/\/admin\/inbox\/([^/]+)/)?.[1] ?? null;
   const [filter, setFilter] = useState<FilterKey>("all");
   const [q, setQ] = useState("");
+  const [muted, setMuted] = useState(false);
+  useEffect(() => setMuted(isInboxSoundMuted()), []);
 
   const filters: { key: FilterKey; label: string; count: number }[] = [
     { key: "all", label: ib.filterAll, count: rows.length },
@@ -65,6 +72,41 @@ export function RadConversationList({
       <div className="rad-lc-h">
         <div className="rad-lc-t">
           <h1>{dict.inbox.title}</h1>
+          <button
+            type="button"
+            className="rad-sound-toggle"
+            aria-pressed={!muted}
+            aria-label={
+              locale === "ar"
+                ? muted
+                  ? "تشغيل صوت الرسائل الواردة"
+                  : "كتم صوت الرسائل الواردة"
+                : muted
+                  ? "Turn incoming message sound on"
+                  : "Mute incoming message sound"
+            }
+            title={
+              locale === "ar"
+                ? muted
+                  ? "الصوت مكتوم"
+                  : "صوت الرسائل مفعّل"
+                : muted
+                  ? "Sound muted"
+                  : "Sound on"
+            }
+            onClick={() => {
+              const next = !muted;
+              setMuted(next);
+              setInboxSoundMuted(next);
+              if (!next) playInboxChime();
+            }}
+          >
+            {muted ? (
+              <BellOff width={16} height={16} strokeWidth={1.5} aria-hidden />
+            ) : (
+              <Bell width={16} height={16} strokeWidth={1.5} aria-hidden />
+            )}
+          </button>
           <RadConnectionSheet health={health} ib={ib} locale={locale} />
         </div>
         <label className="rad-sb2">

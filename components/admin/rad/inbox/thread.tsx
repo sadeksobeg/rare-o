@@ -146,6 +146,7 @@ export function RadThread({
     {}
   );
   const [draftReady, setDraftReady] = useState(false);
+  const [liveInbound, setLiveInbound] = useState<InboxMessageItem[]>([]);
   const msgsRef = useRef<HTMLDivElement>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const draftTimer = useRef<number | null>(null);
@@ -183,6 +184,11 @@ export function RadThread({
   useThreadSearchHotkey(openSearch, true);
 
   useEffect(() => {
+    const ids = new Set(conversation.messages.map((m) => m.id));
+    setLiveInbound((prev) => (prev.length ? prev.filter((m) => !ids.has(m.id)) : prev));
+  }, [conversation.messages]);
+
+  useEffect(() => {
     const known = new Set(
       conversation.messages
         .map((m) => m.clientRequestId)
@@ -195,6 +201,7 @@ export function RadThread({
 
   useEffect(() => {
     setOptimistic([]);
+    setLiveInbound([]);
     setStatusOverrides({});
     setReplyTo(null);
     setText("");
@@ -204,18 +211,43 @@ export function RadThread({
     stickToBottom.current = true;
   }, [conversation.id]);
 
+  // Latest composer state, readable from async callbacks without re-running effects.
+  const textRef = useRef("");
+  const replyToRef = useRef<InboxMessageItem | null>(null);
+  const messagesRef = useRef(conversation.messages);
+  textRef.current = text;
+  replyToRef.current = replyTo;
+  messagesRef.current = conversation.messages;
+  // Id of the conversation the pending (debounced) draft write belongs to.
+  const pendingDraftFor = useRef<string | null>(null);
+
+  const writeDraft = useCallback(
+    (conversationId: string, body: string, reply: InboxMessageItem | null) => {
+      const fd = new FormData();
+      fd.set("conversationId", conversationId);
+      fd.set("body", body);
+      if (reply) fd.set("replyToMessageId", reply.id);
+      void adminSaveComposerDraftAction(fd);
+    },
+    []
+  );
+
+  // Load the saved draft ONCE per conversation. It used to re-run on every
+  // message refresh and overwrite what the admin was typing (or had just
+  // deleted) with the stale server copy — the "deleted text comes back" bug.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const res = await adminGetComposerDraftAction(conversation.id);
       if (cancelled || !res.ok) {
-        setDraftReady(true);
+        if (!cancelled) setDraftReady(true);
         return;
       }
       const draft = res.data;
-      if (draft?.body) setText(draft.body);
-      if (draft?.replyToMessageId) {
-        const hit = conversation.messages.find(
+      // Never clobber text the admin already started typing meanwhile.
+      if (draft?.body && !textRef.current) setText(draft.body);
+      if (draft?.replyToMessageId && !replyToRef.current) {
+        const hit = messagesRef.current.find(
           (m) => m.id === draft.replyToMessageId
         );
         if (hit) setReplyTo(hit);
@@ -225,22 +257,33 @@ export function RadThread({
     return () => {
       cancelled = true;
     };
-  }, [conversation.id, conversation.messages]);
+  }, [conversation.id]);
 
   useEffect(() => {
     if (!draftReady) return;
     if (draftTimer.current) window.clearTimeout(draftTimer.current);
+    pendingDraftFor.current = conversation.id;
+    const id = conversation.id;
     draftTimer.current = window.setTimeout(() => {
-      const fd = new FormData();
-      fd.set("conversationId", conversation.id);
-      fd.set("body", text);
-      if (replyTo) fd.set("replyToMessageId", replyTo.id);
-      void adminSaveComposerDraftAction(fd);
+      pendingDraftFor.current = null;
+      writeDraft(id, text, replyTo);
     }, 600);
     return () => {
       if (draftTimer.current) window.clearTimeout(draftTimer.current);
     };
-  }, [text, replyTo, conversation.id, draftReady]);
+  }, [text, replyTo, conversation.id, draftReady, writeDraft]);
+
+  // Switching conversation / leaving: flush the pending write instead of
+  // dropping it, otherwise the previous server draft (old text) survives.
+  useEffect(() => {
+    const id = conversation.id;
+    return () => {
+      if (pendingDraftFor.current === id) {
+        pendingDraftFor.current = null;
+        writeDraft(id, textRef.current, replyToRef.current);
+      }
+    };
+  }, [conversation.id, writeDraft]);
 
   useEffect(() => {
     const el = msgsRef.current;
@@ -263,10 +306,40 @@ export function RadThread({
         );
       }
     },
+    // The shell already refreshes on every new message; here we only paint the
+    // text instantly so the bubble appears before the server data returns.
     onMessageNew: (p) => {
-      if (p.conversationId === conversation.id) {
-        router.refresh();
-      }
+      if (p.conversationId !== conversation.id) return;
+      if (p.direction !== "inbound" || (p.messageType ?? "text") !== "text") return;
+      const id = p.messageId || `live-${p.eventId}`;
+      setLiveInbound((prev) =>
+        prev.some((m) => m.id === id)
+          ? prev
+          : [
+              ...prev,
+              {
+                id,
+                direction: "inbound",
+                channel: "whatsapp",
+                messageType: "text",
+                body: p.preview ?? "",
+                caption: null,
+                mediaMime: null,
+                mediaFileName: null,
+                mediaSize: null,
+                mediaDurationSec: null,
+                mediaUrl: null,
+                thumbnailUrl: null,
+                isPtt: false,
+                replyTo: null,
+                status: "delivered",
+                errorSafe: null,
+                clientRequestId: null,
+                waTimestamp: null,
+                createdAt: new Date().toISOString(),
+              },
+            ]
+      );
     },
   });
 
@@ -275,6 +348,9 @@ export function RadThread({
     for (const m of conversation.messages) {
       const status = statusOverrides[m.id] ?? m.status;
       byId.set(m.id, { ...m, status });
+    }
+    for (const m of liveInbound) {
+      if (!byId.has(m.id)) byId.set(m.id, m);
     }
     for (const m of optimistic) {
       if (m.clientRequestId) {
@@ -290,7 +366,7 @@ export function RadThread({
       const tb = new Date(b.waTimestamp ?? b.createdAt).getTime();
       return ta - tb;
     });
-  }, [conversation.messages, optimistic, statusOverrides]);
+  }, [conversation.messages, optimistic, statusOverrides, liveInbound]);
 
   function onMsgsScroll() {
     const el = msgsRef.current;

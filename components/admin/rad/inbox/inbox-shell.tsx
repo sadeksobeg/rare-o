@@ -4,6 +4,11 @@ import { createContext, useContext, useEffect, useRef, useState, type ReactNode 
 import { usePathname, useRouter } from "next/navigation";
 import type { InboxConversationListItem } from "@/lib/whatsapp/messaging/inbox";
 import { InboxOverlayProvider } from "@/components/admin/rad/inbox/overlay-root";
+import { useInboxEvents } from "@/components/admin/rad/inbox/use-inbox-events";
+import {
+  installInboxSoundUnlock,
+  playInboxChime,
+} from "@/components/admin/rad/inbox/inbox-sound";
 
 type InboxUi = {
   ctxOpen: boolean;
@@ -40,6 +45,43 @@ export function RadInboxShell({
   const router = useRouter();
   const [ctxOpen, setCtxOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
+  const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastRefreshAt = useRef(0);
+
+  useEffect(() => {
+    installInboxSoundUnlock();
+  }, []);
+
+  // Live stream for the whole inbox (list view AND open chat): chime on every
+  // incoming message and refresh at once. Leading-edge refresh = no waiting;
+  // a burst collapses into one trailing refresh.
+  useInboxEvents({
+    onMessageNew: (p) => {
+      // Chime only for fresh messages (a resumed stream may replay older ones).
+      const ageMs = p.createdAt ? Date.now() - new Date(p.createdAt).getTime() : 0;
+      if (p.direction === "inbound" && ageMs < 30_000) playInboxChime();
+      const run = () => {
+        lastRefreshAt.current = Date.now();
+        router.refresh();
+      };
+      const since = Date.now() - lastRefreshAt.current;
+      if (since > 350) {
+        run();
+      } else if (!refreshTimer.current) {
+        refreshTimer.current = setTimeout(() => {
+          refreshTimer.current = null;
+          run();
+        }, 350 - since);
+      }
+    },
+  });
+
+  useEffect(
+    () => () => {
+      if (refreshTimer.current) clearTimeout(refreshTimer.current);
+    },
+    []
+  );
 
   const activeId = pathname.match(/\/admin\/inbox\/([^/]+)/)?.[1] ?? null;
   const threadVisible = activeId !== null;

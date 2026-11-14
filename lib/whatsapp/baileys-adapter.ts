@@ -293,6 +293,25 @@ export type BaileysWhatsAppAdapterOptions = {
 /**
  * Production WhatsApp adapter backed by Baileys multi-device.
  */
+
+/** Build the minimal WAMessage Baileys needs to render a real quote. */
+function buildQuotedOptions(
+  jid: string,
+  quoted?: { waMessageId: string; fromMe: boolean; text: string } | null
+) {
+  if (!quoted?.waMessageId) return undefined;
+  return {
+    quoted: {
+      key: {
+        remoteJid: jid,
+        fromMe: quoted.fromMe,
+        id: quoted.waMessageId,
+      },
+      message: { conversation: quoted.text || "" },
+    },
+  } as const;
+}
+
 export class BaileysWhatsAppAdapter implements WhatsAppAdapter {
   private readonly session: WhatsAppSessionStoreConfig;
   private readonly events: WhatsAppAdapterEvents;
@@ -597,7 +616,11 @@ export class BaileysWhatsAppAdapter implements WhatsAppAdapter {
 
     try {
       await this.simulateTyping(jid, "composing", text.length);
-      const result = await this.sock.sendMessage(jid, { text });
+      const result = await this.sock.sendMessage(
+        jid,
+        { text },
+        buildQuotedOptions(jid, input.quoted) as never
+      );
       const waMessageId = result?.key?.id;
       if (!waMessageId) {
         return {
@@ -697,14 +720,14 @@ export class BaileysWhatsAppAdapter implements WhatsAppAdapter {
             image: input.bytes,
             caption,
             mimetype: mime,
-          });
+          }, buildQuotedOptions(jid, input.quoted) as never);
           break;
         case "video":
           result = await this.sock.sendMessage(jid, {
             video: input.bytes,
             caption,
             mimetype: mime,
-          });
+          }, buildQuotedOptions(jid, input.quoted) as never);
           break;
         case "audio": {
           const asPtt = input.ptt !== false;
@@ -724,7 +747,7 @@ export class BaileysWhatsAppAdapter implements WhatsAppAdapter {
             input.seconds > 0
               ? { seconds: Math.max(1, Math.round(input.seconds)) }
               : {}),
-          });
+          }, buildQuotedOptions(jid, input.quoted) as never);
           break;
         }
         case "document":
@@ -733,7 +756,7 @@ export class BaileysWhatsAppAdapter implements WhatsAppAdapter {
             mimetype: mime,
             fileName: input.fileName?.trim() || "file",
             caption,
-          });
+          }, buildQuotedOptions(jid, input.quoted) as never);
           break;
         default:
           return {

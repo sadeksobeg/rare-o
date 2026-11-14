@@ -2765,3 +2765,20 @@
   background: var(--rad-white);
   padding: 10px;
 }
+
+/* Incoming-message sound toggle (list header). */
+.rad-sound-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-inline-start: auto;
+  border-radius: var(--rad-r-sm, 8px);
+  border: 1px solid var(--rad-bd);
+  background: transparent;
+  color: var(--rad-tx-2, inherit);
+  cursor: pointer;
+}
+.rad-sound-toggle:hover { background: var(--rad-c1); }
+.rad-sound-toggle:focus-visible { outline: 2px solid var(--rad-ac); outline-offset: 2px; }

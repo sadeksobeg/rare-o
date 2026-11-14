@@ -39,6 +39,7 @@ import {
   isOutboundEnvEnabled,
   primeOutboundKillSwitch,
   type WhatsAppAdapter,
+  type WhatsAppQuotedRef,
   type WhatsAppChatSeedEvent,
   type WhatsAppContactIdentityEvent,
   type WhatsAppHealth,
@@ -401,6 +402,19 @@ export async function persistUnsupportedInbound(
       }
     });
 
+    if (result.created) {
+      void publishInboxEvent("message.new", {
+        conversationId: result.conversationId,
+        messageId: result.messageId,
+        status: "received",
+        direction: "inbound",
+        messageType: "unsupported",
+      });
+      void publishInboxEvent("conversation.updated", {
+        conversationId: result.conversationId,
+      });
+    }
+
     return {
       ok: true,
       created: result.created,
@@ -558,6 +572,21 @@ export async function persistInboundMedia(
         };
       }
     });
+
+    if (result.created) {
+      void publishInboxEvent("message.new", {
+        conversationId: result.conversationId,
+        messageId: result.messageId,
+        status: "received",
+        direction: "inbound",
+        messageType: event.messageType,
+        preview: mediaPreview(event.messageType, event.caption, event.fileName),
+      });
+      void publishInboxEvent("conversation.updated", {
+        conversationId: result.conversationId,
+        preview: mediaPreview(event.messageType, event.caption, event.fileName),
+      });
+    }
 
     return {
       ok: true,
@@ -1406,13 +1435,25 @@ export async function claimOutboundForSend(
       storageKey: string | null;
       mediaDurationSec: number | null;
       isPtt: boolean;
+      quoted: WhatsAppQuotedRef | null;
       deskBlocked: "blocked" | "archived" | "muted" | null;
     }
   | { ok: false; reason: "NOT_FOUND" | "NOT_CLAIMABLE" | "MAX_ATTEMPTS" }
 > {
   const row = await db.whatsAppMessage.findUnique({
     where: { id: messageId },
-    include: { conversation: true },
+    include: {
+      conversation: true,
+      replyTo: {
+        select: {
+          waMessageId: true,
+          direction: true,
+          body: true,
+          caption: true,
+          messageType: true,
+        },
+      },
+    },
   });
   if (!row || row.direction !== "outbound") {
     return { ok: false, reason: "NOT_FOUND" };
@@ -1487,6 +1528,24 @@ export async function claimOutboundForSend(
     storageKey: row.storageKey,
     mediaDurationSec: row.mediaDurationSec ?? null,
     isPtt: row.isPtt === true,
+    quoted:
+      row.replyTo?.waMessageId
+        ? {
+            waMessageId: row.replyTo.waMessageId,
+            fromMe: row.replyTo.direction === "outbound",
+            text:
+              (row.replyTo.caption || row.replyTo.body || "").slice(0, 300) ||
+              (row.replyTo.messageType === "image"
+                ? "📷"
+                : row.replyTo.messageType === "audio"
+                  ? "🎤"
+                  : row.replyTo.messageType === "video"
+                    ? "🎥"
+                    : row.replyTo.messageType === "document"
+                      ? "📄"
+                      : ""),
+          }
+        : null,
     deskBlocked: deskOutboundBlockedReason({
       blockedAt: row.conversation.blockedAt,
       archivedAt: row.conversation.archivedAt,
@@ -1697,6 +1756,7 @@ export async function dispatchOutboundMessage(
       bytes,
       ptt: asPtt,
       seconds: claimed.mediaDurationSec,
+      quoted: claimed.quoted,
     });
   } else {
     send = await adapter.sendText({
@@ -1704,6 +1764,7 @@ export async function dispatchOutboundMessage(
       text: claimed.body,
       clientRequestId: claimed.clientRequestId,
       adminId: claimed.adminId ?? "unknown",
+      quoted: claimed.quoted,
     });
   }
 

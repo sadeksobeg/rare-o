@@ -54,6 +54,7 @@
     "test:shipping-shipments": "node node_modules/tsx/dist/cli.mjs scripts/shipping-shipments-checks.ts",
     "test:shipping-engine": "node node_modules/tsx/dist/cli.mjs scripts/shipping-engine-checks.ts",
     "shipping:import": "node node_modules/tsx/dist/cli.mjs scripts/shipping-import.ts",
+    "test:whatsapp-quote": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-quote-checks.ts",
     "test:whatsapp-reply-route": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-reply-route-checks.ts",
     "test:whatsapp-phase-c": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-phase-c-checks.ts",
     "test:whatsapp-phase-d": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-phase-d-checks.ts",
