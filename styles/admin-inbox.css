@@ -2909,3 +2909,71 @@
   line-height: 20px;
   text-align: center;
 }
+
+/* ═══ Mobile pass (≤767px): compact header, no gutter buttons, roomy composer ═══ */
+.rad-hint-short { display: none; }
+@media (max-width: 767px) {
+  /* Touch: the ⋯ gutter button is replaced by long-press on the bubble */
+  .rad-msg-acts {
+    position: absolute !important;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+  .rad-bb-row { gap: 0; max-width: 88%; -webkit-touch-callout: none; }
+  .rad-bb { font-size: 15px; line-height: 1.5; font-weight: 400; padding: 7px 11px 5px; }
+  .rad-bb .rad-bm { margin-top: 2px; }
+
+  /* Thread header: one name line, one scrollable chip line */
+  .rad-th { padding: 6px 8px; min-height: 52px; }
+  .rad-th b { font-size: 15px; }
+  .rad-th small { font-size: 11.5px; }
+  .rad-th-badges {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding-block: 1px;
+  }
+  .rad-th-badges::-webkit-scrollbar { display: none; }
+  .rad-th-badges .rad-chipl {
+    flex: none;
+    max-width: none;
+    height: 22px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+
+  /* Banners: one calm line */
+  .rad-bn {
+    margin: 6px 10px 0;
+    padding: 6px 10px;
+    font-size: 12.5px;
+    line-height: 1.4;
+    gap: 8px;
+  }
+
+  /* Composer: tools left, round send right, short route chip */
+  .rad-hint-long { display: none; }
+  .rad-hint-short { display: inline; }
+  .rad-cbr { gap: 2px; align-items: center; }
+  .rad-cbr .rad-hint.rad-chipl { height: 22px; padding: 0 8px; font-size: 11px; }
+  .rad-sendb {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 50%;
+    flex: none;
+  }
+  .rad-sendb .rad-sendb-t { display: none; }
+
+  /* List: one-line filter strip */
+  .rad-fl { flex-wrap: nowrap; padding-block-end: 2px; }
+}
+@media (max-width: 767px) {
+  .rad-bb-row.rad-grp { margin-top: -2px; }
+  .rad-th .rad-chipl-name { display: none; }
+}

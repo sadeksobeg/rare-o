@@ -1076,11 +1076,20 @@ export function RadThread({
                       data-channel={replyRoute.channel}
                       title={replyBlocked ? dict.inbox.composerNoChannelToast : undefined}
                     >
-                      {replyBlocked
-                        ? dict.inbox.composerNoChannel
-                        : replyUsesPlatform
-                          ? dict.inbox.composerWillUsePlatform
-                          : dict.inbox.composerWillUseWhatsApp}
+                      <span className="rad-hint-long">
+                        {replyBlocked
+                          ? dict.inbox.composerNoChannel
+                          : replyUsesPlatform
+                            ? dict.inbox.composerWillUsePlatform
+                            : dict.inbox.composerWillUseWhatsApp}
+                      </span>
+                      <span className="rad-hint-short">
+                        {replyBlocked
+                          ? dict.inbox.composerNoChannel
+                          : replyUsesPlatform
+                            ? dict.inbox.channelPlatform
+                            : dict.inbox.channelWhatsApp}
+                      </span>
                     </span>
                   ) : (
                     <span className="rad-hint">{ib.composerSendHint}</span>
@@ -1092,9 +1101,12 @@ export function RadThread({
                       text.trim() && !pending && "rad-sendb-ready"
                     )}
                     disabled={!text.trim() || pending || replyDisabled}
+                    aria-label={mode === "note" ? ib.saveNoteButton : ib.sendButton}
                     onClick={mode === "reply" ? sendReply : saveNote}
                   >
-                    {mode === "note" ? ib.saveNoteButton : ib.sendButton}
+                    <span className="rad-sendb-t">
+                      {mode === "note" ? ib.saveNoteButton : ib.sendButton}
+                    </span>
                     <Send width={16} height={16} strokeWidth={1.5} aria-hidden />
                   </button>
                 </>
@@ -1152,7 +1164,9 @@ function ThreadHeaderBadges({
     chips.push(
       <span key="trader" className="rad-chipl rad-ok">
         {dict.inbox.linkedTraderChip}{" "}
-        <bdi dir="ltr">{conversation.crm.trader.displayName}</bdi>
+        <bdi dir="ltr" className="rad-chipl-name">
+          {conversation.crm.trader.displayName}
+        </bdi>
       </span>
     );
   }
