@@ -285,6 +285,7 @@ export const config = {
     "/forbidden",
     "/track/:path*",
     "/order/:path*",
+    "/invoice/:path*",
     "/admin/:path*",
     "/trader/:path*",
     "/dev",

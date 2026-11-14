@@ -59,6 +59,7 @@
     "test:whatsapp-business-number": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-business-number-checks.ts",
     "test:retail-identity": "node node_modules/tsx/dist/cli.mjs scripts/retail-identity-checks.ts",
     "test:retail-order-page": "node node_modules/tsx/dist/cli.mjs scripts/retail-order-page-checks.ts",
+    "test:retail-fulfillment": "node node_modules/tsx/dist/cli.mjs scripts/retail-fulfillment-checks.ts",
     "test:whatsapp-reply-route": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-reply-route-checks.ts",
     "test:whatsapp-phase-c": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-phase-c-checks.ts",
     "test:whatsapp-phase-d": "node node_modules/tsx/dist/cli.mjs scripts/whatsapp-phase-d-checks.ts",

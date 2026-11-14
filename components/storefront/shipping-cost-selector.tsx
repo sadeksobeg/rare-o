@@ -16,7 +16,7 @@ import {
   calculateOudShipmentWeightKg,
   describeOudShipmentBoxes,
 } from "@/lib/shipping/rates";
-import { listDestinationOptions } from "@/lib/shipping/destination-options";
+import { useDestinations } from "@/lib/shipping/use-destinations";
 import {
   computeMethodBadges,
   inquiryReasonLabel,
@@ -106,8 +106,9 @@ export function ShippingCostSelector({
   const selectedOption =
     options.find((o) => o.code === methodCode) ?? options[0] ?? null;
 
+  const { options: destinationOptions } = useDestinations();
   const destinationEntry =
-    listDestinationOptions().find((g) => g.code === destinationCode) ?? null;
+    destinationOptions.find((g) => g.code === destinationCode) ?? null;
 
   const weightTitle =
     weightKind === "oud-box"

@@ -58,7 +58,7 @@ export function isPlausibleToken(t: string): boolean {
 }
 
 export type CreateShipmentInput = {
-  parent: "wholesale" | "brokerage";
+  parent: "wholesale" | "brokerage" | "retail";
   parentId: string;
   methodCode?: string;
   methodLabel?: string;
@@ -90,9 +90,17 @@ export async function createShipment(
 
   let wholesaleRequestId: string | null = null;
   let brokerageRequestId: string | null = null;
+  let retailRequestId: string | null = null;
   let traderId: string | null = null;
 
-  if (input.parent === "wholesale") {
+  if (input.parent === "retail") {
+    const r = await prisma.retailRequest.findUnique({
+      where: { id: input.parentId },
+      select: { id: true },
+    });
+    if (!r) return { ok: false, error: "PARENT_NOT_FOUND" };
+    retailRequestId = r.id;
+  } else if (input.parent === "wholesale") {
     const r = await prisma.wholesaleRequest.findUnique({
       where: { id: input.parentId },
       select: { id: true, traderId: true },
@@ -115,6 +123,7 @@ export async function createShipment(
     data: {
       wholesaleRequestId,
       brokerageRequestId,
+      retailRequestId,
       status: "CONFIRMED",
       methodCode: cleanText(input.methodCode, 80),
       methodLabel: cleanText(input.methodLabel, 160),
@@ -136,7 +145,7 @@ export async function createShipment(
     select: { id: true },
   });
 
-  if (traderId) {
+  if (traderId && input.parent !== "retail") {
     await notifyTrader({
       traderId,
       domain: input.parent,
@@ -318,4 +327,48 @@ export async function getPublicTracking(
       at: e.at.toISOString(),
     })),
   };
+}
+
+/**
+ * A status change AND/OR a plain note on the shipment («وصلت إلى المكان المتفق عليه»).
+ * Returns the resulting status so callers can build the customer message.
+ */
+export async function postShipmentUpdate(input: {
+  id: string;
+  to?: string | null;
+  note?: string;
+  trackingNumber?: string;
+  actor: string;
+}): Promise<OpResult<{ id: string; status: string }>> {
+  const s = await prisma.shipment.findUnique({
+    where: { id: input.id },
+    select: { id: true, status: true },
+  });
+  if (!s) return { ok: false, error: "NOT_FOUND" };
+  const note = cleanText(input.note, 500);
+  const tracking = cleanText(input.trackingNumber, 64);
+  if (input.to && input.to !== s.status) {
+    const r = await transitionShipment({
+      id: s.id,
+      to: input.to,
+      note,
+      trackingNumber: tracking,
+      actor: input.actor,
+    });
+    return r.ok ? { ok: true, id: s.id, status: input.to } : r;
+  }
+  if (!note && !tracking) return { ok: false, error: "NOTHING_TO_POST" };
+  await prisma.$transaction([
+    ...(tracking ? [prisma.shipment.update({ where: { id: s.id }, data: { trackingNumber: tracking } })] : []),
+    prisma.shipmentEvent.create({
+      data: {
+        shipmentId: s.id,
+        status: s.status,
+        note: note || (tracking ? `رقم التتبع: ${tracking}` : ""),
+        actor: cleanText(input.actor, 120),
+        notified: true,
+      },
+    }),
+  ]);
+  return { ok: true, id: s.id, status: s.status };
 }

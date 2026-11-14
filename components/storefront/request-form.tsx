@@ -29,6 +29,7 @@ type SuccessData = {
   status?: string;
   whatsAppDeepLink?: string | null;
   handoffMessageText?: string | null;
+  publicToken?: string | null;
 };
 
 const SUCCESS_STORAGE_KEY = "ro-request-success";
@@ -191,6 +192,7 @@ export function RequestForm({
         labels={successLabels}
         reference={data.reference}
         messageText={data.handoffMessageText}
+        orderToken={data.publicToken}
         hasDeepLink={Boolean(data.whatsAppDeepLink && data.id)}
         opening={opening}
         error={openError}

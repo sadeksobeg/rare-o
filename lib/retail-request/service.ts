@@ -184,6 +184,16 @@ export async function createRetailRequestFromCart(
   }
   const customerId = customer.id;
 
+  // Expected delivery window of the chosen method, frozen on the request (editable by the team).
+  const methodEta = shippingMethodCode
+    ? await prisma.shippingMethod
+        .findUnique({
+          where: { code: shippingMethodCode },
+          select: { etaMinDays: true, etaMaxDays: true },
+        })
+        .catch(() => null)
+    : null;
+
   const status = input.status as RetailRequestStatus;
   const createdAt = new Date();
 
@@ -268,6 +278,8 @@ export async function createRetailRequestFromCart(
           handoffPreparedAt,
           idempotencyKey: input.idempotencyKey ?? null,
           publicToken: newOrderToken(),
+          etaMinDays: methodEta?.etaMinDays ?? null,
+          etaMaxDays: methodEta?.etaMaxDays ?? null,
           customerId,
           lines: {
             create: resolvedLines.map((l) => ({
@@ -412,8 +424,8 @@ export async function markRetailHandoffOpened(input: {
           actorAdminId: input.actorAdminId ?? null,
           note:
             from === to
-              ? "Handoff deep link opened again (same request)"
-              : "Handoff deep link opened",
+              ? "فُتح رابط التحويل مجدداً (الطلب نفسه)"
+              : "فُتح رابط التحويل",
         },
       },
     },

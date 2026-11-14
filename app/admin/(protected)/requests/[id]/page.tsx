@@ -11,6 +11,9 @@ import {
 import { RevealPhone } from "@/components/admin/reveal-phone";
 import { RequestStatusMenu } from "@/components/admin/rad/request-status-menu";
 import { RetailConfirmationPanel } from "@/components/admin/rad/retail-confirmation-panel";
+import { RetailFulfillmentPanel } from "@/components/admin/rad/retail-fulfillment-panel";
+import { allowedNextStatuses } from "@/lib/shipping/shipments";
+import { formatEta } from "@/lib/retail-request/shipment-text";
 import { findRetailCustomerConversation } from "@/lib/retail-request/customer-channel";
 import {
   Avatar,
@@ -39,6 +42,25 @@ import { shippingDestinationParts } from "@/lib/shipping/countries";
 import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
+
+/** Notes written by older code in English — shown in the admin's language. */
+const NOTE_AR: Record<string, string> = {
+  "Initial handoff prepared from storefront": "جُهّز التحويل الأولي من المتجر",
+  "Handoff deep link opened": "فُتح رابط التحويل",
+  "Handoff deep link opened again (same request)": "فُتح رابط التحويل مجدداً (الطلب نفسه)",
+};
+
+const EXTRA_EVENT_TITLES: Record<string, [string, string]> = {
+  customer_confirmed: ["العميل أكّد صحة البيانات", "Customer confirmed the details"],
+  customer_changes_requested: ["العميل طلب تعديلاً", "Customer requested a change"],
+  confirmation_sent: ["أُرسلت رسالة التأكيد للعميل", "Confirmation message sent"],
+  confirmation_opened: ["فُتحت رسالة التأكيد في واتساب", "Confirmation opened in WhatsApp"],
+  status_notified: ["أُرسل تحديث الحالة للعميل", "Status update sent to customer"],
+  edited: ["عُدّلت بيانات العميل", "Customer data edited"],
+  payment_set: ["حُدّدت طريقة الدفع", "Payment method set"],
+  sent_to_shipping: ["أُرسل الطلب للشحن", "Sent to shipping"],
+  shipment_update: ["تحديث الشحنة", "Shipment update"],
+};
 
 export default async function AdminRequestDetailPage({
   params,
@@ -81,6 +103,11 @@ export default async function AdminRequestDetailPage({
   });
 
   const canNotify = !!(await findRetailCustomerConversation(request));
+  const shipmentRow = await prisma.shipment.findFirst({
+    where: { retailRequestId: request.id, status: { not: "CANCELLED" } },
+    orderBy: { createdAt: "desc" },
+    include: { events: { orderBy: { at: "desc" }, take: 6 } },
+  });
 
   const current = isRetailRequestStatus(request.status)
     ? request.status
@@ -353,6 +380,43 @@ export default async function AdminRequestDetailPage({
             <Card
               padded={false}
               className="rad-rise"
+              style={{ ["--rad-s" as string]: "3" }}
+            >
+              <CardHeader title={ar ? "الدفع والشحن" : "Payment & shipping"} />
+              <div className="rad-cb2">
+                <RetailFulfillmentPanel
+                  requestId={request.id}
+                  closed={request.status === "completed" || request.status === "cancelled"}
+                  paymentMode={request.paymentMode === "prepaid" || request.paymentMode === "cod" ? request.paymentMode : null}
+                  paymentConfirmed={Boolean(request.paymentConfirmedAt)}
+                  etaLabel={formatEta(request.etaMinDays, request.etaMaxDays, ar)}
+                  methodLabel={request.shippingMethodLabel ?? ""}
+                  canNotify={canNotify}
+                  optedIn={request.whatsappShippingOptIn}
+                  defaultPrice={request.shippingCostAmount != null ? String(Number(request.shippingCostAmount)) : ""}
+                  shipment={
+                    shipmentRow
+                      ? {
+                          id: shipmentRow.id,
+                          status: shipmentRow.status,
+                          carrierLabel: shipmentRow.carrierLabel,
+                          trackingNumber: shipmentRow.trackingNumber,
+                          next: allowedNextStatuses(shipmentRow.status),
+                          recent: shipmentRow.events.map((e) => ({
+                            status: e.status,
+                            note: e.note,
+                            at: formatAdminDate(e.at, locale, { forceAbsolute: true, withTime: true }) as string,
+                          })),
+                        }
+                      : null
+                  }
+                />
+              </div>
+            </Card>
+
+            <Card
+              padded={false}
+              className="rad-rise"
               style={{ ["--rad-s" as string]: "4" }}
             >
               <CardHeader title={d.auditEvents} />
@@ -367,21 +431,28 @@ export default async function AdminRequestDetailPage({
                       icon: (
                         <Package width={15} height={15} strokeWidth={1.5} />
                       ),
-                      title: d.retailEvent[e.eventType] ?? e.eventType,
+                      title:
+                        d.retailEvent[e.eventType] ??
+                        EXTRA_EVENT_TITLES[e.eventType]?.[ar ? 0 : 1] ??
+                        e.eventType,
                       meta: (
                         <>
-                          {e.fromStatus
-                            ? (u.status.retail[e.fromStatus] ?? e.fromStatus)
-                            : "—"}{" "}
-                          <ArrowRight
-                            className="mx-1 inline size-3 rtl:-scale-x-100"
-                            strokeWidth={1.5}
-                            aria-hidden
-                          />{" "}
-                          {e.toStatus
-                            ? (u.status.retail[e.toStatus] ?? e.toStatus)
-                            : "—"}
-                          {" · "}
+                          {e.fromStatus || e.toStatus ? (
+                            <>
+                              {e.fromStatus
+                                ? (u.status.retail[e.fromStatus] ?? e.fromStatus)
+                                : "—"}{" "}
+                              <ArrowRight
+                                className="mx-1 inline size-3 rtl:-scale-x-100"
+                                strokeWidth={1.5}
+                                aria-hidden
+                              />{" "}
+                              {e.toStatus
+                                ? (u.status.retail[e.toStatus] ?? e.toStatus)
+                                : "—"}
+                              {" · "}
+                            </>
+                          ) : null}
                           {d.actor[e.actor] ?? e.actor}
                           {" · "}
                           <span className="rad-nowrap">
@@ -391,13 +462,7 @@ export default async function AdminRequestDetailPage({
                             })}
                           </span>
                           {e.note
-                            ? ` — «${
-                                e.note === "Initial handoff prepared from storefront"
-                                  ? ar
-                                    ? "جُهّز التحويل الأولي من المتجر"
-                                    : e.note
-                                  : e.note
-                              }»`
+                            ? ` — «${ar ? (NOTE_AR[e.note] ?? e.note) : e.note}»`
                             : ""}
                         </>
                       ),
@@ -415,10 +480,15 @@ export default async function AdminRequestDetailPage({
                     dir="auto"
                     className="overflow-x-auto whitespace-pre-wrap text-xs"
                     style={{
-                      padding: 12,
+                      padding: 14,
                       borderRadius: 12,
                       background: "var(--rad-surface2)",
                       border: "1px solid var(--rad-bd)",
+                      fontFamily: "inherit",
+                      fontSize: 13,
+                      lineHeight: 1.9,
+                      overflowWrap: "anywhere",
+                      unicodeBidi: "plaintext",
                     }}
                   >
                     {request.handoffMessageText}
@@ -515,10 +585,17 @@ export default async function AdminRequestDetailPage({
                     </div>
                     {linkedConversation.lastMessagePreview ? (
                       <p
+                        dir="auto"
                         style={{
                           color: "var(--rad-tx2)",
                           fontSize: 13,
                           lineHeight: 1.7,
+                          overflowWrap: "anywhere",
+                          wordBreak: "break-word",
+                          display: "-webkit-box",
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
                         }}
                       >
                         «{linkedConversation.lastMessagePreview}»

@@ -7,6 +7,7 @@
 import { randomBytes } from "node:crypto";
 import { prisma } from "@/lib/db/prisma";
 import { isFullName, isValidPhone } from "@/lib/validation/customer-identity";
+import { CUSTOMER_SHIPMENT_TEXT, formatEta, paymentLabel } from "@/lib/retail-request/shipment-text";
 
 export function newOrderToken(): string {
   return randomBytes(18).toString("base64url");
@@ -177,7 +178,7 @@ export type PublicOrderView = {
   reference: string;
   status: string;
   customerName: string;
-  maskedPhone: string;
+  phone: string;
   destinationCountry: string;
   customerNotes: string;
   currency: string;
@@ -190,21 +191,33 @@ export type PublicOrderView = {
   responseNote: string;
   respondedAt: string | null;
   locale: "ar" | "en";
+  shipment: { status: string; trackingToken: string; trackingNumber: string | null } | null;
+  paymentLabel: string | null;
+  etaLabel: string | null;
+  /** Newest first: what the team posted about the shipment (customer wording + their note). */
+  updates: { status: string; title: string; note: string; at: string }[];
 };
-
-function maskPhone(p: string): string {
-  const d = p.replace(/\D/g, "");
-  if (d.length < 6) return "•••";
-  return `+${d.slice(0, 3)} ••• ${d.slice(-3)}`;
-}
 
 export async function getPublicOrder(token: string): Promise<PublicOrderView | null> {
   if (!isPlausibleOrderToken(token)) return null;
   const r = await prisma.retailRequest.findUnique({
     where: { publicToken: token },
-    include: { lines: true },
+    include: {
+      lines: true,
+      shipments: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        select: {
+          status: true,
+          publicToken: true,
+          trackingNumber: true,
+          events: { orderBy: { at: "desc" }, take: 8, select: { status: true, note: true, at: true } },
+        },
+      },
+    },
   });
   if (!r) return null;
+  const sh = r.shipments[0];
   const ship =
     r.shippingCostAmount != null && r.shippingCostCurrency
       ? { amount: num(r.shippingCostAmount), currency: r.shippingCostCurrency, label: r.shippingMethodLabel }
@@ -214,7 +227,9 @@ export async function getPublicOrder(token: string): Promise<PublicOrderView | n
     reference: r.reference,
     status: r.status,
     customerName: r.customerName,
-    maskedPhone: maskPhone(r.customerPhone),
+    // Reachable only with the unguessable token the customer received on their own
+    // chat; they must see their own number exactly as stored.
+    phone: r.customerPhone,
     destinationCountry: r.destinationCountry,
     customerNotes: r.customerNotes,
     currency: r.currency,
@@ -234,6 +249,15 @@ export async function getPublicOrder(token: string): Promise<PublicOrderView | n
     responseNote: r.customerResponseNote ?? "",
     respondedAt: r.customerRespondedAt?.toISOString() ?? null,
     locale: r.locale === "en" ? "en" : "ar",
+    shipment: sh ? { status: sh.status, trackingToken: sh.publicToken, trackingNumber: sh.trackingNumber } : null,
+    paymentLabel: paymentLabel(r.paymentMode, Boolean(r.paymentConfirmedAt), r.locale !== "en"),
+    etaLabel: formatEta(r.etaMinDays, r.etaMaxDays, r.locale !== "en"),
+    updates: (sh?.events ?? []).map((e) => ({
+      status: e.status,
+      title: (CUSTOMER_SHIPMENT_TEXT[e.status] ?? [e.status, e.status])[r.locale === "en" ? 1 : 0],
+      note: e.note,
+      at: e.at.toISOString(),
+    })),
   };
 }
 

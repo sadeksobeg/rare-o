@@ -3,10 +3,8 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { ChevronDown, Search } from "lucide-react";
 import { DestinationMark } from "@/components/storefront/shipping/flag";
-import {
-  listDestinationOptions,
-  type DestinationOption,
-} from "@/lib/shipping/destination-options";
+import { type DestinationOption } from "@/lib/shipping/destination-options";
+import { useDestinations } from "@/lib/shipping/use-destinations";
 import {
   readRememberedDestination,
   rememberDestination,
@@ -40,7 +38,7 @@ export function DestinationCombobox({
   const autoId = useId();
   const listId = `${autoId}-list`;
   const searchId = id || `${autoId}-search`;
-  const all = useMemo(() => listDestinationOptions(), []);
+  const { options: all, loading: destLoading, failed: destFailed } = useDestinations(portalTone === "admin");
   const selected = all.find((d) => d.code === value) ?? null;
 
   const [open, setOpen] = useState(false);
@@ -229,7 +227,17 @@ export function DestinationCombobox({
           >
             {filtered.length === 0 ? (
               <li className="px-3 py-2 text-sm text-ro-muted">
-                {t(locale, "لا نتائج", "No matches")}
+                {destLoading
+                  ? t(locale, "جارٍ تحميل الوجهات…", "Loading destinations…")
+                  : destFailed
+                    ? t(locale, "تعذّر تحميل الوجهات — أعد المحاولة", "Could not load destinations — retry")
+                    : query.trim()
+                      ? t(
+                          locale,
+                          "لا نشحن إلى هذه الوجهة حالياً — تواصل معنا لعرض سعر",
+                          "We do not ship there yet — contact us for a quote"
+                        )
+                      : t(locale, "لا نتائج", "No matches")}
               </li>
             ) : (
               filtered.map((d, i) => (

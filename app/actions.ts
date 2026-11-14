@@ -859,6 +859,7 @@ export async function createRetailRequestAction(
         status: request.status,
         whatsAppDeepLink: request.whatsAppDeepLink,
         handoffMessageText: request.handoffMessageText,
+        publicToken: request.publicToken,
       },
     };
   } catch (e) {

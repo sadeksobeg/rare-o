@@ -210,6 +210,26 @@ export function RetailConfirmationPanel({
           <p className="text-xs text-[color:var(--rad-tx-2)]">
             رابط صفحة الطلب للعميل: <bdi dir="ltr">{prep.orderUrl}</bdi>
           </p>
+          <div className="flex flex-wrap gap-2">
+            <a
+              className="rad-btn rad-gh rad-sm"
+              href={prep.orderUrl.replace("/order/", "/invoice/")}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              الفاتورة (عرض / طباعة / PDF)
+            </a>
+            <button
+              type="button"
+              className="rad-btn rad-gh rad-sm"
+              onClick={() => {
+                void navigator.clipboard?.writeText(prep.orderUrl.replace("/order/", "/invoice/"));
+                toast.success("نُسخ رابط الفاتورة");
+              }}
+            >
+              نسخ رابط الفاتورة
+            </button>
+          </div>
         </>
       )}
 

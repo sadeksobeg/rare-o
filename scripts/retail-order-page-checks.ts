@@ -45,8 +45,8 @@ async function main() {
 
     const view = await getPublicOrder(token);
     check(view?.reference === request.reference, "token resolves the request");
-    check(!!view && !view.maskedPhone.includes(suffix) && view.maskedPhone.includes("•••"), "phone is masked on the public view");
-    check(!JSON.stringify(view).includes(phone.replace("+", "")), "full phone never appears in the public payload");
+    check(view?.phone === phone, "the customer sees their own phone exactly as stored (unmasked)");
+    check(!JSON.stringify(view).includes("adminId"), "no admin identifiers in the public payload");
     check((await getPublicOrder("A".repeat(24))) === null, "unknown token → null");
     check((await getPublicOrder("../etc/passwd")) === null, "malformed token → null");
 

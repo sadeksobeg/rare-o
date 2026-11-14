@@ -165,6 +165,18 @@ export function RequestStatusMenu({
           </>
         ) : null}
 
+        <details className="rad-adv" style={{ flexBasis: "100%" }}>
+          <summary
+            className="rad-btn rad-gh rad-sm"
+            style={{ display: "inline-flex", cursor: "pointer", listStyle: "none" }}
+          >
+            خيارات متقدمة
+          </summary>
+          <p style={{ fontSize: 12.5, lineHeight: 1.7, color: "var(--rad-tx3)", margin: "10px 0" }}>
+            رابط «فتح واتساب» الذي يراه العميل بعد تقديم الطلب يُبنى مرة واحدة عند الإنشاء. إن غيّرتَ رقم واتساب الأعمال أو عدّلتَ بيانات الطلب
+            فاضغط «إعادة بناء رابط العميل» ليتجدّد الرابط والنص المخزّنان. لا يُرسل شيئاً لأحد.
+          </p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
         {canRetrigger ? (
           <button
             type="button"
@@ -189,7 +201,7 @@ export function RequestStatusMenu({
               });
             }}
           >
-            {f.retrigger}
+            إعادة بناء رابط العميل
           </button>
         ) : null}
 
@@ -220,9 +232,11 @@ export function RequestStatusMenu({
               });
             }}
           >
-            {f.openHandoff}
+            اختبار الرابط (يفتح واتساب)
           </button>
         ) : null}
+          </div>
+        </details>
       </div>
 
       {message ? (

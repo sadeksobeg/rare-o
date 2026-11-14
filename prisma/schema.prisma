@@ -158,6 +158,12 @@ model RetailRequest {
   customerResponse     String?
   customerResponseNote String?
   customerRespondedAt  DateTime?
+  /// prepaid | cod (cash on delivery) — set by the team once agreed with the customer
+  paymentMode          String?
+  paymentConfirmedAt   DateTime?
+  /// Expected delivery window in days, copied from the chosen shipping method (editable)
+  etaMinDays           Int?
+  etaMaxDays           Int?
   customerId           String?
   customer             Customer?            @relation(fields: [customerId], references: [id])
   lines                RetailRequestLine[]

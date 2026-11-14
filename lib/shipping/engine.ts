@@ -185,8 +185,22 @@ export async function quote(input: {
     config
   );
 
+  // Zone packages (intl:<zone>:land|air) are shared by several countries; their
+  // stored label names the zone's lead country («باقة ألمانيا»), which looks like
+  // a bug when the customer picked Belgium. Label them by the DESTINATION instead.
+  const methods = core.methods.map((m) => {
+    if (!m.methodCode.startsWith("intl:") || !country) return m;
+    const air = (m.mode || "").toUpperCase() === "AIR" || m.methodCode.endsWith(":air");
+    return {
+      ...m,
+      labelAr: `${air ? "شحن جوي" : "شحن بري"} إلى ${country.nameAr}`,
+      labelEn: `${air ? "Air" : "Land"} shipping to ${country.nameEn || country.nameAr}`,
+    };
+  });
+
   return {
     ...core,
+    methods,
     // An unknown or inquiry-disabled destination still never shows a price.
     inquiry: core.inquiry && (country ? country.inquiryEnabled : true),
     destinationCode,
