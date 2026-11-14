@@ -195,7 +195,7 @@ export async function createRetailRequestFromCart(
     let handoffPreparedAt: Date | null = null;
 
     if (status === "ready_for_handoff") {
-      const prepared = prepareWhatsAppHandoff(handoffPayload);
+      const prepared = await prepareWhatsAppHandoff(handoffPayload);
       handoffMessageText = prepared.messageText;
       whatsAppDeepLink = prepared.deepLink;
       handoffPreparedAt = createdAt;
@@ -439,7 +439,7 @@ export async function retriggerRetailHandoff(input: {
 
   const payload = parsePayload(request.handoffPayloadJson);
   payload.status = request.status;
-  const prepared = prepareWhatsAppHandoff(payload);
+  const prepared = await prepareWhatsAppHandoff(payload);
   const now = new Date();
 
   return prisma.retailRequest.update({

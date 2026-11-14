@@ -13,6 +13,7 @@ import {
 import { BusinessContextPanel } from "@/components/admin/business-context-panel";
 import { RecordPicker } from "@/components/admin/record-picker";
 import { Dialog } from "@/components/ui/dialog";
+import { CreateRetailRequestDialog } from "@/components/admin/rad/inbox/create-request-dialog";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 import type {
@@ -59,7 +60,12 @@ export function LinkedRecordPanel({
   audits = [],
   dict,
   locale,
+  defaultCustomerName = "",
+  maskedPhone = null,
 }: {
+  /** Prefill for «إنشاء طلب تجزئة» (display name from WhatsApp). */
+  defaultCustomerName?: string;
+  maskedPhone?: string | null;
   conversationId: string;
   link: InboxLinkSummary;
   context: BusinessContextView;
@@ -75,6 +81,7 @@ export function LinkedRecordPanel({
   const [pickerOpen, setPickerOpen] = useState(false);
   const [unlinkOpen, setUnlinkOpen] = useState(false);
   const [mergeOpen, setMergeOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const [mergePreview, setMergePreview] = useState<{
     traderId: string;
     secondaryCount: number;
@@ -307,14 +314,26 @@ export function LinkedRecordPanel({
             </button>
           </>
         ) : (
-          <button
-            type="button"
-            className="rad-btn rad-gh rad-sm"
-            disabled={pending}
-            onClick={() => setPickerOpen(true)}
-          >
-            {i.linkRecord}
-          </button>
+          <>
+            <button
+              type="button"
+              className="rad-btn rad-gh rad-sm"
+              disabled={pending}
+              onClick={() => setPickerOpen(true)}
+            >
+              {i.linkRecord}
+            </button>
+            {!crm.trader ? (
+              <button
+                type="button"
+                className="rad-btn rad-pri rad-sm"
+                disabled={pending}
+                onClick={() => setCreateOpen(true)}
+              >
+                {locale === "ar" ? "إنشاء طلب تجزئة" : "Create retail request"}
+              </button>
+            ) : null}
+          </>
         )}
         <p className="rad-link-hint">{i.linkConfirmHint}</p>
         {error ? (
@@ -351,6 +370,15 @@ export function LinkedRecordPanel({
           </ul>
         </section>
       ) : null}
+
+      <CreateRetailRequestDialog
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        conversationId={conversationId}
+        defaultName={defaultCustomerName}
+        maskedPhone={maskedPhone}
+        locale={locale}
+      />
 
       <RecordPicker
         open={pickerOpen}

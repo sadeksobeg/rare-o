@@ -23,6 +23,8 @@ export type WhatsAppHealth = {
   /** Safe operational message — never includes session secrets */
   detail?: string;
   lastConnectedAt?: string | null;
+  /** Digits of the linked account's own number (when known). */
+  connectedPhone?: string | null;
   updatedAt: string;
 };
 

@@ -8,6 +8,7 @@
  */
 
 import type { HandoffPayload } from "@/lib/retail-request/types";
+import { resolveBusinessE164 } from "@/lib/whatsapp/business-number";
 
 export type WhatsAppDeepLinkResult = {
   businessE164: string;
@@ -96,10 +97,10 @@ export function buildWhatsAppDeepLink(
   return `https://wa.me/${businessE164Digits}?text=${text}`;
 }
 
-export function prepareWhatsAppHandoff(
+export async function prepareWhatsAppHandoff(
   payload: HandoffPayload
-): WhatsAppDeepLinkResult {
-  const businessE164 = getWhatsAppBusinessE164();
+): Promise<WhatsAppDeepLinkResult> {
+  const businessE164 = await resolveBusinessE164();
   const messageText = buildHandoffMessageText(payload);
   const deepLink = buildWhatsAppDeepLink(businessE164, messageText);
   return { businessE164, messageText, deepLink };

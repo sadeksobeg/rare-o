@@ -72,7 +72,7 @@ async function prepareWholesaleHandoffForRequest(
       traderNotes: request.traderNotes,
     });
 
-    const prepared = prepareWholesaleHandoff(messageText);
+    const prepared = await prepareWholesaleHandoff(messageText);
     await prisma.wholesaleRequest.update({
       where: { id: request.id },
       data: {

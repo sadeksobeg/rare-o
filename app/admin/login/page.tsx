@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { adminLoginAction } from "@/app/actions";
 import { LoginForm } from "@/components/auth/login-form";
-import { whatsAppGreetingLink } from "@/lib/config/contact";
+import { whatsAppGreetingLinkAsync } from "@/lib/config/contact";
 import { getRequestDictionary } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
@@ -45,7 +45,7 @@ export default async function AdminLoginPage({
       forgotTitle={a.forgotTitle}
       forgotSubtitle={a.forgotSubtitle}
       forgotWhatsAppLabel={a.forgotWhatsApp}
-      forgotWhatsAppHref={whatsAppGreetingLink(a.forgotWhatsAppMessage)}
+      forgotWhatsAppHref={await whatsAppGreetingLinkAsync(a.forgotWhatsAppMessage)}
       backToSignInLabel={a.backToSignIn}
       returnTo={returnTo}
       notice={

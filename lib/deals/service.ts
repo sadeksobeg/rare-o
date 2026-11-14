@@ -282,7 +282,7 @@ export async function addNegotiationEntry(input: AddNegotiationInput) {
         currency: updated.currency ?? "USD",
         traderName: trader?.displayName || trader?.email || "",
       });
-      const prepared = preparePaymentHandoff(messageText);
+      const prepared = await preparePaymentHandoff(messageText);
       await prisma.dealProposal.update({
         where: { id: updated.id },
         data: {

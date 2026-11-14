@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { storefrontMetadata } from "@/lib/seo";
-import { whatsAppGreetingLink } from "@/lib/config/contact";
+import { whatsAppGreetingLinkAsync } from "@/lib/config/contact";
 import { MaterialPlate } from "@/components/storefront/material-plate";
 import { ButtonLink } from "@/components/ui/button";
 import { Banner } from "@/components/ui/banner";
@@ -22,7 +22,7 @@ export default async function ContactPage() {
     locale === "ar"
       ? "مرحباً، أود الاستفسار عبر RARE OUD."
       : "Hello, I would like to inquire via RARE OUD.";
-  const wa = whatsAppGreetingLink(greeting);
+  const wa = await whatsAppGreetingLinkAsync(greeting);
 
   return (
     <section className="grid gap-10 md:grid-cols-2 md:items-center">

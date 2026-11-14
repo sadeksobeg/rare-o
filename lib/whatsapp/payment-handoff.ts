@@ -3,6 +3,7 @@
  * Deep-link only — does not send via Baileys / Business API.
  */
 
+import { resolveBusinessE164 } from "@/lib/whatsapp/business-number";
 import {
   buildWhatsAppDeepLink,
   getWhatsAppBusinessE164,
@@ -79,8 +80,8 @@ export function buildBrokeragePaymentHandoffMessage(input: {
   ].join("\n");
 }
 
-export function preparePaymentHandoff(messageText: string): PaymentHandoffResult {
-  const businessE164 = getWhatsAppBusinessE164();
+export async function preparePaymentHandoff(messageText: string): Promise<PaymentHandoffResult> {
+  const businessE164 = await resolveBusinessE164();
   const deepLink = buildWhatsAppDeepLink(businessE164, messageText);
   return { businessE164, messageText, deepLink };
 }

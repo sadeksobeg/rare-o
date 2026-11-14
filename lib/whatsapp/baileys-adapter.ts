@@ -321,6 +321,7 @@ export class BaileysWhatsAppAdapter implements WhatsAppAdapter {
   private state: WhatsAppConnectionState = "DISCONNECTED";
   private detail: string | undefined;
   private lastConnectedAt: string | null = null;
+  private connectedPhone: string | null = null;
   private updatedAt: string = nowIso();
   private starting = false;
   private stopped = false;
@@ -396,6 +397,7 @@ export class BaileysWhatsAppAdapter implements WhatsAppAdapter {
       state: this.state,
       detail: this.detail,
       lastConnectedAt: this.lastConnectedAt,
+      connectedPhone: this.connectedPhone,
       updatedAt: this.updatedAt,
     };
   }
@@ -889,6 +891,12 @@ export class BaileysWhatsAppAdapter implements WhatsAppAdapter {
       // A burst of outbound traffic the instant the session reconnects is a
       // known ban signal — arm a brief cooldown before sends resume.
       noteConnectionEstablished();
+      // Own number: "9639xxxxxxxx:12@s.whatsapp.net" → digits before the device suffix.
+      const selfId = this.sock?.user?.id ?? "";
+      const selfDigits = selfId.split("@")[0]?.split(":")[0]?.replace(/\D/g, "") ?? "";
+      if (selfDigits.length >= 8 && selfDigits.length <= 15) {
+        this.connectedPhone = selfDigits;
+      }
       await this.setHealth("CONNECTED", "Baileys connection open");
       // Nudge app-state / roster sync so chat list fills beyond the last open slice
       void this.requestRosterRefresh();

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { traderLoginAction } from "@/app/deal-actions";
 import { LoginForm } from "@/components/auth/login-form";
 import { AdminLocaleToggle } from "@/components/admin/locale-toggle";
-import { whatsAppGreetingLink } from "@/lib/config/contact";
+import { whatsAppGreetingLinkAsync } from "@/lib/config/contact";
 import { getRequestDictionary } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
@@ -18,7 +18,7 @@ export default async function TraderLoginPage({
   const { returnTo, notice } = await searchParams;
   const a = dict.auth;
   const accountRequestHref =
-    whatsAppGreetingLink(
+    await whatsAppGreetingLinkAsync(
       locale === "ar"
         ? "مرحباً، أود طلب حساب تاجر في منصة RARE OUD."
         : "Hello — I would like to request a trader account on RARE OUD."
@@ -58,7 +58,7 @@ export default async function TraderLoginPage({
       forgotTitle={a.forgotTitle}
       forgotSubtitle={a.forgotSubtitle}
       forgotWhatsAppLabel={a.forgotWhatsApp}
-      forgotWhatsAppHref={whatsAppGreetingLink(a.forgotWhatsAppMessage)}
+      forgotWhatsAppHref={await whatsAppGreetingLinkAsync(a.forgotWhatsAppMessage)}
       backToSignInLabel={a.backToSignIn}
       returnTo={returnTo}
       notice={

@@ -639,6 +639,9 @@ model WhatsAppConnectionHealth {
   updatedAt        DateTime  @updatedAt
   /// Admin pairing — E.164 digits of the phone being linked (no +)
   pairingPhone     String?
+  /// E.164 digits of the WhatsApp account that is (or was last) connected —
+  /// set by the worker on connect; the wa.me handoff target for customers.
+  connectedPhone   String?
   /// Ephemeral pairing code for admin display only — cleared once connected
   pairingCode      String?
   /// Optional QR data URL for admin display only — cleared once connected

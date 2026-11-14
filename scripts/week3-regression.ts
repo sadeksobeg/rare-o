@@ -197,8 +197,9 @@ async function main() {
   );
 
   // WhatsApp helper builds from env
-  const prepared = prepareWhatsAppHandoff(retail.handoffPayload);
-  assert(prepared.deepLink.includes(process.env.WHATSAPP_BUSINESS_E164!.replace(/\D/g, "")), "WA number from env");
+  const prepared = await prepareWhatsAppHandoff(retail.handoffPayload);
+  const { resolveBusinessE164 } = await import("../lib/whatsapp/business-number");
+  assert(prepared.deepLink.includes(await resolveBusinessE164()), "WA number from linked account / env");
 
   // ------------------------------------------------------------------
   // 3) Deals + negotiation + no auto catalog/offer

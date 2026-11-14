@@ -104,7 +104,7 @@ export async function createBrokerageRequest(input: {
       statedPriceUsd: input.statedPriceUsd,
       traderName: trader.displayName || trader.email,
     });
-    const prepared = preparePaymentHandoff(messageText);
+    const prepared = await preparePaymentHandoff(messageText);
     handoffMessageText = prepared.messageText;
     whatsAppDeepLink = prepared.deepLink;
     handoffPreparedAt = new Date();

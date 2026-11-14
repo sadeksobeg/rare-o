@@ -1152,3 +1152,165 @@ export async function adminSaveComposerDraftAction(
   });
   return { ok: true };
 }
+
+// ── Create a retail request from a WhatsApp conversation ─────────────────────
+
+export type RetailProductOption = {
+  id: string;
+  nameAr: string;
+  nameEn: string;
+  price: number;
+  currency: string;
+};
+
+/** Published, priced, available pieces — what a retail request can contain. */
+export async function adminListRetailProductsAction(): Promise<
+  ActionResult & { data?: RetailProductOption[] }
+> {
+  try {
+    await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+  const rows = await prisma.product.findMany({
+    where: {
+      status: "published",
+      availability: "available",
+      retailPrice: { not: null },
+      currency: { not: null },
+    },
+    orderBy: { updatedAt: "desc" },
+    take: 300,
+    select: { id: true, nameAr: true, nameEn: true, retailPrice: true, currency: true },
+  });
+  return {
+    ok: true,
+    data: rows.map((r) => ({
+      id: r.id,
+      nameAr: r.nameAr,
+      nameEn: r.nameEn,
+      price: Number(r.retailPrice),
+      currency: r.currency ?? "USD",
+    })),
+  };
+}
+
+/**
+ * Admin creates the retail request for someone who wrote on WhatsApp first.
+ * The request starts straight in «قيد المتابعة» (the chat already exists),
+ * is linked to the conversation, and the customer record is attached.
+ */
+export async function adminCreateRetailRequestFromConversationAction(
+  formData: FormData
+): Promise<ActionResult & { data?: { requestId: string; reference: string } }> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e, "UNAUTHORIZED");
+  }
+
+  const conversationId = String(formData.get("conversationId") || "").trim();
+  if (!conversationId) return { ok: false, error: "VALIDATION" };
+
+  const conversation = await prisma.whatsAppConversation.findUnique({
+    where: { id: conversationId },
+    select: {
+      id: true,
+      participantE164: true,
+      displayName: true,
+      linkType: true,
+      linkId: true,
+      traderId: true,
+    },
+  });
+  if (!conversation) return { ok: false, error: "NOT_FOUND" };
+  if (conversation.traderId) return { ok: false, error: "TRADER_CONVERSATION" };
+  if (conversation.linkType !== "none" || conversation.linkId) {
+    return { ok: false, error: "ALREADY_LINKED" };
+  }
+
+  const name = String(formData.get("customerName") || "").trim() || conversation.displayName?.trim() || "";
+  const phoneOverride = String(formData.get("customerPhone") || "").trim();
+  const phone = phoneOverride || (conversation.participantE164 ? `+${conversation.participantE164.replace(/\D/g, "")}` : "");
+  if (!name) return { ok: false, error: "NAME_REQUIRED" };
+  if (phone.replace(/\D/g, "").length < 5) return { ok: false, error: "PHONE_REQUIRED" };
+
+  let rawLines: unknown;
+  try {
+    rawLines = JSON.parse(String(formData.get("lines") || "[]"));
+  } catch {
+    return { ok: false, error: "VALIDATION" };
+  }
+  const lines = (Array.isArray(rawLines) ? rawLines : [])
+    .map((l) => ({
+      productId: String((l as { productId?: unknown }).productId || ""),
+      quantity: Math.floor(Number((l as { quantity?: unknown }).quantity) || 0),
+    }))
+    .filter((l) => l.productId && l.quantity >= 1 && l.quantity <= 99)
+    .slice(0, 20);
+  if (lines.length === 0) return { ok: false, error: "LINES_REQUIRED" };
+
+  const destination = String(formData.get("destinationCountry") || "").trim() || "غير محدد";
+  const notes = String(formData.get("customerNotes") || "").trim().slice(0, 2000);
+
+  try {
+    const { createRetailRequestFromCart, transitionRetailRequestStatus } = await import(
+      "@/lib/retail-request/service"
+    );
+    const { request } = await createRetailRequestFromCart({
+      locale: "ar",
+      customerName: name.slice(0, 120),
+      customerPhone: phone.slice(0, 40),
+      customerNotes: notes,
+      destinationCountry: destination.slice(0, 80),
+      destinationCode: null,
+      shippingMethodCode: null,
+      lines,
+      status: "ready_for_handoff",
+      idempotencyKey: String(formData.get("idempotencyKey") || "") || undefined,
+    });
+
+    // The conversation already exists → fast-forward the lifecycle honestly,
+    // each step recorded as an admin transition.
+    await transitionRetailRequestStatus({
+      requestId: request.id,
+      toStatus: "handoff_opened",
+      actorAdminId: session.sub,
+      note: "أُنشئ من محادثة واتساب",
+    });
+    await transitionRetailRequestStatus({
+      requestId: request.id,
+      toStatus: "in_follow_up",
+      actorAdminId: session.sub,
+      note: "أُنشئ من محادثة واتساب",
+    });
+
+    const link = await linkConversationToBusinessRecord({
+      conversationId: conversation.id,
+      linkType: "retail_request",
+      linkId: request.id,
+      adminId: session.sub,
+    });
+    if (request.customerId) {
+      await prisma.whatsAppConversation
+        .update({ where: { id: conversation.id }, data: { customerId: request.customerId } })
+        .catch(() => undefined);
+    }
+
+    revalidatePath("/admin/requests");
+    revalidatePath("/admin/inbox");
+    revalidatePath(`/admin/inbox/${conversation.id}`);
+    if (!link.ok) {
+      // Request exists; surface a soft problem instead of hiding it.
+      return { ok: false, error: "CREATED_BUT_LINK_FAILED" };
+    }
+    return { ok: true, data: { requestId: request.id, reference: request.reference } };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "FAILED";
+    if (msg === "CART_ITEMS_UNAVAILABLE" || msg === "EMPTY_CART" || msg === "MIXED_CURRENCY_CART") {
+      return { ok: false, error: msg };
+    }
+    return { ok: false, error: "FAILED" };
+  }
+}

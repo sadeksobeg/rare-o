@@ -5,6 +5,7 @@
  * propose_price request): this is the final price-settled point, matching
  * how deals/brokerage hand off after their own "accept" step.
  */
+import { resolveBusinessE164 } from "@/lib/whatsapp/business-number";
 import {
   buildWhatsAppDeepLink,
   getWhatsAppBusinessE164,
@@ -105,10 +106,10 @@ export function buildWholesaleHandoffMessage(
   ].join("\n");
 }
 
-export function prepareWholesaleHandoff(
+export async function prepareWholesaleHandoff(
   messageText: string
-): WholesaleHandoffResult {
-  const businessE164 = getWhatsAppBusinessE164();
+): Promise<WholesaleHandoffResult> {
+  const businessE164 = await resolveBusinessE164();
   const deepLink = buildWhatsAppDeepLink(businessE164, messageText);
   return { businessE164, messageText, deepLink };
 }

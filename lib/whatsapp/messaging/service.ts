@@ -288,6 +288,19 @@ export async function persistInboundText(
     });
 
     if (result.created) {
+      // Customer sent the prepared handoff text → attach the retail request.
+      // Never allowed to fail the inbound path.
+      try {
+        const { autoLinkConversationByRetailReference } = await import(
+          "@/lib/whatsapp/messaging/reference-link"
+        );
+        await autoLinkConversationByRetailReference(
+          { conversationId: result.conversationId, text },
+          db as typeof defaultPrisma
+        );
+      } catch {
+        /* auto-link is best-effort */
+      }
       void publishInboxEvent("message.new", {
         conversationId: result.conversationId,
         messageId: result.messageId,
@@ -868,11 +881,14 @@ export async function upsertConnectionHealth(
       state: health.state,
       detailSafe,
       lastConnectedAt,
+      connectedPhone: health.connectedPhone ?? null,
     },
     update: {
       state: health.state,
       detailSafe,
       ...(lastConnectedAt ? { lastConnectedAt } : {}),
+      // Keep the last known number across disconnects (wa.me links must survive).
+      ...(health.connectedPhone ? { connectedPhone: health.connectedPhone } : {}),
     },
     select: { state: true, outboundKillSwitch: true },
   });

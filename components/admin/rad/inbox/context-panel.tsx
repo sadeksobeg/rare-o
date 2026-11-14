@@ -92,6 +92,8 @@ export function RadContextPanel({
           audits={audits}
           dict={dict}
           locale={locale}
+          defaultCustomerName={conversation.name ?? ""}
+          maskedPhone={maskedPhone}
         />
       </section>
 
