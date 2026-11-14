@@ -563,3 +563,12 @@ sensitive credentials + TLS; field-level Postgres PII still out of scope):
 - Matrix: FINAL-REPORT + DELIVERY-VS-CONTRACT — **7.1–7.5 PASS**; **9.1 live WhatsApp** remains the open owner gate
 
 `npm run report:counts` after matrix edit: PASS 30 · PARTIAL 3 · OWNER-ACTION 0.
+
+## 2026-11-14 — Wholesale test round 1 (findings)
+Fixed (6ddebdf): `WH-YYYY-NNNN` reference collided in a real test run (9000 values, no retry) → now `WH-YYYY-XXXXXX` (crypto, 5 retries); admin now gets a live toast on new wholesale request / quote accepted / declined.
+Open (not fixed, awaiting owner direction):
+1. Admin wholesale detail: "Operations" (the quote/transition controls) sits below the shipping card — primary action is buried; same stage-gating as retail (show only what applies) is advisable.
+2. Admin wholesale detail: the "تتبّع الشحنة" button in the shipping card has no handler (dead button); shipping fields show even before confirmation.
+3. Trader is notified in-portal only (`notifyTrader`); no WhatsApp message to the trader on quote / status change (retail has this). Needs owner decision.
+4. No admin ops-alert entry for wholesale (dashboard queue only).
+Not yet covered: full UI walk-through with browser (trader create → admin quote → accept → handoff), deals track.
