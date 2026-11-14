@@ -570,7 +570,9 @@ export function RadThread({
       prevBubble = m.messageType === "system" ? null : m;
       out.push(
         <Bubble
-          key={m.id}
+          // Stable across optimistic → server swap (id changes, clientRequestId
+          // does not) so the bubble is not unmounted and re-faded-in.
+          key={m.clientRequestId ?? m.id}
           m={m}
           i={i}
           grouped={grouped}

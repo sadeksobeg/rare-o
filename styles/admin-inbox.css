@@ -276,7 +276,7 @@
   cursor: pointer;
   transition: background-color 0.14s var(--rad-ease);
   animation: rad-rowin 0.4s var(--rad-ease) both;
-  animation-delay: calc(var(--rad-i) * 35ms);
+  animation-delay: calc(min(var(--rad-i), 6) * 30ms);
   outline-offset: -2px;
 }
 .rad-cv:hover {
@@ -595,8 +595,8 @@
   font-size: 14px;
   line-height: 1.65;
   position: relative;
-  animation: rad-msgin 0.32s var(--rad-ease) both;
-  animation-delay: calc(var(--rad-i) * 40ms);
+  animation: rad-msgin 0.16s var(--rad-ease) both;
+  animation-delay: 0ms;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
@@ -2063,8 +2063,8 @@
   gap: 6px;
   max-width: min(460px, 78%);
   min-width: 0;
-  animation: rad-msgin 0.32s var(--rad-ease) both;
-  animation-delay: calc(var(--rad-i) * 40ms);
+  animation: rad-msgin 0.16s var(--rad-ease) both;
+  animation-delay: 0ms;
 }
 .rad-bb-row.rad-in {
   align-self: flex-start;

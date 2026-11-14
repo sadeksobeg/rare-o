@@ -758,7 +758,7 @@
   border-radius: 12px;
   transition: background-color 0.16s var(--rad-ease);
   animation: rad-rowin 0.45s var(--rad-ease) both;
-  animation-delay: calc(var(--rad-i) * 45ms);
+  animation-delay: calc(min(var(--rad-i), 8) * 45ms);
 }
 .rad-row:hover,
 .rad-row:focus-within {
@@ -1043,7 +1043,7 @@
   padding: 7px 0 11px;
   min-width: 0;
   animation: rad-rowin 0.45s var(--rad-ease) both;
-  animation-delay: calc(var(--rad-i) * 60ms + 250ms);
+  animation-delay: calc(min(var(--rad-i), 8) * 60ms + 250ms);
 }
 .rad-ev > div {
   min-width: 0;
