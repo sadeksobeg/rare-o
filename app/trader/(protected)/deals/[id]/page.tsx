@@ -145,7 +145,7 @@ export default async function TraderDealDetailPage({
               }
               if (deal.proposedPrice != null) {
                 items.push({
-                  label: t.dealTotal,
+                  label: locale === "ar" ? "السعر المقترح" : "Proposed price",
                   value: (
                     <>
                       {formatMoney(

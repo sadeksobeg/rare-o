@@ -572,3 +572,12 @@ Open (not fixed, awaiting owner direction):
 3. Trader is notified in-portal only (`notifyTrader`); no WhatsApp message to the trader on quote / status change (retail has this). Needs owner decision.
 4. No admin ops-alert entry for wholesale (dashboard queue only).
 Not yet covered: full UI walk-through with browser (trader create → admin quote → accept → handoff), deals track.
+
+## 2026-11-14 — Deals test round 1 (findings)
+Fixed (6a5457f + label): `DP-YYYY-NNNN` reference (4 digits, Math.random, no retry) → `DP-YYYY-XXXXXX` crypto + retry; admin live toast on new deal / trader reply / accept / reject / close; trader now told in platform inbox + WhatsApp on admin accept/reject/close/counter and payment confirmation (`lib/trader/notify-channels.ts`); trader deal page label "الإجمالي" for a unit-price field → "السعر المقترح". New check: `npm run test:deals-flow` (8 pass).
+Verified in browser (local): trader creates non-catalog deal (3-step wizard) → admin sees it → admin accept (confirm dialog) → awaiting_payment card with "confirm payment" action.
+Open (awaiting owner direction):
+1. Unclear whether `proposedPrice` is per-unit or total (form label "السعر (مطلوب)"); admin card says "الشروط التجارية الحالية". Decide and label consistently.
+2. Admin awaiting_payment view repeats the commercial terms twice (payment card + details card).
+3. Admin deal reply form lists all five actions at once (continue/counter/accept/reject/close); stage-gating like wholesale/retail would reduce confusion.
+4. Payment-confirm step not clicked in browser (covered by service check).
