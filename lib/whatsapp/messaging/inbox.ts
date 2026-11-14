@@ -44,6 +44,9 @@ export type InboxConversationListItem = {
   hasPhone: boolean;
   lastMessagePreview: string;
   lastMessageAt: string | null;
+  /** Direction/status of the newest visible message (list preview prefix + tick). */
+  lastMessageDirection: "inbound" | "outbound" | null;
+  lastMessageStatus: string | null;
   unreadCount: number;
   hasUnread: boolean;
   archived: boolean;
@@ -248,6 +251,8 @@ async function listInboxConversationsImpl(
           messageType: true,
           waTimestamp: true,
           createdAt: true,
+          direction: true,
+          status: true,
         },
       },
     },
@@ -287,6 +292,13 @@ async function listInboxConversationsImpl(
         // Raw tags — UI humanizes via humanizeInboxPreview.
         lastMessagePreview: derivedPreview,
         lastMessageAt: toIso(lastAt),
+        lastMessageDirection:
+          latest?.direction === "outbound"
+            ? "outbound"
+            : latest?.direction === "inbound"
+              ? "inbound"
+              : null,
+        lastMessageStatus: latest?.status ?? null,
         unreadCount: r.unreadCount,
         hasUnread: r.unreadCount > 0,
         archived: Boolean(r.archivedAt),

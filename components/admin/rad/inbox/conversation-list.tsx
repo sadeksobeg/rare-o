@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, BellOff, Search } from "lucide-react";
+import { Bell, BellOff, Check, CheckCheck, CircleAlert, LoaderCircle, Search } from "lucide-react";
 import type { InboxConversationListItem } from "@/lib/whatsapp/messaging/inbox";
 import type { InboxHealthView } from "@/lib/whatsapp/messaging/inbox";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -181,7 +181,37 @@ export function RadConversationList({
                     ) : null}
                   </div>
                   <div className="rad-cp">
+                    {r.lastMessageDirection === "outbound" ? (
+                      <span
+                        className={cn(
+                          "rad-cp-tick",
+                          r.lastMessageStatus === "read" && "rad-rd",
+                          r.lastMessageStatus === "failed" && "rad-cp-fail"
+                        )}
+                        aria-hidden
+                      >
+                        {r.lastMessageStatus === "failed" ? (
+                          <CircleAlert width={14} height={14} strokeWidth={1.75} />
+                        ) : r.lastMessageStatus === "read" ||
+                          r.lastMessageStatus === "delivered" ? (
+                          <CheckCheck width={14} height={14} strokeWidth={1.75} />
+                        ) : r.lastMessageStatus === "sent" ? (
+                          <Check width={14} height={14} strokeWidth={1.75} />
+                        ) : (
+                          <LoaderCircle width={14} height={14} strokeWidth={1.75} />
+                        )}
+                      </span>
+                    ) : null}
                     <span className={cn(!hasPreview && "rad-cp-empty")}>{preview}</span>
+                    {r.muted ? (
+                      <BellOff
+                        className="rad-cp-muted"
+                        width={13}
+                        height={13}
+                        strokeWidth={1.75}
+                        aria-label={ib.mute8h}
+                      />
+                    ) : null}
                     {r.phoneConflict ? (
                       <i className="rad-ub rad-ub-conflict" aria-label={dict.inbox.phoneConflictChip}>
                         !

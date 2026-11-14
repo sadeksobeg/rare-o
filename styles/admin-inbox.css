@@ -2833,7 +2833,7 @@
 }
 
 /* Header badges: one tidy row, long labels truncate instead of wrapping inside the pill. */
-.rad-th-badges { flex-wrap: nowrap; overflow: hidden; }
+.rad-th-badges { flex-wrap: wrap; row-gap: 4px; }
 .rad-th-badges .rad-chipl {
   flex: 0 1 auto;
   min-width: 0;
@@ -2841,4 +2841,71 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* ── Conversation list: delivery tick, muted marker, tighter hierarchy ── */
+.rad-cp { gap: 6px; }
+.rad-cp-tick {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  color: var(--rad-tx3);
+}
+.rad-cp-tick.rad-rd { color: var(--rad-info, #53a6ff); }
+.rad-cp-tick.rad-cp-fail { color: var(--rad-err, #e5484d); }
+.rad-cp-muted { flex: none; color: var(--rad-tx3); opacity: 0.8; }
+.rad-cp > span:not(.rad-cp-tick) {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rad-cv { border-radius: 12px; margin-inline: 6px; transition: background-color 0.12s ease; }
+.rad-cv.rad-un .rad-cr b { font-weight: 700; }
+.rad-cv.rad-un .rad-ub {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-style: normal;
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+}
+
+/* ── Context panel: card sections, count badges, status chips ── */
+.rad-pf2-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+.rad-xp section.rad-xp-card {
+  margin: 12px;
+  padding: 14px;
+  border: 1px solid var(--rad-bd);
+  border-radius: 14px;
+  background: var(--rad-surface, transparent);
+}
+.rad-xp .rad-xp-card h3 {
+  justify-content: flex-start;
+  gap: 8px;
+  font-size: 12.5px;
+  letter-spacing: 0;
+  color: var(--rad-tx2, var(--rad-tx3));
+}
+.rad-xp .rad-xp-card h3 .rad-num {
+  margin-inline-start: auto;
+  min-width: 20px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--rad-surface2, var(--rad-c1));
+  color: var(--rad-tx3);
+  font-style: normal;
+  font-size: 11px;
+  line-height: 20px;
+  text-align: center;
 }

@@ -1,17 +1,19 @@
 /**
  * W1 enqueue rate limits (application layer, on top of outbound-safety):
- * - ≤1 message / second / conversation
+ * - ≤ PER_CONV_BURST messages / PER_CONV_WINDOW_MS / conversation (a person typing
+ *   fast sends 2–3 in a row; the old hard 1/s gap rejected the second one)
  * - ≤N messages / minute global (configurable; default 20)
  * Small jitter is applied by the worker anti-ban slot, not here.
  */
 
-const PER_CONV_MIN_GAP_MS = 1_000;
+const PER_CONV_WINDOW_MS = 10_000;
+const PER_CONV_BURST = 5;
 const GLOBAL_WINDOW_MS = 60_000;
 const DEFAULT_GLOBAL_MAX_PER_WINDOW = 20;
 
 let globalMaxPerWindow = DEFAULT_GLOBAL_MAX_PER_WINDOW;
 
-const perConversationLast = new Map<string, number>();
+const perConversationStamps = new Map<string, number[]>();
 const globalStamps: number[] = [];
 
 export type EnqueueRateLimitResult =
@@ -61,12 +63,14 @@ export function assessEnqueueRateLimit(
     return { ok: false, code: "RATE_LIMITED", error: "Missing conversation key" };
   }
 
-  const last = perConversationLast.get(key) ?? 0;
-  if (now - last < PER_CONV_MIN_GAP_MS) {
+  const recent = (perConversationStamps.get(key) ?? []).filter(
+    (t) => now - t < PER_CONV_WINDOW_MS
+  );
+  if (recent.length >= PER_CONV_BURST) {
     return {
       ok: false,
       code: "RATE_LIMITED",
-      error: "Per-conversation send rate exceeded (max 1/s)",
+      error: `Per-conversation send rate exceeded (max ${PER_CONV_BURST}/${PER_CONV_WINDOW_MS / 1000}s)`,
     };
   }
 
@@ -88,14 +92,18 @@ export function recordEnqueueAccepted(conversationKey: string): void {
   const now = Date.now();
   const key = conversationKey.trim();
   if (!key) return;
-  perConversationLast.set(key, now);
+  const stamps = (perConversationStamps.get(key) ?? []).filter(
+    (t) => now - t < PER_CONV_WINDOW_MS
+  );
+  stamps.push(now);
+  perConversationStamps.set(key, stamps);
   pruneGlobal(now);
   globalStamps.push(now);
 }
 
 /** Test helper — clears in-memory windows. */
 export function clearEnqueueRateLimitForTests(): void {
-  perConversationLast.clear();
+  perConversationStamps.clear();
   globalStamps.length = 0;
   globalMaxPerWindow = DEFAULT_GLOBAL_MAX_PER_WINDOW;
 }

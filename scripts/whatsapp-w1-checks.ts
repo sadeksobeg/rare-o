@@ -137,8 +137,10 @@ async function main() {
     clearEnqueueRateLimitForTests();
     assert(assessEnqueueRateLimit(waChatId).ok, "first rate ok");
     recordEnqueueAccepted(waChatId);
+    assert(assessEnqueueRateLimit(waChatId).ok, "2nd quick send allowed (burst)");
+    for (let k = 0; k < 4; k += 1) recordEnqueueAccepted(waChatId);
     const limited = assessEnqueueRateLimit(waChatId);
-    assert(!limited.ok && limited.code === "RATE_LIMITED", "per-chat 1/s");
+    assert(!limited.ok && limited.code === "RATE_LIMITED", "per-chat burst cap (5/10s)");
 
     // --- kill switch with actor ---
     console.log("[w1] kill switch");

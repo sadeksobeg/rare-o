@@ -52,29 +52,35 @@ export function RadContextPanel({
         <span>
           <bdi dir="ltr">{maskedPhone ?? ""}</bdi>
         </span>
+        <div className="rad-pf2-chips">
+          {conversation.crm.trader ? (
+            <span className="rad-chipl rad-ok">
+              {dict.inbox.linkedTraderChip}
+            </span>
+          ) : null}
+          {conversation.link.linked ? (
+            <span className="rad-chipl">
+              {conversation.link.linkType === "retail_request"
+                ? dict.inbox.typeRetail
+                : conversation.link.linkType === "deal_proposal"
+                  ? dict.inbox.typeDeal
+                  : conversation.link.linkType === "wholesale_request"
+                    ? dict.inbox.typeWholesale
+                    : conversation.link.linkType === "brokerage_request"
+                      ? dict.inbox.typeBrokerage
+                      : ib.filterLinked}
+            </span>
+          ) : null}
+          {conversation.muted ? (
+            <span className="rad-chipl">{ib.mute8h}</span>
+          ) : null}
+          {conversation.blocked ? (
+            <span className="rad-chipl rad-no">{ib.blockContact}</span>
+          ) : null}
+        </div>
       </section>
 
-      <section>
-        <h3>{ib.notesHeading}</h3>
-        <RadNotesSection
-          conversationId={conversation.id}
-          notes={conversation.notes}
-          ib={ib}
-          locale={locale}
-        />
-      </section>
-
-      <section>
-        <h3>{ib.tagsHeading}</h3>
-        <RadTagsSection
-          conversationId={conversation.id}
-          tags={conversation.tags}
-          ib={ib}
-          inbox={dict.inbox}
-        />
-      </section>
-
-      <section>
+      <section className="rad-xp-card">
         <h3>{ib.linkedRecordsHeading}</h3>
         <LinkedRecordPanel
           conversationId={conversation.id}
@@ -86,6 +92,36 @@ export function RadContextPanel({
           audits={audits}
           dict={dict}
           locale={locale}
+        />
+      </section>
+
+      <section className="rad-xp-card">
+        <h3>
+          {ib.notesHeading}
+          {conversation.notes.length > 0 ? (
+            <em className="rad-num">{conversation.notes.length}</em>
+          ) : null}
+        </h3>
+        <RadNotesSection
+          conversationId={conversation.id}
+          notes={conversation.notes}
+          ib={ib}
+          locale={locale}
+        />
+      </section>
+
+      <section className="rad-xp-card">
+        <h3>
+          {ib.tagsHeading}
+          {conversation.tags.length > 0 ? (
+            <em className="rad-num">{conversation.tags.length}</em>
+          ) : null}
+        </h3>
+        <RadTagsSection
+          conversationId={conversation.id}
+          tags={conversation.tags}
+          ib={ib}
+          inbox={dict.inbox}
         />
       </section>
     </aside>
