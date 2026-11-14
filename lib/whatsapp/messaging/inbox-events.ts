@@ -29,6 +29,8 @@ export type InboxEventPayload = {
   /** Admin toast kind (e.g. customer_confirmed) — no PII. */
   kind?: string;
   requestId?: string;
+  /** retail (default) | wholesale | deal — picks the admin page the toast opens. */
+  domain?: string;
   /** Short Arabic title for the toast, e.g. the request reference. */
   title?: string;
   connectionState?: string;
@@ -98,6 +100,7 @@ export async function publishInboxEvent(
         : {}),
       ...(payload.kind ? { kind: String(payload.kind).slice(0, 40) } : {}),
       ...(payload.requestId ? { requestId: String(payload.requestId).slice(0, 40) } : {}),
+      ...(payload.domain ? { domain: String(payload.domain).slice(0, 20) } : {}),
       ...(payload.title ? { title: String(payload.title).slice(0, 80) } : {}),
       ...(payload.connectionState
         ? { connectionState: payload.connectionState }

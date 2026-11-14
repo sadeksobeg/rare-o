@@ -108,13 +108,17 @@ export function RadShellClient({
         customer_confirmed: "العميل أكّد صحة بياناته",
         customer_changes_requested: "العميل طلب تعديلاً على طلبه",
         customer_paid_claim: "العميل أفاد بأنه أرسل الدفعة",
+        wholesale_submitted: "طلب جملة جديد من تاجر",
+        wholesale_quote_accepted: "التاجر قبل عرض السعر",
+        wholesale_quote_declined: "التاجر رفض عرض السعر",
       };
+      const base = p.domain === "wholesale" ? "/admin/wholesale" : "/admin/requests";
       if (!text[p.kind]) return;
       playInboxChime();
       toast(text[p.kind], {
         id: p.eventId,
         description: p.title || undefined,
-        action: { label: "فتح الطلب", onClick: () => router.push(`/admin/requests/${p.requestId}`) },
+        action: { label: "فتح الطلب", onClick: () => router.push(`${base}/${p.requestId}`) },
       });
     },
   });

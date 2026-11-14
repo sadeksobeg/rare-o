@@ -1,5 +1,7 @@
+import { randomInt } from "node:crypto";
 import { uiVisibleWholesaleWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
+import { publishInboxEvent } from "@/lib/whatsapp/messaging/inbox-events";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { notifyTrader } from "@/lib/trader/notifications";
 import {
@@ -89,10 +91,14 @@ async function prepareWholesaleHandoffForRequest(
   }
 }
 
+const REFERENCE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+
+/** WH-YYYY-XXXXXX — 6 unguessable characters (the old 4-digit form collided in practice). */
 function buildReference(now = new Date()): string {
   const y = now.getUTCFullYear();
-  const n = Math.floor(Math.random() * 9000) + 1000;
-  return `WH-${y}-${n}`;
+  let code = "";
+  for (let i = 0; i < 6; i += 1) code += REFERENCE_ALPHABET[randomInt(REFERENCE_ALPHABET.length)];
+  return `WH-${y}-${code}`;
 }
 
 export type WholesaleLineInput = {
@@ -256,7 +262,8 @@ export async function createWholesaleRequest(input: CreateWholesaleRequestInput)
     shippingQuoteSnapshot = buildQuoteSnapshot(quoteResult, null);
   }
 
-  return prisma.wholesaleRequest.create({
+  const createOnce = (reference: string) =>
+    prisma.wholesaleRequest.create({
     data: {
       reference,
       traderId: input.traderId,
@@ -298,6 +305,24 @@ export async function createWholesaleRequest(input: CreateWholesaleRequestInput)
     },
     include: { lines: true },
   });
+
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      const created = await createOnce(attempt === 0 ? reference : buildReference());
+      void publishInboxEvent("conversation.updated", {
+        kind: "wholesale_submitted",
+        domain: "wholesale",
+        requestId: created.id,
+        title: created.reference,
+      });
+      return created;
+    } catch (e) {
+      if ((e as { code?: string }).code !== "P2002") throw e;
+      lastErr = e;
+    }
+  }
+  throw lastErr;
 }
 
 export async function markWholesaleHandoffOpened(input: {
@@ -600,6 +625,12 @@ export async function traderRespondToWholesaleQuote(input: {
     await prepareWholesaleHandoffForRequest(updated.id, input.locale ?? "ar");
   }
 
+  void publishInboxEvent("conversation.updated", {
+    kind: input.accept ? "wholesale_quote_accepted" : "wholesale_quote_declined",
+    domain: "wholesale",
+    requestId: updated.id,
+    title: updated.reference,
+  });
   return updated;
 }
 
