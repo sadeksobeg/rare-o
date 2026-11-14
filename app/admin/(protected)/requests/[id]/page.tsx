@@ -51,6 +51,7 @@ const NOTE_AR: Record<string, string> = {
 };
 
 const EXTRA_EVENT_TITLES: Record<string, [string, string]> = {
+  customer_paid_claim: ["العميل أفاد بأنه أرسل الدفعة", "Customer says the payment was sent"],
   customer_confirmed: ["العميل أكّد صحة البيانات", "Customer confirmed the details"],
   customer_changes_requested: ["العميل طلب تعديلاً", "Customer requested a change"],
   confirmation_sent: ["أُرسلت رسالة التأكيد للعميل", "Confirmation message sent"],

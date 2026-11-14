@@ -71,6 +71,7 @@ export function RetailFulfillmentPanel(p: Props) {
   const [note, setNote] = useState("");
   const [tracking, setTracking] = useState("");
   const [notify, setNotify] = useState(p.optedIn && p.canNotify);
+  const [notifyPay, setNotifyPay] = useState(true);
 
   const paymentDirty = mode !== p.paymentMode || (mode === "prepaid" && paid !== p.paymentConfirmed);
 
@@ -80,10 +81,18 @@ export function RetailFulfillmentPanel(p: Props) {
     fd.set("requestId", p.requestId);
     fd.set("mode", mode);
     fd.set("confirmed", paid ? "1" : "0");
+    if (notifyPay) fd.set("notifyCustomer", "1");
     start(async () => {
       const res = await adminSetRetailPaymentAction(fd);
       if (!res.ok) return void toast.error(ERR[res.error] ?? "تعذّر الحفظ");
-      toast.success("حُفظت طريقة الدفع");
+      const n = res.data?.notified;
+      toast.success(
+        n === "sent"
+          ? "حُفظت طريقة الدفع وأُرسلت للعميل على واتساب"
+          : n && n !== "skipped"
+            ? `حُفظت طريقة الدفع (لم تُرسل للعميل: ${ERR[n] ?? n})`
+            : "حُفظت طريقة الدفع"
+      );
       router.refresh();
     });
   }
@@ -166,6 +175,12 @@ export function RetailFulfillmentPanel(p: Props) {
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={paid} disabled={p.closed} onChange={(e) => setPaid(e.target.checked)} className="size-4" />
             تم استلام الدفعة
+          </label>
+        ) : null}
+        {paymentDirty && mode ? (
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={notifyPay} onChange={(e) => setNotifyPay(e.target.checked)} className="size-4" />
+            إبلاغ العميل على واتساب (رسالة جاهزة + رابط صفحة طلبه)
           </label>
         ) : null}
         {paymentDirty && mode ? (

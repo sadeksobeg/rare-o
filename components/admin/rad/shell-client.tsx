@@ -2,6 +2,10 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
+import { usePathname, useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useInboxEvents } from "@/components/admin/rad/inbox/use-inbox-events";
+import { playInboxChime } from "@/components/admin/rad/inbox/inbox-sound";
 import { RadSidebar, useRadSidebarCollapsed, type RadNavGroup } from "@/components/admin/rad/sidebar";
 import { RadTopbar } from "@/components/admin/rad/topbar";
 import type { RadPaletteAction } from "@/components/admin/rad/command-palette";
@@ -75,7 +79,45 @@ export function RadShellClient({
   mobileRequestsCount: number;
   children: ReactNode;
 }) {
+  const pathname = usePathname();
+  const router = useRouter();
   const [collapsed, setCollapsed] = useRadSidebarCollapsed();
+
+  // Admin-wide live notifications (the inbox page has its own handler for chime/refresh).
+  useInboxEvents({
+    onMessageNew: (p) => {
+      const ageMs = p.createdAt ? Date.now() - new Date(p.createdAt).getTime() : 0;
+      if (p.direction !== "inbound" || ageMs > 30_000) return;
+      if (pathname.startsWith("/admin/inbox")) return;
+      playInboxChime();
+      router.refresh(); // updates the sidebar unread badge
+      toast("رسالة واتساب جديدة", {
+        id: p.eventId,
+        description: p.preview || undefined,
+        action: {
+          label: "فتح",
+          onClick: () =>
+            router.push(p.conversationId ? `/admin/inbox/${p.conversationId}` : "/admin/inbox"),
+        },
+      });
+    },
+    onConversationUpdated: (p) => {
+      const ageMs = p.createdAt ? Date.now() - new Date(p.createdAt).getTime() : 0;
+      if (!p.kind || !p.requestId || ageMs > 60_000) return;
+      const text: Record<string, string> = {
+        customer_confirmed: "العميل أكّد صحة بياناته",
+        customer_changes_requested: "العميل طلب تعديلاً على طلبه",
+        customer_paid_claim: "العميل أفاد بأنه أرسل الدفعة",
+      };
+      if (!text[p.kind]) return;
+      playInboxChime();
+      toast(text[p.kind], {
+        id: p.eventId,
+        description: p.title || undefined,
+        action: { label: "فتح الطلب", onClick: () => router.push(`/admin/requests/${p.requestId}`) },
+      });
+    },
+  });
   const [mobileOpen, setMobileOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [paletteMounted, setPaletteMounted] = useState(false);

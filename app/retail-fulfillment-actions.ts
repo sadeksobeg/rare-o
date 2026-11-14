@@ -6,7 +6,7 @@ import { handleAdminSessionError, requireAdminSession } from "@/lib/auth/admin-s
 import { prisma } from "@/lib/db/prisma";
 import { sendRetailCustomerMessage } from "@/lib/retail-request/customer-channel";
 import { ensureOrderToken, orderPageUrl } from "@/lib/retail-request/order-page";
-import { buildShipmentUpdateMessage, formatEta } from "@/lib/retail-request/shipment-text";
+import { buildPaymentMessage, buildShipmentUpdateMessage, formatEta } from "@/lib/retail-request/shipment-text";
 import { createShipment, postShipmentUpdate } from "@/lib/shipping/shipments";
 
 function bump(requestId: string) {
@@ -16,7 +16,9 @@ function bump(requestId: string) {
 }
 
 /** Payment agreed with the customer: prepaid or cash on delivery (+ confirm receipt of an advance payment). */
-export async function adminSetRetailPaymentAction(formData: FormData): Promise<ActionResult> {
+export async function adminSetRetailPaymentAction(
+  formData: FormData
+): Promise<ActionResult & { data?: { notified: string } }> {
   let session;
   try {
     session = await requireAdminSession();
@@ -29,7 +31,17 @@ export async function adminSetRetailPaymentAction(formData: FormData): Promise<A
   if (mode !== "prepaid" && mode !== "cod") return { ok: false, error: "VALIDATION" };
   const r = await prisma.retailRequest.findUnique({
     where: { id: requestId },
-    select: { id: true, status: true, paymentConfirmedAt: true },
+    select: {
+      id: true,
+      status: true,
+      paymentConfirmedAt: true,
+      paymentMode: true,
+      reference: true,
+      customerName: true,
+      customerPhone: true,
+      customerId: true,
+      locale: true,
+    },
   });
   if (!r) return { ok: false, error: "NOT_FOUND" };
   if (r.status === "completed" || r.status === "cancelled") return { ok: false, error: "REQUEST_CLOSED" };
@@ -58,7 +70,39 @@ export async function adminSetRetailPaymentAction(formData: FormData): Promise<A
     }),
   ]);
   bump(r.id);
-  return { ok: true };
+
+  let notified = "skipped";
+  const changed = r.paymentMode !== mode || Boolean(r.paymentConfirmedAt) !== (mode === "prepaid" && confirmed);
+  if (String(formData.get("notifyCustomer") || "") === "1" && changed) {
+    const token = await ensureOrderToken(r.id);
+    if (token) {
+      const sent = await sendRetailCustomerMessage({
+        request: r,
+        adminId: session.sub,
+        text: buildPaymentMessage({
+          locale: r.locale === "en" ? "en" : "ar",
+          name: r.customerName,
+          reference: r.reference,
+          mode,
+          confirmed: mode === "prepaid" && confirmed,
+          link: orderPageUrl(token),
+        }),
+      });
+      notified = sent.ok ? "sent" : sent.error;
+      if (sent.ok) {
+        await prisma.retailHandoffEvent.create({
+          data: {
+            requestId: r.id,
+            eventType: "status_notified",
+            actor: "admin",
+            actorAdminId: session.sub,
+            note: "أُبلغ العميل بطريقة الدفع على واتساب",
+          },
+        });
+      }
+    }
+  }
+  return { ok: true, data: { notified } };
 }
 
 /** Turns the request into a Shipment (carrier, tracking, price) so it can be followed and updated. */

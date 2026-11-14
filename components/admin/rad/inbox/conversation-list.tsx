@@ -54,7 +54,12 @@ export function RadConversationList({
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    return rows.filter((r) => {
+    const sorted = [...rows].sort(
+      (a, b) =>
+        (b.lastMessageAt ? Date.parse(b.lastMessageAt) : 0) -
+        (a.lastMessageAt ? Date.parse(a.lastMessageAt) : 0)
+    );
+    return sorted.filter((r) => {
       if (filter === "un" && !r.hasUnread) return false;
       if (filter === "lk" && !r.link.linked) return false;
       if (filter === "nl" && r.link.linked) return false;

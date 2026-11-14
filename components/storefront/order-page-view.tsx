@@ -5,6 +5,8 @@ import { PackageCheck, Truck } from "lucide-react";
 import { Rings } from "@/components/brand";
 import { useMotion } from "@/components/motion/provider";
 import { OrderJourney } from "@/components/storefront/order-journey";
+import { AutoRefresh } from "@/components/storefront/auto-refresh";
+import { PaymentClaim } from "@/components/storefront/payment-claim";
 import { OrderResponse } from "@/components/storefront/order-response";
 import { ButtonLink } from "@/components/ui/button";
 import type { Locale } from "@/lib/i18n/config";
@@ -153,6 +155,11 @@ export function OrderPageView({
           </div>
         </div>
       </m.header>
+
+      <AutoRefresh />
+      {order.payment?.mode === "prepaid" && !order.payment.confirmed ? (
+        <PaymentClaim token={token} locale={locale} claimed={order.payment.claimed} />
+      ) : null}
 
       {order.response ? (
         <m.div

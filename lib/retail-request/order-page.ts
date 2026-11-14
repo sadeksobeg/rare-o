@@ -5,6 +5,7 @@
  * by itself — sending is always an explicit admin action.
  */
 import { randomBytes } from "node:crypto";
+import { publishInboxEvent } from "@/lib/whatsapp/messaging/inbox-events";
 import { prisma } from "@/lib/db/prisma";
 import { isFullName, isValidPhone } from "@/lib/validation/customer-identity";
 import { CUSTOMER_SHIPMENT_TEXT, formatEta, paymentLabel } from "@/lib/retail-request/shipment-text";
@@ -193,6 +194,7 @@ export type PublicOrderView = {
   locale: "ar" | "en";
   shipment: { status: string; trackingToken: string; trackingNumber: string | null } | null;
   paymentLabel: string | null;
+  payment: { mode: "prepaid" | "cod"; confirmed: boolean; claimed: boolean } | null;
   etaLabel: string | null;
   /** Newest first: what the team posted about the shipment (customer wording + their note). */
   updates: { status: string; title: string; note: string; at: string }[];
@@ -217,6 +219,12 @@ export async function getPublicOrder(token: string): Promise<PublicOrderView | n
     },
   });
   if (!r) return null;
+  const claimed = Boolean(
+    await prisma.retailHandoffEvent.findFirst({
+      where: { requestId: r.id, eventType: "customer_paid_claim" },
+      select: { id: true },
+    })
+  );
   const sh = r.shipments[0];
   const ship =
     r.shippingCostAmount != null && r.shippingCostCurrency
@@ -251,6 +259,14 @@ export async function getPublicOrder(token: string): Promise<PublicOrderView | n
     locale: r.locale === "en" ? "en" : "ar",
     shipment: sh ? { status: sh.status, trackingToken: sh.publicToken, trackingNumber: sh.trackingNumber } : null,
     paymentLabel: paymentLabel(r.paymentMode, Boolean(r.paymentConfirmedAt), r.locale !== "en"),
+    payment:
+      r.paymentMode === "prepaid" || r.paymentMode === "cod"
+        ? {
+            mode: r.paymentMode,
+            confirmed: Boolean(r.paymentConfirmedAt),
+            claimed: claimed,
+          }
+        : null,
     etaLabel: formatEta(r.etaMinDays, r.etaMaxDays, r.locale !== "en"),
     updates: (sh?.events ?? []).map((e) => ({
       status: e.status,
@@ -273,7 +289,7 @@ export async function submitCustomerResponse(input: {
   }
   const r = await prisma.retailRequest.findUnique({
     where: { publicToken: input.token },
-    select: { id: true, status: true },
+    select: { id: true, status: true, reference: true },
   });
   if (!r) return { ok: false, error: "NOT_FOUND" };
   if (r.status === "completed" || r.status === "cancelled") {
@@ -298,5 +314,38 @@ export async function submitCustomerResponse(input: {
       },
     }),
   ]);
+  void publishInboxEvent("conversation.updated", {
+    kind: input.response === "confirmed" ? "customer_confirmed" : "customer_changes_requested",
+    requestId: r.id,
+    title: r.reference,
+  });
+  return { ok: true };
+}
+
+/** Customer says the advance payment was sent — tells the admin live; the admin still confirms receipt. */
+export async function submitCustomerPaymentClaim(
+  token: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (!isPlausibleOrderToken(token)) return { ok: false, error: "NOT_FOUND" };
+  const r = await prisma.retailRequest.findUnique({
+    where: { publicToken: token },
+    select: { id: true, status: true, reference: true, paymentMode: true, paymentConfirmedAt: true },
+  });
+  if (!r) return { ok: false, error: "NOT_FOUND" };
+  if (r.status === "completed" || r.status === "cancelled") return { ok: false, error: "REQUEST_CLOSED" };
+  if (r.paymentMode !== "prepaid" || r.paymentConfirmedAt) return { ok: false, error: "NOT_APPLICABLE" };
+  const dup = await prisma.retailHandoffEvent.findFirst({
+    where: { requestId: r.id, eventType: "customer_paid_claim" },
+    select: { id: true },
+  });
+  if (dup) return { ok: true };
+  await prisma.retailHandoffEvent.create({
+    data: { requestId: r.id, eventType: "customer_paid_claim", actor: "customer", note: "العميل أفاد بأنه أرسل الدفعة" },
+  });
+  void publishInboxEvent("conversation.updated", {
+    kind: "customer_paid_claim",
+    requestId: r.id,
+    title: r.reference,
+  });
   return { ok: true };
 }

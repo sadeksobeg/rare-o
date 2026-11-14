@@ -26,6 +26,11 @@ export type InboxEventPayload = {
   /** Truncated preview for list UI — max ~80 chars, never full body */
   preview?: string;
   unreadCount?: number;
+  /** Admin toast kind (e.g. customer_confirmed) — no PII. */
+  kind?: string;
+  requestId?: string;
+  /** Short Arabic title for the toast, e.g. the request reference. */
+  title?: string;
   connectionState?: string;
   outboundEnabled?: boolean;
   outboundKillSwitch?: boolean;
@@ -91,6 +96,9 @@ export async function publishInboxEvent(
       ...(typeof payload.unreadCount === "number"
         ? { unreadCount: payload.unreadCount }
         : {}),
+      ...(payload.kind ? { kind: String(payload.kind).slice(0, 40) } : {}),
+      ...(payload.requestId ? { requestId: String(payload.requestId).slice(0, 40) } : {}),
+      ...(payload.title ? { title: String(payload.title).slice(0, 80) } : {}),
       ...(payload.connectionState
         ? { connectionState: payload.connectionState }
         : {}),

@@ -5,9 +5,10 @@
  */
 import { prisma } from "@/lib/db/prisma";
 import { createRetailRequestFromCart } from "@/lib/retail-request/service";
-import { getPublicOrder } from "@/lib/retail-request/order-page";
+import { getPublicOrder, submitCustomerPaymentClaim } from "@/lib/retail-request/order-page";
 import { computeJourney } from "@/lib/retail-request/journey";
 import {
+  buildPaymentMessage,
   buildShipmentUpdateMessage,
   formatEta,
   paymentLabel,
@@ -95,6 +96,18 @@ async function main() {
     check(view?.updates[0]?.note === "عند المكان المتفق عليه b", "update note is sanitised");
     check(!!view?.updates.some((u) => u.note === "الشحنة في مركز الفرز"), "note-only update is visible to the customer");
     check(!JSON.stringify(view).includes("actor"), "no staff identity in the public payload");
+
+    // customer says the advance payment was sent
+    const tok = full!.publicToken!;
+    check(!(await submitCustomerPaymentClaim(tok)).ok, "paid-claim refused while payment mode is COD");
+    await prisma.retailRequest.update({ where: { id: request.id }, data: { paymentMode: "prepaid", paymentConfirmedAt: null } });
+    check((await submitCustomerPaymentClaim(tok)).ok, "paid-claim accepted for prepaid");
+    check((await submitCustomerPaymentClaim(tok)).ok, "paid-claim is idempotent");
+    const claims = await prisma.retailHandoffEvent.count({ where: { requestId: request.id, eventType: "customer_paid_claim" } });
+    check(claims === 1, "only one paid-claim event stored");
+    check((await getPublicOrder(tok))?.payment?.claimed === true, "public view reports the claim");
+    const msg = buildPaymentMessage({ locale: "ar", name: "أحمد علي حسن", reference: "RO-X", mode: "prepaid", confirmed: false, link: "https://x/order/t" });
+    check(msg.includes("أحمد") && msg.includes("RO-X") && msg.includes("https://x/order/t"), "payment message carries name, reference and link");
   } finally {
     await prisma.shipment.deleteMany({ where: { retailRequestId: request.id } });
     await prisma.retailRequest.delete({ where: { id: request.id } }).catch(() => undefined);

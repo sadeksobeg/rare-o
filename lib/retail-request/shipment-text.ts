@@ -53,3 +53,27 @@ export function buildShipmentUpdateMessage(input: {
     ar ? `تابع كل التفاصيل: ${input.link}` : `Follow everything here: ${input.link}`,
   ].join("\n");
 }
+
+/** WhatsApp text sent when the team fixes how the customer pays. */
+export function buildPaymentMessage(input: {
+  locale: "ar" | "en";
+  name: string;
+  reference: string;
+  mode: "prepaid" | "cod";
+  confirmed: boolean;
+  link: string;
+}): string {
+  const first = input.name.trim().split(/\s+/)[0] || input.name;
+  if (input.locale === "en") {
+    if (input.mode === "cod")
+      return `Hello ${first}, for request ${input.reference} payment will be on delivery. Follow your order here: ${input.link}`;
+    if (input.confirmed)
+      return `Hello ${first}, we received your payment for request ${input.reference}. Thank you! Follow your order here: ${input.link}`;
+    return `Hello ${first}, request ${input.reference} is paid in advance. Please complete the payment as agreed, then reply here or tap "I have paid" on your order page: ${input.link}`;
+  }
+  if (input.mode === "cod")
+    return `أهلاً ${first}، طلبك ${input.reference} سيكون الدفع فيه عند الاستلام. تابع طلبك من هنا: ${input.link}`;
+  if (input.confirmed)
+    return `أهلاً ${first}، استلمنا دفعتك لطلب ${input.reference}. شكراً لك! تابع طلبك من هنا: ${input.link}`;
+  return `أهلاً ${first}، طلبك ${input.reference} بنظام الدفع المسبق. يرجى إتمام الدفع حسب المتفق عليه، ثم ردّ علينا هنا أو اضغط «أرسلتُ الدفعة» في صفحة طلبك: ${input.link}`;
+}
