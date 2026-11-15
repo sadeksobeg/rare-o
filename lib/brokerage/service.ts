@@ -272,7 +272,11 @@ export async function listTraderBrokerage(traderId: string) {
   return prisma.brokerageRequest.findMany({
     where: { traderId },
     orderBy: { createdAt: "desc" },
-    include: { quote: true, inspection: true },
+    include: {
+      quote: true,
+      inspection: true,
+      photoRequests: { where: { requestedBy: "admin", fulfilledAt: null }, select: { id: true } },
+    },
   });
 }
 
@@ -284,6 +288,7 @@ export async function listAdminBrokerage(status?: string) {
       trader: { select: { id: true, displayName: true, email: true } },
       quote: true,
       inspection: true,
+      photoRequests: { select: { requestedBy: true, fulfilledAt: true } },
     },
   });
 }

@@ -245,6 +245,25 @@ export default async function AdminBrokeragePage({
                             r.descriptionEn
                           )}
                         </p>
+                        {(() => {
+                          const waitingPhotos = r.photoRequests.filter((x) => x.requestedBy === "admin" && !x.fulfilledAt).length;
+                          const fresh = r.photoRequests.filter((x) => x.fulfilledAt && Date.now() - new Date(x.fulfilledAt).getTime() < 48 * 3600 * 1000).length;
+                          if (!waitingPhotos && !fresh) return null;
+                          return (
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              {fresh ? (
+                                <span className="rounded-full px-2 py-0.5 text-[0.65rem] font-bold" style={{ background: "rgba(46,157,106,.18)", color: "#2e9d6a" }}>
+                                  📷 وصلت صور جديدة
+                                </span>
+                              ) : null}
+                              {waitingPhotos ? (
+                                <span className="rounded-full px-2 py-0.5 text-[0.65rem] font-bold" style={{ background: "rgba(224,160,48,.2)", color: "#c98a1a" }}>
+                                  ⏳ بانتظار صور
+                                </span>
+                              ) : null}
+                            </div>
+                          );
+                        })()}
                         <div className="mt-2 flex items-center justify-between gap-2">
                           <p
                             className="truncate text-xs"

@@ -7,7 +7,7 @@ import { BrokerageStatusBadge } from "@/components/brokerage/status-badge";
 import { TraderPageHeader } from "@/components/trader/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { listTraderBrokerage } from "@/lib/brokerage/service";
-import { nextActor } from "@/lib/brokerage/status";
+import { BROKERAGE_LIFECYCLE, nextActor, type BrokerageStatus } from "@/lib/brokerage/status";
 import { getTraderSession } from "@/lib/auth/trader-session";
 import { formatAgeDays } from "@/lib/i18n/format";
 import { getRequestDictionary } from "@/lib/i18n/server";
@@ -88,56 +88,60 @@ export default async function TraderBrokeragePage() {
           actionLabel={t.brokerageNewCta}
         />
       ) : (
-        <ul className="grid gap-3">
+        <ul className="grid gap-3.5">
           {rows.map((r, i) => {
             const waiting = nextActor(r.status) === "trader";
+            const photosOpen = r.photoRequests.length > 0;
+            const attention = waiting || photosOpen;
             const age = formatAgeDays(r.createdAt, locale);
+            const idx = BROKERAGE_LIFECYCLE.indexOf(r.status as BrokerageStatus);
+            const dead = ["DECLINED", "REJECTED", "CANCELLED"].includes(r.status);
+            const pct = r.status === "CLOSED" ? 100 : idx >= 0 ? Math.round(((idx + 1) / BROKERAGE_LIFECYCLE.length) * 100) : 10;
+            const accent = dead ? "#e06060" : r.status === "CLOSED" ? "#2e9d6a" : attention ? "#e0a030" : "var(--rad-ac, #8a52c4)";
             return (
-              <li
-                key={r.id}
-                className="min-w-0"
-                style={{ animationDelay: `${Math.min(i, 7) * 45}ms` }}
-              >
+              <li key={r.id} className="min-w-0" style={{ animationDelay: `${Math.min(i, 7) * 45}ms` }}>
                 <Link
                   href={`/trader/brokerage/${r.id}`}
-                  className={`rad-card group flex min-h-14 flex-wrap items-center justify-between gap-3 rounded-[14px] p-4 pe-5 ${
-                    waiting
-                      ? "border-[color:color-mix(in_srgb,var(--rad-warn)_50%,var(--rad-bd))] bg-[color:var(--rad-warns)]"
-                      : "hover:border-[color:var(--rad-ac)]"
-                  }`}
+                  className="rad-card group relative block overflow-hidden rounded-[18px] p-4 ps-5 transition-[transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:shadow-lg"
+                  style={{ borderColor: attention ? "color-mix(in srgb, #e0a030 55%, var(--rad-bd))" : undefined }}
                 >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p
-                        className="font-mono text-[0.7rem] text-[color:var(--rad-tx3)]"
-                        dir="ltr"
-                      >
-                        <bdi dir="ltr">{r.reference}</bdi>
+                  <span aria-hidden className="absolute inset-y-0 start-0 w-1.5" style={{ background: accent }} />
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="flex flex-wrap items-center gap-x-2 text-[0.7rem] text-[color:var(--rad-tx3)]">
+                        <bdi dir="ltr" className="font-mono">{r.reference}</bdi>
+                        <span>·</span>
+                        <span>{age}</span>
                       </p>
-                      <span className="text-[0.7rem] text-[color:var(--rad-tx3)]">
-                        {age}
-                      </span>
+                      <p className="mt-1 line-clamp-2 text-[15.5px] font-semibold leading-snug text-[color:var(--rad-tx)]">
+                        {localizedName(locale, r.descriptionAr, r.descriptionEn)}
+                      </p>
+                      {r.cityAr || r.cityEn ? (
+                        <p className="mt-0.5 text-xs text-[color:var(--rad-tx3)]">{localizedName(locale, r.cityAr, r.cityEn)}</p>
+                      ) : null}
                     </div>
-                    <p className="mt-1 truncate text-base font-medium text-[color:var(--rad-tx)]">
-                      {localizedName(locale, r.descriptionAr, r.descriptionEn)}
-                    </p>
-                    {(r.cityAr || r.cityEn) && (
-                      <p className="mt-0.5 text-xs text-[color:var(--rad-tx3)]">
-                        {localizedName(locale, r.cityAr, r.cityEn)}
-                      </p>
-                    )}
+                    <BrokerageStatusBadge status={r.status} label={brokerageStatusLabel(r.status, locale)} />
                   </div>
-                  <div className="flex items-center gap-2.5">
-                    {waiting ? (
-                      <span className="rounded-full bg-[color:var(--rad-surface)] px-2.5 py-1 text-xs font-semibold text-[color:var(--rad-warn)]">
-                        {t.brokerageNeedsYouChip}
-                      </span>
-                    ) : null}
-                    <BrokerageStatusBadge
-                      status={r.status}
-                      label={brokerageStatusLabel(r.status, locale)}
-                    />
+                  <div className="mt-3.5 flex items-center gap-3">
+                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-black/10" aria-hidden>
+                      <div className="h-full rounded-full transition-[width] duration-700" style={{ width: `${pct}%`, background: accent }} />
+                    </div>
+                    <span className="text-[11px] font-semibold tabular-nums text-[color:var(--rad-tx3)]">{pct}%</span>
                   </div>
+                  {attention ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {photosOpen ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-[rgba(224,160,48,.2)] px-3 py-1 text-xs font-bold text-[#c98a1a]">
+                          📷 مطلوب منك صور
+                        </span>
+                      ) : null}
+                      {waiting ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-[rgba(224,160,48,.2)] px-3 py-1 text-xs font-bold text-[#c98a1a]">
+                          {r.status === "AWAITING_PAYMENT" ? "💳 بانتظار دفعك" : t.brokerageNeedsYouChip}
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </Link>
               </li>
             );
