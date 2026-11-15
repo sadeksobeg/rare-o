@@ -18,6 +18,10 @@ import {
   wholesaleTraderRespondSchema,
 } from "@/lib/validation/schemas";
 import {
+  adminConfirmWholesalePayment,
+  adminIssueWholesaleInvoice,
+  traderClaimWholesalePayment,
+  traderConfirmWholesale,
   adminProvideWholesaleQuote,
   adminTransitionWholesaleStatus,
   adminUpdateWholesaleShipping,
@@ -28,6 +32,8 @@ import {
 } from "@/lib/wholesale/service";
 import { isWholesaleStatus } from "@/lib/wholesale/constants";
 import { prisma } from "@/lib/db/prisma";
+import { notifyTraderChannels } from "@/lib/trader/notify-channels";
+import { siteBaseUrl } from "@/lib/retail-request/order-page";
 import {
   ensureTraderConversation,
   sendAdminPlatformMessage,
@@ -72,6 +78,29 @@ async function maybeNotifyTrader(
   const res = await sendWholesaleTraderWhatsApp({ traderId: r.traderId, adminId, text });
   const wa = res.ok ? "sent" : res.error;
   return `${platform ? "platform" : "noplatform"}:${wa}`;
+}
+
+/** Same channels as maybeNotifyTrader, for the phase events that have their own wording. */
+async function maybeNotifyTraderText(
+  formData: FormData,
+  requestId: string,
+  adminId: string,
+  kind: "payment"
+): Promise<string> {
+  if (String(formData.get("notifyTrader") || "") !== "1") return "skipped";
+  const r = await prisma.wholesaleRequest.findUnique({
+    where: { id: requestId },
+    select: { reference: true, traderId: true, trader: { select: { displayName: true } } },
+  });
+  if (!r) return "skipped";
+  const first = r.trader.displayName.trim().split(/\s+/)[0];
+  const text =
+    kind === "payment"
+      ? `أهلاً ${first}، استلمنا دفعة طلب الجملة ${r.reference}. سنجهّز الشحن ونوافيك بالتفاصيل.
+${traderRequestUrl(requestId)}`
+      : "";
+  const res = await notifyTraderChannels({ traderId: r.traderId, adminId, text });
+  return `${res.platform ? "platform" : "noplatform"}:${res.whatsapp}`;
 }
 
 const STATUS_EVENT: Record<string, WholesaleWaEvent> = {
@@ -383,4 +412,100 @@ export async function traderOpenWholesaleHandoffAction(
   }
   revalidatePath(`/trader/wholesale/${requestId}`);
   return { ok: true };
+}
+
+
+function failMessage(e: unknown, fallback: string): string {
+  return e instanceof Error ? e.message : fallback;
+}
+
+/** Trader: final confirmation of the confirmed order, via the platform or WhatsApp. */
+export async function traderConfirmWholesaleAction(formData: FormData): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireTraderSession();
+  } catch (e) {
+    return handleTraderSessionError(e);
+  }
+  const requestId = String(formData.get("requestId") ?? "");
+  const via = String(formData.get("via") ?? "") === "whatsapp" ? "whatsapp" : "platform";
+  try {
+    await traderConfirmWholesale({ requestId, traderId: session.sub, via });
+    revalidateWholesaleSurfaces(requestId);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: failMessage(e, "Failed") };
+  }
+}
+
+/** Trader: "I have paid" — tells the admin; the admin still confirms receipt. */
+export async function traderClaimWholesalePaymentAction(formData: FormData): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireTraderSession();
+  } catch (e) {
+    return handleTraderSessionError(e);
+  }
+  const requestId = String(formData.get("requestId") ?? "");
+  try {
+    await traderClaimWholesalePayment({ requestId, traderId: session.sub });
+    revalidateWholesaleSurfaces(requestId);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: failMessage(e, "Failed") };
+  }
+}
+
+/** Admin: issue the invoice and drop its link into the trader's chat (platform + WhatsApp) in one click. */
+export async function adminSendWholesaleInvoiceAction(
+  formData: FormData
+): Promise<ActionResult & { data?: { notified: string; url: string } }> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+  const requestId = String(formData.get("requestId") ?? "");
+  try {
+    const inv = await adminIssueWholesaleInvoice({ requestId, actorAdminId: session.sub });
+    const url = `${siteBaseUrl()}/wholesale-invoice/${inv.invoiceToken}`;
+    const tr = await prisma.traderAccount.findUnique({ where: { id: inv.traderId }, select: { displayName: true } });
+    const first = (tr?.displayName ?? "").trim().split(/\s+/)[0];
+    const res = await notifyTraderChannels({
+      traderId: inv.traderId,
+      adminId: session.sub,
+      text: `أهلاً ${first}، هذه فاتورة طلب الجملة ${inv.reference}:
+${url}
+بعد إتمام الدفع حسب المتفق عليه اضغط «أرسلتُ الدفعة» في صفحة طلبك أو ردّ علينا هنا.`,
+    });
+    revalidateWholesaleSurfaces(requestId);
+    return {
+      ok: true,
+      data: { notified: `${res.platform ? "platform" : "noplatform"}:${res.whatsapp}`, url },
+    };
+  } catch (e) {
+    return { ok: false, error: failMessage(e, "Failed") };
+  }
+}
+
+/** Admin: the payment arrived. */
+export async function adminConfirmWholesalePaymentAction(
+  formData: FormData
+): Promise<ActionResult & { data?: { notified: string } }> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+  const requestId = String(formData.get("requestId") ?? "");
+  try {
+    const u = await adminConfirmWholesalePayment({ requestId, actorAdminId: session.sub });
+    const notified = await maybeNotifyTraderText(formData, u.id, session.sub, "payment");
+    revalidateWholesaleSurfaces(requestId);
+    return { ok: true, data: { notified } };
+  } catch (e) {
+    return { ok: false, error: failMessage(e, "Failed") };
+  }
 }

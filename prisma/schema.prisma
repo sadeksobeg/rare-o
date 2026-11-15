@@ -413,6 +413,15 @@ model WholesaleRequest {
   carrier              String?
   trackingReference    String?
   shippedAt            DateTime?
+  /// Phased fulfilment after "confirmed": trader final confirmation → invoice/payment → shipping → complete
+  traderConfirmedAt    DateTime?
+  /// platform | whatsapp — how the trader chose to confirm
+  traderConfirmedVia   String?
+  /// Unguessable token for the printable invoice link (set when the invoice is first issued)
+  invoiceToken         String?                 @unique
+  invoiceIssuedAt      DateTime?
+  paymentConfirmedAt   DateTime?
+  paymentConfirmedByAdminId String?
   lines                WholesaleRequestLine[]
   events               WholesaleRequestEvent[]
   shipments            Shipment[]

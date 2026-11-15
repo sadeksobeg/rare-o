@@ -62,3 +62,46 @@ export function isOpenWholesaleStatus(status: WholesaleStatus): boolean {
     status === "confirmed"
   );
 }
+
+/**
+ * Where a request stands inside its lifecycle. "confirmed" is split into phases so each side
+ * only ever sees (and can only do) the step that applies:
+ * awaiting_trader → payment → shipping → ready_to_complete.
+ */
+export type WholesalePhase =
+  | "new"
+  | "review"
+  | "quoted"
+  | "awaiting_trader"
+  | "payment"
+  | "shipping"
+  | "ready_to_complete"
+  | "completed"
+  | "cancelled";
+
+export function wholesalePhase(r: {
+  status: string;
+  traderConfirmedAt: Date | null;
+  paymentConfirmedAt: Date | null;
+  shippedAt: Date | null;
+}): WholesalePhase {
+  switch (r.status) {
+    case "submitted":
+      return "new";
+    case "under_review":
+      return "review";
+    case "quote_provided":
+      return "quoted";
+    case "completed":
+      return "completed";
+    case "cancelled":
+      return "cancelled";
+    case "confirmed":
+      if (!r.traderConfirmedAt) return "awaiting_trader";
+      if (!r.paymentConfirmedAt) return "payment";
+      if (!r.shippedAt) return "shipping";
+      return "ready_to_complete";
+    default:
+      return "new";
+  }
+}

@@ -1,4 +1,4 @@
-import { randomInt } from "node:crypto";
+import { randomBytes, randomInt } from "node:crypto";
 import { uiVisibleWholesaleWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
 import { publishInboxEvent } from "@/lib/whatsapp/messaging/inbox-events";
@@ -10,6 +10,7 @@ import {
 } from "@/lib/shipping/engine";
 import {
   WHOLESALE_QTY_TECHNICAL_MAX,
+  wholesalePhase,
   canTransitionWholesale,
   isOpenWholesaleStatus,
   isWholesaleRequestMode,
@@ -429,6 +430,16 @@ export async function adminTransitionWholesaleStatus(input: {
     throw new Error("QUOTE_REQUIRED_BEFORE_CONFIRM");
   }
 
+  // Only the trader can accept a quotation — the admin must not confirm over their head.
+  if (input.toStatus === "confirmed" && request.status === "quote_provided") {
+    throw new Error("TRADER_MUST_ACCEPT");
+  }
+  // Completion needs every step behind it: trader confirmation, payment, shipment.
+  if (input.toStatus === "completed") {
+    const phase = wholesalePhase(request);
+    if (phase !== "ready_to_complete") throw new Error(`NOT_READY:${phase}`);
+  }
+
   const now = new Date();
   const data: {
     status: WholesaleStatus;
@@ -684,9 +695,14 @@ export async function adminUpdateWholesaleShipping(input: {
   });
   if (!request) throw new Error("REQUEST_NOT_FOUND");
 
+  const phase = wholesalePhase(request);
+  if (phase !== "shipping" && phase !== "ready_to_complete") {
+    throw new Error(`NOT_READY:${phase}`);
+  }
   const carrier = input.carrier.trim();
   const trackingReference = input.trackingReference.trim();
-  if (!carrier || !trackingReference) {
+  // Tracking number is optional (some carriers/hand deliveries have none).
+  if (!carrier) {
     throw new Error("SHIPPING_FIELDS_REQUIRED");
   }
 
@@ -694,7 +710,7 @@ export async function adminUpdateWholesaleShipping(input: {
     where: { id: request.id },
     data: {
       carrier,
-      trackingReference,
+      trackingReference: trackingReference || null,
       shippedAt: input.shippedAt ?? new Date(),
       events: {
         create: {
@@ -703,7 +719,7 @@ export async function adminUpdateWholesaleShipping(input: {
           toStatus: request.status,
           actorRole: "admin",
           actorAdminId: input.actorAdminId,
-          note: `Shipping: ${carrier} / ${trackingReference}`,
+          note: trackingReference ? `Shipping: ${carrier} / ${trackingReference}` : `Shipping: ${carrier}`,
         },
       },
     },
@@ -719,10 +735,157 @@ export async function adminUpdateWholesaleShipping(input: {
     domain: "wholesale",
     titleAr: `تحديث شحن الجملة · ${updated.reference}`,
     titleEn: `Wholesale shipping update · ${updated.reference}`,
-    bodyAr: `الناقل ${carrier} — رقم التتبع ${trackingReference}`,
-    bodyEn: `Carrier ${carrier} — tracking ${trackingReference}`,
+    bodyAr: trackingReference ? `الناقل ${carrier} — رقم التتبع ${trackingReference}` : `الناقل ${carrier}`,
+    bodyEn: trackingReference ? `Carrier ${carrier} — tracking ${trackingReference}` : `Carrier ${carrier}`,
     href: `/trader/wholesale/${updated.id}`,
   });
 
   return updated;
+}
+
+
+// ---------------------------------------------------------------------------
+// Phased fulfilment after "confirmed"
+// ---------------------------------------------------------------------------
+
+/** The trader's final confirmation of the order, by the channel they choose. */
+export async function traderConfirmWholesale(input: {
+  requestId: string;
+  traderId: string;
+  via: "platform" | "whatsapp";
+}) {
+  const request = await prisma.wholesaleRequest.findFirst({
+    where: { id: input.requestId, traderId: input.traderId },
+  });
+  if (!request) throw new Error("REQUEST_NOT_FOUND");
+  if (request.status !== "confirmed") throw new Error("RESPONSE_NOT_ALLOWED");
+  if (request.traderConfirmedAt) return request; // idempotent
+  const updated = await prisma.wholesaleRequest.update({
+    where: { id: request.id },
+    data: {
+      traderConfirmedAt: new Date(),
+      traderConfirmedVia: input.via,
+      ...(input.via === "whatsapp" && !request.handoffOpenedAt ? { handoffOpenedAt: new Date() } : {}),
+      events: {
+        create: {
+          eventType: "trader_confirmed",
+          fromStatus: request.status,
+          toStatus: request.status,
+          actorRole: "trader",
+          actorTraderId: input.traderId,
+          note: input.via === "whatsapp" ? "via_whatsapp" : "via_platform",
+        },
+      },
+    },
+  });
+  void publishInboxEvent("conversation.updated", {
+    kind: input.via === "whatsapp" ? "wholesale_trader_confirmed_wa" : "wholesale_trader_confirmed",
+    domain: "wholesale",
+    requestId: updated.id,
+    title: updated.reference,
+  });
+  return updated;
+}
+
+/** Issues (once) the unguessable invoice link and records that it was sent. */
+export async function adminIssueWholesaleInvoice(input: { requestId: string; actorAdminId: string }) {
+  const request = await prisma.wholesaleRequest.findUnique({ where: { id: input.requestId } });
+  if (!request) throw new Error("REQUEST_NOT_FOUND");
+  const phase = wholesalePhase(request);
+  if (phase !== "payment" && phase !== "shipping" && phase !== "ready_to_complete") {
+    throw new Error(`NOT_READY:${phase}`);
+  }
+  const token = request.invoiceToken ?? randomBytes(18).toString("base64url");
+  const updated = await prisma.wholesaleRequest.update({
+    where: { id: request.id },
+    data: {
+      invoiceToken: token,
+      invoiceIssuedAt: request.invoiceIssuedAt ?? new Date(),
+      events: {
+        create: {
+          eventType: "invoice_sent",
+          fromStatus: request.status,
+          toStatus: request.status,
+          actorRole: "admin",
+          actorAdminId: input.actorAdminId,
+        },
+      },
+    },
+    select: { id: true, reference: true, traderId: true, invoiceToken: true },
+  });
+  return updated;
+}
+
+/** Admin confirms the (offline) payment arrived. */
+export async function adminConfirmWholesalePayment(input: { requestId: string; actorAdminId: string }) {
+  const request = await prisma.wholesaleRequest.findUnique({ where: { id: input.requestId } });
+  if (!request) throw new Error("REQUEST_NOT_FOUND");
+  if (wholesalePhase(request) !== "payment") throw new Error(`NOT_READY:${wholesalePhase(request)}`);
+  if (!request.invoiceIssuedAt) throw new Error("INVOICE_REQUIRED");
+  const updated = await prisma.wholesaleRequest.update({
+    where: { id: request.id },
+    data: {
+      paymentConfirmedAt: new Date(),
+      paymentConfirmedByAdminId: input.actorAdminId,
+      events: {
+        create: {
+          eventType: "payment_confirmed",
+          fromStatus: request.status,
+          toStatus: request.status,
+          actorRole: "admin",
+          actorAdminId: input.actorAdminId,
+        },
+      },
+    },
+  });
+  await notifyTrader({
+    traderId: updated.traderId,
+    domain: "wholesale",
+    titleAr: `تم استلام الدفعة · ${updated.reference}`,
+    titleEn: `Payment received · ${updated.reference}`,
+    bodyAr: "أكدت الإدارة استلام الدفعة وسنجهّز الشحن.",
+    bodyEn: "We confirmed your payment and will prepare shipping.",
+    href: `/trader/wholesale/${updated.id}`,
+  });
+  return updated;
+}
+
+/** Trader says they sent the payment (admin still confirms receipt). Idempotent. */
+export async function traderClaimWholesalePayment(input: { requestId: string; traderId: string }) {
+  const request = await prisma.wholesaleRequest.findFirst({
+    where: { id: input.requestId, traderId: input.traderId },
+  });
+  if (!request) throw new Error("REQUEST_NOT_FOUND");
+  if (wholesalePhase(request) !== "payment") throw new Error("RESPONSE_NOT_ALLOWED");
+  const dup = await prisma.wholesaleRequestEvent.findFirst({
+    where: { requestId: request.id, eventType: "trader_paid_claim" },
+    select: { id: true },
+  });
+  if (dup) return request;
+  await prisma.wholesaleRequestEvent.create({
+    data: {
+      requestId: request.id,
+      eventType: "trader_paid_claim",
+      fromStatus: request.status,
+      toStatus: request.status,
+      actorRole: "trader",
+      actorTraderId: input.traderId,
+    },
+  });
+  void publishInboxEvent("conversation.updated", {
+    kind: "wholesale_paid_claim",
+    domain: "wholesale",
+    requestId: request.id,
+    title: request.reference,
+  });
+  return request;
+}
+
+/** Public invoice view model, keyed by the unguessable token. */
+export async function getWholesaleInvoiceByToken(token: string) {
+  if (!/^[A-Za-z0-9_-]{20,40}$/.test(token)) return null;
+  return prisma.wholesaleRequest.findUnique({
+    where: { invoiceToken: token },
+    include: { lines: true, trader: { select: { displayName: true, companyName: true, email: true, phone: true } } },
+  });
 }

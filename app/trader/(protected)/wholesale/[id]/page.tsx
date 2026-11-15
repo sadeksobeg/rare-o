@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { PaymentHandoffCard } from "@/components/trader/payment-handoff-card";
+import { TraderWholesalePhaseCard } from "@/components/trader/wholesale-phase-card";
+import { wholesalePhase } from "@/lib/wholesale/constants";
 import { QuoteCard } from "@/components/trader/quote-card";
 import { TraderWholesaleActions } from "@/components/trader/wholesale-actions";
 import { Banner } from "@/components/ui/banner";
@@ -140,15 +141,14 @@ export default async function TraderWholesaleDetailPage({
       ) : null}
 
       {request.status === "confirmed" ? (
-        <PaymentHandoffCard
-          kind="wholesale"
-          recordId={request.id}
-          title={t.wsHandoffTitle}
-          body={t.wsHandoffBody}
-          openLabel={t.wsHandoffOpenWa}
-          unavailableLabel={t.wsHandoffUnavailable}
-          deepLink={request.whatsAppDeepLink}
-          messageText={request.handoffMessageText}
+        <TraderWholesalePhaseCard
+          requestId={request.id}
+          phase={wholesalePhase(request)}
+          whatsAppDeepLink={request.whatsAppDeepLink}
+          invoiceUrl={request.invoiceToken ? `/wholesale-invoice/${request.invoiceToken}` : null}
+          paidClaimed={request.events.some((e) => e.eventType === "trader_paid_claim")}
+          carrier={request.carrier}
+          tracking={request.trackingReference}
         />
       ) : null}
 

@@ -83,6 +83,8 @@ export function humanizeWholesaleNote(
 ): string | null {
   if (!note) return null;
   const trimmed = note.trim();
+  if (trimmed === "via_whatsapp") return "عبر واتساب";
+  if (trimmed === "via_platform") return "عبر المنصة";
   const onlyMode = /^Mode:\s*([a-z_]+)\s*$/i.exec(trimmed);
   if (onlyMode) {
     const key = onlyMode[1];

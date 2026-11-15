@@ -286,6 +286,7 @@ export const config = {
     "/track/:path*",
     "/order/:path*",
     "/invoice/:path*",
+    "/wholesale-invoice/:path*",
     "/admin/:path*",
     "/trader/:path*",
     "/dev",

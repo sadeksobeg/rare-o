@@ -581,3 +581,7 @@ Open (awaiting owner direction):
 2. Admin awaiting_payment view repeats the commercial terms twice (payment card + details card).
 3. Admin deal reply form lists all five actions at once (continue/counter/accept/reject/close); stage-gating like wholesale/retail would reduce confusion.
 4. Payment-confirm step not clicked in browser (covered by service check).
+
+## 2026-11-15 — Wholesale phased fulfilment
+Added (additive migrations 20261115100000/100100, backfill grandfathers already-confirmed rows): after "confirmed" the request moves through phases awaiting_trader → payment → shipping → ready_to_complete (`wholesalePhase`). Rules enforced server-side: admin cannot confirm a quotation (only the trader can); invoice/shipping/complete require the previous phase; tracking number optional; payment confirm requires an issued invoice. Trader chooses to confirm via platform or WhatsApp; admin sends the invoice link into the trader chat (platform + WhatsApp) in one click; trader "I have paid" notice; public invoice `/wholesale-invoice/<token>`. `npm run test:wholesale-phases` (21 checks).
+Open: invoice is a print-to-PDF page + link in chat (no server-generated PDF attachment); decide if a real PDF file attachment is wanted (needs a PDF library).

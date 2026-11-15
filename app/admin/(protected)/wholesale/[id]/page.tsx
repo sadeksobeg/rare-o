@@ -21,6 +21,7 @@ import { buildDetailSteps } from "@/lib/ui/detail-stepper";
 import { statusToneToPill } from "@/lib/ui/pill-tone";
 import { getStatusChipProps } from "@/lib/ui/status-labels";
 import { getWholesaleRequestForAdmin } from "@/lib/wholesale/service";
+import { wholesalePhase } from "@/lib/wholesale/constants";
 
 export default async function AdminWholesaleDetailPage({
   params,
@@ -62,6 +63,19 @@ export default async function AdminWholesaleDetailPage({
       ? l.productNameAr || l.productNameEn
       : l.productNameEn || l.productNameAr) || "—";
 
+  const phase = wholesalePhase(request);
+  const paidClaimed = request.events.some((e) => e.eventType === "trader_paid_claim");
+  const proposedTotal =
+    request.requestMode === "propose_price"
+      ? request.lines.reduce((sum, l) => sum + (l.proposedUnitPrice != null ? Number(l.proposedUnitPrice) * l.quantity : 0), 0)
+      : 0;
+  const proposedCurrency = request.lines.find((l) => l.currency)?.currency ?? defaultCurrency;
+  const EXTRA_EVENT_AR: Record<string, string> = {
+    trader_confirmed: "أكّد التاجر الطلب نهائياً",
+    invoice_sent: "أُرسلت الفاتورة للتاجر",
+    payment_confirmed: "تم تأكيد استلام الدفعة",
+    trader_paid_claim: "التاجر أفاد بأنه أرسل الدفعة",
+  };
   const chip = getStatusChipProps(dict, "wholesale", request.status);
   const steps = buildDetailSteps("wholesale", request.status, dict);
   const meta = [
@@ -88,6 +102,35 @@ export default async function AdminWholesaleDetailPage({
               <DetailStepper steps={steps} aria-label={d.stepperLabel} />
             </Card>
 
+            {request.requestMode === "propose_price" && proposedTotal > 0 ? (
+              <Card padded={false} className="rad-rise">
+                <div
+                  className="rad-cb2"
+                  style={{
+                    borderInlineStart: "4px solid var(--rad-ac, #a678d8)",
+                    background: "color-mix(in srgb, var(--rad-ac, #a678d8) 10%, transparent)",
+                    borderRadius: 14,
+                  }}
+                >
+                  <p className="text-xs font-semibold opacity-80">سعر التاجر المقترح</p>
+                  <p className="mt-1 text-2xl font-bold tabular-nums" dir="ltr" style={{ textAlign: "start" }}>
+                    {formatNumber(proposedTotal, locale, { maximumFractionDigits: 2 })} {proposedCurrency}
+                  </p>
+                  <ul className="mt-2 space-y-0.5 text-sm">
+                    {request.lines.map((l) => (
+                      <li key={l.id}>
+                        {productName(l)} × {l.quantity} —{" "}
+                        <b dir="ltr">
+                          {l.proposedUnitPrice != null ? `${formatNumber(Number(l.proposedUnitPrice), locale, { maximumFractionDigits: 2 })} ${l.currency ?? proposedCurrency}` : "—"}
+                        </b>{" "}
+                        للوحدة
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </Card>
+            ) : null}
+
             <Card padded={false}>
               <CardHeader title={u.form.operations} />
               <div className="rad-cb2">
@@ -100,9 +143,16 @@ export default async function AdminWholesaleDetailPage({
                     id: l.id,
                     productName: productName(l),
                     quantity: l.quantity,
+                    proposedUnit: l.proposedUnitPrice != null ? Number(l.proposedUnitPrice) : null,
+                    proposedCurrency: l.currency,
                   }))}
                   quoteCurrencyDefault={defaultCurrency}
                   labels={u}
+                  phase={phase}
+                  traderConfirmedVia={request.traderConfirmedVia}
+                  invoiceUrl={request.invoiceToken ? `/wholesale-invoice/${request.invoiceToken}` : null}
+                  paidClaimed={paidClaimed}
+                  shipping={request.shippedAt ? { carrier: request.carrier, tracking: request.trackingReference } : null}
                 />
               </div>
             </Card>
@@ -203,7 +253,7 @@ export default async function AdminWholesaleDetailPage({
                       icon: (
                         <Package width={15} height={15} strokeWidth={1.5} />
                       ),
-                      title: t.wholesaleEvent[e.eventType] ?? e.eventType,
+                      title: EXTRA_EVENT_AR[e.eventType] ?? t.wholesaleEvent[e.eventType] ?? e.eventType,
                       meta: (
                         <>
                           {t.actorRole[e.actorRole] ?? e.actorRole}
