@@ -1,5 +1,6 @@
 "use client";
 
+import { LinkifiedText } from "@/components/ui/linkified-text";
 import {
   useCallback,
   useEffect,
@@ -1321,7 +1322,7 @@ function Bubble({
           </div>
         ) : null}
         {showMedia ? <MediaBubbleBody m={m} ib={ib} /> : null}
-        {!showMedia && bodyLabel !== labels.empty ? bodyLabel : null}
+        {!showMedia && bodyLabel !== labels.empty ? (typeof bodyLabel === "string" ? <LinkifiedText text={bodyLabel} /> : bodyLabel) : null}
         <div className="rad-bm">
           <span
             className={cn(

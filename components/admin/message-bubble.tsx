@@ -1,5 +1,6 @@
 "use client";
 
+import { LinkifiedText } from "@/components/ui/linkified-text";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -194,7 +195,7 @@ function MediaBody({
 
   return (
     <p className="whitespace-pre-wrap break-words">
-      <bdi>{message.body}</bdi>
+      <LinkifiedText text={message.body} />
     </p>
   );
 }

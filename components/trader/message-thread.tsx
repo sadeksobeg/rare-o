@@ -44,6 +44,7 @@ export function TraderMessageThread({
     const el = scrollerRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, []);
+  // Smooth-follow new messages like WhatsApp
 
   useEffect(() => {
     const el = scrollerRef.current;
@@ -71,7 +72,7 @@ export function TraderMessageThread({
     <div className="rad-tmsg rad-card flex flex-col overflow-hidden">
       <div
         ref={scrollerRef}
-        className="rad-tmsg-scroll min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain px-3 py-3 sm:px-5"
+        className="rad-tmsg-scroll min-h-0 flex-1 space-y-2.5 overflow-y-auto overscroll-contain bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,#8a52c4_7%,transparent),transparent_60%)] px-3 py-4 sm:px-6"
       >
         {messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-center">

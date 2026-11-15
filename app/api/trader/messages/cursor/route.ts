@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getTraderSession } from "@/lib/auth/trader-session";
+import { countUnreadTraderNotifications } from "@/lib/trader/notifications";
 import { getTraderConversationCursor } from "@/lib/whatsapp/messaging/trader-channel";
 
 export const dynamic = "force-dynamic";
@@ -17,5 +18,6 @@ export async function GET() {
     lastMessageId: cursor?.lastMessageId ?? null,
     updatedAt: cursor?.updatedAt ?? null,
     unreadCount: cursor?.unreadCount ?? 0,
+    notificationsUnread: await countUnreadTraderNotifications(session.sub),
   });
 }

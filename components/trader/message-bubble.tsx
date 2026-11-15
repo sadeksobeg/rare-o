@@ -1,9 +1,10 @@
 "use client";
 
-import { Check, CheckCheck, CircleAlert, Clock, FileText, Loader, MapPin, MessageCircle, UserRound } from "lucide-react";
+import { Check, CheckCheck, CircleAlert, Clock, FileText, Loader, MapPin, MessageCircle } from "lucide-react";
 import type { TraderDict } from "@/lib/ui/trader-labels";
 import type { InboxMessageItem } from "@/lib/whatsapp/messaging/inbox";
 import { cn } from "@/lib/utils";
+import { LinkifiedText } from "@/components/ui/linkified-text";
 
 function DeliveryIcon({ status }: { status: string }) {
   const cls = "size-3 shrink-0 opacity-70";
@@ -28,6 +29,13 @@ function DeliveryIcon({ status }: { status: string }) {
     default:
       return null;
   }
+}
+
+function linkCls(isMine: boolean): string {
+  return cn(
+    "break-all font-semibold underline decoration-[1.5px] underline-offset-[3px] hover:opacity-80",
+    isMine ? "text-[#fff3d6] decoration-[#f4d9a6]/70" : "text-[color:var(--rad-ac,#6d3aa6)] decoration-current/50"
+  );
 }
 
 function MediaBody({
@@ -66,7 +74,7 @@ function MediaBody({
         ) : (
           <p className={muted}>{t.messagesChannelPlatform}</p>
         )}
-        {caption ? <p className="whitespace-pre-wrap break-words"><bdi>{caption}</bdi></p> : null}
+        {caption ? <p dir="auto" className="whitespace-pre-wrap break-words"><LinkifiedText text={caption} linkClassName={linkCls(isMine)} /></p> : null}
       </div>
     );
   }
@@ -120,8 +128,8 @@ function MediaBody({
   }
 
   return (
-    <p className="whitespace-pre-wrap break-words">
-      <bdi>{message.body}</bdi>
+    <p dir="auto" className="whitespace-pre-wrap break-words">
+      <LinkifiedText text={message.body} linkClassName={linkCls(isMine)} />
     </p>
   );
 }
@@ -145,42 +153,27 @@ export function TraderMessageBubble({
   );
   const isPlatform =
     message.channel === "platform" || (!isMine && !waDelivered);
+  const isAr = /\p{Script=Arabic}/u.test(t.messagesTitle);
 
   return (
     <article
       className={cn(
-        "group max-w-[min(28rem,85%)] px-3.5 py-2 text-[13.5px] leading-relaxed",
+        "group relative max-w-[min(30rem,88%)] px-4 py-2.5 text-[14px] leading-[1.75]",
         isMine
           ? // Explicit light-on-plum — portal themes remap --ro-sand-50 to dark surfaces.
-            "rad-tmsg-mine ms-auto rounded-[18px] rounded-ee-[6px] bg-[#7a44b3] text-[#fffcf8] shadow-[0_1px_2px_rgba(20,8,40,0.18)]"
-          : "me-auto rounded-[18px] rounded-es-[6px] border border-ro-border bg-ro-paper text-ro-ink shadow-sm"
+            "rad-tmsg-mine ms-auto rounded-[20px] rounded-ee-[6px] bg-gradient-to-br from-[#8a52c4] to-[#5f3390] text-[#fffcf8] shadow-[0_6px_18px_-8px_rgba(60,25,100,0.55)]"
+          : "me-auto rounded-[20px] rounded-es-[6px] border border-[color-mix(in_srgb,#c8963e_28%,var(--ro-border))] bg-ro-paper text-ro-ink shadow-[0_4px_14px_-8px_rgba(40,20,70,0.25)]"
       )}
     >
-      <div className="mb-1 flex items-center gap-1.5">
-        <span
-          className={cn(
-            "inline-flex size-5 shrink-0 items-center justify-center rounded-full",
-            isMine ? "bg-[color-mix(in_srgb,var(--ro-sand-50)_18%,transparent)]" : "bg-ro-sunken"
-          )}
-          aria-hidden
-        >
-          {isMine ? (
-            <UserRound className="size-3" strokeWidth={1.5} />
-          ) : (
-            <MessageCircle className="size-3" strokeWidth={1.5} />
-          )}
-        </span>
-        <span
-          className={cn(
-            "text-[10px] font-medium",
-            isMine
-              ? "text-[color-mix(in_srgb,#fffcf8_78%,transparent)]"
-              : "text-ro-muted"
-          )}
-        >
-          {isPlatform ? t.messagesChannelPlatform : t.messagesChannelWhatsapp}
-        </span>
-      </div>
+      {!isMine ? (
+        <div className="mb-1 flex items-center gap-1.5">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/logo-cream.png" alt="" className="size-5 shrink-0 rounded-full bg-[var(--ro-plum-900)] p-[3px]" />
+          <span className="text-[11.5px] font-semibold text-[var(--ro-plum-700)]">
+            {isAr ? "فريق RARE OUD" : "RARE OUD team"}
+          </span>
+        </div>
+      ) : null}
 
       <MediaBody message={message} isMine={isMine} t={t} />
 
@@ -192,6 +185,12 @@ export function TraderMessageBubble({
             : "text-ro-muted"
         )}
       >
+        <span className="inline-flex items-center gap-1 rounded-full bg-black/5 px-1.5 py-px text-[10px]">
+          {isPlatform ? (
+            <MessageCircle className="size-2.5" strokeWidth={1.75} aria-hidden />
+          ) : null}
+          {isPlatform ? t.messagesChannelPlatform : t.messagesChannelWhatsapp}
+        </span>
         <time dateTime={message.waTimestamp ?? message.createdAt}>{timeLabel}</time>
         {isMine ? <DeliveryIcon status={message.status} /> : null}
       </footer>

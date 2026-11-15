@@ -61,7 +61,7 @@ export function TraderMessageComposer({ t }: { t: TraderDict }) {
         submit();
       }}
     >
-      <div className="flex items-end gap-1.5 rounded-[16px] border border-ro-border bg-ro-sunken p-1.5">
+      <div className="flex items-end gap-1.5 rounded-[22px] border border-[color-mix(in_srgb,#c8963e_35%,var(--ro-border))] bg-ro-paper p-1.5 shadow-[0_6px_20px_-12px_rgba(60,25,100,0.4)] focus-within:border-[var(--ro-plum-700)]">
         <label className="min-w-0 flex-1">
           <span className="sr-only">{t.messagesPlaceholder}</span>
           <textarea
@@ -85,9 +85,9 @@ export function TraderMessageComposer({ t }: { t: TraderDict }) {
           disabled={pending || !text.trim()}
           aria-label={pending ? t.messagesSending : t.messagesSend}
           className={cn(
-            "inline-flex size-9 shrink-0 items-center justify-center rounded-full transition-[opacity,transform] duration-150 disabled:opacity-40",
+            "inline-flex size-10 shrink-0 items-center justify-center rounded-full transition-[opacity,transform] duration-150 disabled:opacity-40",
             text.trim()
-              ? "bg-[var(--ro-plum-700)] text-[#fffcf8] hover:opacity-90 active:scale-[0.96]"
+              ? "bg-gradient-to-br from-[#8a52c4] to-[#5f3390] text-[#fffcf8] shadow-md hover:opacity-90 active:scale-[0.94]"
               : "bg-ro-border text-ro-muted"
           )}
         >

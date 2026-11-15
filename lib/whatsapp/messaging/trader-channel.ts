@@ -116,7 +116,15 @@ export async function getTraderConversation(
   });
   if (!row) return null;
 
-  const messages = mapMessages(row.messages);
+  // Chronological like WhatsApp. Messages without a WhatsApp timestamp (typed in the
+  // portal) used to sort LAST in SQL (NULLS LAST) and jump below newer messages —
+  // order by the effective time instead.
+  const when = (m: { waTimestamp: Date | null; createdAt: Date }) =>
+    (m.waTimestamp ?? m.createdAt).getTime();
+  const ordered = [...row.messages].sort(
+    (a, b) => when(a) - when(b) || a.createdAt.getTime() - b.createdAt.getTime() || a.id.localeCompare(b.id)
+  );
+  const messages = mapMessages(ordered);
   const last = messages[messages.length - 1] ?? null;
   return {
     conversationId: row.id,

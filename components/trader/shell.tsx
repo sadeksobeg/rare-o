@@ -11,6 +11,7 @@ import { SonnerToaster } from "@/components/ui/sonner-toaster";
 import {
   TraderBottomTabs,
   TraderDesktopNav,
+  TraderLiveAlerts,
   type TraderTab,
 } from "@/components/trader/nav";
 import { getTraderSession } from "@/lib/auth/trader-session";
@@ -72,6 +73,7 @@ export async function TraderShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <SonnerToaster />
+      <TraderLiveAlerts initialMessages={unreadMessages} initialNotifications={unreadNotifications} locale={locale} />
       <PortalShellFrame
         surface="trader"
         defaultTheme="light"
