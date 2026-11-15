@@ -149,12 +149,18 @@ export function NegotiationThread({
       <Timeline events={events} />
     );
 
+  const lastOffer = [...entries].reverse().find((e) => e.action === "propose" || e.action === "counter");
   const form = open ? (
     <NegotiationForm
       dealId={dealId}
       mode={mode}
       labels={labels}
       currency={currency}
+      lastOfferBy={lastOffer ? (lastOffer.actorRole === "admin" ? "admin" : "trader") : null}
+      current={{
+        price: lastOffer?.proposedPrice != null ? Number(lastOffer.proposedPrice) : null,
+        qty: lastOffer?.quantity ?? null,
+      }}
     />
   ) : null;
 

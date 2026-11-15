@@ -10,7 +10,8 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { adminCreateOfferDraftFromDealAction } from "@/app/deal-actions";
-import { DealPaymentConfirm } from "@/components/admin/deal-payment-confirm";
+import { AdminDealPhases } from "@/components/admin/deal-phases";
+import { dealPhase } from "@/lib/deals/constants";
 import { NegotiationThread } from "@/components/deals/negotiation-thread";
 import {
   Avatar,
@@ -141,80 +142,24 @@ export default async function AdminDealDetailPage({
               <DetailStepper steps={steps} aria-label={d.stepperLabel} />
             </Card>
 
-            {deal.status === "awaiting_payment" ? (
-              <Card
-                padded={false}
-                className="rad-rise"
-                style={{ ["--rad-s" as string]: "2" }}
-              >
-                <CardHeader
-                  title={ar ? "الدفع خارج المنصة" : "Off-platform payment"}
-                />
-                <div className="rad-cb2">
-                  <DealPaymentConfirm
-                    dealId={deal.id}
-                    title={
-                      ar
-                        ? "تأكيد استلام الدفع"
-                        : "Confirm payment received"
-                    }
-                    body={
-                      ar
-                        ? "بعد تحقق التحويل عبر واتساب، أكّد النجاح لإكمال الطلب. هذا الإجراء يدوي ولا يمكن التراجع عنه."
-                        : "After verifying the WhatsApp transfer, confirm to complete the order. This is manual and irreversible."
-                    }
-                    confirmLabel={
-                      ar ? "تأكيد نجاح الدفع" : "Confirm payment success"
-                    }
-                    cancelLabel={dict.common.cancel}
-                    modalTitle={
-                      ar
-                        ? "تأكيد استلام الدفعة؟"
-                        : "Confirm payment received?"
-                    }
-                    modalBody={
-                      ar
-                        ? `تأكّد من وصول المبلغ من ${deal.trader.displayName} قبل المتابعة. سيُسجَّل الإجراء باسمك ولا يمكن التراجع عنه.`
-                        : `Confirm funds from ${deal.trader.displayName} before continuing. This is audited and irreversible.`
-                    }
-                  />
-                  <KeyValue
-                    items={[
-                      {
-                        label: d.commercialSnapshot,
-                        value:
-                          deal.proposedPrice != null ? (
-                            <bdi dir="ltr">
-                              {money(deal.proposedPrice, deal.currency)}
-                            </bdi>
-                          ) : (
-                            "—"
-                          ),
-                      },
-                      {
-                        label: d.qty,
-                        value: deal.quantity != null ? String(deal.quantity) : "—",
-                      },
-                    ]}
-                  />
-                </div>
-              </Card>
-            ) : deal.status === "payment_confirmed" ? (
-              <Card padded={false}>
-                <CardHeader
-                  title={ar ? "الدفع خارج المنصة" : "Off-platform payment"}
-                />
-                <div className="rad-cb2">
-                  <PayNote ok>
-                    <b>
-                      {ar
-                        ? "تم تأكيد استلام الدفعة."
-                        : "Payment receipt confirmed."}
-                    </b>
-                  </PayNote>
-                </div>
-              </Card>
-            ) : null}
+            {(() => {
+              const phase = dealPhase(deal);
+              if (phase === "negotiating" || phase === "rejected" || phase === "closed") return null;
+              return (
+                <Card padded={false} className="rad-rise" style={{ ["--rad-s" as string]: "2" }}>
+                  <CardHeader title={ar ? "الدفع والشحن والإتمام" : "Payment, shipping & completion"} />
+                  <div className="rad-cb2">
+                    <AdminDealPhases
+                      dealId={deal.id}
+                      phase={phase}
+                      invoiceUrl={deal.invoiceToken ? `/deal-invoice/${deal.invoiceToken}` : null}
+                      paidClaim={deal.paymentClaimedAt ? { via: deal.paymentClaimedVia } : null}
+                      shipping={deal.shippedAt ? { carrier: deal.carrier, tracking: deal.trackingReference } : null}
+                    />
+                  </div>
+                </Card>
+              );
+            })()}
 
             <Card
               padded={false}

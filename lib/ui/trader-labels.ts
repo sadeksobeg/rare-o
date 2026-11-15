@@ -21,6 +21,9 @@ export function traderActionMessage(t: TraderDict, error: string): string {
     const ar = /\p{Script=Arabic}/u.test(t.actionErrorGeneric);
     return stockShortMessage(stock[1]!, Number(stock[2]), ar);
   }
+  if (key === "OWN_OFFER_CANNOT_ACCEPT") return "لا يمكنك قبول عرضك بنفسك — بانتظار رد الطرف الآخر";
+  if (key === "COUNTER_EMPTY") return "اكتب سعراً أو كمية أو شروطاً جديدة للعرض المقابل";
+  if (key === "INVOICE_REQUIRED") return "أرسل الفاتورة أولاً";
   if (key === "Unauthorized") return t.actionErrorUnauthorized;
   if (
     key === "Not allowed" ||

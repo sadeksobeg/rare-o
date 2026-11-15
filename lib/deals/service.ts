@@ -1,4 +1,4 @@
-import { randomInt } from "node:crypto";
+import { randomBytes, randomInt } from "node:crypto";
 import { composeMessage } from "@/lib/messaging/compose";
 import { publishInboxEvent } from "@/lib/whatsapp/messaging/inbox-events";
 import { notifyTraderChannels, traderPortalUrl } from "@/lib/trader/notify-channels";
@@ -10,6 +10,7 @@ import {
   isDealStatus,
   isOpenDealStatus,
   nextDealStatusForAction,
+  dealPhase,
   type DealKind,
   type DealStatus,
   type NegotiationAction,
@@ -85,7 +86,7 @@ export type CreateDealInput = {
   dealKind: DealKind;
   title: string;
   productId?: string | null;
-  modelNumber: string;
+  modelNumber?: string;
   /** Required — trader-stated price (payment-first, 2026-11-03) */
   proposedPrice: number;
   currency: string;
@@ -98,8 +99,7 @@ export async function createDealProposal(input: CreateDealInput) {
   if (!DEAL_KINDS.includes(input.dealKind)) {
     throw new Error("INVALID_DEAL_KIND");
   }
-  const modelNumber = input.modelNumber.trim();
-  if (!modelNumber) throw new Error("MODEL_NUMBER_REQUIRED");
+  const modelNumber = (input.modelNumber ?? "").trim(); // optional
   if (!Number.isFinite(input.proposedPrice) || input.proposedPrice <= 0) {
     throw new Error("PRICE_REQUIRED");
   }
@@ -207,6 +207,24 @@ export async function addNegotiationEntry(input: AddNegotiationInput) {
     }
   }
 
+  // Turn-based: you can only accept the OTHER side's latest offer, never your own.
+  if (input.action === "accept") {
+    const lastOffer = await prisma.negotiationEntry.findFirst({
+      where: { dealId: deal.id, action: { in: ["propose", "counter"] } },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      select: { actorRole: true },
+    });
+    if (lastOffer && lastOffer.actorRole === input.actorRole) {
+      throw new Error("OWN_OFFER_CANNOT_ACCEPT");
+    }
+  }
+  if (input.action === "counter") {
+    const hasPrice = input.proposedPrice != null && Number(input.proposedPrice) > 0;
+    const hasQty = input.quantity != null && Number(input.quantity) > 0;
+    const hasNotes = Boolean(input.conditionsNotes?.trim());
+    if (!hasPrice && !hasQty && !hasNotes) throw new Error("COUNTER_EMPTY");
+  }
+
   const nextStatus = nextDealStatusForAction(deal.status, input.action);
 
   let conflictWarnings: Awaited<ReturnType<typeof findCatalogDealConflicts>> =
@@ -261,9 +279,13 @@ export async function addNegotiationEntry(input: AddNegotiationInput) {
       handoffPreparedAt?: Date | null;
     } = { status: nextStatus };
 
-    // Payment-first: counter may update qty/conditions only — not price.
+    // A counter-offer can change the price, quantity and terms; the other side must accept it.
     if (input.action === "counter") {
-      if (input.quantity !== undefined) dealUpdate.quantity = input.quantity;
+      if (price != null && Number(price) > 0) {
+        dealUpdate.proposedPrice = Number(price);
+        if (currency) dealUpdate.currency = currency;
+      }
+      if (input.quantity != null) dealUpdate.quantity = input.quantity;
       if (input.conditionsNotes !== undefined) {
         dealUpdate.conditionsNotes = input.conditionsNotes?.trim() || "";
       }
@@ -409,6 +431,7 @@ export async function confirmDealPayment(input: {
   const deal = await prisma.dealProposal.findUnique({ where: { id: input.dealId } });
   if (!deal) throw new Error("DEAL_NOT_FOUND");
   if (deal.status !== "awaiting_payment") throw new Error("INVALID_STATUS");
+  if (!deal.invoiceIssuedAt) throw new Error("INVOICE_REQUIRED");
 
   const updated = await prisma.dealProposal.update({
     where: { id: input.dealId },
@@ -531,5 +554,85 @@ export async function listDealsForAdmin() {
       },
       _count: { select: { entries: true } },
     },
+  });
+}
+
+
+// ---------------------------------------------------------------------------
+// Phased follow-up after acceptance: invoice → payment → shipping → completion
+// ---------------------------------------------------------------------------
+
+/** Issues (once) the unguessable invoice link. */
+export async function adminIssueDealInvoice(input: { dealId: string }) {
+  const deal = await prisma.dealProposal.findUnique({ where: { id: input.dealId } });
+  if (!deal) throw new Error("DEAL_NOT_FOUND");
+  if (dealPhase(deal) !== "payment") throw new Error(`NOT_READY:${dealPhase(deal)}`);
+  const token = deal.invoiceToken ?? randomBytes(18).toString("base64url");
+  return prisma.dealProposal.update({
+    where: { id: deal.id },
+    data: { invoiceToken: token, invoiceIssuedAt: deal.invoiceIssuedAt ?? new Date() },
+    select: { id: true, reference: true, traderId: true, title: true, invoiceToken: true },
+  });
+}
+
+/** Trader says the payment was sent (platform notice or via WhatsApp). Admin still confirms receipt. */
+export async function traderClaimDealPayment(input: {
+  dealId: string;
+  traderId: string;
+  via: "platform" | "whatsapp";
+}) {
+  const deal = await prisma.dealProposal.findFirst({ where: { id: input.dealId, traderId: input.traderId } });
+  if (!deal) throw new Error("DEAL_NOT_FOUND");
+  if (dealPhase(deal) !== "payment") throw new Error("RESPONSE_NOT_ALLOWED");
+  if (deal.paymentClaimedAt) return deal;
+  const updated = await prisma.dealProposal.update({
+    where: { id: deal.id },
+    data: { paymentClaimedAt: new Date(), paymentClaimedVia: input.via },
+  });
+  void publishInboxEvent("conversation.updated", {
+    kind: input.via === "whatsapp" ? "deal_paid_claim_wa" : "deal_paid_claim",
+    domain: "deal",
+    requestId: updated.id,
+    title: updated.reference,
+  });
+  return updated;
+}
+
+/** Records the shipment (carrier required, tracking optional). Needs the payment confirmed. */
+export async function adminUpdateDealShipping(input: {
+  dealId: string;
+  carrier: string;
+  trackingReference: string;
+}) {
+  const deal = await prisma.dealProposal.findUnique({ where: { id: input.dealId } });
+  if (!deal) throw new Error("DEAL_NOT_FOUND");
+  const phase = dealPhase(deal);
+  if (phase !== "shipping" && phase !== "ready_to_complete") throw new Error(`NOT_READY:${phase}`);
+  const carrier = input.carrier.trim();
+  if (!carrier) throw new Error("SHIPPING_FIELDS_REQUIRED");
+  return prisma.dealProposal.update({
+    where: { id: deal.id },
+    data: { carrier, trackingReference: input.trackingReference.trim() || null, shippedAt: deal.shippedAt ?? new Date() },
+    select: { id: true, reference: true, traderId: true, title: true, carrier: true, trackingReference: true },
+  });
+}
+
+/** Completes the deal — only once shipped (or handed over directly). */
+export async function adminCompleteDeal(input: { dealId: string }) {
+  const deal = await prisma.dealProposal.findUnique({ where: { id: input.dealId } });
+  if (!deal) throw new Error("DEAL_NOT_FOUND");
+  if (dealPhase(deal) !== "ready_to_complete") throw new Error(`NOT_READY:${dealPhase(deal)}`);
+  return prisma.dealProposal.update({
+    where: { id: deal.id },
+    data: { completedAt: new Date() },
+    select: { id: true, reference: true, traderId: true, title: true },
+  });
+}
+
+export async function getDealInvoiceByToken(token: string) {
+  if (!/^[A-Za-z0-9_-]{20,40}$/.test(token)) return null;
+  return prisma.dealProposal.findUnique({
+    where: { invoiceToken: token },
+    include: { trader: { select: { displayName: true, companyName: true, phone: true } } },
   });
 }

@@ -32,8 +32,15 @@ import {
 import { checkNewPassword } from "@/lib/auth/password-policy";
 import { safePortalReturnTo } from "@/lib/auth/return-to";
 import { prisma } from "@/lib/db/prisma";
+import { composeMessage } from "@/lib/messaging/compose";
+import { notifyTraderChannels, traderPortalUrl } from "@/lib/trader/notify-channels";
+import { siteBaseUrl } from "@/lib/retail-request/order-page";
 import {
   addNegotiationEntry,
+  adminCompleteDeal,
+  adminIssueDealInvoice,
+  adminUpdateDealShipping,
+  traderClaimDealPayment,
   confirmDealPayment,
   createDealProposal,
   createTraderAccount,
@@ -777,4 +784,140 @@ export async function traderOpenDealHandoffAction(
   }
   revalidatePath(`/trader/deals/${dealId}`);
   return { ok: true };
+}
+
+
+function dealMsg(e: unknown, fallback: string): string {
+  return e instanceof Error ? e.message : fallback;
+}
+
+async function tellTrader(
+  deal: { id: string; reference: string; traderId: string },
+  adminId: string,
+  headline: string,
+  note?: string,
+  details?: (string | null)[],
+  link = traderPortalUrl(`/trader/deals/${deal.id}`),
+  linkLabel = "تفاصيل الصفقة:"
+): Promise<string> {
+  const tr = await prisma.traderAccount.findUnique({ where: { id: deal.traderId }, select: { displayName: true } });
+  const res = await notifyTraderChannels({
+    traderId: deal.traderId,
+    adminId,
+    text: composeMessage({
+      ar: true,
+      name: tr?.displayName,
+      headline,
+      context: `الصفقة رقم ${deal.reference}`,
+      details,
+      note,
+      linkLabel,
+      link,
+    }),
+  });
+  return `${res.platform ? "platform" : "noplatform"}:${res.whatsapp}`;
+}
+
+/** Admin: issue the invoice and put its link into the trader's chat (platform + WhatsApp) in one click. */
+export async function adminSendDealInvoiceAction(
+  formData: FormData
+): Promise<ActionResult & { data?: { notified: string; url: string } }> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+  const dealId = String(formData.get("dealId") ?? "");
+  try {
+    const inv = await adminIssueDealInvoice({ dealId });
+    const url = `${siteBaseUrl()}/deal-invoice/${inv.invoiceToken}`;
+    const notified = await tellTrader(
+      inv,
+      session.sub,
+      "فاتورة صفقتك جاهزة",
+      "بعد إتمام الدفع حسب المتفق عليه، اختر من صفحة الصفقة: «أرسلتُ الدفعة» عبر المنصة أو عبر واتساب.",
+      [],
+      url,
+      "عرض الفاتورة:"
+    );
+    revalidatePath(`/admin/deals/${dealId}`);
+    revalidatePath(`/trader/deals/${dealId}`);
+    return { ok: true, data: { notified, url } };
+  } catch (e) {
+    return { ok: false, error: dealMsg(e, "Failed") };
+  }
+}
+
+/** Trader: "I have paid" via the platform or WhatsApp. */
+export async function traderClaimDealPaymentAction(formData: FormData): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireTraderSession();
+  } catch (e) {
+    return handleTraderSessionError(e);
+  }
+  const dealId = String(formData.get("dealId") ?? "");
+  const via = String(formData.get("via") ?? "") === "whatsapp" ? "whatsapp" : "platform";
+  try {
+    await traderClaimDealPayment({ dealId, traderId: session.sub, via });
+    revalidatePath(`/admin/deals/${dealId}`);
+    revalidatePath(`/trader/deals/${dealId}`);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: dealMsg(e, "Failed") };
+  }
+}
+
+/** Admin: record the shipment (tracking optional) and tell the trader. */
+export async function adminUpdateDealShippingAction(
+  formData: FormData
+): Promise<ActionResult & { data?: { notified: string } }> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+  const dealId = String(formData.get("dealId") ?? "");
+  try {
+    const d = await adminUpdateDealShipping({
+      dealId,
+      carrier: String(formData.get("carrier") ?? ""),
+      trackingReference: String(formData.get("trackingReference") ?? ""),
+    });
+    const notified = await tellTrader(d, session.sub, "شُحنت صفقتك", undefined, [
+      d.carrier ? `شركة الشحن: ${d.carrier}` : null,
+      d.trackingReference ? `رقم التتبع: ${d.trackingReference}` : null,
+    ]);
+    revalidatePath(`/admin/deals/${dealId}`);
+    revalidatePath(`/trader/deals/${dealId}`);
+    return { ok: true, data: { notified } };
+  } catch (e) {
+    return { ok: false, error: dealMsg(e, "Failed") };
+  }
+}
+
+/** Admin: complete the deal (after shipping). */
+export async function adminCompleteDealAction(
+  formData: FormData
+): Promise<ActionResult & { data?: { notified: string } }> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+  const dealId = String(formData.get("dealId") ?? "");
+  try {
+    const d = await adminCompleteDeal({ dealId });
+    const notified = await tellTrader(d, session.sub, "اكتملت صفقتك", "شكراً لتعاملك مع RARE OUD.");
+    revalidatePath(`/admin/deals/${dealId}`);
+    revalidatePath(`/trader/deals/${dealId}`);
+    revalidatePath("/admin/deals");
+    revalidatePath("/trader/deals");
+    return { ok: true, data: { notified } };
+  } catch (e) {
+    return { ok: false, error: dealMsg(e, "Failed") };
+  }
 }

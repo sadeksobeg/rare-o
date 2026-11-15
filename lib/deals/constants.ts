@@ -74,3 +74,38 @@ export function nextDealStatusForAction(
   }
   return current;
 }
+
+/**
+ * Where a deal stands. After "awaiting_payment" the deal moves through
+ * payment → shipping → ready_to_complete → completed; each side only sees the step that applies.
+ */
+export type DealPhase =
+  | "negotiating"
+  | "payment"
+  | "shipping"
+  | "ready_to_complete"
+  | "completed"
+  | "rejected"
+  | "closed";
+
+export function dealPhase(d: {
+  status: string;
+  shippedAt: Date | null;
+  completedAt: Date | null;
+}): DealPhase {
+  switch (d.status) {
+    case "proposed":
+    case "negotiating":
+    case "accepted":
+      return "negotiating";
+    case "awaiting_payment":
+      return "payment";
+    case "payment_confirmed":
+      if (d.completedAt) return "completed";
+      return d.shippedAt ? "ready_to_complete" : "shipping";
+    case "rejected":
+      return "rejected";
+    default:
+      return d.completedAt ? "completed" : "closed";
+  }
+}

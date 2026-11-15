@@ -121,6 +121,8 @@ export function RadShellClient({
         deal_trader_accepted: "التاجر قبل شروط الصفقة",
         deal_trader_rejected: "التاجر رفض الصفقة",
         deal_trader_closed: "التاجر أغلق الصفقة",
+        deal_paid_claim: "التاجر أفاد بأنه دفع الصفقة (عبر المنصة)",
+        deal_paid_claim_wa: "التاجر أبلغ بالدفع عبر واتساب",
       };
       const base =
         p.domain === "wholesale" ? "/admin/wholesale" : p.domain === "deal" ? "/admin/deals" : p.domain === "product" ? "/admin/products" : "/admin/requests";

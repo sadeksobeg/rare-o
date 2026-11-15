@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { CurrencySelect } from "@/components/ui/currency-select";
 import { Wizard } from "@/components/ui/wizard";
 import { Field, Input, Select, Textarea } from "@/components/ui-kit/field";
+import { HelpField } from "@/components/trader/help-field";
 import { coercePlatformCurrency } from "@/lib/catalog/currency";
 import type { Locale } from "@/lib/i18n/config";
 import { fmt, traderActionMessage, type TraderDict } from "@/lib/ui/trader-labels";
@@ -18,6 +19,27 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 
 const initial: ActionResult | null = null;
+
+const HELP = {
+  ar: {
+    kind: "«صفقة من الكتالوج» تخص قطعة موجودة عندنا فتختارها من القائمة. «فرصة خارج الكتالوج» لقطعة أو عرض ليس في الكتالوج، تصفه بنفسك.",
+    title: "اسم قصير وواضح للصفقة يظهر لك ولفريقنا في كل مكان، مثل «عود VIP — دفعة موسم الربيع».",
+    message: "تعريف سريع بما تقترحه ولماذا. هي أول رسالة تصل للفريق مع عرضك، وليست إلزامية.",
+    model: "رقم أو كود الموديل للقطعة إن وُجد (مثلاً كود المصنّع). الحقل اختياري — اتركه فارغاً إن لم يكن لديك.",
+    price: "السعر الذي تقترحه لـ«الوحدة الواحدة». يُضرب تلقائياً في الكمية لتحصل على الإجمالي، وسيردّ الفريق بالقبول أو بعرض مقابل.",
+    qty: "عدد القطع المطلوب. إن تركته فارغاً تُحسب الصفقة على قطعة واحدة.",
+    notes: "أي شروط تريدها: مدة التسليم، طريقة الدفع، المواصفات المطلوبة… سيراها الفريق مع عرضك.",
+  },
+  en: {
+    kind: "Catalog deal is about a piece we already list - pick it from the list. Off-catalog is a piece or offer you describe yourself.",
+    title: "A short, clear name for the deal that you and our team will see everywhere.",
+    message: "A quick intro of what you propose and why. It is the first message our team receives with your offer - optional.",
+    model: "The piece model number or code, if any. Optional - leave empty if you do not have one.",
+    price: "The price you propose for ONE unit. It is multiplied by the quantity for the total; our team will accept or counter.",
+    qty: "How many pieces. If empty the deal counts as one piece.",
+    notes: "Any conditions: delivery time, payment method, required specs. Our team sees them with your offer.",
+  },
+} as const;
 const DRAFT_KEY = "ro-trader-deal-draft";
 
 type Draft = {
@@ -181,10 +203,6 @@ export function NewDealForm({
       }
     }
     if (step === 1) {
-      if (!draft.modelNumber.trim()) {
-        setStepError(t.wizardNeedModel);
-        return false;
-      }
       if (!draft.proposedPrice.trim() || Number(draft.proposedPrice) <= 0) {
         setStepError(t.wizardNeedPrice);
         return false;
@@ -246,6 +264,21 @@ export function NewDealForm({
         value={draft.conditionsNotes}
       />
 
+      <div
+        className="overflow-hidden rounded-3xl p-5 text-[#fff7ea] sm:p-6"
+        style={{ background: "linear-gradient(135deg, #2a1340 0%, #4a2575 60%, #7a44b3 100%)" }}
+      >
+        <p className="text-xs font-semibold tracking-wide text-[#f4d9a6]">{locale === "ar" ? "اقتراح صفقة" : "Propose a deal"}</p>
+        <h2 className="mt-1 text-xl font-bold sm:text-2xl">
+          {locale === "ar" ? "ثلاث خطوات قصيرة ويصل عرضك لفريقنا" : "Three short steps and your offer reaches our team"}
+        </h2>
+        <p className="mt-1.5 max-w-xl text-sm text-white/80">
+          {locale === "ar"
+            ? "حدّد القطعة وسعر الوحدة والكمية. سنقبل العرض أو نردّ بعرض مقابل، ثم تتابع الدفع والشحن من هنا. اضغط على علامة الاستفهام بجانب أي حقل لشرحه."
+            : "Choose the piece, unit price and quantity. We accept or counter, then you follow payment and shipping here. Tap the ? next to any field to see what it means."}
+        </p>
+      </div>
+
       <Wizard
         steps={steps}
         current={draft.step}
@@ -271,7 +304,7 @@ export function NewDealForm({
         {draft.step === 0 ? (
           <fieldset className="min-w-0 space-y-4 p-1 sm:p-0">
             <legend className="sr-only">{t.sectionType}</legend>
-            <Field label={t.dealTypeLabel}>
+            <HelpField label={t.dealTypeLabel} help={HELP[locale === "ar" ? "ar" : "en"].kind}>
               <Select
                 value={draft.dealKind}
                 onChange={(e) =>
@@ -284,15 +317,15 @@ export function NewDealForm({
                 <option value="catalog">{t.dealKind.catalog}</option>
                 <option value="non_catalog">{t.dealKind.non_catalog}</option>
               </Select>
-            </Field>
-            <Field label={t.dealTitleLabel}>
+            </HelpField>
+            <HelpField label={t.dealTitleLabel} help={HELP[locale === "ar" ? "ar" : "en"].title}>
               <Input
                 required
                 maxLength={200}
                 value={draft.title}
                 onChange={(e) => patch({ title: e.target.value })}
               />
-            </Field>
+            </HelpField>
             {draft.dealKind === "catalog" ? (
               <div className="space-y-1.5">
                 <p className="text-sm font-medium">{t.productLabel}</p>
@@ -320,31 +353,30 @@ export function NewDealForm({
             ) : (
               <p className="text-sm text-ro-muted">{t.nonCatalogNote}</p>
             )}
-            <Field label={t.initialMessageLabel}>
+            <HelpField label={t.initialMessageLabel} optional optionalLabel={locale === "ar" ? "اختياري" : "Optional"} help={HELP[locale === "ar" ? "ar" : "en"].message}>
               <Textarea
                 rows={3}
                 value={draft.message}
                 onChange={(e) => patch({ message: e.target.value })}
               />
-            </Field>
+            </HelpField>
           </fieldset>
         ) : null}
 
         {draft.step === 1 ? (
           <fieldset className="min-w-0 space-y-4 p-1 sm:p-0">
             <legend className="sr-only">{t.sectionTerms}</legend>
-            <Field label={t.modelNumberLabel}>
+            <HelpField label={t.modelNumberLabel} optional optionalLabel={locale === "ar" ? "اختياري" : "Optional"} help={HELP[locale === "ar" ? "ar" : "en"].model}>
               <Input
                 type="text"
-                required
                 maxLength={120}
                 dir="ltr"
                 value={draft.modelNumber}
                 onChange={(e) => patch({ modelNumber: e.target.value })}
               />
-            </Field>
+            </HelpField>
             <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-3">
-              <Field label={t.priceOptional}>
+              <HelpField label={locale === "ar" ? "سعر الوحدة (مطلوب)" : "Unit price (required)"} help={HELP[locale === "ar" ? "ar" : "en"].price}>
                 <Input
                   type="number"
                   step="0.01"
@@ -354,7 +386,7 @@ export function NewDealForm({
                   value={draft.proposedPrice}
                   onChange={(e) => patch({ proposedPrice: e.target.value })}
                 />
-              </Field>
+              </HelpField>
               <CurrencySelect
                 name="currencyUi"
                 required
@@ -370,7 +402,7 @@ export function NewDealForm({
                   currencySyp: t.currencySyp,
                 }}
               />
-              <Field label={t.quantityLabel}>
+              <HelpField label={t.quantityLabel} optional optionalLabel={locale === "ar" ? "اختياري" : "Optional"} help={HELP[locale === "ar" ? "ar" : "en"].qty}>
                 <Input
                   type="number"
                   min="1"
@@ -378,15 +410,25 @@ export function NewDealForm({
                   value={draft.quantity}
                   onChange={(e) => patch({ quantity: e.target.value })}
                 />
-              </Field>
+              </HelpField>
             </div>
-            <Field label={t.conditionsLabel}>
+            {Number(draft.proposedPrice) > 0 ? (
+              <p
+                className="rounded-xl bg-[color:color-mix(in_srgb,var(--rad-ac)_10%,transparent)] p-3 text-sm font-semibold"
+                dir="ltr"
+                style={{ textAlign: "start" }}
+              >
+                {draft.proposedPrice} × {Math.max(1, Number(draft.quantity) || 1)} ={" "}
+                {Math.round(Number(draft.proposedPrice) * Math.max(1, Number(draft.quantity) || 1) * 100) / 100} {draft.currency}
+              </p>
+            ) : null}
+            <HelpField label={t.conditionsLabel} optional optionalLabel={locale === "ar" ? "اختياري" : "Optional"} help={HELP[locale === "ar" ? "ar" : "en"].notes}>
               <Textarea
                 rows={3}
                 value={draft.conditionsNotes}
                 onChange={(e) => patch({ conditionsNotes: e.target.value })}
               />
-            </Field>
+            </HelpField>
           </fieldset>
         ) : null}
 
@@ -424,7 +466,7 @@ export function NewDealForm({
                   <bdi dir="ltr">{draft.modelNumber || "—"}</bdi>
                 </li>
                 <li>
-                  {t.priceOptional}:{" "}
+                  {locale === "ar" ? "سعر الوحدة" : "Unit price"}:{" "}
                   {draft.proposedPrice ? (
                     <bdi dir="ltr">
                       {draft.proposedPrice}

@@ -51,9 +51,14 @@ export function NegotiationForm({
   mode,
   labels,
   currency,
+  lastOfferBy = null,
+  current,
 }: {
   dealId: string;
   mode: "trader" | "admin";
+  /** Who made the latest price offer — you can only accept the OTHER side's offer. */
+  lastOfferBy?: "trader" | "admin" | null;
+  current?: { price: number | null; qty: number | null };
   /** Optional bilingual labels (trader portal). Admin keeps English defaults. */
   labels?: TraderDict;
   currency?: string | null;
@@ -67,6 +72,11 @@ export function NegotiationForm({
   const [warnings, setWarnings] = useState<ConflictWarning[]>([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
+  const ownOffer = lastOfferBy === mode;
+  const [cPrice, setCPrice] = useState("");
+  const [cQty, setCQty] = useState("");
+  const priceN = Number(cPrice);
+  const qtyN = cQty ? Number(cQty) : current?.qty ?? 0;
   const needsConfirm =
     action === "accept" || action === "close" || action === "reject";
   const confirmTitle =
@@ -151,8 +161,9 @@ export function NegotiationForm({
           <option value="counter">
             {labels?.dealAction.counter ?? "Counter"}
           </option>
-          <option value="accept">
+          <option value="accept" disabled={ownOffer}>
             {labels?.dealAction.accept ?? "Accept"}
+            {ownOffer ? " — بانتظار رد الطرف الآخر" : ""}
           </option>
           {mode === "admin" ? (
             <option value="reject">
@@ -180,30 +191,55 @@ export function NegotiationForm({
           }
         />
       </label>
+      {ownOffer ? (
+        <p className="rounded-[10px] bg-[color:var(--rad-surface3)] p-3 text-sm text-[color:var(--rad-tx2)]">
+          عرضك الأخير بانتظار رد الطرف الآخر — لا يمكنك قبول عرضك بنفسك. يمكنك إرسال رسالة أو تقديم عرض مقابل جديد.
+        </p>
+      ) : lastOfferBy ? (
+        <p className="rounded-[10px] bg-[color:color-mix(in_srgb,var(--rad-ac)_12%,transparent)] p-3 text-sm font-medium text-[color:var(--rad-tx)]">
+          الكرة في ملعبك: يمكنك قبول العرض الحالي، أو الردّ بعرض مقابل، أو الاستفسار.
+        </p>
+      ) : null}
       {action === "counter" ? (
         <div className="grid gap-3 sm:grid-cols-2">
           <p className="sm:col-span-2 text-xs leading-snug text-[color:var(--rad-tx3)]">
-            {labels?.negCounterPriceLocked ??
-              "Price stays fixed after the trader’s proposal — counter can adjust quantity or notes only."}
+            اكتب السعر الجديد للوحدة وأي تعديل على الكمية أو الشروط. بعد الإرسال يقبله الطرف الآخر أو يناقشه.
+            {current?.price != null ? ` العرض الحالي: ${current.price} ${currency ?? ""} للوحدة.` : ""}
           </p>
-          {currency ? (
-            <input type="hidden" name="currency" value={currency} />
-          ) : null}
+          {currency ? <input type="hidden" name="currency" value={currency} /> : null}
           <label className="block space-y-1.5 text-sm font-semibold">
-            <span className="text-[color:var(--rad-tx2)]">
-              {labels?.negQty ?? "Quantity"}
-            </span>
+            <span className="text-[color:var(--rad-tx2)]">السعر الجديد للوحدة {currency ? `(${currency})` : ""}</span>
+            <input
+              name="proposedPrice"
+              type="number"
+              min="0"
+              step="0.01"
+              dir="ltr"
+              value={cPrice}
+              onChange={(e) => setCPrice(e.target.value)}
+              className={fieldClass}
+            />
+          </label>
+          <label className="block space-y-1.5 text-sm font-semibold">
+            <span className="text-[color:var(--rad-tx2)]">{labels?.negQty ?? "Quantity"}</span>
             <input
               name="quantity"
               type="number"
               min="1"
+              dir="ltr"
+              value={cQty}
+              onChange={(e) => setCQty(e.target.value)}
+              placeholder={current?.qty ? String(current.qty) : undefined}
               className={fieldClass}
             />
           </label>
+          {priceN > 0 && qtyN > 0 ? (
+            <p className="sm:col-span-2 text-sm font-semibold" dir="ltr" style={{ textAlign: "start" }}>
+              {priceN} × {qtyN} = {Math.round(priceN * qtyN * 100) / 100} {currency ?? ""}
+            </p>
+          ) : null}
           <label className="block space-y-1.5 text-sm font-semibold sm:col-span-2">
-            <span className="text-[color:var(--rad-tx2)]">
-              {labels?.negConditions ?? "Conditions / notes"}
-            </span>
+            <span className="text-[color:var(--rad-tx2)]">{labels?.negConditions ?? "Conditions / notes"}</span>
             <textarea name="conditionsNotes" rows={2} className={fieldClass} />
           </label>
         </div>

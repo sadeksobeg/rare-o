@@ -317,6 +317,16 @@ model DealProposal {
   handoffOpenedAt           DateTime?
   paymentConfirmedAt        DateTime?
   paymentConfirmedByAdminId String?
+  /// Phased follow-up after payment: invoice link, trader payment notice, shipping, completion
+  invoiceToken              String?              @unique
+  invoiceIssuedAt           DateTime?
+  paymentClaimedAt          DateTime?
+  /// platform | whatsapp
+  paymentClaimedVia         String?
+  shippedAt                 DateTime?
+  carrier                   String?
+  trackingReference         String?
+  completedAt               DateTime?
   /// Estimate-only in v1 (no Shipment row until deal converts)
   shippingQuoteSnapshot     Json?
   entries                   NegotiationEntry[]

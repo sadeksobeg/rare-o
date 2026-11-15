@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { NegotiationThread } from "@/components/deals/negotiation-thread";
-import { PaymentHandoffCard } from "@/components/trader/payment-handoff-card";
+import { TraderDealPhaseCard } from "@/components/trader/deal-phase-card";
+import { dealPhase } from "@/lib/deals/constants";
 import { Banner } from "@/components/ui/banner";
 import { Card, CardHeader } from "@/components/ui-kit/card";
 import {
@@ -145,20 +146,23 @@ export default async function TraderDealDetailPage({
               }
               if (deal.proposedPrice != null) {
                 items.push({
-                  label: locale === "ar" ? "السعر المقترح" : "Proposed price",
-                  value: (
-                    <>
-                      {formatMoney(
-                        deal.proposedPrice,
-                        deal.currency,
-                        locale
-                      )}
-                      {deal.quantity != null
-                        ? ` · ${t.dealQtyShort} ${deal.quantity}`
-                        : ""}
-                    </>
-                  ),
+                  label: locale === "ar" ? "السعر الحالي للوحدة" : "Current unit price",
+                  value: <bdi dir="ltr">{formatMoney(deal.proposedPrice, deal.currency, locale)}</bdi>,
                 });
+                if (deal.quantity != null && deal.quantity > 0) {
+                  items.push({
+                    label: t.dealQtyShort,
+                    value: String(deal.quantity),
+                  });
+                  items.push({
+                    label: locale === "ar" ? "الإجمالي" : "Total",
+                    value: (
+                      <b dir="ltr">
+                        {formatMoney(Number(deal.proposedPrice) * deal.quantity, deal.currency, locale)}
+                      </b>
+                    ),
+                  });
+                }
               } else if (deal.quantity != null) {
                 items.push({
                   label: t.dealQtyShort,
@@ -178,22 +182,21 @@ export default async function TraderDealDetailPage({
         </div>
       </Card>
 
-      {deal.status === "awaiting_payment" ? (
-        <PaymentHandoffCard
-          kind="deal"
-          recordId={deal.id}
-          title={t.dealPayTitle}
-          body={t.dealPayBody}
-          openLabel={t.dealPayOpenWa}
-          unavailableLabel={t.dealPayUnavailable}
-          deepLink={deal.whatsAppDeepLink}
-          messageText={deal.handoffMessageText}
-        />
-      ) : null}
-
-      {deal.status === "payment_confirmed" ? (
-        <Banner tone="success">{t.dealPayConfirmed}</Banner>
-      ) : null}
+      {(() => {
+        const phase = dealPhase(deal);
+        if (phase === "negotiating" || phase === "rejected" || phase === "closed") return null;
+        return (
+          <TraderDealPhaseCard
+            dealId={deal.id}
+            phase={phase}
+            invoiceUrl={deal.invoiceToken ? `/deal-invoice/${deal.invoiceToken}` : null}
+            whatsAppDeepLink={deal.whatsAppDeepLink}
+            claimed={Boolean(deal.paymentClaimedAt)}
+            carrier={deal.carrier}
+            tracking={deal.trackingReference}
+          />
+        );
+      })()}
 
       <NegotiationThread
         entries={deal.entries}

@@ -314,7 +314,7 @@ export const dealProposalCreateSchema = z
     dealKind: z.enum(DEAL_KINDS),
     title: z.string().trim().min(1).max(200),
     productId: z.string().trim().min(1).optional().nullable(),
-    modelNumber: z.string().trim().min(1).max(120),
+    modelNumber: z.string().trim().max(120).nullish().transform((v) => v ?? ""),
     proposedPrice: requiredMoney,
     currency: requiredCurrency,
     quantity: optionalQty,

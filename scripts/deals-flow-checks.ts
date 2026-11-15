@@ -5,7 +5,17 @@
  */
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { addNegotiationEntry, confirmDealPayment, createDealProposal } from "../lib/deals/service";
+import {
+  addNegotiationEntry,
+  adminCompleteDeal,
+  adminIssueDealInvoice,
+  adminUpdateDealShipping,
+  confirmDealPayment,
+  createDealProposal,
+  getDealInvoiceByToken,
+  traderClaimDealPayment,
+} from "../lib/deals/service";
+import { dealPhase } from "../lib/deals/constants";
 
 const prisma = new PrismaClient();
 let passed = 0;
@@ -17,6 +27,15 @@ function check(cond: boolean, msg: string) {
   } else {
     failed += 1;
     console.log(`FAIL: ${msg}`);
+  }
+}
+
+async function rejects(fn: () => Promise<unknown>, prefix: string): Promise<boolean> {
+  try {
+    await fn();
+    return false;
+  } catch (e) {
+    return (e as Error).message.startsWith(prefix);
   }
 }
 
@@ -62,6 +81,26 @@ async function main() {
     }
     check(forbidden, "another trader cannot negotiate on this deal");
 
+    // Price negotiation: counter can change the price; you cannot accept your own offer.
+    const n = ids[2]!;
+    check(
+      await rejects(() => addNegotiationEntry({ dealId: n, action: "accept", actorRole: "trader", actorTraderId: trader.id }), "OWN_OFFER_CANNOT_ACCEPT"),
+      "trader cannot accept their own opening offer"
+    );
+    check(
+      await rejects(() => addNegotiationEntry({ dealId: n, action: "counter", actorRole: "admin", actorAdminId: admin.id }), "COUNTER_EMPTY"),
+      "an empty counter-offer is refused"
+    );
+    await addNegotiationEntry({ dealId: n, action: "counter", actorRole: "admin", actorAdminId: admin.id, proposedPrice: 90, currency: "USD" });
+    const countered = await prisma.dealProposal.findUniqueOrThrow({ where: { id: n } });
+    check(Number(countered.proposedPrice) === 90 && countered.status === "negotiating", "admin counter changes the price and keeps negotiating");
+    check(
+      await rejects(() => addNegotiationEntry({ dealId: n, action: "accept", actorRole: "admin", actorAdminId: admin.id }), "OWN_OFFER_CANNOT_ACCEPT"),
+      "admin cannot accept their own counter-offer"
+    );
+    await addNegotiationEntry({ dealId: n, action: "accept", actorRole: "trader", actorTraderId: trader.id });
+    check((await prisma.dealProposal.findUniqueOrThrow({ where: { id: n } })).status === "awaiting_payment", "trader accepts the admin counter → awaiting payment");
+
     const before = await prisma.whatsAppMessage.count({ where: { channel: "platform", adminId: admin.id } });
     const acc = await addNegotiationEntry({ dealId: id, action: "accept", actorRole: "admin", actorAdminId: admin.id, message: "ok" });
     check(acc.deal.status === "awaiting_payment", "admin accept → awaiting_payment");
@@ -76,9 +115,32 @@ async function main() {
     }
     check(early, "payment cannot be confirmed before accept");
 
+    let noInvoice = false;
+    try {
+      await confirmDealPayment({ dealId: id, adminId: admin.id });
+    } catch (e) {
+      noInvoice = (e as Error).message === "INVOICE_REQUIRED";
+    }
+    check(noInvoice, "payment cannot be confirmed before the invoice is sent");
+    const inv = await adminIssueDealInvoice({ dealId: id });
+    check(!!inv.invoiceToken && !!(await getDealInvoiceByToken(inv.invoiceToken!)), "invoice issued and resolvable by token");
+    await traderClaimDealPayment({ dealId: id, traderId: trader.id, via: "platform" });
+    await traderClaimDealPayment({ dealId: id, traderId: trader.id, via: "whatsapp" });
+    const claimed = await prisma.dealProposal.findUniqueOrThrow({ where: { id } });
+    check(claimed.paymentClaimedVia === "platform", "trader payment notice is recorded once (platform)");
     await confirmDealPayment({ dealId: id, adminId: admin.id });
     const row = await prisma.dealProposal.findUnique({ where: { id }, select: { status: true, paymentConfirmedAt: true } });
     check(row?.status === "payment_confirmed" && !!row.paymentConfirmedAt, "payment confirmed → payment_confirmed");
+    const afterPayRow = await prisma.dealProposal.findUniqueOrThrow({ where: { id } });
+    check(dealPhase(afterPayRow) === "shipping", "after payment the deal is in the shipping phase");
+    check(
+      await rejects(() => adminCompleteDeal({ dealId: id }), "NOT_READY"),
+      "cannot complete before shipping"
+    );
+    await adminUpdateDealShipping({ dealId: id, carrier: "DHL", trackingReference: "" });
+    check(dealPhase(await prisma.dealProposal.findUniqueOrThrow({ where: { id } })) === "ready_to_complete", "shipping without tracking number accepted");
+    await adminCompleteDeal({ dealId: id });
+    check(dealPhase(await prisma.dealProposal.findUniqueOrThrow({ where: { id } })) === "completed", "deal completes after shipping");
     const afterPay = await prisma.whatsAppMessage.count({ where: { channel: "platform", adminId: admin.id } });
     check(afterPay === afterAccept + 1, "trader got a platform-inbox message on payment");
   } finally {
