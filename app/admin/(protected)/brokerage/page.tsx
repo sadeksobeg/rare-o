@@ -1,3 +1,4 @@
+import { Camera as CameraIcon, Hourglass as HourglassIcon } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { LayoutGrid, List } from "lucide-react";
@@ -253,12 +254,12 @@ export default async function AdminBrokeragePage({
                             <div className="mt-2 flex flex-wrap gap-1.5">
                               {fresh ? (
                                 <span className="rounded-full px-2 py-0.5 text-[0.65rem] font-bold" style={{ background: "rgba(46,157,106,.18)", color: "#2e9d6a" }}>
-                                  📷 وصلت صور جديدة
+                                  <CameraIcon className="me-1 inline size-3 align-[-1px]" aria-hidden />وصلت صور جديدة
                                 </span>
                               ) : null}
                               {waitingPhotos ? (
                                 <span className="rounded-full px-2 py-0.5 text-[0.65rem] font-bold" style={{ background: "rgba(224,160,48,.2)", color: "#c98a1a" }}>
-                                  ⏳ بانتظار صور
+                                  <HourglassIcon className="me-1 inline size-3 align-[-1px]" aria-hidden />بانتظار صور
                                 </span>
                               ) : null}
                             </div>

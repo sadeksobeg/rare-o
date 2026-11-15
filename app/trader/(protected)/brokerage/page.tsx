@@ -1,3 +1,4 @@
+import { Camera as CameraIcon, CreditCard as CardIcon } from "lucide-react";
 import Link from "next/link";
 import { Compass, Plus } from "lucide-react";
 import {
@@ -132,12 +133,12 @@ export default async function TraderBrokeragePage() {
                     <div className="mt-3 flex flex-wrap gap-2">
                       {photosOpen ? (
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-[rgba(224,160,48,.2)] px-3 py-1 text-xs font-bold text-[#c98a1a]">
-                          📷 مطلوب منك صور
+                          <CameraIcon className="size-3.5" aria-hidden />مطلوب منك صور
                         </span>
                       ) : null}
                       {waiting ? (
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-[rgba(224,160,48,.2)] px-3 py-1 text-xs font-bold text-[#c98a1a]">
-                          {r.status === "AWAITING_PAYMENT" ? "💳 بانتظار دفعك" : t.brokerageNeedsYouChip}
+                          {r.status === "AWAITING_PAYMENT" ? (<><CardIcon className="size-3.5" aria-hidden />بانتظار دفعك</>) : t.brokerageNeedsYouChip}
                         </span>
                       ) : null}
                     </div>

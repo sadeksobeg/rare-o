@@ -1,5 +1,7 @@
 "use client";
 
+import { TriangleAlert as WarnIcon } from "lucide-react";
+
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -132,7 +134,7 @@ export function RetailConfirmationPanel({
         >
           <b>
             {response === "confirmed"
-              ? "✓ العميل أكّد صحة البيانات"
+              ? "العميل أكّد صحة البيانات"
               : "العميل طلب تعديلاً"}
           </b>
           {responseNote ? <p className="mt-1">«{responseNote}»</p> : null}
@@ -146,7 +148,7 @@ export function RetailConfirmationPanel({
 
       {prep && prep.missing.length > 0 ? (
         <p role="alert" className="text-sm" style={{ color: "var(--rad-warn, #e0a030)" }}>
-          ⚠️ ينقص أو يحتاج تصحيحاً: {prep.missing.map((m) => MISSING_AR[m] ?? m).join("، ")} — عدّل البيانات ثم أرسل التأكيد.
+          <WarnIcon className="me-1 inline size-4 align-text-bottom" aria-hidden />ينقص أو يحتاج تصحيحاً: {prep.missing.map((m) => MISSING_AR[m] ?? m).join("، ")} — عدّل البيانات ثم أرسل التأكيد.
         </p>
       ) : null}
 

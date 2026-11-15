@@ -1,5 +1,7 @@
 "use client";
 
+import { Check as CheckIcon } from "lucide-react";
+
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, CreditCard, FileText, MessageCircle, Package, ShieldCheck, Truck } from "lucide-react";
@@ -168,7 +170,7 @@ export function TraderWholesalePhaseCard({
           </div>
           {paidClaimed ? (
             <p role="status" className="text-sm font-medium text-[#2e9d6a]">
-              ✓ وصلنا إشعارك بالدفع — بانتظار تأكيد الفريق لاستلام الدفعة.
+              <CheckIcon className="me-1 inline size-4 align-text-bottom" aria-hidden />وصلنا إشعارك بالدفع — بانتظار تأكيد الفريق لاستلام الدفعة.
             </p>
           ) : null}
         </div>

@@ -1,5 +1,7 @@
 "use client";
 
+import { TriangleAlert as WarnIcon } from "lucide-react";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
@@ -268,7 +270,7 @@ export function ProductsListView({
             }}
           >
             {r.stock.qty <= 0 ? "نفد" : r.stock.qty}
-            {r.stock.low && r.stock.qty > 0 ? " ⚠" : ""}
+            {r.stock.low && r.stock.qty > 0 ? <WarnIcon className="ms-1 inline size-3" aria-hidden /> : null}
           </span>
         ),
     },

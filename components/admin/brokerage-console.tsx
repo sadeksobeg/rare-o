@@ -1,5 +1,7 @@
 "use client";
 
+import { Check as CheckIcon } from "lucide-react";
+
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -211,7 +213,7 @@ export function BrokerageConsole({
               className="rounded-lg border border-[color:var(--rad-bd)] p-3 text-sm"
               style={{ background: "color-mix(in srgb, var(--rad-ok, #2e9d6a) 12%, transparent)" }}
             >
-              ✓ التاجر أبلغ بالدفع {paidClaimed.via === "whatsapp" ? "(عبر واتساب)" : "(عبر المنصة)"} — تحقق من الاستلام ثم أكّد.
+              <CheckIcon className="me-1 inline size-4 align-text-bottom" aria-hidden />التاجر أبلغ بالدفع {paidClaimed.via === "whatsapp" ? "(عبر واتساب)" : "(عبر المنصة)"} — تحقق من الاستلام ثم أكّد.
             </p>
           ) : null}
           <div className="flex flex-wrap gap-2">
@@ -315,7 +317,7 @@ export function BrokerageConsole({
               </div>
             </>
           ) : (
-            btn("📷 اطلب صوراً من التاجر", () => setPhotoOpen(true), "gh")
+            btn("اطلب صوراً من التاجر", () => setPhotoOpen(true), "gh")
           )}
         </div>
       ) : null}

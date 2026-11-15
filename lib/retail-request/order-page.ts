@@ -105,10 +105,10 @@ export function buildConfirmationMessage(m: MessageInput): string {
   };
   const reminders = m.missing.length
     ? ar
-      ? `\n⚠️ ينقصنا أو يحتاج تصحيحاً: ${m.missing
+      ? `\nتنبيه: ينقصنا أو يحتاج تصحيحاً: ${m.missing
           .map((k) => ({ name: "الاسم الثلاثي", phone: "رقم الهاتف", destination: "الوجهة" })[k as "name"])
           .join("، ")}.`
-      : `\n⚠️ Missing or needs correction: ${m.missing
+      : `\nNote: missing or needs correction: ${m.missing
           .map((k) => ({ name: "full name", phone: "phone number", destination: "destination" })[k as "name"])
           .join(", ")}.`
     : "";

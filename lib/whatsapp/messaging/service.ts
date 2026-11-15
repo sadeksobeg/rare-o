@@ -1552,13 +1552,13 @@ export async function claimOutboundForSend(
             text:
               (row.replyTo.caption || row.replyTo.body || "").slice(0, 300) ||
               (row.replyTo.messageType === "image"
-                ? "📷"
+                ? "صورة"
                 : row.replyTo.messageType === "audio"
-                  ? "🎤"
+                  ? "رسالة صوتية"
                   : row.replyTo.messageType === "video"
-                    ? "🎥"
+                    ? "فيديو"
                     : row.replyTo.messageType === "document"
-                      ? "📄"
+                      ? "مستند"
                       : ""),
           }
         : null,

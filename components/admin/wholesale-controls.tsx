@@ -1,5 +1,7 @@
 "use client";
 
+import { Check as CheckIcon } from "lucide-react";
+
 import {
   adminConfirmWholesalePaymentAction,
   adminSendWholesaleInvoiceAction,
@@ -287,7 +289,7 @@ export function AdminWholesaleControls({
                   opacity: done || cur ? 1 : 0.55,
                 }}
               >
-                {done ? "✓ " : ""}
+                {done ? <CheckIcon className="me-1 inline size-3.5 align-text-bottom" aria-hidden /> : null}
                 {st.label}
               </li>
             );
@@ -368,7 +370,7 @@ export function AdminWholesaleControls({
               className="rounded-lg border border-[color:var(--rad-bd)] p-3 text-sm"
               style={{ background: "color-mix(in srgb, var(--rad-ok, #2e9d6a) 12%, transparent)" }}
             >
-              ✓ التاجر أفاد بأنه أرسل الدفعة — تحقق من الاستلام ثم أكّد.
+              <CheckIcon className="me-1 inline size-4 align-text-bottom" aria-hidden />التاجر أفاد بأنه أرسل الدفعة — تحقق من الاستلام ثم أكّد.
             </p>
           ) : null}
           <div className="flex flex-wrap gap-2">

@@ -1,3 +1,4 @@
+import { TriangleAlert as WarnIcon } from "lucide-react";
 import { notFound } from "next/navigation";
 import { ImageUploader } from "@/components/admin/image-uploader";
 import { ProductForm } from "@/components/admin/product-form";
@@ -114,7 +115,7 @@ export default async function EditProductPage({
                 background: product.stockQuantity <= 0 ? "rgba(220,80,80,.12)" : "rgba(224,160,48,.14)",
               }}
             >
-              <span aria-hidden className="text-2xl leading-none">⚠</span>
+              <WarnIcon className="size-6 shrink-0" aria-hidden />
               <div>
                 <p className="font-bold">
                   {product.stockQuantity <= 0 ? "نفد مخزون هذه القطعة" : `المخزون يوشك على النفاد — المتبقي ${product.stockQuantity} قطعة فقط`}

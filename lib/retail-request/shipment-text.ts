@@ -25,7 +25,7 @@ export function formatEta(min: number | null, max: number | null, ar: boolean): 
 export function paymentLabel(mode: string | null, confirmed: boolean, ar: boolean): string | null {
   if (mode === "cod") return ar ? "الدفع عند الاستلام" : "Pay on delivery";
   if (mode === "prepaid") {
-    if (confirmed) return ar ? "مدفوع مسبقاً ✓" : "Paid in advance ✓";
+    if (confirmed) return ar ? "مدفوع مسبقاً" : "Paid in advance";
     return ar ? "دفع مسبق — بانتظار التأكيد" : "Advance payment — awaiting confirmation";
   }
   return null;

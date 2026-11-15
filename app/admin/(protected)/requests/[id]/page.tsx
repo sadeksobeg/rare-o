@@ -1,3 +1,4 @@
+import { Check as CheckIcon } from "lucide-react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -358,7 +359,7 @@ export default async function AdminRequestDetailPage({
                 <CardHeader title={ar ? "تأكيد البيانات مع العميل" : "Confirm details with the customer"} />
                 <div className="rad-cb2">
                   <p className="text-sm">
-                    <b>✓ {ar ? "العميل أكّد صحة بياناته" : "The customer confirmed the details"}</b>
+                    <b><CheckIcon className="me-1 inline size-4 align-text-bottom" aria-hidden />{ar ? "العميل أكّد صحة بياناته" : "The customer confirmed the details"}</b>
                   </p>
                   <details className="mt-3">
                     <summary className="cursor-pointer text-sm opacity-80">

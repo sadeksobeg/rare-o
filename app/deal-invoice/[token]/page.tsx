@@ -94,7 +94,7 @@ export default async function DealInvoicePage({ params }: { params: Promise<{ to
               <h3>تفاصيل الصفقة</h3>
               <p>
                 <span className="k">الدفع: </span>
-                {paid ? "مدفوعة ✓" : "تحويل خارج المنصة بحسب الاتفاق"}
+                {paid ? "مدفوعة" : "تحويل خارج المنصة بحسب الاتفاق"}
               </p>
               {d.carrier ? (
                 <p>

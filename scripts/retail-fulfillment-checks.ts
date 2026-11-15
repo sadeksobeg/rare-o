@@ -25,7 +25,7 @@ async function main() {
   check(formatEta(5, 5, false) === "5 days", "ETA single (en)");
   check(formatEta(null, null, true) === null, "no ETA → null");
   check(paymentLabel("cod", false, true) === "الدفع عند الاستلام", "COD label");
-  check(paymentLabel("prepaid", true, true)?.includes("✓") === true, "prepaid confirmed label");
+  check(paymentLabel("prepaid", true, true) === "مدفوع مسبقاً", "prepaid confirmed label");
   check(paymentLabel(null, false, true) === null, "no payment mode → null");
   const arrived = buildShipmentUpdateMessage({ locale: "ar", name: "أحمد", reference: "RO-X", status: "ARRIVED", note: "عند الباب", link: "https://x/o" });
   check(arrived.includes("نقطة التسليم المتفق عليها") && arrived.includes("عند الباب") && arrived.includes("https://x/o"), "arrived message");

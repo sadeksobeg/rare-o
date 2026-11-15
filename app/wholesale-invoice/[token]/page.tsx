@@ -103,7 +103,7 @@ export default async function WholesaleInvoicePage({ params }: { params: Promise
               <h3>تفاصيل الطلب</h3>
               <p>
                 <span className="k">الدفع: </span>
-                {paid ? "مدفوعة ✓" : "تحويل خارج المنصة بحسب الاتفاق"}
+                {paid ? "مدفوعة" : "تحويل خارج المنصة بحسب الاتفاق"}
               </p>
               {r.shippingMethodLabel ? (
                 <p>
