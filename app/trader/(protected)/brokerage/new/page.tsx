@@ -7,7 +7,7 @@ export default async function TraderBrokerageNewPage() {
   const t = dict.trader;
 
   return (
-    <section className="mx-auto max-w-xl space-y-6">
+    <section className="mx-auto w-full max-w-3xl space-y-6">
       <div>
         <Link
           href="/trader/brokerage"
@@ -18,9 +18,6 @@ export default async function TraderBrokerageNewPage() {
         <h1 className="mt-3 text-2xl font-semibold text-[color:var(--rad-tx)]">
           {t.brokerageWizardTitle}
         </h1>
-        <p className="mt-1 text-sm text-[color:var(--rad-tx2)]">
-          {t.brokerageExplainerBody}
-        </p>
       </div>
       <BrokerageNewForm locale={locale} labels={t} />
     </section>

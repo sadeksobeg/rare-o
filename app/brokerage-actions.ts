@@ -40,9 +40,9 @@ import type { BrokerageStatus } from "@/lib/brokerage/status";
 import { prisma } from "@/lib/db/prisma";
 
 const createSchema = z.object({
-  descriptionAr: z.string().trim().min(8).max(2000),
+  descriptionAr: z.string().trim().min(3).max(2000),
   descriptionEn: z.string().trim().max(2000).optional(),
-  modelNumber: z.string().trim().min(1).max(120),
+  modelNumber: z.string().trim().max(120).nullish().transform((v) => v ?? ""),
   statedPriceUsd: z.coerce.number().int().positive().max(10_000_000),
   quantity: z.coerce.number().int().min(1).max(99).optional(),
   cityAr: z.string().trim().max(120).optional(),

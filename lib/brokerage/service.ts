@@ -103,7 +103,7 @@ export async function createBrokerageRequest(input: {
   /** @deprecated legacy — prefer modelNumber */
   categoryAr?: string;
   categoryEn?: string;
-  modelNumber: string;
+  modelNumber?: string;
   statedPriceUsd: number;
   quantity?: number;
   cityAr?: string;
@@ -119,8 +119,7 @@ export async function createBrokerageRequest(input: {
   photoPaths?: string[];
   locale?: "ar" | "en";
 }) {
-  const modelNumber = input.modelNumber.trim();
-  if (!modelNumber) throw new Error("MODEL_NUMBER_REQUIRED");
+  const modelNumber = (input.modelNumber ?? "").trim(); // optional
   if (
     !Number.isFinite(input.statedPriceUsd) ||
     input.statedPriceUsd <= 0 ||

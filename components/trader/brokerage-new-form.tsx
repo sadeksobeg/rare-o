@@ -10,6 +10,7 @@ import {
   type BrokeragePhotoMeta,
 } from "@/components/brokerage/photo-field";
 import { Button } from "@/components/ui/button";
+import { HelpField } from "@/components/trader/help-field";
 import { Field, Input, Textarea } from "@/components/ui-kit/field";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { useUnsavedGuard } from "@/lib/ui/use-unsaved-guard";
@@ -193,17 +194,31 @@ export function BrokerageNewForm({
     }));
   }
 
-  function canNext() {
+  /** What is still missing on the current step, in plain words (shown instead of a silently disabled button). */
+  function missing(): { key: string; text: string }[] {
+    const out: { key: string; text: string }[] = [];
     if (draft.step === 0) {
+      if (draft.form.descriptionAr.trim().length < 3) {
+        out.push({ key: "descriptionAr", text: "وصف القطعة (3 أحرف على الأقل)" });
+      }
       const price = Number(draft.form.statedPriceUsd);
-      return (
-        draft.form.descriptionAr.trim().length >= 8 &&
-        draft.form.modelNumber.trim().length > 0 &&
-        Number.isFinite(price) &&
-        price > 0
-      );
+      if (!Number.isFinite(price) || price <= 0) {
+        out.push({ key: "statedPriceUsd", text: "السعر بالدولار (رقم أكبر من صفر)" });
+      }
     }
-    return true;
+    return out;
+  }
+  function canNext() {
+    return missing().length === 0;
+  }
+  const [showMissing, setShowMissing] = useState(false);
+  function tryNext() {
+    if (!canNext()) {
+      setShowMissing(true);
+      return;
+    }
+    setShowMissing(false);
+    setStep((s) => s + 1);
   }
 
   const { step, form } = draft;
@@ -263,7 +278,7 @@ export function BrokerageNewForm({
         onSubmit={(e) => {
           if (step < 3) {
             e.preventDefault();
-            if (canNext()) setStep((s) => s + 1);
+            tryNext();
             return;
           }
           try {
@@ -287,16 +302,20 @@ export function BrokerageNewForm({
         <input type="hidden" name="traderNotes" value={form.traderNotes} />
 
         <div className={cn(step !== 0 && "hidden")}>
-          <Field label={t.brokerageFieldDescription}>
+          <HelpField
+            label={t.brokerageFieldDescription}
+            help="اكتب ما هي القطعة بوضوح: النوع، الصانع أو المصدر، العمر التقريبي، الحالة، وأي تفاصيل تساعدنا في المعاينة والشراء."
+          >
             <Textarea
               name="descriptionArVisible"
               required
-              minLength={8}
+              minLength={3}
               rows={4}
               value={form.descriptionAr}
               onChange={(e) => update("descriptionAr", e.target.value)}
+              invalid={showMissing && form.descriptionAr.trim().length < 3}
             />
-          </Field>
+          </HelpField>
           {/* Keep mounted so file inputs survive later steps */}
           <div className="mt-4">
             <BrokeragePhotoField
@@ -315,15 +334,21 @@ export function BrokerageNewForm({
             ) : null}
           </div>
           <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
-            <Field label={t.brokerageFieldCategory}>
+            <HelpField
+              label={t.brokerageFieldCategory}
+              optional
+              help="رقم أو كود الموديل إن وُجد (مثلاً كود الصانع أو رقم القطعة عند البائع). اتركه فارغاً إن لم يكن لديك."
+            >
               <Input
                 name="modelNumberVisible"
-                required
                 value={form.modelNumber}
                 onChange={(e) => update("modelNumber", e.target.value)}
               />
-            </Field>
-            <Field label={t.brokerageFieldBudgetMin}>
+            </HelpField>
+            <HelpField
+              label="السعر الذي أبلغك به البائع (USD)"
+              help="السعر بالدولار الذي طلبه البائع للقطعة. نستعمله مرجعاً أثناء الشراء، والدفع يتم في آخر مرحلة بعد الشراء."
+            >
               <Input
                 name="statedPriceUsdVisible"
                 type="number"
@@ -332,17 +357,19 @@ export function BrokerageNewForm({
                 dir="ltr"
                 value={form.statedPriceUsd}
                 onChange={(e) => update("statedPriceUsd", e.target.value)}
+                invalid={showMissing && !(Number(form.statedPriceUsd) > 0)}
               />
-            </Field>
-            <Field label={t.brokerageFieldQuantity}>
+            </HelpField>
+            <HelpField label={t.brokerageFieldQuantity} optional help="عدد القطع المطلوبة. إن تركته فارغاً يُحسب قطعة واحدة.">
               <Input
                 name="quantityVisible"
                 type="number"
+                min={1}
                 dir="ltr"
                 value={form.quantity}
                 onChange={(e) => update("quantity", e.target.value)}
               />
-            </Field>
+            </HelpField>
           </div>
         </div>
 
@@ -456,6 +483,21 @@ export function BrokerageNewForm({
           </dl>
         ) : null}
 
+        {showMissing && missing().length > 0 ? (
+          <div
+            role="alert"
+            className="rounded-xl border p-3.5 text-sm"
+            style={{ borderColor: "rgba(224,160,48,.6)", background: "rgba(224,160,48,.14)" }}
+          >
+            <p className="font-bold">أكمل الحقول التالية للمتابعة:</p>
+            <ul className="mt-1 list-inside list-disc space-y-0.5">
+              {missing().map((m) => (
+                <li key={m.key}>{m.text}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
         {state && !state.ok ? (
           <p className="text-sm text-[var(--ro-danger-700)]">{state.error}</p>
         ) : null}
@@ -471,12 +513,7 @@ export function BrokerageNewForm({
             </Button>
           ) : null}
           {step < 3 ? (
-            <Button
-              type="button"
-              disabled={!canNext()}
-              onClick={() => setStep((s) => s + 1)}
-              className="ms-auto"
-            >
+            <Button type="button" onClick={tryNext} className="ms-auto w-full sm:w-auto" size="lg">
               {t.wizardNext}
             </Button>
           ) : (

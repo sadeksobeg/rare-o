@@ -2996,9 +2996,9 @@ const ar: Dict = {
     notificationsFilterWholesale: "جملة",
     notificationsFilterBrokerage: "وساطة",
     brokerageWizardTitle: "طلب وساطة جديد",
-    brokerageExplainerTitle: "الدفع أولاً ثم المتابعة",
+    brokerageExplainerTitle: "كيف تسير الوساطة",
     brokerageExplainerBody:
-      "تُدخل رقم الموديل والسعر الذي تبلغ به. بعدها تفتح محادثة واتساب مع الإدارة للدفع. بعد تأكيد الإدارة لنجاح الدفع تُفتح بقية مراحل الوساطة (معاينة وشراء وشحن).",
+      "صِف القطعة وأرفق صورها واذكر السعر الذي تبلغ به. تراجع الإدارة الطلب وتعاين القطعة وتشتريها لك، ثم تصلك الفاتورة للدفع في آخر مرحلة، وبعد تأكيد الدفع تُشحن القطعة إليك.",
     brokerageStepWhat: "القطعة",
     brokerageStepWhere: "المكان",
     brokerageStepExpectations: "التوقعات",
@@ -4912,9 +4912,9 @@ const en: Dict = {
     notificationsFilterWholesale: "Wholesale",
     notificationsFilterBrokerage: "Brokerage",
     brokerageWizardTitle: "New brokerage request",
-    brokerageExplainerTitle: "Payment first, then the rest",
+    brokerageExplainerTitle: "How brokerage works",
     brokerageExplainerBody:
-      "Enter the model number and the price you state. Then open WhatsApp with admin to pay. After admin confirms payment, the remaining brokerage stages unlock (inspection, purchase, shipping).",
+      "Describe the piece, attach photos and state the price you were quoted. We review the request, inspect the piece and buy it for you; the invoice comes last for payment, and the piece ships once payment is confirmed.",
     brokerageStepWhat: "The piece",
     brokerageStepWhere: "Location",
     brokerageStepExpectations: "Expectations",
