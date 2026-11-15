@@ -5,6 +5,7 @@
  * always gets the in-portal notification — this is the extra WhatsApp nudge.
  */
 import { randomUUID } from "node:crypto";
+import { composeMessage } from "@/lib/messaging/compose";
 import { prisma } from "@/lib/db/prisma";
 import { normalizePhoneDigits } from "@/lib/validation/customer-identity";
 import { siteBaseUrl } from "@/lib/retail-request/order-page";
@@ -29,23 +30,35 @@ export function buildWholesaleTraderMessage(input: {
   link: string;
   shipping?: { carrier: string; tracking: string } | null;
 }): string {
-  const first = input.name.trim().split(/\s+/)[0] || input.name;
-  const tail = `\nتفاصيل الطلب: ${input.link}`;
+  const context = `طلب الجملة رقم ${input.reference}`;
+  const base = { ar: true, name: input.name, context, linkLabel: "تفاصيل الطلب:", link: input.link };
   switch (input.event) {
     case "review":
-      return `أهلاً ${first}، بدأنا مراجعة طلب الجملة ${input.reference}.${tail}`;
+      return composeMessage({ ...base, headline: "بدأنا مراجعة طلبك", note: "سنوافيك بعرض السعر في أقرب وقت." });
     case "quote":
-      return `أهلاً ${first}، جهّزنا عرض سعر لطلب الجملة ${input.reference}. يرجى مراجعته وقبوله أو رفضه من بوابتك.${tail}`;
+      return composeMessage({
+        ...base,
+        headline: "عرض السعر جاهز",
+        note: "يرجى مراجعة العرض وقبوله أو رفضه من بوابة التاجر.",
+      });
     case "confirmed":
-      return `أهلاً ${first}، تم تأكيد طلب الجملة ${input.reference}. سنتواصل معك لترتيب التفاصيل.${tail}`;
+      return composeMessage({
+        ...base,
+        headline: "تم تأكيد طلبك",
+        note: "اختر من بوابتك طريقة التأكيد النهائي (المنصة أو واتساب) لنتابع الفاتورة والشحن.",
+      });
     case "shipped":
-      return `أهلاً ${first}، شُحن طلب الجملة ${input.reference}${
-        input.shipping ? ` عبر ${input.shipping.carrier} — رقم التتبع: ${input.shipping.tracking}` : ""
-      }.${tail}`;
+      return composeMessage({
+        ...base,
+        headline: "شُحن طلبك",
+        details: input.shipping
+          ? [`شركة الشحن: ${input.shipping.carrier}`, input.shipping.tracking ? `رقم التتبع: ${input.shipping.tracking}` : null]
+          : [],
+      });
     case "completed":
-      return `أهلاً ${first}، اكتمل طلب الجملة ${input.reference}. شكراً لتعاملك مع RARE OUD.${tail}`;
+      return composeMessage({ ...base, headline: "اكتمل طلبك", note: "شكراً لتعاملك مع RARE OUD." });
     case "cancelled":
-      return `أهلاً ${first}، أُلغي طلب الجملة ${input.reference}. للاستفسار راسلنا هنا.${tail}`;
+      return composeMessage({ ...base, headline: "تم إلغاء الطلب", note: "للاستفسار، راسلنا في هذه المحادثة." });
   }
 }
 

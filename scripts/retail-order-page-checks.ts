@@ -113,7 +113,7 @@ async function main() {
     check(msg.includes("1,130 USD"), "message shows the estimated total");
     check(msg.includes(`/order/${token}`) && msg.includes("رقم الهاتف"), "message carries the link and the missing-data reminder");
     const upd = buildStatusUpdateMessage({ locale: "ar", name: "أحمد", reference: "RO-X", status: "completed", link: "https://x/o" });
-    check(upd.includes("مكتمل") && upd.includes("https://x/o"), "status update message");
+    check(upd.includes("اكتمل طلبك") && upd.includes("https://x/o"), "status update message");
   } finally {
     await prisma.retailRequest.delete({ where: { id: request.id } }).catch(() => undefined);
     if (legacyId) await prisma.retailRequest.delete({ where: { id: legacyId } }).catch(() => undefined);

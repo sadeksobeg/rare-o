@@ -32,6 +32,7 @@ import {
 } from "@/lib/wholesale/service";
 import { isWholesaleStatus } from "@/lib/wholesale/constants";
 import { prisma } from "@/lib/db/prisma";
+import { composeMessage } from "@/lib/messaging/compose";
 import { notifyTraderChannels } from "@/lib/trader/notify-channels";
 import { siteBaseUrl } from "@/lib/retail-request/order-page";
 import {
@@ -96,8 +97,15 @@ async function maybeNotifyTraderText(
   const first = r.trader.displayName.trim().split(/\s+/)[0];
   const text =
     kind === "payment"
-      ? `أهلاً ${first}، استلمنا دفعة طلب الجملة ${r.reference}. سنجهّز الشحن ونوافيك بالتفاصيل.
-${traderRequestUrl(requestId)}`
+      ? composeMessage({
+          ar: true,
+          name: r.trader.displayName,
+          headline: "استلمنا دفعتك",
+          context: `طلب الجملة رقم ${r.reference}`,
+          note: "نجهّز الآن الشحن وسنوافيك بالتفاصيل.",
+          linkLabel: "تفاصيل الطلب:",
+          link: traderRequestUrl(requestId),
+        })
       : "";
   const res = await notifyTraderChannels({ traderId: r.traderId, adminId, text });
   return `${res.platform ? "platform" : "noplatform"}:${res.whatsapp}`;
@@ -475,9 +483,15 @@ export async function adminSendWholesaleInvoiceAction(
     const res = await notifyTraderChannels({
       traderId: inv.traderId,
       adminId: session.sub,
-      text: `أهلاً ${first}، هذه فاتورة طلب الجملة ${inv.reference}:
-${url}
-بعد إتمام الدفع حسب المتفق عليه اضغط «أرسلتُ الدفعة» في صفحة طلبك أو ردّ علينا هنا.`,
+text: composeMessage({
+        ar: true,
+        name: tr?.displayName,
+        headline: "فاتورة طلبك جاهزة",
+        context: `طلب الجملة رقم ${inv.reference}`,
+        note: "بعد إتمام الدفع حسب المتفق عليه، اضغط «أرسلتُ الدفعة» في صفحة طلبك أو أخبرنا هنا.",
+        linkLabel: "عرض الفاتورة:",
+        link: url,
+      }),
     });
     revalidateWholesaleSurfaces(requestId);
     return {

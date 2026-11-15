@@ -91,9 +91,15 @@ export function AdminWholesaleControls({
     let tail = "";
     if (n && n !== "skipped") {
       const [plat, wa] = n.split(":");
-      const platText = plat === "platform" ? "وصلته رسالة في رسائل المنصة" : "تعذّرت رسالة المنصة";
-      const waText = wa === "sent" ? "وعلى واتساب" : `(واتساب: ${WA_ERR_AR[wa ?? ""] ?? wa})`;
-      tail = ` — ${platText} ${waText}`;
+      const waOk = wa === "sent";
+      const platOk = plat === "platform";
+      tail = platOk && waOk
+        ? " — وأُرسلت للتاجر عبر المنصة وواتساب"
+        : platOk
+          ? ` — وأُرسلت للتاجر عبر المنصة (تعذّر واتساب: ${WA_ERR_AR[wa ?? ""] ?? wa})`
+          : waOk
+            ? " — وأُرسلت للتاجر عبر واتساب"
+            : " — تعذّر إرسال الرسالة للتاجر";
     }
     setMessage(okText + tail);
     router.refresh();

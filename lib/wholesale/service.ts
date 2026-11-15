@@ -719,7 +719,7 @@ export async function adminUpdateWholesaleShipping(input: {
           toStatus: request.status,
           actorRole: "admin",
           actorAdminId: input.actorAdminId,
-          note: trackingReference ? `Shipping: ${carrier} / ${trackingReference}` : `Shipping: ${carrier}`,
+          note: trackingReference ? `الشحن: ${carrier} — رقم التتبع ${trackingReference}` : `الشحن: ${carrier}`,
         },
       },
     },

@@ -5,6 +5,7 @@
  * by itself — sending is always an explicit admin action.
  */
 import { randomBytes } from "node:crypto";
+import { composeMessage } from "@/lib/messaging/compose";
 import { publishInboxEvent } from "@/lib/whatsapp/messaging/inbox-events";
 import { prisma } from "@/lib/db/prisma";
 import { isFullName, isValidPhone } from "@/lib/validation/customer-identity";
@@ -164,15 +165,25 @@ export function buildStatusUpdateMessage(input: {
 }): string {
   const ar = input.locale === "ar";
   const label: Record<string, [string, string]> = {
-    in_follow_up: ["قيد المتابعة — نعمل على تجهيز طلبك", "In follow-up — we are preparing your request"],
-    completed: ["مكتمل — شكراً لثقتك بـ RARE OUD", "Completed — thank you for choosing RARE OUD"],
-    cancelled: ["أُلغي — تواصل معنا إن كان هذا غير مقصود", "Cancelled — contact us if this is unexpected"],
+    in_follow_up: ["طلبك قيد التجهيز", "Your order is being prepared"],
+    completed: ["اكتمل طلبك — شكراً لثقتك بـ RARE OUD", "Your order is complete — thank you for choosing RARE OUD"],
+    cancelled: ["تم إلغاء طلبك", "Your order has been cancelled"],
   };
   const l = label[input.status];
-  const text = l ? (ar ? l[0] : l[1]) : input.status;
-  return ar
-    ? `مرحباً ${input.name}،\nتحديث طلبك ${input.reference}: ${text}.\nتفاصيل الطلب وحالته: ${input.link}`
-    : `Hello ${input.name},\nUpdate on your request ${input.reference}: ${text}.\nDetails and status: ${input.link}`;
+  return composeMessage({
+    ar,
+    name: input.name,
+    headline: l ? (ar ? l[0] : l[1]) : input.status,
+    context: ar ? `طلبك رقم ${input.reference}` : `Your order ${input.reference}`,
+    note:
+      input.status === "cancelled"
+        ? ar
+          ? "إن كان الإلغاء غير مقصود فراسلنا هنا وسنساعدك."
+          : "If this was not intended, reply here and we will help."
+        : null,
+    linkLabel: ar ? "تفاصيل الطلب وحالته:" : "Order details and status:",
+    link: input.link,
+  });
 }
 
 export type PublicOrderView = {

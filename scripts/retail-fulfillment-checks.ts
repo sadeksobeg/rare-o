@@ -28,7 +28,7 @@ async function main() {
   check(paymentLabel("prepaid", true, true)?.includes("✓") === true, "prepaid confirmed label");
   check(paymentLabel(null, false, true) === null, "no payment mode → null");
   const arrived = buildShipmentUpdateMessage({ locale: "ar", name: "أحمد", reference: "RO-X", status: "ARRIVED", note: "عند الباب", link: "https://x/o" });
-  check(arrived.includes("المكان المتفق عليه") && arrived.includes("عند الباب") && arrived.includes("https://x/o"), "arrived message");
+  check(arrived.includes("نقطة التسليم المتفق عليها") && arrived.includes("عند الباب") && arrived.includes("https://x/o"), "arrived message");
   const transit = buildShipmentUpdateMessage({ locale: "ar", name: "أحمد", reference: "RO-X", status: "IN_TRANSIT", eta: "7–10 يوماً", link: "l" });
   check(transit.includes("الوصول المتوقع: 7–10 يوماً"), "in-transit message carries the ETA");
   check(!buildShipmentUpdateMessage({ locale: "ar", name: "a", reference: "r", status: "ARRIVED", eta: "5 أيام", link: "l" }).includes("الوصول المتوقع"), "no ETA line once arrived");
@@ -92,7 +92,7 @@ async function main() {
     check(view?.paymentLabel === "الدفع عند الاستلام", "public view shows the payment mode");
     check(view?.etaLabel === "7–10 يوماً", "public view shows the ETA");
     check(view?.shipment?.status === "ARRIVED", "public view shows the shipment status");
-    check(view?.updates[0]?.title === "وصلت شحنتك إلى المكان المتفق عليه", "newest update uses customer wording");
+    check(view?.updates[0]?.title === "وصلت شحنتك إلى نقطة التسليم المتفق عليها", "newest update uses customer wording");
     check(view?.updates[0]?.note === "عند المكان المتفق عليه b", "update note is sanitised");
     check(!!view?.updates.some((u) => u.note === "الشحنة في مركز الفرز"), "note-only update is visible to the customer");
     check(!JSON.stringify(view).includes("actor"), "no staff identity in the public payload");

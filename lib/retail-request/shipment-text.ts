@@ -1,15 +1,17 @@
+import { composeMessage } from "@/lib/messaging/compose";
+
 /** Customer-facing wording for the shipping part of a retail request. */
 
 export const CUSTOMER_SHIPMENT_TEXT: Record<string, [string, string]> = {
-  CONFIRMED: ["أُنشئت شحنتك", "Your shipment was created"],
-  PACKED: ["جُهّزت قطعتك وغُلّفت", "Your piece is packed"],
-  HANDED_OVER: ["سُلّمت الشحنة للناقل", "Handed over to the carrier"],
+  CONFIRMED: ["تم إنشاء شحنتك", "Your shipment has been created"],
+  PACKED: ["تم تجهيز طلبك وتغليفه", "Your order has been packed"],
+  HANDED_OVER: ["تم تسليم الشحنة إلى شركة الشحن", "Your shipment was handed to the carrier"],
   IN_TRANSIT: ["شحنتك في الطريق إليك", "Your shipment is on its way"],
-  ARRIVED: ["وصلت شحنتك إلى المكان المتفق عليه", "Your shipment arrived at the agreed place"],
-  DELIVERED: ["تم تسليم شحنتك — نتمنى أن تسعدك", "Your shipment was delivered — enjoy it"],
-  FAILED: ["تعذّر تسليم الشحنة — سنتواصل معك", "Delivery failed — we will contact you"],
-  RETURNED: ["أُعيدت الشحنة — سنتواصل معك", "Shipment returned — we will contact you"],
-  CANCELLED: ["أُلغيت الشحنة", "Shipment cancelled"],
+  ARRIVED: ["وصلت شحنتك إلى نقطة التسليم المتفق عليها", "Your shipment has reached the agreed delivery point"],
+  DELIVERED: ["تم تسليم طلبك — نتمنى أن تسعدك قطعتك", "Your order was delivered — we hope you love it"],
+  FAILED: ["تعذّر تسليم الشحنة وسنتواصل معك لترتيب موعد جديد", "Delivery was unsuccessful — we will contact you to rearrange"],
+  RETURNED: ["أُعيدت الشحنة إلينا وسنتواصل معك", "The shipment was returned to us — we will contact you"],
+  CANCELLED: ["تم إلغاء الشحنة", "The shipment was cancelled"],
 };
 
 export function formatEta(min: number | null, max: number | null, ar: boolean): string | null {
@@ -41,17 +43,21 @@ export function buildShipmentUpdateMessage(input: {
 }): string {
   const ar = input.locale === "ar";
   const t = CUSTOMER_SHIPMENT_TEXT[input.status] ?? [input.status, input.status];
-  const line = ar ? `${t[0]}.` : `${t[1]}.`;
   const etaVisible =
     input.eta && ["CONFIRMED", "PACKED", "HANDED_OVER", "IN_TRANSIT"].includes(input.status);
-  return [
-    ar ? `مرحباً ${input.name}،` : `Hello ${input.name},`,
-    ar ? `تحديث طلبك ${input.reference}: ${line}` : `Update on your request ${input.reference}: ${line}`,
-    ...(input.note ? [input.note] : []),
-    ...(input.tracking ? [ar ? `رقم التتبع: ${input.tracking}` : `Tracking: ${input.tracking}`] : []),
-    ...(etaVisible ? [ar ? `الوصول المتوقع: ${input.eta}` : `Expected delivery: ${input.eta}`] : []),
-    ar ? `تابع كل التفاصيل: ${input.link}` : `Follow everything here: ${input.link}`,
-  ].join("\n");
+  return composeMessage({
+    ar,
+    name: input.name,
+    headline: ar ? t[0] : t[1],
+    context: ar ? `طلبك رقم ${input.reference}` : `Your order ${input.reference}`,
+    details: [
+      input.tracking ? (ar ? `رقم التتبع: ${input.tracking}` : `Tracking number: ${input.tracking}`) : null,
+      etaVisible ? (ar ? `الوصول المتوقع: ${input.eta}` : `Estimated delivery: ${input.eta}`) : null,
+    ],
+    note: input.note,
+    linkLabel: ar ? "لمتابعة طلبك:" : "Track your order:",
+    link: input.link,
+  });
 }
 
 /** WhatsApp text sent when the team fixes how the customer pays. */
@@ -63,17 +69,38 @@ export function buildPaymentMessage(input: {
   confirmed: boolean;
   link: string;
 }): string {
-  const first = input.name.trim().split(/\s+/)[0] || input.name;
-  if (input.locale === "en") {
-    if (input.mode === "cod")
-      return `Hello ${first}, for request ${input.reference} payment will be on delivery. Follow your order here: ${input.link}`;
-    if (input.confirmed)
-      return `Hello ${first}, we received your payment for request ${input.reference}. Thank you! Follow your order here: ${input.link}`;
-    return `Hello ${first}, request ${input.reference} is paid in advance. Please complete the payment as agreed, then reply here or tap "I have paid" on your order page: ${input.link}`;
+  const ar = input.locale !== "en";
+  const ctx = ar ? `طلبك رقم ${input.reference}` : `Your order ${input.reference}`;
+  if (input.mode === "cod") {
+    return composeMessage({
+      ar,
+      name: input.name,
+      headline: ar ? "الدفع عند الاستلام" : "Payment on delivery",
+      context: ctx,
+      note: ar ? "لا يلزمك أي دفع الآن، تدفع عند استلام طلبك." : "No payment is needed now — you pay when your order arrives.",
+      linkLabel: ar ? "لمتابعة طلبك:" : "Track your order:",
+      link: input.link,
+    });
   }
-  if (input.mode === "cod")
-    return `أهلاً ${first}، طلبك ${input.reference} سيكون الدفع فيه عند الاستلام. تابع طلبك من هنا: ${input.link}`;
-  if (input.confirmed)
-    return `أهلاً ${first}، استلمنا دفعتك لطلب ${input.reference}. شكراً لك! تابع طلبك من هنا: ${input.link}`;
-  return `أهلاً ${first}، طلبك ${input.reference} بنظام الدفع المسبق. يرجى إتمام الدفع حسب المتفق عليه، ثم ردّ علينا هنا أو اضغط «أرسلتُ الدفعة» في صفحة طلبك: ${input.link}`;
+  if (input.confirmed) {
+    return composeMessage({
+      ar,
+      name: input.name,
+      headline: ar ? "استلمنا دفعتك، شكراً لك" : "We received your payment — thank you",
+      context: ctx,
+      linkLabel: ar ? "لمتابعة طلبك:" : "Track your order:",
+      link: input.link,
+    });
+  }
+  return composeMessage({
+    ar,
+    name: input.name,
+    headline: ar ? "بانتظار إتمام الدفع" : "Awaiting your payment",
+    context: ctx,
+    note: ar
+      ? "يرجى إتمام الدفع حسب المتفق عليه، ثم أخبرنا هنا أو اضغط «أرسلتُ الدفعة» في صفحة طلبك."
+      : "Please complete the payment as agreed, then let us know here or tap “I have paid” on your order page.",
+    linkLabel: ar ? "صفحة طلبك:" : "Your order page:",
+    link: input.link,
+  });
 }

@@ -2818,7 +2818,9 @@
 .rad-bb.rad-out .rad-bm-ch { color: color-mix(in srgb, #fffcf8 82%, transparent); }
 
 /* Consecutive messages from the same side/channel sit tighter and share a corner. */
-.rad-bb-row.rad-grp { margin-top: -6px; }
+.rad-bb-row.rad-grp { margin-top: 6px; }
+/* Breathing room between bubbles (long WhatsApp texts used to touch each other). */
+.rad-bb-row:not(.rad-grp) { margin-top: 12px; }
 .rad-bb-row.rad-grp.rad-out .rad-bb { border-start-end-radius: 14px; }
 .rad-bb-row.rad-grp.rad-in .rad-bb { border-start-start-radius: 14px; }
 
@@ -2974,6 +2976,6 @@
   .rad-fl { flex-wrap: nowrap; padding-block-end: 2px; }
 }
 @media (max-width: 767px) {
-  .rad-bb-row.rad-grp { margin-top: -2px; }
+  .rad-bb-row.rad-grp { margin-top: 4px; }
   .rad-th .rad-chipl-name { display: none; }
 }

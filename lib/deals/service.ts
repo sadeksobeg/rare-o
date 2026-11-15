@@ -1,4 +1,5 @@
 import { randomInt } from "node:crypto";
+import { composeMessage } from "@/lib/messaging/compose";
 import { publishInboxEvent } from "@/lib/whatsapp/messaging/inbox-events";
 import { notifyTraderChannels, traderPortalUrl } from "@/lib/trader/notify-channels";
 import { uiVisibleDealWhere } from "@/lib/admin/ui-hidden";
@@ -342,14 +343,14 @@ export async function addNegotiationEntry(input: AddNegotiationInput) {
   if (input.actorRole === "admin") {
     const actionLabelAr =
       input.action === "accept"
-        ? "قُبلت الشروط — بانتظار الدفع"
+        ? "تم قبول شروط صفقتك — بانتظار الدفع"
         : input.action === "reject"
-          ? "رُفضت الصفقة"
+          ? "تم رفض الصفقة"
           : input.action === "close"
-            ? "أُغلقت الصفقة"
+            ? "تم إغلاق الصفقة"
             : input.action === "counter"
-              ? "رد من الإدارة (بدون تغيير السعر)"
-              : "تحديث على الصفقة";
+              ? "ردّ جديد من الإدارة على صفقتك"
+              : "تحديث على صفقتك";
     const actionLabelEn =
       input.action === "accept"
         ? "Terms accepted — awaiting payment"
@@ -381,13 +382,18 @@ export async function addNegotiationEntry(input: AddNegotiationInput) {
         where: { id: updated.traderId },
         select: { displayName: true },
       });
-      const first = (tr?.displayName ?? "").trim().split(/\s+/)[0];
       await notifyTraderChannels({
         traderId: updated.traderId,
         adminId: input.actorAdminId,
-        text: `أهلاً ${first || ""}، ${actionLabelAr} — صفقة ${updated.reference}${rejectReason ? `
-السبب: ${rejectReason}` : ""}
-التفاصيل: ${traderPortalUrl(`/trader/deals/${updated.id}`)}`,
+text: composeMessage({
+          ar: true,
+          name: tr?.displayName,
+          headline: actionLabelAr,
+          context: `الصفقة رقم ${updated.reference}`,
+          note: rejectReason ? `السبب: ${rejectReason}` : null,
+          linkLabel: "تفاصيل الصفقة:",
+          link: traderPortalUrl(`/trader/deals/${updated.id}`),
+        }),
       });
     }
   }
@@ -422,11 +428,18 @@ export async function confirmDealPayment(input: {
     bodyEn: "Admin confirmed payment and completed the order.",
     href: `/trader/deals/${deal.id}`,
   });
+  const dealTrader = await prisma.traderAccount.findUnique({ where: { id: deal.traderId }, select: { displayName: true } });
   await notifyTraderChannels({
     traderId: deal.traderId,
     adminId: input.adminId,
-    text: `تم تأكيد استلام دفعة صفقتك ${deal.reference}. شكراً لك!
-التفاصيل: ${traderPortalUrl(`/trader/deals/${deal.id}`)}`,
+text: composeMessage({
+      ar: true,
+      name: dealTrader?.displayName,
+      headline: "تم تأكيد استلام دفعتك",
+      context: `الصفقة رقم ${deal.reference}`,
+      linkLabel: "تفاصيل الصفقة:",
+      link: traderPortalUrl(`/trader/deals/${deal.id}`),
+    }),
   });
 
   return updated;
