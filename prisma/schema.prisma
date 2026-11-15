@@ -789,10 +789,18 @@ model BrokerageRequest {
   handoffOpenedAt           DateTime?
   paymentConfirmedAt        DateTime?
   paymentConfirmedByAdminId String?
+  /// Payment is the LAST stage (after the piece is purchased): invoice link + trader payment notice
+  invoiceToken              String?              @unique
+  invoiceIssuedAt           DateTime?
+  paymentClaimedAt          DateTime?
+  /// platform | whatsapp
+  paymentClaimedVia         String?
+  purchasedAt               DateTime?
   shippingQuoteSnapshot     Json?
   inspection                BrokerageInspection?
   quote                     BrokerageQuote?
   events                    BrokerageEvent[]
+  photoRequests             BrokeragePhotoRequest[]
   shipments                 Shipment[]
   createdAt                 DateTime             @default(now())
   updatedAt                 DateTime             @updatedAt
@@ -1051,4 +1059,24 @@ model TraderSavedAddress {
   updatedAt DateTime @updatedAt
 
   @@index([traderId])
+}
+
+/// Admin asks the trader for specific photos (or the trader sends extra ones on their own) — one batch per row.
+model BrokeragePhotoRequest {
+  id                 String           @id @default(cuid())
+  requestId          String
+  request            BrokerageRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  /// What the admin needs to see (empty for trader-initiated batches)
+  note               String           @default("")
+  /// admin | trader — who started this batch
+  requestedBy        String           @default("admin")
+  requestedByAdminId String?
+  /// JSON string array of media-route paths received for this batch
+  photoPaths         String           @default("[]")
+  /// Trader's note sent with the photos
+  traderNote         String           @default("")
+  createdAt          DateTime         @default(now())
+  fulfilledAt        DateTime?
+
+  @@index([requestId, createdAt])
 }

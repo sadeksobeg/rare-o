@@ -7,6 +7,7 @@ export type BrokeragePhase =
   | "inspection"
   | "quote"
   | "fulfillment"
+  | "shipping"
   | "closed";
 
 export type BrokerageAudience = "admin" | "trader";
@@ -31,7 +32,8 @@ export const BROKERAGE_PHASE_LABEL: Record<
   payment: { ar: "الدفع", en: "Payment" },
   inspection: { ar: "معاينة", en: "Inspection" },
   quote: { ar: "عرض (قديم)", en: "Quote (legacy)" },
-  fulfillment: { ar: "تنفيذ", en: "Fulfillment" },
+  fulfillment: { ar: "الشراء", en: "Purchase" },
+  shipping: { ar: "الشحن", en: "Shipping" },
   closed: { ar: "إغلاق", en: "Closed" },
 };
 
@@ -65,11 +67,11 @@ export const BROKERAGE_STATUS_META: Record<BrokerageStatus, BrokerageStatusMeta>
       },
       nextHint: {
         admin: {
-          ar: "بانتظار رد التاجر. بعد اكتمال المعلومات يمكنك المتابعة للدفع أو الرفض.",
-          en: "Waiting on the trader. Once info is complete you can proceed to payment or decline.",
+          ar: "بانتظار رد التاجر. بعد اكتمال المعلومات اقبل الطلب للمعاينة أو ارفضه.",
+          en: "Waiting on the trader. Once info is complete accept for inspection or decline.",
         },
         trader: {
-          ar: "أكمِل المعلومات المطلوبة ثم أعد إرسال الطلب.",
+          ar: "أكمِل المعلومات المطلوبة وأرفق الصور إن طُلبت ثم أعد إرسال الطلب.",
           en: "Provide the requested information and resubmit.",
         },
       },
@@ -78,17 +80,17 @@ export const BROKERAGE_STATUS_META: Record<BrokerageStatus, BrokerageStatusMeta>
       label: { ar: "بانتظار الدفع", en: "Awaiting payment" },
       phase: "payment",
       meaning: {
-        ar: "التاجر يدفع عبر واتساب مع الإدارة وبانتظار تأكيد استلام الدفع.",
-        en: "Trader pays via WhatsApp with admin; waiting for payment confirmation.",
+        ar: "اشتُريت القطعة وهي بانتظار الدفع: الفاتورة صدرت والتاجر يدفع ثم تؤكد الإدارة الاستلام.",
+        en: "The piece is purchased and awaiting payment: invoice issued, trader pays, admin confirms receipt.",
       },
       nextHint: {
         admin: {
-          ar: "بعد استلام التحويل: أكّد نجاح الدفع لفتح بقية المراحل.",
-          en: "After receiving the transfer: confirm payment to unlock remaining stages.",
+          ar: "أرسل الفاتورة للتاجر، وبعد استلام التحويل أكّد الدفع لتبدأ مرحلة الشحن.",
+          en: "Send the invoice; after receiving the transfer confirm payment to start shipping.",
         },
         trader: {
-          ar: "افتح واتساب وأتمّ الدفع، ثم انتظر تأكيد الإدارة.",
-          en: "Open WhatsApp, complete payment, then wait for admin confirmation.",
+          ar: "اطّلع على الفاتورة وأتمّ الدفع، ثم أبلغنا عبر المنصة أو واتساب.",
+          en: "Review the invoice, complete payment, then tell us via the platform or WhatsApp.",
         },
       },
     },
@@ -96,17 +98,17 @@ export const BROKERAGE_STATUS_META: Record<BrokerageStatus, BrokerageStatusMeta>
       label: { ar: "تأكيد الدفع", en: "Payment confirmed" },
       phase: "payment",
       meaning: {
-        ar: "أكدت الإدارة نجاح الدفع. يمكن بدء المعاينة والتنفيذ.",
-        en: "Admin confirmed payment. Inspection and fulfillment can begin.",
+        ar: "أكدت الإدارة استلام الدفعة. تُجهَّز القطعة للشحن.",
+        en: "Admin confirmed payment. The piece is being prepared for shipping.",
       },
       nextHint: {
         admin: {
-          ar: "اقبل الطلب للمعاينة أو ارفض إن لزم.",
-          en: "Accept for inspection or decline if needed.",
+          ar: "سجّل بيانات الشحن (شركة الشحن مطلوبة، رقم التتبع اختياري).",
+          en: "Record shipping (carrier required, tracking optional).",
         },
         trader: {
-          ar: "تم تأكيد الدفع — الإدارة تتابع بقية المراحل.",
-          en: "Payment confirmed — admin continues the remaining stages.",
+          ar: "تم تأكيد الدفع — نجهّز شحن قطعتك.",
+          en: "Payment confirmed — we are preparing your shipment.",
         },
       },
     },
@@ -150,8 +152,8 @@ export const BROKERAGE_STATUS_META: Record<BrokerageStatus, BrokerageStatusMeta>
       label: { ar: "اكتملت المعاينة", en: "Inspected" },
       phase: "fulfillment",
       meaning: {
-        ar: "تقرير المعاينة جاهز. الخطوة التالية تنفيذ الشراء (بعد الدفع المؤكد).",
-        en: "Inspection report is ready. Next: purchase (payment already confirmed).",
+        ar: "تقرير المعاينة جاهز. الخطوة التالية تنفيذ الشراء.",
+        en: "Inspection report is ready. Next: purchase.",
       },
       nextHint: {
         admin: {
@@ -204,23 +206,23 @@ export const BROKERAGE_STATUS_META: Record<BrokerageStatus, BrokerageStatusMeta>
       label: { ar: "تم الشراء", en: "Purchased" },
       phase: "fulfillment",
       meaning: {
-        ar: "تم شراء القطعة وبانتظار تجهيز الشحن للتاجر.",
-        en: "Piece purchased; ready to ship to the trader.",
+        ar: "تم شراء القطعة. الخطوة التالية: الدفع (الفاتورة).",
+        en: "Piece purchased. Next: payment (invoice).",
       },
       nextHint: {
         admin: {
-          ar: "سجّل الشحن: اسم الناقل ورقم التتبع.",
-          en: "Record shipment: carrier and tracking number.",
+          ar: "افتح مرحلة الدفع: أصدر الفاتورة وأرسلها للتاجر.",
+          en: "Open the payment stage: issue and send the invoice.",
         },
         trader: {
-          ar: "تم الشراء — بانتظار بيانات الشحن.",
-          en: "Purchased — waiting for shipping details.",
+          ar: "تم شراء القطعة — ستصلك الفاتورة للدفع.",
+          en: "Purchased — your invoice for payment is next.",
         },
       },
     },
     SHIPPED: {
       label: { ar: "قيد الشحن", en: "Shipped" },
-      phase: "fulfillment",
+      phase: "shipping",
       meaning: {
         ar: "الشحنة في الطريق وبانتظار تأكيد وصولها.",
         en: "Shipment is in transit awaiting delivery confirmation.",
@@ -238,7 +240,7 @@ export const BROKERAGE_STATUS_META: Record<BrokerageStatus, BrokerageStatusMeta>
     },
     DELIVERED: {
       label: { ar: "تم التسليم", en: "Delivered" },
-      phase: "fulfillment",
+      phase: "shipping",
       meaning: {
         ar: "وصلت الشحنة للتاجر. يبقى إغلاق ملف الوساطة.",
         en: "Delivered to the trader. Close the brokerage file next.",

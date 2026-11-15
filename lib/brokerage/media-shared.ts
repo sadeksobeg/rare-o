@@ -1,6 +1,11 @@
 /** Client-safe brokerage media helpers — no Node / sharp imports. */
 
-export const BROKERAGE_MAX_PHOTOS = 6;
+/** Photos allowed on the initial request form. */
+export const BROKERAGE_CREATE_MAX_PHOTOS = 6;
+/** Total photos kept per request (initial + photo requests + extras). */
+export const BROKERAGE_MAX_PHOTOS = 30;
+/** Photos per single upload batch. */
+export const BROKERAGE_BATCH_MAX_PHOTOS = 12;
 export const BROKERAGE_MAX_BYTES = 8 * 1024 * 1024;
 
 export const BROKERAGE_ALLOWED_IMAGE_TYPES = [

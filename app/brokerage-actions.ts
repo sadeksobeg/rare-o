@@ -12,7 +12,12 @@ import {
   requireTraderSession,
 } from "@/lib/auth/trader-session";
 import {
+  adminIssueBrokerageInvoice,
+  tellBrokerageTrader,
+  traderClaimBrokeragePayment,
+  adminRequestBrokeragePhotos,
   appendBrokerageRequestPhotos,
+  traderSubmitBrokeragePhotos,
   adminTransitionBrokerage,
   confirmBrokeragePayment,
   createBrokerageRequest,
@@ -30,6 +35,7 @@ import {
   preflightPhotoFiles,
   saveBrokeragePhotos,
 } from "@/lib/brokerage/media";
+import { BROKERAGE_BATCH_MAX_PHOTOS } from "@/lib/brokerage/media-shared";
 import type { BrokerageStatus } from "@/lib/brokerage/status";
 import { prisma } from "@/lib/db/prisma";
 
@@ -93,6 +99,7 @@ export async function traderCreateBrokerageAction(
     return { ok: false, error: "VALIDATION" };
   }
   const files = collectPhotoFiles(formData);
+  if (files.length > 6) return { ok: false, error: mediaErrorMessage("MAX", "ar") };
   const pre = preflightPhotoFiles(files, 0);
   if (!pre.ok) {
     return { ok: false, error: mediaErrorMessage(pre.error, "ar") };
@@ -195,8 +202,9 @@ export async function adminBrokerageTransitionAction(
   _prev: ActionResult | null,
   formData: FormData
 ): Promise<ActionResult> {
+  let session;
   try {
-    await requireAdminSession();
+    session = await requireAdminSession();
   } catch (e) {
     return handleAdminSessionError(e);
   }
@@ -206,6 +214,7 @@ export async function adminBrokerageTransitionAction(
   try {
     await adminTransitionBrokerage({
       id,
+      adminId: session.sub,
       toStatus,
       declineReason: String(formData.get("declineReason") ?? "") || undefined,
       inspectionAssignee:
@@ -231,8 +240,9 @@ export async function adminSaveInspectionAction(
   _prev: ActionResult | null,
   formData: FormData
 ): Promise<ActionResult> {
+  let session;
   try {
-    await requireAdminSession();
+    session = await requireAdminSession();
   } catch (e) {
     return handleAdminSessionError(e);
   }
@@ -255,6 +265,7 @@ export async function adminSaveInspectionAction(
     }
     await upsertInspection({
       requestId,
+      adminId: session.sub,
       grade: String(formData.get("grade") ?? "B"),
       notesAr: String(formData.get("notesAr") ?? ""),
       notesEn: String(formData.get("notesEn") ?? ""),
@@ -339,6 +350,138 @@ export async function traderOpenBrokerageHandoffAction(
   if (!id) return { ok: false, error: "VALIDATION" };
   try {
     await markBrokerageHandoffOpened({ id, traderId: session.sub });
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "ERROR" };
+  }
+  revalidateBrokerage(id);
+  return { ok: true };
+}
+
+
+/** Admin: ask the trader for specific photos (platform + WhatsApp message). */
+export async function adminRequestBrokeragePhotosAction(
+  formData: FormData
+): Promise<ActionResult & { data?: { notified: string } }> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+  const id = String(formData.get("id") ?? "");
+  try {
+    const res = await adminRequestBrokeragePhotos({
+      requestId: id,
+      adminId: session.sub,
+      note: String(formData.get("note") ?? ""),
+    });
+    const { composeMessage } = await import("@/lib/messaging/compose");
+    const { notifyTraderChannels, traderPortalUrl } = await import("@/lib/trader/notify-channels");
+    const tr = await prisma.traderAccount.findUnique({ where: { id: res.request.traderId }, select: { displayName: true } });
+    const out = await notifyTraderChannels({
+      traderId: res.request.traderId,
+      adminId: session.sub,
+      text: composeMessage({
+        ar: true,
+        name: tr?.displayName,
+        headline: "نحتاج صوراً إضافية لطلبك",
+        context: `طلب الوساطة رقم ${res.request.reference}`,
+        note: res.photoRequest.note,
+        linkLabel: "ارفع الصور من هنا:",
+        link: traderPortalUrl(`/trader/brokerage/${id}`),
+      }),
+    });
+    revalidateBrokerage(id);
+    return { ok: true, data: { notified: `${out.platform ? "platform" : "noplatform"}:${out.whatsapp}` } };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "ERROR" };
+  }
+}
+
+/** Trader: send photos (for an open request, or extra ones on their own). */
+export async function traderSubmitBrokeragePhotosAction(
+  _prev: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireTraderSession();
+  } catch (e) {
+    return handleTraderSessionError(e);
+  }
+  const id = String(formData.get("id") ?? "");
+  if (!id) return { ok: false, error: "VALIDATION" };
+  const files = collectPhotoFiles(formData).slice(0, BROKERAGE_BATCH_MAX_PHOTOS);
+  if (files.length === 0) return { ok: false, error: "اختر صورة واحدة على الأقل" };
+  try {
+    const existing = await prisma.brokerageRequest.findFirst({
+      where: { id, traderId: session.sub },
+      select: { photoPaths: true },
+    });
+    if (!existing) return { ok: false, error: "NOT_FOUND" };
+    const already = parsePhotoPaths(existing.photoPaths).length;
+    const pre = preflightPhotoFiles(files, already);
+    if (!pre.ok) return { ok: false, error: mediaErrorMessage(pre.error, "ar") };
+    const saved = await saveBrokeragePhotos(id, files, already);
+    if (!saved.ok) return { ok: false, error: mediaErrorMessage(saved.error, "ar") };
+    await traderSubmitBrokeragePhotos({
+      requestId: id,
+      traderId: session.sub,
+      photoRequestId: String(formData.get("photoRequestId") ?? "") || null,
+      paths: saved.paths,
+      note: String(formData.get("note") ?? ""),
+    });
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "ERROR" };
+  }
+  revalidateBrokerage(id);
+  return { ok: true };
+}
+
+
+/** Admin: issue the invoice and drop its link into the trader chat (platform + WhatsApp) in one click. */
+export async function adminSendBrokerageInvoiceAction(
+  formData: FormData
+): Promise<ActionResult & { data?: { notified: string; url: string } }> {
+  let session;
+  try {
+    session = await requireAdminSession();
+  } catch (e) {
+    return handleAdminSessionError(e);
+  }
+  const id = String(formData.get("id") ?? "");
+  try {
+    const inv = await adminIssueBrokerageInvoice({ requestId: id, adminId: session.sub });
+    const { siteBaseUrl } = await import("@/lib/retail-request/order-page");
+    const url = `${siteBaseUrl()}/brokerage-invoice/${inv.invoiceToken}`;
+    const notified = await tellBrokerageTrader(
+      { id: inv.id, reference: inv.reference, traderId: inv.traderId },
+      session.sub,
+      "فاتورة طلبك جاهزة",
+      "بعد إتمام الدفع، اختر من صفحة الطلب: «أبلغ بالدفع» عبر المنصة أو عبر واتساب.",
+      [],
+      url,
+      "عرض الفاتورة:"
+    );
+    revalidateBrokerage(id);
+    return { ok: true, data: { notified, url } };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "ERROR" };
+  }
+}
+
+/** Trader: "I have paid" via the platform or WhatsApp. */
+export async function traderClaimBrokeragePaymentAction(formData: FormData): Promise<ActionResult> {
+  let session;
+  try {
+    session = await requireTraderSession();
+  } catch (e) {
+    return handleTraderSessionError(e);
+  }
+  const id = String(formData.get("id") ?? "");
+  const via = String(formData.get("via") ?? "") === "whatsapp" ? "whatsapp" : "platform";
+  try {
+    await traderClaimBrokeragePayment({ requestId: id, traderId: session.sub, via });
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "ERROR" };
   }

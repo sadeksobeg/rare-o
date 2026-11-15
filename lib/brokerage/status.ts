@@ -21,40 +21,46 @@ export const BROKERAGE_STATUSES = [
 
 export type BrokerageStatus = (typeof BROKERAGE_STATUSES)[number];
 
-/** Happy path for new creates (payment-first, 2026-11-03). */
+/**
+ * Happy path for new requests (2026-11-15): review → inspection → purchase → PAYMENT (last stage) → shipping → delivery.
+ * Requests created before this change may still carry the old payment-first statuses; those keep working.
+ */
 export const BROKERAGE_LIFECYCLE: BrokerageStatus[] = [
-  "AWAITING_PAYMENT",
-  "PAYMENT_CONFIRMED",
+  "SUBMITTED",
   "ACCEPTED",
   "INSPECTION_SCHEDULED",
   "INSPECTED",
   "PURCHASED",
+  "AWAITING_PAYMENT",
+  "PAYMENT_CONFIRMED",
   "SHIPPED",
   "DELIVERED",
 ];
 
 const ADMIN_TRANSITIONS: Partial<Record<BrokerageStatus, BrokerageStatus[]>> = {
-  SUBMITTED: ["NEEDS_INFO", "AWAITING_PAYMENT", "DECLINED"],
-  NEEDS_INFO: ["AWAITING_PAYMENT", "DECLINED", "CANCELLED"],
-  AWAITING_PAYMENT: ["PAYMENT_CONFIRMED", "NEEDS_INFO", "DECLINED", "CANCELLED"],
-  PAYMENT_CONFIRMED: ["ACCEPTED", "CANCELLED"],
+  SUBMITTED: ["NEEDS_INFO", "ACCEPTED", "DECLINED"],
+  NEEDS_INFO: ["ACCEPTED", "DECLINED", "CANCELLED"],
   ACCEPTED: ["INSPECTION_SCHEDULED", "DECLINED"],
   INSPECTION_SCHEDULED: ["INSPECTED", "CANCELLED"],
-  INSPECTED: ["PURCHASED", "QUOTE_SENT", "DECLINED"],
+  INSPECTED: ["PURCHASED", "DECLINED"],
+  PURCHASED: ["AWAITING_PAYMENT", "SHIPPED"],
+  AWAITING_PAYMENT: ["PAYMENT_CONFIRMED", "CANCELLED"],
+  PAYMENT_CONFIRMED: ["SHIPPED", "ACCEPTED"],
+  SHIPPED: ["DELIVERED"],
+  DELIVERED: ["CLOSED"],
   /* Legacy quote path — still transitionable for old rows */
   QUOTE_SENT: ["DECLINED"],
   APPROVED: ["PURCHASED", "CANCELLED"],
-  PURCHASED: ["SHIPPED"],
-  SHIPPED: ["DELIVERED"],
-  DELIVERED: ["CLOSED"],
 };
 
 const TRADER_TRANSITIONS: Partial<Record<BrokerageStatus, BrokerageStatus[]>> = {
   /* Legacy */
   QUOTE_SENT: ["APPROVED", "REJECTED"],
-  NEEDS_INFO: ["AWAITING_PAYMENT", "CANCELLED"],
+  NEEDS_INFO: ["SUBMITTED", "CANCELLED"],
   SUBMITTED: ["CANCELLED"],
-  AWAITING_PAYMENT: ["CANCELLED"],
+  ACCEPTED: ["CANCELLED"],
+  INSPECTION_SCHEDULED: ["CANCELLED"],
+  AWAITING_PAYMENT: [],
 };
 
 export function canAdminTransition(from: string, to: string): boolean {
@@ -69,22 +75,21 @@ export function canTraderTransition(from: string, to: string): boolean {
   );
 }
 
-export function nextActor(
-  status: string
-): "admin" | "trader" | "none" {
+export function nextActor(status: string): "admin" | "trader" | "none" {
   switch (status) {
     case "SUBMITTED":
-    case "AWAITING_PAYMENT":
-    case "PAYMENT_CONFIRMED":
     case "ACCEPTED":
     case "INSPECTION_SCHEDULED":
     case "INSPECTED":
+    case "PAYMENT_CONFIRMED":
     case "APPROVED":
-    case "PURCHASED":
+    case "SHIPPED":
     case "DELIVERED":
+    case "PURCHASED":
       return "admin";
     case "NEEDS_INFO":
     case "QUOTE_SENT":
+    case "AWAITING_PAYMENT":
       return "trader";
     default:
       return "none";

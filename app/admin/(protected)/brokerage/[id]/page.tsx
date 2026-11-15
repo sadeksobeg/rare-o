@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { MapPin, Package, User } from "lucide-react";
-import { BrokerageAdminPanel } from "@/components/admin/brokerage-admin-panel";
+import { BrokerageConsole } from "@/components/admin/brokerage-console";
+import { InspectionTable } from "@/components/brokerage/inspection-table";
+import { listBrokeragePhotoRequests } from "@/lib/brokerage/service";
 import { brokerageStatusLabel } from "@/components/brokerage/labels";
 import { BrokerageLifecycleRail } from "@/components/brokerage/lifecycle-rail";
 import { BrokeragePhotoGallery } from "@/components/brokerage/photo-gallery";
@@ -37,6 +39,8 @@ export default async function AdminBrokerageDetailPage({
   const requestPhotos = parsePhotoPaths(row.photoPaths);
   const inspectionPhotos = parsePhotoPaths(row.inspection?.photoPaths);
   const statusLabel = brokerageStatusLabel(row.status, locale);
+  const photoBatches = await listBrokeragePhotoRequests(row.id);
+  const openPhotoReqs = photoBatches.filter((b) => b.requestedBy === "admin" && !b.fulfilledAt);
 
   return (
     <section data-admin-brokerage-detail="" className="pb-8">
@@ -190,6 +194,39 @@ export default async function AdminBrokerageDetailPage({
                 ar ? "لم يرفق التاجر صوراً بعد" : "No trader photos yet"
               }
             />
+            {photoBatches.length > 0 ? (
+              <Card padded={false}>
+                <CardHeader title="طلبات الصور من التاجر" count={photoBatches.length} />
+                <div className="rad-cb2 space-y-5">
+                  {photoBatches.map((b) => (
+                    <div key={b.id} className="space-y-2">
+                      <p className="text-sm">
+                        <span
+                          className="me-2 rounded-full px-2.5 py-0.5 text-xs font-bold"
+                          style={{
+                            background: b.fulfilledAt ? "rgba(46,157,106,.16)" : "rgba(224,160,48,.2)",
+                            color: b.fulfilledAt ? "#2e9d6a" : "#c98a1a",
+                          }}
+                        >
+                          {b.fulfilledAt ? "وصلت الصور" : "بانتظار التاجر"}
+                        </span>
+                        {b.requestedBy === "admin" ? `طلبتَ: ${b.note}` : "صور أرسلها التاجر بمبادرته"}
+                      </p>
+                      {b.traderNote ? <p className="text-sm opacity-80">«{b.traderNote}»</p> : null}
+                      <BrokeragePhotoGallery pathsJson={b.photoPaths} title="" />
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            ) : null}
+            {row.inspection ? (
+              <InspectionTable
+                grade={row.inspection.grade}
+                checklist={row.inspection.checklist}
+                verdict={localizedName(locale, row.inspection.verdictAr, row.inspection.verdictEn)}
+                notes={localizedName(locale, row.inspection.notesAr, row.inspection.notesEn)}
+              />
+            ) : null}
             {inspectionPhotos.length > 0 ? (
               <BrokeragePhotoGallery
                 paths={inspectionPhotos}
@@ -242,12 +279,23 @@ export default async function AdminBrokerageDetailPage({
             <Card padded={false}>
               <CardHeader title={ar ? "إجراءات الإدارة" : "Admin actions"} />
               <div className="rad-cb2">
-                <BrokerageAdminPanel
+                <BrokerageConsole
                   requestId={row.id}
                   status={row.status}
-                  locale={locale}
-                  hasInspection={Boolean(row.inspection)}
-                  inspectionPhotoCount={inspectionPhotos.length}
+                  invoiceUrl={row.invoiceToken ? `/brokerage-invoice/${row.invoiceToken}` : null}
+                  paidClaimed={row.paymentClaimedAt ? { via: row.paymentClaimedVia } : null}
+                  inspection={
+                    row.inspection
+                      ? {
+                          grade: row.inspection.grade,
+                          notesAr: row.inspection.notesAr,
+                          verdictAr: row.inspection.verdictAr,
+                          checklist: row.inspection.checklist,
+                        }
+                      : null
+                  }
+                  hasPurchased={Boolean(row.purchasedAt)}
+                  paymentConfirmed={Boolean(row.paymentConfirmedAt)}
                 />
               </div>
             </Card>

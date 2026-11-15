@@ -14,21 +14,20 @@ import { cn } from "@/lib/utils";
 const RAIL: BrokerageStatus[] = [...BROKERAGE_LIFECYCLE, "CLOSED"];
 
 const PHASE_GROUPS: { phase: BrokeragePhase; statuses: BrokerageStatus[] }[] = [
-  { phase: "payment", statuses: ["AWAITING_PAYMENT", "PAYMENT_CONFIRMED"] },
+  { phase: "intake", statuses: ["SUBMITTED"] },
   {
     phase: "inspection",
     statuses: ["ACCEPTED", "INSPECTION_SCHEDULED", "INSPECTED"],
   },
-  {
-    phase: "fulfillment",
-    statuses: ["PURCHASED", "SHIPPED", "DELIVERED"],
-  },
+  { phase: "fulfillment", statuses: ["PURCHASED"] },
+  { phase: "payment", statuses: ["AWAITING_PAYMENT", "PAYMENT_CONFIRMED"] },
+  { phase: "shipping", statuses: ["SHIPPED", "DELIVERED"] },
   { phase: "closed", statuses: ["CLOSED"] },
 ];
 
 function railIndex(status: string): number {
-  if (status === "NEEDS_INFO" || status === "SUBMITTED") {
-    return RAIL.indexOf("AWAITING_PAYMENT");
+  if (status === "NEEDS_INFO") {
+    return RAIL.indexOf("SUBMITTED");
   }
   if (status === "DECLINED" || status === "CANCELLED") return -1;
   if (status === "REJECTED" || status === "QUOTE_SENT" || status === "APPROVED") {
@@ -109,7 +108,7 @@ export function BrokerageLifecycleRail({
 
       <div className="flex flex-wrap gap-2">
         {PHASE_GROUPS.map((g) => {
-          const active = meta.phase === g.phase && !side;
+          const active = g.statuses.includes(status as BrokerageStatus) && !side;
           const groupDone =
             stepIdx >= 0 &&
             g.statuses.every((s) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { Modal } from "@/components/ui-kit/modal";
 
@@ -134,6 +134,7 @@ export function ConfirmDialog({
   cancelLabel,
   pending,
   destructive = true,
+  children,
 }: {
   open: boolean;
   onClose: () => void;
@@ -144,6 +145,7 @@ export function ConfirmDialog({
   cancelLabel: string;
   pending?: boolean;
   destructive?: boolean;
+  children?: ReactNode;
 }) {
   return (
     <Modal
@@ -169,6 +171,7 @@ export function ConfirmDialog({
       <p className="text-sm text-[color:var(--rad-tx2,var(--ro-text-muted))]">
         {body}
       </p>
+      {children}
     </Modal>
   );
 }

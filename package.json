@@ -60,6 +60,7 @@
     "test:deals-flow": "node node_modules/tsx/dist/cli.mjs scripts/deals-flow-checks.ts",
     "test:wholesale-phases": "node node_modules/tsx/dist/cli.mjs scripts/wholesale-phases-checks.ts",
     "test:stock": "node node_modules/tsx/dist/cli.mjs scripts/stock-checks.ts",
+    "test:brokerage-flow": "node node_modules/tsx/dist/cli.mjs scripts/brokerage-flow-checks.ts",
     "test:retail-identity": "node node_modules/tsx/dist/cli.mjs scripts/retail-identity-checks.ts",
     "test:retail-order-page": "node node_modules/tsx/dist/cli.mjs scripts/retail-order-page-checks.ts",
     "test:retail-fulfillment": "node node_modules/tsx/dist/cli.mjs scripts/retail-fulfillment-checks.ts",

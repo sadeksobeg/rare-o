@@ -5,11 +5,19 @@ import {
   type BrokerageStatus,
 } from "@/lib/brokerage/status";
 import { notifyTrader } from "@/lib/trader/notifications";
+import { publishInboxEvent } from "@/lib/whatsapp/messaging/inbox-events";
+import { randomBytes, randomInt } from "node:crypto";
+import { composeMessage } from "@/lib/messaging/compose";
+import { notifyTraderChannels, traderPortalUrl } from "@/lib/trader/notify-channels";
 
+const REFERENCE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+
+/** BR-YYYY-XXXXXX - unguessable and collision-safe (the old 4-digit form could repeat). */
 function ref() {
-  const n = Math.floor(1000 + Math.random() * 9000);
   const y = new Date().getFullYear();
-  return `BR-${y}-${n}`;
+  let code = "";
+  for (let i = 0; i < 6; i += 1) code += REFERENCE_ALPHABET[randomInt(REFERENCE_ALPHABET.length)];
+  return `BR-${y}-${code}`;
 }
 
 async function uniqueRef(): Promise<string> {
@@ -44,6 +52,48 @@ async function appendEvent(input: {
       messageEn: input.messageEn ?? "",
     },
   });
+}
+
+/** Customer-facing wording per status (platform inbox + WhatsApp). */
+const BROKERAGE_TRADER_COPY: Partial<Record<string, { headline: string; note?: string }>> = {
+  NEEDS_INFO: { headline: "نحتاج معلومات إضافية لطلبك", note: "يرجى فتح الطلب وإكمال المطلوب." },
+  ACCEPTED: { headline: "تم قبول طلبك للمعاينة", note: "سنحدد موعد المعاينة ونوافيك به." },
+  INSPECTION_SCHEDULED: { headline: "تم تحديد موعد المعاينة" },
+  INSPECTED: { headline: "اكتملت المعاينة — تقريرك جاهز", note: "افتح الطلب لتطلع على جدول المعاينة والصور والحكم النهائي." },
+  PURCHASED: { headline: "تم شراء القطعة لصالحك", note: "الخطوة التالية: الدفع، وسنرسل لك الفاتورة." },
+  AWAITING_PAYMENT: { headline: "بانتظار إتمام الدفع", note: "افتح الطلب لعرض الفاتورة وإبلاغنا بالدفع." },
+  SHIPPED: { headline: "شُحنت قطعتك" },
+  DELIVERED: { headline: "تم تسليم قطعتك", note: "نتمنى أن تسعدك." },
+  CLOSED: { headline: "اكتمل طلب الوساطة", note: "شكراً لثقتك بـ RARE OUD." },
+  DECLINED: { headline: "تعذّر قبول طلب الوساطة" },
+  CANCELLED: { headline: "تم إلغاء الطلب" },
+};
+
+async function tellTrader(
+  row: { id: string; reference: string; traderId: string },
+  adminId: string,
+  headline: string,
+  note?: string,
+  details?: (string | null)[],
+  link = traderPortalUrl(`/trader/brokerage/${row.id}`),
+  linkLabel = "تفاصيل الطلب:"
+): Promise<string> {
+  const tr = await prisma.traderAccount.findUnique({ where: { id: row.traderId }, select: { displayName: true } });
+  const res = await notifyTraderChannels({
+    traderId: row.traderId,
+    adminId,
+    text: composeMessage({
+      ar: true,
+      name: tr?.displayName,
+      headline,
+      context: `طلب الوساطة رقم ${row.reference}`,
+      details,
+      note,
+      linkLabel,
+      link,
+    }),
+  });
+  return `${res.platform ? "platform" : "noplatform"}:${res.whatsapp}`;
 }
 
 export async function createBrokerageRequest(input: {
@@ -90,33 +140,11 @@ export async function createBrokerageRequest(input: {
   const descriptionAr = input.descriptionAr.trim();
   const descriptionEn = (input.descriptionEn ?? input.descriptionAr).trim();
 
-  let handoffMessageText: string | null = null;
-  let whatsAppDeepLink: string | null = null;
-  let handoffPreparedAt: Date | null = null;
-  try {
-    const { buildBrokeragePaymentHandoffMessage, preparePaymentHandoff } =
-      await import("@/lib/whatsapp/payment-handoff");
-    const messageText = buildBrokeragePaymentHandoffMessage({
-      locale,
-      reference,
-      description: locale === "ar" ? descriptionAr : descriptionEn || descriptionAr,
-      modelNumber,
-      statedPriceUsd: input.statedPriceUsd,
-      traderName: trader.displayName || trader.email,
-    });
-    const prepared = await preparePaymentHandoff(messageText);
-    handoffMessageText = prepared.messageText;
-    whatsAppDeepLink = prepared.deepLink;
-    handoffPreparedAt = new Date();
-  } catch {
-    /* WHATSAPP_BUSINESS_E164 may be unset in some envs — status still AWAITING_PAYMENT */
-  }
-
   const row = await prisma.brokerageRequest.create({
     data: {
       reference,
       traderId: input.traderId,
-      status: "AWAITING_PAYMENT",
+      status: "SUBMITTED",
       descriptionAr,
       descriptionEn,
       categoryAr: input.categoryAr?.trim() ?? "",
@@ -135,18 +163,20 @@ export async function createBrokerageRequest(input: {
       timelineNotes: input.timelineNotes?.trim() ?? "",
       traderNotes: input.traderNotes?.trim() ?? "",
       photoPaths: JSON.stringify(input.photoPaths ?? []),
-      handoffMessageText,
-      whatsAppDeepLink,
-      handoffPreparedAt,
     },
   });
   await appendEvent({
     requestId: row.id,
     actor: "trader",
-    toStatus: "AWAITING_PAYMENT",
-    messageAr: "تم تقديم الطلب — بانتظار الدفع عبر واتساب ثم تأكيد الإدارة",
-    messageEn:
-      "Request submitted — await WhatsApp payment then admin confirmation",
+    toStatus: "SUBMITTED",
+    messageAr: "تم تقديم الطلب — بانتظار مراجعة الإدارة",
+    messageEn: "Request submitted - awaiting admin review",
+  });
+  void publishInboxEvent("conversation.updated", {
+    kind: "brokerage_submitted",
+    domain: "brokerage",
+    requestId: row.id,
+    title: row.reference,
   });
   return row;
 }
@@ -161,6 +191,7 @@ export async function confirmBrokeragePayment(input: {
   if (row.status !== "AWAITING_PAYMENT") {
     throw new Error("INVALID_TRANSITION");
   }
+  if (!row.invoiceIssuedAt) throw new Error("INVOICE_REQUIRED");
   const updated = await prisma.brokerageRequest.update({
     where: { id: input.id },
     data: {
@@ -174,18 +205,24 @@ export async function confirmBrokeragePayment(input: {
     actor: "admin",
     fromStatus: "AWAITING_PAYMENT",
     toStatus: "PAYMENT_CONFIRMED",
-    messageAr: "تم تأكيد نجاح الدفع — يمكن متابعة مراحل الوساطة",
-    messageEn: "Payment confirmed — remaining brokerage stages unlocked",
+    messageAr: "تم تأكيد استلام الدفعة — نجهّز الشحن",
+    messageEn: "Payment received - preparing shipping",
   });
   await notifyTrader({
     traderId: row.traderId,
     domain: "brokerage",
     titleAr: `تأكيد دفع الوساطة ${row.reference}`,
     titleEn: `Brokerage payment confirmed ${row.reference}`,
-    bodyAr: "أكدت الإدارة استلام الدفع. ستُتابع بقية المراحل.",
+    bodyAr: "أكدت الإدارة استلام الدفعة. نجهّز الشحن الآن.",
     bodyEn: "Admin confirmed payment receipt. Remaining stages will continue.",
     href: `/trader/brokerage/${row.id}`,
   });
+  await tellTrader(
+    { id: row.id, reference: row.reference, traderId: row.traderId },
+    input.adminId,
+    "استلمنا دفعتك، شكراً لك",
+    "نجهّز الآن شحن قطعتك وسنوافيك بالتفاصيل."
+  );
   return updated;
 }
 
@@ -285,10 +322,27 @@ export async function adminTransitionBrokerage(input: {
   inspectionLocation?: string;
   carrier?: string;
   trackingRef?: string;
+  adminId?: string;
 }) {
-  const row = await prisma.brokerageRequest.findUnique({ where: { id: input.id } });
+  const row = await prisma.brokerageRequest.findUnique({
+    where: { id: input.id },
+    include: { inspection: { select: { id: true } } },
+  });
   if (!row) throw new Error("NOT_FOUND");
   if (!canAdminTransition(row.status, input.toStatus)) {
+    throw new Error("INVALID_TRANSITION");
+  }
+  // Each stage needs what precedes it.
+  if (input.toStatus === "INSPECTED" && !row.inspection) throw new Error("INSPECTION_REPORT_REQUIRED");
+  if (input.toStatus === "INSPECTION_SCHEDULED" && !(input.inspectionAt ?? row.inspectionAt)) {
+    throw new Error("INSPECTION_DATE_REQUIRED");
+  }
+  if (input.toStatus === "SHIPPED") {
+    if (!row.paymentConfirmedAt) throw new Error("PAYMENT_REQUIRED");
+    if (!row.purchasedAt) throw new Error("PURCHASE_REQUIRED");
+    if (!(input.carrier ?? row.carrier)?.trim()) throw new Error("CARRIER_REQUIRED");
+  }
+  if (input.toStatus === "ACCEPTED" && row.status === "PAYMENT_CONFIRMED" && row.purchasedAt) {
     throw new Error("INVALID_TRANSITION");
   }
   const data: Record<string, unknown> = { status: input.toStatus };
@@ -300,6 +354,7 @@ export async function adminTransitionBrokerage(input: {
     data.inspectionLocation = input.inspectionLocation;
   if (input.carrier !== undefined) data.carrier = input.carrier;
   if (input.trackingRef !== undefined) data.trackingRef = input.trackingRef;
+  if (input.toStatus === "PURCHASED") data.purchasedAt = new Date();
   if (input.toStatus === "SHIPPED") data.shippedAt = new Date();
   if (input.toStatus === "DELIVERED") data.deliveredAt = new Date();
 
@@ -316,6 +371,30 @@ export async function adminTransitionBrokerage(input: {
     messageEn: input.messageEn ?? `Status → ${input.toStatus}`,
   });
 
+  if (input.toStatus === "AWAITING_PAYMENT") {
+    // Payment is the last stage: prepare the WhatsApp payment message the trader can open.
+    try {
+      const { buildBrokeragePaymentHandoffMessage, preparePaymentHandoff } = await import("@/lib/whatsapp/payment-handoff");
+      const tr = await prisma.traderAccount.findUnique({ where: { id: row.traderId }, select: { displayName: true, email: true } });
+      const prepared = await preparePaymentHandoff(
+        buildBrokeragePaymentHandoffMessage({
+          locale: "ar",
+          reference: row.reference,
+          description: row.descriptionAr,
+          modelNumber: row.modelNumber,
+          statedPriceUsd: row.statedPriceUsd ?? 0,
+          traderName: tr?.displayName || tr?.email || "",
+        })
+      );
+      await prisma.brokerageRequest.update({
+        where: { id: row.id },
+        data: { handoffMessageText: prepared.messageText, whatsAppDeepLink: prepared.deepLink, handoffPreparedAt: new Date() },
+      });
+    } catch {
+      /* business number not configured - the platform notice still works */
+    }
+  }
+
   await notifyTrader({
     traderId: row.traderId,
     domain: "brokerage",
@@ -325,6 +404,30 @@ export async function adminTransitionBrokerage(input: {
     bodyEn: input.messageEn ?? "",
     href: `/trader/brokerage/${row.id}`,
   });
+  if (input.adminId) {
+    const copy = BROKERAGE_TRADER_COPY[input.toStatus];
+    if (copy) {
+      const when = (input.inspectionAt ?? updated.inspectionAt)?.toLocaleString("ar", { dateStyle: "medium", timeStyle: "short" });
+      await tellTrader(
+        { id: row.id, reference: row.reference, traderId: row.traderId },
+        input.adminId,
+        copy.headline,
+        input.toStatus === "DECLINED" ? input.declineReason || undefined : copy.note,
+        input.toStatus === "INSPECTION_SCHEDULED"
+          ? [
+              when ? `الموعد: ${when}` : null,
+              (input.inspectionLocation ?? updated.inspectionLocation) ? `المكان: ${input.inspectionLocation ?? updated.inspectionLocation}` : null,
+              (input.inspectionAssignee ?? updated.inspectionAssignee) ? `المعاين: ${input.inspectionAssignee ?? updated.inspectionAssignee}` : null,
+            ]
+          : input.toStatus === "SHIPPED"
+            ? [
+                updated.carrier ? `شركة الشحن: ${updated.carrier}` : null,
+                updated.trackingRef ? `رقم التتبع: ${updated.trackingRef}` : null,
+              ]
+            : undefined
+      );
+    }
+  }
 
   return updated;
 }
@@ -355,6 +458,12 @@ export async function traderTransitionBrokerage(input: {
     messageAr: input.messageAr ?? "",
     messageEn: input.messageEn ?? "",
   });
+  void publishInboxEvent("conversation.updated", {
+    kind: input.toStatus === "CANCELLED" ? "brokerage_cancelled" : "brokerage_resubmitted",
+    domain: "brokerage",
+    requestId: row.id,
+    title: row.reference,
+  });
   return updated;
 }
 
@@ -367,6 +476,7 @@ export async function upsertInspection(input: {
   verdictEn?: string;
   photoPaths?: string[];
   checklist?: string;
+  adminId?: string;
 }) {
   const row = await prisma.brokerageRequest.findUnique({
     where: { id: input.requestId },
@@ -400,6 +510,7 @@ export async function upsertInspection(input: {
     if (row.status !== "INSPECTED" && canAdminTransition(row.status, "INSPECTED")) {
       await adminTransitionBrokerage({
         id: input.requestId,
+        adminId: input.adminId,
         toStatus: "INSPECTED",
         messageAr: "تم حفظ تقرير المعاينة",
         messageEn: "Inspection report saved",
@@ -478,3 +589,172 @@ export async function countActiveBrokerage() {
     },
   });
 }
+
+
+// ---------------------------------------------------------------------------
+// Photo requests: the admin asks for specific photos; the trader can also send extras any time.
+// ---------------------------------------------------------------------------
+
+const PHOTO_STAGE_BLOCKED = ["DELIVERED", "CLOSED", "DECLINED", "REJECTED", "CANCELLED"];
+
+export async function adminRequestBrokeragePhotos(input: {
+  requestId: string;
+  adminId: string;
+  note: string;
+}) {
+  const row = await prisma.brokerageRequest.findUnique({ where: { id: input.requestId } });
+  if (!row) throw new Error("NOT_FOUND");
+  if (PHOTO_STAGE_BLOCKED.includes(row.status)) throw new Error("PHOTOS_NOT_ALLOWED");
+  const note = input.note.trim().slice(0, 1000);
+  if (note.length < 3) throw new Error("NOTE_REQUIRED");
+  const pr = await prisma.brokeragePhotoRequest.create({
+    data: { requestId: row.id, note, requestedBy: "admin", requestedByAdminId: input.adminId },
+  });
+  await appendEvent({
+    requestId: row.id,
+    actor: "admin",
+    kind: "photos_requested",
+    messageAr: `طلبت الإدارة صوراً: ${note}`,
+    messageEn: `Admin requested photos: ${note}`,
+  });
+  await notifyTrader({
+    traderId: row.traderId,
+    domain: "brokerage",
+    titleAr: `مطلوب صور لطلب الوساطة ${row.reference}`,
+    titleEn: `Photos requested for brokerage ${row.reference}`,
+    bodyAr: note,
+    bodyEn: note,
+    href: `/trader/brokerage/${row.id}`,
+  });
+  return { photoRequest: pr, request: { id: row.id, reference: row.reference, traderId: row.traderId } };
+}
+
+/** Trader sends photos - answering an open request (photoRequestId) or as an extra batch. */
+export async function traderSubmitBrokeragePhotos(input: {
+  requestId: string;
+  traderId: string;
+  photoRequestId?: string | null;
+  paths: string[];
+  note?: string;
+}) {
+  const row = await prisma.brokerageRequest.findFirst({
+    where: { id: input.requestId, traderId: input.traderId },
+  });
+  if (!row) throw new Error("NOT_FOUND");
+  if (PHOTO_STAGE_BLOCKED.includes(row.status)) throw new Error("PHOTOS_NOT_ALLOWED");
+  if (input.paths.length === 0) throw new Error("NO_PHOTOS");
+  const note = (input.note ?? "").trim().slice(0, 1000);
+
+  let batchId: string;
+  if (input.photoRequestId) {
+    const pr = await prisma.brokeragePhotoRequest.findFirst({
+      where: { id: input.photoRequestId, requestId: row.id },
+    });
+    if (!pr) throw new Error("NOT_FOUND");
+    const merged = JSON.stringify([...JSON.parse(pr.photoPaths || "[]"), ...input.paths]);
+    await prisma.brokeragePhotoRequest.update({
+      where: { id: pr.id },
+      data: { photoPaths: merged, traderNote: note || pr.traderNote, fulfilledAt: new Date() },
+    });
+    batchId = pr.id;
+  } else {
+    const pr = await prisma.brokeragePhotoRequest.create({
+      data: {
+        requestId: row.id,
+        requestedBy: "trader",
+        photoPaths: JSON.stringify(input.paths),
+        traderNote: note,
+        fulfilledAt: new Date(),
+      },
+    });
+    batchId = pr.id;
+  }
+  const { mergePhotoPaths } = await import("@/lib/brokerage/media-shared");
+  await setBrokerageRequestPhotos(row.id, mergePhotoPaths(row.photoPaths, input.paths));
+  await appendEvent({
+    requestId: row.id,
+    actor: "trader",
+    kind: "photos_received",
+    messageAr: `أرسل التاجر ${input.paths.length} صورة${note ? `: ${note}` : ""}`,
+    messageEn: `Trader sent ${input.paths.length} photo(s)${note ? `: ${note}` : ""}`,
+  });
+  void publishInboxEvent("conversation.updated", {
+    kind: "brokerage_photos",
+    domain: "brokerage",
+    requestId: row.id,
+    title: `${row.reference} (${input.paths.length})`,
+  });
+  return { batchId, request: { id: row.id, reference: row.reference } };
+}
+
+export async function listBrokeragePhotoRequests(requestId: string) {
+  return prisma.brokeragePhotoRequest.findMany({
+    where: { requestId },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+
+// ---------------------------------------------------------------------------
+// Payment — the LAST stage: invoice → trader payment notice → admin confirms
+// ---------------------------------------------------------------------------
+
+/** Issues (once) the unguessable invoice link; requires the piece to be purchased. */
+export async function adminIssueBrokerageInvoice(input: { requestId: string; adminId: string }) {
+  const row = await prisma.brokerageRequest.findUnique({ where: { id: input.requestId } });
+  if (!row) throw new Error("NOT_FOUND");
+  if (row.status !== "AWAITING_PAYMENT") throw new Error("INVALID_TRANSITION");
+  const token = row.invoiceToken ?? randomBytes(18).toString("base64url");
+  const updated = await prisma.brokerageRequest.update({
+    where: { id: row.id },
+    data: { invoiceToken: token, invoiceIssuedAt: row.invoiceIssuedAt ?? new Date() },
+  });
+  await appendEvent({
+    requestId: row.id,
+    actor: "admin",
+    kind: "invoice_sent",
+    messageAr: "أُصدرت الفاتورة وأُرسلت للتاجر",
+    messageEn: "Invoice issued and sent to the trader",
+  });
+  return updated;
+}
+
+/** Trader says the payment was sent (platform notice or via WhatsApp); admin confirms receipt. */
+export async function traderClaimBrokeragePayment(input: {
+  requestId: string;
+  traderId: string;
+  via: "platform" | "whatsapp";
+}) {
+  const row = await prisma.brokerageRequest.findFirst({ where: { id: input.requestId, traderId: input.traderId } });
+  if (!row) throw new Error("NOT_FOUND");
+  if (row.status !== "AWAITING_PAYMENT") throw new Error("INVALID_TRANSITION");
+  if (row.paymentClaimedAt) return row;
+  const updated = await prisma.brokerageRequest.update({
+    where: { id: row.id },
+    data: { paymentClaimedAt: new Date(), paymentClaimedVia: input.via },
+  });
+  await appendEvent({
+    requestId: row.id,
+    actor: "trader",
+    kind: "payment_claimed",
+    messageAr: `أبلغ التاجر بإتمام الدفع (${input.via === "whatsapp" ? "عبر واتساب" : "عبر المنصة"})`,
+    messageEn: `Trader reported payment (${input.via})`,
+  });
+  void publishInboxEvent("conversation.updated", {
+    kind: input.via === "whatsapp" ? "brokerage_paid_claim_wa" : "brokerage_paid_claim",
+    domain: "brokerage",
+    requestId: row.id,
+    title: row.reference,
+  });
+  return updated;
+}
+
+export async function getBrokerageInvoiceByToken(token: string) {
+  if (!/^[A-Za-z0-9_-]{20,40}$/.test(token)) return null;
+  return prisma.brokerageRequest.findUnique({
+    where: { invoiceToken: token },
+    include: { trader: { select: { displayName: true, companyName: true, phone: true } }, quote: true },
+  });
+}
+
+export { tellTrader as tellBrokerageTrader };

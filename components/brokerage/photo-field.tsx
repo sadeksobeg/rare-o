@@ -4,7 +4,7 @@ import { useEffect, useId, useState } from "react";
 import { ImagePlus, X } from "lucide-react";
 import {
   BROKERAGE_MAX_BYTES,
-  BROKERAGE_MAX_PHOTOS,
+  BROKERAGE_CREATE_MAX_PHOTOS,
 } from "@/lib/brokerage/media-shared";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +20,7 @@ export type BrokeragePhotoMeta = {
 export function BrokeragePhotoField({
   locale,
   name = "photos",
-  max = BROKERAGE_MAX_PHOTOS,
+  max = BROKERAGE_CREATE_MAX_PHOTOS,
   alreadyCount = 0,
   className,
   onMetaChange,

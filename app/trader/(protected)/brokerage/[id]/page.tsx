@@ -10,8 +10,10 @@ import { BrokerageStatusBrief } from "@/components/brokerage/status-brief";
 import { BrokerageTimeline } from "@/components/brokerage/timeline";
 import { BrokerageNeedsInfoActions } from "@/components/trader/brokerage-needs-info-actions";
 import { BrokerageQuoteActions } from "@/components/trader/brokerage-quote-actions";
-import { PaymentHandoffCard } from "@/components/trader/payment-handoff-card";
-import { getBrokerageForTrader } from "@/lib/brokerage/service";
+import { InspectionTable } from "@/components/brokerage/inspection-table";
+import { BrokeragePaymentCard } from "@/components/trader/brokerage-payment-card";
+import { BrokeragePhotoRequests } from "@/components/trader/brokerage-photo-requests";
+import { getBrokerageForTrader, listBrokeragePhotoRequests } from "@/lib/brokerage/service";
 import { parsePhotoPaths } from "@/lib/brokerage/media-shared";
 import { getTraderSession } from "@/lib/auth/trader-session";
 import { getRequestDictionary } from "@/lib/i18n/server";
@@ -36,6 +38,7 @@ export default async function TraderBrokerageDetailPage({
   const quote = row.quote;
   const requestPhotos = parsePhotoPaths(row.photoPaths);
   const inspectionPhotos = parsePhotoPaths(row.inspection?.photoPaths);
+  const photoBatches = await listBrokeragePhotoRequests(row.id);
 
   return (
     <section className="space-y-6 pb-[calc(120px+env(safe-area-inset-bottom,0px))] min-[901px]:pb-0">
@@ -110,17 +113,27 @@ export default async function TraderBrokerageDetailPage({
       ) : null}
 
       {row.status === "AWAITING_PAYMENT" ? (
-        <PaymentHandoffCard
-          kind="brokerage"
-          recordId={row.id}
-          title={t.brokeragePayTitle}
-          body={t.brokeragePayBody}
-          openLabel={t.dealPayOpenWa}
-          unavailableLabel={t.dealPayUnavailable}
-          deepLink={row.whatsAppDeepLink}
-          messageText={row.handoffMessageText}
+        <BrokeragePaymentCard
+          requestId={row.id}
+          invoiceUrl={row.invoiceToken ? `/brokerage-invoice/${row.invoiceToken}` : null}
+          whatsAppDeepLink={row.whatsAppDeepLink}
+          claimed={Boolean(row.paymentClaimedAt)}
         />
       ) : null}
+
+      <BrokeragePhotoRequests
+        requestId={row.id}
+        canSend={!["DELIVERED", "CLOSED", "DECLINED", "REJECTED", "CANCELLED"].includes(row.status)}
+        batches={photoBatches.map((b) => ({
+          id: b.id,
+          note: b.note,
+          requestedBy: b.requestedBy,
+          traderNote: b.traderNote,
+          photos: parsePhotoPaths(b.photoPaths),
+          fulfilled: Boolean(b.fulfilledAt),
+          createdAt: b.createdAt.toLocaleDateString("ar"),
+        }))}
+      />
 
       <BrokeragePhotoGallery
         paths={requestPhotos}
@@ -204,36 +217,15 @@ export default async function TraderBrokerageDetailPage({
       ) : null}
 
       {row.inspection ? (
-        <div className="rad-card p-5">
-          <h2 className="text-lg font-semibold text-[color:var(--rad-tx)]">
-            {t.brokerageInspectionReport}
-          </h2>
-          <p className="mt-3 inline-flex rounded-md bg-[color-mix(in_srgb,var(--rad-ac)_14%,var(--rad-surface3))] px-2.5 py-1 text-sm font-semibold text-[color:var(--rad-ac)]">
-            {t.brokerageGrade}: {row.inspection.grade}
-          </p>
-          <p className="mt-3 text-sm text-[color:var(--rad-tx)]">
-            {localizedName(
-              locale,
-              row.inspection.verdictAr,
-              row.inspection.verdictEn
-            )}
-          </p>
-          <p className="mt-1 text-sm text-[color:var(--rad-tx2)]">
-            {localizedName(
-              locale,
-              row.inspection.notesAr,
-              row.inspection.notesEn
-            )}
-          </p>
-          {inspectionPhotos.length > 0 ? (
-            <div className="mt-4">
-              <BrokeragePhotoGallery
-                paths={inspectionPhotos}
-                title={t.brokerageInspectionPhotos}
-              />
-            </div>
-          ) : null}
-        </div>
+        <InspectionTable
+          grade={row.inspection.grade}
+          checklist={row.inspection.checklist}
+          verdict={localizedName(locale, row.inspection.verdictAr, row.inspection.verdictEn)}
+          notes={localizedName(locale, row.inspection.notesAr, row.inspection.notesEn)}
+        />
+      ) : null}
+      {inspectionPhotos.length > 0 ? (
+        <BrokeragePhotoGallery paths={inspectionPhotos} title={t.brokerageInspectionPhotos} />
       ) : null}
 
       {(row.carrier || row.trackingRef) && (
