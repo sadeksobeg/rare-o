@@ -45,6 +45,10 @@ model Product {
   status            String                 @default("draft")
   /// available | unavailable — public retail flag ONLY (not inventory)
   availability      String                 @default("available")
+  /// Units in stock. null = not tracked (unlimited). Reserved when a request is created, released on cancel.
+  stockQuantity     Int?
+  /// Admin gets a warning when stock falls to this number or below
+  lowStockThreshold Int                    @default(3)
   /// Forward-looking flag for Week 3; no wholesale UI in Week 2
   wholesaleEligible Boolean                @default(false)
   /// Admin storefront badges (independent toggles)

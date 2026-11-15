@@ -82,6 +82,10 @@ export default async function AdminProductsPage({
         p.retailPrice == null || !p.currency
           ? dict.product.priceOnRequest
           : formatAdminMoney(Number(p.retailPrice), p.currency, locale),
+      stock:
+        p.stockQuantity == null
+          ? null
+          : { qty: p.stockQuantity, low: p.stockQuantity <= p.lowStockThreshold },
       thumbPath: thumb?.path,
       thumbAlt:
         locale === "ar" ? thumb?.altAr || name : thumb?.altEn || name,

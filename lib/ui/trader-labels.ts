@@ -1,3 +1,4 @@
+import { stockShortMessage } from "@/lib/inventory/stock-copy";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 import { formatDate, formatNumber } from "@/lib/i18n/format";
@@ -15,6 +16,11 @@ export function wholesaleStatusLabel(t: TraderDict, status: string): string {
 /** Map action error codes / English fallbacks to dictionary copy. */
 export function traderActionMessage(t: TraderDict, error: string): string {
   const key = error.trim();
+  const stock = /^INSUFFICIENT_STOCK:([\s\S]*):(\d+)$/.exec(key);
+  if (stock) {
+    const ar = /\p{Script=Arabic}/u.test(t.actionErrorGeneric);
+    return stockShortMessage(stock[1]!, Number(stock[2]), ar);
+  }
   if (key === "Unauthorized") return t.actionErrorUnauthorized;
   if (
     key === "Not allowed" ||

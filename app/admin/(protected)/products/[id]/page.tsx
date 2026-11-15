@@ -105,6 +105,28 @@ export default async function EditProductPage({
         </nav>
 
         <div className="rad-stack min-w-0">
+          {product.stockQuantity != null && product.stockQuantity <= product.lowStockThreshold ? (
+            <div
+              role="alert"
+              className="flex items-start gap-3 rounded-2xl border p-4"
+              style={{
+                borderColor: product.stockQuantity <= 0 ? "rgba(220,80,80,.6)" : "rgba(224,160,48,.6)",
+                background: product.stockQuantity <= 0 ? "rgba(220,80,80,.12)" : "rgba(224,160,48,.14)",
+              }}
+            >
+              <span aria-hidden className="text-2xl leading-none">⚠</span>
+              <div>
+                <p className="font-bold">
+                  {product.stockQuantity <= 0 ? "نفد مخزون هذه القطعة" : `المخزون يوشك على النفاد — المتبقي ${product.stockQuantity} قطعة فقط`}
+                </p>
+                <p className="mt-0.5 text-sm opacity-80">
+                  {product.stockQuantity <= 0
+                    ? "تحوّلت حالتها تلقائياً إلى «غير متاح» ولا يمكن لأحد طلبها. أضف كمية جديدة من حقل «الكمية المتاحة» أدناه لإعادة فتح الطلب."
+                    : "عند نفاد الكمية يُغلق الطلب تلقائياً. حدّث «الكمية المتاحة» أدناه عند وصول بضاعة جديدة."}
+                </p>
+              </div>
+            </div>
+          ) : null}
           <Card aria-label={ar ? "بيانات المنتج" : "Product details"}>
             <div className="px-4 py-5 sm:px-5 sm:py-6">
               <ProductForm
@@ -135,6 +157,8 @@ export default async function EditProductPage({
                   currency: product.currency ?? "",
                   status: product.status,
                   availability: product.availability,
+                  stockQuantity: product.stockQuantity != null ? String(product.stockQuantity) : "",
+                  lowStockThreshold: String(product.lowStockThreshold),
                   wholesaleEligible: product.wholesaleEligible,
                   badgeNew: product.badgeNew,
                   badgeFeatured: product.badgeFeatured,

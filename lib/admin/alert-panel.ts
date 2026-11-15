@@ -1,3 +1,4 @@
+import { listLowStockProducts } from "@/lib/inventory/stock";
 import { prisma } from "@/lib/db/prisma";
 import { uiVisibleDealWhere, uiVisibleRetailRequestWhere } from "@/lib/admin/ui-hidden";
 import { listOpsAlertItems } from "@/lib/whatsapp/messaging/ops-alerts";
@@ -15,7 +16,7 @@ export async function listAdminAlertPanelItems(limit = 8): Promise<{
   items: AdminAlertPanelItem[];
   unreadCount: number;
 }> {
-  const [unreadInbox, deals, retail, ops] = await Promise.all([
+  const [unreadInbox, deals, retail, ops, lowStock] = await Promise.all([
     prisma.whatsAppConversation.count({ where: { unreadCount: { gt: 0 } } }),
     prisma.dealProposal.findMany({
       where: {
@@ -37,6 +38,7 @@ export async function listAdminAlertPanelItems(limit = 8): Promise<{
       select: { id: true, reference: true, status: true },
     }),
     listOpsAlertItems().catch(() => []),
+    listLowStockProducts(6).catch(() => []),
   ]);
 
   const items: AdminAlertPanelItem[] = [];
@@ -55,6 +57,15 @@ export async function listAdminAlertPanelItems(limit = 8): Promise<{
       href: "/admin/inbox?tab=unread",
       title: "__inbox_unread__",
       body: String(unreadInbox),
+      unread: true,
+    });
+  }
+  for (const p of lowStock) {
+    items.push({
+      id: `stock-${p.id}`,
+      href: `/admin/products/${p.id}`,
+      title: p.stockQuantity <= 0 ? `نفد المخزون: ${p.nameAr}` : `مخزون منخفض: ${p.nameAr}`,
+      body: p.stockQuantity <= 0 ? "المنتج غير متاح حالياً — أضف كمية جديدة" : `المتبقي ${p.stockQuantity} قطعة فقط`,
       unread: true,
     });
   }
@@ -82,6 +93,7 @@ export async function listAdminAlertPanelItems(limit = 8): Promise<{
     items: items.slice(0, limit),
     unreadCount:
       opsUnread +
+      lowStock.length +
       unreadInbox +
       deals.filter((d) => d.status === "awaiting_payment").length,
   };

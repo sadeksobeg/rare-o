@@ -165,19 +165,31 @@ export function TraderLiveAlerts({
             const n = d.notificationsUnread ?? 0;
             const onMessages = pathRef.current.startsWith("/trader/messages");
             let changed = false;
-            if (m > seen.current.m && !onMessages) {
+            const dm = m - seen.current.m;
+            const dn = n - seen.current.n;
+            const showMsg = dm > 0 && !onMessages;
+            if (showMsg || dn > 0) {
               void chime();
-              toast(ar ? "رسالة جديدة من فريق RARE OUD" : "New message from the RARE OUD team", {
-                action: { label: ar ? "فتح" : "Open", onClick: () => router.push("/trader/messages") },
-              });
               changed = true;
-            }
-            if (n > seen.current.n) {
-              if (m <= seen.current.m) void chime();
-              toast(ar ? "إشعار جديد" : "New notification", {
-                action: { label: ar ? "عرض" : "View", onClick: () => router.push("/trader/notifications") },
-              });
-              changed = true;
+              if (showMsg && dn > 0) {
+                toast(ar ? "لديك رسالة وإشعارات جديدة" : "New message and notifications", {
+                  id: "trader-live",
+                  description: ar ? `${dm} رسالة · ${dn} إشعار` : `${dm} message(s) · ${dn} notification(s)`,
+                  action: { label: ar ? "فتح الرسائل" : "Open", onClick: () => router.push("/trader/messages") },
+                });
+              } else if (showMsg) {
+                toast(ar ? "رسالة جديدة من فريق RARE OUD" : "New message from the RARE OUD team", {
+                  id: "trader-live",
+                  description: dm > 1 ? (ar ? `${dm} رسائل جديدة` : `${dm} new messages`) : undefined,
+                  action: { label: ar ? "فتح" : "Open", onClick: () => router.push("/trader/messages") },
+                });
+              } else {
+                toast(ar ? "إشعار جديد" : "New notification", {
+                  id: "trader-live",
+                  description: dn > 1 ? (ar ? `${dn} إشعارات جديدة` : `${dn} new notifications`) : undefined,
+                  action: { label: ar ? "عرض" : "View", onClick: () => router.push("/trader/notifications") },
+                });
+              }
             }
             if (m !== seen.current.m || n !== seen.current.n) changed = true;
             seen.current = { m, n };

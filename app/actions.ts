@@ -425,6 +425,8 @@ export async function upsertProductAction(
     currency: formData.get("currency"),
     status: formData.get("status"),
     availability: formData.get("availability"),
+    stockQuantity: formData.get("stockQuantity") ?? "",
+    lowStockThreshold: formData.get("lowStockThreshold") || 3,
     wholesaleEligible: formData.get("wholesaleEligible") === "on",
     badgeNew: formData.get("badgeNew") === "on",
     badgeFeatured: formData.get("badgeFeatured") === "on",

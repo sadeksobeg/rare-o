@@ -7,6 +7,7 @@ import { fmt, type TraderDict } from "@/lib/ui/trader-labels";
 import { WHOLESALE_QTY_TECHNICAL_MAX } from "@/lib/wholesale/constants";
 import type { Locale } from "@/lib/i18n/config";
 import { cn } from "@/lib/utils";
+import { stockShortMessage } from "@/lib/inventory/stock-copy";
 import { ImageOff, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -19,6 +20,8 @@ export type PickerProduct = {
   categoryNameEn?: string | null;
   categoryNameAr?: string | null;
   imagePath?: string | null;
+  /** Units in stock; null/undefined = not tracked */
+  stock?: number | null;
 };
 
 const SINGLE_PREVIEW = 6;
@@ -93,6 +96,14 @@ export function ProductPicker({
       for (const pid of Object.keys(qtyById)) {
         if (pid !== id && (qtyById[pid] ?? 0) > 0) onQtyChange(pid, 0);
       }
+    }
+    const stock = products.find((x) => x.id === id)?.stock;
+    if (stock != null && next > stock) {
+      const name = products.find((x) => x.id === id);
+      const label = name ? (locale === "ar" ? name.nameAr || name.nameEn : name.nameEn || name.nameAr) : "";
+      setQtyErrors((prev) => ({ ...prev, [id]: stockShortMessage(label, stock, locale === "ar") }));
+      onQtyChange(id, Math.max(0, stock));
+      return;
     }
     if (next > WHOLESALE_QTY_TECHNICAL_MAX) {
       setQtyErrors((prev) => ({
@@ -278,11 +289,25 @@ export function ProductPicker({
                       </span>
                     ) : null;
                   })()}
+                  {p.stock != null ? (
+                    <span
+                      className="mt-0.5 inline-block rounded-full px-2 py-px text-[11px] font-bold"
+                      style={{
+                        background: p.stock <= 0 ? "rgba(220,80,80,.18)" : "rgba(46,157,106,.16)",
+                        color: p.stock <= 0 ? "#e06060" : "#2e9d6a",
+                      }}
+                    >
+                      {p.stock <= 0
+                        ? locale === "ar" ? "نفد" : "Out of stock"
+                        : locale === "ar" ? `المتوفر: ${p.stock}` : `Available: ${p.stock}`}
+                    </span>
+                  ) : null}
                 </span>
                 {qty < 1 ? (
                   <button
                     type="button"
                     onClick={() => setQty(p.id, 1)}
+                    disabled={p.stock != null && p.stock <= 0}
                     className="rad-btn rad-gh rad-sm shrink-0"
                   >
                     {t.wsAddPiece}

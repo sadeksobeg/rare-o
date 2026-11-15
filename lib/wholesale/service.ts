@@ -1,4 +1,5 @@
 import { randomBytes, randomInt } from "node:crypto";
+import { releaseStock, reserveStock } from "@/lib/inventory/stock";
 import { uiVisibleWholesaleWhere } from "@/lib/admin/ui-hidden";
 import { prisma } from "@/lib/db/prisma";
 import { publishInboxEvent } from "@/lib/whatsapp/messaging/inbox-events";
@@ -140,6 +141,7 @@ export async function listWholesaleEligibleProducts() {
       nameEn: true,
       currency: true,
       retailPrice: true,
+      stockQuantity: true,
       category: { select: { nameEn: true, nameAr: true, slug: true } },
       images: {
         orderBy: { sortOrder: "asc" },
@@ -307,6 +309,7 @@ export async function createWholesaleRequest(input: CreateWholesaleRequestInput)
     include: { lines: true },
   });
 
+  const reservedStock = await reserveStock(resolved.map((l) => ({ productId: l.productId, quantity: l.quantity })));
   let lastErr: unknown;
   for (let attempt = 0; attempt < 5; attempt += 1) {
     try {
@@ -319,11 +322,24 @@ export async function createWholesaleRequest(input: CreateWholesaleRequestInput)
       });
       return created;
     } catch (e) {
-      if ((e as { code?: string }).code !== "P2002") throw e;
+      if ((e as { code?: string }).code !== "P2002") {
+        await releaseStock(reservedStock);
+        throw e;
+      }
       lastErr = e;
     }
   }
+  await releaseStock(reservedStock);
   throw lastErr;
+}
+
+/** Cancelled / declined wholesale requests give their pieces back. */
+async function releaseWholesaleStock(requestId: string): Promise<void> {
+  const lines = await prisma.wholesaleRequestLine.findMany({
+    where: { requestId, productId: { not: null } },
+    select: { productId: true, quantity: true },
+  });
+  await releaseStock(lines.filter((l): l is { productId: string; quantity: number } => l.productId != null));
 }
 
 export async function markWholesaleHandoffOpened(input: {
@@ -470,6 +486,7 @@ export async function adminTransitionWholesaleStatus(input: {
     include: { lines: true, events: { orderBy: { createdAt: "asc" } } },
   });
 
+  if (input.toStatus === "cancelled") await releaseWholesaleStock(updated.id);
   if (input.toStatus === "confirmed") {
     await prepareWholesaleHandoffForRequest(updated.id, input.locale ?? "ar");
   }
@@ -632,6 +649,7 @@ export async function traderRespondToWholesaleQuote(input: {
     include: { lines: true, events: { orderBy: { createdAt: "asc" } } },
   });
 
+  if (!input.accept) await releaseWholesaleStock(updated.id);
   if (input.accept && updated.status === "confirmed") {
     await prepareWholesaleHandoffForRequest(updated.id, input.locale ?? "ar");
   }
@@ -663,6 +681,7 @@ export async function traderCancelWholesaleRequest(input: {
   }
 
   const now = new Date();
+  await releaseWholesaleStock(request.id);
   return prisma.wholesaleRequest.update({
     where: { id: request.id },
     data: {

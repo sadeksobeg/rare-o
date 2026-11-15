@@ -1,3 +1,4 @@
+import { releaseStock, reserveStock } from "@/lib/inventory/stock";
 import { randomInt } from "node:crypto";
 import { prisma } from "@/lib/db/prisma";
 import { normalizePhoneDigits } from "@/lib/validation/customer-identity";
@@ -150,6 +151,11 @@ export async function createRetailRequestFromCart(
       null
     ) as Prisma.InputJsonValue;
   }
+
+  // Stock: take the units now (atomic) so the last piece can never be sold twice.
+  const reservedStock = await reserveStock(
+    resolvedLines.map((l) => ({ productId: l.productId, quantity: l.quantity }))
+  );
 
   // Same person ordering again later → same Customer record (matched on the
   // phone's last 9 digits), so the history, the WhatsApp chat and the CRM
@@ -330,6 +336,7 @@ export async function createRetailRequestFromCart(
               .delete({ where: { id: customerId } })
               .catch(() => {});
           }
+          await releaseStock(reservedStock);
           request = winner;
           break;
         }
@@ -338,6 +345,7 @@ export async function createRetailRequestFromCart(
       if (isUniqueViolation && targetsReference && attempt < MAX_REFERENCE_ATTEMPTS) {
         continue; // draw a new reference and retry
       }
+      await releaseStock(reservedStock);
       if (customerWasCreated) {
         await prisma.customer
           .delete({ where: { id: customerId } })
@@ -451,6 +459,17 @@ export async function transitionRetailRequestStatus(input: {
   const from = request.status;
   if (!canTransitionRetailRequest(from, input.toStatus)) {
     throw new Error("INVALID_TRANSITION");
+  }
+
+  // A cancelled request gives its reserved pieces back to stock.
+  if (input.toStatus === "cancelled") {
+    const lines = await prisma.retailRequestLine.findMany({
+      where: { requestId: request.id, productId: { not: null } },
+      select: { productId: true, quantity: true },
+    });
+    await releaseStock(
+      lines.filter((l): l is { productId: string; quantity: number } => l.productId != null)
+    );
   }
 
   return prisma.retailRequest.update({

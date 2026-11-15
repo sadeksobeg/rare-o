@@ -4318,3 +4318,34 @@ body:not(:has([data-page="home"])) .ro-sf-wallpaper {
   0% { transform: scale(0.85); opacity: 0.9; }
   100% { transform: scale(1.7); opacity: 0; }
 }
+
+/* Toasts: separate cards that stack one under another (never overlap), premium look. */
+[data-sonner-toaster] { --width: 380px; }
+[data-sonner-toast].rad-toast {
+  border-radius: 18px;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, #c8963e 38%, rgba(138, 82, 196, 0.35));
+  background: linear-gradient(135deg, #2a1340 0%, #3b1d5c 100%);
+  color: #fff7ea;
+  box-shadow: 0 18px 40px -14px rgba(20, 8, 40, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  font-size: 14px;
+  line-height: 1.6;
+  backdrop-filter: blur(6px);
+}
+[data-sonner-toast].rad-toast [data-title] { font-weight: 700; font-size: 14.5px; color: #fff; }
+[data-sonner-toast].rad-toast [data-description] { color: rgba(255, 247, 234, 0.78); font-size: 13px; }
+[data-sonner-toast].rad-toast [data-button] {
+  background: linear-gradient(135deg, #f4d9a6, #c8963e);
+  color: #2a1340;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 6px 14px;
+  height: auto;
+}
+[data-sonner-toast].rad-toast [data-close-button] {
+  background: #3b1d5c;
+  border-color: rgba(244, 217, 166, 0.35);
+  color: #f4d9a6;
+}
+[data-sonner-toast].rad-toast[data-type="success"] { border-color: rgba(46, 157, 106, 0.55); }
+[data-sonner-toast].rad-toast[data-type="error"] { border-color: rgba(220, 80, 80, 0.6); }

@@ -70,13 +70,20 @@ export function AdminWholesaleControls({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [prices, setPrices] = useState<Record<string, string>>({});
+  /** Per line: enter the unit price (× quantity) or the line total. */
+  const [modes, setModes] = useState<Record<string, "unit" | "total">>({});
   const [notify, setNotify] = useState(true);
   const [reQuote, setReQuote] = useState(false);
+  const [quoteCur, setQuoteCur] = useState<string>(quoteCurrencyDefault);
 
 
-  const lineQuotesJson = JSON.stringify(
-    lines.map((l) => ({ lineId: l.id, quotedUnitPrice: Number(prices[l.id] || 0) }))
-  );
+  const unitOf = (l: { id: string; quantity: number }) => {
+    const v = Number(prices[l.id] || 0);
+    const unit = (modes[l.id] ?? "unit") === "unit" ? v : v / l.quantity;
+    return Math.round(unit * 10000) / 10000;
+  };
+  const lineQuotesJson = JSON.stringify(lines.map((l) => ({ lineId: l.id, quotedUnitPrice: unitOf(l) })));
+  const grandTotal = lines.reduce((sum, l) => sum + unitOf(l) * l.quantity, 0);
 
   function report(res: { ok: boolean; error?: string; data?: unknown }, okText: string) {
     if (!res.ok) {
@@ -140,28 +147,74 @@ export function AdminWholesaleControls({
       <CurrencySelect
         name="quoteCurrency"
         required
-        defaultValue={quoteCurrencyDefault}
+        value={quoteCur}
+        onChange={(c) => setQuoteCur(c)}
         labels={{ currency: f.quoteCurrency, currencyUsd: f.currencyUsd, currencySyp: f.currencySyp }}
         className="max-w-xs"
       />
-      <div className="space-y-2">
-        {lines.map((l) => (
-          <TextField
-            key={l.id}
-            name={`price-${l.id}`}
-            type="number"
-            min={0}
-            step="0.01"
-            required
-            dir="ltr"
-            label={`${l.productName} × ${l.quantity}${l.proposedUnit != null ? ` — اقتراح التاجر: ${l.proposedUnit} ${l.proposedCurrency ?? ""}` : ""}`}
-            placeholder={f.quotedUnitPrice}
-            value={prices[l.id] ?? ""}
-            onChange={(e) => setPrices((prev) => ({ ...prev, [l.id]: e.target.value }))}
-            dense
-            className="max-w-sm"
-          />
-        ))}
+      <div className="space-y-3">
+        {lines.map((l) => {
+          const mode = modes[l.id] ?? "unit";
+          const raw = prices[l.id] ?? "";
+          const filled = raw !== "" && Number(raw) >= 0;
+          const unit = unitOf(l);
+          const cur = quoteCur;
+          return (
+            <div key={l.id} className="space-y-2 rounded-xl border border-ro-line p-3">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <b className="text-sm">
+                  {l.productName} × {l.quantity}
+                </b>
+                {l.proposedUnit != null ? (
+                  <span className="rounded-full bg-[color-mix(in_srgb,var(--rad-ac,#a678d8)_16%,transparent)] px-2.5 py-0.5 text-xs font-semibold">
+                    اقتراح التاجر: {l.proposedUnit} {l.proposedCurrency ?? ""} للوحدة
+                  </span>
+                ) : null}
+              </div>
+              <div role="group" aria-label="طريقة إدخال السعر" className="inline-flex rounded-full border border-ro-line p-0.5 text-xs">
+                {(["unit", "total"] as const).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    aria-pressed={mode === m}
+                    onClick={() => setModes((prev) => ({ ...prev, [l.id]: m }))}
+                    className="rounded-full px-3 py-1 font-semibold"
+                    style={{
+                      background: mode === m ? "var(--rad-ac, #8a52c4)" : "transparent",
+                      color: mode === m ? "#fff" : "inherit",
+                    }}
+                  >
+                    {m === "unit" ? "سعر الوحدة" : "السعر الإجمالي"}
+                  </button>
+                ))}
+              </div>
+              <TextField
+                name={`price-${l.id}`}
+                type="number"
+                min={0}
+                step="0.01"
+                required
+                dir="ltr"
+                label={mode === "unit" ? `سعر الوحدة (× ${l.quantity})` : `السعر الإجمالي لـ ${l.quantity} قطعة`}
+                placeholder={mode === "unit" ? f.quotedUnitPrice : "0.00"}
+                value={raw}
+                onChange={(e) => setPrices((prev) => ({ ...prev, [l.id]: e.target.value }))}
+                dense
+                className="max-w-sm"
+              />
+              {filled ? (
+                <p className="text-xs opacity-80" dir="ltr" style={{ textAlign: "start" }}>
+                  {unit} {cur} / unit × {l.quantity} = <b>{Math.round(unit * l.quantity * 100) / 100} {cur}</b>
+                </p>
+              ) : null}
+            </div>
+          );
+        })}
+        {lines.length > 1 && grandTotal > 0 ? (
+          <p className="text-sm font-semibold" dir="ltr" style={{ textAlign: "start" }}>
+            Total: {Math.round(grandTotal * 100) / 100} {quoteCur}
+          </p>
+        ) : null}
       </div>
       <Textarea name="quoteMessage" label={f.quoteMessage} rows={3} dense />
       <button type="submit" className="rad-btn rad-pri rad-sm" disabled={pending}>

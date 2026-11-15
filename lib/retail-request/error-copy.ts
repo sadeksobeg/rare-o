@@ -1,4 +1,5 @@
 import type { Locale } from "@/lib/i18n/config";
+import { stockShortMessage } from "@/lib/inventory/stock-copy";
 
 /** Map server/error codes to human storefront copy — never surface raw enums. */
 export function retailRequestErrorCopy(
@@ -7,6 +8,8 @@ export function retailRequestErrorCopy(
 ): string {
   const ar = locale === "ar";
   const code = codeOrMessage.trim();
+  const stock = /^INSUFFICIENT_STOCK:([\s\S]*):(\d+)$/.exec(code);
+  if (stock) return stockShortMessage(stock[1]!, Number(stock[2]), ar);
 
   switch (code) {
     case "INVALID_PRODUCT":

@@ -261,6 +261,8 @@ export async function createProduct(input: ProductUpsertInput) {
       currency: input.currency,
       status: input.status,
       availability: input.availability,
+      stockQuantity: input.stockQuantity,
+      lowStockThreshold: input.lowStockThreshold,
       wholesaleEligible: input.wholesaleEligible,
       badgeNew: input.badgeNew,
       badgeFeatured: input.badgeFeatured,
@@ -277,6 +279,14 @@ export async function updateProduct(id: string, input: ProductUpsertInput) {
   });
   if (!category) {
     throw new Error("INVALID_CATEGORY");
+  }
+
+  // Stock drives availability: 0 → unavailable; refilled from 0 → available again.
+  const before = await prisma.product.findUnique({ where: { id }, select: { stockQuantity: true } });
+  let availability = input.availability;
+  if (input.stockQuantity === 0) availability = "unavailable";
+  else if (input.stockQuantity != null && input.stockQuantity > 0 && (before?.stockQuantity ?? 1) <= 0) {
+    availability = "available";
   }
 
   return prisma.product.update({
@@ -298,7 +308,9 @@ export async function updateProduct(id: string, input: ProductUpsertInput) {
       compareAtPrice: input.compareAtPrice,
       currency: input.currency,
       status: input.status,
-      availability: input.availability,
+      availability,
+      stockQuantity: input.stockQuantity,
+      lowStockThreshold: input.lowStockThreshold,
       wholesaleEligible: input.wholesaleEligible,
       badgeNew: input.badgeNew,
       badgeFeatured: input.badgeFeatured,

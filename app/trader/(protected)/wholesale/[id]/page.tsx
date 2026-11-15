@@ -136,7 +136,41 @@ export default async function TraderWholesaleDetailPage({
         steps={steps}
       />
 
-      {meta.nextActor === "trader" ? (
+      {request.status === "quote_provided" && grandTotal != null ? (
+        <section
+          aria-label="عرض السعر"
+          className="overflow-hidden rounded-3xl border p-5 sm:p-7"
+          style={{
+            borderColor: "color-mix(in srgb, var(--rad-ac, #8a52c4) 45%, var(--rad-bd))",
+            background:
+              "linear-gradient(135deg, color-mix(in srgb, var(--rad-ac, #8a52c4) 18%, var(--rad-surface, transparent)), var(--rad-surface, transparent))",
+          }}
+        >
+          <p className="text-sm font-semibold text-[color:var(--rad-tx2)]">وصلك عرض سعر من RARE OUD</p>
+          <p className="mt-1 text-4xl font-bold tabular-nums text-[color:var(--rad-tx)]" dir="ltr" style={{ textAlign: "start" }}>
+            {formatMoney(grandTotal, moneyCurrency, locale)}
+          </p>
+          <ul className="mt-3 space-y-1 text-sm text-[color:var(--rad-tx2)]">
+            {request.lines.map((l) => (
+              <li key={l.id}>
+                {lineName(l)} × {l.quantity}
+                {l.quotedUnitPrice != null ? (
+                  <>
+                    {" — "}
+                    <b dir="ltr">{formatMoney(l.quotedUnitPrice, request.quoteCurrency || l.currency, locale)}</b> للوحدة
+                  </>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+          {request.quoteMessage ? (
+            <p className="mt-3 rounded-xl bg-black/5 p-3 text-sm text-[color:var(--rad-tx)]">{request.quoteMessage}</p>
+          ) : null}
+          <a href="#wholesale-actions" className="rad-btn rad-pri mt-4 inline-flex">
+            مراجعة العرض وقبوله أو رفضه
+          </a>
+        </section>
+      ) : meta.nextActor === "trader" ? (
         <Banner tone="attention">{t.wsQuoteBanner}</Banner>
       ) : null}
 
@@ -353,11 +387,13 @@ export default async function TraderWholesaleDetailPage({
       </Card>
 
       {hasActions ? (
-        <TraderWholesaleActions
-          requestId={request.id}
-          status={request.status}
-          labels={t}
-        />
+        <div id="wholesale-actions" className="scroll-mt-24">
+          <TraderWholesaleActions
+            requestId={request.id}
+            status={request.status}
+            labels={t}
+          />
+        </div>
       ) : null}
 
       <Card padded={false}>

@@ -301,6 +301,15 @@ export default async function ProductPage({
                 availability={product.availability}
                 label={dict.product.unavailable}
               />
+              {product.stockQuantity != null &&
+              product.stockQuantity > 0 &&
+              product.stockQuantity <= product.lowStockThreshold ? (
+                <p className="mt-1 text-sm font-semibold" style={{ color: "var(--ro-warn, #b8741a)" }}>
+                  {locale === "ar"
+                    ? `متبقّي ${product.stockQuantity} ${product.stockQuantity === 1 ? "قطعة" : "قطع"} فقط`
+                    : `Only ${product.stockQuantity} left`}
+                </p>
+              ) : null}
             </div>
 
             {descriptionText ? (

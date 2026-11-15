@@ -37,6 +37,8 @@ export type ProductsListRow = {
   statusLabel: string;
   pillTone: PillTone;
   priceLabel: string;
+  /** null = stock not tracked */
+  stock: { qty: number; low: boolean } | null;
   thumbPath?: string;
   thumbAlt: string;
   published: boolean;
@@ -249,6 +251,26 @@ export function ProductsListView({
           <bdi dir="ltr">{r.priceLabel}</bdi>
         </span>
       ),
+    },
+    {
+      id: "stock",
+      header: "المخزون",
+      hideOnMobile: true,
+      cell: (r) =>
+        r.stock == null ? (
+          <span className="opacity-50">—</span>
+        ) : (
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold tabular-nums"
+            style={{
+              background: r.stock.qty <= 0 ? "rgba(220,80,80,.18)" : r.stock.low ? "rgba(224,160,48,.2)" : "rgba(46,157,106,.16)",
+              color: r.stock.qty <= 0 ? "#e06060" : r.stock.low ? "#c98a1a" : "#2e9d6a",
+            }}
+          >
+            {r.stock.qty <= 0 ? "نفد" : r.stock.qty}
+            {r.stock.low && r.stock.qty > 0 ? " ⚠" : ""}
+          </span>
+        ),
     },
     {
       id: "actions",

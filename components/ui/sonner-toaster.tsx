@@ -11,7 +11,10 @@ export function SonnerToaster() {
     <Toaster
       position="bottom-right"
       offset={88}
-      richColors
+      expand
+      gap={12}
+      visibleToasts={4}
+      duration={7000}
       closeButton
       theme="system"
       toastOptions={{

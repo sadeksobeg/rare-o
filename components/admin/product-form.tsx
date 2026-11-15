@@ -27,7 +27,7 @@ import {
   formErrorClass,
 } from "@/lib/ui/form-classes";
 import { formatAdminMoney } from "@/lib/i18n/admin-format";
-import { Field, Select } from "@/components/ui-kit/field";
+import { Field, Input, Select } from "@/components/ui-kit/field";
 
 function fieldScore(value: string, weight = 1) {
   return value.trim().length > 0 ? weight : 0;
@@ -52,6 +52,8 @@ type ProductValues = {
   currency?: string;
   status?: string;
   availability?: string;
+  stockQuantity?: string;
+  lowStockThreshold?: string;
   wholesaleEligible?: boolean;
   badgeNew?: boolean;
   badgeFeatured?: boolean;
@@ -419,6 +421,36 @@ export function ProductForm({
           </Select>
         </Field>
       </div>
+      <fieldset className="space-y-3 rounded-[var(--ro-r-sm)] border border-ro-line p-4">
+        <legend className={controlLabelTextClass}>المخزون</legend>
+        <p className="text-xs text-ro-muted">
+          حدّد عدد القطع المتاحة. عند كل طلب تُحجز القطع تلقائياً، ولا يستطيع أحد طلب أكثر من المتوفر، وتتحوّل الحالة إلى «غير متاح» عند النفاد وتصلك تنبيهات قبلها. اترك الحقل فارغاً لعدم تتبّع المخزون.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="الكمية المتاحة" hint="فارغ = غير محدد (بلا حدّ)">
+            <Input
+              name="stockQuantity"
+              type="number"
+              min={0}
+              step={1}
+              inputMode="numeric"
+              dir="ltr"
+              defaultValue={product?.stockQuantity ?? ""}
+            />
+          </Field>
+          <Field label="تنبيه عند بقاء" hint="تصلك رسالة تحذير عندما تصل الكمية إلى هذا العدد أو أقل">
+            <Input
+              name="lowStockThreshold"
+              type="number"
+              min={0}
+              step={1}
+              inputMode="numeric"
+              dir="ltr"
+              defaultValue={product?.lowStockThreshold ?? "3"}
+            />
+          </Field>
+        </div>
+      </fieldset>
       <fieldset className="space-y-3 rounded-[var(--ro-r-sm)] border border-ro-line p-4">
         <legend className={controlLabelTextClass}>{f.storeBadges}</legend>
         <p className="text-xs text-ro-muted">{f.storeBadgesHelp}</p>

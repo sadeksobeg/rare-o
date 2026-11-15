@@ -65,6 +65,12 @@ export const productUpsertSchema = z.object({
     }),
   status: z.enum(PRODUCT_STATUSES),
   availability: z.enum(PRODUCT_AVAILABILITIES),
+  /** Empty = stock not tracked (unlimited). */
+  stockQuantity: z
+    .union([z.literal(""), z.coerce.number().int().min(0).max(1000000)])
+    .optional()
+    .transform((v) => (v === "" || v === undefined ? null : v)),
+  lowStockThreshold: z.coerce.number().int().min(0).max(100000).default(3),
   wholesaleEligible: z.coerce.boolean().default(false),
   badgeNew: z.coerce.boolean().default(false),
   badgeFeatured: z.coerce.boolean().default(false),

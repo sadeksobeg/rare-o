@@ -1,3 +1,4 @@
+import { RelatedRecords } from "@/components/admin/rad/inbox/related-records";
 import { LinkedRecordPanel } from "@/components/admin/linked-record-panel";
 import type { InboxConversationDetail } from "@/lib/whatsapp/messaging/inbox";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -96,6 +97,8 @@ export function RadContextPanel({
           maskedPhone={maskedPhone}
         />
       </section>
+
+      <RelatedRecords conversationId={conversation.id} dict={dict} />
 
       <section className="rad-xp-card">
         <h3>

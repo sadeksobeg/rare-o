@@ -114,6 +114,8 @@ export function RadShellClient({
         wholesale_trader_confirmed: "التاجر أكّد طلب الجملة عبر المنصة",
         wholesale_trader_confirmed_wa: "التاجر أكّد طلب الجملة عبر واتساب",
         wholesale_paid_claim: "التاجر أفاد بأنه دفع طلب الجملة",
+        stock_low: "تنبيه: المخزون يوشك على النفاد",
+        stock_out: "نفد المخزون — أصبح المنتج غير متاح",
         deal_proposed: "صفقة جديدة من تاجر",
         deal_trader_reply: "ردّ التاجر على الصفقة",
         deal_trader_accepted: "التاجر قبل شروط الصفقة",
@@ -121,13 +123,13 @@ export function RadShellClient({
         deal_trader_closed: "التاجر أغلق الصفقة",
       };
       const base =
-        p.domain === "wholesale" ? "/admin/wholesale" : p.domain === "deal" ? "/admin/deals" : "/admin/requests";
+        p.domain === "wholesale" ? "/admin/wholesale" : p.domain === "deal" ? "/admin/deals" : p.domain === "product" ? "/admin/products" : "/admin/requests";
       if (!text[p.kind]) return;
       playInboxChime();
       toast(text[p.kind], {
         id: p.eventId,
         description: p.title || undefined,
-        action: { label: "فتح الطلب", onClick: () => router.push(`${base}/${p.requestId}`) },
+        action: { label: p.domain === "product" ? "فتح المنتج" : "فتح الطلب", onClick: () => router.push(`${base}/${p.requestId}`) },
       });
     },
   });
